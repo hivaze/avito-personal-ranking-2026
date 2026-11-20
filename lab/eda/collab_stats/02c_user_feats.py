@@ -1,0 +1,40 @@
+import numpy as np, polars as pl, time
+from common import *
+t0=time.time()
+V=Val('val'); RP=V.rand_pf()
+rel_users=np.load(f'{OUT}/rel_users.npy')
+ulut=np.full(rel_users.max()+1,-1,np.int32); ulut[rel_users]=np.arange(len(rel_users),dtype=np.int32)
+U=dict(np.load(f'{OUT}/user_cat_aggs.npz'))
+vu=ulut[np.repeat(V.f['user_id'].to_numpy(),V.M)]; vc=np.asarray(arr('val','cand_category_id')).astype(int)
+in_train=U['nfeeds'][vu]>0
+print('val feeds with user in train:', (U['nfeeds'][ulut[V.f['user_id'].to_numpy()]]>0).mean())
+n_uc=U['n'][vu,vc]; c_uc=U['c'][vu,vc]; Ef_uc=U['Ef'][vu,vc]
+n_u=U['n'][vu].sum(1); c_u=U['c'][vu].sum(1)
+p_u=(c_u+20*0.0217)/(n_u+20)
+print('val rows with user x cat train impressions >0:', (n_uc>0).mean(), ' with >=1 click:', (c_uc>0).mean())
+res={}
+def rep(nm,s,store=True):
+    a,d,se=V.cmp(s,RP); pf=V.pf_rt(s); fin=np.bincount(V.fid,weights=in_train)>0
+    print(f'{nm:40s} ndcg={a:.4f} lift={d:+.4f}+-{se:.4f} | feeds w/ train user: {pf[fin].mean():.4f} vs rand {RP[fin].mean():.4f}', flush=True)
+    if store: res[nm]=s.astype(np.float32)
+rep('uc_ctr_bayes(a=5, prior=user ctr)', (c_uc+5*p_u)/(n_uc+5))
+rep('uc_coec_Ef(a=2)', (c_uc+2)/(Ef_uc+2))
+rep('uc_clicks', c_uc)
+rep('uc_impr', n_uc)
+rep('uc_click_share (c_uc/c_u)', c_uc/np.maximum(c_u,1))
+res['u_ctr']=p_u.astype(np.float32); res['u_nfeeds']=U['nfeeds'][vu].astype(np.float32); res['u_impr']=n_u.astype(np.float32)
+# own-history category affinity (reference)
+H=V.f['H'].to_numpy(); hc=np.asarray(arr('val','hist_category_id')).astype(int); he=np.asarray(arr('val','hist_event_type')).astype(int)
+hf=np.repeat(np.arange(V.n),H)
+HC=np.zeros((V.n,54)); np.add.at(HC,(hf,hc),1)
+HC1=np.zeros((V.n,54)); m=he==1; np.add.at(HC1,(hf[m],hc[m]),1)
+HCo=np.zeros((V.n,54)); m=he!=1; np.add.at(HCo,(hf[m],hc[m]),1)
+rep('own_hist_cat_count', HC[V.fid,vc])
+rep('own_hist_cat_share', HC[V.fid,vc]/np.maximum(H[V.fid],1))
+rep('own_hist_cat_count_et1', HC1[V.fid,vc])
+rep('own_hist_cat_count_et!=1', HCo[V.fid,vc])
+hp=np.asarray(arr('val','hist_hpos'))
+HCr=np.zeros((V.n,54)); m=hp<20; np.add.at(HCr,(hf[m],hc[m]),1)
+rep('own_hist_cat_count_last20', HCr[V.fid,vc])
+import pickle; pickle.dump(res, open(f'{OUT}/user_feats_val.pkl','wb'))
+tlog(t0,'done')

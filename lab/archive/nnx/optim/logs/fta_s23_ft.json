@@ -1,0 +1,88 @@
+{
+  "args": {
+    "variant": "s2_base_s23",
+    "out": "fta_s23",
+    "epochs": 4,
+    "lr": 5e-05,
+    "wd": 0.02,
+    "warmup": 30,
+    "cand_budget": 8192,
+    "max_feeds": 128,
+    "loss": "softmax",
+    "loss_norm": "batch",
+    "folds": 5,
+    "seeds": 1,
+    "drop": null,
+    "from_scratch": false,
+    "extra": "it_cand_cnt_train,it_tr_coec,it_tr_coec_rk,it_tr_coec_z,it_tr_coec_gap,it_tr_ctr,it_tr_pos,u_tr_ctr,u_tr_feeds,hour,centrality,it_hist_all_luo,it_hist_all_luo_rk,it_hist_all_luo_z,it_hist_all_luo_gap,it_hist_et1_luo,it_hist_et2_luo,it_hist_et3_luo,it_hist_et4_luo,it_hist_et5_luo,it_hist_et6_luo,it_hist_et7_luo,it_hist_et8_luo,it_hist_et9_luo,it_hist_et10_luo,seq_cv_invd20,seq_cv_invd20_rk,seq_cv_pop,seq_cv_norm,seq_max_all,seq_top3,seq_argmax_hpos,ctx_nd_c80,ctx_nd_c90,ctx_nd_c95,ctx_nd_dupb_f1,ctx_nd_dupb_h,ctx_nd_dupb_u,ctx_nd_hcent,ctx_nd_knn_f1,ctx_nd_knn_h,ctx_nd_knn_h_dev,ctx_nd_knn_u,ctx_nd_knn_u_dev,ctx_nd_max,ctx_nd_mean,ctx_nd_top5h,ctx_nd_top5u,ctx_nd_ucent",
+    "extra_lr_mult": 10.0,
+    "add_random": 0,
+    "pseudo": "",
+    "w_test": 0.3,
+    "pseudo_n": 12000,
+    "pseudo_T": 1.0,
+    "select": "snapshot",
+    "decay": "cos",
+    "ema": 0.99,
+    "ema_start": 0.5,
+    "lpft_epochs": 0,
+    "lpft_lr": 0.0005
+  },
+  "oof_by_epoch": [
+    0.3825872120291941,
+    0.3851867815754674,
+    0.385904367432371,
+    0.38569023276089887,
+    0.3854086759068217
+  ],
+  "best_epoch": 2,
+  "oof_ndcg_best_epoch": 0.385904367432371,
+  "oof_ndcg_snapshot": 0.38568005887042306,
+  "saved": "ema_final",
+  "fold_curves": [
+    [
+      0.37577115281631085,
+      0.379702887455052,
+      0.379666543134981,
+      0.37905163205087655,
+      0.3789707300920417
+    ],
+    [
+      0.37843267351913024,
+      0.3807820537844076,
+      0.38226915102750386,
+      0.38238291847218625,
+      0.3826365418497922
+    ],
+    [
+      0.3854869965359266,
+      0.38892816891100335,
+      0.38911626755373663,
+      0.3891172502630076,
+      0.388697164899889
+    ],
+    [
+      0.38929554213082207,
+      0.3931601393849952,
+      0.39255383185780646,
+      0.3922983263629962,
+      0.3920398245898947
+    ],
+    [
+      0.38395249362270434,
+      0.38336278983791733,
+      0.38591835327596197,
+      0.3856032970221046,
+      0.3847011713586902
+    ]
+  ],
+  "ema_oof_by_epoch": [
+    NaN,
+    0.3853103339656201,
+    0.38557966771071517,
+    0.3855674886493764,
+    0.3855293293538728
+  ],
+  "oof_ndcg_ema_final": 0.3855293293538728,
+  "minutes": 6.471779072284699
+}

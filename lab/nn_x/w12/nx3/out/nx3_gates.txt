@@ -1,0 +1,106 @@
+[     0s] lens md5 c4a1ad8f427a8d064902bab8fd799b23, condlib md5 afbecdf49891f1207696b2ffc0e35c3d
+[     1s] files: train (246745836,) val (1389971,) test (2904806,) twin (1389971,); K (rp3b05) 1.932062e+05
+[     2s] pool feeds (p_random > 0.5, M >= 50, not holdout): 134118; with has = 1: 69173; slots 6-8: 31074; slots 11-13: 38097
+[     2s] === PART 1. G-parity (label-free) ===
+[     2s] age buckets: ['<1d', '1-3d', '3-7d', '7-10d', '10-24d', '24-76d', '>76d(+cap)']
+[     2s] --- C3, train side = POOL feeds [OFFICIAL, BUILD_SPEC C3]
+[     2s]   test-like train rows (slots 11-13), 38097 feeds, 5688227 rows, vs PRIVATE rows (M >= 50): share 0.1513 vs 0.1725; dZ 0.0295 (ok), largest bucket 0.0499 at >76d(+cap) (ok)   [critic advance, holdout feeds: dZ 0.0365, bucket 0.0665]
+[     2s]      view by bucket 0.000 0.003 0.008 0.055 0.174 0.241 0.232 | ref 0.000 0.004 0.010 0.023 0.146 0.276 0.282 | view row share 0.114 0.079 0.097 0.048 0.129 0.171 0.362
+[     3s]   test-like train rows (slots 11-13), 38097 feeds, 5688227 rows, vs PUBLIC rows (M >= 50): share 0.1513 vs 0.1794; dZ 0.0270 (ok), largest bucket 0.0527 at >76d(+cap) (ok)   [critic advance, holdout feeds: dZ 0.0383, bucket 0.0695]
+[     3s]      view by bucket 0.000 0.003 0.008 0.055 0.174 0.241 0.232 | ref 0.000 0.002 0.007 0.060 0.175 0.284 0.285 | view row share 0.114 0.079 0.097 0.048 0.129 0.171 0.362
+[     3s]   val-like train rows (slots 6-8), 31074 feeds, 4565632 rows, vs VAL rows (M >= 50): share 0.1773 vs 0.1982; dZ 0.0316 (ok), largest bucket 0.0511 at >76d(+cap) (ok)   [critic advance, holdout feeds: dZ 0.0417, bucket 0.0675]
+[     3s]      view by bucket 0.000 0.010 0.086 0.177 0.216 0.259 0.244 | ref 0.000 0.003 0.054 0.123 0.216 0.298 0.295 | view row share 0.116 0.077 0.105 0.046 0.125 0.167 0.364
+[     3s] --- C3, train side = HOLDOUT feeds [critic's population; comparison]
+[     3s]   test-like train rows (slots 11-13), 8279 feeds, 1289110 rows, vs PRIVATE rows (M >= 50): share 0.1382 vs 0.1725; dZ 0.0366 (ok), largest bucket 0.0664 at >76d(+cap) (ok)   [critic advance, holdout feeds: dZ 0.0365, bucket 0.0665]
+[     3s]      view by bucket 0.000 0.002 0.006 0.049 0.158 0.220 0.215 | ref 0.000 0.004 0.010 0.023 0.146 0.276 0.282 | view row share 0.116 0.080 0.099 0.049 0.129 0.170 0.357
+[     3s]   test-like train rows (slots 11-13), 8279 feeds, 1289110 rows, vs PUBLIC rows (M >= 50): share 0.1382 vs 0.1794; dZ 0.0382 (ok), largest bucket 0.0693 at >76d(+cap) (ok)   [critic advance, holdout feeds: dZ 0.0383, bucket 0.0695]
+[     3s]      view by bucket 0.000 0.002 0.006 0.049 0.158 0.220 0.215 | ref 0.000 0.002 0.007 0.060 0.175 0.284 0.285 | view row share 0.116 0.080 0.099 0.049 0.129 0.170 0.357
+[     3s]   val-like train rows (slots 6-8), 6946 feeds, 1077395 rows, vs VAL rows (M >= 50): share 0.1611 vs 0.1982; dZ 0.0416 (ok), largest bucket 0.0674 at >76d(+cap) (ok)   [critic advance, holdout feeds: dZ 0.0417, bucket 0.0675]
+[     3s]      view by bucket 0.000 0.008 0.077 0.159 0.196 0.234 0.228 | ref 0.000 0.003 0.054 0.123 0.216 0.298 0.295 | view row share 0.120 0.078 0.106 0.047 0.127 0.167 0.355
+[     4s]   information: stale-val twin (val M >= 50) vs PRIVATE: share 0.1571 vs 0.1725; dZ 0.0157, largest bucket 0.0292 at >76d(+cap)   [critic advance: 0.1564 vs 0.1717; dZ 0.0156, bucket 0.0292]
+[     4s] --- C5 non-zero share by day: val slot 16 / 18 / all: 0.2090 / 0.1873 / 0.1987 | test slot 20 / 21 / 22 / 23: 0.1808 / 0.1758 / 0.1725 / 0.1713 | public 0.1800 private 0.1726 | holdout lag view slot 6 / 7 / 8 / 11 / 12 / 13: 0.1669 / 0.1639 / 0.1546 / 0.1388 / 0.1376 / 0.1382
+[     4s]      [critic advance: val 0.2086 / 0.1868 | test 0.1802 / 0.1751 / 0.1718 / 0.1705 | public 0.1795 private 0.1718 | holdout lag view 0.1665 / 0.1634 / 0.1541 / 0.1382 / 0.1370 / 0.1375]
+[     4s]      bar: every test day >= 0.5 x 0.2090 = 0.1045: ok
+[     4s] --- C4 PSI (bar 0.25): train side against val / public / private (all rows of the reference)
+[     4s]   nx_rp3_z | BUILD_SPEC bins (10 val deciles of the non-zero values + exact-zero bin) | POOL feeds has = 1 (10254287 rows): vs val 0.0363, vs public 0.0100, vs private 0.0129  [OFFICIAL] ok
+[     9s]   nx_rp3_z | BUILD_SPEC bins (10 val deciles of the non-zero values + exact-zero bin) | ALL has = 1 train rows (115150397 rows): vs val 0.1267, vs public 0.2603, vs private 0.3462  (comparison) ABOVE 0.25
+[    10s]   nx_rp3_z | BUILD_SPEC bins (10 val deciles of the non-zero values + exact-zero bin) | HOLDOUT has = 1 rows (2366505 rows): vs val 0.0851, vs public 0.0261, vs private 0.0130  (comparison)
+[    10s]   nx_rp3_z | BUILD_SPEC bins (10 val deciles of the non-zero values + exact-zero bin) | information: holdout test-like rows (slots 11-13) vs private 0.0409; val vs private 0.0578; val vs public 0.0278; stale-val twin vs private 0.0080   [critic advance, critic bins: 0.0437; val vs private 0.0545]
+[    10s]   nx_rp3_z | critic bins (9 decile edges over all val values) | POOL feeds has = 1 (10254287 rows): vs val 0.0366, vs public 0.0067, vs private 0.0101  (comparison)
+[    15s]   nx_rp3_z | critic bins (9 decile edges over all val values) | ALL has = 1 train rows (115150397 rows): vs val 0.1270, vs public 0.2639, vs private 0.3474  (comparison) ABOVE 0.25
+[    15s]   nx_rp3_z | critic bins (9 decile edges over all val values) | HOLDOUT has = 1 rows (2366505 rows): vs val 0.0858, vs public 0.0221, vs private 0.0099  (comparison)
+[    15s]   nx_rp3_z | critic bins (9 decile edges over all val values) | information: holdout test-like rows (slots 11-13) vs private 0.0403; val vs private 0.0566; val vs public 0.0273; stale-val twin vs private 0.0061   [critic advance, critic bins: 0.0437; val vs private 0.0545]
+[    15s]   nx_rp3_rk | BUILD_SPEC bins (10 val deciles of the non-zero values + exact-zero bin) | POOL feeds has = 1 (10254287 rows): vs val 0.0914, vs public 0.0293, vs private 0.0165  [OFFICIAL] ok
+[    21s]   nx_rp3_rk | BUILD_SPEC bins (10 val deciles of the non-zero values + exact-zero bin) | ALL has = 1 train rows (115150397 rows): vs val 0.0410, vs public 0.1264, vs private 0.1732  (comparison)
+[    21s]   nx_rp3_rk | BUILD_SPEC bins (10 val deciles of the non-zero values + exact-zero bin) | HOLDOUT has = 1 rows (2366505 rows): vs val 0.1802, vs public 0.0820, vs private 0.0559  (comparison)
+[    21s]   nx_rp3_rk | BUILD_SPEC bins (10 val deciles of the non-zero values + exact-zero bin) | information: holdout test-like rows (slots 11-13) vs private 0.1136; val vs private 0.0488; val vs public 0.0271; stale-val twin vs private 0.0207   [critic advance, critic bins: 0.0993; val vs private 0.0535]
+[    21s]   nx_rp3_rk | critic bins (9 decile edges over all val values) | POOL feeds has = 1 (10254287 rows): vs val 0.0862, vs public 0.0219, vs private 0.0127  (comparison)
+[    26s]   nx_rp3_rk | critic bins (9 decile edges over all val values) | ALL has = 1 train rows (115150397 rows): vs val 0.0445, vs public 0.1397, vs private 0.1872  (comparison)
+[    26s]   nx_rp3_rk | critic bins (9 decile edges over all val values) | HOLDOUT has = 1 rows (2366505 rows): vs val 0.1681, vs public 0.0670, vs private 0.0455  (comparison)
+[    26s]   nx_rp3_rk | critic bins (9 decile edges over all val values) | information: holdout test-like rows (slots 11-13) vs private 0.0993; val vs private 0.0512; val vs public 0.0285; stale-val twin vs private 0.0163   [critic advance, critic bins: 0.0993; val vs private 0.0535]
+[    26s]   C4 comparison values above 0.25: ['nx_rp3_z | BUILD_SPEC bins (10 val deciles of the non-zero values + exact-zero bin) | ALL has = 1 train rows', 'nx_rp3_z | critic bins (9 decile edges over all val values) | ALL has = 1 train rows']
+[    26s] --- J1 (no bar): P(walk = 0 | seq_cv_invd20 > 0)   [critic advance: holdout lag view slots 6-8 0.1231, slots 11-13 0.2293; val 0.0019; public 0.0021; private 0.0033; val twin 0.1571]
+[    27s]   holdout lag view, slots 6-8: rows 1077395, walk > 0 0.1611, seq_cv_invd20 > 0 0.1078, P(walk = 0 | invd20 > 0) 0.1223, P(walk > 0 | invd20 = 0) 0.0745
+[    27s]   holdout lag view, slots 11-13: rows 1289110, walk > 0 0.1382, seq_cv_invd20 > 0 0.1121, P(walk = 0 | invd20 > 0) 0.2280, P(walk > 0 | invd20 = 0) 0.0581
+[    27s]   ALL lag-view train rows, slots 6-9 (val-like): rows 56017930, walk > 0 0.2493, seq_cv_invd20 > 0 0.1856, P(walk = 0 | invd20 > 0) 0.1183, P(walk > 0 | invd20 = 0) 0.1051
+[    28s]   ALL lag-view train rows, slots 11-14 (test-like): rows 59132467, walk > 0 0.2182, seq_cv_invd20 > 0 0.1949, P(walk = 0 | invd20 > 0) 0.2157, P(walk > 0 | invd20 = 0) 0.0812
+[    29s]   ALL lag-view train rows: rows 115150397, walk > 0 0.2333, seq_cv_invd20 > 0 0.1904, P(walk = 0 | invd20 > 0) 0.1695, P(walk > 0 | invd20 = 0) 0.0929
+[    29s]   val rows (natural): rows 1389971, walk > 0 0.1987, seq_cv_invd20 > 0 0.1135, P(walk = 0 | invd20 > 0) 0.0004, P(walk > 0 | invd20 = 0) 0.0962
+[    29s]   val rows (stale-val twin of the walk; seq_cv as stored): rows 1389971, walk > 0 0.1576, seq_cv_invd20 > 0 0.1135, P(walk = 0 | invd20 > 0) 0.1542, P(walk > 0 | invd20 = 0) 0.0695
+[    29s]   test rows, public: rows 886924, walk > 0 0.1800, seq_cv_invd20 > 0 0.1023, P(walk = 0 | invd20 > 0) 0.0005, P(walk > 0 | invd20 = 0) 0.0866
+[    29s]   test rows, private: rows 2017882, walk > 0 0.1726, seq_cv_invd20 > 0 0.0976, P(walk = 0 | invd20 > 0) 0.0004, P(walk > 0 | invd20 = 0) 0.0831
+[    29s] 
+=== PART 2. G-info: calibrated lens (score test given pool + own inputs); bar: sign + and |cz| >= 2.5 ===
+[    77s] [holdout, pool = 16 held-out wide students; control block 83 columns]
+[    77s]   lens check: stored FRESH rp3b05 on ALL 30,000 holdout feeds: cz +8.20 / +9.75 (record +8.20 / +9.75; critic +8.20 / +9.75)
+[    78s]   all lag-view feeds (slots 6-13; 15,225): FILES as entered: nx_rp3_z cz +4.98 (dnats 0.00044, b1 +0.0297, R2 0.25) | nx_rp3_rk cz +4.32 (b1 +0.1539)
+[    78s]       critic's formula on my raw array, forms(log1p(K rp3b05)): z +4.98 / rank +4.32 (dnats 0.00044, b1 +0.0297)   [critic advance: +5.02 / +4.43 (0.00044), b1 +0.0299]
+[    78s]       FRESH stored column (cut = own day) on the same feeds, same formula: z +6.93 / rank +5.65 (dnats 0.00088); kept share 0.72 / 0.77
+[    79s]   val-like (slots 6-8; 6,946): FILES as entered: nx_rp3_z cz +3.58 (dnats 0.00023, b1 +0.0290, R2 0.13) | nx_rp3_rk cz +2.82 (b1 +0.1292)
+[    79s]       critic's formula on my raw array, forms(log1p(K rp3b05)): z +3.58 / rank +2.82 (dnats 0.00023, b1 +0.0290)   [critic advance: +3.51 / +2.81 (0.00022), b1 +0.0285]
+[    79s]       FRESH stored column (cut = own day) on the same feeds, same formula: z +4.89 / rank +3.10 (dnats 0.00045); kept share 0.73 / 0.91
+[    80s]   test-like (slots 11-13; 8,279): FILES as entered: nx_rp3_z cz +2.89 (dnats 0.00015, b1 +0.0221, R2 0.13) | nx_rp3_rk cz +2.59 (b1 +0.1171)
+[    80s]       critic's formula on my raw array, forms(log1p(K rp3b05)): z +2.89 / rank +2.59 (dnats 0.00015, b1 +0.0221)   [critic advance: +3.00 / +2.76 (0.00016), b1 +0.0230]
+[    80s]       FRESH stored column (cut = own day) on the same feeds, same formula: z +3.92 / rank +3.78 (dnats 0.00028); kept share 0.74 / 0.69
+[    83s]   C6 placebo: 20 within-feed permutations of the nx_rp3_z file on the holdout rows (lag view): sd 0.91, max |cz| 1.78, values +0.31 +0.25 +0.31 -1.19 -1.30 -1.16 -0.32 +0.57 -0.57 -1.38 +1.78 -1.17 +1.28 -0.05 +0.60 -0.73 +0.50 +0.84 -0.71 +0.94   [critic advance: sd 0.89, max 1.93]
+[    91s] [val, base TO16; control block 84 columns]
+[    91s]   NATURAL files (information): nx_rp3_z cz +6.78 (dnats 0.00166, b1 +0.0554, R2 0.52) | nx_rp3_rk cz +5.99 (b1 +0.3077) | critic's formula on my raw: +6.78 / +5.99 | the stored c09_val column, same formula: +6.84 / +5.97   [critic advance: +6.84 / +5.97 (0.00168), b1 +0.0556]
+[    91s]   STALE-VAL TWIN files (gate): nx_rp3_z cz +6.46 (dnats 0.00154, b1 +0.0501, R2 0.42) | nx_rp3_rk cz +4.78 (b1 +0.2312) | critic's formula on my raw: +6.46 / +4.78   [critic advance: +6.64 / +4.90 (0.00163), b1 +0.0513]
+[    91s]       val slot 16: natural z +3.63 / rank +3.32 | twin z +3.92 / rank +2.96   [critic advance, raw rp3b05 form: slot 16 natural +3.30 / +3.23, twin +3.97 / +2.94; slot 18 natural +3.84 / +2.83, twin +4.17 / +2.48]
+[    91s]       val slot 18: natural z +4.04 / rank +2.75 | twin z +3.84 / rank +2.33
+[    92s]   C6 placebo: 20 within-feed permutations of the stale-val twin nx_rp3_z file: sd 0.82, max |cz| 1.63, values +0.35 +0.24 +0.25 +0.36 -0.27 +0.05 +1.63 +0.82 -1.23 -1.58 -0.88 +1.14 -0.07 +0.32 -0.96 -0.37 -1.09 +0.77 -0.56 -0.68   [critic advance: sd 0.91, max 1.55]
+[    93s]   information: 20 within-feed permutations of the natural val nx_rp3_z file (seeds 5000-5019): sd 1.00, max |cz| 1.97
+[    93s]   val rows: correlation natural vs twin, nx_rp3_z 0.779, nx_rp3_rk 0.836; non-zero in natural 0.1987, in twin 0.1576, natural only 0.0446, twin only 0.0035   [critic advance: 0.778 / 0.835; 0.1982 / 0.1569 / 0.0449 / 0.0035]
+[   100s] [val, base FILE; control block 84 columns]
+[   100s]   NATURAL files (information): nx_rp3_z cz +6.84 (dnats 0.00169, b1 +0.0559, R2 0.52) | nx_rp3_rk cz +6.01 (b1 +0.3090) | critic's formula on my raw: +6.84 / +6.01 | the stored c09_val column, same formula: +6.90 / +6.00   [critic advance: +6.91 / +6.00 (0.00171)]
+[   100s]   STALE-VAL TWIN files (gate): nx_rp3_z cz +6.51 (dnats 0.00157, b1 +0.0504, R2 0.42) | nx_rp3_rk cz +4.79 (b1 +0.2319) | critic's formula on my raw: +6.51 / +4.79   [critic advance: +6.70 / +4.92 (0.00165)]
+[   101s]       val slot 16: natural z +3.64 / rank +3.28 | twin z +3.93 / rank +2.91
+[   101s]       val slot 18: natural z +4.10 / rank +2.81 | twin z +3.89 / rank +2.39
+[   101s] 
+=== STEP 0 TABLE: gate | bar | build of record | critic advance (c03_gates.txt / c05_coef.txt / c06_joint.txt) | verdict ===
+[   101s] G-code C1 stored c09_val / c09_hold reproduced | 1e-5 relative | see out/c1_repro.txt | max abs diff 0 (val; holdout slots 6, 13) | PASS
+[   101s] G-code C2 causality counts (+ numpy re-derivation on a sample) | all 0 | see out/build.log | (not run by the critic) | PASS
+[   101s] C3 test-like vs PRIVATE: dZ / largest bucket | <= 0.05 / <= 0.10 | 0.0295 / 0.0499 | 0.0365 / 0.0665 (holdout feeds) | ok
+[   101s] C3 test-like vs PUBLIC: dZ / largest bucket | <= 0.05 / <= 0.10 | 0.0270 / 0.0527 | 0.0383 / 0.0695 (holdout feeds) | ok
+[   101s] C3 val-like vs VAL: dZ / largest bucket | <= 0.05 / <= 0.10 | 0.0316 / 0.0511 | 0.0417 / 0.0675 (holdout feeds) | ok
+[   101s]    C3 on the HOLDOUT feeds (comparison) test-like vs PRIVATE | (no bar) | 0.0366 / 0.0664 | 0.0365 / 0.0665 | 
+[   101s]    C3 on the HOLDOUT feeds (comparison) test-like vs PUBLIC | (no bar) | 0.0382 / 0.0693 | 0.0383 / 0.0695 | 
+[   101s]    C3 on the HOLDOUT feeds (comparison) val-like vs VAL | (no bar) | 0.0416 / 0.0674 | 0.0417 / 0.0675 | 
+[   101s] C5 non-zero share, lowest test day against 0.5 x val's | >= 0.1045 | 0.1713 | 0.1705 (bar 0.1043) | ok
+[   101s] C4 PSI nx_rp3_z, pool has = 1 rows vs val / public / private | <= 0.25 | 0.0363 / 0.0100 / 0.0129 | 0.0884 / 0.0230 / 0.0109 (critic bins, holdout rows) | ok
+[   101s]    same, critic bins on the holdout has = 1 rows (comparison) | (no bar) | 0.0858 / 0.0221 / 0.0099 | 0.0884 / 0.0230 / 0.0109 | 
+[   101s] C4 PSI nx_rp3_rk, pool has = 1 rows vs val / public / private | <= 0.25 | 0.0914 / 0.0293 / 0.0165 | 0.1710 / 0.0681 / 0.0451 (critic bins, holdout rows) | ok
+[   101s]    same, critic bins on the holdout has = 1 rows (comparison) | (no bar) | 0.1681 / 0.0670 / 0.0455 | 0.1710 / 0.0681 / 0.0451 | 
+[   101s] J1 P(walk = 0 | seq_cv_invd20 > 0): holdout lag view slots 6-8 / 11-13 || val / public / private | (no bar) | 0.122 / 0.228 || 0.000 / 0.000 / 0.000 | 0.123 / 0.229 || 0.002 / 0.002 / 0.003 | 
+[   101s]    same on ALL lag-view train rows: slots 6-9 / 11-14 | (no bar) | 0.118 / 0.216 | (not built by the critic) | 
+[   101s] C7 holdout rows, lag view (15,225 feeds): cz of nx_rp3_z / nx_rp3_rk | sign +, >= 2.5 (z or rank) | +4.98 / +4.32 | +5.02 / +4.43 | ok
+[   101s] C7 val rows, stale-val twin, base TO16: cz of nx_rp3_z / nx_rp3_rk | sign +, >= 2.5 (z or rank) | +6.46 / +4.78 | +6.64 / +4.90 | ok
+[   101s] C7 val rows, stale-val twin, base FILE (FD16P20) | sign +, >= 2.5 (z or rank) | +6.51 / +4.79 | +6.70 / +4.92 | ok
+[   101s]    val rows, natural files, base TO16 / FILE (information): z, rank | (no bar) | +6.78, +5.99 / +6.84, +6.01 | +6.84, +5.97 / +6.91, +6.00 | 
+[   101s] C6 20 permutations, max |cz|: holdout lag view / val twin | < 3.0 | 1.78 / 1.63 (sd 0.91 / 0.82) | 1.93 / 1.55 (sd 0.89 / 0.91) | ok
+[   101s] J2 one-step coefficient b1 of nx_rp3_z: holdout lag view (all / slots 6-8 / slots 11-13) || val natural / twin (TO16) | (no bar) | 0.0297 / 0.0290 / 0.0221 || 0.0554 / 0.0501 | 0.0299 / 0.0285 / 0.0230 || 0.0556 / 0.0513 | 
+[   101s]    J2 R2 of nx_rp3_z with pool + own inputs: holdout lag view all || val natural / twin | (no bar) | 0.25 || 0.52 / 0.42 | 0.25 || 0.52 / 0.42 | 
+[   101s] G-code PASS (C1 True, C2 True, re-derivation True); G-parity PASS (C3 True, C4 True, C5 True); G-info PASS (C7 True, C6 True)
+[   101s] G-info detail: the same form passes on both witnesses and both val bases: True; all six cz (z and rank; holdout, twin TO16, twin FILE) >= 2.5: True
+[   101s] STEP 0 VERDICT (amended rule A2): PASS
+[   101s] DONE

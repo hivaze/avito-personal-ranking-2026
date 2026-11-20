@@ -1,0 +1,31 @@
+### 5.1 The final pair I would pick today
+
+**W8P20 and W16: the lead's two files, with the roles reversed.** Only files with a public reading qualify today, and among them W8P20 is the one expected to score best on private (section 2.1). W16 is the hedge against "the popularity-light view reverses on private" (P about 0.08 by the rule, 0.15 as my own number); as a hedge it is worth about +0.00002 in the expected maximum of the pair [I: E(max(0, X)) for X ~ N(-0.00071, 0.00051)]. If ONE file had to be named, it is W8P20.
+
+If the better of two finals counts (owner's open question 1), the second slot is worth more as a second popularity-light file of a different composition than as this hedge: a file that is a forecast tie with W8P20 at a realised sd of 0.0005 adds about +0.0002 to the expected maximum, ten times the hedge, at the price of both finals leaning on the same view. The candidates for that role are the full-data twin of the lead's plan (FD16P20; its held-out original W16P20w reads a tie with W8P20: -0.00004 ± 0.00050) and the outcome of the experiment below; each needs its own public reading first. Risk preference is the owner's: with W16 as the second final the pair cannot lose more than the hedge case; with two popularity-light finals it gains about +0.0002 in expectation and loses about 0.0007 against W16 in the 8 - 15% case.
+
+What I would NOT do: (1) send W16P20x8 as declared in the expectation that it beats W8P20 (forecast -0.00034 ± 0.00049); (2) change the popularity-light weight of any final away from 0.2 on the val evidence alone (the lagged holdout contradicts every heavier weight, section 3.4); (3) add a private "staleness bonus" to any forecast of this family (section 2.2 (c)); (4) drop or dilute the fine-tune half of any final (audit rows 1-2: it is worth more on private than on val).
+
+### 5.2 The single experiment that would most change the choice
+
+**Two public slots for the same 24 members at two weights: W16P20x8 (as declared by the lead at 03:35Z) and RULEM2040 = per branch (1 - w) z(W16) + w z(Px8) with w = 0.2 on feeds with M < 50 and w = 0.4 on feeds with M >= 50, FINAL 0.5 / 0.5.** CPU build from members that are all fine-tuned already (the per-feed weight is applied to per-feed z, as in `t3b_rule.py`; the builder of the lead needs one `np.where` on the feed size); gate as usual.
+
+Why this one.
+- It is the one open question on which the witnesses disagree in sign at 1.5 - 5 SE each: val FINAL +0.00064 ± 0.00021, pmix-public +0.00091 ± 0.00029, pmix-private +0.00120 ± 0.00037, stale-val +0.00043 ± 0.00022 for RULEM2040 against W16P20x8; lagged holdout -0.00043 ± 0.00029 and in-period holdout -0.00111 ± 0.00022 per long feed. It is the val-against-holdout conflict that public settled once for this family, now between val and the LAGGED holdout, which is the witness the new evidence policy leans on.
+- The two files differ only in the weight on long feeds, so the difference of their public scores has a paired SE of 0.00027 (a usual pair: 0.0004 - 0.0005) [M: sd of the val per-feed delta / sqrt(8,562)]. Val predicts about +0.0009 (in-sample; nested about +0.0005), the lagged holdout about -0.0003, the in-period holdout about -0.0007: the two families are 3 - 6 public SE apart. No other pair on the table separates them that well.
+- Label-free the two files differ on private days as they do on public days (same top-1 item in 95.3% / 95.7% of feeds, cold-minus-warm offset +0.0046 / +0.0040, val days +0.0041 / +0.0043; `out/t2_forecast.md` T2h, last pair but one): what public reads for this pair is what private will pay, about 13% weaker.
+- It decides something that every later final inherits: the weight of FD16P20, of X16P20 on an hz / xd / th base, and whether val + stale-val (RULE hz) or the lagged holdout should be believed when they disagree.
+
+With ONE slot only: RULEM2040 alone, read against W8P20 (public SE of the pair 0.00045; pmix-public expectation +0.00064 in-sample) and against W16. It is less clean (different base, different popularity-light members) but it is the file with the higher upside of the two.
+
+Reading rules I would write before the slot (the lead's own forms; thresholds in public SE):
+- weight: "0.4 on long feeds is adopted for the 16-base finals iff public(RULEM2040) - public(W16P20x8) >= +0.0003 (1 paired SE) ; it is closed iff <= -0.0003; in between the weight stays 0.2";
+- file: "RULEM2040 is a final candidate iff public >= W8P20 - 0.0003, and replaces W8P20 as the best file iff the inverse-variance mean of its val delta (+0.00039 ± 0.00035) and its public delta against W8P20 is >= +2 SE" (the form of the "ARM hz" file rule of 02:15Z; it needs public >= about +0.0008 against W8P20).
+
+Why RULEM2040 and not the nested modal rule RULEM1040 (0.1 / 0.4): 0.1 against 0.2 on short feeds is mixed in sign over the five compositions and the lagged holdout cannot see short feeds at all; 0.4 against 0.2 on long feeds is the part on which 5 of 5 compositions agree on val and 9 of 9 disagree on the lagged holdout. RULEM2040 changes that one thing and keeps the scored weight elsewhere.
+
+### 5.3 Next in line
+
+1. STALE-FT (fine-tune on val with private-like stale inputs; veto.md item 6, "prepared as code"): the audit moves it up. The fine-tune half is the staleness adaptation of the file (worth +0.0005 on public, +0.0007 .. +0.0010 at the private mix, zero on cool feeds), and it is the only stage that trains on out-of-period labels; nothing so far trains it on inputs as stale as private rows. Judge: out-of-fold on stale-val, FINAL level.
+2. For every read of the lagged holdout on this family: use more than one base-seed set (the D on record, +0.00074, is +0.00015 on the other 8 seeds) and quote the nine-composition mean (+0.00003 ± 0.00023 at weight 0.2).
+3. Add each new scored pair to the sanity table T1f (free); six pairs give a transfer slope of 1.08 ± 0.49, ten would give about ± 0.35.

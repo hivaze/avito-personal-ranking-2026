@@ -1,0 +1,9 @@
+Written 2026-11-13T05:20:49Z (date -u), AFTER the pre-declared run (out/cluster_diag.log, verdict CLOSED). Post-hoc checks, no gate role,
+cannot change the verdict (the val clause of the gate fails for all 8 arms). Script: p1_posthoc.py.
+Motivation: ue32_shrunk shows holdout +0.00056 +- 0.00015 (z 3.7) with val +0.00022 +- 0.00025; random-cluster controls are
+negative on the holdout (-0.0004..-0.0005).
+(a) Random-label null: 50 random labelings (seeds 100-149) for K in {8, 32} x {raw, shrunk}, same nested procedure, val and holdout;
+    report mean/sd of the pc-gl delta and where each real arm falls (empirical rank).
+(b) holdout -> val transfer: per-cluster family weights fitted on all 30K holdout feeds, applied to the val leak-free feeds,
+    vs holdout-global weights applied to val (the mirror of the pre-declared val -> holdout transfer).
+(c) Per-cluster optimal-weight agreement: for each key/K, the correlation over clusters of the full-fit F10 / F7x weight on val vs holdout.

@@ -1,0 +1,93 @@
+{
+ "part": "cpu",
+ "passed": 29,
+ "total": 29,
+ "fails": [],
+ "res": {
+  "dry": [
+   "<repo>/.venv/bin/python train.py --variant w11_wg_d192_m02_r711 --init <repo>/nn/ckpt/v29_d192_m02_s711@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1611 ",
+   "<repo>/.venv/bin/python train.py --variant w11_wg_d192_drop02_r711 --init <repo>/nn/ckpt/v29_d192_m02_s711@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1611 --drop_cd 0.2",
+   "<repo>/.venv/bin/python train.py --variant w11_wg_d192_mup_r711 --init <repo>/nn/ckpt/v29_d192_m02_s711@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1611 --mup_base 128",
+   "<repo>/.venv/bin/python train.py --variant w11_wg_d128_m02_r901 --init <repo>/nn/ckpt/v30_f7_m02_s901@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1801 ",
+   "<repo>/.venv/bin/python train.py --variant w11_wg_d192_m02_r715 --init <repo>/nn/ckpt/v29_d192_m02_s715@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1615 ",
+   "<repo>/.venv/bin/python train.py --variant w11_wg_d128_m02_r905 --init <repo>/nn/ckpt/v30_f7_m02_s905@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1805"
+  ],
+  "w1_lines": [
+   "wave-11 WIDTH-GATE muP: --mup_base 128 at d 192: Muon lr multiplier sqrt(128/192) = 0.8165 on 39 width-growing matrices (1.843M params); 1.0 on 7 fixed-fan-in matrices ['c_lin.weight', 'c_mlp.0.weight', 'h_lin.weight', 'retr.t1.weight', 'retr.t2.weight', 'retr.wk.weight', 'u_lin.weight'] (0.179M params); applied inside the step loop after the per-step lr reset; Muon's decoupled weight decay (wd 0.02) scales by the same multiplier on the scaled matrices; AdamW groups untouched",
+   "wave-11 muP example cross.0.attn.q.weight shape (192, 192): mult 0.8165; spectral step at lr = 0.2 * lr * 0.8165 * sqrt(192) = 2.2627 * lr (d128 reference 0.2 * sqrt(128) = 2.2627 * lr)",
+   "wave-11 muP example c_lin.weight shape (192, 256): mult 1.0000; spectral step at lr = 0.2 * lr * 1.0000 * sqrt(256) = 3.2000 * lr",
+   "wave-11 muP example retr.wk.weight shape (64, 128): mult 1.0000; spectral step at lr = 0.2 * lr * 1.0000 * sqrt(128) = 2.2627 * lr"
+  ],
+  "w1_step_d192": {
+   "loss": 0.02838403731584549,
+   "worst_rel": 8.421333768637851e-05,
+   "max_dA": 0.003614485263824463
+  },
+  "w1_step_d128": {
+   "loss": 0.026002686470746994,
+   "worst_rel": 0.0,
+   "max_dA": 0.0037445425987243652
+  },
+  "e2e_new128": {
+   "steps": 40,
+   "lines": [
+    "step 10/40 loss 2.6616 val_ndcg 0.47560 holdout_ndcg 0.44077 lr 1.08e-03 cd_loss_reg 0.0000 cd_loss_pool 2.7605",
+    "step 20/40 loss 0.0000 val_ndcg 0.47257 holdout_ndcg 0.44146 lr 6.63e-04 cd_loss_reg 3.0393 cd_loss_pool 1.8715",
+    "step 30/40 loss 0.0000 val_ndcg 0.47341 holdout_ndcg 0.39452 lr 3.48e-04 cd_loss_reg 3.6465 cd_loss_pool 1.6172",
+    "step 40/40 loss 0.0000 val_ndcg 0.47347 holdout_ndcg 0.39497 lr 8.44e-05 cd_loss_reg 3.8439 cd_loss_pool 1.2246",
+    "BEST step 20 val_ndcg 0.47257; train time"
+   ]
+  },
+  "e2e_new192": {
+   "steps": 40,
+   "lines": [
+    "step 10/40 loss 2.6814 val_ndcg 0.43737 holdout_ndcg 0.41085 lr 1.08e-03 cd_loss_reg 0.0000 cd_loss_pool 2.8186",
+    "step 20/40 loss 0.0000 val_ndcg 0.43860 holdout_ndcg 0.43441 lr 6.63e-04 cd_loss_reg 3.1069 cd_loss_pool 1.8466",
+    "step 30/40 loss 0.0000 val_ndcg 0.43248 holdout_ndcg 0.41237 lr 3.48e-04 cd_loss_reg 3.6788 cd_loss_pool 1.6125",
+    "step 40/40 loss 0.0000 val_ndcg 0.42674 holdout_ndcg 0.41258 lr 8.44e-05 cd_loss_reg 3.8457 cd_loss_pool 1.2424",
+    "BEST step 20 val_ndcg 0.43860; train time"
+   ]
+  },
+  "e2e_mup": {
+   "summary": [
+    [
+     "10",
+     "8.816e-04",
+     "1.080e-03",
+     "1.080e-03"
+    ],
+    [
+     "20",
+     "5.413e-04",
+     "6.629e-04",
+     "6.629e-04"
+    ],
+    [
+     "30",
+     "2.843e-04",
+     "3.481e-04",
+     "3.481e-04"
+    ],
+    [
+     "40",
+     "6.892e-05",
+     "8.440e-05",
+     "8.440e-05"
+    ]
+   ],
+   "on_lines": [
+    "step 10/40 loss 2.6814 val_ndcg 0.43737 holdout_ndcg 0.41045 lr 1.08e-03 cd_loss_reg 0.0000 cd_loss_pool 2.8186",
+    "step 20/40 loss 0.0000 val_ndcg 0.43821 holdout_ndcg 0.43449 lr 6.63e-04 cd_loss_reg 3.1046 cd_loss_pool 1.8474",
+    "step 30/40 loss 0.0000 val_ndcg 0.43413 holdout_ndcg 0.43365 lr 3.48e-04 cd_loss_reg 3.6925 cd_loss_pool 1.6160",
+    "step 40/40 loss 0.0000 val_ndcg 0.42990 holdout_ndcg 0.41265 lr 8.44e-05 cd_loss_reg 3.8744 cd_loss_pool 1.2442",
+    "BEST step 20 val_ndcg 0.43821; train time"
+   ],
+   "setup": [
+    "wave-11 WIDTH-GATE muP: --mup_base 128 at d 192: Muon lr multiplier sqrt(128/192) = 0.8165 on 39 width-growing matrices (1.843M params); 1.0 on 7 fixed-fan-in matrices ['c_lin.weight', 'c_mlp.0.weight', 'h_lin.weight', 'retr.t1.weight', 'retr.t2.weight', 'retr.wk.weight', 'u_lin.weight'] (0.179M params); applied inside the step loop after the per-step lr reset; Muon's decoupled weight decay (wd 0.02) scales by the same multiplier on the scaled matrices; AdamW groups untouched",
+    "wave-11 muP example cross.0.attn.q.weight shape (192, 192): mult 0.8165; spectral step at lr = 0.2 * lr * 0.8165 * sqrt(192) = 2.2627 * lr (d128 reference 0.2 * sqrt(128) = 2.2627 * lr)",
+    "wave-11 muP example c_lin.weight shape (192, 256): mult 1.0000; spectral step at lr = 0.2 * lr * 1.0000 * sqrt(256) = 3.2000 * lr",
+    "wave-11 muP example retr.wk.weight shape (64, 128): mult 1.0000; spectral step at lr = 0.2 * lr * 1.0000 * sqrt(128) = 2.2627 * lr"
+   ]
+  }
+ }
+}

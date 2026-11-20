@@ -1,0 +1,50 @@
+# Submission files are never versioned: the final files and every staged or scored candidate
+# are parquet files under artifacts/submissions/ (and older copies inside lab/).
+*.parquet
+**/subs/
+**/stage/*.parquet
+
+# Data, predictions, submissions and run outputs: hundreds of GB, never versioned.
+artifacts/
+
+# The lab tree is versioned for its code and text only.
+lab/**/*.npy
+lab/**/*.npz
+lab/**/*.pt
+lab/**/*.memmap
+lab/**/*.bin
+lab/**/*.pkl
+lab/**/*.zip
+lab/**/*.cbm
+lab/**/*.safetensors
+lab/nn/feat_cache/
+
+# Caches
+__pycache__/
+*.pyc
+*.nbi
+*.nbc
+.pytest_cache/
+catboost_info/
+
+# Environments
+.venv/
+.venv_*/
+*.egg-info/
+build/
+
+# Symlinks made by lab/tools/legacy_layout.sh on (old top-level names for running lab scripts)
+/nn
+/nn_x
+/reports
+/eda
+/solvers
+/feats_v2
+/feat_new
+/pretrain
+/logs
+/archive
+/src
+/data
+/preds
+/subs

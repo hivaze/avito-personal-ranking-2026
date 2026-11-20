@@ -1,0 +1,11 @@
+== STAGE E AP1 CONFIRMATION read-out (2026-11-13T10:51:59Z): w5_e10_e15_s[951, 952] vs w5_e10_base_s[951, 952], selected checkpoints primary (@last info). Rule (logs/E_e15_predeclared.txt): PASS iff pooled val > 0 AND holdout > +1 SE AND no val slice (M<50, M>=50, Tue, Thu) < -2 SE AND pmix >= -1 SE
+seed 951: base val 0.39632 hold 0.32084 | e15 val 0.39611 hold 0.32023 | d val -0.00021 d hold -0.00061
+         last ckpt: d val -0.00016 d hold -0.00123
+seed 952: base val 0.39691 hold 0.32000 | e15 val 0.39602 hold 0.32019 | d val -0.00088 d hold +0.00019
+         last ckpt: d val -0.00112 d hold -0.00031
+POOLED member (selected): val -0.00055+-0.00071 (z -0.76) | holdout -0.00021+-0.00043 (z -0.49) | pmix -0.00050+-0.00106 (z -0.48) | slices M<50 +0.00003 (z +0.0) M>=50 -0.00095 (z -1.2) Tue +0.00063 (z +0.6) Thu -0.00184 (z -1.8)
+POOLED member (@last, info): val -0.00064+-0.00076 (z -0.85) | holdout -0.00077+-0.00043 (z -1.77)
+2-member POOL (info): base val 0.39837 hold 0.32226 | e15 val 0.39808 hold 0.32184 | d val -0.00029+-0.00081 d hold -0.00043+-0.00049
+gates: val > 0 NO; holdout > +1 SE NO; no val slice < -2 SE OK; pmix >= -1 SE OK
+VERDICT e15: FAIL (val -0.00055, holdout -0.00021 +- 0.00043, pmix -0.00050 +- 0.00106)
+registry: w5_e10_e15_s951/952 vs w5_e10_base (10-epoch from-scratch pair, E_BASE + HYG, selected ckpt, pre-declared E rule 07:28 UTC): val -0.00055 +- 0.00071 (z -0.8), holdout -0.00021 +- 0.00043 (z -0.5), pmix -0.00050, M<50 +0.00003 M>=50 -0.00095 Tue +0.00063 Thu -0.00184, pool val -0.00029 / hold -0.00043, @last val -0.00064 / hold -0.00077 -> FAIL (<repo>/nn_x/w5/logs/w5_eval_E_e15.txt)

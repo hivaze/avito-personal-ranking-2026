@@ -1,0 +1,43 @@
+PREDECLARED (written before any E/L/val/test statistic or NDCG was computed): 2026-11-13 04:45:51 UTC
+Item: HOLD-CLEAN label-free format readout (TRICKS_SWEEP_1113 §2 allowed residual "Step 2"). CPU only, 12 threads.
+Purpose: INFORMATION for FUTURE arms only. No closed arm is recomputed or re-judged; nothing is adopted or submitted.
+
+1. Holdout feed index: rule of nn_x/r6/train.py (and nn_x/audit/external/common_ext.holdout_index): p = nan_to_num(train_prandom.p_random),
+   p[M<50]=0, cand = where(p>0.9 & M>=50), hold = sort(default_rng(12345).choice(cand, 30000, replace=False)).
+   Sanity: train M[hold] must equal preds/holdout/holdout_meta.npy[0] and holdout_y must equal train cand_target on the holdout rows
+   (if not: stop and report).
+2. Day split (project convention MSK = UTC+3, day = (timestamp+10800)//86400; day 20702 = Sun Sep 6 2026):
+   E = MSK days Sep 6-8   = timestamp <  1788901200 (= 2026-09-09 00:00 MSK = 2026-09-08 21:00 UTC)
+   L = MSK days Sep 9-19  = timestamp >= 1788901200 (includes the few boundary feeds stamped Sep 20 00:00 MSK; counted and reported).
+3. Comparators: val (all 14,423 feeds) and test split into public (timestamp < 1790497920) and private (>= 1790497920).
+   PRIMARY comparators are the FORMAT-MATCHED subsets val M>=50, test-public M>=50, test-private M>=50 (the holdout is M>=50 by
+   construction); all-M val/test values are reported as info only. For the count below "test" = test M>=50 (public+private pooled);
+   public and private are also reported separately.
+4. Format statistics (label-free). The ten PRIMARY scalars used in the count (one per family; feed-level ones averaged over feeds,
+   row-level ones over candidate rows):
+   S1  M distribution            : mean log(M)                       (info: quantiles p10/25/50/75/90, mean M)
+   S2  history length            : mean log1p(H)                     (info: quantiles, share H=256 cap, share H<=10)
+   S3  user_id 0                 : share of feeds with user_id == 0
+   S4  candidate-category entropy: mean per-feed Shannon entropy (nats) of the candidate category_id distribution
+                                   (info: mean distinct categories / M)
+   S5  cand_f1..f5 missing/zero  : share of candidate rows with ANY of f1..f5 NaN or == 0 (info: per-feature NaN share, zero share)
+   S6  seen-in-history           : share of candidate rows whose item_id occurs among the same feed's history item_ids
+                                   (invalid ids, i.e. negative / sentinel, never match; documented in RESULT)
+   S7  listing-age proxy         : share of candidate rows with age_hours(f4) < 24 h (age map exactly as nn_x/audit/ageprod/ap01_lifts.py,
+                                   life_f4_age_knots.npy; f4 >= 63/64 -> NaN -> oldest bin) (info: 8-bin shares, median age)
+   S8  pre2 NaN share            : share of candidate rows with pre2_fe NaN
+   S9  LUO zero rate             : share of candidate rows with it_hist_all_luo == 0
+   S10 popularity level          : mean log1p(it_hist_all_luo) over candidate rows
+   Info only (not counted; no val/test comparator exists): p_random distribution of E vs L (mean, quantiles, share > 0.99).
+   Feed-level SEs for E, L and E-L are computed by the delta method over feeds (row-level stats: ratio-of-sums SE with feeds as units).
+5. Pre-declared reading (the only decision this readout makes):
+   For each Sk: E_out(k) = |E - val50| > |L - val50|  AND  |E - test50| > |L - test50|  AND  |E - L| > 2 SE(E - L).
+   If sum_k E_out(k) >= 3 (of 10): record "E is out-of-format" and recommend that FUTURE arm readouts carry a pre-declared dE/dL
+   information column (holdout NDCG delta on E and on L separately). Nothing else follows: no closed arm is recomputed, no judge is
+   changed retroactively, no pick changes. If < 3: record "E is not out-of-format by the pre-declared rule"; no dE/dL column.
+   Secondary (info only, not the decision): the same count without the 2-SE noise guard, and counts vs public50 / private50 separately.
+6. G3 NDCG on E vs L (info): G3 holdout = member-equal per-feed z-mean of the 20 G3 train-only members' holdout preds
+   (nn_x/pubdiag/build/g3_members.txt); must reproduce 0.32379 on all 30K (else stop and report). Report mean per-feed NDCG
+   (src/metrics.ndcg_per_feed, pessimistic ties) ± SE on E and on L, E-L ± SE (independent feed sets), and the same for each of the
+   20 members: member sd across the 20 on E, on L and of (E-L); member deviation from the pool mean on E vs L (Pearson across members);
+   member-minus-G3 gap on E and L. Also the per-family (F10 / F7x / F7x70) means. None of this is a judge for any arm.

@@ -1,0 +1,70 @@
+# The whole change to the ranker's trainer for training on all train feeds, as a diff between the trainer of
+# the held-out members (lab/nn_x/w5/train.py, frozen copy ref/train_w5.py.txt) and train_full.py.
+# One flag, off by default; the added statements run only behind it (through 'fd is not None' guards), so a
+# run without the flag executes the original code path (checked by test_full.py in the same lab folder).
+# Classic diff format, reference file first. The command that wrote the diff is not on record.
+# The popularity-light trainer carries the same patch (logs/patch_abl.diff).
+# Kept as it ran: paths and names refer to the lab tree (see lab/ and docs/glossary.md).
+# Original: lab/nn_x/w12/stale/fulldata/logs/patch_w5.diff
+#
+2a3,15
+> FULLDATA copy (nn_x/w12/stale/fulldata, 2026-11-15; reports/STALE_1115/fulldata.md): nn_x/w5/train.py (frozen copy
+> ref/train_w5.py.txt, md5 in ref/md5.txt) + ONE flag, OFF by default and guarded so that a flag-off run executes exactly
+> the nn_x/w5/train.py code path (test_full.py: AST proof + textual diff + end-to-end CPU identity). Helper cd_full.py:
+>   --holdout_in_train     the 30,000 holdout feeds are identified exactly as before (hold / hold_rows, the exploration posterior,
+>                          every log line up to "holdout: ...") but are NOT removed from the training feeds nor from the cooldown
+>                          exploration pool; the kept checkpoint is the LAST step (no selection: the holdout is in-sample and val
+>                          is never a selection metric here); the holdout NDCG of every eval is logged on its own line with the
+>                          word IN-SAMPLE and the regular holdout_ndcg field is nan; holdout predictions are written as
+>                          preds/holdout/nn_<v>[@last]_holdoutINSAMPLE.npy (never as ..._holdout.npy); val / test predictions,
+>                          --save_last and --save_steps as before. Run from the code directory with PYTHONPATH=<code dir>:
+>                            cd <repo>/nn_x/w5 && PYTHONPATH=<repo>/nn_x/w5 python <repo>/nn_x/w12/stale/fulldata/train_full.py --variant ... --holdout_in_train
+> Previous docstring:
+> 
+56a70
+> from cd_full import FullData  # FULLDATA --holdout_in_train (nn_x/w12/stale/fulldata; OFF by default)
+263a278,281
+>     p.add_argument("--holdout_in_train", action="store_true",
+>                    help="FULLDATA (cd_full.py): keep the --holdout feeds identified as before but do NOT remove them from the "
+>                         "training feeds nor from the cooldown pool; checkpoint = the LAST step (no selection); holdout NDCG "
+>                         "logged as IN-SAMPLE only; holdout preds written as ..._holdoutINSAMPLE.npy")
+283a302
+>     fd = None  # FULLDATA (cd_full.py): stays None unless --holdout_in_train
+293a313,314
+>             if a.holdout_in_train:  # FULLDATA: remember the training feeds BEFORE the holdout is removed (checks + a.keep = 'last')
+>                 fd = FullData(a, feeds, hold, hold_rows, tr, log)
+295a317,318
+>             if fd is not None:  # FULLDATA: put them back (hold / hold_rows stay as identified above)
+>                 feeds = fd.put_back(feeds, log)
+402a426,427
+>     if fd is not None:  # FULLDATA: holdout feeds per epoch in the regular batches (count check)
+>         fd.steps_note(epoch_batches, total, a, tr, log)
+432c457,459
+<         pool = exploration_pool(feeds, prand_np, a.pool_p, hold)  # == feeds[prand_np[feeds] > 0.5] at the default
+---
+>         pool = exploration_pool(feeds, prand_np, a.pool_p, hold if fd is None else None)  # == feeds[prand_np[feeds] > 0.5] at the default
+>         if fd is not None:  # FULLDATA: the pool keeps its holdout feeds (counted and logged)
+>             fd.pool_note(pool, log)
+553a581,582
+>             if fd is not None:  # FULLDATA: logged on its own line as IN-SAMPLE; the regular field below shows nan
+>                 ndh = fd.insample(step + 1, ndh, log)
+573a603,604
+>             if fd is not None:  # FULLDATA: no selection at all; a.keep == 'last' (set by FullData) keeps the LAST step
+>                 sel = -math.inf
+588c619,621
+<         last_sd = save_last(a, model, va, tr, hold, hold_rows, step + 1, CKPT, PREDS, predict, eval_ndcg, ndcg, log)
+---
+>         last_sd = save_last(a, model, va, tr, hold if fd is None else None, hold_rows, step + 1, CKPT, PREDS, predict, eval_ndcg, ndcg, log)
+>         if fd is not None:  # FULLDATA: the last checkpoint's holdout preds under the IN-SAMPLE name
+>             fd.save_insample(f"{a.variant}@last", model, tr, PREDS, predict, ndcg, log)
+597c630
+<     if a.save_holdout:  # wave-5 hygiene (r7 port): holdout preds of the selected checkpoint, identical to holdout_eval.py
+---
+>     if a.save_holdout and fd is None:  # wave-5 hygiene (r7 port): holdout preds of the selected checkpoint, identical to holdout_eval.py
+599c632
+<     if a.hzcd:  # wave-5 hzcd: the selected checkpoint's holdout preds scored through the hz view (extra diagnostic file)
+---
+>     if a.hzcd and fd is None:  # wave-5 hzcd: the selected checkpoint's holdout preds scored through the hz view (extra diagnostic file)
+600a634,635
+>     if fd is not None:  # FULLDATA: kept (= last) checkpoint's holdout preds (as built, and through the hz view with --hzcd), IN-SAMPLE names
+>         fd.finish(a, model, tr, tr_hz, best[2], total, PREDS, LOGS, predict, ndcg, log)

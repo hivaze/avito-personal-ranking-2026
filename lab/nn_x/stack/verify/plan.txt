@@ -1,0 +1,30 @@
+VERIFY PLAN  written Thu Nov 12 16:46:40 UTC 2026
+Role: adversarial verifier of 4 'accepted' stacking/weighting variants (S1 hfit P11W1to, S2 nnstk g3gate3r, S3 PoP3, S3 PoP2M).
+For each, with my own code (verify.py in this dir, CPU only, OMP/MKL/POLARS threads 12):
+ 1. Rebuild the reference equal pool(s) from member preds (spec = 0.5*z(mean z(ft)) + 0.5*z(mean z(to)), z = per-feed z via feed_rank_z),
+    check they match preds/ens_*.
+ 2. Recompute candidate val score from its stored val preds (and, where possible, from first principles:
+    S1 = re-apply logged weights to member to-preds; PoP = mean of z(spec) of pools). Paired per-feed delta vs the stated equal ref
+    and vs G3 with iid SE and user-clustered SE; slices M<50/M>=50, Tue/Thu, coldpos/warmpos (cold = it_hist_all_luo==0, per-positive
+    split of NDCG via feeds whose positives are cold/warm as in prior studies -> I will define coldpos as feeds whose positives are all cold? no:
+    I will reproduce the studies' definition after reading their code, and state it).
+ 3. Holdout delta (where OOS claimed) recomputed.
+ 4. Leakage audit: read fitting code. S1: weights fitted only on holdout (train-only preds, train-period feeds) - confirm no val/test arrays enter the fit.
+    S2: confirm fold assignment == nn/finetune.py GroupKFold(user, user0 singletons), inner models never see outer-fold val rows,
+    ES uses an inner training fold, test pred = mean of inner models, no test labels; inputs per row are OOF ft preds of the same fold.
+    PoP: no fitted params - confirm.
+ 5. Candidate file: row count / ids / ordering identical to an existing sub (G3), per-feed Spearman vs my recomputed test score ~1.
+ 6. Selection-adjusted view: report the multiplicity context; default to refuted when I cannot reproduce.
+Verdict per variant: confirmed (reproduces + protocol clean + passes (ii)-(iv)), refuted (fails reproduction / leak / rule), unclear.
+Deadline: return by ~18:10 UTC.
+
+RESULT Thu Nov 12 16:57:11 UTC 2026  (scripts verify.py..verify7.py, logs logs_stage1..7.txt in this dir; CPU only, no GPU, no other process touched)
+- All 4 reproduce exactly from member preds with my own z/pool code + src/metrics.ndcg_per_feed (parity with frozen arrays <=3e-5);
+  all 4 subs valid (2,904,806 rows, ids == flat order == G3 sub, unique within-feed ranks), per-feed Spearman vs my recomputed test >= 0.9995.
+- Leak audit: S1 weights = my own float64 ListNet refit on the holdout alone (identical to 4 dp) -> no val/test info in the fit; holdout is
+  train-period (max ts < val min ts). S2 folds == GroupKFold(user, u0 singletons), no user split across folds, folds align with FT fold models
+  (between-fold var of mean(ft-to) 60-100x random); nested loop code clean (outer fold never in train/ES). PoP: no fitted params.
+- Robustness: S1 t 2.54 but half-holdout refits give +0.00009..+0.00042 (none >= 2 SE), 40-test max-t adjusted p 0.09, vs G3 tie.
+  S2 t 2.02 (all SE estimators), unselected replicates s1+s2 t 1.97, 19-config max-t adjusted p 0.20; uses cold context, private colder (0.46 vs 0.38).
+  PoP3 t 2.28, holdout +1.53 SE, 9-PoP adjusted p 0.08. PoP2M t 2.04 (fold-jackknife 1.80), adjusted p 0.13.
+  Verdicts: PoP3 confirmed; S1, S2, PoP2M unclear (pass by the letter, not robust). None is shown better than G3.

@@ -1,0 +1,236 @@
+line	class	kd_status	idea	mechanism_note
+17	A	-	Muon (match_rms_adamw) on hidden 2-D matrices	adopted recipe / protocol
+18	A	-	WSD 1-sqrt cooldown, no stage 2	adopted recipe / protocol
+19	2	no (Q-level null)	lr 1e-3 vs 2e-3	lr set under hard-label gradient noise; F9 lr1e-3 vs F7 at pool level -0.0004 val / -0.0005 hold, G_mix 0 (M8, M10)
+20	2	no (Q-level null)	lr > 2e-3	lr set under hard-label gradient noise; F9 lr1e-3 vs F7 at pool level -0.0004 val / -0.0005 hold, G_mix 0 (M8, M10)
+21	2	moot	cooldown mix 0.3 at 10 ep	pool memorisation/forgetting; at pool level the mix dose 0.01-0.10 is flat (m01/m04/xp2m10 Q 0 +- 0.0006, M8) -> nothing for KD to unlock
+22	A	-	**cooldown mix 0.02 (m02) in the CD harness**	adopted recipe / protocol
+23	A	-	cooldown mix 0 (m0) vs m02	m0 vs m02 decided for m02
+24	1	no	aux_anneal 0.5 in the cooldown (aa5)	K9 aux dose/normalisation null; see row 85 for the K9-under-KD question
+25	2	retest T8	cooldown length (cf4 40% matched, e3, s2c2 12 ep)	long cooldowns memorise (cf4, e3, s2c2); under KD the late decline is gone (last-best -0.0001, M6) but kw_e20 shows a 2x cooldown adds nothing
+26	2	moot	cooldown mix 0.1 vs 0 at 10 ep	pool memorisation/forgetting; at pool level the mix dose 0.01-0.10 is flat (m01/m04/xp2m10 Q 0 +- 0.0006, M8) -> nothing for KD to unlock
+27	2	retest T8	cooldown_frac (0.2) / lr floor (3%)	long cooldowns memorise (cf4, e3, s2c2); under KD the late decline is gone (last-best -0.0001, M6) but kw_e20 shows a 2x cooldown adds nothing
+28	3n	no	1-epoch cooldown continuation from plateau checkpoints	snapshot / continuation / 2-epoch members: noise-type diversity only
+29	3n	no	stage-1 weight EMA (2-ep cosine)	weight averaging removes member noise, not mean-function error (ens -0.0025); worthless at the pool asymptote
+30	3n	no	**plateau weight averaging (avg of WSD-plateau snapshots)**	weight averaging removes member noise, not mean-function error (ens -0.0025); worthless at the pool asymptote
+31	2	done-KD: closed	longer plateau (>10 ep, or more plateau at lr 2e-3)	longer training: kw_e20 member -0.0008/-0.0004, mean-function estimate +0.0008+-0.0011 / 0.0000+-0.0006 (M3b): null, late memorisation returns (-0.0007)
+32	A	-	cooldown improves the mean function (not just de-noising)	finding / statistic / header row
+33	4	no	**earlier cooldown (~7-ep schedule) as a cost lever**	cost levers (shorter schedules); pool already at the asymptote so cheaper members buy nothing
+34	3n	no	plateau snapshots as single members (F7p @77.5k)	snapshot / continuation / 2-epoch members: noise-type diversity only
+35	A	-	2 vs 10 epochs	adopted recipe / protocol
+36	3n	no	2-epoch same-recipe seed families as members (F8)	snapshot / continuation / 2-epoch members: noise-type diversity only
+37	4	no	5-7 epochs under Muon	cost levers (shorter schedules); pool already at the asymptote so cheaper members buy nothing
+38	2	done-KD: closed	15 / 20 epochs	longer training: kw_e20 member -0.0008/-0.0004, mean-function estimate +0.0008+-0.0011 / 0.0000+-0.0006 (M3b): null, late memorisation returns (-0.0007)
+39	1	no	batch size (cand_budget 32768 / max_feeds 512)	batch 4x: fewer cooldown steps; pool-level Q -0.0015/-0.0024 (M8); G_mix 0
+40	1	no	warmup 500, Muon momentum 0.95, AdamW betas (0.9, 0.98), clip 1.0	no instability to fix
+41	2	done-KD: works	KD (born-again)	single-teacher born-again KD -> ensemble KD (row 296)
+46	2	done-KD: closed; retest T9 (low)	dropout (0.1)	dropout 0 under KD: member -0.0006/-0.0002, Q 0; plateau lead +0.0007/+0.0004 lost to late-cooldown memorisation (-0.0010) -> late-dropout form T9
+47	2	no (low)	weight decay (0.02)	weight decay never varied; no KD-specific mechanism; P<0.03
+48	1	no	aux anneal target (0.1)	K9 aux dose/normalisation null; see row 85 for the K9-under-KD question
+49	4	no	P8 pool-batch aux normalisation	aux normalisation fix = AUXF, null
+50	2	done-KD: realised	label smoothing / anchor against pool memorisation	label smoothing / anchor: the KD target is the anchor
+51	2	retest T5	history-event dropout (augmentation)	history-event dropout: closed by TTA replay only, never trained at 10 ep; under KD = privileged-history distillation (stale ctx_hn/hs caveat)
+52	3v	no	uniform xt input dropout (xt_drop 0.15 / 0.3)	input dropout = cold/warm trade (popularity view); see pop1 rows
+53	3v	no	age-conditioned input dropout	input dropout = cold/warm trade (popularity view); see pop1 rows
+58	A	-	TabR retrieval top-16 (A4)	adopted recipe / protocol
+59	A	-	gated attention (A1)	adopted recipe / protocol
+60	2	retest T7	retr_m != 16	retrieval capacity (retr_m 32, a4u): null at 10 ep under hard labels (Q +0.0018+-0.0013 / -0.0009+-0.0007); not re-tested under KD
+61	1	no	FoX, QK-norm + SSMax, MoE, PLE, TabM, propensity head, semantic IDs, EWMA features	block-form zoo all within +-0.0005 (FoX, QK-norm, MoE, PLE, TabM, propensity, semantic IDs, EWMA)
+62	2	done-KD: closed	d = 256 / 8 heads	d256: mean-function estimate -0.0005/-0.0011 vs d192 (M3b)
+63	2	done-KD: works	d = 192 / 6 heads under Muon (F12)	d192: hard labels Q -0.0002/+0.0002 (null, M8) -> under KD asymptote +0.0002 val / +0.0007 hold over d128 (M3a); member-level invisible (+0.00007/+0.00038)
+64	2	done-KD: closed	deep (3 blocks + 2 history layers)	3 blocks Q -0.0004/-0.0002 (null), 2 history layers -0.0008/-0.0011; heads never varied under KD (T10)
+65	2	done-KD: closed	heads 8 / blocks 3 at 2 ep	3 blocks Q -0.0004/-0.0002 (null), 2 history layers -0.0008/-0.0011; heads never varied under KD (T10)
+66	2	done-KD: closed	ff (2)	FFN x4 Q -0.0007/-0.0009
+67	3n	running (forecast: fail)	GRU history encoder	GRU: G_mix(F7 x GRU F10) 0.0000+-0.0002 / +0.00002+-0.00011, rho_sys 0.997 (M10): no structural diversity
+68	3n	no	DIN	DIN: weak (-0.0018) and no set attention; no_set view has G_mix +0.0003/+0.0006 at a cost of -0.0025/-0.0014 (M11)
+69	A	-	max_hist (256 = data cap)	data cap
+74	A	-	cvnd (co-vis + LUO popularity + ctx_nd)	adopted recipe / protocol
+75	1	no	prew	prew: net 0 after fine-tune
+76	A	-	pre2s (clip-safe pre2)	adopted recipe / protocol
+77	4	no	train-row pre_* / cvnd_pre / cvnd_prez	leak / parity ban
+78	3v	no	hzcv, ixh, it_hist_hz, ud, src_expo; causal / lagged popularity	hz / lagged popularity views: cold/warm trade; see hzcd row 144
+79	4	no	*_id_contrib in any preset	leak / parity ban
+84	A	-	listwise softmax CE, feed-normalised	adopted recipe / protocol
+85	2	retest T6	K9 listwise production-order distillation (tau 10, 0.5)	K9 = dense de-noising aux (+0.0024); doses null under hard labels (CD ap1 4-pool +0.0003/+0.00026+-0.00016, M8); under KD its marginal role is untested
+86	2	retest T6	K9 tau 30 / PL top-20 / aux_pos 1.0	K9 = dense de-noising aux (+0.0024); doses null under hard labels (CD ap1 4-pool +0.0003/+0.00026+-0.00016, M8); under KD its marginal role is untested
+87	2	no (low)	label smoothing, focal, LambdaLoss, CE+Lambda, PL-over-positives	loss zoo judged on one-hot clicks (frozen-trunk); with soft targets the loss form is formally open but T 0.7/1.5 is running and Q is invariant to kd_w 0.3-0.8 (M1)
+88	2	no (low)	RankNet, LambdaRank, NeuralNDCG, ApproxNDCG, BCE, ListMLE	loss zoo judged on one-hot clicks (frozen-trunk); with soft targets the loss form is formally open but T 0.7/1.5 is running and Q is invariant to kd_w 0.3-0.8 (M1)
+89	3v	no	aux head as a blend member (W6)	aux head as member: rho 0.03 but gap 0.094
+90	1	done-KD: closed (ID)	intent head, item-ID residual, position tower	intent head = label echo; item-ID table under KD -0.0057/-0.0049; position tower unobservable at inference
+95	A	-	fta (cos + EMA 0.99, 4 ep) on Muon checkpoints	adopted recipe / protocol
+96	A	-	n2c_pre_v3 + u0 singleton	adopted recipe / protocol
+97	2	retest T3	shorter fine-tune (epochs 1-2) / nested epoch selection	fine-tune on 14.4K hard-label feeds overfits (epoch-1 peak); under KD the FT branch is 0.0007 BELOW the TO branch and hurts M<50 in 9/9 families (M7)
+98	2	retest T3	fine-tune lr, batch, wd, extra_lr_mult under fta	fine-tune on 14.4K hard-label feeds overfits (epoch-1 peak); under KD the FT branch is 0.0007 BELOW the TO branch and hurts M<50 in 9/9 families (M7)
+99	2	retest T3	refit on full val	fine-tune on 14.4K hard-label feeds overfits (epoch-1 peak); under KD the FT branch is 0.0007 BELOW the TO branch and hurts M<50 in 9/9 families (M7)
+100	4	no	w_ft != 0.5	w_ft: W8 w=0.15/0.30 +0.00028+-0.00035/0.00026 vs 0.5 (M7): null
+101	3n	no	fine-tune seed bagging / multiple FT variants	FT seed bagging: noise-only
+102	4	moot	pseudo-labels (test)	test pseudo-labels / transductive KD: leak-grey and student agreement is identical on holdout/val/public/private (0.9737/0.9722/0.9718/0.9719, M9): no fidelity gap to fix
+103	2	retest T3	LP-FT, SAM in fta	fine-tune on 14.4K hard-label feeds overfits (epoch-1 peak); under KD the FT branch is 0.0007 BELOW the TO branch and hurts M<50 in 9/9 families (M7)
+108	A	-	member-equal per-feed z-mean, 0.5 FT + 0.5 TO	adopted recipe / protocol
+109	4	process finding F2	strength gates (a) single + (b) 6-seed family	gates / member-level screens are blind to mean-function levers (d192 fails the kw screen itself); @last = selected for students (M12a)
+110	3v	see F3	same-strength different-recipe families	families as the lever: only information-view families carry structural diversity (M10, M11)
+111	1	no	GBDT members, stackers, rank / RRF fusion, segment / routing weights	GBDT members / stackers: weak (rho 0.86) or val-fitted; second level 0/78
+112	1	no	pre_final / encoder term	encoder term -0.0008
+113	3n	no	F9 family (lr 1e-3 pre2s)	F9 lr 1e-3 family: G_mix 0.0000/+0.0001, rho_sys 0.996 (M10)
+114	A	-	diversity source = plateau iterate noise	finding / statistic / header row
+115	4	process finding F2	evaluate recipe changes at ensemble level (k-seed TO ensemble + seed corr)	gates / member-level screens are blind to mean-function levers (d192 fails the kw screen itself); @last = selected for students (M12a)
+120	1	no	cold offsets / gates / routers / MoE by coldness	cold routing: oracle is a label echo
+121	4	no	coverage-weighted val / reweighted holdout	validation design / judge changes
+122	A	-	stale-val replay as a robustness column	adopted recipe / protocol
+123	4	no	later-history signal	later-history: banned and test-null
+128	A	-	single-member val sd (10 ep Muon)	finding / statistic / header row
+129	A	-	same-seed non-determinism (late plateau)	finding / statistic / header row
+130	A	-	within-run plateau eval jitter	finding / statistic / header row
+131	A	-	MDE, 6-vs-6 family comparison	finding / statistic / header row
+132	A	-	val MDE (blend tweak / seed variant / model generation)	finding / statistic / header row
+137	1	no	LLM backbones as soft-token rankers (Qwen3-0.6B / Qwen3.5-4B / 9B, LoRA r32, matched 150K 	LLM backbones: -0.004, structural corr 0.97
+138	1	no	cooldown-data arms wave 4: hcap (history parity), rec33 (recency), rho70 (RHO-LOSS learnab	hcap null, rec33 / rho70 negative at pool level too (M8)
+139	2	retest T3	val FT recipe retune (Optuna TPE, 35 trials, user-hash TUNE/CONFIRM)	fine-tune on 14.4K hard-label feeds overfits (epoch-1 peak); under KD the FT branch is 0.0007 BELOW the TO branch and hurts M<50 in 9/9 families (M7)
+140	1	no	item-level exploration prior from val / train-exploration labels	information nulls (item prior, AGE-PROD, pretrained ID encoder, external data, TRUNC M-bucket, W25)
+141	1	no	AGE-PROD: training-only listing-age margin on production rows (sibling of TRUNC)	information nulls (item prior, AGE-PROD, pretrained ID encoder, external data, TRUNC M-bucket, W25)
+142	1	no	R3/P8: pretrained ID-aware sequence encoder as history-encoder init / frozen ID table	information nulls (item prior, AGE-PROD, pretrained ID encoder, external data, TRUNC M-bucket, W25)
+143	1	no	TRUNC-PROD (training-only true rank-from-end offset on production rows)	TRUNC-PROD: pool-level -0.0003/-0.0009 (M8)
+144	3v	retest T4	hzcd popularity-parity cooldown	hzcd = stale-popularity view: member hold -0.0005 but 4-pool val +0.0008+-0.0005 / hold -0.0001 (M8), G_mix +0.0002/+0.0002, cost ~0 on val (M11); the holdout is in-period (biased judge)
+145	1	no	AUXF feed-normalised K9 aux (cooldown form)	K9 aux dose/normalisation null; see row 85 for the K9-under-KD question
+146	1	no	External / connected data (calendar, paydays, weather, events, Avito promos, market stats)	information nulls (item prior, AGE-PROD, pretrained ID encoder, external data, TRUNC M-bucket, W25)
+147	1	no	TRUNC per-M-bucket lifts (trunc2 10-epoch pairs; truncp2 cooldown form)	information nulls (item prior, AGE-PROD, pretrained ID encoder, external data, TRUNC M-bucket, W25)
+148	1	no	val labels replayed inside the m02 cooldown (valcd, user-grouped 5-fold OOF)	val labels in the cooldown = FT value; arithmetic nulls
+149	1	no	2025-winners recipe (W25: group-level EASE-DAN / RDLAE / EASE scorers, contact-ratio targe	information nulls (item prior, AGE-PROD, pretrained ID encoder, external data, TRUNC M-bucket, W25)
+150	1	no	more xt_rel inputs in the ranker (xrel_more: seq_cv_pop, it_hist_et1_luo, ctx_nd_knn_h, ct	xrel_more: -0.0018/-0.0007 at pool level too (M8); G_mix 0
+151	2	retest T6	removing any current component (retrieval, popularity inputs, K9 aux, set attention, feed 	K9 = dense de-noising aux (+0.0024); doses null under hard labels (CD ap1 4-pool +0.0003/+0.00026+-0.00016, M8); under KD its marginal role is untested
+152	2	retest T7	capacity / width scale-ups of the ranker: retr_m 32, retr_m 32 unique+type counts, 4 more 	retrieval capacity (retr_m 32, a4u): null at 10 ep under hard labels (Q +0.0018+-0.0013 / -0.0009+-0.0007); not re-tested under KD
+157	1	no	DOMAIN-DIAG / PRODDIR / DOM-X / domain CFG / K9 logit adjustment (inference-time productio	production-direction removal = cold/warm trade; FUTWIN = label echo
+158	1	no	FN-PU (mask/soften later-interacted negatives)	mechanism closures (true negatives; additive key)
+159	1	no	XUSER-RIM cross-user labelled kNN, additive concat key	mechanism closures (true negatives; additive key)
+160	4	no	HOLD-CLEAN re-judging closed cold/warm arms on Sep 9-19 holdout	validation design / judge changes
+161	1	no	FUTWIN future-window intent aux / PFD	production-direction removal = cold/warm trade; FUTWIN = label echo
+162	4	no	PICK-EMAX	pick-time tie-break
+163	3n	no	post-hoc combiners: risk-averse pooling, SML weights, head-weighted z, SegFuse, FT/TO conf	post-hoc combiners: bounded by the infinite-member headroom (N-law: a/N = 0.0003 at N=8, M3a)
+164	2	retest T9 (low)	LATE-DROPOUT (res/FFN/retr drop 0 in plateau, 0.1 in cooldown)	LATE-DROPOUT closed under hard labels (+0.0001/+0.0001; pool Q +0.0006+-0.0012/+0.0002+-0.0007); KD plateau lead measured (M13)
+165	1	no	RECYCLE v2 (score-conditioned 2nd pass, noised pass-1 + depth-matched control)	head-only recycle: headroom is in the tail
+166	3n	no	HDROP-ALL / RDROP-CD / CTXDROP / MODSUP / SAM-CD	R-Drop / SAM: member hold +0.0004..0.0006 at corr 0.990; 4-pool +0.0003..0.0004+-0.00025 hold, val -0.0002/+0.0003 (M8): noise reduction; redundant with soft targets
+167	2	moot	ANCHOR-REPLAY, MetaBalance-K9, POP-REL, MODDROP-POP, HZCOND, FPCD, PRE2T, cross-feed negat	ANCHOR-REPLAY is realised by KD on pool batches and the pool-level dose curve is flat (rows 21/203); POP-REL / HZCOND = popularity views (T4)
+168	2	running (confounded) / retest T2	SCTTA, snapshot/SWAG, TTT/Mean-Teacher, :D sub-list, SLS, multi-sample sub-list, WiSE-FT, 	:D sub-list sampling / SLS = kwsub arms; closed earlier for label-dependence with STALE ctx features; 6 of 20 ctx inputs are 0.8-3.6 sd M-dependent (M14)
+173	1	no	Pre-training on trajectories (PRETRAIN_PLAN_1113)	pre-training / SSL / encoder scale: same-data ratio 1:1, triggers failed
+174	1	no	E1 P8-v2 in-category / condition-token / nonfeed / contact encoder	pre-training / SSL / encoder scale: same-data ratio 1:1, triggers failed
+175	1	no	E2 in-ranker masked-newest-event / MSM SSL aux	pre-training / SSL / encoder scale: same-data ratio 1:1, triggers failed
+176	1	no	F8 pre2 scale-up (d512+, 4-6 ep, bag head)	pre-training / SSL / encoder scale: same-data ratio 1:1, triggers failed
+177	1	no	Encoder-as-init / parallel fine-tuned branch / pseudo-feed ranker pre-training	pre-training / SSL / encoder scale: same-data ratio 1:1, triggers failed
+178	1	no	Contrastive user encoders (CoLES/CLUE/LURM/ICLRec), TS foundation models (Chronos/TimesFM/	pre-training / SSL / encoder scale: same-data ratio 1:1, triggers failed
+179	1	no	P1 trajectory clustering diagnostic (user_emb / history profile, K 8/32)	trajectory clustering, user_emb residual, whitening, cross-user kNN: nulls
+180	1	no	P2 user_emb non-history residual (	trajectory clustering, user_emb residual, whitening, cross-user kNN: nulls
+181	1	no	P3 within-category whitening / CSLS of retrieval similarity	trajectory clustering, user_emb residual, whitening, cross-user kNN: nulls
+182	1	no	P4 cross-user trajectory-kNN label transfer (s_neg/contrast)	trajectory clustering, user_emb residual, whitening, cross-user kNN: nulls
+183	1	no	head-only re-ranking / score-conditioned second pass (RECYCLE, cascade)	head-only recycle: headroom is in the tail
+184	2	retest T5	history-event dropout augmentation / TTA at 10 epochs (HDROP-ALL)	history-event dropout: closed by TTA replay only, never trained at 10 ep; under KD = privileged-history distillation (stale ctx_hn/hs caveat)
+185	1	no	future-window / dense category-intent aux (FUTWIN, PFD)	production-direction removal = cold/warm trade; FUTWIN = label echo
+186	A	-	holdout Sep 6-8 vs Sep 9-19 format (HOLD-CLEAN step 2)	finding / statistic / header row
+187	3n	no	two-pass consistency regularisers in the cooldown (RDROP-CD, SAM-CD)	R-Drop / SAM: member hold +0.0004..0.0006 at corr 0.990; 4-pool +0.0003..0.0004+-0.00025 hold, val -0.0002/+0.0003 (M8): noise reduction; redundant with soft targets
+188	1	no	zero-shot LLM manual ranking from a text rendering (Opus 5.5, tools, no trained model)	zero-shot LLM ranking
+189	1	no	same-category second retrieval (retr_cat)	same-category retrieval: +0.0005+-0.0005 / 0.0; G_mix 0 (M11)
+190	A	-	removing the pre-trained encoder's scalar inputs (xdrop_pre2)	load-bearing / inconclusive ablations (ctx_nd removal is a view with G_mix +0.0005/+0.00045 at -0.0013/0.0 cost, M11)
+191	A	-	removing ctx_hn + ctx_hs inputs	load-bearing / inconclusive ablations (ctx_nd removal is a view with G_mix +0.0005/+0.00045 at -0.0013/0.0 cost, M11)
+192	1	no	trajectory-type conditioning (clusters of user_emb / history profile: per-cluster weights,	trajectory clustering, user_emb residual, whitening, cross-user kNN: nulls
+193	1	no	user_emb beyond-history residual (	trajectory clustering, user_emb residual, whitening, cross-user kNN: nulls
+194	1	no	within-category whitened / CSLS similarity for retrieval	trajectory clustering, user_emb residual, whitening, cross-user kNN: nulls
+195	1	no	cross-user trajectory-kNN label transfer (clicked / ignored by similar users)	trajectory clustering, user_emb residual, whitening, cross-user kNN: nulls
+196	1	no	codes decoding (event types, sources, categories, f1..f5) + decoding-enabled features	feature / decoding / embedding / time / enrichment nulls (nested residual on G3)
+197	A	-	embedding origin / fingerprint (public text or vision model? Matryoshka? appended block?)	finding / statistic / header row
+198	1	no	embedding pre/post-processing (drift flag, centred/whitened/ABTT cos, mean-direction proj,	feature / decoding / embedding / time / enrichment nulls (nested residual on G3)
+199	1	no	embedding location-subspace match (category-residualised feed-level 16-d cos; dim-6/96 mod	feature / decoding / embedding / time / enrichment nulls (nested residual on G3)
+200	1	no	s4 similar-listings item-to-item graph features	feature / decoding / embedding / time / enrichment nulls (nested residual on G3)
+201	1	no	region-normalised popularity (f2 home-region key)	feature / decoding / embedding / time / enrichment nulls (nested residual on G3)
+202	3v	retest T1 (public-judged)	pop-free + one exposure-count input (pop1)	pop1 / pop2 / pop-free views: the ONLY axis with structural diversity that survives distillation: G_mix +0.0006..0.0008 val / +0.0010..0.0013 hold as students (M10); cost -0.0016 val / -0.007 hold; public +0.0005 in C3
+203	2	moot	cooldown aux dose (aa0 = anneal to 0; ap1 = aux_pos 1.0) and cooldown mix 0.01 / 0.04 (wav	cooldown aux dose and mix 0.01/0.04: pool-level Q flat (M8)
+204	1	no	decoding-enabled constructions (34 cues: surfaces, funnel depth, satisfied-need masks, fee	feature / decoding / embedding / time / enrichment nulls (nested residual on G3)
+205	3n	no	two-pass consistency regularisers in the cooldown (R-Drop KL 1.0; SAM rho 0.05)	R-Drop / SAM: member hold +0.0004..0.0006 at corr 0.990; 4-pool +0.0003..0.0004+-0.00025 hold, val -0.0002/+0.0003 (M8): noise reduction; redundant with soft targets
+207	2	retest T9 (low)	late dropout (plateau dropout 0 + cooldown dropout 0.1; 10-ep pair)	LATE-DROPOUT closed under hard labels (+0.0001/+0.0001; pool Q +0.0006+-0.0012/+0.0002+-0.0007); KD plateau lead measured (M13)
+208	3v	retest T1 (public-judged)	pop1 family as pool members (pop-free + one exposure count; 10-ep s951-954, two FT variant	pop1 / pop2 / pop-free views: the ONLY axis with structural diversity that survives distillation: G_mix +0.0006..0.0008 val / +0.0010..0.0013 hold as students (M10); cost -0.0016 val / -0.007 hold; public +0.0005 in C3
+209	2	retest T6	aux_pos 1.0 at 10 epochs from scratch (AP1 confirmation) + 7-root CD family	K9 = dense de-noising aux (+0.0024); doses null under hard labels (CD ap1 4-pool +0.0003/+0.00026+-0.00016, M8); under KD its marginal role is untested
+210	2	done-KD: closed	training length 15 / 20 / 30 epochs (E-EPOCHS dose-response; e20 x4 decision arm, e15/e30 	longer training: kw_e20 member -0.0008/-0.0004, mean-function estimate +0.0008+-0.0011 / 0.0000+-0.0006 (M3b): null, late memorisation returns (-0.0007)
+211	1	no	batch size 4x at 10 epochs (bs4 lr 2e-3; bs4lr4 lr 4e-3), E rule + diversity clause	batch 4x: fewer cooldown steps; pool-level Q -0.0015/-0.0024 (M8); G_mix 0
+212	1	no	cooldown batch size = number of cooldown steps (wave 8: cbs05 half batch, cbs2 double batc	cooldown batch: standard is the optimum; cbs2 4-pool +0.0004/+0.0004+-0.0003 (M8) = noise
+213	3n	no	DW3: plateau domain re-weighting toward random-order feeds (prand_base 0.3, normalised, co	DW3: near copy (rho_sys 0.999; G_mix +0.0004+-0.0002/+0.0001)
+214	3v	no	CATGRAD: composite log P(cat) + log P(item	CATGRAD: rho_sys 0.990 but USEFUL diversity small (G_mix +0.0004+-0.0003/+0.0002+-0.00014) at -0.0017/-0.0011 (M11)
+215	3v	retest T12 (low, zero-sum)	HS1 / HS1b: history VIEW restricted to the feed surface (s1 events) / to target actions (w	HS1 history view: G_mix +0.0010+-0.0003/+0.0011+-0.0002 at cost -0.0022/-0.0022 -> net 0; HS1b net negative (M11)
+216	3n	no	JOINT: single-stream early-fusion transformer over [user; history; candidates] (+ hq0 vari	JOINT early fusion: G_mix +0.0002/+0.0004 at -0.0009/-0.0001; 1.84x cost
+217	3v	retest T1 (public-judged)	popularity-view families as pool members: pop-free (Q1a), pop1 x4 (Q2a), pop1 x8 (Q2a8), p	pop1 / pop2 / pop-free views: the ONLY axis with structural diversity that survives distillation: G_mix +0.0006..0.0008 val / +0.0010..0.0013 hold as students (M10); cost -0.0016 val / -0.007 hold; public +0.0005 in C3
+218	1	no	input scaling / clipping / categorical re-encoding / feed and user aggregates / nonlinear 	feature / decoding / embedding / time / enrichment nulls (nested residual on G3)
+219	3n	no	second-level combiners (feed-conditional weights, stackers, pooling variants, family weigh	post-hoc combiners: bounded by the infinite-member headroom (N-law: a/N = 0.0003 at N=8, M3a)
+220	4	no	validation design: val reweighting (public-matched / pmix), true temporal holdout (T5), as	validation design / judge changes
+221	1	no	FPCD-lite: m02 re-cool without the Sep 6-8 pre2-blank feeds (pre2-flag format parity)	FPCD: masked feeds help
+222	A	-	**External scan 11-13 (reports/EXTERNAL_SCAN_1113.md): rows below copied from its §6.1**	finding / statistic / header row
+224	4	no	f5 forward echo (SNA'19 "next counter"): other-user later f5 minus f5 now	forward echo: leak class
+225	1	no	Avito blender: within-category production order as a cleaner K9 teacher	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+226	1	no	Embedding-level negative feedback from the user's earlier impressions (DFN / XDM / skip-ab	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+227	1	no	Lifelong history from earlier snapshots (SIM/TWIN)	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+228	1	no	IDF damping of history items (OTTO 3rd w_recsys) on the embedding-sim aggregation	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+229	1	no	Typed / backward co-vis, t1 share, ref co-vis	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+230	1	no	Category-sequence family (runs, momentum, decayed shares, head-run)	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+231	1	no	Seller-slot batch co-membership	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+232	1	no	Per-user prior-error / preference from earlier labelled feeds	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+233	1	no	User-relative f4/f5 profile (user preferred age / engagement level)	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+234	1	no	Additive item CTR/COEC as a train-stage input (F17)	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+235	2	no (low)	D2 / EXPLO-STACK, stage 2 on OOF NN scores of 134K exploration feeds	EXPLO-STACK stage 2 on OOF scores: teacher_oof.npy now exists at train scale, but the students already are that second stage
+236	1	no	XOFF: examination offset on exploration rows only	XOFF: exact null (slot effect unobservable at inference)
+237	3n	no	Objective-diverse member family (CE + BCE term, `--bce_w`)	CE+BCE objective family: same order, diversity margin tiny
+238	3n	no	Parallel DCN / GDCN branch on the transformer ranker	GDCN / DCNv2 branch: exact near copy
+239	1	no	Example-age / source-depth input	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+240	4	moot	KD / test pseudo-labels from G3 in the cooldown	test pseudo-labels / transductive KD: leak-grey and student agreement is identical on holdout/val/public/private (0.9737/0.9722/0.9718/0.9719, M9): no fidelity gap to fix
+241	4	process finding F2	Checkpoint read @last as primary (protocol) + rdrop/sam fresh-root replication	gates / member-level screens are blind to mean-function levers (d192 fails the kw screen itself); @last = selected for students (M12a)
+242	1	no	ixh (item production-position prior) as NN input	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+243	2	retest T11	sim_bias 2; within-(feed, category) xrel_cat; non-additive position embedding with observa	sim_bias 2 / xrel_cat / position embedding: never run at 10 epochs
+244	2	no (low)	ADT truncated / reweighted CE	loss zoo judged on one-hot clicks (frozen-trunk); with soft targets the loss form is formally open but T 0.7/1.5 is running and Q is invariant to kd_w 0.3-0.8 (M1)
+245	1	no	GBDT leaf-SVD / GBDT-OOF score as NN input	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+246	1	no	Post-last-click negatives down-weighted as unexamined	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+247	2	no (low)	Event-field dropout in history tokens	event-field dropout, token MLP: untested, P<=0.015
+248	2	no (low)	Nonlinear token MLP (concat vs sum)	event-field dropout, token MLP: untested, P<=0.015
+249	1	no	Cross-feed prediction consensus	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+250	3n	no	User-half data-split members	user-split members: bagging = noise-type diversity at -0.0012 (80% data); the 15 xf fold models exist and add nothing
+251	1	no	CPU closure batch (streak, latent geometry, co-vis variants, IDF/IUF/Swing counts, Bradley	external-scan feature ideas: nested residual nulls / untested with P<=0.02
+252	4	no	PDA/TIDE re-judging of popularity-robust arms	validation design / judge changes
+253	4	no	Gap-matched lens / true backtest fold	validation design / judge changes
+254	1	no	XOFF: examination offset on exploration training rows (wave 10 R2)	XOFF: exact null (slot effect unobservable at inference)
+255	3n	no	CE + BCE objective-diverse member family (--bce_w 5 / 20; wave 10 R3)	CE+BCE objective family: same order, diversity margin tiny
+256	3n	no	parallel GDCN / DCNv2 cross branch at full strength as a member family (wave 10 R4; + cros	GDCN / DCNv2 branch: exact near copy
+257	A	-	**CCB-1113 CPU closure batch (nn_x/insights/ccb_1113/RESULT.md §3): 16 rows, all CLOSED**	finding / statistic / header row
+258	1	no	C01 GBDT-OOF score + leaf-SVD64 (LightGBM lambdarank on 134K XM feeds, pred_leaf → SVD64) 	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+259	1	no	C02 Streak / EWMA (τ 4/16/64) + strike Σ2^-k + per-type same-category recency	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+260	1	no	C03 Latent geometry (loc16 subspace, mode6/96 sides, f2-supervised W: g_shift, g_f2res, g_	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+261	1	no	C04 Co-vis variants w5/fwd5/t1/seqs + OTTO-7th NB log-lift (B9 day source)	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+262	1	no	C05 IDF / IUF / BM25 / idf-damped invd20 / Swing co-vis counts	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+263	1	no	C06 Bradley-Terry / first-choice item strength (λ 3; train p_random > 0.5)	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+264	1	no	C07 Item trend / lifecycle at a gap-matched as-of (it_n7, it_trend, it_slope7, it_q95gap, 	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+265	1	no	C08 EMDE multi-partition sketch (32 × 6 projections, k64, per type group)	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+266	1	no	C09 RP3beta whole-sequence walk (β 0.5 / 0)	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+267	1	no	C10 User aggregates F26 + F27 × 10 cues (160 interactions), holdout as-of tte_u_*	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+268	1	no	C11 Typed implicit rating cvx_g1/g2/g3 / intent / tw	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+269	1	no	C12 Metric-optimal post-processing key B (kappaB) on G3, residual form	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+270	1	no	C13 Pending favourite (saved, not contacted) p1/p2/p3	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+271	1	no	C14 Cross-feed prediction consensus (TO-G3 z of the item in other users' earlier feeds)	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+272	1	no	C15 PLE / PCGrad pre-gate: main vs K9 gradient cosine on w5_e10_base	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+273	1	no	C16 REGIME4 Step 0: Sep-12 production-regime indicator, GBDT proxy (regcorr)	CPU closure batch: 16 nested-residual nulls / cold-warm trades
+274	1	no	external-knowledge enrichment: sourced late-September seasonality per leaf, purchase-cycle	feature / decoding / embedding / time / enrichment nulls (nested residual on G3)
+275	3n	no	fine-tune seed bagging (3 FT seeds per fold, all 28 members)	FT seed bagging: noise-only
+276	1	no	feed weekday + hour-of-day as ranker inputs (TIME arm; val is weekday-only, public weekend	feature / decoding / embedding / time / enrichment nulls (nested residual on G3)
+277	1	no	time-gap features (days since last / first appearance, never-seen, active days) made split	feature / decoding / embedding / time / enrichment nulls (nested residual on G3)
+278	1	no	item ids as a posting-time clock / bumped-listing signal; item-level weekend affinity beyo	feature / decoding / embedding / time / enrichment nulls (nested residual on G3)
+279	A	-	**Solver-power deep-dive closures (reports/SOLVER_POWER_1113.md Appendix B): rows below co	finding / statistic / header row
+280	1	no	new: feed-conditional routing G3 vs popularity-light / same-recipe pools (31 label-free co	routing / MoE / per-vertical experts
+281	1	no	l.120 cold gates / routers	cold routing: oracle is a label echo
+282	1	no	l.61 MoE (sparse, upcycled)	routing / MoE / per-vertical experts
+283	1	no	new: per-vertical experts / adapters	routing / MoE / per-vertical experts
+284	1	no	new: ALL-LABELS-CD (holdout + val in the m02 pool)	val labels in the cooldown = FT value; arithmetic nulls
+285	1	no	new: FT-PSEUDO (val/test-period pseudo-feeds in the FT)	val labels in the cooldown = FT value; arithmetic nulls
+286	1	no	l.137 LLM backbones, full-data slope	LLM backbones: -0.004, structural corr 0.97
+287	2	done-KD: works	l.152 capacity (width)	d192: hard labels Q -0.0002/+0.0002 (null, M8) -> under KD asymptote +0.0002 val / +0.0007 hold over d128 (M3a); member-level invisible (+0.00007/+0.00038)
+288	1	no	l.177 pseudo-feed ranker training	pseudo-feeds: 2-pool +0.0007/-0.0001 (M8); no teacher target possible without an online teacher
+289	1	no	l.176 / l.190 pre2 scale	pre-training / SSL / encoder scale: same-data ratio 1:1, triggers failed
+290	1	no	next-item / self-supervised auxiliary on the history encoder, HSTU-style joint generative 	pre-training / SSL / encoder scale: same-data ratio 1:1, triggers failed
+291	1	no	encoder scaling: pre2 channel worth at 10 ep, ID-free encoder swap, frozen hidden-state K/	pre-training / SSL / encoder scale: same-data ratio 1:1, triggers failed
+292	2	done-KD: works	ranker width under the recipe with a sqrt-width-corrected Muon lr and cooldown dropout (WI	d192: hard labels Q -0.0002/+0.0002 (null, M8) -> under KD asymptote +0.0002 val / +0.0007 hold over d128 (M3a); member-level invisible (+0.00007/+0.00038)
+293	1	no	XPOOL: all-M exploration posterior v2 (set-composition classifier x order LR; 292K feeds, 	XPOOL: detector valid, lever null (4-pool -0.0001/+0.0003, M8)
+294	4	no	M-split blend (TO-only on M<50) on a 3-seed-FT pool (C3)	M-split blend null
+295	1	no	PSEUDO-DIRECT (pseudo-feeds from histories, 10-epoch pair)	pseudo-feeds: 2-pool +0.0007/-0.0001 (M8); no teacher target possible without an online teacher
+296	2	done-KD: works	Ensemble KD (soft listwise targets from an 11-member train-only teacher; w 0.5 / 0.8)	ensemble KD
+297	4	no	Privileged hindsight targets from later snapshots (train only)	hindsight targets: label copy

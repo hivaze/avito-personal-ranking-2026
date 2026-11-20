@@ -1,0 +1,308 @@
+ADVERSARIAL REVIEW of reports/INSIGHTS_1112.md (and the five analyses behind it)
+Written 2026-11-12 ~19:40 UTC. CPU only, 12 threads per process; no GPU used; no existing file edited.
+Scripts and logs: nn_x/insights/review/r*.py and nn_x/insights/review/logs/*.log.
+"±" = per-feed paired SE unless stated. MDE for a member/pool change is ~0.0005-0.001.
+
+=====================================================================================================================
+0. VERDICT IN SIX LINES
+=====================================================================================================================
+- TRUNC-PROD: premise verified exactly, and the CPU proxy REPLICATES on a fresh, disjoint 150K-feed sample with 4 new
+  seeds (+0.0031 ± 0.0006 val / +0.0020 ± 0.0005 holdout at 200 rounds). Keep it #1. But the proxy gain is only
+  +0.0016 / +0.0003 at 100 rounds: the offset mostly stops a decline that builds up with more training. A 2-epoch
+  screen and a cooldown-only arm are therefore weak tests. Run 10-epoch from-scratch pairs directly.
+- The re-cool discount D ~= 0.0015 is OVERSTATED. Same-trunk, selection-free paired estimate: +0.00056 ± 0.00041
+  (CDSEED 811), +0.00033 ± 0.00039 (CDSEED 813). The +0.00153 comes from an unpaired comparison against v30. v30 has the
+  lowest late val-minus-holdout gap of all 8 continuous-cooldown families. Use D ~= 0.0005-0.0008 for Dec-9 inputs.
+- M-split: the numbers reproduce exactly (G3 +0.00054 ± 0.00028; user-clustered SE identical; pmix +0.00040 ± 0.00040).
+  Nested Optuna routing picks "low FT weight on small feeds" in 15/15 folds, but out of fold it does not beat the plain
+  M-split. Expect +0.0002..+0.0004 on private, not +0.0003..+0.0005. Checked: the 5-fold test averaging does not bias
+  the val estimate.
+- TO age miscalibration via LUO future counts: CONFIRMED by a sharper test. The same G3 TO pool is calibrated on the
+  train-period holdout (1-3 d act/exp 0.974 ± 0.016) and miscalibrated on val (1.131 ± 0.027). The skew is LARGER on
+  private than on val: the LUO==0 rate for 3-7 d listings is 0.23 on holdout, 0.62 on val, 0.83 on public and 0.86 on
+  private. This upgrades hzcd as a private-shift lever, but val can only show part of it.
+- "FT only 3-4 members per pool" is optimistic. Under the M-split, k=4 costs -0.00017 on average and the worst
+  subset costs -0.00043. Fine-tune at least 8.
+- "NEW members lower the G3 asymptote" holds on val only. The holdout asymptotes are equal (0.32378 vs 0.32379). The
+  val gap is what the re-cool excess predicts for a lower re-cooled share.
+
+=====================================================================================================================
+1. INDEPENDENT RE-CHECKS OF THE DECISION-RELEVANT NUMBERS
+=====================================================================================================================
+R1. TRUNC premise: the NN tower mis-indexes rank-from-end (r1_rev_index.py; own code from feeds.parquet cand_off and
+    train_prandom.npz). CONFIRMED.
+    - Feeds with max(pos) > M-1: 0.8554; mean gaps 7.94.
+    - prod M>=50: the NN rev-0 bucket holds 13.54 candidates per feed at click rate 0.0262. The true last item is
+      clicked 0.2346 of the time; rkend 1/2 0.0117/0.0114; base 0.0158.
+    - random-like M>=50: true last 0.2843.
+    - nn/model.py:502 and solvers/solvers/loss_zoo.py:202 use clamp(M-1-pos).
+    - Nuance the synthesis omits:
+      - Only 23.5% of prod M>=50 feeds have a last-item positive. Terminal clicks are 11.0% of prod M>=50 positives
+        (10.1% prod M<50, 15.6% random M>=50).
+      - prod M<50 has a second spike at rkend 2 (0.2795; 0.5238 in short random-like feeds). This structure is not
+        understood, and the offset applies a lift of 2.0 to it.
+      - The round-1 NN tower still learned a diluted end effect, "+0.6..0.8 for the last 3 positions"
+        (nn_report.md:34), and was neutral (nn_report.md:48-49: 0.37361 vs nopos 0.37385). So "never tested" means
+        "tested only in a diluted form".
+
+R2. TRUNC proxy: fresh-sample replication (r2_trunc_replicate.py, r2b_summarize.py).
+    - Setup: 150K train feeds disjoint from data_usage's U (rng 2026, 4.3% pool feeds), same 53 features and LightGBM
+      params, seeds 11-14. Readout on data_usage's val/HO caches.
+    - CONFIRMED, and the effect is somewhat larger than the original (4-seed mean, paired per feed):
+        rounds 100: d val +0.00158 ± 0.00063 | d hold +0.00034 ± 0.00056
+        rounds 200: d val +0.00309 ± 0.00061 | d hold +0.00199 ± 0.00054   (data_usage: +0.0022 / +0.0021)
+        rounds 300: d val +0.00351 ± 0.00061 | d hold +0.00201 ± 0.00058
+        best round vs best round: +0.00295 (base peaks at 100 rounds, then declines; tprod1 peaks at 300)
+      M<50 gains more than M>=50 (+0.0039 vs +0.0026 at 200).
+    - Lifts estimated on the new sample match trunc_lift.json: prod M<50 1.02/0.54/1.99; prod M>=50 2.80/-0.15/-0.21.
+    - Reading: the gain grows with boosting rounds. A production truncation artefact is learned late, and the offset
+      prevents it.
+    - Transfer caveat: the proxy is ~0.024 below a single NN member. deep_PLAYBOOK.md:80 (C4) documents that position
+      gains shrink as features get richer (BASIC +0.0067 -> RICH +0.0042 -> 110 features ~0).
+
+R3. M-split blend (r3_msplit.py). Numbers CONFIRMED exactly.
+    - G3:   final 0.40032, M-split +0.00054 (feed SE 0.00028, user-clustered SE 0.00028), pmix +0.00040 ± 0.00040.
+            FT half: M<20 -0.00243, M20-49 -0.00046, M>=50 +0.00085.
+    - PF7x: +0.00063 ± 0.00029, pmix +0.00041. FT half: M<20 -0.00110, M20-49 -0.00187.
+    - M2:   +0.00043 ± 0.00030, pmix +0.00014 ± 0.00046.
+    - Which small-M bin carries the harm differs between pools (G3: M<20; PF7x: M20-49). That is a noise signature.
+    - New check, a val/test asymmetry nobody tested:
+      - Val FT = one OOF fold model per feed. Test FT = mean of the 5 fold models (nn/finetune.py:6,210,272).
+      - On test, the single-fold pool-FT noise sd is 0.045-0.047 z against an FT shift of 0.12-0.13 z (variance
+        ratio 0.13-0.15), flat across M. Fold deviations are independent (pairwise corr -0.247 ~= -1/4).
+      - Injecting that noise on val costs ~0.
+      - So val does NOT under-state test FT on small feeds. The M-split is not an artefact of fold averaging.
+
+R4. Re-cool val excess D (r4_recool.py, r4b_family_gap.py; own log parser; same definition as dynamics a7).
+    - The synthesis number reproduces: F7x(cs811) minus v30, late val-minus-holdout gain over own plateau,
+      +0.00153 ± 0.00020.
+    - REFUTED as an estimate of D:
+      (a) With CDSEED 813 the same unpaired statistic is +0.00104, a 0.0005 swing from data order alone. The ±0.0002
+          SE ignores it.
+      (b) The paired, same-trunk, selection-free estimate (c0 re-cool minus the SAME F7 trunk's continuous mix-.1
+          cooldown) is +0.00056 ± 0.00041 (cs811, n 7) and +0.00033 ± 0.00039 (cs813, n 4). Components: val +0.00047,
+          holdout -0.00009. The dynamics analyst had this number (+0.00061 / +0.00031); the synthesis did not use it.
+      (c) m02 re-cool minus c0 re-cool, same trunk: gap -0.00019 ± 0.00039. So m02 itself adds no val-over-holdout
+          excess.
+      (d) Late gap of every CONTINUOUS (no re-cool) 10-epoch family:
+            F7 +0.00086, F9 +0.00066, F10 +0.00034, F12 -0.00026 (mix .1)
+            V27 +0.00073, V28 -0.00003, V29 +0.00095, V30 -0.00030 (m02)
+          Family means: mix .1 +0.00039, m02 +0.00024.
+          v30 is the minimum. F7-original minus v30 is +0.00115 with NO re-cool involved, so most of the +0.0015 is a
+          difference between trunk sets.
+    - Best estimate: D ~= +0.0004..+0.0006 per re-cooled member (95% CI ~ -0.0002..+0.0012).
+      - The CDSEED-813 "gap813 +0.00104 ± 0.00064" (CURRENT_STATUS.md:346-349) used holdout-SELECTED checkpoints. It
+        includes selection luck (dynamics: +0.00053).
+    - Harness confound for item 4:
+      - v30 trained AND cooled in nn/train.py (nn/run_final15.sh). Every re-cool ran in nn_x/r6/train.py.
+      - So "re-cool vs continuous" confounds optimizer reset with the harness, even though the feature cache is the
+        same (nn_x/r6/feat_cache is a symlink to nn/feat_cache) and model config comes from the checkpoint.
+      - nn/train.py:133 supports --init.
+
+R5. Nested Optuna routing of w_ft by M (r5_route_optuna.py).
+    - Setup: user-grouped 5 outer folds; 60 TPE trials inside each training fold over threshold T 10-150, w_ft for
+      M<T and for M>=T; the per-feed NDCG grid is precomputed.
+    - Out-of-fold gain over fixed 0.5:
+      - G3: tuned +0.00040 ± 0.00032, M-split +0.00054, nested global w +0.00030.
+      - PF7x: tuned +0.00028 ± 0.00034, M-split +0.00063.
+      - M2: tuned +0.00055 ± 0.00035, M-split +0.00043.
+    - Chosen settings: w_small 0-0.35 in 15/15 folds (mostly <= 0.15); w_large 0.65-1.0 in 14/15; T 35-75.
+    - The direction is consistent, but a tuned rule never beats the plain pre-declared M-split by more than 0.5 SE
+      (tuned minus M-split: -0.00013 / -0.00034 / +0.00012).
+    - Conclusion: Optuna over blend routing adds nothing; the plain M-split is the right form. The honest test-gain
+      estimate is the nested +0.0003..+0.0005 at 1.2-1.6 SE, shrunk under pmix to +0.0001..+0.0004.
+
+R6. Age miscalibration and its LUO explanation (r6_age_holdout.py; own z-mean of the 20 G3 TO members; holdout feed ids
+    rebuilt exactly as nn_x/r6/train.py and asserted against holdout_meta/holdout_y).
+    - act/exp by age bucket:
+                      <6h    6-24h  1-3d   3-7d   7-30d  30-90d >90d
+        VAL     G3 TO 0.908  1.057  1.131  1.056  1.034  0.979  0.958   (errors: 1.136 at 1-3d)
+        HOLDOUT G3 TO 0.894  0.966  0.974  1.018  1.016  1.023  0.990
+    - LUO==0 rate by age:
+        holdout 0.59 / 0.45 / 0.32 / 0.23 / 0.18 / 0.14 / 0.14
+        val     0.94 / 0.90 / 0.84 / 0.62 / 0.29 / 0.17 / 0.19
+    - CONFIRMED and sharpened: on train-period rows, which have training input semantics, the TO pool is calibrated by
+      age. The miscalibration exists only where the LUO count density changes. Within young listings on val,
+      LUO 1-3 and LUO>3 rows are the most under-ranked (1-3d: 1.20 / 1.31).
+    - One deviation the mechanism does not explain: <6h listings are over-ranked on both splits (0.91 / 0.89).
+
+R7. Is the input skew worse on test, and what can a post-hoc fix reach on val? (r7_age_luo_offset.py)
+    - LUO==0 rate, val / public / private:
+        1-3d   0.84 / 0.88 / 0.92
+        3-7d   0.62 / 0.83 / 0.86
+        7-30d  0.29 / 0.37 / 0.45
+        30d+   unchanged
+      The skew grows over test time, as expected from counts that include other users' future, so val under-states
+      the private cost.
+    - Nested (user 5-fold) post-hoc offset by (age bucket x LUO==0): G3 final +0.00067 ± 0.00047, G3 TO +0.00034 ±
+      0.00044. Below 2 SE, consistent with the do-not entry on post-hoc age offsets. Its value on private would be
+      larger, but it cannot be validated there.
+
+R8. "FT 3 of 20 members = FT of all 20" (r8_ft_fewer.py; 12 random subsets per k; FT branch from k members, TO from
+    all 20). Mean change vs FT of all 20, with the worst subset in brackets:
+        0.5/0.5 blend:  k=3 -0.00007 (-0.00045) | k=4 -0.00005 (-0.00045) | k=5 -0.00009 (-0.00054) | k=8 +0.00002 (-0.00028)
+        M-split blend:  k=3 -0.00030 (-0.00065) | k=4 -0.00017 (-0.00043) | k=5 -0.00015 (-0.00039) | k=8 -0.00004 (-0.00024)
+    - The claim "k=3 +0.00001 ± 0.00022" is OPTIMISTIC, especially combined with the M-split, which the plan also
+      adopts.
+    - Use k >= 8. FT runs take minutes, so the saving from k=4 is not worth a ~0.0002 expected loss.
+
+Not re-derived (accepted as checked by the analysts, or not decision-relevant):
+- the loss-split shares (53% / 37%);
+- CE ~ LambdaRank gradient allocation;
+- the K9 aux normalisation, verified only in code: nn_x/r6/train.py:385-388 = sum((1-p) CE)/sum(1-p) per batch;
+  nn/model.py:527-534 main loss per feed with denom max_feeds;
+- FT loss_norm default "batch" (nn/finetune.py:39).
+
+=====================================================================================================================
+2. EACH RANKED ITEM: DUPLICATE CHECK AND REALISM VS THE MDE AND THE RE-COOL ARTIFACT
+=====================================================================================================================
+#1 TRUNC-PROD (INSIGHTS_1112.md:177-215)
+- Duplicate?
+  - Not a duplicate of a closed NN arm. COVERAGE_MAP.md:90 "position tower CLOSED (old recipe)" covers learned
+    towers with mis-indexed rev.
+  - The prior is mildly negative:
+    - the round-1 tower learned a diluted end effect and was neutral (nn_report.md:34, :48-49);
+    - PAL tower in the MLP proxy: -0.0006 val / +0.00016 holdout (sol_solvers.md:144, :183);
+    - "position gain shrinks with richer features; NN position tower neutral" (deep_PLAYBOOK.md:80).
+  - GBDT position work with the true rkend was positive: eda_labels_position.md:43 +0.0042; deep_gbdt_ranking.md:45
+    +0.0022; now replicated here at +0.003.
+- Realism:
+  - The proxy is robust (R2), so P(member gain > 0) ~0.3.
+  - Expected member +0.0003..+0.0008. The MDE of a 4-root CD screen is ~0.0006-0.0008 val, so a true +0.0004 will
+    often read as null.
+  - Not exposed to the re-cool artefact only if both arms are re-cooled from the same snapshot (a CD arm) or both are
+    from scratch.
+- Protocol flaw:
+  - The proxy shows the effect mostly as anti-decay at long training (R2: 100 rounds +0.0016 / +0.0003 hold; 200+
+    rounds +0.003 / +0.002).
+  - The trunk absorbs the artefact over 8 plateau epochs. A cooldown-only arm can undo only part of it, and a 2-epoch
+    screen sits before the decay regime.
+  - Fix: build the flag in a copy of nn/train.py (the v30 harness), prove flag-off bit-identity against v30, and run
+    10-epoch from-scratch seeds 901-904. They are data-order-paired with the existing v30 members, whose eval
+    residuals are step-locked to the batch sequence (dynamics), so the pairing cuts variance.
+  - GPUs N were idle; ~2-3 h wall per member.
+  - Keep the CD arm only as an early read.
+
+#2 FT small-feed fix / M-split (INSIGHTS_1112.md:217-243)
+- Duplicate?
+  - Partly. sol_ensemble.md:37, :114, :302 (S1, M-specific w_ft: nested +0.00034, failed replication);
+    COVERAGE_MAP.md:100 (w_ft != 0.5 CLOSED), :111 (segment/routing weights CLOSED); err_segments §6.
+  - The new element is a sign flip between cvnd and pre2s trunks. That is a post-hoc story fitted to the same val
+    feeds.
+- Realism:
+  - In-sample +0.00054 is ~2 SE. Nested +0.0003..+0.0005 (R5, errors 09). pmix +0.0001..+0.0004.
+  - It is at or below the MDE, and the only test is val itself.
+  - The pre-declared "fresh member pool" check uses the same feeds and the same FT folds. It cannot detect feed-level
+    overfitting; it is a member-generality check, not a replication.
+- Still worth doing: zero cost, nested-positive, no val/test asymmetry (R3).
+- Change (c): fine-tune at least 8 members, not ~4 (R8).
+
+#3 AUXF (INSIGHTS_1112.md:245-262)
+- Duplicate? No. COVERAGE_MAP.md:49 "P8 pool-batch aux normalisation NEVER"; REVIEW_SYNTHESIS.md:124, :289 (W4: 0 to
+  +0.0005).
+- Realism:
+  - Aux magnitude changes were all null (aux_pos 1.0 null, aa5 -0.00007; COVERAGE_MAP.md:24, :86). The outcome is
+    insensitive to aux strength, and the fix only redistributes it.
+  - In the CD arm the aux weight is annealed to 0.1, and pool batches are 2% of cooldown batches. The CD arm is
+    therefore near-null by construction.
+  - Expected member 0..+0.0004, P ~0.1-0.15, below the MDE. Demote: 2-epoch pair only, sharing the base runs; drop the
+    CD arm.
+
+#4 Re-cool mechanism A/B (INSIGHTS_1112.md:264-289)
+- Duplicate? No. COVERAGE_MAP.md:40 lists optimizer warmup and momentum as NEVER. CDSEED-813 (CURRENT_STATUS.md:292-296,
+  :346-349) varied only the data order.
+- Realism:
+  - The readout D ~= 0.0015 that motivates it is overstated (R4); the same-trunk value is ~0.0005.
+  - Arm A as specified (r6 harness re-cool vs v30's nn/train.py continuous cooldown) confounds the optimizer reset
+    with the harness. Run arm A in nn/train.py --init (nn/train.py:133).
+  - Also do a zero-step eval of one @77500 snapshot in both harnesses: val/holdout must match to ~1e-5.
+  - Predicted A - continuous gap ~+0.0005, which 4 roots barely resolve (paired SE ~0.0004). Run all 6 v30 roots once
+    s905/s906 finish.
+  - Still valuable: it sets D for G3 (70% re-cooled) and M2 (100%), worth about 0.0004-0.001 of S.
+
+#5 P8 item-ID CPU gate (INSIGHTS_1112.md:291-307)
+- Duplicate? Partly. RESEARCH_SWEEP_1112.md:83, :100, :161 already plan it. COVERAGE_MAP.md:90 (item-ID residual
+  CLOSED), :61 (semantic IDs CLOSED); nn_report.md:196-199 (N4 -0.0022); err_SYNTHESIS.md:183 (idmax32 null).
+  Re-targeting it to warm same-category beater pairs is new and sharper.
+- Realism: P ~0.08. CPU only, so cheap. The 2-SE in-cell rule is the right gate.
+
+#6 hzcd LUO input-parity cooldown (INSIGHTS_1112.md:309-335)
+- Duplicate? The INPUT is a duplicate:
+  - COVERAGE_MAP.md:78 "it_hist_hz ... CLOSED"; EXPERIMENT_REGISTRY.md:67;
+  - featnew_it_hist_hz.md:9-16: REJECT on GBDT gates; cold/warm trade (young-positive feeds +0.04, others -0.006);
+    pmix +0.0008 ± 0.0009.
+  The NN cooldown usage is new.
+- Realism:
+  - Val ceiling: nested offset +0.0003..+0.0007 at <= 1.5 SE (R7, errors 13). Val cannot pass a > 2 SE rule.
+  - The mechanism is now confirmed (R6), and the skew is larger on private (R7). This is a private-shift lever that val
+    under-measures.
+  - Change the pre-flight to compare the hz zero-rate against PRIVATE, not val. hz only re-counts young TRAIN rows to
+    val's density; val/test rows stay as-built LUO (featnew_it_hist_hz.md:32-42, :113). So it may still under-shoot
+    private.
+  - Judge with pmix and coldpos as co-primary diagnostics, and keep the stage-1 val >= 0 / holdout >= 0 futility rule.
+  - P ~0.15-0.2. GPU only after #1.
+
+#7 DOMAIN-DIAG: low value.
+- It only gates L3 (exam offsets).
+- The proxy shows exam adds ~0 on top of trunc (12_gbdt_summary.csv: exam1_trunc1 +0.0018 vs trunc1 +0.0023), so the
+  decision is already made.
+- The domain token was "neutral" (nn_report.md:10). Demote below the line.
+
+#8 Hygiene rules
+- Not experiments, and fine. Root-specific CDSEED was pre-declared conditional (CURRENT_STATUS.md:296).
+- Corrections:
+  - Base D on the paired estimate (R4).
+  - Do not cut FT to 4 members (R8).
+
+Later items:
+- L4 wcat: duplicate in spirit of the loss zoo (COVERAGE_MAP.md:87-88; sol_solvers §2.1). labels_loss shows CE already
+  gives same-category negatives LambdaRank's share. Keep demoted.
+- L5 replay timing: COVERAGE_MAP.md:22-26. Every constant-mix arm is STOP; the expected val effect is 0 by the
+  dynamics' own m02 = m0 finding. Keep idle-only.
+- L6 short relabel: sol_solvers.md:45 (short random-like feeds in the pool -0.00053). Untested as domain/K9 relabel.
+  Low.
+- L7 cooldown dropout: CURRENT_STATUS.md:317-318 (d0 -0.00119; d20 -0.00015 / +0.00031, STOP); COVERAGE_MAP.md:46. Only
+  for families not in any pool. Drop.
+
+=====================================================================================================================
+3. CORRECTED PRIORITIES (top 6)
+=====================================================================================================================
+1. TRUNC-PROD as 10-epoch from-scratch pairs, data-order-paired with v30 s901-904, plus the CD arm as an early read.
+   - ~1 h implementation in a copy of nn/train.py with a flag-off bit-identity test against v30, then 4 x ~2.5 h on
+     the idle GPUs (one process per GPU, <= 4 per GPU, >= 30 GB free). CD arm ~2 GPU-h.
+   - Member +0.0003..+0.0008, P ~0.3.
+   - Kill: paired 4-seed val < 0 or holdout < 0 vs the v30 seeds; M<50 < -1 SE; pmix < -1 SE.
+2. Dec-9 D recalibration (done on CPU here: D ~= 0.0005) plus the re-cool mechanism A/B with a harness control.
+   - v30 s901-906 @77500 re-cooled with m02 in nn/train.py --init, vs their own continuous cooldown. Opt-warm arm in
+     the new harness. Zero-step cross-harness eval check.
+   - 4-6 GPU-h.
+   - Kill: A - continuous <= +0.0003 on 6 roots -> D := 0, skip B.
+3. M-split adoption by its pre-declared rule (free), with the nested estimate and a pmix veto; FT at least 8 members.
+   - +0.0002..+0.0004 (P ~0.7 > 0).
+   - Kill: candidate-pool delta < +1 SE, or pmix < -1 SE, or nested < 0.
+4. LUO input parity (hzcd) re-scoped as a private-shift lever.
+   - CPU pre-flight against PRIVATE LUO zero-rates (R7 numbers), then a CD arm after #1 with pmix and coldpos
+     co-primary.
+   - Val +0.0001..+0.0004, private possibly more, P ~0.2.
+   - Kill: pre-flight fails; arm's 1-3 d act/exp >= 1.08; val < 0 or holdout < 0; pmix < -1 SE.
+5. P8 item-ID CPU gate on warm same-category beater pairs (CPU ~2.5 h). P ~0.08.
+   - Kill: pair AUC < 0.53, or in-cell nested < 2 SE, or overall < +0.0003.
+6. AUXF as a 2-epoch from-scratch pair only, sharing base runs; no CD arm. P ~0.1-0.15, ~1 GPU-h.
+   - Kill: pooled val < 0 or holdout < 0.
+
+Below the line: DOMAIN-DIAG, exam offsets (L3), wcat (L4), replay timing (L5), short relabel (L6), dropout brake (L7).
+
+=====================================================================================================================
+4. FILES
+=====================================================================================================================
+nn_x/insights/review/:
+- r1_rev_index.py
+- r2_trunc_replicate.py, r2b_summarize.py
+  out/gb/: U2 cache 2.4 GB (re-buildable in ~1 min with `r2_trunc_replicate.py build`) and per-feed results.
+- r3_msplit.py
+- r4_recool.py, r4b_family_gap.py
+- r5_route_optuna.py
+- r6_age_holdout.py
+- r7_age_luo_offset.py
+- r8_ft_fewer.py
+- logs/*.log

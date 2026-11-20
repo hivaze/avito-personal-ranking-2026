@@ -1,0 +1,229 @@
+=== witness READ of arm hz vs ref re-cools, 2026-11-15T06:31:13Z ===
+complete (hz, ref) snapshot pairs (both json): 16 of 16: ['k951', 'k952', 'k953', 'k954', 'k955', 'k956', 'k957', 'k958', 'l951', 'l952', 'l953', 'l954', 'l955', 'l956', 'l957', 'l958']
+not complete: []
+DECISION PAIRS (complete + stored val / holdout + CPU stale-val of the SELECTED checkpoints on both sides): 16: ['k951', 'k952', 'k953', 'k954', 'k955', 'k956', 'k957', 'k958', 'l951', 'l952', 'l953', 'l954', 'l955', 'l956', 'l957', 'l958']
+
+
+################ SELECTED checkpoints (decision) ################
+
+== SELECTED: hz 16-pool vs ref 16-pool, paired by snapshot
+   levels: A_val 0.40119 | B_val 0.40127 | A_stale 0.40052 | B_stale 0.39939 | A_hold 0.32361 | B_hold 0.32437
+   val              -0.00009 +- 0.00040  (z -0.22; n 14423)
+   val_M>=50        +0.00002 +- 0.00045  (z +0.05; n 8530)
+   val_M<50         -0.00025 +- 0.00072  (z -0.34; n 5893)
+   pmix_pub         +0.00034 +- 0.00052  (z +0.65; n 14423)
+   pmix_priv        +0.00066 +- 0.00065  (z +1.00; n 14423)
+   coldpos          +0.00377 +- 0.00092  (z +4.09; n 3422)
+   warmpos          -0.00169 +- 0.00049  (z -3.42; n 9118)
+   stale            +0.00113 +- 0.00043  (z +2.60; n 14423)
+   stale_M>=50      +0.00117 +- 0.00048  (z +2.43; n 8530)
+   stale_M<50       +0.00108 +- 0.00080  (z +1.34; n 5893)
+   stale_pmix_priv  +0.00175 +- 0.00068  (z +2.57; n 14423)
+   stale_coldpos    -0.00095 +- 0.00088  (z -1.07; n 3422)
+   stale_warmpos    +0.00224 +- 0.00058  (z +3.89; n 9118)
+   SV2              +0.00052 +- 0.00034  (z +1.55; n 14423)
+   SVpriv           +0.00080 +- 0.00037  (z +2.20; n 14423)
+   stale_minus_val  +0.00122 +- 0.00048  (z +2.51; n 14423)
+   hold             -0.00076 +- 0.00022  (z -3.46; n 30000)
+   hold_subset      -0.00023 +- 0.00030  (z -0.78; n 13424)
+   HOLD-SHORT       -0.00040 +- 0.00019  (z -2.06; n 30000)
+==    LAGGED HOLDOUT (subset 13,424 feeds; CPU fp32 both sides), 16 pairs ['k951', 'k952', 'k953', 'k954', 'k955', 'k956', 'k957', 'k958', 'l951', 'l952', 'l953', 'l954', 'l955', 'l956', 'l957', 'l958'] (val / stale-val / stored holdout of the same pairs for reference)
+   levels: A_lag_lag0 0.32286 | B_lag_lag0 0.32295 | A_lag_priv 0.32016 | B_lag_priv 0.31973
+   val              -0.00009 +- 0.00040  (z -0.22; n 14423)
+   stale            +0.00113 +- 0.00043  (z +2.60; n 14423)
+   SV2              +0.00052 +- 0.00034  (z +1.55; n 14423)
+   hold             -0.00076 +- 0.00022  (z -3.46; n 30000)
+   hold_subset      -0.00023 +- 0.00030  (z -0.78; n 13424)
+   lag_lag0         -0.00009 +- 0.00030  (z -0.31; n 13424)
+   lag_priv         +0.00042 +- 0.00034  (z +1.25; n 13424)
+   D_priv           +0.00051 +- 0.00041  (z +1.24; n 13424)
+   dropA_priv       -0.00270 +- 0.00069  (z -3.92; n 13424)
+   dropB_priv       -0.00321 +- 0.00075  (z -4.30; n 13424)
+   ivw(val, lag_priv)     +0.00021 +- 0.00026  (z +0.81; same 16 pairs)
+   ivw(stale, lag_priv)   +0.00069 +- 0.00027  (z +2.59; same 16 pairs)
+   ivw(SV2, lag_priv)     +0.00047 +- 0.00024  (z +1.98; same 16 pairs)
+
+RULE hz on 16 pairs: val delta >= 0 [False: -0.00009 +- 0.00040]; stale-val delta >= +2 SE [True: +0.00113 +- 0.00043 = +2.60 SE]; val M<50 >= -1 SE [True: -0.00025 +- 0.00072 = -0.34 SE]
+VERDICT (16 of 16 pairs): CLOSED AGAIN under KD
+
+   per snapshot (single re-cool member, hz - ref): val | stale | hold
+      kcd s951: -0.00022 +- 0.00051 | +0.00071 +- 0.00052 | -0.00048 +- 0.00027
+      kcd s952: +0.00028 +- 0.00051 | +0.00088 +- 0.00055 | -0.00044 +- 0.00028
+      kcd s953: +0.00048 +- 0.00056 | +0.00148 +- 0.00060 | -0.00030 +- 0.00031
+      kcd s954: +0.00022 +- 0.00050 | +0.00131 +- 0.00057 | -0.00021 +- 0.00028
+      kcd s955: +0.00064 +- 0.00051 | +0.00126 +- 0.00055 | -0.00047 +- 0.00029
+      kcd s956: +0.00009 +- 0.00063 | +0.00116 +- 0.00065 | -0.00028 +- 0.00036
+      kcd s957: +0.00068 +- 0.00047 | +0.00121 +- 0.00053 | -0.00043 +- 0.00029
+      kcd s958: +0.00061 +- 0.00057 | +0.00161 +- 0.00060 | -0.00031 +- 0.00031
+      lcd s951: +0.00150 +- 0.00062 | +0.00155 +- 0.00067 | -0.00012 +- 0.00036
+      lcd s952: +0.00020 +- 0.00050 | +0.00020 +- 0.00054 | -0.00053 +- 0.00030
+      lcd s953: +0.00062 +- 0.00049 | +0.00120 +- 0.00052 | -0.00075 +- 0.00028
+      lcd s954: +0.00076 +- 0.00062 | +0.00125 +- 0.00064 | -0.00056 +- 0.00036
+      lcd s955: +0.00088 +- 0.00053 | +0.00105 +- 0.00058 | -0.00062 +- 0.00031
+      lcd s956: +0.00072 +- 0.00047 | +0.00089 +- 0.00055 | -0.00037 +- 0.00027
+      lcd s957: +0.00047 +- 0.00059 | -0.00023 +- 0.00061 | -0.00042 +- 0.00034
+      lcd s958: -0.00057 +- 0.00055 | -0.00009 +- 0.00059 | -0.00052 +- 0.00032
+      positive in 14 (val) / 14 (stale) / 0 (hold) of 16 snapshots
+      half kcd (8 snapshots; teacher mean11): val +0.00023 +- 0.00041 | stale +0.00105 +- 0.00045 | hold -0.00040 +- 0.00023
+      half lcd (8 snapshots; teacher mean25): val +0.00033 +- 0.00039 | stale +0.00071 +- 0.00045 | hold -0.00060 +- 0.00024
+
+== [0.8 z(hz 16-pool) + 0.2 z(pop1kd x4)] vs [0.8 z(ref 16-pool) + 0.2 z(pop1kd x4)]  (pop1kd members: selected checkpoints)
+   levels: A_val 0.40126 | B_val 0.40137 | A_stale 0.40093 | B_stale 0.40044 | A_hold 0.32336 | B_hold 0.32396
+   val              -0.00010 +- 0.00035  (z -0.30; n 14423)
+   val_M>=50        -0.00030 +- 0.00037  (z -0.81; n 8530)
+   val_M<50         +0.00017 +- 0.00066  (z +0.26; n 5893)
+   pmix_pub         -0.00006 +- 0.00044  (z -0.13; n 14423)
+   pmix_priv        +0.00011 +- 0.00055  (z +0.20; n 14423)
+   coldpos          +0.00247 +- 0.00084  (z +2.93; n 3422)
+   warmpos          -0.00129 +- 0.00042  (z -3.06; n 9118)
+   stale            +0.00049 +- 0.00039  (z +1.26; n 14423)
+   stale_M>=50      +0.00068 +- 0.00042  (z +1.61; n 8530)
+   stale_M<50       +0.00022 +- 0.00074  (z +0.30; n 5893)
+   stale_pmix_priv  +0.00079 +- 0.00060  (z +1.32; n 14423)
+   stale_coldpos    -0.00165 +- 0.00079  (z -2.10; n 3422)
+   stale_warmpos    +0.00133 +- 0.00052  (z +2.56; n 9118)
+   SV2              +0.00019 +- 0.00030  (z +0.65; n 14423)
+   SVpriv           +0.00033 +- 0.00033  (z +1.01; n 14423)
+   stale_minus_val  +0.00060 +- 0.00043  (z +1.38; n 14423)
+   hold             -0.00059 +- 0.00020  (z -3.01; n 30000)
+   hold_subset      -0.00006 +- 0.00029  (z -0.19; n 13424)
+   HOLD-SHORT       -0.00048 +- 0.00017  (z -2.75; n 30000)
+==    same, LAGGED HOLDOUT subset, 16 pairs
+   levels: A_lag_lag0 0.32247 | B_lag_lag0 0.32270 | A_lag_priv 0.32016 | B_lag_priv 0.31976
+   lag_lag0         -0.00023 +- 0.00029  (z -0.81; n 13424)
+   lag_priv         +0.00040 +- 0.00031  (z +1.31; n 13424)
+   D_priv           +0.00063 +- 0.00039  (z +1.63; n 13424)
+   dropA_priv       -0.00231 +- 0.00061  (z -3.76; n 13424)
+   dropB_priv       -0.00294 +- 0.00065  (z -4.50; n 13424)
+   value of the pop1kd admixture (w 0.2) on the hz pool (16 members): val +0.00008 +- 0.00034, stale-val +0.00041 +- 0.00032, SV2 +0.00025 +- 0.00028, holdout -0.00025 +- 0.00022
+   value of the pop1kd admixture (w 0.2) on the ref pool (16 members): val +0.00009 +- 0.00036, stale-val +0.00105 +- 0.00035, SV2 +0.00057 +- 0.00029, holdout -0.00041 +- 0.00022
+   same on the lagged subset, hz pool (16 members): lag0 -0.00039 +- 0.00033, private-like +0.00001 +- 0.00028, D +0.00039 +- 0.00038
+   same on the lagged subset, ref pool (16 members): lag0 -0.00025 +- 0.00032, private-like +0.00003 +- 0.00030, D +0.00027 +- 0.00038
+   add or substitute: the plain hz - ref delta is not positive on both val (-0.00009) and stale-val (+0.00113); shares not defined
+
+
+################ @last checkpoints (reported, no decision) ################
+of the 16 decision pairs: 16 have stored @last val / holdout files, 16 have CPU @last stale-val on both sides ['k951', 'k952', 'k953', 'k954', 'k955', 'k956', 'k957', 'k958', 'l951', 'l952', 'l953', 'l954', 'l955', 'l956', 'l957', 'l958']
+
+== @last: hz 16-pool vs ref 16-pool, paired by snapshot
+   levels: A_val 0.40154 | B_val 0.40130 | A_stale 0.40083 | B_stale 0.39966 | A_hold 0.32388 | B_hold 0.32432
+   val              +0.00024 +- 0.00038  (z +0.63; n 14423)
+   val_M>=50        +0.00011 +- 0.00042  (z +0.27; n 8530)
+   val_M<50         +0.00042 +- 0.00069  (z +0.60; n 5893)
+   pmix_pub         +0.00086 +- 0.00051  (z +1.68; n 14423)
+   pmix_priv        +0.00128 +- 0.00065  (z +1.97; n 14423)
+   coldpos          +0.00458 +- 0.00089  (z +5.16; n 3422)
+   warmpos          -0.00156 +- 0.00047  (z -3.31; n 9118)
+   stale            +0.00117 +- 0.00045  (z +2.57; n 14423)
+   stale_M>=50      +0.00087 +- 0.00051  (z +1.70; n 8530)
+   stale_M<50       +0.00159 +- 0.00083  (z +1.92; n 5893)
+   stale_pmix_priv  +0.00142 +- 0.00070  (z +2.04; n 14423)
+   stale_coldpos    -0.00211 +- 0.00092  (z -2.30; n 3422)
+   stale_warmpos    +0.00251 +- 0.00060  (z +4.16; n 9118)
+   SV2              +0.00070 +- 0.00034  (z +2.07; n 14423)
+   SVpriv           +0.00092 +- 0.00038  (z +2.42; n 14423)
+   stale_minus_val  +0.00093 +- 0.00049  (z +1.91; n 14423)
+   hold             -0.00044 +- 0.00022  (z -1.97; n 30000)
+   hold_subset      -0.00005 +- 0.00030  (z -0.16; n 13424)
+   HOLD-SHORT       -0.00028 +- 0.00019  (z -1.48; n 30000)
+   LAGGED HOLDOUT: no pair of this table has lagged predictions on both sides (not scored)
+
+   per snapshot (single re-cool member, hz - ref): val | stale | hold
+      kcd s951: -0.00019 +- 0.00050 | +0.00003 +- 0.00053 | -0.00070 +- 0.00028
+      kcd s952: +0.00028 +- 0.00051 | +0.00088 +- 0.00055 | -0.00044 +- 0.00028
+      kcd s953: -0.00013 +- 0.00051 | +0.00106 +- 0.00056 | -0.00033 +- 0.00028
+      kcd s954: +0.00023 +- 0.00054 | +0.00098 +- 0.00057 | -0.00011 +- 0.00029
+      kcd s955: +0.00064 +- 0.00051 | +0.00126 +- 0.00055 | -0.00047 +- 0.00029
+      kcd s956: +0.00012 +- 0.00049 | +0.00095 +- 0.00058 | -0.00069 +- 0.00029
+      kcd s957: +0.00082 +- 0.00050 | +0.00126 +- 0.00053 | -0.00049 +- 0.00028
+      kcd s958: +0.00054 +- 0.00050 | +0.00160 +- 0.00055 | -0.00025 +- 0.00028
+      lcd s951: +0.00041 +- 0.00047 | +0.00066 +- 0.00052 | -0.00030 +- 0.00028
+      lcd s952: +0.00025 +- 0.00048 | +0.00044 +- 0.00052 | -0.00046 +- 0.00028
+      lcd s953: +0.00008 +- 0.00048 | +0.00060 +- 0.00052 | -0.00102 +- 0.00028
+      lcd s954: +0.00067 +- 0.00048 | +0.00214 +- 0.00054 | -0.00055 +- 0.00028
+      lcd s955: +0.00091 +- 0.00048 | +0.00149 +- 0.00057 | -0.00080 +- 0.00027
+      lcd s956: +0.00083 +- 0.00047 | +0.00082 +- 0.00053 | -0.00076 +- 0.00027
+      lcd s957: +0.00005 +- 0.00048 | -0.00021 +- 0.00052 | -0.00049 +- 0.00028
+      lcd s958: -0.00037 +- 0.00049 | +0.00114 +- 0.00054 | -0.00054 +- 0.00027
+      positive in 13 (val) / 15 (stale) / 0 (hold) of 16 snapshots
+      half kcd (8 snapshots; teacher mean11): val -0.00010 +- 0.00040 | stale +0.00122 +- 0.00046 | hold -0.00049 +- 0.00023
+      half lcd (8 snapshots; teacher mean25): val +0.00052 +- 0.00035 | stale +0.00076 +- 0.00044 | hold -0.00071 +- 0.00022
+
+== [0.8 z(hz 16-pool) + 0.2 z(pop1kd x4)] vs [0.8 z(ref 16-pool) + 0.2 z(pop1kd x4)]  (pop1kd members: selected checkpoints)
+   levels: A_val 0.40148 | B_val 0.40153 | A_stale 0.40086 | B_stale 0.40055 | A_hold 0.32331 | B_hold 0.32383
+   val              -0.00005 +- 0.00035  (z -0.13; n 14423)
+   val_M>=50        -0.00044 +- 0.00038  (z -1.14; n 8530)
+   val_M<50         +0.00052 +- 0.00064  (z +0.82; n 5893)
+   pmix_pub         -0.00004 +- 0.00046  (z -0.09; n 14423)
+   pmix_priv        +0.00010 +- 0.00058  (z +0.17; n 14423)
+   coldpos          +0.00302 +- 0.00083  (z +3.62; n 3422)
+   warmpos          -0.00130 +- 0.00043  (z -3.06; n 9118)
+   stale            +0.00031 +- 0.00039  (z +0.78; n 14423)
+   stale_M>=50      +0.00030 +- 0.00043  (z +0.70; n 8530)
+   stale_M<50       +0.00032 +- 0.00073  (z +0.43; n 5893)
+   stale_pmix_priv  +0.00051 +- 0.00060  (z +0.85; n 14423)
+   stale_coldpos    -0.00185 +- 0.00083  (z -2.24; n 3422)
+   stale_warmpos    +0.00121 +- 0.00051  (z +2.36; n 9118)
+   SV2              +0.00013 +- 0.00030  (z +0.44; n 14423)
+   SVpriv           +0.00021 +- 0.00033  (z +0.65; n 14423)
+   stale_minus_val  +0.00035 +- 0.00043  (z +0.82; n 14423)
+   hold             -0.00052 +- 0.00019  (z -2.69; n 30000)
+   hold_subset      -0.00016 +- 0.00028  (z -0.56; n 13424)
+   HOLD-SHORT       -0.00039 +- 0.00017  (z -2.34; n 30000)
+   value of the pop1kd admixture (w 0.2) on the hz pool (16 members): val -0.00006 +- 0.00033, stale-val +0.00003 +- 0.00033, SV2 -0.00001 +- 0.00027, holdout -0.00057 +- 0.00022
+   value of the pop1kd admixture (w 0.2) on the ref pool (16 members): val +0.00022 +- 0.00034, stale-val +0.00089 +- 0.00036, SV2 +0.00056 +- 0.00028, holdout -0.00049 +- 0.00022
+   add or substitute (DECLARATION block 1 (4)): share of the plain hz - ref delta kept on top of the admixture: val -0.19, stale-val 0.26 -> SUBSTITUTE
+
+
+################ harness nulls on the same snapshots (information) ################
+== ref re-cools vs the ORIGINAL runs of the same 16 snapshots (harness control, expected 0)
+   levels: A_val 0.40127 | B_val 0.40144 | A_stale 0.39939 | B_stale 0.39994 | A_hold 0.32437 | B_hold 0.32460
+   val              -0.00016 +- 0.00029  (z -0.56; n 14423)
+   val_M>=50        +0.00019 +- 0.00033  (z +0.58; n 8530)
+   val_M<50         -0.00067 +- 0.00054  (z -1.24; n 5893)
+   pmix_pub         +0.00002 +- 0.00037  (z +0.07; n 14423)
+   pmix_priv        +0.00014 +- 0.00045  (z +0.31; n 14423)
+   coldpos          -0.00002 +- 0.00058  (z -0.03; n 3422)
+   warmpos          -0.00001 +- 0.00039  (z -0.02; n 9118)
+   stale            -0.00056 +- 0.00030  (z -1.84; n 14423)
+   stale_M>=50      -0.00005 +- 0.00031  (z -0.17; n 8530)
+   stale_M<50       -0.00129 +- 0.00058  (z -2.20; n 5893)
+   stale_pmix_priv  -0.00047 +- 0.00048  (z -0.98; n 14423)
+   stale_coldpos    -0.00062 +- 0.00055  (z -1.12; n 3422)
+   stale_warmpos    -0.00056 +- 0.00041  (z -1.35; n 9118)
+   SV2              -0.00036 +- 0.00024  (z -1.50; n 14423)
+   SVpriv           -0.00045 +- 0.00026  (z -1.76; n 14423)
+   stale_minus_val  -0.00039 +- 0.00036  (z -1.11; n 14423)
+   hold             -0.00023 +- 0.00017  (z -1.34; n 30000)
+   hold_subset      -0.00033 +- 0.00025  (z -1.31; n 13424)
+== hz re-cools vs the ORIGINAL runs of the same 16 snapshots (information)
+   levels: A_val 0.40119 | B_val 0.40144 | A_stale 0.40052 | B_stale 0.39994 | A_hold 0.32361 | B_hold 0.32460
+   val              -0.00025 +- 0.00042  (z -0.60; n 14423)
+   val_M>=50        +0.00021 +- 0.00045  (z +0.47; n 8530)
+   val_M<50         -0.00092 +- 0.00079  (z -1.16; n 5893)
+   pmix_pub         +0.00036 +- 0.00055  (z +0.65; n 14423)
+   pmix_priv        +0.00080 +- 0.00070  (z +1.14; n 14423)
+   coldpos          +0.00375 +- 0.00096  (z +3.91; n 3422)
+   warmpos          -0.00170 +- 0.00053  (z -3.19; n 9118)
+   stale            +0.00058 +- 0.00047  (z +1.22; n 14423)
+   stale_M>=50      +0.00112 +- 0.00052  (z +2.15; n 8530)
+   stale_M<50       -0.00021 +- 0.00087  (z -0.24; n 5893)
+   stale_pmix_priv  +0.00127 +- 0.00075  (z +1.71; n 14423)
+   stale_coldpos    -0.00157 +- 0.00098  (z -1.60; n 3422)
+   stale_warmpos    +0.00168 +- 0.00062  (z +2.71; n 9118)
+   SV2              +0.00016 +- 0.00037  (z +0.44; n 14423)
+   SVpriv           +0.00035 +- 0.00040  (z +0.88; n 14423)
+   stale_minus_val  +0.00083 +- 0.00049  (z +1.68; n 14423)
+   hold             -0.00098 +- 0.00024  (z -4.08; n 30000)
+   hold_subset      -0.00056 +- 0.00034  (z -1.66; n 13424)
+== ref2 vs ref (second cooldown seed, 16 snapshot pairs ['k951', 'k952', 'k953', 'k954', 'k955', 'k956', 'k957', 'k958', 'l951', 'l952', 'l953', 'l954', 'l955', 'l956', 'l957', 'l958']): the A/A null of a paired re-cool contrast
+   levels: A_val 0.40138 | B_val 0.40127 | A_hold 0.32450 | B_hold 0.32437
+   val              +0.00011 +- 0.00033  (z +0.34; n 14423)
+   val_M>=50        -0.00021 +- 0.00038  (z -0.55; n 8530)
+   val_M<50         +0.00057 +- 0.00059  (z +0.97; n 5893)
+   pmix_pub         -0.00008 +- 0.00042  (z -0.19; n 14423)
+   pmix_priv        -0.00012 +- 0.00051  (z -0.24; n 14423)
+   coldpos          +0.00020 +- 0.00066  (z +0.30; n 3422)
+   warmpos          +0.00000 +- 0.00044  (z +0.01; n 9118)
+   hold             +0.00013 +- 0.00018  (z +0.75; n 30000)
+   hold_subset      +0.00015 +- 0.00025  (z +0.62; n 13424)

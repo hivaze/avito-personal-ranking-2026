@@ -1,0 +1,179 @@
+DECLARATION  nn_x/w12/fresh/review  (ADVERSARIAL REVIEW of the CPU pre-gate nn_x/w12/fresh/pregate, verdict under review: NO)
+=====================================================================================================================
+BLOCK 1 written 2026-11-15T15:54:12Z (date -u), BEFORE any number of this review was computed.
+Known at this moment: the builder's return value and report (reports/FRESH_1115/pregate.md), his DECLARATION / logs / code
+(read, not re-run). Nothing of mine has been computed. Default position of the review: "not shown".
+
+R1. CHECK 1 (rebuild from the raw tables + leak rules)  [label-free]
+  Source: data/competition/{val,test}/impressions/part-*.parquet, columns feed_id, timestamp, user_id, item_id ONLY
+  (the target column is never read by the rebuild script). 500 val feeds drawn with numpy default_rng(20261115) from the
+  raw val table. For every candidate row of these feeds my own python / polars code (no import from the builder's
+  directory) counts the feeds g of val + test with ts(g) < t that list the item and whose user differs
+  (user_id 0: every uid-0 feed is its own user). Mapped to the builder's rows by (feed_id, item_id).
+  PASS iff 100% of the rows equal out/cnt_main.npy[:, 0]; the same for windows a24, b, d, e (reported).
+  Leak part: (a) a variant that does NOT exclude same-user feeds is built; reported: number of rows where it differs,
+  and the builder's array must equal the excluding version on every one of them; (b) own feed never counted
+  (builder count never equals my "own feed included" variant on a row whose item appears only once in the feed);
+  (c) no label: my rebuild reads no label and reproduces the array -> the array cannot depend on a label; code read of
+  the forms / cold flag (tte_it_imp) for label use; (d) item_id 0 ("missing id" by the readme): number of candidate rows
+  with item_id 0 and their share of the count mass (if > 0.1% of rows: MAJOR issue).
+  NZ variant: the same for out/cnt_nzsrc.npy[:, 0].
+
+R2. CHECK 2 (nested residual read, my folds, my model)  [val labels, nested by user]
+  Pool score: I recompute b = zf(0.5 zf(ft) + 0.5 zf(to)) from preds/ens_FD16P20kd_{ft,to}_val.npy with my own code and
+  my own NDCG; must give 0.40271 +- 2e-5; and I confirm on the TEST side that the submitted file
+  subs/cand_FD16P20kd_r4.parquet is the same formula on the *_test.npy twins (rank correlation per feed = 1).
+  My folds: 5 folds, users (uid-0 feeds singletons) sorted, shuffled with default_rng(seed), split by np.array_split;
+  fold seeds 11, 12, 13. Variant U0G (reported): all uid-0 feeds in ONE group.
+  MODEL D1 (direct NDCG, one feature, one weight; no likelihood, the control is the raw pool score itself):
+     s = b + w * x ;  x in { z_a, r_a - 0.5, i_a, cs_a = cold & i_a, l_a = log1p(n_a), z_a24, i_a24 }  (as-of forms only)
+     w in {0} U +-{0.01, 0.02, 0.03, 0.05, 0.075, 0.1, 0.15, 0.2, 0.3, 0.5};
+     per training fold: (x, w) = argmax of the mean NDCG over the training feeds (w = 0 if nothing beats it);
+     the held-out fold is scored with that (x, w). GAIN = mean over 14,423 feeds of NDCG(s) - NDCG(b), per-feed d
+     averaged over the 3 fold seeds, SE = sd / sqrt(14,423), z = GAIN / SE.
+  MODEL D2 (direct NDCG, coordinate ascent, 9 coordinates): s = b + sum_j w_j x_j with the 7 columns of D1 plus
+     b * i_a and b * cs_a (does the pool score need another slope on shown rows = the interaction a tree could use);
+     start w = 0; 2 passes over the coordinates in the listed order, each coordinate moved to the grid value with the
+     best training-fold NDCG (kept only if it improves by > 1e-7); held-out fold scored with the final w.
+  Variants reported, not deciding: D1L / D2L = the same with the later-using windows (b same day, d whole period,
+     e later-only) replacing a / a24 (the leak-prone forms; information), pmix public / private of D1 and D2.
+  IN-SAMPLE CEILING (information): the best single (x, w) of D1 on all val feeds, fit = score. If even this is
+     < +0.0005 the bar cannot be met by any one-weight rule.
+  READING (my rule, primary = D2, the richer one; D1 next to it):
+     builder's NO is CONFIRMED iff neither D1 nor D2 reaches [GAIN >= +0.0005 AND z >= 2 AND above every draw of my placebo].
+     NOT CONFIRMED (verdict to be corrected to PROMISING) iff D1 or D2 reaches all three.
+     CONFIRMED WITH A NOTE iff one of them has GAIN > 0 with z >= 2 and above every placebo draw but < +0.0005.
+
+R3. CHECK 3 (my placebo, 20 draws, seeds 500..519)
+  Different from the builder's P1: the raw count vector (n_a, n_a24, n_b, n_d, n_e) is permuted across the candidates
+  INSIDE each feed, separately for cold and warm candidates (within feed x cold flag). Every feed keeps exactly its own
+  multiset of counts per cold class (so each feed's count level, its position in the period and the cold-conditional
+  count distribution are kept exactly); only the link "which item of the feed has the count" is destroyed.
+  Forms recomputed; identical nested D1 / D2 read. Reported: mean, sd, min, max, rank of the real gain.
+  Second placebo (information, 10 draws, seeds 600..609): the builder's P1 strata (day x cold x 3-hour block), my code.
+
+R4. CHECK 4 (position in the period)  [label-free coverage + the per-feed gains of R2]
+  Coverage of a and a24 (count >= 1) by Moscow day x third of the day for val and test, and the first 1 / 3 / 6 hours
+  of the first test day; "sources" split into val feeds vs earlier test feeds for the first test day.
+  Gain of D1 / D2 by day (20718 / 20720), by third of the day, and by quintile of the feed's as-of coverage.
+  Statement to be judged: "gain concentrated late in val": TRUE iff (gain in day 20720) - (gain in day 20718) >= 2 SE
+  of the difference AND the day-20720 gain itself is > 0 at z >= 2. Otherwise "no gain to concentrate".
+
+R5. CHECK 5 (step-0 facts)  [code read + label-free numbers]
+  (a) code lines quoted by the builder are opened and confirmed or corrected: src/features.py:241-248, 336-337;
+      src/features_luo.py:45-51; nn_x/w5/finetune.py:67, 87-89, 164; nn_x/abl/train.py:91-111;
+      nn_x/abl/pop1/build_xp_imp_c50.py:33-36; src/features_tte.py.
+  (b) how much of the fresh as-of count is already carried by existing inputs: R^2 of l_a on the 34 train-stage inputs
+      + xp_imp_c50 (ridge / least squares, label-free, val rows; and within-feed-demeaned), and the within-feed
+      Spearman of n_a with the pool score b, it_hist_all_luo, xp_imp_c50.
+  (c) the pool score is the final file's (see R2).
+
+R6. CHECK 6 (parity)  [label-free]
+  Independent construction on train (my code, data/flat/train): one pseudo-period with the real calendar (two days
+  with a gap, then 4 days after a gap), sources = a random subsample of random-like train feeds (p_random > 0.9) of the
+  val / test daily feed numbers; queries (i) the sampled feeds themselves, (ii) a random 20,000 OTHER train feeds of the
+  same days that are NOT random-like (production-ordered = 89% of what the ranker is trained on).
+  Reported: as-of coverage per day against the real one, PSI of the raw as-of count (bins 0,1,2,3-4,5-9,10-19,20+)
+  for (i) and (ii) against val / public-like / private-like. Criterion: parity for a query population iff PSI < 0.25
+  (project rule < 0.5). Judgement asked by the task: can a train-row version be built for the rows the members train
+  on, or only for 11% of them / only on val (14,423 feeds).
+
+R7. PROBE OF THE ONE DISAGREEMENT (LightGBM secondary: +0.00079 over its own control, above 10 / 10 placebo draws)
+  [val labels, nested by user; information; cannot by itself overturn the verdict, see reading]
+  My LightGBM (my folds seeds 11-13): lambdarank, init_score = b, features control [b, M, cold], arm = control +
+  [n_w, r_w, z_w, cs_w] for w in {a, a24}; num_leaves 15, lr 0.05, min_data_in_leaf 100, lambda_l2 10, 200 rounds;
+  held-out NDCG read at rounds 0, 5, 10, 20, 50, 100, 200 for control and arm.
+  Questions: (i) does the arm-minus-control difference replicate with other folds; (ii) is there ANY round count at
+  which the arm beats the RAW pool score (the only usable form): reading "usable" iff arm - raw pool >= +0.0005 at
+  z >= 2 at some round (in-sample choice of the round = optimistic; if it fails even so, closed);
+  (iii) is the difference an item-level signal or a feed-level one: the same read with my within-feed placebo
+  (5 draws, seeds 500..504, fold seed 11 only if time is short): if the within-feed-permuted counts give the same
+  arm-minus-control difference as the real ones, the LightGBM "signal" is feed-level re-shaping of b (count level of the
+  feed = position in the period / feed type), not information about the item.
+
+RULES OF THIS RUN: CPU only (CUDA_VISIBLE_DEVICES=""), <= 2 heavy processes x 12 threads, < 30 GB resident; writes only
+under nn_x/w12/fresh/review/ and reports/FRESH_1115/review.md; nothing of the builder is modified; no process of anyone
+else is signalled. Val labels only inside the user-grouped nested reads R2 / R3 / R7 and the declared in-sample ceiling.
+
+AMENDMENT 1 written 2026-11-15T15:59:08Z, BEFORE any LightGBM number of mine (R7 not started). Seen by now: CHECK 1 (PASS, all rows equal),
+the label-free position table, my real D1 / D2 reads (A: D1 -0.00004 +- 0.00020, D2 -0.00014 +- 0.00020; in-sample D1
+ceiling +0.00017) and 5 placebo draws. Nothing in R1-R6 is changed.
+- R2 detail (implementation, fixed before the run): the later-using set L of D1 = {z_d, r_d-0.5, i_d, cs_d, l_d, z_b, i_b, z_e, i_e},
+  D2 adds b*i_d and b*cs_d. "Third of the day" = terciles of the feed time inside each val day (equal feed numbers).
+- R7 additions (information): (a) an arm F with FEED-LEVEL columns only: control + [share of the feed's candidates with
+  n_a >= 1, feed mean of log1p(n_a), the same two for a24, share of cold & shown candidates]: no column distinguishes two
+  candidates of one feed. If F reproduces the arm-A difference, the LightGBM reading is feed-level re-shaping of b.
+  (b) placebo draws: within-feed x cold (WF) 10 draws seeds 500..509, and the builder's strata (STRAT) 5 draws seeds 600..604,
+  3 fold seeds each. (c) the reading of R7 stays: usable only if arm - RAW pool >= +0.0005 at z >= 2 at some round.
+
+AMENDMENT 2 written 2026-11-15T16:03:43Z, BEFORE the numbers it concerns. Seen by now: all of R1-R6, the real R7 read and one R7 placebo draw.
+INSTRUMENT CHECKS for my D1 read (information; they cannot change the verdict on the fresh counts, they say whether a
+"no" from D1 means anything):
+- PC1 (real positive control): base = zf(fine-tuned branch of FD16P20 alone), x = zf(train-only branch), same grid, same
+  folds, nested exactly like D1. Reference = NDCG(final file score) - NDCG(fine-tuned branch) on plain val. The read is
+  "sensitive" iff the nested gain is >= half of the reference with z >= 2.
+- PC2 (planted signal, synthetic): x = Bernoulli indicator with P(x = 1 | no click) = q = 0.108 (the as-of coverage on val)
+  and P(x = 1 | click) = rho * q, independent of everything else, rho in {1.1, 1.2, 1.35, 1.5, 2.0}, 3 planting seeds
+  (900..902) each; nested D1 with this single column against the raw pool score. Reported: gain, z per rho = the click
+  lift a "shown elsewhere" flag would need for +0.0005. (The flag is built from val labels on purpose: it is a simulation.)
+- DESC (descriptive, in sample, my code): within-feed AUC of n_a for the val click, all / cold / warm candidates; observed
+  click share of the rows with n_a >= 1 against the share expected from the pool score (softmax of beta * b within feed,
+  beta from a one-parameter likelihood fit on all val feeds), cold / warm. No criterion.
+
+AMENDMENT 3 written 2026-11-15T16:06:00Z, BEFORE any number it concerns. Seen by now: R1-R6, R7 real + 4 placebo draws, PC1 / PC2 / DESC.
+(PC1 result, disclosed: FAILS my sensitivity criterion: reference +0.00081 +- 0.00040, nested +0.00017 +- 0.00027;
+part of it is a design fault of PC1: the reference blend is w = 1, my grid stops at 0.5.)
+STALE-VAL READ (the witness the project's evidence policy names for the staleness family, CURRENT_STATUS section 1; the
+builder's gate was read only where popularity inputs are 5.7 d stale): does the fresh as-of count repair a pool that
+reads STALE inputs?
+- Stale pool S = zf(mean over 16 members of zf(nn_x/w5/preds/stale/nn_<v>_staleval.npy)), members = the held-out twins of
+  the FD16 base (w5_e10_kd05w192_s951..958, w5_e10_kd05t25w192_s951..958; selected checkpoints; train-only branch; scenario
+  both_pre2both = val inputs with private-like coverage). Fresh twin F = the same with nn_<v>_trainonly_val.npy.
+  Reported: NDCG(F), NDCG(S), the staleness loss.
+- D1 and D2 exactly as in R2 (as-of set A; same grid, my folds 11-13) with base = S; gain against S. The same with
+  base = F (the fresh train-only pool) as the paired contrast. Placebo: within-feed x cold (WF), 10 draws, seeds 500..509.
+- Slices: feeds by tertile of the share of candidates whose it_hist_all_luo is changed by the scenario.
+- READING: "repairs staleness" iff D1 or D2 on S: gain >= +0.0005, z >= 2, above every placebo draw, AND
+  (gain on S) - (gain on F) > 0 at 2 SE (paired). Declared caveat: the scenario hides TRUE train popularity of items that
+  are really warm, and the val-feed count is a weak proxy of exactly that (within-feed Spearman +0.15 with xp_imp_c50),
+  so a positive reading is an UPPER bound for private, where cold items are really new: it would re-open the question
+  (verdict "NO on val, OPEN on stale-val"), never give PROMISING. A null reading closes the staleness route as well.
+
+AMENDMENT 4 written 2026-11-15T16:10:37Z, BEFORE the numbers it concerns. Seen by now: everything above; R7 with 9 of 10 within-feed placebo
+draws (LightGBM arm - control at 200 rounds: real +0.00042, placebo mean +0.00013, max +0.00045, real above 7 of 9; at
+20 / 50 rounds real above 9 of 9 by +1.8..+1.9 placebo sd; at 5 / 10 rounds real below 7 of 9; arm never above the raw pool).
+D3 (information; one more look, disclosed): the only form a tree with b could use and D1 / D2 could not = a NON-LINEAR
+interaction of "shown elsewhere" with the pool score. Columns: i_a*1[b>0], i_a*1[b>1], i_a*1[b>2], i_a*max(b,0),
+cs_a*1[b>0], cs_a*1[b>1], 1[n_a>=2]*1[b>0], 1[n_a>=2]*1[b>1]. D3-1 = best single (column, w), D3-2 = coordinate ascent over
+the 8 columns, both nested exactly as D1 / D2 against the raw pool score, my folds 11-13; within-feed placebo 10 draws
+(seeds 500..509); in-sample ceiling of D3-1. READING: same bar as R2 (>= +0.0005, z >= 2, above every placebo draw);
+anything less = the LightGBM difference is not an exploitable interaction.
+
+AMENDMENT 5 written 2026-11-15T16:12:36Z, BEFORE its number (information only; instrument check, not about the fresh counts).
+PC1b = PC1 with the grid extended by {0.75, 1.0, 1.5, 2.0} (so that the reference blend w = 1 is inside), same folds,
+same nested selection. Note written before the run: the PC1 reference itself is only z 2.0 (+0.00081 +- 0.00040), so the
+PC1 criterion (half of the reference at z >= 2) asks more than the paired SE of a two-branch blend allows; PC1b says how
+much of the miss is the grid.
+
+READ 2026-11-15T16:15:26Z (by the rules above; numbers from out/*.json and logs/)
+  R1 PASS: 500 feeds (49,563 rows) and all 4,294,777 rows equal for a, a24, b, d, e and the no-uid-0 as-of count; same-user
+     exclusion verified on 678 rows (339 for the as-of window); no label read; item_id 0 rows: 0.
+  R2 as-of set, against the raw pool score (0.402714): D1 -0.00004 +- 0.00020 (z -0.18), D2 -0.00014 +- 0.00020 (z -0.71);
+     in-sample D1 ceiling +0.00017 +- 0.00025. Later-using set: D1 -0.00069 +- 0.00017, D2 -0.00059 +- 0.00023.
+  R3 within-feed placebo (20 draws): D1 band -0.00037 .. +0.00006 (real above 15), D2 -0.00053 .. +0.00007 (real above 11).
+     -> by the R2 reading: neither D1 nor D2 reaches [>= +0.0005, z >= 2, above every draw]: the builder's NO is CONFIRMED.
+  R4 "gain concentrated late in val": NOT true (day 20720 minus 20718: D1 +0.00030 +- 0.00042, z +0.71; day-20720 gain
+     +0.00012 +- 0.00033). First test day: 24-hour form 0.6% in the first hour, 6.8% over the day; all-earlier form 18.9%,
+     63.9% of its covered rows only through feeds older than 24 h.
+  R5 step-0 facts confirmed from code; R^2 of the count on existing inputs 0.066 (within feed 0.060); pool score = the
+     final file (test order identical on all but 2 of 2,904,806 rows).
+  R6 parity: PSI 0.001 (sampled feeds), 0.002-0.008 (production-ordered and all train feeds as queries): attainable for
+     every train feed; train AUC of the as-of count 0.4979 +- 0.0009.
+  R7 LightGBM: arm - control at 200 rounds +0.00042 +- 0.00043 (real above 8 of 10 within-feed and 4 of 5 strata draws);
+     arm - raw pool < 0 at every round count (best -0.00017 +- 0.00010 at 5 rounds) -> not usable by the declared reading.
+  PC1 FAILS my criterion (+0.00017 +- 0.00027 of +0.00081); PC1b (grid to 2.0) +0.00058 +- 0.00038 (z 1.53).
+  PC2: lift 1.2 not detectable, 1.35 reads +0.0008..+0.0015, 1.5 reads +0.003..+0.004; measured lift 1.008 +- 0.021.
+  Stale-val (AMENDMENT 3): loss -0.00143 +- 0.00049; D1 +0.00013 +- 0.00026, D2 +0.00005 +- 0.00025, real above 7 / 6 of 10
+     placebo draws; S minus F D1 +0.00035 +- 0.00022 (z 1.56) -> "repairs staleness": NO.
+  D3 (AMENDMENT 4): -0.00026 +- 0.00009 / -0.00029 +- 0.00014; real above 3 of 10 -> no exploitable interaction.
+  VERDICT OF THE REVIEW: the builder's NO stands. Issues: 0 BLOCKER, 0 MAJOR, 2 MEDIUM, 6 LOW (reports/FRESH_1115/review.md).

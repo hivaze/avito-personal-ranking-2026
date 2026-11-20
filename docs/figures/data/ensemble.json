@@ -1,0 +1,68 @@
+{
+ "description": "Numbers shown in the ensemble figure: how the final files are assembled. The popularity-light weight w of a file can depend on the feed: w_short on feeds of fewer than short_feed_limit candidates, w_long on the others.",
+ "weight_finetuned": 0.5,
+ "weight_train_only": 0.5,
+ "short_feed_limit": 50,
+ "finetune_models_per_test_row": 15,
+ "submission_rows": 2904806,
+ "test_feeds": 28595,
+ "files": [
+  {
+   "id": "FD16P20@m0.4_0.2",
+   "role": "pick 1",
+   "wide_students": 16,
+   "popularity_light_students": 4,
+   "popularity_light_width": 192,
+   "members_train_on": "all train feeds",
+   "w_short": 0.4,
+   "w_long": 0.2,
+   "val_finetuned_branch": 0.40139,
+   "val_train_only_branch": 0.40208,
+   "val_final": 0.40293,
+   "public": 0.3952092
+  },
+  {
+   "id": "FDX16P20:ps",
+   "role": "pick 2",
+   "wide_students": 16,
+   "popularity_light_students": 4,
+   "popularity_light_width": 192,
+   "members_train_on": "all train feeds",
+   "w_short": 0.2,
+   "w_long": 0.2,
+   "val_finetuned_branch": 0.40194,
+   "val_train_only_branch": 0.40234,
+   "val_final": 0.40286,
+   "public": 0.39526061
+  },
+  {
+   "id": "FD16P20",
+   "role": "pick 1 until 18 Nov",
+   "wide_students": 16,
+   "popularity_light_students": 4,
+   "popularity_light_width": 192,
+   "members_train_on": "all train feeds",
+   "w_short": 0.2,
+   "w_long": 0.2,
+   "val_finetuned_branch": 0.4019,
+   "val_train_only_branch": 0.40213,
+   "val_final": 0.40271,
+   "public": 0.394892
+  },
+  {
+   "id": "W8P20",
+   "role": "pick 2 until 19 Nov",
+   "wide_students": 8,
+   "popularity_light_students": 4,
+   "popularity_light_width": 128,
+   "members_train_on": "hold out 30,000 train feeds",
+   "w_short": 0.2,
+   "w_long": 0.2,
+   "val_finetuned_branch": 0.40167,
+   "val_train_only_branch": 0.40212,
+   "val_final": 0.40214,
+   "public": 0.3950094
+  }
+ ],
+ "source": "lab/nn_x/w12/kd/build_r4.py and lab/nn_x/w12/kd/build_r3.py. Branch scores of W8P20 and FD16P20 come from an independent rebuild of both files from the stored member predictions (2026-11-16), those of FD16P20@m0.4_0.2 (2026-11-18) and FDX16P20:ps (2026-11-19) from their stored pools read with avito_ranker (stored predictions and pools are not published). That read reproduces the branch scores of FD16P20@m0.4_0.2 and W8P20."
+}

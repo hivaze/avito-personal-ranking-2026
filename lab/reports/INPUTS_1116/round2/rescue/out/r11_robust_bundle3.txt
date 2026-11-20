@@ -1,0 +1,25 @@
+[    40s] === witness H (holdout rows, lag view); null model = pool + 83 own inputs + nx_rp3_z + nx_rp3_rk ===
+[    40s] (a) + (b): form | all | slots 6-8 | slots 11-13 | 100 placebos: sd, max |cz|, cz / sd, share of placebos with |cz| >= the read | placebos on slots 11-13 only: sd, max, cz / sd
+[    68s] bt5:rk         | +4.17 | +3.79 | +2.11 | sd 0.91, max 2.31, cz / sd +4.58, beyond 0.00 | sd 0.98, max 3.73, cz / sd +2.16
+[    95s] kn1_5:z        | -4.55 | -3.74 | -2.61 | sd 0.95, max 2.27, cz / sd -4.77, beyond 0.00 | sd 0.97, max 2.67, cz / sd -2.71
+[   123s] ns2_5:z        | -4.50 | -3.14 | -3.50 | sd 0.95, max 2.53, cz / sd -4.73, beyond 0.00 | sd 1.02, max 3.49, cz / sd -3.43
+[   123s] (c) overlap: cz of the row form given the null model + the column form (diagonal = given the null model alone); last column = given ALL other forms
+[   163s]                |        bt5:rk |       kn1_5:z |       ns2_5:z | given all others
+[   163s] bt5:rk         |         +4.17 |         +3.96 |         +3.72 | +3.55
+[   163s] kn1_5:z        |         -4.37 |         -4.55 |         -4.26 | -4.13
+[   163s] ns2_5:z        |         -4.07 |         -4.17 |         -4.50 | -3.78
+[   176s] (d) log-likelihood per feed (30000 feeds): pool alone -8.15807; + own inputs -8.15320 (gain 0.00487); + nx3 -8.15276 (gain 0.00044); + the 3 forms -8.15191 (gain 0.00085 nats per feed, LR 50.9 on 3 df)
+[   176s]     joint coefficients of the forms: bt5:rk +0.0917, kn1_5:z -0.0311, ns2_5:z -0.0263
+[   184s] === witness T (val rows, stale-val twin, base TO16); null model = pool + 84 own inputs + nx_rp3_z + nx_rp3_rk ===
+[   184s] (a) + (b): form | all | slot 16 | slot 18 | M < 50 | M >= 50 | pmix-public w | pmix-private w | 100 placebos: sd, max |cz|, cz / sd, share of placebos with |cz| >= the read
+[   188s] bt5:rk         | +4.12 | +3.22 | +2.57 | +1.20 | +4.23 | +3.02 | +2.74 | sd 1.10, max 2.64, cz / sd +3.75, beyond 0.00
+[   192s] kn1_5:z        | -3.22 | -1.48 | -3.11 | -2.36 | -2.26 | -1.56 | -0.81 | sd 0.98, max 2.59, cz / sd -3.27, beyond 0.00
+[   196s] ns2_5:z        | -3.15 | -2.01 | -2.51 | -1.96 | -2.48 | -2.56 | -2.38 | sd 0.91, max 1.90, cz / sd -3.46, beyond 0.00
+[   196s] (c) overlap: cz of the row form given the null model + the column form (diagonal = given the null model alone); last column = given ALL other forms
+[   208s]                |        bt5:rk |       kn1_5:z |       ns2_5:z | given all others
+[   208s] bt5:rk         |         +4.12 |         +4.07 |         +4.02 | +3.97
+[   208s] kn1_5:z        |         -3.16 |         -3.22 |         -3.20 | -3.14
+[   208s] ns2_5:z        |         -3.01 |         -3.12 |         -3.15 | -2.99
+[   212s] (d) log-likelihood per feed (14423 feeds): pool alone -6.04202; + own inputs -6.03304 (gain 0.00899); + nx3 -6.03125 (gain 0.00179); + the 3 forms -6.03003 (gain 0.00123 nats per feed, LR 35.3 on 3 df)
+[   212s]     joint coefficients of the forms: bt5:rk +0.1271, kn1_5:z -0.0274, ns2_5:z -0.0275
+[   212s] DONE

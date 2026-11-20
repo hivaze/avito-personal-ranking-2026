@@ -1,0 +1,757 @@
+[
+ {
+  "lens": "head",
+  "summary": "Head-of-list lens (ranks 1-10) on the 7,214-feed discovery half (base NDCG 0.39939). I submit zero rules because nothing reaches a cross-fitted gain of +0.0003 with z >= 2. I tried about 1,250 parameter settings in about 20 rule families. The opportunity is real: a perfect re-order of the top 10, with the head set fixed, would add +0.21 NDCG (top 3: +0.056). But the columns cannot find it. A cross-fitted LightGBM head re-ranker loses 0.0022-0.0052. A residual GBM loses more the longer it trains (-0.00004 at 50 rounds, -0.0016 at 400). A ridge conditional logit over all 46 columns loses 0.0011-0.0030. In 308 quintile bins of 35 features there is no bin where rank 2 beats rank 1, and cross-fitted swap trees for 1<->2, 2<->3 and 1<->3 are all <= 0 out of fold. The branch weight is already optimal at 0.5/0.5 (0.6: +0.00001). Re-weighting toward s_to inside the head costs 0.0005-0.0011. Per-segment branch weights, cross-fitted over 7 segmentations, range from -0.0006 to +0.00014 (in-sample +0.0002 to +0.0005, which is fold noise). Where the branches disagree on top-1 (1,378 feeds), the consensus is right most often (9.0% vs 8.6% ft and 7.5% to). Within-feed choice models find only weak single-feature signals (max z about 2.9 at K=10, which is the null level). The strong-looking residuals in rank-calibrated tables (hmean5 z=6.2, category share z=6.6) are either feed-level confounds or sit in the middle/tail, so they do not move NDCG. The closest failures: an h10 tie-break at w=-0.02, cross-fitted +0.00052 (z 1.95, one of about 600 tie-break variants); a boost for very popular items (popularity-only), +0.00048 (z 1.57); a hmax boost in small feeds, +0.00047 (z 1.67).",
+  "findings": [
+   {
+    "finding": "The head order is at the noise floor for every column in the table: flexible and linear re-rankers both lose out of fold.",
+    "evidence": "LightGBM head re-ranker, cross-fitted: binary K=5/10/20 -0.0022/-0.0023/-0.0023 (z about -2.5); lambdarank K=10 -0.0052 (z -3.5). Residual GBM K=10: 50/150/400 rounds -0.00004/-0.0006/-0.0016. Ridge conditional logit (score not penalised plus 46 columns), K=10 and K=30, all penalties: -0.0011 to -0.0030. Oracle top-10 re-order (set fixed) +0.212, so the opportunity exists but these columns cannot find it."
+   },
+   {
+    "finding": "Rank 1 beats rank 2 in every subgroup tested, so no swap rule exists in the head.",
+    "evidence": "308 quintile bins (rank-1 value and pair difference for 35 features): the best bin is still -0.0007 per feed for a 1<->2 swap. In the smallest-gap quintile (gap_next < .057), y1 = 9.8% vs y2 = 8.4%. Cross-fitted regression trees on the swap gain (depth 2-4, leaf 200-800), 27 settings over swaps 1<->2, 2<->3 and 1<->3: all <= 0 OOF, the worst -0.0034."
+   },
+   {
+    "finding": "The s_ft/s_to balance of 0.5/0.5 is already optimal overall, inside the head and in every segment measured. When the branches disagree, the consensus wins.",
+    "evidence": "Global w_ft: 0.4 -0.00014, 0.6 +0.00001, 0.75 -0.00048. Head-only re-weighting (K 2..300, w 0..0.6): every variant <= +0.00001. Cross-fitted segment weights for M, H, newest_type, n_hist_cats32, n_feed_cats, newest_src, guest: +0.00007, +0.00014, -0.00012, -0.00002, -0.00009, -0.00062, -0.00028. Top-1 disagreement feeds (1,378): score-top1 9.0%, ft 8.6%, to 7.5%. Pairwise head accuracy: ft .6106, to .6142, score .6140."
+   },
+   {
+    "finding": "Branch disagreement is at most a very weak uncertainty signal and not usable.",
+    "evidence": "score - lam*|s_ft - s_to|: lam .3 +0.00010 (z 0.3), .6 -0.0005. A bonus for disagreement is -0.0008 (z -2.7). Rank-average of the branches -0.00023. Head-local re-standardisation K=10 +0.00015 (z 1.2). Agreement product |delta| <= 0.00013."
+   },
+   {
+    "finding": "Likelihood-based residual signals (conditional logit, rank-calibration tables) do not become NDCG gains. They sit in the middle/tail or are feed-level confounds.",
+    "evidence": "Category share in the feed: full-list conditional logit z=+6.6, yet NDCG for w .02-.3 is -0.00007 to -0.0018. hmean5 top decile has residual +0.020 (z 6.2) against the rank calibration, but only z 1.9 within feed. Near-identical-to-history items in the head are 1.3-1.7x the rank-calibrated rate, but promoting them cross-fits to -0.00015 (hmax) and -0.00036 (c_contact)."
+   },
+   {
+    "finding": "Near-copies in the head do not split clicks; users open both copies. Diversification has nothing to fix.",
+    "evidence": "5,212 fingerprinted near-copy pairs in the top 20 (1,378 feeds): the lower copy is positive 3.65% vs 3.27% expected; P(lower pos | upper pos) = 6.2% vs 3.5% when the upper is negative. Demoting the lower copy by 0.05-0.4: -0.00002 to -0.00017."
+   },
+   {
+    "finding": "Focused users (n_hist_cats32 <= 2) show a coherent likelihood signal that affinity should count more, but it gives no NDCG gain.",
+    "evidence": "Conditional-logit interactions at K=30: hmax x focused z=4.1, f1 3.3, h5 2.75, cat_actions 2.7 (360 tests, null max about 3.3). Cross-fitted NDCG for score + w*z(x)*[nhc32<=T]: hmax -0.00003, h5 -0.00019, hmean5 -0.00039, f1 -0.00027."
+   },
+   {
+    "finding": "Per-category head bias, stored row order and ties are all clean.",
+    "evidence": "Category dummies in the head conditional logit: max |z| 2.5 over about 30 categories x 4 depths. Within-feed row position has a flat label rate (corr with score -0.0008). Only one exact tie in 697k rows, with no positive in it."
+   }
+  ],
+  "rules": [],
+  "failed_ideas": [
+   {
+    "idea": "Re-weight s_ft vs s_to inside the head only (top K re-ordered by w*s_ft + (1-w)*s_to)",
+    "result": "K=2..300, w in {0,.2,.3,.4,.6}: every variant <= +0.00001; toward s_to costs 0.0005-0.0011 (35 variants)"
+   },
+   {
+    "idea": "Branch weight chosen per feed segment (M, H, newest_type, n_hist_cats32, n_feed_cats, newest_src, guest)",
+    "result": "Cross-fitted +0.00014 at best (H, z 0.56), newest_src -0.00062 (z -2.3); in-sample +0.0002 to +0.0005 was fold noise"
+   },
+   {
+    "idea": "Uncertainty penalty for branch disagreement, rank-average, agreement product, head-local re-standardisation",
+    "result": "Best +0.00015 (head-local z, K=10, z 1.2); a disagreement bonus is -0.0008"
+   },
+   {
+    "idea": "Cross-fitted LightGBM re-ranker of the head (binary, lambdarank, residual-on-score)",
+    "result": "-0.00004 to -0.0052 out of fold; more boosting rounds only add loss"
+   },
+   {
+    "idea": "Ridge conditional logit over all columns as a linear head re-ranker",
+    "result": "-0.0011 to -0.0030 out of fold at every penalty"
+   },
+   {
+    "idea": "Swap rules for ranks 1<->2, 2<->3, 1<->3 (quintile scan plus cross-fitted regression trees)",
+    "result": "No bin with y2 > y1; 27 tree settings all <= 0 OOF"
+   },
+   {
+    "idea": "Small tie-breakers score + w*z(x) for 41 features, head-only and full list (574 variants)",
+    "result": "Best h10 at w=-.02: cf +0.00052 (z 1.95, full) / +0.00042 (z 1.57, head); below the z>=2 bar and expected from the number of variants"
+   },
+   {
+    "idea": "Category share of the feed (cat_n_in_feed/M, log count) as a boost",
+    "result": "-0.00007 to -0.0018 despite conditional-logit z=6.6"
+   },
+   {
+    "idea": "Focused-user (n_hist_cats32 <= T) boost of history similarity / affinity; small-feed (M <= T) boosts",
+    "result": "Focused: -0.00039 to -0.00003; small feeds: hmax +0.00047 (z 1.67), others <= 0 (165 variants)"
+   },
+   {
+    "idea": "Demote the lower of two near-copy candidates inside the head (click-splitting)",
+    "result": "-0.00002 to -0.00017; the lower copy is actually slightly under-estimated"
+   },
+   {
+    "idea": "Promote near-identical-to-history items (hmax or c_contact >= .99/.995) inside the head",
+    "result": "Cross-fitted -0.00015 (hmax), -0.00036 (c_contact)"
+   },
+   {
+    "idea": "Boost very popular items (it_hist_et1_luo >= 300, or a hinge-log of it), popularity-only",
+    "result": "In-sample +0.00048; cross-fitted +0.00024 to +0.00048 (z 0.7-1.6); 79 variants"
+   },
+   {
+    "idea": "Engagement rate f5 for well-exposed items (xp_imp_c50 >= 3.9); Beta-smoothed CTR",
+    "result": "Cross-fitted +0.00024 (z 1.3); smoothed CTR conditional-logit z <= 1.3"
+   },
+   {
+    "idea": "Per-category head bias; drift of the branch balance across days / fidx; tie-breaking base ties",
+    "result": "No category beyond multiple-testing level; no drift (two weekdays); only one tie, with no positive"
+   }
+  ]
+ },
+ {
+  "lens": "category",
+  "summary": "Category lens: no rule submitted (rules/ is empty on purpose). I tested about 377 rule families, about 2,650 parameter variants in all. Each was scored by cross-fitted NDCG over kit.folds on 7,214 feeds. None reached +0.0003 with z >= 2. The best honest results were +0.0002 to +0.0004 with z 1.0-2.0. Given how many families were tried, that is what noise looks like.\n\nCategory-level calibration is good. A conditional logit over the categories of each feed gives a model-mass coefficient of 1.00-1.04. By vertical, O/E runs from 0.93 to 1.03, and every leaf category has |z| <= 2.2. Re-fitting category mass with extra state features hurts NDCG even in sample (-0.0001 to -0.0002).\n\nThere are real likelihood signals:\n- feed share of the category (score-test z +5.6)\n- history share, f3\n- the newest event's category at ranks 1-3 (O/E 1.08 against 0.87 for categories last seen 5-31 events ago)\n- Services over-ranked (O/E 0.93 overall, 0.72 when the user has no Services history)\n\nNone of them turns into NDCG. They sit in the tail or reverse from fold to fold. For example, the feed-share boost scores -0.00064 cross-fitted, and head boosts of the newest event's category score -0.0001 to -0.0004.\n\nThe only consistent near-miss is a global Services demotion of -0.1 z-units: +0.00022, SE 0.00022, z 1.0. Its per-fold deltas are +.00063/-.00008/+.00011/+.00014/+.00029, so it is not submitted.\n\nTwo flexible upper bounds also fail out of fold:\n- a LightGBM lambdarank residual on category and all features (18 configurations): -0.0002 to -0.010\n- a ridge linear LambdaRank on 41 category features: -0.0013 to -0.0025, and negative in sample too\n\nOn this sample the model uses the category structure about as well as it can be used. In bad feeds, the positive is mostly deep inside a category the model already favours, with lower similarity than the head. Those look like choices driven by photo or price, which the features cannot see.",
+  "findings": [
+   {
+    "finding": "Category-level probability mass is calibrated; across-category corrections do not help NDCG.",
+    "evidence": "Conditional logit over the (feed, category) units: log-mass coefficient 1.036 alone, 0.95-1.04 with feed share, absent/newest/recency, history counts or a Services dummy added. Cross-fitted NDCG -0.00018 to -0.00058 for all 7 fits; in sample also negative (-0.00002 to -0.00023). O/E by vertical 0.93-1.03 (|z| <= 2.2); by leaf category |z| <= 2.2 for all 48 categories."
+   },
+   {
+    "finding": "Services is the most consistently over-ranked category, but the effect is too small to pass as an NDCG rule.",
+    "evidence": "O/E 0.931 (728 vs 782 expected, z -2.2). With no Services history: O/E 0.72 (46 vs 64). With cat_views==0: about 0.73. Lambda screen: cat_user_rank x Services z -4.45. Rule score - 0.1*[cat==50]: cross-fitted +0.00022, SE 0.00022, z 1.0; w=0.1 chosen in all 5 folds; per-fold deltas +.00063/-.00008/+.00011/+.00014/+.00029. Gating on weak history makes it worse (views==0: -0.00015; views<=2: -0.00023)."
+   },
+   {
+    "finding": "At ranks 1-3, items in the newest event's category are under-ranked relative to other categories (calibration), but every rule built on this is negative out of fold.",
+    "evidence": "Ranks 1-3: newest-category items O/E 1.079 (z +3.0); items whose category was last seen 5-31 events ago O/E 0.872 (z -2.9). Boost inside top K (K=2,3,5,10,all): cross-fitted -0.0001 to -0.0004. Conditioned on 18 segments (newest_type, newest_src, newest vertical): best +0.00038, z 1.6, and that was the opposite sign (w=-0.05). Head demotion of idx5-31 categories, K=3: in sample +0.0003, cross-fitted -0.00004."
+   },
+   {
+    "finding": "Feed composition (share of the category among candidates) is under-used in the likelihood sense but gives no NDCG gain: the signal lives in the tail.",
+    "evidence": "Score test z +5.6 (share), +4.8 (log cat_n); lambda gradient z +5.0; head duels at R=3 z +2.8. NDCG: share boost cross-fitted -0.00064 (in-sample best w=0); 0.2*log cat_n +0.00013 (z 1.1); head-only K=3..30: -0.0002."
+   },
+   {
+    "finding": "Head concentration in one category is a feed-level temperature effect, which cannot change the order inside a feed; there is no evidence for diversification (rather the opposite).",
+    "evidence": "Top 10 all one category: head O/E 1.14 (z +3.4), tail 0.94. Diverse heads (5-7 categories): head 0.93, tail 1.08-1.25. Second item of its category at ranks 1-3: O/E 1.10 against 0.96 for first-of-category. Shrinking toward the category mean: cross-fitted 0.0; by vertical all <= 0."
+   },
+   {
+    "finding": "Per-vertical and per-category-state re-weighting of item features, and s_ft vs s_to branch weights, show nothing beyond noise.",
+    "evidence": "a11: 208 families (11 segments x 16 features), 1,456 variants; maximum cross-fitted z 2.03 (Hobby x f4, +0.00036), the best of 208, consistent with noise. a12: global branch re-weighting -0.00025; 27 category-context segments, best +0.00021 (z 1.2)."
+   },
+   {
+    "finding": "Flexible upper bounds confirm there is no learnable category residual out of fold.",
+    "evidence": "LightGBM lambdarank residual (init_score = score), category features and all features, 18 configurations: OOF -0.0002 to -0.010, worse with more rounds. Ridge linear LambdaRank on 41 category features: cross-fitted -0.0013 to -0.0025, in sample -0.0001 to -0.0009."
+   },
+   {
+    "finding": "Bad feeds (best positive at 30+) are mostly within-category misses that the features cannot explain.",
+    "evidence": "Printed feeds: Clothing positive at 24th of 164 in its category, Parts 68th of 100, Services 11th of 50, Clothing 66th of 90, Services 13th of 18. These positives have lower hmax/ucos than the head and ordinary popularity. Fewer cases: a second-recent category (Vacancies with cat_newest_idx 1, behind 120 Apartments led by a favourite) or an absent category (Sports). 97% of feeds contain the newest event's category, and 96% contain the user's #1 category."
+   }
+  ],
+  "rules": [],
+  "failed_ideas": [
+   {
+    "idea": "Boost same-category-as-newest items inside the head (K=2,3,5,10,all), optionally only for focused users (n_hist_cats32<=2/3/4)",
+    "result": "Cross-fitted -0.00042 to +0.00023 (best nhc<=3 at all ranks, z 1.1); 16 families, 128 variants"
+   },
+   {
+    "idea": "Boost categories by feed share / log cat_n_in_feed / history share / f3 / category mean score",
+    "result": "Share -0.00064 (z -2.4); log cat_n +0.00013 (z 1.1); hist share -0.00037; f3 -0.00051; head-only log cat_n -0.0002"
+   },
+   {
+    "idea": "Services demotion (all, absent, views==0, views<=2, 1/(1+views), cat_user_rank-scaled) and ShiftGigs demotion",
+    "result": "Best global -0.1: +0.00022, SE 0.00022, z 1.0; gated variants -0.00023 to +0.00016; ShiftGigs 0.0"
+   },
+   {
+    "idea": "Per-vertical offsets for categories absent from history; demote all absent categories",
+    "result": "All between -0.00026 and +0.00012 (best Personal absent -0.3, z 1.6)"
+   },
+   {
+    "idea": "Across-category conditional-logit correction of category mass (log mass, log share, absent/newest/recency, history counts, Services)",
+    "result": "Negative both cross-fitted (-0.00018 to -0.00058) and in sample"
+   },
+   {
+    "idea": "Per-vertical / per-category-state re-weighting of 16 item features (freshness, engagement, popularity, similarities, region, sequence encoder, branch difference, candidate near-duplicates, within-category rank)",
+    "result": "208 families, 1,456 variants; maximum z 2.03 (Hobby x f4, +0.00036), the best of 208, so noise"
+   },
+   {
+    "idea": "Re-weight s_ft vs s_to globally and by 27 category-context segments (newest vertical, n_hist_cats32, n_feed_cats, newest type/source, guest)",
+    "result": "Global -0.00025; best segment +0.00021 (z 1.2)"
+   },
+   {
+    "idea": "Vertical x context offsets (hour, weekday, guest, history length, feed size)",
+    "result": "118 cells screened; top 8 by cross-fitted NDCG: -0.00008 to +0.00031 (H50-199 x Services, z 2.03, picked post hoc and without a behavioural story)"
+   },
+   {
+    "idea": "Head-only crowd boost; feature re-weighting inside the dominant category (share >= 0.5) of large feeds",
+    "result": "Head crowd -0.0002 for every K; dominant-category best lpop +0.00043, z 1.6"
+   },
+   {
+    "idea": "Feed-relative category standing (most recent / most frequent category present in this feed)",
+    "result": "-0.00042 to +0.00003"
+   },
+   {
+    "idea": "Same-category-as-newest boost by newest event type, source and vertical",
+    "result": "18 segments, 144 variants; best +0.00038 z 1.6 (opposite sign, nt=1); contact-type newest events -0.00025"
+   },
+   {
+    "idea": "Head demotion of non-recent categories (idx5-31, idx>=5, absent; K=3,5,10)",
+    "result": "All cross-fitted <= 0 (-0.00004 to -0.00075)"
+   },
+   {
+    "idea": "Within-category spread (shrink/expand toward the category mean) per vertical and for big categories",
+    "result": "All cross-fitted <= 0"
+   },
+   {
+    "idea": "Upper bounds: LightGBM lambdarank residual on category and all features; ridge linear LambdaRank on 41 category features",
+    "result": "LightGBM OOF -0.0002 to -0.010; linear -0.0013 to -0.0025 (negative in sample too)"
+   }
+  ]
+ },
+ {
+  "lens": "within_cat",
+  "summary": "I am submitting no rules: nothing in this lens survived cross-fitting. On the discovery sample (7,214 feeds, 11,026 positives, base NDCG 0.39939) the model already orders items inside a category and among near-duplicates about as well as these columns allow. A conditional logit inside (feed, category) groups that contain a positive (8,306 groups, 31 features, score as offset) found no effect beyond |z| 2.7 (z 3.1 when only groups of 30+ candidates are kept). 660 segment-specific within-category slopes peaked at |z| 3.77, which is what chance gives for 660 tests. About 120 observed/expected cells in the top-10 are all within |z| 1.9. In near-duplicate pairs (found exactly as two rows of a feed with equal cand_maxcos; 1,572 pairs with one positive), the score picks the clicked member 58-61% of the time. Once the score is known, freshness, popularity and closeness to the newest event add nothing reliable (f4 z -1.7). The only strong signals are listwise-likelihood miscalibrations in the tail of the list: category size (z 5.5), category share of history (z 5.3), and within-category score spread growing with category size (z 6.3). They also improve the out-of-fold likelihood (+0.0026 nats per feed, z 2.95), but they lower NDCG (-0.00042). Across about 185 cross-fitted NDCG variants, the best out-of-fold results were +0.00011 (z 1.76, more weight on the train-only branch for categories absent from history) and +0.00010 (z 1.5, boosting near-copies); both fall short of the +0.0003 and z 2 bar. Learned head re-rankers fitted on 4 folds (conditional logit, NDCG-weighted pairwise, and LightGBM lambdarank on the residual) were all at or below zero on the held-out fold, down to -0.0116 for the largest LightGBM.",
+  "findings": [
+   {
+    "finding": "Inside a category, the clicked item cannot be told apart from its category mates once the model score is accounted for.",
+    "evidence": "Conditional logit inside (feed, category) groups with a positive (8,306 groups, 10,473 positives), one feature at a time with the score as offset: max effect h32 +0.049/sd (z 2.7), then xp_imp_c50 -0.030 (z -2.6); all others |z| < 1.9 (screen_within.py). Observed/expected by within-category quintile for 19 features in categories with 10+ candidates is flat within +-6% (desc3.py). 660 segment x feature within-category slope tests: max |z| 3.77 (furniture, freshness), consistent with chance (screen_inter.py)."
+   },
+   {
+    "finding": "The top-10 is calibrated on every dimension of this lens.",
+    "evidence": "head_oe.py / head_oe2.py: E is the softmax of a*score within the top-10. All ~120 cells have |z| <= 1.9: hmax band x hmax_idx band, hmax_type/src, dup count, f4/f5 quintiles, exposure band, cat_user_rank, within-category rank, c_contact/c_fav/c_vfeed >= .95, n_hdup95, same_cat_newest, cat_newest_idx band, h1 band, category share x M, newest_type, category code. NDCG-weighted pairwise logistic on same-category pairs in the top-10/30 with feed-clustered SEs: max |z| 2.0 (pairs_head.py)."
+   },
+   {
+    "finding": "Near-duplicate pairs can be identified exactly. The model's score already picks the clicked member, and duplicates are not diluted.",
+    "evidence": "Rows of a feed with equal cand_maxcos are mutual nearest pairs (56,243 pairs; 29,768 isolated). In the 1,572 pairs with exactly one positive, the higher-scored member is the clicked one 58% (cos .95-.98), 61% (.98-.995) and 61% (>= .995) of the time. The clicked member is fresher in 47.6% / 47.0% / 39.3% of pairs (z -1.6, -1.3, -1.7); given the score, f4 is -0.07/sd (z -1.7) (pairs_sign.py, pairs.py). Top-10 O/E for the lower member of a pair whose partner ranks above it: 1.10 (z 1.2); upper member 1.04-1.12 (head_dupabove.py)."
+   },
+   {
+    "finding": "The within-category score spread is miscalibrated by category size: too compressed in big categories, too wide in small ones. The effect is real but sits in the tail and does not move NDCG.",
+    "evidence": "Full-list conditional logit z = a*s + (b0 + b1*log cat_n)*(s - category mean of s): b0 -0.239 (z -5.3), b1 +0.083 (z +6.3). In the newest event's category the extra spread is +0.115 (z 4.5) (fit_scale.py, screen_scale.py). Out of fold: log-likelihood +0.0026 nats per feed (z 2.95), but NDCG -0.00042 (z -1.0) (t_oofll.py). Restricted to the top-10/20 the effect is only z 1.6-2.0 (fit_scale_head.py). Cross-fitted stretch rule, 15 variants: -0.00031."
+   },
+   {
+    "finding": "Category size, history share and near-duplicate count are under-weighted in listwise likelihood, but correcting them lowers NDCG. The gains are at deep ranks, and the head is calibrated.",
+    "evidence": "Full-list conditional logit: lcatn +0.097/sd (z 5.5), cat_hist_share +0.073 (z 5.3), ldup +0.030 (z 2.6). Out-of-fold log-likelihood gains are z 2.05 / 2.11 / 1.05, while NDCG changes by -0.00016 / -0.00019 / -0.00089. Additive cross-fits: lcatn -0.00024, cat_hist_share -0.00039, ldup -0.00008. The raw table of top-of-list click rate by category share is confounded by feed size and flat for M >= 100."
+   },
+   {
+    "finding": "In the bad feeds, the clicked item sits deep in a large, tightly scored dominant category and looks like its mates on every column.",
+    "evidence": "57% of positives at rank 31+ have more than 10 same-category items above them; only 7.5% lead their category. 31% of all items ranked above positives are same-category. Example: feed 11372, 159 clothing items scored 1.14-1.70, positive at rank 46 with typical f1/f4/ucos/hmax; also feeds 4522, 5499, 7122 (show.py). Items deep in a category, compared with matched negatives at the same within-category rank, differ only in score-correlated similarity features (deep_mates.py)."
+   }
+  ],
+  "rules": [],
+  "failed_ideas": [
+   {
+    "idea": "Additive boost by category size (log cat_n_in_feed), category share of history, or f3",
+    "result": "7 grid values each. Out of fold: -0.00024 (se 0.00021), -0.00039, -0.00013"
+   },
+   {
+    "idea": "Re-weight the two branches (s_ft vs s_to), globally and in 6 segments (big categories, duplicates, top category, absent category, cold items)",
+    "result": "Best was absent-category rows at weight .7 on s_to: out of fold +0.00011 (se 0.00006, z 1.76). The conditional logit finds no signal there (z -0.19); the other segments were -0.00023 to -0.00007"
+   },
+   {
+    "idea": "Stretch within-category score deviations by log category size, or in the newest event's category",
+    "result": "20 variants. Out of fold -0.00031 and -0.00017, although the likelihood effect has z 6.3"
+   },
+   {
+    "idea": "Boost near-duplicates (log(1+n_cand_dup95), dup>=1, cand_maxcos above .9), on all rows or the top-30 only",
+    "result": "36 variants. Out of fold -0.00008 to +0.00010 (best z 1.5)"
+   },
+   {
+    "idea": "Boost the fresher member of each mutual near-duplicate pair",
+    "result": "5 variants. Out of fold 0 (in-sample -0.00015 to -0.00046)"
+   },
+   {
+    "idea": "Head re-ranker by conditional logit on the top-K (K 10/20/40) with 5 a-priori feature sets, fitted on 4 folds",
+    "result": "15 configs, all negative: -0.00001 to -0.00168"
+   },
+   {
+    "idea": "Head re-ranker fitted with an NDCG-weighted pairwise logistic (one LambdaRank step) on f1/pre2 and category-affinity features",
+    "result": "6 configs. Out of fold -0.00102 to +0.00012"
+   },
+   {
+    "idea": "LightGBM lambdarank on the residual (init_score = score) with within-category and all features, as a ceiling test",
+    "result": "6 sizes x 2 feature sets, all negative: -0.00034 for the tiniest model down to -0.0116"
+   },
+   {
+    "idea": "Novelty boost inside big categories (lower exposure, popularity or age, when 20+ or 40+ candidates)",
+    "result": "24 variants. Out of fold -0.00005 / -0.00011 / -0.00007 (in-sample best +0.00014)"
+   },
+   {
+    "idea": "Demote by region affinity f2 (raw or within-category), which kept appearing with a negative sign in screens",
+    "result": "10 variants. Out of fold -0.00011 / -0.00020"
+   },
+   {
+    "idea": "Rebuild near-duplicate clusters from similarity profiles (ucos/h1/h5/h10/h32/hmean5/hmax within a tolerance)",
+    "result": "Matched n_cand_dup95 for under 30% of items. Replaced by exact mutual-pair detection via equal cand_maxcos"
+   },
+   {
+    "idea": "Fatigue from the same item repeated across one user's feeds, or item recurrence across the sample",
+    "result": "Not possible: only 15 of 6,887 users have two feeds. Sample recurrence is weak (z 2.3 in likelihood) and depends on sample size"
+   }
+  ]
+ },
+ {
+  "lens": "segments",
+  "summary": "I am submitting zero rules from the segments / score-shape lens. On the 7,214 discovery feeds (base NDCG 0.39939), nothing reached the bar of a cross-fitted gain of at least +0.0003 with z of at least 2. I tried about 1,870 variants in roughly 60 families.\n\nSegment-specific blends of the score with simple signals do not help. I tested 27 signals across these segments: M, H, hour, weekday, n_feed_cats, newest_type, guest/cold users, contact-heavy histories, score peakedness and branch correlation. The cross-fitted deltas are almost all negative, with a mean of -4e-4 over a 144-variant lens scan. Only one variant reached z > 2, and it was noise from 181 guest feeds.\n\nRe-weighting the two branches (s_ft vs s_to) gives a jagged curve with its optimum at 0.5 in every segment. The two branches correlate at a median of 0.993 within a feed. Other ways of combining them (disagreement penalties, rank fusion, soft-min/max) also do not help.\n\nAs a headroom check, residual LightGBM rankers with the model score as init were also negative in every setting: -22 to -65 (lambdarank) and +0.4 to -6.1 (pointwise), in units of 1e-4. Category-specific slopes, segment x category offsets and head-only re-orderings were all negative too.\n\nGood and bad feeds differ in a clear way. In feeds with at least 60 candidates where the best positive is at rank 30 or worse, that positive:\n- is the median 12th item of a 28-candidate category;\n- shares the top-1 item's category in only 28% of feeds (83% in good feeds);\n- comes from a category absent from history 11% of the time (3% in good feeds);\n- is weaker on every affinity signal (f3 0.48 vs 0.66, h1 0.53 vs 0.70).\n\nThe model's score peakedness hardly differs between good and bad feeds (g110 0.76 vs 0.84), so it cannot flag them.\n\nThe best near-miss is a within-category saturation penalty: score - 0.02*(cat_rank_in_feed-1)^0.3. It gains +2.3e-4 cross-fitted (z 2.5), and the per-fold deltas range from -0.2 to +5.1. It is the best of about 160 variants in its family. A likelihood check restricted to the head does not corroborate it. It is saved at <repo>/lab/nn_x/errfix_1117/agents/segments/work/candidate_cat_saturation.py and is not submitted. Full notes are in <repo>/lab/nn_x/errfix_1117/agents/segments/notes.txt.",
+  "findings": [
+   {
+    "finding": "NDCG differences across segments are explained almost entirely by feed size M. Hour, weekday, newest event type/source, history length and number of history categories add little. Guest, uvec_missing and empty-history feeds are too small to move the total.",
+    "evidence": "NDCG by M: <20 0.61, 20-50 0.44, 50-100 0.36, 100-150 0.31, 150-300 0.27-0.30. Guest 312 feeds 0.406; uvm 92 feeds 0.344; H=0 95 feeds 0.372. Hour buckets range 0.377-0.414 with similar M."
+   },
+   {
+    "finding": "In bad feeds (M>=60, best positive at rank 30+), the positive is usually a deep within-category pick or an exploration click with weak affinity on every signal the model uses.",
+    "evidence": "Best positive, bad vs good feeds: median cat_rank_in_feed 12 vs 1; same category as the model's top-1 28% vs 83%; category absent from history 11% vs 3%; same_cat_newest 28% vs 64%; f3 0.48 vs 0.66; f1 0.42 vs 0.63; h1 0.53 vs 0.70; hmax>=.95 15% vs 51%. Bad feeds: M 183 vs 141, npos 1.3 vs 2.7. Individual feeds printed with work/a05b_print.py confirm this."
+   },
+   {
+    "finding": "Score shape does not identify the feeds the model gets wrong.",
+    "evidence": "g110 (top-1 minus top-10 score) is 0.76 in bad feeds vs 0.84 in good; g12 is 0.25 vs 0.27. Blends restricted to flat-score feeds (g110 lowest 30%) give at most +5.7e-4 in-sample with z<2, and all are cross-fitted negative or near zero."
+   },
+   {
+    "finding": "The 0.5/0.5 branch blend is optimal in every segment, and the two branches are nearly identical.",
+    "evidence": "Median within-feed corr(s_ft, s_to) is 0.993. The w_ft scan over 0.2-0.8 across 19 segments gives a jagged, non-monotone curve. Overall: w=0.45 +0.4e-4, w=0.55 +0.3e-4, w=0.3 -5.8e-4. In the 1,378 feeds where the branches' top-1 items differ, the top-1 has 124 positives for the blend, 118 for ft and 103 for to."
+   },
+   {
+    "finding": "Across-feed calibration residuals at the head (for example high f3 under-rated, same_cat_newest=0 over-rated, s_ft-s_to in [.05,.13] over-rated) do not turn into within-feed re-ranking gains.",
+    "evidence": "At ranks <=3/10, obs/exp is 1.18 for f3>=.92, 0.89 for same_cat_newest=0 (z -3.5) and 0.84 for sft-sto in [.05,.13] (z -4.2). The matching head-only re-orderings are all cross-fitted negative: f3 -1.9 to -3.7, same_cat_newest -4.2 to -4.5, sto-sft -5 to -134 (e-4). See work/a08_resid.py and work/a09_head.py."
+   },
+   {
+    "finding": "The model appears to sit at a local optimum against simple corrections built from these columns. Fitting a perturbation on 4 folds systematically hurts on the 5th.",
+    "evidence": "Lens scan: 144 segment x feature variants with mean cross-fitted delta -4.0e-4. Category-specific slopes: -3.6 to -17.9e-4. Segment x category offsets: all negative. Residual GBM: lambdarank -22 to -65e-4; pointwise binary +0.4/-5.2/-6.1e-4 at 50/100/200 rounds."
+   },
+   {
+    "finding": "A within-category saturation penalty (demoting the 2nd, 3rd, ... item of a category) gives a small, fold-stable gain that stays below the bar. It is concentrated in M 30-100 and in flat-score feeds, and a likelihood check does not support it.",
+    "evidence": "score - 0.02*(cat_rank_in_feed-1)^0.3: cross-fitted +2.31e-4 (se 0.92e-4, z 2.51), w=0.02 chosen in all 5 folds, per-fold +2.7/+5.1/-0.2/+0.3/+3.7e-4. Changes 79% of feeds. By segment: M30-100 about +5e-4, M100+ about +1e-4, M<30 slightly negative. In a conditional logit restricted to ranks <=5/10/20, the follower coefficient is about 0, and +0.14 for M<30 (followers under-rated). File: work/candidate_cat_saturation.py, not submitted."
+   }
+  ],
+  "rules": [],
+  "failed_ideas": [
+   {
+    "idea": "Global blend score + w*z_feed(x) for 27 signals (ucos, h1/h5/h10/h32/hmax/hmean5, f1-f5, popularity, seq_cv, pre2, cand_maxcos, c_*, sft-sto, cat rank), 8 weights each",
+    "result": "Best was +4.5e-4 in-sample (f3, w=-0.03, z 1.5) out of 216 tries, consistent with noise. Not cross-fit-positive."
+   },
+   {
+    "idea": "Segment-specific weights (M3, H3) for 13 features, chosen per segment by cross-fitting",
+    "result": "Cross-fitted -15.5e-4 to +2.9e-4. Only hmax by M3 was positive, at +2.9e-4 (z 0.97)."
+   },
+   {
+    "idea": "Lens scan: 9 segment schemes (hour4, weekday, n_feed_cats, g110, g12, newest_type, cold users, n_hist_cats32, corr(ft,to)) x 16 features",
+    "result": "144 variants, mean cross-fitted -4.0e-4. One had z>2 (newest_type x f2_home, +6.0e-4, z 2.17), driven entirely by 181 guest feeds with per-fold deltas from -21 to +238e-4, i.e. noise."
+   },
+   {
+    "idea": "Contact-heavy vs view-heavy histories (terciles of feed action share) x 13 features (c_contact, c_fav, c_vfeed, c_vsearch, h1, hmax, f1, f3, ucos, popularity, f4, f5)",
+    "result": "Cross-fitted -12.8e-4 to +1.8e-4. All with z<0.5 except negatives."
+   },
+   {
+    "idea": "Branch re-weighting w*s_ft+(1-w)*s_to by 19 segments; disagreement penalty -lam*|s_ft-s_to|; rank fusion; logsumexp soft-min/max",
+    "result": "Jagged noise with 0.5 optimal. Best overall was +2.1e-4 for soft-min (t=-3) with se 1.9e-4."
+   },
+   {
+    "idea": "Head-only re-ordering (ranks <=5/10/20) by f3, f1, same_cat_newest, category user rank, category recency, cat_hist_share, sto-sft, h1, ucos",
+    "result": "All cross-fitted negative or zero except cat_hist_share at +2.1 to +2.7e-4 (z <0.9)."
+   },
+   {
+    "idea": "Category-specific slopes (onehot(cat) x z(feature)) for f1, f2, f2_home, f4, f5, ucos, h1, hmax, xp, popularity, pre2, fitted by L2 conditional logit",
+    "result": "All cross-fitted negative: -3.6e-4 to -17.9e-4."
+   },
+   {
+    "idea": "Segment x category offsets (cat alone, hour4, M3, H3, guest, weekday, newest_type, newest_src), fitted by L2 conditional logit",
+    "result": "All cross-fitted negative except M3xcat at L2=30 (+2.4e-4, z 0.48)."
+   },
+   {
+    "idea": "Feed composition / dilution: log cat_n_in_feed, share, capped versions",
+    "result": "The likelihood favours more same-category candidates (w=+0.075, dLL 15.5), but NDCG cross-fit is -2.5e-4 (z -1.1)."
+   },
+   {
+    "idea": "Residual GBM (lambdarank with score init; pointwise binary on clogit-calibrated logit) as a headroom check",
+    "result": "Cross-fitted -22 to -65e-4 (lambdarank) and +0.4/-5.2/-6.1e-4 (binary). No exploitable nonlinear headroom on 7.2k feeds."
+   },
+   {
+    "idea": "Within-category saturation family: (cr-1)^p, [cr>=2], log cr, M gating, cascade sum of higher same-category probabilities, flatness scaling, near-duplicate directional versions",
+    "result": "Best was +2.3-2.4e-4 cross-fitted (z 2.25-2.5), below the +3e-4 bar after about 160 family variants. Near-duplicate versions were +0.6 to -1.2e-4. Head-likelihood does not corroborate it. Not submitted."
+   },
+   {
+    "idea": "Boosting category followers in small feeds (M<30), as the head conditional logit suggested",
+    "result": "Cross-fitted -1.5e-4 (z -0.35)."
+   },
+   {
+    "idea": "Leak and quirk checks: within-feed storage position, exact score ties, the same user/item across feeds",
+    "result": "No position signal (obs/exp 0.97-1.02). No ties. Only 15 users have 2 feeds, so cross-feed repeats are not usable."
+   }
+  ]
+ },
+ {
+  "lens": "history_intent",
+  "summary": "I am submitting no rules. Within the recent-intent lens, FD16P20 has no ranking error I could find. I analysed the 7,214 discovery feeds (base NDCG 0.39939). For h1, h5, h10, hmean5, the event-typed similarities (c_*) and cat_newest_idx, observed/expected positive rates stay within 0.93-1.07 in every bin with 200+ positives. The expected rate comes from a within-feed softmax of the score with slope 0.98, so the score already behaves as a calibrated log-odds. Some residuals do hold up. Top-10 items whose mean similarity to the last 5 history events (hmean5) is at least 0.8 are under-predicted in all 5 folds (O/E 1.09-1.20, about 750 positives). In large feeds (M >= 150), recency is under-weighted on likelihood (z +4.4 to +4.8). After a contact, near-copies of contacted items have O/E 1.18. All three are size-of-score effects, not ordering errors. In 13,647 head pairs with a score gap under 0.05 and exactly one positive, the upper item is positive 49.9% of the time, and no lens feature tells which one is positive (|z| at most 2.3; all lean slightly towards the item less like recent history). I tried 108 cross-fitted rule variants plus 20 residual-GBM configurations. The best was a tiny demotion of items similar to feed-viewed items (oof +0.00039, z 1.97). That is within the null: 40 random features gave oof up to +0.00051 and z up to 1.88. The residual GBMs reached at most +0.00009, and a per-group s_ft/s_to re-weighting gave -0.00040. Positives the model misses (rank 31+) sit in large feeds and look less like the history: median h1 0.52 vs 0.69 at ranks 1-3, and 10% vs 3.3% in a category absent from the history. They are clicks the history does not predict, not a pattern a rule can fix.",
+  "findings": [
+   {
+    "finding": "The score is a calibrated within-feed log-odds, and the lens features show no marginal miscalibration.",
+    "evidence": "A conditional logit on the score alone has slope 0.98; adding s_ft/s_to separately or quadratic terms changes the negative log-likelihood by under 0.5. O/E by bin of h1, h5, h10, hmean5, hmax, c_contact, c_order, c_fav, c_lead, c_vfeed, c_vsearch, cat_newest_idx and same_cat_newest is within 0.93-1.07 in every bin with 200+ positives (resid1.py, resid2.py)."
+   },
+   {
+    "finding": "Focused-intent items (hmean5 >= 0.8) in the top 10 are under-predicted in magnitude but not mis-ordered.",
+    "evidence": "O/E is 1.16/1.09/1.20/1.10/1.15 per fold, against 0.91-1.00 for the other top-10 items. In top-10 pairs where exactly one item has hmean5 >= 0.8 and the gap is < 0.1, the upper item is positive 0.495 vs 0.488 and 0.536 vs 0.545 of the time. The excess comes from pairs with a gap > 0.4 (0.77 vs 0.59). Every boost form is negative or zero under cross-fitting (best oof +0.00013, z 0.6)."
+   },
+   {
+    "finding": "At near-ties in the head, no feature separates the positive from its neighbour; the lens features lean slightly towards novelty.",
+    "evidence": "There are 13,647 pairs (top 30, gap < 0.05, one positive) in 3,679 feeds, and the upper item is positive 49.9% of the time. For each feature, z of the mean sign(feature difference) x outcome, clustered by feed: hmean5 -2.1, c_contact -2.3, same_cat_newest -2.0, h1 -1.6, h10 -1.0. All 34 features have |z| < 2.3. A composite novelty tie-breaker gives oof -0.00005 (neartie.py, t_novelty.py)."
+   },
+   {
+    "finding": "In large feeds, recency is under-weighted on likelihood but not where it changes NDCG.",
+    "evidence": "For M >= 150, the clogit score test gives z +4.8 for cat_newest_idx <= 5 and +4.3/+4.4 for h1/h10/hmean5; these hold up after about 1,300 tests. The fitted shift is only 0.07-0.09 score units per within-feed SD and acts in the tail. The cross-fitted NDCG of 24 forms ranges from -0.00019 to +0.00013 (t_bigM.py, t_coef.py)."
+   },
+   {
+    "finding": "Source and type of the newest event: after a contact, near-copies are clicked a bit more (the user continues the search). After a view from search or another surface, near-copies of that item are clicked less (they were probably already seen on the results page). Neither can be used.",
+    "evidence": "Newest event a contact and c_contact >= 0.95: O/E 1.18 (255 positives); boosting gives oof -0.00022 to +0.00002. Newest event a view from search or another surface and h1 >= 0.9: O/E 0.76 / 0.64 (81 positives in 602 feeds); demoting gives in-sample +0.00019 and oof +0.00003 to +0.00023 (z <= 1.2)."
+   },
+   {
+    "finding": "The misses are not systematic: positives at rank 31+ are in large feeds and look less like the history.",
+    "evidence": "Medians at rank 31+ vs ranks 1-3: M 193 vs 29; h1 0.52 vs 0.70; category absent from the history 10.4% vs 3.3%; hmax >= 0.95 15% vs 42%. Positives at ranks 1-3 look the same as top-3 negatives (h1 0.70 vs 0.69, hmean5 0.66 vs 0.65). In individual bad feeds (bad1.txt), the clicked item resembles the 8 items above it."
+   },
+   {
+    "finding": "Flexible residual models also find nothing to learn.",
+    "evidence": "A cross-fitted LightGBM on the lens features (+ rank, M, score) or on all columns reaches at most oof +0.00009 (z 0.4) at 25 trees; lambdarank versions reach -0.0041 and -0.0076. A pairwise logistic over the top 15 has an oof log loss of 0.63840 with lens differences against 0.63697 for the gap alone."
+   },
+   {
+    "finding": "Null calibration: random features reach the same gains as the best variants.",
+    "evidence": "40 random within-feed-z features through the same cross-fit grid give an oof mean of -0.00011, an SD of 0.00026, a maximum of +0.00051 and a maximum z of 1.88. The best real variant, -z(c_vfeed) as a tie-breaker, gives oof +0.00039 (z 1.97); its in-sample curve peaks at w = 0.01 and is negative from w = 0.03."
+   }
+  ],
+  "rules": [],
+  "failed_ideas": [
+   {
+    "idea": "Boost focused-intent items: relu(hmean5 - t) or an hmean5 indicator, in the top 3/10/30 or everywhere (20 variants)",
+    "result": "Cross-fitted oof from -0.00024 to +0.00013, all with z < 1. The O/E excess is a size-of-score effect (finding 2)."
+   },
+   {
+    "idea": "Boost recency (cat_newest_idx <= 5, h1, h5, h10, h32, hmean5, ucos) in large feeds M >= 100/150/200 (24 variants)",
+    "result": "oof from -0.00019 to +0.00013. The likelihood gain lies in the tail, at ranks 50 and below."
+   },
+   {
+    "idea": "Satisfied need: demote items whose nearest history event is a favourite (c_fav >= 0.8/0.9/0.95, ranks 3/10/all; 9 variants)",
+    "result": "oof from -0.00022 to +0.00011."
+   },
+   {
+    "idea": "Continuing search: boost near-copies of contacted items (newest event a contact, c_contact or h1 >= 0.9/0.95; or c_contact >= t at ranks > 10; 6 variants)",
+    "result": "oof from -0.00022 to +0.00002."
+   },
+   {
+    "idea": "Already seen on the results page: demote near-copies of the newest item when it was viewed from search or another non-feed surface (6 variants)",
+    "result": "Best oof +0.00023 (z 1.2); in-sample at most +0.00038. Only 81 positives, so it cannot reach +0.0003."
+   },
+   {
+    "idea": "Boost near-copies of ordered items (c_order >= 0.9/0.95)",
+    "result": "oof -0.00043 / -0.00023."
+   },
+   {
+    "idea": "Demote items outside the newest-event category in the head (category share < 0.2, category absent, top of its category; 14 variants)",
+    "result": "oof from -0.00053 to 0.00000."
+   },
+   {
+    "idea": "Small within-feed z tie-breakers on 10 similarity columns, both signs (20 variants), plus the c_vfeed and search-vs-feed views difference (4 variants)",
+    "result": "Best oof +0.00039 (z 1.97), for -z(c_vfeed); this is inside the null range (random features reach +0.00051), and the curve shape is near-tie noise."
+   },
+   {
+    "idea": "Novelty composite tie-breaker (minus the mean z of hmean5, h1, h10, c_contact, c_vfeed, same_cat_newest), all ranks or top 30",
+    "result": "oof -0.00005 / -0.00006."
+   },
+   {
+    "idea": "Re-weight the s_ft and s_to branches by newest-event group (9 groups, alpha chosen per group on 4 folds)",
+    "result": "oof -0.00040 (z -1.4)."
+   },
+   {
+    "idea": "Cross-fitted residual GBM (lambdarank with init_score, or binary with a clogit offset) on lens features or on all columns (20 configurations)",
+    "result": "Best oof +0.00009 at 25 trees; larger models are negative (down to -0.0076)."
+   }
+  ]
+ },
+ {
+  "lens": "popularity_fresh",
+  "summary": "No rules submitted. On the popularity, exposure, freshness and cold columns the model is already close to optimal, and every correction I tried failed out of sample. Discovery base NDCG is 0.39939 on 7,214 feeds. One-dimensional calibration is flat: A/E (actual vs expected positives) stays within 0.89-1.14 for every bin of xp_imp_c50, f4, f5, it_hist_*, seq_cv and pre2. The one systematic deviation is that the head is over-confident (A/E 0.934 at rank 1, 1.064 at ranks 11-20), which does not change the order. Learned upper-bound probes gave nothing usable: LightGBM on top of the score reached at best +0.0005 (z 0.9), regularised conditional logit at best +0.00017, and a head-only re-ranker was -0.0002 to -0.0024. I tried about 730 rule variants (25+ families). Each family has its own cross-fit, but choosing the family and weight together on 4 folds gives -0.00011, -0.00087, -0.00024 and -0.00063 on four fold seeds, so the in-sample winners are selection noise. A simulation shows why. Even the strongest real likelihood effect, cold listings in categories the user browsed 50+ times (beta +0.139, z 3.4), would give only +0.00027 expected NDCG if fully true, which is below the +0.0003 bar. The other effects (fresh vacancies/services, low f5 at high exposure, cold items in the user's top category) would give +0.00005 to +0.00009. Several hypotheses from the brief did not hold: high f5 at low exposure is not over-trusted, the encoder scores are not mis-trusted on cold items, and no segment prefers a branch mix other than 0.5/0.5. The best near-miss is kept, unsubmitted, as <repo>/lab/nn_x/errfix_1117/agents/popularity_fresh/work/rejected_cold_heavycat.py (in-sample +0.00068, z 2.52), with the reasons in the file and in <repo>/lab/nn_x/errfix_1117/agents/popularity_fresh/notes.txt.",
+  "findings": [
+   {
+    "finding": "The model is well calibrated along every column in this lens. The only deviation is a head temperature effect (over-confident at the top), and it cannot change the order.",
+    "evidence": "A/E by bin: xp_imp_c50 0.94-1.02, f4 0.89-1.07, f5 0.97-1.08, it_hist_* 0.93-1.07, seq_cv 0.94-1.04, pre2 0.94-1.14. By rank: rank 1 0.934, ranks 2-3 0.946, ranks 11-20 1.064. The softmax temperature that maximises likelihood is exactly 1.0 (work/a01_resid.py, a09_head.py)."
+   },
+   {
+    "finding": "Learned upper bounds on these columns give no out-of-sample gain, so simple rules here cannot either.",
+    "evidence": "Cross-fitted results (work/a03_gbdt_bound.py, a03b, a10_clogit_bound.py, a22_headlogit.py). LightGBM lambdarank with init_score=score: -0.0004 to -0.0067. LightGBM binary or lambdarank without score features: at best +0.00049 (z 0.94). Conditional logit with offset=score, 19/159/100/240 features: at best +0.00017; the lens-only fit is -0.0004 even in-sample. Head-only re-ranking (top 5/10/20): -0.0002 to -0.0024."
+   },
+   {
+    "finding": "The rule search as a whole has negative out-of-sample value; the best-looking families are selection noise.",
+    "evidence": "Nested cross-fit choosing family and weight together on 4 folds (25 families, 128 candidates): -0.00011 (seed 0), -0.00087, -0.00024, -0.00063 (seeds 1-3). Lambda-gradient screen: 588 tests, z sd 1.34, 21 with |z|>3, close to the null (work/a21_nested.py, a06_screen.py)."
+   },
+   {
+    "finding": "Effects that are real at the likelihood level are too small, or sit too far down the list, to pay in NDCG. To clear +0.0003, an effect needs |beta| above roughly 0.3 on items competing for the top 5, and none exists in this lens.",
+    "evidence": "Simulation with labels drawn from softmax(score+beta*g) (work/a25_simgain.py). cold & cat_views>=50: beta +0.139 (se .041), expected gain +0.00027 (sd 0.00033). cold & top category: beta +0.103, gain +0.00009. fresh<.1 in cat 48|50: beta -0.596, gain +0.00005. f5<.2 & xp>3: beta -0.125, gain +0.00008."
+   },
+   {
+    "finding": "Fresh (f4<0.2) almost always means cold: young listings have no train impressions. On test, where popularity is about 11 days stale instead of 6, the cold set will also contain older items, so cold-based rules face an input shift that discovery cannot validate.",
+    "evidence": "xp_imp_c50 x f4 table (work/a11_topcat.py): f4<.2 rows with xp>0 number fewer than 50 out of about 90k per category-familiarity segment."
+   },
+   {
+    "finding": "f5 reliability: high f5 at low exposure is not over-trusted. At saturated exposure f5 looks slightly under-used, but no exposure-weighted f5 tilt survives a cross-fit.",
+    "evidence": "f5>=.8 & xp<1.5: A/E 1.01 at rank 1, 0.97 at ranks 2-3, 1.04 at ranks 4-10 (work/a09_head.py). 7 f5 x exposure tilt forms: CF -0.00034 to +0.00033, best z 2.13 with the weight at the grid edge, and none selected in the nested check (work/a15_f5rel.py)."
+   },
+   {
+    "finding": "Fresh listings in guest and short-history feeds are over-predicted (A/E 0.52), but they rank far from the top, so demoting them is worth about nothing.",
+    "evidence": "fresh<.1 x guest: lambda z -4.0, in-sample NDCG +0.00001, CF -0.00001. Guest|uvec_missing|H<30 family: CF -0.00012 (work/a07_cf1.py)."
+   },
+   {
+    "finding": "Near-duplicate pairs in a feed are under-predicted (A/E 1.07), and the fresher copy more so (1.13 vs 1.01 for the older one). These items sit around mean rank 85, so re-ordering inside pairs does not help NDCG.",
+    "evidence": "56k mutual-nearest pairs (equal cand_maxcos >= .95). 6 rule forms all negative: CF -0.00066 to -0.00007 (work/a18_duppairs.py, a19_dupfresh.py)."
+   },
+   {
+    "finding": "In bad feeds (best positive at 30+), the positives look ordinary on these columns. These feeds are large, multi-category feeds with an exploration click, and the model already uses the lens differences between positives and the negatives above them.",
+    "evidence": "Bad feeds have mean M 174 vs 57 for good feeds, and 15.7 feed categories vs 9.5. Medians, positives at 30+ vs negatives at ranks 1-3: xp 1.39 vs 1.79, f4 .51 vs .56, f5 .46 vs .57 (work/a04_goodbad.py, a05_feeds.py)."
+   },
+   {
+    "finding": "Re-weighting the two branches (s_ft vs s_to) by lens or feed segment does not help; 0.5/0.5 is optimal.",
+    "evidence": "Global a=0.4: -0.00014, a=0.6: +0.00001, a=0.7: -0.00050. Item-level (s_to-s_ft)*g for 7 lens indicators: best CF +0.00020 (z 1.74) (work/a08_branch.py, a20_branchlens.py)."
+   }
+  ],
+  "rules": [],
+  "failed_ideas": [
+   {
+    "idea": "Demote fresh (f4<t) listings in weak-signal feeds (guest, missing user vector, H<30)",
+    "result": "Cross-fitted -0.00012 (z -0.89); guest-only version -0.00001; in-sample best +0.00004"
+   },
+   {
+    "idea": "Demote fresh listings in vacancies/services (cat 48|50), where fresh A/E is 0.45-0.60",
+    "result": "Fixed form: CF +0.00011 (z 2.02). Family with threshold search: +0.00002. Below the bar."
+   },
+   {
+    "idea": "Demote low-f5, high-exposure listings (f5<.2 & xp>3), overall and in real estate",
+    "result": "CF +0.00026 (z 1.02) overall and +0.00016 (z 1.49) in real estate; family with threshold search -0.00005"
+   },
+   {
+    "idea": "Boost cold listings in the user's top or heavily browsed category (novelty for heavy category users)",
+    "result": "Top category (cur==1): CF +0.00030 (z 0.82). cat_views>=50: CF +0.00068 (z 2.52), but the response is jagged in threshold and weight, 10 feeds carry the whole gain, the nested check is negative, and even if real the expected gain is +0.00027. Kept unsubmitted in work/rejected_cold_heavycat.py."
+   },
+   {
+    "idea": "Tilt by f5 weighted by exposure (f5 trusted only when exposure is high), 7 forms",
+    "result": "CF -0.00034 to +0.00033; best z 2.13 with the weight at the smallest grid value; not robust"
+   },
+   {
+    "idea": "Demote listings with 1-9 train impressions at ranks 1, 1-3 or 1-10 (A/E 0.67-0.80 at rank 1)",
+    "result": "All 9 variants CF <= +0.00003; most around -0.0004"
+   },
+   {
+    "idea": "Shrink or boost encoder scores (pre2_fe_z / pre2_new_z) on cold vs warm items",
+    "result": "CF -0.00130 to -0.00020"
+   },
+   {
+    "idea": "Demote head items the encoder dislikes (pre2<0 at ranks 1, 1-3 or 1-5)",
+    "result": "CF -0.00026 to +0.00012"
+   },
+   {
+    "idea": "Item-level branch re-weighting (s_to-s_ft)*g for cold, young, saturated, low-exposure, old, low-f5 and all items",
+    "result": "Best CF +0.00020 (z 1.74), the rest negative"
+   },
+   {
+    "idea": "Boost the fresher copy within near-duplicate pairs in a feed",
+    "result": "6 forms, CF -0.00066 to -0.00007 (the items sit around rank 85)"
+   },
+   {
+    "idea": "Demote fresh listings in feeds where over half the candidates are cold",
+    "result": "CF -0.00007"
+   },
+   {
+    "idea": "Flexible learners on lens features: LightGBM (lambdarank or binary), regularised conditional logit with category and segment interactions, head-only re-ranker",
+    "result": "All 0 or negative out of fold (best +0.00049 at z 0.94)"
+   },
+   {
+    "idea": "Break exact score ties using lens features",
+    "result": "Nothing to break: 1 feed has a tie, and it involves no positive"
+   }
+  ]
+ },
+ {
+  "lens": "residual_model",
+  "summary": "I am submitting zero rules. On the discovery half (7,214 feeds, base NDCG 0.399392), I could not find a learned residual on top of the FD16P20 score that gains anything when cross-fitted on kit.folds. LightGBM residuals used init_score = 1.0*score (the softmax scale fitted on the training folds), 130 raw and within-feed derived columns, and lambdarank, binary or a custom per-feed softmax objective. They all score at or below 0 out of fold. The best was +0.00037 (z 0.8, regularised lambdarank at 10 trees), and runs reached -0.012 at 400 trees, while in-sample fit reached +0.037. Linear and binned (857 dummies) conditional-logit residuals score -0.0010 to -0.0114. The tree learners are also weak at this sample size: starting from s_to (-0.00113) with s_ft and s_ft-s_to available, they win back at most half the gap (to -0.0006). Their noise costs about 0.0005-0.001, so the measured upper bound for a feature rule here is about 0. Simpler versions do no better. One-term nudges (96 columns, weights by MLE or by an NDCG grid inside the cross-fit) behave like random columns: mean z -0.45 for real columns against -0.28 for random ones. Nested greedy forward selection, which repeats the whole scan inside each fold, loses NDCG: -0.00071 (z -2.4) after one term and -0.00143 after three. Its first pick differed in four of five folds, with +0.0005 to +0.0009 gains on the training folds, which shows how large the selection bias is. Calibration scans also look like noise: about 1,500 feature bins (max |z| 3.4) and 1,279 category-by-context cells (4 with |z|>=2.8 against 6.5 expected by chance). Badly ranked feeds are mostly large (median M 167 against 29 for good feeds). Their deep positives are exploration clicks with low recent-history similarity, while the rank-1 negatives look just like the positives in good feeds. Over about 300 cross-fitted variants, the nearest misses were +0.00029 with z 1.89 and +0.00029 with z 2.12 (the second on a segment I picked in-sample). Neither meets the bar.",
+  "findings": [
+   {
+    "finding": "A learned residual on top of the score has no cross-fitted gain, so the upper bound for feature rules on this sample is about 0.",
+    "evidence": "Cross-fitted (kit.folds) LightGBM residuals with init_score=c*score (c=1.0) on 130 columns. lambdarank 15 leaves: -0.0031 at 10 trees to -0.0119 at 400, while in-sample was +0.037 at 50 trees. Regularised lambdarank (7 leaves, min_data 3000, l2 100): best +0.00037 (z 0.8). Binary 4 leaves: best +0.00022 (z 1.7). Per-feed softmax objective with 3 leaves and min_data 20000: best +0.00014 (z 1.2). Restricting to one feature group (sim/pop/cat/ctx): best +0.00026 (z 0.7). Linear conditional logit: -0.0010 (in-sample only +0.00047). Binned GAM: -0.0011 to -0.0114. All runs are in cv_log.txt."
+   },
+   {
+    "finding": "At this sample size the tree learners lose about 0.0005-0.001 NDCG to noise, so they can only show effects larger than that, and none exist.",
+    "evidence": "Power check: base s_to (-0.00113 vs score) with s_ft and s_ft-s_to among the features. Best recovery is to -0.0006 (softmax at 50 trees), and every further tree count after that ends up worse."
+   },
+   {
+    "finding": "Distilling the residual into a few terms loses NDCG when the selection itself is cross-fitted.",
+    "evidence": "nested_fs.py scans 96 columns x 10 weights inside each fold. Step 1: -0.00071 (se 0.00030, z -2.37). Step 3: -0.00143 (z -3.93). First picks were p_f5, f1, c_order and it_hist_et1_luo (twice), each gaining +0.0005 to +0.0009 on its training folds."
+   },
+   {
+    "finding": "One-term nudges behave like random columns.",
+    "evidence": "Softmax-MLE weight per column (96 columns): mean z -0.45. 40 random N(0,1) columns: mean z -0.28 (sd 0.83). NDCG-grid version: best h10 +0.00052 (z 1.93), mean z -0.87, and every chosen weight is the smallest non-zero grid value. Some MLE weights are stable across folds (cat_n_in_feed +0.14\u00b10.02, ucos +0.04) yet still hurt NDCG out of fold, because the likelihood gain sits in the tail."
+   },
+   {
+    "finding": "The model is calibrated against every column and every category-by-context cell I could form.",
+    "evidence": "Observed/expected positives per decile of 130 columns (expected = per-feed softmax of the score): max |z| 3.4 over about 1,500 bins, which is what chance alone gives. Category x {hour, weekday, newest type/src, M, H, rank band, guest, hist cats}: 4 of 1,279 cells with |z|>=2.8, against 6.5 expected by chance. f5 by exposure level: flat. Rank-1 vs rank-2 pairs with one positive (1,473 feeds, rank 1 wins 58.5%): max |z| 2.5 over 97 feature differences."
+   },
+   {
+    "finding": "Bad feeds are large, and their deep positives are exploration clicks that nothing in these columns predicts. The rank-1 negatives look like correct top picks.",
+    "evidence": "Bad feeds (best positive at 30+, n=1,481): median M 167 against 29 for good feeds, and 15.7 against 9.5 categories in the feed. In feeds with M>=100, positives at rank 30+ against rank 1-3: h1 0.54 vs 0.73, same_cat_newest 34% vs 66%, cat_newest_idx 15.5 vs 3.1, pre2_fe_z 0.26 vs 1.19. Rank-1 negatives: h1 0.70, same_cat_newest 62%, pre2 1.14. Individual feeds such as 13726, 13745, 493, 2188, 10882 and 11958 show the user's main category filling the top 10 while the click goes to a rarer category or to a same-category listing the columns cannot tell apart."
+   },
+   {
+    "finding": "The NDCG weight of a positive depends on its rank inside its category, but the model already absorbs this.",
+    "evidence": "A top-10 item that is 2nd in its category comes from a feed with 2.27 positives on average when it is positive, against 1.77 for a category leader and 3.0 for 4th or lower. Its mean 1/IDCG is therefore lower (0.661 vs 0.712 in feeds of 100+). Learned key score + m*log E[1/IDCG | positive, x]: -0.00005 at the theoretical m=1 and -0.00054 with m chosen by cross-fit. Rule family score - a*[cat_rank_in_feed==2 & rank<=10]: +0.00029 cross-fitted (se 0.00016, z 1.89), 10 variants tried in the family."
+   },
+   {
+    "finding": "Re-weighting s_ft against s_to is flat overall; one segment is borderline but was picked in-sample and cannot be checked on the holdout.",
+    "evidence": "w_ft between 0.45 and 0.6 is within \u00b10.00004 of the 50/50 mix. score + 0.3*(s_ft-s_to) for n_hist_cats32==1 (568 feeds): +0.00029 cross-fitted (z 2.12), but chosen after looking at about 45 segments in-sample. H>=150: -0.00039. -|s_ft-s_to| uncertainty penalty: -0.00039 (z -2.1)."
+   }
+  ],
+  "rules": [],
+  "failed_ideas": [
+   {
+    "idea": "LightGBM lambdarank residual with init_score=score (15 or 7 leaves)",
+    "result": "-0.0031 to -0.0119 out of fold (15 leaves); regularised 7 leaves best +0.00037 (z 0.8) at 10 trees, then -0.0012 to -0.0067. In-sample +0.037: memorisation of about 11k positives."
+   },
+   {
+    "idea": "Binary and per-feed softmax LightGBM residuals with strong regularisation (3-15 leaves, min_data 500-20000, l2 up to 100)",
+    "result": "Best +0.00022 (z 1.7) and +0.00014 (z 1.2); every larger tree count is negative (down to -0.004)."
+   },
+   {
+    "idea": "Residual GBM restricted to one feature group (similarity, popularity, category, context)",
+    "result": "Best per group: sim +0.00011, pop -0.00012, cat -0.00004, ctx +0.00026 (z 0.7). All negative at 400 trees."
+   },
+   {
+    "idea": "Linear and binned-GAM conditional-logit residuals (107 or 857 terms)",
+    "result": "Linear -0.0010; binned -0.0011 (l2=1) to -0.0114 (l2=.001). Relative to s_to the binned version is -0.0001 and relative to s_ft -0.0003."
+   },
+   {
+    "idea": "Submitting the residual model itself as a small embedded rule",
+    "result": "Not done: no size or tree count gave a positive cross-fitted delta."
+   },
+   {
+    "idea": "One-term linear nudges on 96 columns (MLE weight and NDCG-grid weight)",
+    "result": "Best h10 +0.00052 (z 1.93), p_f3 +0.00043 (z 1.85), cat_rank_pct +0.00022 (z 1.92). Mean z is -0.45 and -0.87, the same as random columns."
+   },
+   {
+    "idea": "Nested greedy forward selection of up to 3 terms (honest distillation)",
+    "result": "-0.00071 / -0.00109 / -0.00143 after steps 1/2/3 (z -2.4 / -3.1 / -3.9). Picks are unstable across folds."
+   },
+   {
+    "idea": "Category runner-up demotion / leader boost (diversity tie-break) and -a*log(cat_rank_in_feed)",
+    "result": "+0.00029 (z 1.89), +0.00043 (z 1.62) and +0.00013 (z 1.26) cross-fitted; 10 variants. Below the bar."
+   },
+   {
+    "idea": "Metric-optimal key: add the learned log E[1/IDCG | positive, features]",
+    "result": "-0.00005 at the theoretical weight m=1; -0.00054 with m chosen by cross-fit."
+   },
+   {
+    "idea": "Branch re-weighting s_ft vs s_to, globally and by segment (H, M, n_hist_cats32, n_feed_cats), plus a |s_ft-s_to| uncertainty penalty",
+    "result": "Global flat around 50/50. Segments -0.0004 to +0.00029; the best (n_hist_cats32==1, z 2.12) was picked in-sample and cannot be tested on the holdout. Penalty -0.00039."
+   },
+   {
+    "idea": "Head swap model for ranks 1 vs 2 from feature differences",
+    "result": "No feature difference is significant beyond the score gap (max |z| 2.5 of 97, n=1,473 feeds)."
+   },
+   {
+    "idea": "Category x context (hour, weekday, newest event, M, H) miscalibration; f5 noisiness at low exposure",
+    "result": "1,279 cells, 4 with |z|>=2.8 (chance level); f5 by exposure is calibrated."
+   }
+  ]
+ },
+ {
+  "lens": "deep_dive",
+  "summary": "I found nothing systematic in the model's confident errors, and I submitted one weak rule that is probably noise.\n\nI read 45 lens-(a) feeds (rank 1 negative, gap to rank 2 in the top quartile, best positive at 30 or lower), 25 lens-(b) feeds (positive at rank 50+ with fewer than 120 candidates), 12 small bad feeds in full and 25 good feeds. I then tested 8 behavioural hypotheses on all 7,214 discovery feeds.\n\n- **The head is calibrated.** Rank-1 precision rises with the gap to rank 2: 20.3% vs 8.3% for rank 2 in the top gap quintile. In none of 25 head segments does rank 2 beat rank 1, so no swap rule exists.\n- **Matched comparison.** At matched score (each positive against its \u00b13 rank neighbours), no column separates positives from negatives beyond about |z| 3. That is noise level for about 180 tests.\n- **Residual model.** A LightGBM boosted from the model's own score, cross-fitted by user, gains at most +0.00023 (z 0.6); larger versions lose up to -0.0025. Free stackers lose -0.006 to -0.011.\n- **Simple rules.** All 28 single-column corrections and all branch re-weightings or uncertainty bonuses are \u2264 +0.0003 cross-fitted.\n- **Submitted rule.** The best of 144 segment \u00d7 feature pairs is small feeds (M < 40) \u00d7 the within-feed z-score of hmax, at weight 0.05. Cross-fitted it gives +0.00074, SE 0.00031, z 2.39, with the same weight chosen in all 5 folds. That clears the thresholds only nominally: after picking the best of 144 pairs it is more likely noise than not, and its gain peaks sharply at w = 0.05.\n- **Item prior from discovery labels (the data idea).** Real but small. Items positive in another user's feed have O/E 1.79, but they are only 0.19% of rows here (0.33% on test). The best rule gives +0.00057 cross-fitted, z 1.82. It is not submitted because it needs validation labels when applied.\n\nIn total I ran about 1,900 evaluations covering about 230 distinct forms.",
+  "findings": [
+   {
+    "finding": "Confident rank-1 errors are not systematic: rank-1 precision rises with the gap to rank 2, and rank 1 beats rank 2 in every head segment tested.",
+    "evidence": "Gap quintiles: rank-1 precision 9.8%, 9.7%, 10.5%, 12.5% and 20.3%; rank 2 stays at 8.3-10.5%. Across 25 rank-1 attribute splits (cold, fresh, same category as the newest event, category absent from history, near-copy of history, favourite as nearest event, guest, near-duplicate in feed, home region, branch disagreement), mean label(rank 2) - label(rank 1) is between -0.006 and -0.12. The only positive cell is 65 feeds (+0.077, z 1.3). Script: scripts/a07_head.py."
+   },
+   {
+    "finding": "Fresh, cold listings at rank 1 with a large gap are a visible sub-type of confident errors (feeds 315, 7536, 10645, 1202, 12210, 6240, 10648, 5726). The model is calibrated on them at every score level, so no fix exists.",
+    "evidence": "In confident feeds, a fresh-cold rank 1 hits 12.5% (n=345) vs 20.3% for other rank 1s, but its rank 2 is worse still (7.8%). O/E of fresh-cold items by score band: 0.96, 1.00, 1.03, 1.01, 0.94, 0.94. Six shrinkage forms cross-fitted -0.00025 to +0.00002; demotion within the top 3: -0.00035. Scripts: a20_coldshrink.py, a19_misc.py."
+   },
+   {
+    "finding": "Near-duplicate candidates complement each other rather than splitting one click. Users who click one copy often click the other.",
+    "evidence": "56,550 near-duplicate pairs were rebuilt (same feed, category and cand_maxcos). 73 have both members positive, against about 12 expected under independence. O/E is 1.06 for the pair leader and 1.10 for the second member. Demoting the second member: cross-fitted -0.00037 (z -2.4); boosting the leader: -0.00101. Script: a15_dupclusters.py."
+   },
+   {
+    "finding": "Saturation hypothesis rejected: candidates the user has seen many near-copies of (n_hdup95 high) are slightly under-predicted, not over-predicted, and neither direction of rule helps.",
+    "evidence": "Per-feed-normalised O/E: 1.05 for 1-3 copies, 1.04 for 10-30, 1.29 for 30+. Demotion (log or indicator): cross-fitted -0.0007/-0.0008. Head boost (10+ copies in the top 10): +0.00012 (z 0.4). Scripts: a05_oe3.py, a06_battery.py, a19_misc.py."
+   },
+   {
+    "finding": "Session-type \u00d7 feature interactions show nothing beyond chance. Segments tested: search session, after contact, after favourite, after order, after lead, guest, short history, focused or diverse user, night, small feed.",
+    "evidence": "144 pairs \u00d7 8 weights, cross-fitted. Largest |z|: small feed \u00d7 hmax (+2.39), guest \u00d7 near-copies in history (+2.39), after favourite \u00d7 hmax (-3.14), small feed \u00d7 freshness (-3.01). A largest |z| near 3 is what chance alone gives across 144 tests. Script: a12_segments.py, output in scripts/segments.txt."
+   },
+   {
+    "finding": "There is no learnable residual signal in the columns at this sample size.",
+    "evidence": "LightGBM boosted from the model's own score (init_score = 0.98 \u00d7 score, the fitted within-feed softmax slope), cross-fitted by user: binary +0.00023 / -0.00013 / -0.00105; lambdarank -0.0007 / -0.0010 / -0.0025. Free stackers on all columns: -0.0061 and -0.0112. Matched \u00b13-rank comparison for ranks 4+: no column beyond |z| 3.1 over about 180 tests. Scripts: a17_offset_gbm.py, a04_stack.py, a11_local.py."
+   },
+   {
+    "finding": "The branch mix (0.5 \u00d7 s_ft + 0.5 \u00d7 s_to) is already optimal, and using branch disagreement as an uncertainty bonus does not help.",
+    "evidence": "Weight a: cross-fitted -0.00025, best in-sample a=0.45 at +0.00004. |s_ft - s_to| bonus: -0.00035. Power mean of exp scores: -0.00005. Max/min mix: -0.00032. Rank-disagreement bonus: -0.00046. Script: a09_branch.py."
+   },
+   {
+    "finding": "Data idea, item prior from discovery labels: real but too small to matter much, and it needs labels when applied.",
+    "evidence": "Coverage: 11.5% of rows show an item seen in another discovery feed; 0.24% show one that was positive elsewhere (out-of-fold counts: 9.7% and 0.19%; test: 12.7% and 0.33%). Out-of-fold, items with a prior positive have 47 positives vs 26.2 expected (O/E 1.79). Best rule, score + 0.5 \u00d7 log(smoothed rate / base): +0.00057, SE 0.00031, z 1.82; positives-only forms +0.0003 to +0.0004. Estimated test gain is at most about +0.0005 to +0.001, if the item's appeal carries over in time. Scripts: a08_itemprior.py, a08b_itemprior.py."
+   },
+   {
+    "finding": "Weak candidate: in small feeds (M < 40), items most similar to the user's long history (hmax) are slightly under-ranked, while short-range similarity (h5, h10, c_vfeed) is not.",
+    "evidence": "At w=0.05: +0.0019 to +0.0022 per feed in each feed-size band below 40, and -0.0005 to -0.0011 in each band at 40 or above. Inside small feeds: +0.0028 when history has more than 50 events and -0.0037 when it has 50 or fewer (270 feeds). In small feeds, long-range h32, ucos and c_contact are about +0.0002 to +0.0004; short-range h10, h5 and c_vfeed are negative. Script: a13_smallfeed.py, a18_smallfeed_check.py."
+   }
+  ],
+  "rules": [
+   {
+    "name": "smallfeed_hmax",
+    "path": "<repo>/lab/nn_x/errfix_1117/agents/deep_dive/rules/smallfeed_hmax.py",
+    "description": "In feeds with fewer than 40 candidates, new score = score + 0.05 \u00d7 within-feed z-score of hmax (missing hmax filled with 0.80); other feeds are unchanged. WEAK: chosen as the best of 144 segment \u00d7 feature pairs, so after selection it is probably noise. The weight curve is peaked (w=0.035: +0.00044, w=0.075: +0.00025). Per-fold out-of-fold deltas: -0.00007, +0.00135, +0.00076, +0.00096, +0.00076. Apply only if it holds on both sealed samples. Does not use s_ft, so it runs unchanged on the holdout; creates no ties and does not depend on row order.",
+    "crossfit_delta": 0.00074,
+    "crossfit_se": 0.00031,
+    "crossfit_z": 2.39,
+    "insample_delta": 0.0007445,
+    "share_feeds_changed": 0.248,
+    "variants_tried": 1288,
+    "columns_used": [
+     "score",
+     "hmax",
+     "M",
+     "fidx"
+    ],
+    "popularity_only": false
+   }
+  ],
+  "failed_ideas": [
+   {
+    "idea": "Demote fresh, cold listings at the top, or shrink high scores of fresh/cold listings (lens-a sub-type)",
+    "result": "Six shrinkage forms: cross-fitted -0.00025 to +0.00002. Demotion within the top 3: -0.00035 (z -1.4). These items are calibrated at every score level."
+   },
+   {
+    "idea": "Saturation: demote candidates the user has seen many near-copies of",
+    "result": "Demotion -0.0007 to -0.0008 cross-fitted (z about -2). O/E is above 1, so the hypothesis runs the wrong way."
+   },
+   {
+    "idea": "Near-duplicate candidates split one click: demote the second member of a pair or boost the leader",
+    "result": "-0.00037 (z -2.4) and -0.00101 (z -2.2). Both members of a pair are clicked together about 6x more often than chance."
+   },
+   {
+    "idea": "Boost items in the newest event's category within the top 5",
+    "result": "Cross-fitted +0.00025 (z 0.9), but with a negative weight. Swaps in favour of matching items lose."
+   },
+   {
+    "idea": "Branch re-weighting a \u00d7 s_ft + (1-a) \u00d7 s_to, |s_ft - s_to| bonus, power mean of exp scores, rank-disagreement bonus",
+    "result": "-0.00025, -0.00035, -0.00005 and -0.00046 cross-fitted."
+   },
+   {
+    "idea": "28 global single-column corrections taken from the O/E scan (f1, f2 bands, category absent, hmax bands, nearest event is a favourite, hmax_idx, n_cand_dup95, ucos, seq_cv, cold, fresh, f5, cat_hist_share, ...)",
+    "result": "All between -0.0009 and +0.00033 cross-fitted; none above z 1.5. The O/E deviations mostly come from feeds having different numbers of positives."
+   },
+   {
+    "idea": "Session-type segment \u00d7 feature interactions (12 \u00d7 12, 8 weights each)",
+    "result": "The best pairs have z about 2.4, consistent with chance across 144 tests. Only small feed \u00d7 hmax was kept, as a weak rule."
+   },
+   {
+    "idea": "Residual LightGBM boosted from the model's own score (binary and lambdarank, 3 sizes each)",
+    "result": "+0.00023 at best (z 0.6); bigger models -0.0010 to -0.0025."
+   },
+   {
+    "idea": "Free stacker on all columns (binary, lambdarank, calibration-only)",
+    "result": "-0.0061, -0.0112, -0.0061."
+   },
+   {
+    "idea": "Item prior from discovery labels (out-of-fold or leave-feed-out click rate of the same item)",
+    "result": "+0.00057 at best, z 1.82; positives-only forms z 1.1 to 1.6; impression-count forms negative. Not submitted: below z 2 and it needs labels when applied."
+   },
+   {
+    "idea": "Repeat impressions to the same user across feeds",
+    "result": "Not testable: 6,872 of 6,887 users have one discovery feed; 60 repeat rows, 0 positives."
+   },
+   {
+    "idea": "Category depth or share in the feed (log cat_n_in_feed, cat share, deep items in big categories)",
+    "result": "-0.00087, -0.00030 and about 0 cross-fitted."
+   },
+   {
+    "idea": "Head-limited demotion when the nearest history event is a favourite (top 5)",
+    "result": "-0.00016 (z -1.1)."
+   }
+  ]
+ }
+]

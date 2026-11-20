@@ -1,0 +1,98 @@
+{
+ "part": "cpu",
+ "passed": 40,
+ "total": 40,
+ "fails": [],
+ "res": {
+  "c0": {
+   "removed": {
+    "import cd_arms10": 1,
+    "add_argument --bce_w": 1,
+    "bce_w = 0.0": 1,
+    "if a.bce_w > 0": 1,
+    "if bce_w > 0": 1
+   },
+   "lane_diff": [
+    "+# nn_x/w10/r3 copy (WAVE 10 arm R3, 2026-11-13 ~17:00 UTC): runs from @W (its own logs/ preds/ ckpt/),",
+    "+#   GPUs N 1 only (the R3 agent's grant), stage-A variants w10_<arm>_s<seed>, stage-E variants w5_e10_<arm>_s<seed> as in nn_x/w5",
+    "+#   (paired vs nn_x/w5's w5_e10_base_s951/952); PIDs go to nn_x/w10/r3/RUNNING.txt.",
+    "+#   Arm r3 (A:r3 | E:r3) = --bce_w 5 (cd_arms10.py; rule nn_x/w5/logs/E_r3_predeclared.txt); r3w20 = --bce_w 20 (information dose, stage A only).",
+    "-ALLOWED=${W5_GPUS:-\"0 1 2 4\"}",
+    "+ALLOWED=${W5_GPUS:-\"0 1\"}",
+    "-TL=@W/trunc_lifts_mbucket.json",
+    "+TL=<repo>/nn_x/w5/trunc_lifts_mbucket.json",
+    "+    A:r3|E:r3) echo \"--bce_w 5\" ;;  # wave-10 R3 (cd_arms10.py): listwise + 5 * feed-normalised BCE",
+    "+    A:r3w20) echo \"--bce_w 20\" ;;  # wave-10 R3 information dose (stage A only)",
+    "-RUN=logs/RUNNING_w5.txt",
+    "+RUN=RUNNING.txt  # nn_x/w10/r3/RUNNING.txt (wrapper PIDs; the REAL python PIDs are recorded there by the agent from /proc)",
+    "-    v=w5_${arm}_s${x}; args=\"$A_BASE $HYG --seed $x $f\"",
+    "+    v=w10_${arm}_s${x}; args=\"$A_BASE $HYG --seed $x $f\"  # nn_x/w10/r3: stage-A variants w10_<arm>_s<seed>",
+    "-    v=${v/w5_/w5_smoke_}; args=\"$args --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10\"",
+    "+    v=${v/#w5_/w5_smoke_}; v=${v/#w10_/w10_smoke_}; args=\"$args --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10\""
+   ]
+  },
+  "c1": {
+   "worst_brute": {
+    "feed": 7.330089663278565e-08,
+    "batch": 1.9728298562667828e-07,
+    "idcg": 7.837359796261044e-08
+   },
+   "worst_sum": 0.0,
+   "worst_grad": 1.1260453192107889e-07,
+   "n_cases": 36
+  },
+  "e2e": {
+   "off_lines": [
+    "step 10/40 loss 4.5506 val_ndcg 0.30643 holdout_ndcg 0.27442 lr 1.00e-03",
+    "step 20/40 loss 0.0000 val_ndcg 0.33138 holdout_ndcg 0.33563 lr 1.00e-03",
+    "step 30/40 loss 0.0000 val_ndcg 0.33366 holdout_ndcg 0.36367 lr 3.49e-04 cd_loss_reg 4.4646 cd_loss_pool 2.6790",
+    "step 40/40 loss 0.0000 val_ndcg 0.32210 holdout_ndcg 0.36568 lr 5.46e-05 cd_loss_reg 5.2610 cd_loss_pool 1.5806",
+    "BEST step 40 val_ndcg 0.32210; train time"
+   ],
+   "on_lines": [
+    "step 10/40 loss 6.0308 val_ndcg 0.31305 holdout_ndcg 0.26486 lr 1.00e-03",
+    "step 20/40 loss 0.0000 val_ndcg 0.32545 holdout_ndcg 0.35082 lr 1.00e-03",
+    "step 30/40 loss 0.0000 val_ndcg 0.32781 holdout_ndcg 0.35791 lr 3.49e-04 cd_loss_reg 5.3700 cd_loss_pool 3.0245",
+    "step 40/40 loss 0.0000 val_ndcg 0.32890 holdout_ndcg 0.36540 lr 5.46e-05 cd_loss_reg 6.1133 cd_loss_pool 1.7745",
+    "BEST step 40 val_ndcg 0.32890; train time"
+   ],
+   "on_wave10": [
+    "wave-10 R3: --bce_w 5.0: loss = listwise (fw, loss_norm feed, denom 8) + 5.0 * feed-normalised mean-per-feed BCE with the same fw / loss_norm / denom (cd_arms10.bce_feed_loss)"
+   ],
+   "lw0": 1.953986406326294,
+   "bce0": 0.29602617025375366,
+   "aux_range": [
+    0.40401993691921234,
+    2.806758552789688
+   ]
+  },
+  "c3": {
+   "trained": {
+    "ce_f": 4.718134217384534,
+    "bce_f": 118.95468486557658,
+    "g_lw": 0.0060210940428078175,
+    "g_b": 0.000527375414094422,
+    "cos": 0.08732966333627701,
+    "lg_mean": 120.2374382019043,
+    "sig_mean": 1.0,
+    "pos_rate": 0.010540702729485929,
+    "share_w1": 0.08758797161196488,
+    "share_w5": 0.43793985805982444,
+    "share_w20": 1.7517594322392978
+   },
+   "init": {
+    "ce_f": 5.370991582951994,
+    "bce_f": 0.8027176035775079,
+    "g_lw": 0.006068325717933476,
+    "g_b": 0.0002887315131374635,
+    "cos": 0.17537600547075272,
+    "lg_mean": 0.1311714230105281,
+    "sig_mean": 0.5289417952299118,
+    "pos_rate": 0.010540702729485929,
+    "share_w1": 0.047580094833108086,
+    "share_w5": 0.23790047416554042,
+    "share_w20": 0.9516018966621617
+   }
+  }
+ }
+}

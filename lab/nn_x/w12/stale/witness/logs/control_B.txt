@@ -1,0 +1,17 @@
+=== witness controls 2026-11-15T03:01:20Z ===
+
+##### CONTROL B: stale-val on CPU #####
+ b1 w5_cd_hzcd_r101             : CPU no-override val NDCG 0.39687 vs stored GPU 0.39693 (paired -0.00006 +- 0.00016), corr 0.999999, max |d| 6.86e-01 -> ok
+ b1 w5_cd_m02ref_r101: CPU base file missing
+ b1 abl_pop1_s23                : CPU no-override val NDCG 0.39248 vs stored GPU 0.39278 (paired -0.00030 +- 0.00020), corr 0.999993, max |d| 5.97e-01 -> ok
+ b1 abl_base_s23: CPU base file missing
+ b1 w5_e10_kd05w192_s951        : CPU no-override val NDCG 0.39897 vs stored GPU 0.39859 (paired +0.00038 +- 0.00019), corr 1.000000, max |d| 7.73e-01 -> ok
+ b1 abl_e10_pop1kd05t25_s951: CPU base file missing
+ CONTROL b1: VALID
+ b2 w5_cd_hzcd_r101             : CPU stale-val NDCG 0.39615 vs stored GPU stale-val 0.39615 (paired +0.00000 +- 0.00016), corr 0.999999, max |d| 6.30e-01 -> ok
+ b2 w5_cd_m02ref_r101           : CPU stale-val NDCG 0.39578 vs stored GPU stale-val 0.39554 (paired +0.00024 +- 0.00018), corr 0.999999, max |d| 7.65e-01 -> ok
+ b2 abl_pop1_s23                : CPU stale-val NDCG 0.39245 vs stored GPU stale-val 0.39279 (paired -0.00034 +- 0.00020), corr 0.999993, max |d| 6.00e-01 -> ok
+ b2 abl_base_s23                : CPU stale-val NDCG 0.39178 vs stored GPU stale-val 0.39191 (paired -0.00014 +- 0.00015), corr 0.999992, max |d| 6.13e-01 -> ok
+ b2 pair w5_cd_hzcd_r101 - w5_cd_m02ref_r101: CPU +0.00037 +- 0.00075 | GPU +0.00061 +- 0.00075 | CPU - GPU -0.00024 +- 0.00023 -> FAIL (outside 1 SE)
+ b2 pair abl_pop1_s23 - abl_base_s23: CPU +0.00068 +- 0.00106 | GPU +0.00088 +- 0.00107 | CPU - GPU -0.00020 +- 0.00023 -> ok
+ CONTROL b2: NOT VALID

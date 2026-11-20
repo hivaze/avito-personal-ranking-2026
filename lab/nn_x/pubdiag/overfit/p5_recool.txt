@@ -1,0 +1,30 @@
+val slice shares: M<50 0.409 M>=50 0.591 Tue 0.523 Thu 0.477 coldpos 0.237 warmpos 0.632 mixedpos 0.131
+cold-candidate share (it_hist_all_luo == 0): val 0.379, test public 0.428, test private 0.456
+
+== 7-member family mixes (TO = train-only; FT = n2cpv3 OOF), paired per feed
+  re-cool c0 (F7b - F7)        val TO +0.00086+-0.00059 | val FT +0.00112+-0.00053 | hold TO -0.00096+-0.00033
+      val TO slices: M<50 +0.00089+-0.00111  M>=50 +0.00084+-0.00063  Tue +0.00128+-0.00078  Thu +0.00040+-0.00088  coldpos +0.00461+-0.00110  warmpos -0.00063+-0.00080  mixedpos +0.00126+-0.00106
+  m02 (F7x - F7b)              val TO +0.00108+-0.00059 | val FT +0.00092+-0.00055 | hold TO +0.00137+-0.00033
+      val TO slices: M<50 +0.00222+-0.00112  M>=50 +0.00030+-0.00062  Tue +0.00089+-0.00080  Thu +0.00130+-0.00086  coldpos +0.00539+-0.00111  warmpos -0.00023+-0.00080  mixedpos -0.00041+-0.00104
+  F7x - F7 (total)             val TO +0.00194+-0.00063 | val FT +0.00204+-0.00055 | hold TO +0.00041+-0.00035
+      val TO slices: M<50 +0.00311+-0.00117  M>=50 +0.00113+-0.00069  Tue +0.00217+-0.00086  Thu +0.00170+-0.00092  coldpos +0.01000+-0.00121  warmpos -0.00086+-0.00086  mixedpos +0.00085+-0.00110
+  p70k (F7x70 - F7x)           val TO -0.00037+-0.00053 | val FT -0.00039+-0.00049 | hold TO -0.00017+-0.00030
+      val TO slices: M<50 -0.00086+-0.00099  M>=50 -0.00004+-0.00057  Tue -0.00077+-0.00073  Thu +0.00006+-0.00076  coldpos -0.00531+-0.00104  warmpos +0.00129+-0.00071  mixedpos +0.00055+-0.00090
+  M2 fams (F7x+F7x70) - F7     val TO +0.00218+-0.00057 | val FT +0.00187+-0.00051 | hold TO +0.00071+-0.00032
+      val TO slices: M<50 +0.00341+-0.00106  M>=50 +0.00133+-0.00064  Tue +0.00263+-0.00080  Thu +0.00169+-0.00083  coldpos +0.00733+-0.00108  warmpos +0.00035+-0.00078  mixedpos +0.00169+-0.00104
+
+== same-root single members (mean over 7 roots of the per-feed delta)
+  re-cool c0 (F7b - F7)        val TO +0.00090+-0.00039 | hold TO -0.00046+-0.00022 | coldpos +0.00481 warmpos -0.00065
+  m02 (F7x - F7b)              val TO +0.00117+-0.00039 | hold TO +0.00134+-0.00022 | coldpos +0.00448 warmpos +0.00009
+  F7x - F7 (total)             val TO +0.00207+-0.00041 | hold TO +0.00088+-0.00025 | coldpos +0.00929 warmpos -0.00057
+  p70k (F7x70 - F7x)           val TO -0.00046+-0.00034 | hold TO +0.00001+-0.00020 | coldpos -0.00468 warmpos +0.00104
+
+== label-free behaviour check: how much each change promotes COLD candidates (feed-equal mean of [mean z-change on cold cands - mean z-change on warm cands], feeds with both), val vs test
+  re-cool c0 (F7b - F7)        val +0.0169+-0.0006 | public +0.0150+-0.0007 | private +0.0132+-0.0004
+  m02 (F7x - F7b)              val +0.0203+-0.0006 | public +0.0216+-0.0007 | private +0.0212+-0.0004
+  F7x - F7 (total)             val +0.0372+-0.0006 | public +0.0365+-0.0007 | private +0.0344+-0.0005
+  p70k (F7x70 - F7x)           val -0.0188+-0.0005 | public -0.0195+-0.0006 | private -0.0190+-0.0004
+  M2 fams (F7x+F7x70) - F7     val +0.0270+-0.0005 | public +0.0261+-0.0006 | private +0.0242+-0.0004
+  pool PF7x  - Cd (TO)           val -0.0034+-0.0003 | public -0.0034+-0.0003 | private -0.0032+-0.0002
+  pool G3    - Cd (TO)           val +0.0081+-0.0004 | public +0.0089+-0.0005 | private +0.0097+-0.0003
+  pool M2    - Cd (TO)           val +0.0250+-0.0005 | public +0.0243+-0.0006 | private +0.0249+-0.0004

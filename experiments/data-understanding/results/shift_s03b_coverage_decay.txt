@@ -1,0 +1,27 @@
+train days ['2026-09-06', '2026-09-07', '2026-09-08', '2026-09-09', '2026-09-10', '2026-09-11', '2026-09-12', '2026-09-13', '2026-09-14', '2026-09-17', '2026-09-18', '2026-09-19']
+built last/first seen 15
+
+==== coverage of candidate rows by item seen in train (cand|hist) per day of val/test
+  val 2026-09-22: days after train end  3; in train cand 69.12%  in train cand|hist 74.47%  seen on last train day 52.48%  first-seen-in-train median day offset 13
+  val 2026-09-24: days after train end  5; in train cand 61.39%  in train cand|hist 67.48%  seen on last train day 45.92%  first-seen-in-train median day offset 16
+  test 2026-09-26: days after train end  7; in train cand 56.92%  in train cand|hist 63.51%  seen on last train day 42.23%  first-seen-in-train median day offset 18
+  test 2026-09-27: days after train end  8; in train cand 54.65%  in train cand|hist 61.51%  seen on last train day 40.43%  first-seen-in-train median day offset 19
+  test 2026-09-28: days after train end  9; in train cand 52.86%  in train cand|hist 59.91%  seen on last train day 38.90%  first-seen-in-train median day offset 20
+  test 2026-09-29: days after train end 10; in train cand 51.38%  in train cand|hist 58.53%  seen on last train day 37.96%  first-seen-in-train median day offset 21
+
+val f1 NDCG pessimistic 0.3279; with random tie-break 0.3364; f1 ties at min value share 17.6%
+
+==== train-history count (log) + f1 on val, using train data up to cutoff (gap = val day - cutoff)
+  cutoff 2026-09-19 (gap to first val day  3d): hist: cover  58.7% +f1 0.3365 (d +0.0087+-0.0012) | cand: cover  65.4% +f1 0.3331 (d +0.0052+-0.0012)
+  cutoff 2026-09-18 (gap to first val day  4d): hist: cover  56.2% +f1 0.3367 (d +0.0088+-0.0012) | cand: cover  61.7% +f1 0.3331 (d +0.0053+-0.0012)
+  cutoff 2026-09-17 (gap to first val day  5d): hist: cover  53.3% +f1 0.3366 (d +0.0087+-0.0012) | cand: cover  57.6% +f1 0.3331 (d +0.0052+-0.0012)
+  cutoff 2026-09-14 (gap to first val day  8d): hist: cover  49.5% +f1 0.3364 (d +0.0085+-0.0012) | cand: cover  50.2% +f1 0.3324 (d +0.0045+-0.0012)
+  cutoff 2026-09-13 (gap to first val day  9d): hist: cover  47.7% +f1 0.3361 (d +0.0082+-0.0012) | cand: cover  47.6% +f1 0.3321 (d +0.0042+-0.0012)
+  cutoff 2026-09-12 (gap to first val day 10d): hist: cover  45.9% +f1 0.3354 (d +0.0075+-0.0012) | cand: cover  44.9% +f1 0.3315 (d +0.0036+-0.0012)
+  cutoff 2026-09-11 (gap to first val day 11d): hist: cover  44.3% +f1 0.3359 (d +0.0080+-0.0012) | cand: cover  42.6% +f1 0.3308 (d +0.0029+-0.0012)
+  cutoff 2026-09-10 (gap to first val day 12d): hist: cover  42.4% +f1 0.3355 (d +0.0077+-0.0012) | cand: cover  40.0% +f1 0.3307 (d +0.0029+-0.0012)
+  cutoff 2026-09-09 (gap to first val day 13d): hist: cover  39.9% +f1 0.3347 (d +0.0068+-0.0012) | cand: cover  36.6% +f1 0.3300 (d +0.0022+-0.0012)
+  cutoff 2026-09-08 (gap to first val day 14d): hist: cover  36.9% +f1 0.3344 (d +0.0065+-0.0012) | cand: cover  33.3% +f1 0.3298 (d +0.0020+-0.0011)
+  cutoff 2026-09-07 (gap to first val day 15d): hist: cover  32.6% +f1 0.3342 (d +0.0063+-0.0012) | cand: cover  29.0% +f1 0.3296 (d +0.0018+-0.0011)
+  cutoff 2026-09-06 (gap to first val day 16d): hist: cover  25.7% +f1 0.3334 (d +0.0056+-0.0011) | cand: cover  22.9% +f1 0.3294 (d +0.0016+-0.0011)
+done 93

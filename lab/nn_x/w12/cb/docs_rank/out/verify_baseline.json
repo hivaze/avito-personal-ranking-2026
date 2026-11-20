@@ -1,0 +1,247 @@
+[
+ {
+  "section": "f.baseline_init_sum",
+  "name": "YetiRank + Pool(baseline=0.7*teacher) on train and eval",
+  "status": "PASS",
+  "detail": "baseline alone 0.7748; eval NDCG it0 0.7726 -> last 0.7498; trees alone 0.6924; baseline+trees 0.7498; model without baseline 0.7239; predict(pool WITH baseline) = trees + baseline",
+  "sec": 0.86
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "YetiRank:mode=NDCG + Pool(baseline=0.7*teacher) on train and eval",
+  "status": "PASS",
+  "detail": "baseline alone 0.7748; eval NDCG it0 0.7758 -> last 0.7536; trees alone 0.6886; baseline+trees 0.7536; model without baseline 0.7137; predict(pool WITH baseline) = trees + baseline",
+  "sec": 1.2
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "YetiRankPairwise + Pool(baseline=0.7*teacher) on train and eval",
+  "status": "PASS",
+  "detail": "baseline alone 0.7748; eval NDCG it0 0.7764 -> last 0.7739; trees alone 0.6819; baseline+trees 0.7739; model without baseline 0.6912; predict(pool WITH baseline) = trees + baseline",
+  "sec": 1.24
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "QuerySoftMax + Pool(baseline=0.7*teacher) on train and eval",
+  "status": "PASS",
+  "detail": "baseline alone 0.7748; eval NDCG it0 0.7749 -> last 0.7633; trees alone 0.6620; baseline+trees 0.7633; model without baseline 0.6625; predict(pool WITH baseline) = trees + baseline",
+  "sec": 0.22
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "QueryRMSE + Pool(baseline=0.7*teacher) on train and eval",
+  "status": "PASS",
+  "detail": "baseline alone 0.7748; eval NDCG it0 0.7702 -> last 0.5109; trees alone 0.2068; baseline+trees 0.5109; model without baseline 0.7261; predict(pool WITH baseline) = trees + baseline",
+  "sec": 0.22
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "LambdaMart + Pool(baseline=0.7*teacher) on train and eval",
+  "status": "PASS",
+  "detail": "baseline alone 0.7748; eval NDCG it0 0.7733 -> last 0.7610; trees alone 0.6963; baseline+trees 0.7610; model without baseline 0.7163; predict(pool WITH baseline) = trees + baseline",
+  "sec": 0.33
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "StochasticRank:metric=NDCG + Pool(baseline=0.7*teacher) on train and eval",
+  "status": "PASS",
+  "detail": "baseline alone 0.7748; eval NDCG it0 0.7751 -> last 0.7783; trees alone 0.5717; baseline+trees 0.7783; model without baseline 0.7129; predict(pool WITH baseline) = trees + baseline",
+  "sec": 13.55
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "PairLogit + Pool(baseline=0.7*teacher) on train and eval",
+  "status": "PASS",
+  "detail": "baseline alone 0.7748; eval NDCG it0 0.7740 -> last 0.7521; trees alone 0.7004; baseline+trees 0.7521; model without baseline 0.7070; predict(pool WITH baseline) = trees + baseline",
+  "sec": 0.35
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "PairLogitPairwise + Pool(baseline=0.7*teacher) on train and eval",
+  "status": "PASS",
+  "detail": "baseline alone 0.7748; eval NDCG it0 0.7777 -> last 0.7728; trees alone 0.6018; baseline+trees 0.7728; model without baseline 0.6705; predict(pool WITH baseline) = trees + baseline",
+  "sec": 0.97
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "GroupQuantile + Pool(baseline=0.7*teacher) on train and eval",
+  "status": "PASS",
+  "detail": "baseline alone 0.7748; eval NDCG it0 0.7661 -> last 0.5211; trees alone 0.2071; baseline+trees 0.5211; model without baseline 0.3440; predict(pool WITH baseline) = trees + baseline",
+  "sec": 0.55
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "Logloss (pointwise) + baseline",
+  "status": "PASS",
+  "detail": "eval NDCG it0 0.7703 -> last 0.7727; trees alone 0.7229; baseline+trees 0.7727",
+  "sec": 0.25
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "CrossEntropy (pointwise) + baseline",
+  "status": "PASS",
+  "detail": "eval NDCG it0 0.7703 -> last 0.7727; trees alone 0.7229; baseline+trees 0.7727",
+  "sec": 0.24
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "RMSE (pointwise) + baseline",
+  "status": "PASS",
+  "detail": "eval NDCG it0 0.7662 -> last 0.5082; trees alone 0.2067; baseline+trees 0.5082",
+  "sec": 0.24
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "the SCALE of the baseline matters for YetiRank (pairwise logistic on score differences)",
+  "status": "PASS",
+  "detail": "scale 0.1: total 0.7402 (trees sd 1.342); scale 0.7: total 0.7498 (trees sd 0.939); scale 3.0: total 0.7708 (trees sd 0.579); scale 10.0: total 0.7699 (trees sd 105.466)",
+  "sec": 3.22
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "baseline on the train pool only",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/algo/preprocess.cpp:30: Baseline for test is not provided",
+  "sec": 0.03
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "baseline through fit() arguments",
+  "status": "PASS",
+  "detail": "baseline passed through fit(X, y, baseline=...)",
+  "sec": 0.79
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model: YetiRank -> YetiRank",
+  "status": "PASS",
+  "detail": "continued: 20 trees; first 10 trees reproduce the init model: True; NDCG init 0.6870 -> continued 0.7201",
+  "sec": 0.47
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model: QuerySoftMax -> YetiRank (objective switch)",
+  "status": "PASS",
+  "detail": "continued: 20 trees; first 10 trees reproduce the init model: True; NDCG init 0.6553 -> continued 0.7091",
+  "sec": 0.3
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model: QueryRMSE -> YetiRank:mode=NDCG",
+  "status": "PASS",
+  "detail": "continued: 20 trees; first 10 trees reproduce the init model: True; NDCG init 0.6928 -> continued 0.6993",
+  "sec": 0.39
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model: YetiRank -> LambdaMart",
+  "status": "PASS",
+  "detail": "continued: 20 trees; first 10 trees reproduce the init model: True; NDCG init 0.6870 -> continued 0.7055",
+  "sec": 0.33
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model: YetiRank lr 0.15 -> lr 0.03, depth 6 -> 8",
+  "status": "PASS",
+  "detail": "continued: 20 trees; first 10 trees reproduce the init model: True; NDCG init 0.6870 -> continued 0.7030",
+  "sec": 0.49
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model with a categorical feature (CTRs)",
+  "status": "PASS",
+  "detail": "continued: 20 trees; first 10 trees reproduce the init model: True; NDCG init 0.7079 -> continued 0.7305",
+  "sec": 0.77
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model with an embedding feature",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/libs/model/model.cpp:1901: Models summation is not supported for models with embedding features",
+  "sec": 44.75
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model: Lossguide -> Lossguide",
+  "status": "PASS",
+  "detail": "continued: 20 trees; first 10 trees reproduce the init model: True; NDCG init 0.6759 -> continued 0.7093",
+  "sec": 0.62
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model: SymmetricTree -> Lossguide",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/libs/model/model.cpp:1885: Summation of symmetric and non-symmetric models is not supported [for now]",
+  "sec": 0.58
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model: Plain -> Ordered",
+  "status": "PASS",
+  "detail": "continued: 20 trees; first 10 trees reproduce the init model: True; NDCG init 0.6870 -> continued 0.7083",
+  "sec": 0.96
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model with different border_count (254 -> 64)",
+  "status": "PASS",
+  "detail": "continued: 20 trees; first 10 trees reproduce the init model: True; NDCG init 0.6870 -> continued 0.7083",
+  "sec": 0.47
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model: RMSE regressor (teacher logit) -> YetiRank on clicks (distil then fine-tune)",
+  "status": "PASS",
+  "detail": "continued from an RMSE regressor on teacher logits: 20 trees, NDCG 0.7149",
+  "sec": 0.32
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "init_model + baseline together",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/algo/learn_context.cpp:557: Specifying baseline for training continuation is not supported",
+  "sec": 0.27
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "sum_models(YetiRank, QuerySoftMax) numeric features",
+  "status": "PASS",
+  "detail": "sum_models max |pred - weighted sum| 2.66e-15; trees 80; type CatBoost",
+  "sec": 1.04
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "sum_models with weights (0.3, 1.7)",
+  "status": "PASS",
+  "detail": "sum_models max |pred - weighted sum| 4.44e-15; trees 80; type CatBoost",
+  "sec": 1.03
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "sum_models with a categorical feature (CTRs)",
+  "status": "PASS",
+  "detail": "sum_models max |pred - weighted sum| 2.22e-15; trees 80; type CatBoost",
+  "sec": 1.5
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "sum_models with an embedding feature",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/libs/model/model.cpp:1901: Models summation is not supported for models with embedding features",
+  "sec": 43.66
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "sum_models of Lossguide models",
+  "status": "PASS",
+  "detail": "sum_models max |pred - weighted sum| 3.55e-15; trees 80; type CatBoost",
+  "sec": 1.34
+ },
+ {
+  "section": "f.baseline_init_sum",
+  "name": "sum_models of models with different quantisation",
+  "status": "PASS",
+  "detail": "different border sets: max err 7.11e-15",
+  "sec": 1.63
+ }
+]

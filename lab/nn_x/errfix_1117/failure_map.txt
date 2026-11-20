@@ -1,0 +1,37 @@
+feeds 14423  NDCG 0.40271  random 0.2890  total loss 8615 feed-units
+
+1. BY FEED SIZE            feeds   NDCG  random  share of loss  share of gain over random
+   M   5- 30             28.1%  0.560  0.420      20.7%        34.7%
+   M  31-100             35.1%  0.388  0.270      36.0%        36.4%
+   M 101-200             20.7%  0.310  0.216      23.9%        17.0%
+   M 201-300             16.1%  0.279  0.195      19.4%        11.9%
+
+2. THE FEED'S BEST POSITIVE, BY CLASS    share of feeds  median rank  feed NDCG  share of loss
+   in_top_cat        = False                 50.2%          15     0.298      59.0%
+   in_top_cat        = True                  49.8%           5     0.508      41.0%
+   recency           = absent from history    6.9%          20     0.309       8.0%
+   recency           = in events 6-32        20.6%          12     0.356      22.2%
+   recency           = in newest 5 events    62.9%           6     0.443      58.7%
+   recency           = only older than 32     9.6%          15     0.303      11.2%
+   near_copy_recent  = False                 89.5%          10     0.382      92.6%
+   near_copy_recent  = True                  10.5%           3     0.582       7.4%
+   cold              = False                 70.7%           9     0.404      70.5%
+   cold              = True                  29.3%           9     0.400      29.5%
+
+3. ORACLES ON THE MODEL'S ORDER: model 0.4027 | categories with a positive first 0.5734 | model's category slots, perfect order inside 0.6936 | perfect 1.0
+
+4. FEEDS OF 100+ CANDIDATES: 5348 feeds; best positive at rank 31+ in 42%, at 1-3 in 14%
+   misses: in the rank-1 item's category 30%; median category size 34, median rank inside its category 14
+   medians:                        h1        h5    hmean5      ucos        f1        f3        f4        f5 xp_imp_c50 cat_hist_share
+   positives at rank 1-3        0.776     0.879     0.702     0.577     0.700     0.710     0.524     0.591     1.386     0.296
+   rank-1 items, negative       0.740     0.865     0.677     0.567     0.682     0.685     0.535     0.577     1.386     0.299
+   positives at rank 31+        0.524     0.666     0.535     0.512     0.423     0.488     0.524     0.452     1.609     0.156
+   all candidates               0.502     0.624     0.509     0.490     0.358     0.424     0.501     0.424     1.386     0.127
+
+5. POSITIVE RATE BY RANK vs A WITHIN-FEED SOFTMAX OF THE SCORE (slope 1, no fitting)
+   ranks   1-  1: actual 0.1311  softmax 0.1365  ratio 0.96
+   ranks   2-  3: actual 0.0843  softmax 0.0875  ratio 0.96
+   ranks   4- 10: actual 0.0495  softmax 0.0485  ratio 1.02
+   ranks  11- 30: actual 0.0245  softmax 0.0237  ratio 1.04
+   ranks  31-100: actual 0.0102  softmax 0.0103  ratio 0.99
+   ranks 101-300: actual 0.0035  softmax 0.0036  ratio 0.96

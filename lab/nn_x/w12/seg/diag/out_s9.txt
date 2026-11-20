@@ -1,0 +1,34 @@
+
+### NDCG, reference REST
+| matching block                  | D after matching | SE      | share of raw left |
+|---------------------------------|------------------|---------|-------------------|
+| raw                             | -0.01711         | 0.00443 | 100%              |
+| F (feed only)                   | -0.01332         | 0.00395 | 78%               |
+| F + T (event-type mix)          | -0.00814         | 0.00394 | 48%               |
+| F + T + R (= X1)                | -0.00917         | 0.00393 | 54%               |
+| X1 + A (user activity markers)  | -0.00630         | 0.00393 | 37%               |
+| F + A                           | -0.01133         | 0.00395 | 66%               |
+| A only                          | -0.01370         | 0.00443 | 80%               |
+| X1 + A + n_pos (NOT label-free) | -0.01083         | 0.00384 | 63%               |
+
+### NDCG, reference NEAR
+| matching block                  | D after matching | SE      | share of raw left |
+|---------------------------------|------------------|---------|-------------------|
+| raw                             | -0.01549         | 0.00470 | 100%              |
+| F (feed only)                   | -0.01353         | 0.00420 | 87%               |
+| F + T (event-type mix)          | -0.00732         | 0.00419 | 47%               |
+| F + T + R (= X1)                | -0.00969         | 0.00418 | 63%               |
+| X1 + A (user activity markers)  | -0.00631         | 0.00418 | 41%               |
+| F + A                           | -0.01140         | 0.00420 | 74%               |
+| A only                          | -0.01310         | 0.00470 | 85%               |
+| X1 + A + n_pos (NOT label-free) | -0.01096         | 0.00409 | 71%               |
+
+user-activity markers: share seen in train H=256 0.517, NEAR 0.283, REST 0.217; mean train feeds per user (uid != 0) H=256 0.98, NEAR 0.40
+| cell                   | feeds | FINAL NDCG     | n_pos | M   |
+|------------------------|-------|----------------|-------|-----|
+| H=256, not in train    | 2018  | 0.3918+-0.0053 | 1.50  | 95  |
+| H=256, 1-3 train feeds | 1959  | 0.3901+-0.0053 | 1.59  | 98  |
+| H=256, 4+ train feeds  | 199   | 0.3821+-0.0156 | 2.10  | 105 |
+| NEAR, not in train     | 5136  | 0.4088+-0.0035 | 1.54  | 96  |
+| NEAR, 1-3 train feeds  | 1961  | 0.3975+-0.0054 | 1.67  | 97  |
+| NEAR, 4+ train feeds   | 68    | 0.4425+-0.0366 | 1.94  | 101 |

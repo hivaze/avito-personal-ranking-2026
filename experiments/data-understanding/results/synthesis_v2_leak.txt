@@ -1,0 +1,10 @@
+val: feeds with a later same-split feed: user>0 25  (incl user0 681)
+test: feeds with a later same-split feed: user>0 108  (incl user0 1285); user>0 public 59 / private 49
+val src=val incl_user0=False: flagged rows 38, feeds 25, target rate 0.974
+   NDCG f1+1e-3f5: 0.33757 -> 0.33875 (+0.00118+-0.00025);  nn_final: 0.38186 -> 0.38292 (+0.00106+-0.00023); affected feeds 25: nn 0.373 -> 0.986
+val src=val incl_user0=True: flagged rows 144, feeds 101, target rate 0.271; user0-only rows 106 rate 0.019
+val src=val+test incl_user0=False: flagged rows 184, feeds 110, target rate 0.935
+   NDCG f1+1e-3f5: 0.33757 -> 0.34256 (+0.00499+-0.00050);  nn_final: 0.38186 -> 0.38653 (+0.00467+-0.00047); affected feeds 110: nn 0.359 -> 0.972
+val src=val+test incl_user0=True: flagged rows 681, feeds 354, target rate 0.276; user0-only rows 497 rate 0.032
+test src=test incl_user0=False: flagged rows 183, feeds 103 (public 57, private 46)
+test src=test incl_user0=True: flagged rows 558, feeds 334 (public 165, private 169)

@@ -1,0 +1,29 @@
+nn_x/w5 STAGE-B WAVE 6 (ABLATION_PLAN_1113 section 3.3 rows 'no_aux load-bearing -> aux_anneal 0 and aux_pos 1.0 listwise in the CD harness' and 'always -> m01 / m04 in the CD harness'): PRE-DECLARED READ-OUT RULE
+frozen 2026-11-13T03:51:47Z (`date -u`), BEFORE the first wave-6 run started: no w5_cd_{aa0,ap1,m01,m04}_r* log, claim, checkpoint or prediction file existed at this time (0 matching files), lane.sh did not yet know the arms.
+
+RUNS (nn_x/w5/lane.sh stage B = the CD harness: 2-epoch re-cool of nn/ckpt/v17_pre2s_s<root>@77500.pt with B_BASE + HYG, roots 101-104,
+  variant w5_cd_<arm>_r<root>, seed CDSEED = 900 + root, GPUs N and 6 only, <= 3 processes per GPU). Arm flags are appended LAST (argparse: the last occurrence wins):
+  aa0 = B_BASE + --aux_anneal 0      : K9 production-order aux weight annealed 0.5 -> 0 over the re-cool (m02ref: 0.5 -> 0.1).
+        train.py semantics (aux_w, lines 374-378): with --sched wsd and step >= t_cool, aux weight = aux_anneal + (aux_pos - aux_anneal) * r,
+        r = (lr(s)/lr - 0.03)/0.97 = the normalised 1-sqrt cooldown ratio (1 at the cooldown start, 0 at the final step); aux_anneal < 0 (default) = constant aux_pos.
+        In the CD harness (--cooldown_frac 1.0 --warmup 0) t_cool = 0: the whole re-cool is cooldown. aux_anneal 0 is NOT degenerate: the head stays
+        active (the aux loss is gated by aux_pos > 0, which stays 0.5); its weight follows 0.5 * r and reaches 0 only at the last step.
+        Mean weight over the run (mean r = 1/3): m02ref 0.233, aa0 0.167, ap1 0.400.
+  ap1 = B_BASE + --aux_pos 1.0       : listwise K9 aux at double weight (1.0 -> 0.1 annealed).
+  m01 = B_BASE + --cooldown_mix 0.01 : exploration-pool batch probability 0.01 (m02ref: 0.02).
+  m04 = B_BASE + --cooldown_mix 0.04 : exploration-pool batch probability 0.04.
+  Reference: the EXISTING w5_cd_m02ref_r<root> (same CDSEED 900 + root, same snapshot, B_BASE + HYG; logs/<v>.json + selected and @last val / holdout preds verified present for roots 101-104 at freeze time).
+
+RULE (per arm, pooled over roots 101-104, paired per val feed vs w5_cd_m02ref_r<root> on the SELECTED checkpoint (holdout-best at step >= 12000);
+  the LAST checkpoint (step 19,670) is reported as information only; pooled = per-feed mean of the 4 paired deltas, SE = sd / sqrt(n_feeds), nn_x/r6/r6_eval.compare):
+  PASS iff ALL of
+    (1) pooled val delta > +2 SE (z > 2);
+    (2) pooled holdout delta >= 0 (the fixed 30K random-like train holdout, selected checkpoints);
+    (3) no val slice among M<50, M>=50, Tue, Thu < -2 SE (slice z >= -2);
+    (4) src/pmix.py private-mix reweighted pooled val delta >= -1 SE.
+  STOP otherwise (the wave 2-4 stage-1 futility rule: a stage-B arm that does not clear these on 4 roots is dropped; no stage 2).
+  Diagnostics (reported, never gates): coldpos / warmpos val slices; the 4-root pool (member-equal z-mean ensemble of the 4 arm runs vs the 4 m02ref runs) val and holdout deltas;
+    per-root deltas; same-root correlation; holdout late20% slice; the last-checkpoint read; levers / cliplog blocks; the plain futility sub-rule (val < 0 or holdout < 0) as a note.
+  INCOMPLETE if any of the 4 arm runs of an arm is missing (that arm is not gated).
+  Read-out: nn_x/w5/w5_eval_wave6.py (a wrapper over the w5_eval.py / r6_eval.py functions; the existing w5_eval.py rules are untouched) -> nn_x/w5/logs/w5_eval_B_wave6.{txt,json}.
+  Adoption consequence of a PASS: the arm's flag becomes a CANDIDATE change of the re-cool recipe, to be confirmed on roots 105-107 (stage 2, PASS-CD rule of w5_eval.py) before any member is built with it; nothing is submitted from this wave.

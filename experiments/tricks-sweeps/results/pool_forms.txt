@@ -1,0 +1,24 @@
+# Read-out copied from the raw run log (not published), unchanged below this line.
+# check 1: pool_forms.py (full-data members, val), run 2026-11-15T21:27:23Z
+rows 1389971 feeds 14423 raw member score sd within feed (first member, TO): 1.0911349058151245
+zmean        final val 0.40271
+rankmean     final val 0.40271
+softmaxmean  final val 0.40290
+rawmean      final val 0.40278
+rankmean     - zmean: -0.00000 +- 0.00026
+softmaxmean  - zmean: +0.00019 +- 0.00013
+rawmean      - zmean: +0.00007 +- 0.00007
+
+# check 2: pool_forms_holdout.py (held-out members, holdout + val; rule in the script header, first run 2026-11-15T21:21:58Z), re-run 2026-11-15T21:27:28Z
+run at 2026-11-15T21:27:29.652752Z
+HOLDOUT (30,000 feeds; train-only pools)
+  zmean        16+4 pool 0.32414 (vs zmean +0.00000 +- 0.00000) | wide-16 pool alone 0.32460 (+0.00000 +- 0.00000)
+  softmaxmean  16+4 pool 0.32421 (vs zmean +0.00007 +- 0.00008) | wide-16 pool alone 0.32455 (-0.00005 +- 0.00007)
+  rawmean      16+4 pool 0.32412 (vs zmean -0.00001 +- 0.00002) | wide-16 pool alone 0.32466 (+0.00006 +- 0.00004)
+  rankmean     16+4 pool 0.32381 (vs zmean -0.00033 +- 0.00018) | wide-16 pool alone 0.32431 (-0.00029 +- 0.00014)
+VAL (14,423 feeds; final form, held-out members)
+  zmean        final 0.40214 (vs zmean +0.00000 +- 0.00000; M>=50 +0.00000 +- 0.00000, M<50 +0.00000 +- 0.00000)
+  softmaxmean  final 0.40219 (vs zmean +0.00005 +- 0.00012; M>=50 -0.00002 +- 0.00014, M<50 +0.00013 +- 0.00020)
+  rawmean      final 0.40210 (vs zmean -0.00004 +- 0.00005; M>=50 +0.00002 +- 0.00004, M<50 -0.00012 +- 0.00011)
+  rankmean     final 0.40221 (vs zmean +0.00007 +- 0.00026; M>=50 +0.00048 +- 0.00032, M<50 -0.00052 +- 0.00043)
+RULE: holdout +0.00007 +- 0.00008 (z +0.88), val +0.00005 +- 0.00012 -> softmax pooling NOT SUPPORTED

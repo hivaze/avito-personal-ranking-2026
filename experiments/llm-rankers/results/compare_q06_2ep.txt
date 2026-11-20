@@ -1,0 +1,11 @@
+single models (val | holdout): llm06_L1_s23 0.37592 | 0.29944, llm06_L1_s24 0.37512 | 0.29921, llmcmp_base_s23 0.37922 | 0.30448, llmcmp_base_s24 0.38083 | 0.30325, llm06rand_L1_s23 0.37599 | 0.29978
+paired L-B val: all -0.00451+-0.00079  M<50 -0.00596+-0.00147  M>=50 -0.00350+-0.00086  Tue -0.00580+-0.00109  Thu -0.00309+-0.00114  allcold +0.01133+-0.00155
+  per seed: -0.00329+-0.00100  -0.00572+-0.00093
+paired L-B hold: all -0.00454+-0.00047  late20% -0.00311+-0.00109
+  per seed: -0.00504+-0.00060  -0.00404+-0.00057
+A1 = False (val z -5.72; slices below -2 SE: ['val:all', 'val:M<50', 'val:M>=50', 'val:Tue', 'val:Thu', 'hold:all', 'hold:late20%'])
+A2(i) gap val -0.00451 hold -0.00454 -> False; A2(ii) eq(L,B)-eq(B,B) val -0.00242+-0.00055  hold -0.00262+-0.00031 -> False; A2 = False
+rho(L,B) ['0.9382', '0.9438'] rho(B23,B24) 0.9463; law-predicted eq gain -0.00061
+control: L-R|val -0.00007+-0.00060  R-B|val -0.00323+-0.00101  L-R|hold -0.00034+-0.00034  R-B|hold -0.00470+-0.00062; no evidence that language pretraining helps (L-R <= 1 SE): an A1/A2 gain would be capacity or architecture, so a small from-scratch family is the cheaper way to get it
+holdout traces (information; no E1 for this arm set): llm06_L1_s23: best step 1400/1516, still improving = False; llm06_L1_s24: best step 1512/1512, still improving = True
+DECISION: A1+A2 FAIL (Qwen3-0.6B (2 epochs, information)) -> STOP for this size. NOTE (information, pre-declared): ['llm06_L1_s24'] still improving at the last holdout evaluation; no extension exists for this arm set.

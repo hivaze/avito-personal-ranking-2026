@@ -1,0 +1,107 @@
+sanity: holdout G3 20-member z-mean NDCG 0.32379 (recorded 0.32379); holdout feeds 30000, M min 50
+sanity: val G3 final NDCG 0.40032 (recorded 0.40032); G3 TO 0.40035
+
+=== P1 val G3 final (ens_G3_final_val): feeds 14423 (with >=1 positive 14423, 1.000), items 1389971, positives 21983
+NDCG 0.40032 +- 0.00205; headroom to 1.0 = 0.59968
+(a) top-K perfect-reorder ceiling (rest of the order unchanged)
+    K   ceiling    gain +- SE           headshare +- SE   | tailshare  feeds(>=1 pos) w/o pos in top-K, their share of headroom
+     3  0.45753  +0.05721 +- 0.00118   0.0954 +- 0.0021   | 0.9046     0.7188   0.8746
+     5  0.51320  +0.11288 +- 0.00168   0.1882 +- 0.0030   | 0.8118     0.6141   0.7722
+     8  0.57645  +0.17613 +- 0.00206   0.2937 +- 0.0037   | 0.7063     0.5116   0.6601
+       slice M<50   n   5893: NDCG 0.51646  gain8 +0.27591  headshare8 0.5706 +- 0.0073
+       slice M>=50  n   8530: NDCG 0.32009  gain8 +0.10720  headshare8 0.1577 +- 0.0034
+       slice Tue    n   7543: NDCG 0.40136  gain8 +0.17883  headshare8 0.2987 +- 0.0051
+       slice Thu    n   6880: NDCG 0.39918  gain8 +0.17317  headshare8 0.2882 +- 0.0053
+    16  0.69294  +0.29262 +- 0.00244   0.4880 +- 0.0043   | 0.5120     0.3435   0.4588
+    32  0.81317  +0.41285 +- 0.00251   0.6884 +- 0.0041   | 0.3116     0.1921   0.2640
+(b) within-feed pos-vs-neg pair AUC (ties 0.5); pooled = micro over pairs, macro = mean over feeds with >=1 pair
+    head8 : pooled 0.6162 +- 0.0038 | macro 0.6209 +- 0.0038 | pairs 52037 in 7041 feeds | tied 0.00000
+             M<50  : pooled 0.6358 +- 0.0048 (4359 feeds)
+             M>=50 : pooled 0.5866 +- 0.0061 (2682 feeds)
+             Tue   : pooled 0.6130 +- 0.0052 (3719 feeds)
+             Thu   : pooled 0.6199 +- 0.0055 (3322 feeds)
+    head16: pooled 0.6265 +- 0.0030 | macro 0.6369 +- 0.0030 | pairs 151717 in 9469 feeds | tied 0.00000
+             M<50  : pooled 0.6611 +- 0.0040 (5370 feeds)
+             M>=50 : pooled 0.5902 +- 0.0046 (4099 feeds)
+             Tue   : pooled 0.6294 +- 0.0042 (4966 feeds)
+             Thu   : pooled 0.6234 +- 0.0044 (4503 feeds)
+    all   : pooled 0.7362 +- 0.0025 | macro 0.7311 +- 0.0019 | pairs 2460724 in 14423 feeds | tied 0.00000
+             M<50  : pooled 0.7267 +- 0.0034 (5893 feeds)
+             M>=50 : pooled 0.7369 +- 0.0026 (8530 feeds)
+             Tue   : pooled 0.7339 +- 0.0034 (7543 feeds)
+             Thu   : pooled 0.7388 +- 0.0035 (6880 feeds)
+(c) rank of positives in the base order: share at 1 / 2-3 / 4-8 / 9-16 / >16
+    all    positives  21983: r1 0.0842  r2-3 0.1114  r4-8 0.1699  r9-16 0.1582  r>16 0.4762   (median rank 15, mean M 96.4)
+    all    best pos/feed 14423: r1 0.1284  r2-3 0.1528  r4-8 0.2072  r9-16 0.1681  r>16 0.3435
+    M<50   positives   7191: r1 0.1687  r2-3 0.2179  r4-8 0.2952  r9-16 0.1996  r>16 0.1186   (median rank 5, mean M 23.4)
+    M<50   best pos/feed  5893: r1 0.2058  r2-3 0.2410  r4-8 0.2931  r9-16 0.1714  r>16 0.0887
+    M>=50  positives  14792: r1 0.0432  r2-3 0.0597  r4-8 0.1090  r9-16 0.1380  r>16 0.6500   (median rank 28, mean M 146.8)
+    M>=50  best pos/feed  8530: r1 0.0749  r2-3 0.0919  r4-8 0.1478  r9-16 0.1659  r>16 0.5195
+
+=== P2 holdout G3 (20-member z-mean): feeds 30000 (with >=1 positive 30000, 1.000), items 4630966, positives 53524
+NDCG 0.32379 +- 0.00116; headroom to 1.0 = 0.67621
+(a) top-K perfect-reorder ceiling (rest of the order unchanged)
+    K   ceiling    gain +- SE           headshare +- SE   | tailshare  feeds(>=1 pos) w/o pos in top-K, their share of headroom
+     3  0.35325  +0.02945 +- 0.00057   0.0436 +- 0.0009   | 0.9564     0.8274   0.9204
+     5  0.38640  +0.06260 +- 0.00088   0.0926 +- 0.0014   | 0.9074     0.7556   0.8574
+     8  0.43466  +0.11087 +- 0.00118   0.1640 +- 0.0018   | 0.8360     0.6665   0.7711
+       slice M<50  : empty
+       slice M>=50  n  30000: NDCG 0.32379  gain8 +0.11087  headshare8 0.1640 +- 0.0018
+    16  0.54086  +0.21706 +- 0.00159   0.3210 +- 0.0025   | 0.6790     0.5036   0.5989
+    32  0.68627  +0.36248 +- 0.00181   0.5360 +- 0.0028   | 0.4640     0.3170   0.3867
+(b) within-feed pos-vs-neg pair AUC (ties 0.5); pooled = micro over pairs, macro = mean over feeds with >=1 pair
+    head8 : pooled 0.5780 +- 0.0032 | macro 0.5778 +- 0.0032 | pairs 77459 in 10005 feeds | tied 0.00000
+             M>=50 : pooled 0.5780 +- 0.0032 (10005 feeds)
+    head16: pooled 0.5894 +- 0.0023 | macro 0.5907 +- 0.0024 | pairs 273736 in 14891 feeds | tied 0.00000
+             M>=50 : pooled 0.5894 +- 0.0023 (14891 feeds)
+    all   : pooled 0.7430 +- 0.0013 | macro 0.7429 +- 0.0012 | pairs 8654514 in 30000 feeds | tied 0.00000
+             M>=50 : pooled 0.7430 +- 0.0013 (30000 feeds)
+(c) rank of positives in the base order: share at 1 / 2-3 / 4-8 / 9-16 / >16
+    all    positives  53524: r1 0.0443  r2-3 0.0589  r4-8 0.1156  r9-16 0.1390  r>16 0.6422   (median rank 28, mean M 154.4)
+    all    best pos/feed 30000: r1 0.0791  r2-3 0.0935  r4-8 0.1609  r9-16 0.1629  r>16 0.5036
+    M<50  : no positives (bucket empty)
+    M>=50  positives  53524: r1 0.0443  r2-3 0.0589  r4-8 0.1156  r9-16 0.1390  r>16 0.6422   (median rank 28, mean M 154.4)
+    M>=50  best pos/feed 30000: r1 0.0791  r2-3 0.0935  r4-8 0.1609  r9-16 0.1629  r>16 0.5036
+
+=== P3 val G3 train-only pool (ens_G3_to_val) [item (d), info]: feeds 14423 (with >=1 positive 14423, 1.000), items 1389971, positives 21983
+NDCG 0.40035 +- 0.00206; headroom to 1.0 = 0.59965
+(a) top-K perfect-reorder ceiling (rest of the order unchanged)
+    K   ceiling    gain +- SE           headshare +- SE   | tailshare  feeds(>=1 pos) w/o pos in top-K, their share of headroom
+     3  0.45708  +0.05673 +- 0.00117   0.0946 +- 0.0021   | 0.9054     0.7195   0.8756
+     5  0.51285  +0.11249 +- 0.00168   0.1876 +- 0.0030   | 0.8124     0.6143   0.7727
+     8  0.57636  +0.17601 +- 0.00206   0.2935 +- 0.0037   | 0.7065     0.5108   0.6595
+       slice M<50   n   5893: NDCG 0.51777  gain8 +0.27563  headshare8 0.5716 +- 0.0073
+       slice M>=50  n   8530: NDCG 0.31924  gain8 +0.10719  headshare8 0.1575 +- 0.0034
+       slice Tue    n   7543: NDCG 0.40098  gain8 +0.17902  headshare8 0.2989 +- 0.0051
+       slice Thu    n   6880: NDCG 0.39967  gain8 +0.17271  headshare8 0.2877 +- 0.0053
+    16  0.69334  +0.29299 +- 0.00244   0.4886 +- 0.0043   | 0.5114     0.3431   0.4584
+    32  0.81156  +0.41121 +- 0.00251   0.6858 +- 0.0041   | 0.3142     0.1942   0.2669
+(b) within-feed pos-vs-neg pair AUC (ties 0.5); pooled = micro over pairs, macro = mean over feeds with >=1 pair
+    head8 : pooled 0.6163 +- 0.0038 | macro 0.6207 +- 0.0038 | pairs 52086 in 7053 feeds | tied 0.00000
+             M<50  : pooled 0.6358 +- 0.0048 (4372 feeds)
+             M>=50 : pooled 0.5866 +- 0.0061 (2681 feeds)
+             Tue   : pooled 0.6135 +- 0.0052 (3723 feeds)
+             Thu   : pooled 0.6194 +- 0.0055 (3330 feeds)
+    head16: pooled 0.6255 +- 0.0030 | macro 0.6355 +- 0.0030 | pairs 151720 in 9474 feeds | tied 0.00000
+             M<50  : pooled 0.6603 +- 0.0040 (5381 feeds)
+             M>=50 : pooled 0.5888 +- 0.0046 (4093 feeds)
+             Tue   : pooled 0.6292 +- 0.0041 (4959 feeds)
+             Thu   : pooled 0.6214 +- 0.0045 (4515 feeds)
+    all   : pooled 0.7353 +- 0.0025 | macro 0.7305 +- 0.0019 | pairs 2460724 in 14423 feeds | tied 0.00000
+             M<50  : pooled 0.7266 +- 0.0034 (5893 feeds)
+             M>=50 : pooled 0.7360 +- 0.0026 (8530 feeds)
+             Tue   : pooled 0.7327 +- 0.0035 (7543 feeds)
+             Thu   : pooled 0.7382 +- 0.0035 (6880 feeds)
+(c) rank of positives in the base order: share at 1 / 2-3 / 4-8 / 9-16 / >16
+    all    positives  21983: r1 0.0846  r2-3 0.1104  r4-8 0.1709  r9-16 0.1581  r>16 0.4760   (median rank 15, mean M 96.4)
+    all    best pos/feed 14423: r1 0.1290  r2-3 0.1515  r4-8 0.2088  r9-16 0.1677  r>16 0.3431
+    M<50   positives   7191: r1 0.1717  r2-3 0.2144  r4-8 0.2959  r9-16 0.2004  r>16 0.1175   (median rank 5, mean M 23.4)
+    M<50   best pos/feed  5893: r1 0.2096  r2-3 0.2372  r4-8 0.2953  r9-16 0.1711  r>16 0.0869
+    M>=50  positives  14792: r1 0.0423  r2-3 0.0598  r4-8 0.1101  r9-16 0.1375  r>16 0.6504   (median rank 28, mean M 146.8)
+    M>=50  best pos/feed  8530: r1 0.0733  r2-3 0.0923  r4-8 0.1490  r9-16 0.1654  r>16 0.5200
+
+=== READING RULE (PREDECLARED.txt): QUEUED only if headshare_8 >= 0.40 AND pooled AUC_head8 < 0.75 on BOTH P1 and P2
+  val_G3    : headshare_8 0.2937 (< 0.40), AUC_head8 0.6162 (< 0.75) -> FAIL | secondary §3 clause gain_8 +0.17613 >= +0.01
+  hold_G3   : headshare_8 0.1640 (< 0.40), AUC_head8 0.5780 (< 0.75) -> FAIL | secondary §3 clause gain_8 +0.11087 >= +0.01
+  val_G3_TO : headshare_8 0.2935 (< 0.40), AUC_head8 0.6163 (< 0.75) -> FAIL (info only) | secondary §3 clause gain_8 +0.17601 >= +0.01
+VERDICT: head-recycle family (RECYCLE v2, head-only cascade) CLOSED

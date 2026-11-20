@@ -1,0 +1,63 @@
+SYNTHESIS (critic-corrected): IS THE PROBLEM NOISE, AND CAN IT BE REMOVED?
+Q/S/C = noise/{quantify,synthesis,critic}/out; F = docs/07 line; SL = status-log; PX = loss_design proxy_read.txt.
+
+Short answer: the click draw makes each feed's score close to a coin flip and caps every team's score. Nothing we measured places that cap at 0.40, and noise does not explain the 0.003 gap. Test labels cannot be cleaned. Distillation already removed most of the training-label noise. Our models do not learn the production position bias in aggregate, so that bias is only a small extra noise term.
+
+1. WHICH NOISE, HOW BIG
+Val/test labels (cannot be removed):
+- Click draw: 67% of per-feed variance. Draw-only SE: val 0.0017, public 0.0021, private 0.0014 (Q).
+- Val scores 0.40294 against 0.40137 expected under our own softmax, +0.00157 ± 0.00175 (Q). Re-run matches (C).
+- That test only checks calibration. CatBoost at 0.370 passes it too (Q), so it does not locate the ceiling.
+- Hidden display slot: an oracle gains +0.127. Of that, +0.126 is the last displayed item, which is the label itself.
+- Slot examination beyond that: +0.00084 ± 0.00026 on M>=50 (S) and +0.0043 ± 0.0014 on short feeds (in-sample; C). Test-wide that is about +0.001-0.002, and it is unreachable because positions are not published (SL700).
+Training labels (reducible in principle):
+- Click draw: perfect soft labels would add about +0.0011 per member beyond w=0.5 (roughly 0 to +0.002; a 4-point fit), or +0.0001-0.0008 per file (Q).
+- Position bias: slot 0 holds 4.75% of non-last click mass in raw production clicks, 2.3-2.7% under the flat-examination counterfactual, 2.55% for the stored teacher, and 2.57% / 2.25% for the student (production / random-order row).
+- TV from the counterfactual: clicks 0.068-0.082, teacher 0.010-0.014, student 0.005-0.014, KD target 0.022-0.035 (C, three examination curves). The bias reaches the models only as noise in the click half.
+- Input drift: popularity-light views gave +0.000523 and +0.00032 on public (F513, F516). Stale-view fixes were null (F525, F529).
+Evaluation: near-copy differences are almost all label draw (Q). The detectable pool effect is 0.00086 val / 0.00112 public (D04:138); best-of-K inflation 0.00045-0.00087 (D04:185).
+
+2. WHAT LIMITS THE TEST SCORE
+- The level: what the inputs say about one click (0.37 nats per click, Q), seen through the draw. Every team shares it.
+- The gap: +0.00305 public equals a calibrated model 2.5% sharper (0.012-0.016 nats per click). That is about half our member-to-file step (+0.0066).
+- The gap's z is 1.8-3.6 at correlation 0.80-0.95, before either team's selection. It is probably real.
+- Cleaning has at most +0.0001-0.0008 per file left, plus a position term that is null in aggregate. Both are below the gap.
+
+3. WHAT ALREADY REMOVED NOISE
+- Denoising that paid:
+  - Distillation: +0.00257 / +0.00200 per member, +0.001032 public (F566).
+  - 2% random-order cooldown: +0.00117 / +0.00134 (F404).
+- Paid but not denoising: equal feed weights (F434), production-order auxiliary loss (F436).
+- Failed on students:
+  - Down-weighting surprising clicks: -0.00058 (L1300).
+  - Learnability-selected cooldown: -0.0035 (F423).
+  - Cross-fitted teacher (F573); pseudo-labels (F552, F579).
+  - Cascade truncation: +0.00004 (L1301).
+  - Teacher weight 0.8 (F568, F570); smoother teacher (F571).
+- Proxy-only: label smoothing (F422, F438), OHEM and DRO (PX).
+- Short-feed p_random fix:
+  - Read in cooldown: +0.00025 ± 0.00035 / -0.00019 (F424, SL732).
+  - Target slice M<50 -0.00016; members added less than seed duplicates; from-scratch runs stopped at 40 min, no signal.
+
+4. REMAINING CANDIDATES
+(a) Teacher scored with the random-order row: drop.
+- The stored teacher already sits at the counterfactual (top slot 0.94-1.09x).
+- Switching rows gives 0.83-0.96x. That is inside the uncertainty of the examination curve, with no predictable sign (C).
+- At inference the row is worth at most 0.0005 (F531). Removing the domain embedding read +0.0004 / 0.0000 (F369).
+(b) IPS-weighted click half:
+- The only untested denoiser with a target, and a small one: the 0.022-0.035 TV the click half leaves in the target.
+- The CPU proxy read -0.00017 ± 0.00025 (PX). Prior: about 0, at most +0.0003.
+- Run it (~1 h) only on idle GPUs, under the declared rule: pool val >= +0.0005 against same-root controls, p < 0.05, private-mix >= 0. Kill if val < 0.
+(c) From-scratch --prand2: drop. It touches ~3% of feeds through an embedding worth ~0.
+Cheap, untested: read the holdout on its 26,655 clean feeds (2,294 are production-ordered, SL732); fixes the witness, not the model.
+Not worth running:
+- Truncated, GCE or symmetric losses, confident learning, co-teaching: surprising clicks are signal (L1300, redraw test; F452 prior 0.02).
+- Label smoothing.
+- A per-domain or higher teacher weight: production is ~90% of feeds, so it is close to the global 0.8 that hurt.
+- Input rescaling (F471: 6 of 94 at z > 2, none on both halves).
+- Test-time augmentation.
+
+5. BOTTOM LINE
+The noise that limits the score is in the test labels, every team has it, and no pre-processing removes it. Distillation took most of the training-side click noise. The models do not learn the position bias, so IPS and domain-row tricks have almost nothing to correct. What remains (at most +0.001 val, likely far less) is below the 0.0032 gap. Closing the gap needs a model that gets more out of the inputs.
+
+Do not separate files on public differences below ~0.0006-0.0012 (2 paired SE). Pick 1 led FD16P20 by +0.00032, about 1 SE (F516).

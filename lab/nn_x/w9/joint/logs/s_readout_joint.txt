@@ -1,0 +1,23 @@
+== STAGE S read-out (2026-11-13T14:42:34Z): w9_joint_s[23, 24] vs nn_x/abl abl_base_s[23, 24] (A_BASE + HYG; 2 epochs, 19,670 steps). Rule nn_x/w5/logs/E_joint_predeclared.txt: GO iff @last pooled val >= -0.0015 AND holdout >= -0.0010 AND val rho_bb - rho_x >= +0.008
+-- PRIMARY: LAST checkpoint (@last)
+  seed 23: base val 0.39364 hold 0.31754 | joint val 0.39259 hold 0.31765 | d val -0.00106 d hold +0.00011
+  seed 24: base val 0.39348 hold 0.31753 | joint val 0.39307 hold 0.31687 | d val -0.00041 d hold -0.00065
+  POOLED member [@last]: val -0.00073+-0.00051 (z -1.45) | holdout -0.00027+-0.00029 (z -0.94) | pmix -0.00095+-0.00078 (z -1.21) | slices M<50 -0.00030 (z -0.3) M>=50 -0.00103 (z -1.9) Tue +0.00029 (z +0.4) Thu -0.00185 (z -2.5)
+  corr (val, within-feed rank-z) [@last]: rho_bb 0.97945 | rho_x 0.97838 | gap rho_bb - rho_x +0.00107 | arm-arm 0.97977 | same-seed arm-base 0.98341 || holdout rho_bb 0.98034 rho_x 0.97927 gap +0.00108
+  2-member pools [@last] (info): partner pair(arm_s, base_other) - pair(base, base): val -0.00070+-0.00037 hold +0.00002+-0.00021 | arm pair - base pair: val -0.00134+-0.00058 hold -0.00041+-0.00033
+-- SECONDARY (info): selected checkpoint (holdout-best among evals at step >= 12000)
+  seed 23: base val 0.39348 hold 0.31756 | joint val 0.39259 hold 0.31765 | d val -0.00089 d hold +0.00009
+  seed 24: base val 0.39348 hold 0.31753 | joint val 0.39307 hold 0.31687 | d val -0.00041 d hold -0.00065
+  POOLED member [selected]: val -0.00065+-0.00052 (z -1.25) | holdout -0.00028+-0.00029 (z -0.96) | pmix -0.00065+-0.00080 (z -0.81) | slices M<50 -0.00036 (z -0.4) M>=50 -0.00085 (z -1.5) Tue +0.00029 (z +0.4) Thu -0.00168 (z -2.2)
+  corr (val, within-feed rank-z) [selected]: rho_bb 0.97776 | rho_x 0.97748 | gap rho_bb - rho_x +0.00028 | arm-arm 0.97977 | same-seed arm-base 0.98260 || holdout rho_bb 0.97874 rho_x 0.97853 gap +0.00021
+  2-member pools [selected] (info): partner pair(arm_s, base_other) - pair(base, base): val -0.00026+-0.00039 hold +0.00029+-0.00021 | arm pair - base pair: val -0.00087+-0.00060 hold -0.00014+-0.00033
+  train minutes (arm / base; selected step): s23: 64.9 / 37.1 (steps 19670 / 19000); s24: 64.9 / 37.5 (steps 19670 / 19670)
+-- INFORMATION arm jointhq0 (joint_hq 0: user / history queries blocked from candidate keys), @last, same reads, no gate
+  seed 23: base val 0.39364 hold 0.31754 | jointhq0 val 0.39236 hold 0.31788 | d val -0.00129 d hold +0.00034
+  seed 24: base val 0.39348 hold 0.31753 | jointhq0 val 0.39321 hold 0.31750 | d val -0.00027 d hold -0.00003
+  POOLED member [hq0 @last]: val -0.00078+-0.00048 (z -1.62) | holdout +0.00016+-0.00029 (z +0.55) | pmix -0.00133+-0.00074 (z -1.80) | slices M<50 -0.00036 (z -0.4) M>=50 -0.00107 (z -2.1) Tue -0.00002 (z -0.0) Thu -0.00161 (z -2.3)
+  corr (val, within-feed rank-z) [hq0 @last]: rho_bb 0.97945 | rho_x 0.97833 | gap rho_bb - rho_x +0.00112 | arm-arm 0.97898 | same-seed arm-base 0.98355 || holdout rho_bb 0.98034 rho_x 0.97927 gap +0.00107
+  2-member pools [hq0 @last] (info): partner pair(arm_s, base_other) - pair(base, base): val -0.00035+-0.00036 hold +0.00045+-0.00021 | arm pair - base pair: val -0.00078+-0.00055 hold +0.00039+-0.00032
+gates (@last): s1 val >= -0.0015 OK; s2 holdout >= -0.0010 OK; s3 rho gap >= +0.008 NO
+VERDICT stage S joint: NO-GO -> arm CLOSED at stage S (val -0.00073 +- 0.00051, holdout -0.00027 +- 0.00029, rho gap +0.00107; selected: val -0.00065, holdout -0.00028, gap +0.00028)
+registry: w9_joint_s23/24 vs abl_base_s23/24 (2-epoch futility screen, A_BASE + HYG + --joint_layers 4 --blocks 0 --hist_layers 0, @last; rule E_joint_predeclared.txt 13:25:13Z): val -0.00073 +- 0.00051 (z -1.4), holdout -0.00027 +- 0.00029 (z -0.9), pmix -0.00095, M<50 -0.00030 M>=50 -0.00103 Tue +0.00029 Thu -0.00185, rho_x 0.9784 vs rho_bb 0.9794 (gap +0.0011), partner pool val -0.00070 / hold +0.00002 -> NO-GO (<repo>/nn_x/w9/joint/logs/s_readout_joint.txt)

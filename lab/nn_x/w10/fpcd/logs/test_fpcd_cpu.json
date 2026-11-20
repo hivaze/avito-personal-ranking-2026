@@ -1,0 +1,110 @@
+{
+ "results": [
+  [
+   "recorded md5s == the live nn_x/w5 files (nothing moved under us)",
+   true
+  ],
+  [
+   "module copies byte-identical to nn_x/w5: blend.py cd_arms.py cd_arms4.py cd_arms5.py cd_arms6.py cd_arms7.py cd_arms8.py data.py finetune.py holdout_eval.py model.py stale_pred.py trunc_lifts_mbucket.json e2e_w5.py mini_split.py",
+   true
+  ],
+  [
+   "common.py == nn_x/w5/common.py up to the output-root constant (AST, docstrings stripped)",
+   true
+  ],
+  [
+   "lane.sh differs from nn_x/w5/lane.sh only in the documented lines (root, GPUs N 7, B:fpcd case, RUN file, header comment)",
+   true
+  ],
+  [
+   "ref_w5_train.py.txt == the live nn_x/w5/train.py (md5) and ref_w5_lane.sh.txt == nn_x/w5/lane.sh",
+   true
+  ],
+  [
+   "AST proof: train.py minus the FPCD statements (exact set) == frozen nn_x/w5/train.py (docstrings stripped)",
+   true
+  ],
+  [
+   "parse(): cd_exclude_days '' by default; every other default == the w5 parser",
+   true
+  ],
+  [
+   "lane DRY: B:fpcd:<r> == B:m02ref:<r> + exactly '--cd_exclude_days 0,1,2' (variant w5_cd_fpcd_r<r>, seed 900+r, init @77500); B:m02ref of this lane == nn_x/w5 lane.sh token for token",
+   true
+  ],
+  [
+   "lane refuses A:fpcd / E:fpcd and GPU N",
+   true
+  ],
+  [
+   "call sites: setup_fpcd once behind `if a.cd_exclude_days` in main; fpcd.batch once behind `if fpcd is not None and step >= t_cool` in the step loop; fpcd.summary once in the eval block",
+   true
+  ],
+  [
+   "placement: the FPCD block sits right after the wave-4 cool_stream block and right before the gather statement",
+   true
+  ],
+  [
+   "placement: the setup block follows the SAM setup and precedes the loop",
+   true
+  ],
+  [
+   "no other module imports cd_arms10; cd_arms10 imports numpy / datetime only",
+   true
+  ],
+  [
+   "excluded_mask: Moscow-day boundaries, relative day indices, absolute days 20702-20704 = 2026-09-06..08",
+   true
+  ],
+  [
+   "parse_days: '0,1,2' -> [0, 1, 2]; '2, 0' -> [0, 2]; '' / negative refused",
+   true
+  ],
+  [
+   "mask_batches: excluded feeds removed, batch count unchanged, 3 forced-empty batches filled by splitting the largest batch of the SAME group, every allowed feed exactly once per group",
+   true
+  ],
+  [
+   "mask_batches: split halves are balanced (the two largest masked batches of group 0 are halves of the largest original)",
+   true
+  ],
+  [
+   "mask_batches: an empty batch without a donor of >= 2 feeds in its group is refused",
+   true
+  ],
+  [
+   "FPCDMask.batch: regular batch = masked all_batches[step] (identity asserted), pool batch = masked stream batch (identity asserted), reshuffled stream detected (passes counted), mismatches refused; summary line",
+   true
+  ],
+  [
+   "excluded set == the Sep 6-8 Moscow feeds (absolute days 20702-20704)",
+   true
+  ],
+  [
+   "shares: 0.2743 of all train feeds / 0.2745 of the training (non-holdout) feeds (skeptic k1.log) / 0.2488 of train.py's pool (p_random > 0.5 with M<50 zeroed; the skeptic's 0.2583 used the raw p_random incl. M<50 feeds)",
+   true
+  ],
+  [
+   "leak guard: no holdout feed among the allowed training feeds / the pool",
+   true
+  ],
+  [
+   "root 101 (seed 1001): 19670 steps (9835/epoch); masked regular batches: every allowed feed exactly once per epoch, no excluded feed, none empty; ratio 0.7255 (mean 317.4 -> 230.3, min 8), split events 0; first pool pass: 644 batches, ratio 0.7512, min 11, split events 0",
+   true
+  ],
+  [
+   "root 102 (seed 1002): 19670 steps (9835/epoch); masked regular batches: every allowed feed exactly once per epoch, no excluded feed, none empty; ratio 0.7255 (mean 317.4 -> 230.3, min 7), split events 0; first pool pass: 644 batches, ratio 0.7512, min 15, split events 0",
+   true
+  ],
+  [
+   "root 103 (seed 1003): 19670 steps (9835/epoch); masked regular batches: every allowed feed exactly once per epoch, no excluded feed, none empty; ratio 0.7255 (mean 317.4 -> 230.3, min 7), split events 0; first pool pass: 644 batches, ratio 0.7512, min 13, split events 0",
+   true
+  ],
+  [
+   "root 104 (seed 1004): 19670 steps (9835/epoch); masked regular batches: every allowed feed exactly once per epoch, no excluded feed, none empty; ratio 0.7255 (mean 317.4 -> 230.3, min 7), split events 0; first pool pass: 644 batches, ratio 0.7512, min 11, split events 0",
+   true
+  ]
+ ],
+ "passed": 26,
+ "total": 26
+}

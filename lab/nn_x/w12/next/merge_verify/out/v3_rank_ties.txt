@@ -1,0 +1,50 @@
+W8 val 0.40165. Equal mix, OURS = W8 model scores, PARTNER = rank file restored on the W8 shape. All columns: mix minus the z-mix of the model scores, paired per feed, 14423 val feeds
+  partner        gap tied rows |   ties -> OUR order    study arithmetic |      ties at random  (2nd key) | ties -> PARTNER order |  ties left (metric) | zmix - better
+  C3        +0.00064     0.094 |  +0.00040 ± 0.00033  +0.00040 ± 0.00033 |  -0.00000 ± 0.00033   -0.00005 |    +0.00006 ± 0.00032 |  -0.00490 ± 0.00031 | -0.00027 ± 0.00039
+  G3        +0.00133     0.092 |  -0.00002 ± 0.00035  -0.00002 ± 0.00035 |  -0.00049 ± 0.00034   -0.00038 |    -0.00032 ± 0.00032 |  -0.00562 ± 0.00033 | -0.00044 ± 0.00040
+  Pall      +0.00269     0.085 |  +0.00041 ± 0.00036  +0.00041 ± 0.00036 |  -0.00072 ± 0.00035   -0.00042 |    -0.00105 ± 0.00033 |  -0.00586 ± 0.00034 | -0.00095 ± 0.00044
+  Cd        +0.00264     0.082 |  +0.00049 ± 0.00037  +0.00049 ± 0.00037 |  -0.00058 ± 0.00036   -0.00044 |    -0.00106 ± 0.00036 |  -0.00604 ± 0.00036 | -0.00061 ± 0.00044
+  S16kd     -0.00008     0.152 |  -0.00016 ± 0.00023  -0.00016 ± 0.00023 |  -0.00035 ± 0.00021   -0.00030 |    -0.00020 ± 0.00020 |  -0.00329 ± 0.00022 | +0.00005 ± 0.00022
+  GRUx6     +0.00317     0.067 |  +0.00017 ± 0.00039  +0.00017 ± 0.00039 |  -0.00069 ± 0.00039   -0.00052 |    -0.00098 ± 0.00039 |  -0.00646 ± 0.00040 | -0.00068 ± 0.00051
+  basex4    +0.00278     0.076 |  +0.00060 ± 0.00037  +0.00060 ± 0.00037 |  -0.00006 ± 0.00038   +0.00033 |    -0.00067 ± 0.00039 |  -0.00622 ± 0.00037 | -0.00115 ± 0.00045
+  CatBoost  +0.01964     0.026 |  -0.00036 ± 0.00056  -0.00036 ± 0.00056 |  -0.00121 ± 0.00056   -0.00099 |    -0.00181 ± 0.00056 |  -0.00586 ± 0.00055 | -0.00458 ± 0.00096
+  XGBoost   +0.03395     0.021 |  -0.00057 ± 0.00062  -0.00057 ± 0.00062 |  -0.00145 ± 0.00062   -0.00113 |    -0.00193 ± 0.00062 |  -0.00559 ± 0.00062 | -0.00763 ± 0.00111
+  LLMx2     +0.02489     0.026 |  -0.00148 ± 0.00058  -0.00148 ± 0.00058 |  -0.00247 ± 0.00059   -0.00257 |    -0.00305 ± 0.00060 |  -0.00728 ± 0.00059 | -0.00624 ± 0.00093
+  mean over 10 partners, ours    : -0.00005 (min -0.00148, max +0.00060)
+  mean over 10 partners, eps     : -0.00005 (min -0.00148, max +0.00060)
+  mean over 10 partners, rand    : -0.00080 (min -0.00247, max -0.00000)
+  mean over 10 partners, partner : -0.00110 (min -0.00305, max +0.00006)
+  mean over 10 partners, pess    : -0.00571 (min -0.00728, max -0.00329)
+  study table 1.2, "v2 way" minus "measured z-mix": C3 +0.00005, G3 -0.00035, Pall -0.00107, Cd -0.00108, S16 -0.00021, GRU -0.00102, base -0.00069, CatBoost -0.00182, XGBoost -0.00193, LLM -0.00305 (mean -0.0011)
+
+-- vs the better file (the quantity a merge decision reads), by tie-break
+  C3        zmix -0.00027 ± 0.00039 | ties -> ours +0.00013 ± 0.00024 | random -0.00027 ± 0.00038 | -> partner -0.00020 ± 0.00047 | left tied -0.00517 ± 0.00037
+  G3        zmix -0.00044 ± 0.00040 | ties -> ours -0.00046 ± 0.00025 | random -0.00093 ± 0.00040 | -> partner -0.00076 ± 0.00050 | left tied -0.00606 ± 0.00039
+  Pall      zmix -0.00095 ± 0.00044 | ties -> ours -0.00055 ± 0.00030 | random -0.00167 ± 0.00043 | -> partner -0.00200 ± 0.00052 | left tied -0.00681 ± 0.00044
+  Cd        zmix -0.00061 ± 0.00044 | ties -> ours -0.00012 ± 0.00032 | random -0.00119 ± 0.00044 | -> partner -0.00167 ± 0.00054 | left tied -0.00665 ± 0.00046
+  S16kd     zmix +0.00005 ± 0.00022 | ties -> ours -0.00010 ± 0.00031 | random -0.00030 ± 0.00024 | -> partner -0.00014 ± 0.00011 | left tied -0.00323 ± 0.00023
+  GRUx6     zmix -0.00068 ± 0.00051 | ties -> ours -0.00051 ± 0.00039 | random -0.00138 ± 0.00051 | -> partner -0.00166 ± 0.00060 | left tied -0.00715 ± 0.00051
+  basex4    zmix -0.00115 ± 0.00045 | ties -> ours -0.00055 ± 0.00032 | random -0.00121 ± 0.00046 | -> partner -0.00183 ± 0.00056 | left tied -0.00737 ± 0.00047
+  CatBoost  zmix -0.00458 ± 0.00096 | ties -> ours -0.00494 ± 0.00090 | random -0.00580 ± 0.00096 | -> partner -0.00640 ± 0.00101 | left tied -0.01045 ± 0.00096
+  XGBoost   zmix -0.00763 ± 0.00111 | ties -> ours -0.00820 ± 0.00109 | random -0.00907 ± 0.00113 | -> partner -0.00956 ± 0.00117 | left tied -0.01321 ± 0.00113
+  LLMx2     zmix -0.00624 ± 0.00093 | ties -> ours -0.00772 ± 0.00091 | random -0.00871 ± 0.00097 | -> partner -0.00929 ± 0.00102 | left tied -0.01352 ± 0.00097
+
+-- roles swapped (OURS = the weaker model, PARTNER = W8 as a rank file) and equal-strength pairs: is the penalty a property of the rank file or of the tie-break / partner strength?
+  ours Cd, partner W8 ranks                      tied 0.082 | ties -> ours -0.00114 ± 0.00035 | random -0.00066 ± 0.00036 | -> partner +0.00037 ± 0.00036
+  ours GRUx6, partner W8 ranks                   tied 0.067 | ties -> ours -0.00087 ± 0.00039 | random -0.00060 ± 0.00039 | -> partner +0.00029 ± 0.00039
+  ours CatBoost, partner W8 ranks                tied 0.026 | ties -> ours -0.00184 ± 0.00056 | random -0.00119 ± 0.00056 | -> partner -0.00033 ± 0.00056
+  ours Pall, partner Cd ranks                    tied 0.155 | ties -> ours +0.00003 ± 0.00020 | random -0.00018 ± 0.00022 | -> partner -0.00010 ± 0.00023
+  ours Cd, partner Pall ranks                    tied 0.155 | ties -> ours -0.00004 ± 0.00022 | random -0.00017 ± 0.00021 | -> partner +0.00007 ± 0.00019
+  ours GRUx6, partner basex4 ranks               tied 0.068 | ties -> ours -0.00084 ± 0.00037 | random -0.00097 ± 0.00037 | -> partner -0.00076 ± 0.00037
+  ours basex4, partner GRUx6 ranks               tied 0.068 | ties -> ours -0.00052 ± 0.00037 | random -0.00076 ± 0.00037 | -> partner -0.00062 ± 0.00037
+  ours C3, partner G3 ranks                      tied 0.143 | ties -> ours +0.00037 ± 0.00025 | random +0.00018 ± 0.00025 | -> partner -0.00001 ± 0.00025
+  ours G3, partner C3 ranks                      tied 0.143 | ties -> ours -0.00001 ± 0.00024 | random +0.00021 ± 0.00024 | -> partner +0.00044 ± 0.00026
+  ours S16kd, partner W8 ranks                   tied 0.152 | ties -> ours -0.00023 ± 0.00020 | random -0.00041 ± 0.00021 | -> partner -0.00021 ± 0.00023
+
+-- the val check of the tool at a weight other than 0.5 has no exact ties: v2 way at w = 0.4 (partner), minus the z-mix at the same weight
+  C3        tied rows 0.0000 | +0.00027 ± 0.00029
+  Pall      tied rows 0.0000 | -0.00020 ± 0.00032
+  S16kd     tied rows 0.0000 | -0.00025 ± 0.00020
+  CatBoost  tied rows 0.0000 | +0.00015 ± 0.00052
+
+[done in 79 s]

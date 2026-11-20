@@ -1,0 +1,25 @@
+PRE-DECLARATION web_shift probe s3/s4 (written 2026-11-15T21:23:42Z, BEFORE any re-prediction is run)
+What: inference-only "lag-equalised" item-occurrence inputs (s2_build.py; arms A kappa 1.0, B kappa 0.5; warm rows only; 5 it_hist_*_luo
+columns of the train-stage inputs) fed to UNCHANGED held-out wide students w5_e10_kd05w192_s951..s954 (selected checkpoints), CPU fp32,
+val split only. Baseline = the same CPU path with the stored inputs (CPU against CPU). Train-only branch only; no fine-tuned model is touched.
+Labels: val labels are read once, by s4_read.py, after all predictions exist. Things tried: 2 arms, fixed before the run; no parameter is fitted
+on labels (the curve m(E) and the reference are label-free).
+Primary read: 4-pool (mean of per-feed z of the 4 members) val NDCG, arm minus baseline, paired per feed, 14,423 feeds.
+RULE: SUPPORT iff the better arm reads >= +2.3 SE (two looks) AND val M<50 >= -1 SE AND the Thursday delta (lag 4.5 d) is not below the Tuesday
+delta (lag 2.6 d) by more than 1 SE of their difference. REFUTED iff both arms read <= 0. Otherwise INCONCLUSIVE.
+Reported without a clause: member-level deltas, warm-positive / cold-positive feeds, M>=50, top-1 change rate, delta on feeds with >= 30% changed rows.
+A SUPPORT buys only the next step (fine-tune with equalised val inputs + equalised test inputs on GPU, then ONE public slot); it is not an adoption.
+An in-sample val read below +0.001 is not evidence of a file-level gain (lesson 1); the read decides only whether the mechanism deserves GPU time.
+
+ADDENDUM 2026-11-15T21:25:45Z (before s5_resid.py is run): ONE residual statistic on stored pools, information only (no rule on a file).
+Listwise conditional logit on all val feeds with a positive: target y/npos, logit = b1*z(pool) + b2*1[cold row] + g*delta, delta = the s2 quantity
+(0 on cold and on unchanged rows). Read: g and its feed-clustered z, for the train-only and the fine-tuned (out-of-fold) branch of FD16 (wide pool,
+ens_FD16kd) if present, else W16kd, and of the P20 file branches. g > 0 at z >= 2 means the pool under-scores warm rows whose count is deflated by the lag.
+
+ADDENDUM 2 2026-11-15T21:26:15Z (after the s5 read g = +0.195..+0.200 (z 6.1) train-only, +0.074..+0.086 (z 2.3-2.7) fine-tuned; before s6_nested.py is run).
+s6 = the OUTPUT-OFFSET form on stored val pools: score' = z(pool) + c * delta, c = g / b1 from the s5 conditional logit fitted on 4 user-grouped folds,
+applied to the 5th (GroupKFold by user_id, user 0 feeds spread by feed; 5 folds, seed 0). ONE parameter per fit, no scan.
+Files read: final = 0.5 z(FT) + 0.5 z(TO) of FD16P20kd (pick 1) and W8P20kd; their two branches as information.
+RULE (final of FD16P20kd): CANDIDATE iff nested delta >= +2 SE AND M<50 >= -1 SE AND both val days >= 0; NOT A CANDIDATE iff nested delta <= +1 SE; else REPLICATE.
+Information, no clause: dose bins of delta (three indicator terms instead of the linear term, in-sample coefficients), per-day g, pmix weights are not applied here.
+A CANDIDATE is an experimental file for ONE public slot (test delta is label-free: listing age and feed time only); the val-fitted c is used unchanged on test.

@@ -1,0 +1,69 @@
+{
+ "checks": [
+  {
+   "name": "G1 flags OFF, previous vs new train.py: identical batch sequence (24 steps incl. pool), train-mode logits and loss-input logits",
+   "ok": true,
+   "info": "24 batches"
+  },
+  {
+   "name": "G1 identical logged metric lines; bit-identical checkpoint and val preds",
+   "ok": true,
+   "info": "BEST step 24 val_ndcg 0.39119; train time"
+  },
+  {
+   "name": "G1 every training batch gathered from tr (src 'tr'); every eval-mode dense call carried luo (0 mismatches) in both runs; predict / eval_subset never saw a view",
+   "ok": true,
+   "info": "eval counts new {'val|tr|eval': [4169913, 0, 120], 'train|tr|eval': [9261932, 0, 164]}"
+  },
+  {
+   "name": "G2 --hzcd (cooldown_frac 0.5, t_cool 12): same batch sequence as G1; 24 train-mode dense calls; batch-0 logits == G1's (view inactive before the cooldown)",
+   "ok": false,
+   "info": ""
+  },
+  {
+   "name": "G2 sources: steps 0-11 from tr, steps 12-23 through the hz view; all from the train split",
+   "ok": true,
+   "info": "Counter({np.str_('tr'): 12, np.str_('hz'): 12})"
+  },
+  {
+   "name": "G2 pre-cooldown batches: LUO slots == brute-force luo (exact); cooldown batches: LUO slots == brute-force hz (exact, fp16(log1p) -> fp32) and != luo on some rows",
+   "ok": true,
+   "info": "bad pre 0, bad cd 0, hz != luo cells in the cooldown 170491"
+  },
+  {
+   "name": "G2 every eval-mode dense call (holdout selection evals, val predicts, save_holdout) carried luo (0 mismatches, none through the view); predict saw the view exactly once (save_holdout_hz, after training); eval_subset never",
+   "ok": false,
+   "info": "eval counts {'val|tr|eval': [4169913, 0, 120], 'train|tr|eval': [13892898, 0, 246], 'train|hz|eval': [4630966, 416845, 82]}; predict_hz [False, False, False, False, True]"
+  },
+  {
+   "name": "G2 nn_<v>_holdout_hz.npy written: shape of the as-built holdout file, finite",
+   "ok": true,
+   "info": "max |hz - as built| 2.9333572387695312"
+  },
+  {
+   "name": "G2 log: hzcd setup line (from step 12 of 24) and the holdout-with-hz line; training changed vs flags OFF",
+   "ok": true,
+   "info": "['wave-5 hzcd: from step 12 (of 24) every TRAINING batch (regular and pool) reads the horizon-limited popularity <repo>/data/feats_new/train/it_hist_hz_*.npy in place of the LUO xt columns', 'wave-5 hzcd: holdout preds of the selected checkpoint scored with the hz inputs (4630966,) -> preds/holdout/nn_w5_thz_new_on_holdout_hz.npy (holdout NDCG with hz inputs 0.31691; the as-built holdout f']"
+  }
+ ],
+ "e2e": {
+  "off_lines": [
+   "step 12/24 loss 4.4137 val_ndcg 0.39025 holdout_ndcg 0.31703 lr 6.87e-04 cd_loss_reg 4.1957 cd_loss_pool 3.6701",
+   "step 24/24 loss 0.0000 val_ndcg 0.39119 holdout_ndcg 0.31770 lr 1.01e-04 cd_loss_reg 4.3878 cd_loss_pool 2.9858",
+   "BEST step 24 val_ndcg 0.39119; train time"
+  ],
+  "on_lines": [
+   "step 12/24 loss 4.4137 val_ndcg 0.39086 holdout_ndcg 0.31723 lr 2.00e-03",
+   "step 24/24 loss 0.0000 val_ndcg 0.39290 holdout_ndcg 0.31772 lr 1.43e-04 cd_loss_reg 3.4660 cd_loss_pool 3.3821",
+   "BEST step 24 val_ndcg 0.39290; train time"
+  ],
+  "hz_lines": [
+   "wave-5 hzcd: from step 12 (of 24) every TRAINING batch (regular and pool) reads the horizon-limited popularity <repo>/data/feats_new/train/it_hist_hz_*.npy in place of the LUO xt columns, same attach_xt scaling (log1p, fp16); col 3 it_hist_all_luo -> it_hist_hz_all: zero rate 0.130 -> 0.228, rows changed 0.1669; col 4 it_hist_et1_luo -> it_hist_hz_et1: zero rate 0.154 -> 0.252, rows changed 0.1606; col 5 it_hist_et2_luo -> it_hist_hz_et2: zero rate 0.480 -> 0.550, rows changed 0.0827; col 6 it_hist_et3_luo -> it_hist_hz_et3: zero rate 0.496 -> 0.567, rows changed 0.0821; col 7 it_hist_et4_luo -> it_hist_hz_et4: zero rate 0.576 -> 0.625, rows changed 0.0603; feature_stats / selection holdout / val / test / save_holdout unchanged (luo); extra file preds/holdout/nn_<v>_holdout_hz.npy; hz tensor 2.30 GB; 6s",
+   "wave-5 hzcd: holdout preds of the selected checkpoint scored with the hz inputs (4630966,) -> preds/holdout/nn_w5_thz_new_on_holdout_hz.npy (holdout NDCG with hz inputs 0.31691; the as-built holdout file is unchanged)"
+  ]
+ },
+ "failed": [
+  "G2 --hzcd (cooldown_frac 0.5, t_cool 12): same batch sequence as G1; 24 train-mode dense calls; batch-0 logits == G1's (view inactive before the cooldown)",
+  "G2 every eval-mode dense call (holdout selection evals, val predicts, save_holdout) carried luo (0 mismatches, none through the view); predict saw the view exactly once (save_holdout_hz, after training); eval_subset never"
+ ]
+}

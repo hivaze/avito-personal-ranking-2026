@@ -1,0 +1,44 @@
+
+## holdout: feeds 30000 | capped (H = 256) 11601 = 38.67% | capped, user_id != 0 11563 | capped, user_id != 0, >= 1 strictly earlier snapshot of the user: 3235 = 10.78% of feeds
+earlier snapshots per feed (5/25/50/75/95%): 1 / 1 / 1 / 2 / 3; by split of the snapshot: train 4872, val 0, test 0
+criterion A (aligned: >= 1 snapshot with >= 16 LCS anchors and an exact run >= 8): pass 3140 = 97.1%, FAIL 2.9% (dropped from everything)
+  first merged snapshot, anchors (5/25/50/75/95%): 85 / 147 / 180 / 220 / 246; longest exact run: 20 / 49 / 82 / 120 / 207; tie swaps repaired per feed: 0 / 1 / 5 / 10 / 23
+criterion B (end-anchored: deepest anchored stored event >= index 248), among A: pass 2511 = 80.0% of A = 77.6% of qualifying; A-and-not-B 19.4% (kept for U, dropped from T)
+  T (older than the stored 256th event), feeds A and B: n = 2511; recovered events (5/25/50/75/95%): 0 / 8 / 29 / 74 / 160; mean 50.3; >= 1: 2358 (93.9% of them, 72.9% of qualifying); >= 32: 1202 (47.9% of them, 37.2% of qualifying); >= 64: 738 (29.4% of them, 22.8% of qualifying); >= 128: 197 (7.8% of them, 6.1% of qualifying)
+  U (all old-only events), feeds A: n = 3140; recovered events (5/25/50/75/95%): 5 / 32 / 74 / 128 / 253; mean 93.7; >= 1: 3123 (99.5% of them, 96.5% of qualifying); >= 32: 2363 (75.3% of them, 73.0% of qualifying); >= 64: 1747 (55.6% of them, 54.0% of qualifying); >= 128: 791 (25.2% of them, 24.5% of qualifying)
+order evidence (first 1488 feeds with >= 16 anchors to the most recent earlier snapshot): stored-only events BEFORE the first anchor (index-0 side) mean 36.9, AFTER the last anchor 12.4; earlier-snapshot-only events before its first anchor 0.4, after its last anchor 25.9
+type-1 (view) share: stored events 129-256 0.442 | T events 0.307 | U events 0.450 (first 1500 feeds)
+[3s]
+
+## val: feeds 14423 | capped (H = 256) 4176 = 28.95% | capped, user_id != 0 4169 | capped, user_id != 0, >= 1 strictly earlier snapshot of the user: 2160 = 14.98% of feeds
+earlier snapshots per feed (5/25/50/75/95%): 1 / 1 / 1 / 2 / 4; by split of the snapshot: train 4082, val 13, test 0
+criterion A (aligned: >= 1 snapshot with >= 16 LCS anchors and an exact run >= 8): pass 1879 = 87.0%, FAIL 13.0% (dropped from everything)
+  first merged snapshot, anchors (5/25/50/75/95%): 51 / 99 / 139 / 181 / 224; longest exact run: 10 / 26 / 48 / 77 / 134; tie swaps repaired per feed: 0 / 1 / 5 / 11 / 26
+criterion B (end-anchored: deepest anchored stored event >= index 248), among A: pass 1465 = 78.0% of A = 67.8% of qualifying; A-and-not-B 19.2% (kept for U, dropped from T)
+  T (older than the stored 256th event), feeds A and B: n = 1465; recovered events (5/25/50/75/95%): 0 / 11 / 29 / 64 / 177; mean 52.1; >= 1: 1383 (94.4% of them, 64.0% of qualifying); >= 32: 691 (47.2% of them, 32.0% of qualifying); >= 64: 367 (25.1% of them, 17.0% of qualifying); >= 128: 155 (10.6% of them, 7.2% of qualifying)
+  U (all old-only events), feeds A: n = 1879; recovered events (5/25/50/75/95%): 32 / 85 / 142 / 208 / 394; mean 166.5; >= 1: 1878 (99.9% of them, 86.9% of qualifying); >= 32: 1785 (95.0% of them, 82.6% of qualifying); >= 64: 1587 (84.5% of them, 73.5% of qualifying); >= 128: 1051 (55.9% of them, 48.7% of qualifying)
+order evidence (first 1437 feeds with >= 16 anchors to the most recent earlier snapshot): stored-only events BEFORE the first anchor (index-0 side) mean 97.6, AFTER the last anchor 17.1; earlier-snapshot-only events before its first anchor 3.9, after its last anchor 25.3
+type-1 (view) share: stored events 129-256 0.230 | T events 0.293 | U events 0.632 (first 1500 feeds)
+[5s]
+  val: qualifying 14.98% of feeds; aligned (A) 13.03%; T >= 1 (A, B): 9.59%; T >= 64 (A, B): 2.54%; T >= 128 (A, B): 1.07%; U >= 1 (A): 13.02%; U >= 64 (A): 11.00%; U >= 128 (A): 7.29%; mean T fill per val feed 4.41; mean U fill 13.73
+
+## test: feeds 28595 | capped (H = 256) 8239 = 28.81% | capped, user_id != 0 8232 | capped, user_id != 0, >= 1 strictly earlier snapshot of the user: 4102 = 14.35% of feeds
+earlier snapshots per feed (5/25/50/75/95%): 1 / 1 / 1 / 2 / 4; by split of the snapshot: train 7533, val 55, test 53
+criterion A (aligned: >= 1 snapshot with >= 16 LCS anchors and an exact run >= 8): pass 3222 = 78.5%, FAIL 21.5% (dropped from everything)
+  first merged snapshot, anchors (5/25/50/75/95%): 45 / 83 / 118 / 161 / 210; longest exact run: 9 / 18 / 36 / 64 / 120; tie swaps repaired per feed: 0 / 1 / 4 / 10 / 25
+criterion B (end-anchored: deepest anchored stored event >= index 248), among A: pass 2565 = 79.6% of A = 62.5% of qualifying; A-and-not-B 16.0% (kept for U, dropped from T)
+  T (older than the stored 256th event), feeds A and B: n = 2565; recovered events (5/25/50/75/95%): 0 / 14 / 34 / 72 / 192; mean 57.6; >= 1: 2427 (94.6% of them, 59.2% of qualifying); >= 32: 1356 (52.9% of them, 33.1% of qualifying); >= 64: 745 (29.0% of them, 18.2% of qualifying); >= 128: 291 (11.3% of them, 7.1% of qualifying)
+  U (all old-only events), feeds A: n = 3222; recovered events (5/25/50/75/95%): 50 / 106 / 158 / 217 / 396; mean 180.7; >= 1: 3222 (100.0% of them, 78.5% of qualifying); >= 32: 3155 (97.9% of them, 76.9% of qualifying); >= 64: 2935 (91.1% of them, 71.6% of qualifying); >= 128: 2099 (65.1% of them, 51.2% of qualifying)
+order evidence (first 1378 feeds with >= 16 anchors to the most recent earlier snapshot): stored-only events BEFORE the first anchor (index-0 side) mean 121.0, AFTER the last anchor 14.9; earlier-snapshot-only events before its first anchor 5.0, after its last anchor 32.3
+type-1 (view) share: stored events 129-256 0.225 | T events 0.294 | U events 0.646 (first 1500 feeds)
+[9s]
+  test all: feeds 28595; capped 28.81%; qualifying 14.35%; aligned (A) 11.27%; T >= 1 (A, B): 8.49%; T >= 64 (A, B): 2.61%; T >= 128 (A, B): 1.02%; U >= 1 (A): 11.27%; U >= 64 (A): 10.26%; U >= 128 (A): 7.34%; mean T fill (cap 128) per feed of the segment 4.28; mean U fill 12.68
+  public-like days: feeds 8562; capped 29.39%; qualifying 15.03%; aligned (A) 12.21%; T >= 1 (A, B): 9.29%; T >= 64 (A, B): 2.93%; T >= 128 (A, B): 1.21%; U >= 1 (A): 12.21%; U >= 64 (A): 11.18%; U >= 128 (A): 8.04%; mean T fill (cap 128) per feed of the segment 4.79; mean U fill 13.78
+  private-like days: feeds 20033; capped 28.57%; qualifying 14.05%; aligned (A) 10.87%; T >= 1 (A, B): 8.15%; T >= 64 (A, B): 2.47%; T >= 128 (A, B): 0.93%; U >= 1 (A): 10.87%; U >= 64 (A): 9.87%; U >= 128 (A): 7.04%; mean T fill (cap 128) per feed of the segment 4.06; mean U fill 12.21
+
+## positive check of the method (pretend the cap is 192; truth = stored events 193-256)
+positive check [holdout, earlier snapshots also cut to 192 (faithful)]: feeds 3235; aligned 3000, end-anchored (index >= 184) 2625, with >= 1 recovered event 2544 (752 with all 64); recovered events compared 91870: exact match at the same position 41.9%; in the true events of the same span (any order) 70.0%; in the true events 193-256 (any order) 72.3%; feeds with every recovered event exact 30.9%; feeds with 64 recovered: position-exact 36.8%, any order 69.1%
+positive check [holdout, earlier snapshots at their stored length]: feeds 3235; aligned 3013, end-anchored (index >= 184) 2735, with >= 1 recovered event 2726 (2413 with all 64); recovered events compared 167419: exact match at the same position 48.5%; in the true events of the same span (any order) 75.3%; in the true events 193-256 (any order) 75.8%; feeds with every recovered event exact 17.1%; feeds with 64 recovered: position-exact 49.9%, any order 76.7%
+positive check [val, earlier snapshots also cut to 192 (faithful)]: feeds 2160; aligned 1593, end-anchored (index >= 184) 1456, with >= 1 recovered event 1417 (606 with all 64); recovered events compared 61462: exact match at the same position 28.5%; in the true events of the same span (any order) 60.3%; in the true events 193-256 (any order) 60.4%; feeds with every recovered event exact 19.1%; feeds with 64 recovered: position-exact 19.5%, any order 52.9%
+positive check [val, earlier snapshots at their stored length]: feeds 2160; aligned 1616, end-anchored (index >= 184) 1527, with >= 1 recovered event 1519 (1400 with all 64); recovered events compared 94370: exact match at the same position 33.4%; in the true events of the same span (any order) 66.3%; in the true events 193-256 (any order) 66.4%; feeds with every recovered event exact 8.6%; feeds with 64 recovered: position-exact 33.2%, any order 66.3%
+[15s] done

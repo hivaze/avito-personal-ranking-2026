@@ -1,0 +1,97 @@
+=== 2026-11-14T22:34:33Z poplag: DESIGN + GATE CRITERION, written before any lagged column is built and before any labelled read ===
+(At this time: only the label-free CPU inference of the stored lag-0 inputs is running; no NDCG has been computed by me.)
+
+FACTS (measured from data/flat feeds.parquet, label-free):
+  dense data = train feeds Sep 6-14 and Sep 17-19 MSK (12 full days, 203K-292K feeds/day; Sep 15 / Sep 20 = 42 / 34 stragglers); dense cutoff CUT = Sep 20 00:00 MSK.
+  sparse data = val Sep 22 (7,542) and Sep 24 (6,878); test Sep 26 (6,050), 27 (7,367), 28 (7,578), 29 (7,600); public = ts < 1790497920 (Sep 27 11:32 MSK).
+  lag of a test row = L = day(t) - day(CUT) = 6, 7, 8, 9 for Sep 26 / 27 / 28 / 29. public-like = {6, 7 before 11:32}; private-like = {7 after 11:32, 8, 9}.
+  days that carry sparse snapshots, as offsets from CUT: PAT = {2, 4, 6, 7, 8, 9}.
+  holdout feeds: 1,801-2,903 per train day on all 12 full days.
+
+HOW THE STORED COLUMNS ARE BUILT (code read):
+  it_hist_{all,et1..4}_luo (src/features_luo.py): occurrences of the item in the histories of ALL snapshots of train + val + test, minus snapshots of the same non-zero
+     user with a later timestamp. Not causal: a holdout row also counts the dense train snapshots AFTER its own time. Test row: dense snapshots end at CUT, i.e. L days
+     before the row; afterwards only the 1/37-density val / test snapshots.
+  seq_cv_{invd20,pop,norm} (feats_v2/seq_/feat_covis.py): co-visitation in de-duplicated user sequences (latest train feed per user before the cutoff day; all user-0 feeds);
+     train row of day d: train days < d; val / test row: all train + val / test histories with ts < own ts; sequences of the same non-zero user are skipped.
+  xp_imp_c50 (nn_x/abl/pop1/build_xp_imp_c50.py) = log1p(min(tte_it_imp, 50)); tte_it_imp = the item's impressions in train candidate rows; train row of day d: days < d;
+     val / test row: all train days. -> the pop1kd members DO have one recency-dependent input.
+  Everything else in the 34 / 27 xt inputs (ctx_nd_*, ctx_hn_*, ctx_hs_*, pre2_*) uses the own feed and own history only: stays as stored.
+  Columns that depend on the lag: W8 members = 3 seq_cv + 5 it_hist (8 columns; in-model rank / z of seq_cv_invd20 and it_hist_all_luo follow); pop1kd members = xp_imp_c50.
+
+KNOWN ARTEFACT TO AVOID (COVERAGE_MAP 220 / DATA_PIPELINE_1113 5.3, "T4"): a plain as-of rule "counts up to T - 7 d" leaves 63.6% of holdout feeds with an empty source,
+  because the dense data start on Sep 6 (a row of Sep 6 + k with lag L has k - L dense days; test rows have 12). Depth and lag must be separated.
+
+CONSTRUCTION ("exposure-matched lag"), per holdout feed f and candidate row (item j):
+  L_f      = lag in days drawn by a hash of feed_id (label-free) from the test distribution of the view: view pub = {6, 7} with the public feed counts as weights,
+             view priv = {7, 8, 9} with the private feed counts as weights.
+  c_f      = 00:00 MSK of day(t_f) - L_f days (the feed's lagged dense cutoff; t_f - c_f has the same law as t - CUT on test rows of that lag).
+  t_post   = t_f - age(f4) (listing creation time, data/feats/life_f4_age_knots.npy, as feat_new/hz_common.py); capped f4 -> old.
+  E        = c_f - t_post = the listing's age at the cutoff (on a test row: CUT - t_post).
+  D (dense cutoff day of the row) = day boundary nearest to  min(CUT, max(c_f, Sep 6 + clip(E, 0, 14 d))).
+     Meaning: the row keeps min(E, 14 d) days of DENSE exposure (what a test row has), taken as the earliest available days.
+       listing created inside the dense data (t_post >= Sep 6) or younger than the cutoff: D = c_f = the plain "counts up to T - lag" rule (empty if c_f <= Sep 6);
+       E >= 14 d: D = Sep 20 = the full dense window, i.e. the stored value for it_hist (old listings are NOT made stale: the dense window surrounds the row);
+       listing created before Sep 6 with 0 < E < 14 d: the first E days of the data instead of the first E days of its life (window shifted later in the item's life).
+  A (sparse anchor day) = max(day(c_f), D); sparse days = A + PAT. Sparse snapshots = train feeds of the shared 1/37 hash sample (feat_new/hz_common.sparse_flag) on a
+     sparse day, or any val / test snapshot on a sparse day. A sparse day before Sep 6 or on a day without data is lost (no substitution).
+  it_hist_*  = occurrences in train snapshots with day < D  +  occurrences in sparse snapshots (day >= D)  +  the own snapshot if not yet counted;
+               snapshots of the same non-zero user with a later timestamp are removed everywhere (stored LUO rule); user 0 as stored.
+  seq_cv_*   = the stored kernel on: dense part = source_fidx(D) (latest train feed per non-zero user with day < D, all user-0 feeds with day < D), then sparse part =
+               sparse train feeds with ts < t_f (causal, as val / test histories are for a test row); same-user sequences skipped; scan cap 3000 as stored.
+               Known limit, written now: for D > c_f the history-neighbour side is fresher than on a test row (neighbour listings created after c_f are visible).
+  xp_imp_c50 = log1p(min(n, 50)), n = train candidate rows of the item with day < D, minus the own feed's row, minus rows of later feeds of the same non-zero user.
+  No label is read anywhere in the construction. Same-user later snapshots are never used.
+  Code checks before use: with L = 0 semantics (D = own day for seq_cv / xp_imp; all snapshots for it_hist) the same code must reproduce the stored columns on the holdout rows.
+
+GATE (label-free; decides whether any labelled read of a lagged view is made). Populations: lagged holdout rows of the view vs test candidate rows of the matching part
+  (public / private) from feeds with M >= 50; lag-0 (stored) holdout rows for contrast. Age buckets from f4: <1d, 1-3d, 3-7d, 7-10d, 10-24d, 24-76d, >76d (incl. capped).
+  Per column and bucket: zero share and mean of the model-scale value (attach_xt transform: log1p for counts; xp_imp_c50 as is). SD = SD of the model-scale column on the test part.
+  dZ = holdout-row-weighted mean over buckets of |zero share(holdout view) - zero share(test part)|;  dM = the same for |mean difference| / SD.
+  PASS (per view) iff ALL of:
+   G1  dZ <= 0.05 for each family primary: it_hist_all_luo, seq_cv_pop, xp_imp_c50;
+   G2  no bucket holding >= 5% of the holdout rows has |zero-share difference| > 0.10, for the three primaries;
+   G3  dM <= 0.20 for the three primaries;
+   G4  dZ of it_hist_all_luo at the lagged view <= 1/3 of its lag-0 value (the view removes at least two thirds of the coverage gap);
+   G5  secondary columns (it_hist_et1..4_luo, seq_cv_invd20, seq_cv_norm): dZ <= 0.10 and dM <= 0.30 each.
+  Written in advance: the stored table nn_x/w5/hzcd/preflight.txt already shows that OLD listings (> 24 d, 53% of holdout rows) are warmer on stored holdout rows than on
+  private rows (zero share 0.144-0.149 vs 0.192-0.200, mean log1p +0.3) and the construction does not change them; this irreducible part (about 0.025 of dZ, 0.10 of dM)
+  is inside the thresholds on purpose and is reported as a limit.
+  FAIL of the private-like view -> stop: no labelled read of any lagged view; report gate table + control. The public-like view is read only if it passes on its own.
+
+CONTROL (validity of the replay; after the gate verdict): CPU fp32 path with stored inputs vs stored bf16 files: each of the 12 members within 0.0010 holdout NDCG,
+  statistic within +-0.0003 of -0.00063. All lagged deltas are CPU replay minus CPU replay.
+
+READ (only on gate PASS): statistic S(w) = NDCG((1-w) z(W8 pool) + w z(pop1kd pool)) - NDCG(z(W8 pool)), pools = member mean of per-feed rank-z, on the 30,000 holdout feeds,
+  paired per feed, w = 0.2 (decision), 0.1 / 0.3 (reported). Decision reading = view priv. Rule as fixed at 22:17:17Z: S >= -0.0002 "bias explanation holds";
+  S <= -0.0005 "view closed for student pools"; between "pick 2 at most". Also reported: W8 pool and pop1kd pool level change (lag - lag 0), by cold-share bins,
+  and one robustness column fixed now: the same statistic on holdout days >= Sep 13 (c_f on or after Sep 4; where at most the earliest sparse day is lost).
+
+=== 2026-11-14T22:45:34Z GATE v1 RESULT and CONSTRUCTION v2 (label-free; still no NDCG computed by me, the lag-0 control inference only writes predictions) ===
+GATE v1 (logs/gate_v1.txt, construction above): view priv FAIL (G2 it_hist_all_luo bucket 10-24d 0.101 > 0.10; G1 xp_imp_c50 dZ 0.0617 > 0.05; G2 xp_imp_c50 bucket >76d 0.120 > 0.10);
+  view pub FAIL (G1 xp_imp_c50 dZ 0.0582; G2 xp_imp_c50 bucket >76d 0.105). No lagged view is read at v1.
+  What v1 shows: listings younger than 10 d are at parity in all nine columns (it_hist_all_luo zero share within 0.015 per bucket); the residual is (a) OLD listings
+  (> 24 d): the full dense window surrounds the holdout row, while on a test row it ends L days before the row; activity near the row is fresher (zero share -0.04..-0.06 for
+  it_hist / seq_cv, -0.12 for impressions of > 76 d listings); (b) listings created before Sep 6 with partial exposure (10-24 d): shifted window, warm for history counts.
+CONSTRUCTION v2 = v1 with two changes, thresholds G1-G5 unchanged:
+  (1) temporal exclusion band g (days): a DENSE train snapshot / impression of day d counts for a row of day dt only if d < D AND |d - dt| >= g. On a test row every dense
+      snapshot is at least L days before the row; a full band g = L is the T4 depth collapse, so g < L trades distance against depth.
+  (2) sparse days are anchored at the feed's own cutoff for every row: sparse snapshot = (1/37 hash-sample train feed or val / test feed) on day c_f + PAT that is not a
+      counted dense snapshot (v1 anchored them at max(c_f, D)); own snapshot always counted; seq_cv sparse sequences need ts < own ts as before.
+      seq_cv de-duplication under the band: a user's feed is a source sequence iff it is outside the band, before D, and the user's next feed is on or after D or inside the band.
+  CALIBRATION of g (label-free, one parameter): g in {0, 1, 2, 3, 4, 5, 6}; the chosen g minimises J(g) = sum over the three primaries (it_hist_all_luo, seq_cv_pop, xp_imp_c50)
+      of dZ on the PRIVATE-like view (the decision view); the same g is used for the public-like view. The fixed gate G1-G5 is then applied once to the chosen g, per view.
+      FAIL at the chosen g -> stop, no labelled read. Disclosure owed in the report: the old-listing part of the view is calibrated to the test coverage, not derived.
+
+=== 2026-11-14T22:52:46Z v2 CALIBRATION RESULT and CONSTRUCTION v3 (label-free; still no NDCG computed by me) ===
+v2 calibration (logs/gate_v2cal.txt): J(g) on the private-like view = 0.1452, 0.1294, 0.0941, 0.0693, 0.0989, 0.1771, 0.2659 for g = 0..6  ->  g = 3.
+GATE v2 at g = 3: view priv FAIL (G2 xp_imp_c50, bucket 10-24d: zero share 0.322 vs 0.130 on private rows); view pub FAIL (G2 xp_imp_c50 bucket 10-24d 0.156).
+  The eight inputs of the W8 members are at parity at g = 3 (priv: it_hist_all_luo dZ 0.0131, largest bucket 0.035, dM 0.031; seq_cv_pop dZ 0.0090, 0.030, 0.025;
+  secondary columns dZ <= 0.0144, dM <= 0.045). The failing column is the pop1kd members' only recency-dependent input.
+  Cause (read from the table, no label): for a listing created before Sep 6 with partial exposure the dense window is the first E days of the DATA (Sep 6 ..), which for a
+  holdout row of Sep 6-10 lies inside the row's own exclusion band, so the band deletes the whole exposure; impressions are front-loaded in a listing's life, so the
+  loss is not offset as it is for the cumulative history counts.
+CONSTRUCTION v3 = v2 at g = 3 (not re-calibrated) with ONE change, for xp_imp_c50 only: the exposure days are preserved under the band. The impression window of a row
+  is the first (D - Sep 6) calendar days from Sep 6 that are OUTSIDE the band (band days are skipped, end capped at Sep 20), instead of [Sep 6, D) minus the band.
+  Rows with D = c_f (window ends before the band) and rows with D = Sep 20 are unchanged. The eight W8 inputs are exactly the v2 g = 3 columns.
+  One shot: the fixed gate G1-G5 is applied to v3 (views priv_v3, pub_v3). FAIL -> stop, no labelled read, report gate + control. No further construction change after this.

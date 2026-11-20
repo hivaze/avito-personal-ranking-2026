@@ -1,0 +1,33 @@
+RESULT: FT seed bagging x3 (rule PREDECLARED_ftbag.txt 19:08:07Z + amendment 1 19:13Z; single read-out 19:30:30Z readout_s3.py).
+Written 2026-11-13T19:32:07Z. Nothing submitted. Numbers in readout_s3.{txt,json}, gate_G3s3.txt, gate_Q2a8s3.txt, check_args.py output.
+
+RUNS: 28/28 fine-tunes rc 0, 19:09:05-19:30:12Z (lanes 15-18 min each, 3-4 per GPU on the GPUs, ~9 GB each); logged args = the
+member's n2cpv3 args except out (suffix n2cpv3s3) and seeds (3) for all 28 (check_args.py ALL OK). Seeds per fold k: 1000k+{0,1,2}.
+Files: preds/nn_<m>_n2cpv3s3_{val_oof,test,test_folds}.npy (84) + nn/logs/<m>_n2cpv3s3_ft.log (28); originals in nn_x/r6/{preds,logs}
+(r6 members) and nn_x/abl/{preds,logs} (pop1), copied with cp --update=none. No existing file modified.
+
+MEMBER LEVEL (FT OOF val NDCG, n2cpv3s3 - n2cpv3, paired per feed; per-member SE ~0.00022; z-corr FT1/FT3 0.9997-0.9998):
+  F10 +0.00003+-0.00004 (4/6 >0) | F7x +0.00000+-0.00009 (4/7) | F7x70 -0.00004+-0.00013 (3/7) | pop1 -0.00001+-0.00008 (3/8)
+  G3 (20) -0.00000+-0.00005 | ALL 28 -0.00000+-0.00004 (SE across members); range -0.00064 (p70k_r106) .. +0.00040 (pop1_s951).
+  => the direct bagging gain at the member level is ZERO (|d| < 0.0001 with SE 0.00004).
+
+POOLS (member-equal 0.5 z(ft) + 0.5 z(to); paired per feed; +- = SE):
+  pool                 n   val      vs same pool n2cpv3        vs G3 (n2cpv3)             pmix vs G3      slices vs G3 (z) M<50 M>=50 Tue Thu  z-corr G3
+  G3  (n2cpv3)         20  0.40032  -                          -                          -               -                                1
+  Q2a8 (n2cpv3)        28  0.40089  -                          +0.00057+-0.00040 (z 1.43) +0.00107+-62    +0.3 +1.9 +1.2 +0.9             0.9987
+  C2 = G3(s3)          20  0.40051  +0.00018+-0.00012 (z 1.54) +0.00018+-0.00012 (z 1.54) +0.00021+-19    +1.0 +1.2 +1.1 +1.1             1.0000
+  C3 = Q2a8(s3)        28  0.40101  +0.00012+-0.00011 (z 1.12) +0.00069+-0.00040 (z 1.73) +0.00130+-62    +0.8 +1.8 +1.3 +1.1             0.9987
+  C3 - Q2a8 slices: M<50 +0.00036+-0.00025, M>=50 -0.00004+-0.00007, Tue +0.00011+-0.00016, Thu +0.00014+-0.00015; pmix +0.00022+-0.00016.
+  C2 - G3 slices: M<50 +0.00025+-0.00024, M>=50 +0.00014+-0.00012, Tue +0.00016+-0.00015, Thu +0.00021+-0.00019; pmix +0.00021+-0.00019.
+  EXPECTATION CHECK: V(C2) - V(G3) = +0.00018 lies inside the pre-declared +0.0001..+0.0004 band but is only z 1.5 (not significant),
+  and the member-level gain is zero: the pool gain is the usual near-copy noise size, not a demonstrated bagging effect.
+
+RULE: (i) C2 - G3 +0.00018 >= -1 SE: built; C3 - Q2a8 +0.00012 >= -1 SE: built. (ii) presub_gate: both PASS (FAIL 0, WARN 0).
+  subs/cand_G3_ftbag3_memeq.parquet   sha256 b5cc2a7daf71f2e7746655c8999dc77c7e8240ade4731c4ef09793bd1558b25f  gate: D val 0.40051 ref 0.40032
+    +0.00018+-0.00012; leak probe -0.00005+-0.00029; E predicted public 0.3924 private 0.3950 (ref 0.3923 / 0.3949); F Spearman val 0.9996 test 0.9998.
+  subs/cand_Q2a8_ftbag3_memeq.parquet sha256 ed3dbeabe47162e676df0e36d4bac254247b813922e2db29ebeb81dd11488d55  gate: D val 0.40101 ref 0.40032
+    +0.00069+-0.00040; leak probe -0.00564+-0.00351 (117 has-later feeds, low power; same sign/size as Q2a's -0.00377+-0.00345 read);
+    E predicted public 0.3929 private 0.3955 (ref 0.3923 / 0.3949); F Spearman val 0.9955 test 0.9956.
+  Level transfer (public = 0.0078 + 0.962 val): C2 0.39309, C3 0.39357 (G3 0.39291 by the same formula; actual 0.392820).
+STATUS: both are PUBLIC PROBES at the user's request (level checks), NOT picks; the pick-1 rule is untouched. They are near copies of
+G3 / Q2a8 (z-corr 1.0000 / 0.9987): public cannot order them (paired public SE 0.0005-0.0007 vs expected +0.0002).

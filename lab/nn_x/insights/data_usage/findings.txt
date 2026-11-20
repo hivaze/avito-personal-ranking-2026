@@ -1,0 +1,399 @@
+TRAINING-DATA USAGE AND POSITION BIAS - findings (data_usage analyst, 2026-11-12, CPU only)
+=======================================================================================
+Dir: <repo>/nn_x/insights/data_usage (scripts 01-15, out/*.csv|parquet|log, out/gb/ = GBDT proxy cache,
+results and the Optuna study). No GPU used, no file outside this directory written. Numbers are reproducible from the
+scripts. "L" = per-feed listwise CE / log M (the RHO scoring quantity; 1.0 = uniform scores). "snap" = F7 @77500
+snapshots r101-r104 (the CD --init, scored by rho_score.py with the TRAINING domain token); "ref" = the pool-only
+reference r6_rhoref_pool_s1 (134K random-like M>=50 feeds, 4 epochs; val 0.38199). Label-defined slices (cold/warm
+positive, rank of the positive) are descriptive, not causal.
+
+TL;DR
+1. Signal mix. 95.7% of the NN's gradient units are production feeds (position-biased labels); random-like feeds are
+   4.3% in the main phase and 5.65% in the m02 cooldown (+0.65 replay passes over 134K feeds). K9 (production-order
+   aux) acts on 95% of units. ~214K exploration feeds hidden among the 1.6M short (M<50) feeds are trained as
+   production (production domain token, K9 on a random order).
+2. Position bias is about HALF examination, half production relevance. In random-like train feeds the click lift at
+   rank 0 is 2.5-2.8x (examination); in production 4.5-6.8x; the examination share of the log-lift is 0.5-0.6 at every
+   rank and M bin. Calibrated propensities are mild (1/theta 0.33-1.5, ESS 87%); the XGBoost propensities that
+   "failed" earlier were ~2.5x too steep in log (confounded with the ranker's relevance).
+3. "Imitation". About half (0.51) of the trained snapshot's production-train advantage over a production-blind
+   (pool-only) reference does not exist on val (L_ref-L_snap 0.0265 vs 0.0131, M-matched; upper bound). The snapshot
+   agrees with production order 1.2-1.9x more steeply than the reference. The category pattern of the advantage
+   transfers to val (corr 0.86); the cold-positive part does not (production shows 12% cold candidates, ranker-
+   selected; exploration 21%; val 38%). The main phase buys warm positives (ref->snap +0.0137 warm, +0.0023 all-cold);
+   the cooldown + replay buys cold positives (snap->F7x +0.0148 all-cold, +0.0007 warm).
+4. Production agreement is VALUE, not bias. Every lever that removes or down-weights production-agreeing feeds hurts,
+   NN and proxy alike: NN rho70 cooldown -0.0035 val (z -5.7) / -0.0020 holdout per member (official readout, 4 roots;
+   damage already at step 1000, on warm positives and short feeds); GBDT proxy rho70 -0.0041 / -0.0037 (calibrates the proxy), calibrated IPS -0.0058 / -0.0048, drop
+   top-slot-positive feeds -0.0082 / -0.0087, inverse selection (drop hardest) -0.006. Learnability curricula, IPS and
+   any "de-bias by selection" are closed. Recency oversampling (rec33) loses -0.0021 val, all of it on cold positives
+   (-0.0084), via late-cooldown memorisation (same signature as mix 0.1): keep any cooldown subset at <= ~+1 extra pass.
+5. The ONE position correction that helps is end-of-feed (truncation) handling: a fixed training-only offset on the
+   true rank-from-end 0-2 gives +0.0022..+0.0024 val (z 3.4-3.8) / +0.0020..+0.0022 holdout in the calibrated proxy
+   (3 seeds per arm), all from production feeds (a production feed's last item is a production-deep item clicked at 23.5%: an anti-production
+   confound). It was NEVER tested in the NN: every NN/MLP position tower indexed rank-from-end as M-1-raw pos, which
+   with the gaps (85.5% of feeds) puts 13.5 candidates/feed into "last" with a 2.6% click rate instead of 23.5%.
+   This is the top proposal (E1); NN-ready rkend arrays and lift table are in out/nn_artifacts/.
+6. Optuna (36 TPE trials over exam offset, trunc offset, IPS clip, pool weight, learnability drop; pre-declared
+   TUNE/CONFIRM split of val) picks trunc 1.2 + exam 0.4 + pool weight 0.56 and never IPS or dropping. The best
+   trial does NOT confirm (CONFIRM +0.0019 +- 0.0012, z 1.6; TUNE +0.0039): it is no better than the plain truncation
+   offset. Optuna's robust message is the negative one (IPS / any learnability drop = worst region).
+7. Proposed next (section 7): E1 truncation offset in the NN (2-epoch screen -> CD arm), E2 a 10-GPU-min domain-token
+   diagnostic, E4 front-loaded replay at equal dose; E3/E5 conditional / low.
+
+---------------------------------------------------------------------------------------------------------------------
+1. WHERE THE TRAINING SIGNAL COMES FROM (01_feed_table.py, 03_signal_accounting.py -> out/03_*.csv)
+---------------------------------------------------------------------------------------------------------------------
+Train = 3,151,208 feeds. Classes as the NN sees them (p_random from eda/labels_position/out/train_prandom.npz,
+NN rule: NaN -> 0, M<50 -> 0; holdout = 30K p>0.9 M>=50, rng 12345):
+
+  class                       feeds      feed share  positives  pos share  candidates  cand share  mean M  pos/feed
+  production M<50 (p := 0)    1,605,861  0.510       2,197,474  0.403      35.1M       0.142        21.8   1.37
+  production M>=50            1,381,229  0.438       2,950,361  0.542      187.3M      0.759       135.6   2.14
+  pool (p>0.5, M>=50)           134,118  0.043         245,513  0.045      19.7M       0.080       147.2   1.83
+  holdout (not trained on)       30,000  0.010          53,524  0.010       4.6M       0.019       154.4   1.78
+
+- Gradient units (--loss_norm feed: one unit per feed visit). Random-like feeds are 4.30% of the units in the
+  8-epoch main phase and 5.65% in the m02 cooldown (19,670 steps; 317 feeds per regular step; a pool batch holds ~223
+  feeds; the replay adds 0.65 passes over the 134K pool on top of the 2 regular passes). The K9 production-order aux
+  is active on 95.2% of the units (weight 1-p).
+- Hidden exploration traffic in short feeds: the EDA posterior averages 0.133 on M>=50; if short feeds have the same
+  share, ~214K exploration feeds (M<50) are trained with the PRODUCTION domain token and a K9 target that is a random
+  order (posterior mean on short feeds 0.267, unreliable; 21.9% have p>0.5).
+- Where positives sit (within-feed rank of the shown position):
+  production M<50: rank 0 10.3%, ranks 1-2 13.5%, 3-9 31.6%, 10-49 44.6%; last item 8.9%, rank-from-end 0-2 38.8%.
+  production M>=50: rank 0 4.1%, 1-2 4.4%, 3-9 9.7%, 10-49 32.6%, >=50 49.2%; last item 11.0%.
+  pool / holdout (random-like): rank 0 1.8% / 1.5%, >=50 59.7% / 62.7%; last item 15.5% / 16.1%.
+- End-of-feed truncation (M>=50): last-item positive rate production 23.5%, random-like 28.4% (bases 1.58% / 1.23%);
+  ranks-from-end 1..5 are flat at the base, i.e. M>=50 feeds end right at the last click (no rank-from-end-2 spike).
+
+---------------------------------------------------------------------------------------------------------------------
+2. POSITION BIAS = HALF EXAMINATION, HALF PRODUCTION RELEVANCE (03_signal_accounting.py part C -> out/03_randtopn.csv)
+---------------------------------------------------------------------------------------------------------------------
+RandTopN decomposition within M bins (M>=50, last 3 ranks excluded): CTR at rank k in random-like feeds / their base
+= examination lift theta(k); production CTR / production base = total lift; the ratio = relevance concentration of
+the production ranker at rank k.
+
+  M bin      rank  prod rate  rand rate  theta (exam)  total lift  relevance lift  exam share of log-lift
+  [50,100)   0     9.94%      4.31%      2.49          4.53        1.82            0.60
+  [100,150)  0     8.47%      3.26%      2.72          5.54        2.03            0.59
+  [150,200)  0     7.71%      2.67%      2.82          6.34        2.25            0.56
+  [200,301)  0     7.12%      2.01%      2.59          6.85        2.64            0.49
+  [100,150)  5-9   2.68%      1.67%      1.39          1.75        1.26            0.59
+  [200,301)  10-19 1.86%      1.06%      1.36          1.79        1.31            0.53
+  (full table in out/03_randtopn.csv; the examination share is 0.5-0.6 at every rank above ~30 and every M bin)
+
+- Pooled examination curve theta_rand (relative to the feed base, M>=50 random-like): rank 0 3.08, 1 2.51, 2 1.93,
+  5 1.62, 10 1.53, 20 1.34, 50 1.09, 100 0.77, 200 0.66 (out/theta_rand_rank.npy). The production CTR curve is 1.6-2x
+  as steep in log: 6.13, 3.86, 2.83, 2.13, 1.76, 1.35, 0.96, 0.68, 0.52 (out/ctr_prod_rank.npy).
+- Consequences:
+  (a) An examination-only correction moves 15.1% of the production positives' slot mass (total-variation distance) and
+      halves the top-3 share (15.0% -> 7.3%).
+  (b) Proper inverse-propensity weights are mild: 1/theta = 0.33 (rank 0) ... 0.66 (10) ... 1.29 (100) ... 1.51 (200);
+      ESS 87% of the production positives. The XGBoost "unbiased LambdaMART" propensities that failed earlier
+      (deep_gbdt_ranking.md 2.3: 0.47 at pos 1, 0.15 at pos 10, 0.028 at pos 100 => weights 7-50x, IPW -0.0022) were
+      ~2.5x too steep in log (theta_rand gives 0.50 at rank 10 and 0.25 at rank 100 relative to rank 0): they absorbed the production ranker's relevance (the confounding of Google KDD'23), so that
+      failure says nothing about a correctly calibrated correction.
+  (c) The old LightGBM offset (src/train_lgb.py --pos_mode offset, alpha 1 x log production CTR(pos); tr300k_offset
+      0.3670 vs tr300k_none 0.3679) used the confounded curve, i.e. it removed the relevance half too.
+- Holdout control (08_holdout_position.py; 30K random-like feeds, single positive): a position-blind model finds
+  top-slot positives HARDER than deep ones in random order (M 50-100: L 0.927 at ranks 1-2, 0.932 at 3-9, 0.918 at
+  10-49, 0.900 at >=50; same pattern in every M bin). That is the position-based-model signature: a click at a
+  high-attention slot needs less relevance. Last-item positives are EASIER (L 0.894 vs 0.920, M 50-100; NDCG 0.359 vs
+  0.328): the truncation spike marks "found it and left" clicks, not noise. Model rank vs shown rank in holdout feeds:
+  Spearman +0.005 +- 0.001 for posterior <= 0.95 vs -0.018 for > 0.995 (residual production contamination of the
+  least-certain holdout feeds; small).
+
+---------------------------------------------------------------------------------------------------------------------
+3. HOW MUCH OF THE LEARNED RANKER IS PRODUCTION IMITATION? (02, 04, 10, 13 -> out/04_*.csv, 10_*.csv, 13_*.csv)
+---------------------------------------------------------------------------------------------------------------------
+3.1 Advantage of the snapshot over the pool-only reference, production train vs val (M-binned, val-M-weighted):
+  M bin       adv_prod (L_ref-L_snap)  adv_val (+-SE)      production-only share
+  [5,20)      0.0391                   0.0176 (0.0028)     0.55
+  [20,50)     0.0276                   0.0151 (0.0016)     0.45
+  [50,100)    0.0240                   0.0126 (0.0013)     0.48
+  [100,200)   0.0222                   0.0110 (0.0012)     0.50
+  [200,300]   0.0200                   0.0087 (0.0012)     0.56
+  val-weighted 0.0265                  0.0131              0.506
+  => about half of what the production-trained trunk "knows" on production feeds does not exist under random order.
+  This is an upper bound on imitation: it also contains in-sample fit (the snapshot trained on these feeds, the
+  reference did not), time shift, and whatever the TRAINING domain token carries (L_snap was scored with it; E2
+  measures that part). In NDCG terms the transferable half is worth ref -> snap +0.0101 +- 0.0011 val.
+3.2 Imitation slope (single-positive production feeds, last-item excluded): dL / d[log(1+rank of positive)/log M]
+  snap / ref = 1.21 (M<20), 1.49 (20-50), 1.74 (50-100), 1.89 (100-200), 1.93 (200-300). The production-trained model
+  agrees with the production order beyond what a production-blind relevance model does, increasingly with M.
+  Memorisation would flatten this slope (it lowers the loss most on hard, deep-positive feeds), so the excess slope is a
+  lower bound on order imitation.
+3.3 What transfers (val, random order) and what does not:
+  - By category of the positive the advantage TRANSFERS: corr(adv_val, adv_prod) = 0.86 over the 15 largest
+    categories (val ~ half of prod in level; out/10_val_adv_pcat.csv). Production data teaches real category-level
+    relevance.
+  - By coldness it does NOT: on production feeds the snapshot's advantage is largest for all-cold-positive feeds
+    (0.051 vs 0.027 warm), on val it is smallest (all-cold 0.0068 +- 0.0018 vs warm 0.0169 +- 0.0010; NDCG ref->snap
+    all-cold +0.0023 +- 0.0022 n.s., warm +0.0137 +- 0.0015).
+  - Why (11_cold_exposure.py): production feeds show few, ranker-selected cold items: cold (it_hist_all_luo == 0)
+    candidate share 12.3% production M>=50 vs 20.7% random-like train feeds vs 37.9% val; shown cold items in
+    production are better than average (cold/warm click ratio 0.67 production vs 0.59 random-like; val 0.71 with its
+    own cold definition). Production does not push cold items to the top (cold share flat ~11% over ranks).
+3.4 Where the val gain of each training stage lands (13_val_cold_members.py, 4 roots, paired):
+  step                 all              warm-pos (63%)   mixed (13%)   all-cold-pos (24%)   M<50     M>=50
+  ref -> snap@77500    +0.0101 (0.0011) +0.0137 (0.0015) +0.0065       +0.0023 (0.0022)     +0.0109  +0.0095
+  snap -> F7 (c0.1)    +0.0027 (0.0005) +0.0006 (0.0007) +0.0039       +0.0077 (0.0011)     +0.0034  +0.0022
+  snap -> F7x (m02)    +0.0047 (0.0006) +0.0007 (0.0009) +0.0054       +0.0148 (0.0013)     +0.0055  +0.0041
+  F7 -> F7x            +0.0020 (0.0005) +0.0002 (0.0007) +0.0016       +0.0071 (0.0010)     +0.0021  +0.0020
+  (F7x is a re-cool: ~+0.001 of its val edge over F7 is the known procedural re-cool excess, CDSEED-813.)
+  => The production-dominated main phase buys warm-item relevance; the cooldown buys almost all of its gain on
+  cold-positive feeds (lr decay and replay together; the replay's own share is visible in m0 vs m02: coldpos -0.0023,
+  z -4.5, r6_eval_cd_m0_vs_m02.txt). Exploration feeds are the only training data that show unselected
+  cold items under random display. Private test is colder than val (cold candidate share 0.393 vs 0.289,
+  err_SYNTHESIS C10), so exploration-type signal is worth more on private than on val.
+
+---------------------------------------------------------------------------------------------------------------------
+4. RHO-LOSS PER-FEED LOSSES: WHICH TRAIN FEEDS LOOK INFORMATIVE (04_rho_anatomy.py -> out/04_seg_*.csv)
+---------------------------------------------------------------------------------------------------------------------
+excess = L_snap - L_ref on 2,987,090 production feeds. Stability: cross-root Pearson of excess 0.80-0.82, of L_snap
+0.93; corr(L_snap, L_ref) 0.79. 54.8% of feeds are kept by all 4 roots' rho70, 16.5% dropped by all 4.
+Mean excess (more negative = snapshot better than the reference; rho70 drops the most negative 30%):
+  - rank of the first positive: 0 -0.060 | 1-2 -0.044 | 3-9 -0.031 | 10-49 -0.019 | >=50 -0.009. Within M bins
+    (single positive) rank 0 vs >=50: -0.116 vs -0.012 (M 50-100), -0.143 vs -0.009 (M 200-300).
+  - last-item positive: -0.014 vs -0.031 (truncation clicks are where the snapshot's edge is smallest).
+  - M: -0.039 (5-20), -0.028 (20-50), -0.024, -0.022, -0.020 (200-300).
+  - positives per feed: 1: -0.033 | 2: -0.023 | >=3: -0.015.
+  - coldness of positives: all-cold -0.051 | mixed -0.022 | warm -0.027.
+  - category of the positive: from -0.009 (cat 13, the largest) to -0.057 (cat 48); corr 0.86 with the val pattern.
+  - flat (|range| <= 0.004): day of the train period (-0.027..-0.029; no recency structure), hour, history length,
+    user 0, users with several train feeds, users who appear in val/test (only 0.6% of production feeds, 19,224).
+  - gap share (production-ness) and p_random of short feeds: short "random-like" feeds -0.035 (they are short).
+rho70 (root 101) kept vs dropped: M<50 share 0.49 vs 0.65; positive at rank 0 9.9% vs 15.5%; rank <= 2 21% vs 31%;
+last-item positive 20% vs 12%; >= 2 positives 38% vs 22%; all-cold positives 5.3% vs 8.4%; M >= 200 12% vs 7%.
+So the "low-learnability" 30% that rho70 removes are short, production-agreeing (top-slot), single-positive and
+cold-positive feeds - exactly the feeds where the trunk's production knowledge is expressed.
+
+NN outcome (wave 4 OFFICIAL stage-1 readout, nn_x/r6/logs/r6_eval_cd_w4.txt: holdout-selected checkpoints, 4 roots,
+pooled member deltas vs m02, same data order):
+  arm    val               M<50      M>=50     warmpos   coldpos   holdout           4-member ens val / hold
+  rho70  -0.00350 (z -5.7) -0.00555  -0.00209  -0.00451  -0.00127  -0.00195 (z -5.8) -0.00361 / -0.00126   STOP
+  rec33  -0.00212 (z -4.3) -0.00183  -0.00233  +0.00043  -0.00841  -0.00120 (z -4.1) -0.00187 / -0.00104   STOP
+  hcap   +0.00007 (z +0.3) +0.00049  -0.00021  +0.00019  -0.00035  +0.00002 (z +0.2) -0.00048 / +0.00013   STOP
+  (logged end-of-run values, before checkpoint selection: rho70 -0.0043..-0.0057 val per root, rec33 -0.0035..-0.0055.)
+- rho70 is already -0.005 val / -0.003 holdout at step 1000 (r101 0.38872 vs 0.39401; r102 0.38879 vs 0.39335),
+  i.e. BELOW its own starting snapshot: the damage is immediate and content-driven (a stream biased to deep, late,
+  multi-positive positives drags the model away from production-agreeing relevance), not late memorisation. It lands
+  where section 3 says production knowledge lives: warm positives (-0.0045, z -5.6) and short feeds (-0.0056), not
+  cold positives (-0.0013 n.s.).
+- rec33 tracks m02 until ~step 8000-9000 and then falls behind (holdout-best steps 7000-11000): the recent-days
+  stream (750K feeds) gets ~2.7 extra passes in the low-lr part of the cooldown - the same late-cooldown memorisation
+  pattern as cooldown mix 0.1 (c0 vs m02 on r101: equal at step 8000, -0.0035 at the end) and long cooldowns
+  (r6_recap 3.3). Its loss is entirely on COLD positives (-0.0084, z -8.5; warm +0.0004): over-fitting the most recent
+  items costs exactly the generalisation to unseen items that private needs (pmix veto). Design rule: no cooldown stream should give any feed subset more
+  than ~+1 pass (m02's pool replay: +0.65 passes).
+- Interpretation for data usage: the per-feed "learnability" of a production feed measured against a weak
+  exploration-only reference is mostly production knowledge the trunk has and the reference lacks; removing it costs
+  ~3x the m02 gain. Learnability/curriculum selection of production feeds is closed (see 6).
+
+---------------------------------------------------------------------------------------------------------------------
+5. CPU GBDT PROXY OF DATA-USAGE LEVERS (06_gbdt_cache.py, 07_gbdt_arms.py, 12_summarize_gbdt.py -> out/12_gbdt_summary.csv)
+---------------------------------------------------------------------------------------------------------------------
+Harness: LightGBM lambdarank, full-list truncation (1000), label gain [0,1], 63 leaves, lr 0.05, 500 rounds, 12
+threads, on a FIXED natural-mix sample of 150K training feeds (11.6M rows; holdout excluded) with 53 leak-free NN-like
+inputs (content f1-f5 + z/rk, history similarity, history category counts, co-visitation, LUO popularity, ctx_nd/hn/hs;
+no pre*/prew*, no train-label target encodings). Readout: full val (exact metric) and 10K of the 30K train-period
+holdout feeds; per-feed NDCG averaged over seeds 0-2 (bagging/feature-fraction seeds; same data), paired deltas vs
+base. Base: 0.3717 (100 rounds) -> 0.3716 (200) -> 0.3695 (500): the naive model peaks early and then over-fits
+production artefacts (as in eda_labels_position 6.2). Offsets = init_score at training only (prediction = f(x)).
+
+CALIBRATION against the NN: rho70 here = -0.0041 +- 0.0009 val / -0.0037 +- 0.0010 holdout; the NN rho70 cooldown arm
+(official, 4 roots) = -0.0035 +- 0.0006 / -0.0020 +- 0.0003. Same sign and similar size on val, so this proxy reads
+data-composition levers (the MLP proxy also did: sol_solvers 2.6); it does not reproduce the slice pattern
+(proxy M<50 -0.0029 / M>=50 -0.0043 vs NN -0.0056 / -0.0021). It is known NOT to read aux-task effects (K9) and its reading of position towers has
+been unreliable (section 6, and see 5.3 for why).
+
+5.1 Results (3 seeds unless noted; d = paired delta vs base at 200 rounds, SE in brackets; "conf" = round count picked
+on the TUNE half of val per arm, delta read on the CONFIRM half):
+  arm (what it does)                                         d_val200          d_hold200         d_conf     M<50 / M>=50
+  trunc0.5  end-of-feed offset 0.5 x log lift(rkend 0-2)     +0.0024 (0.0006)  +0.0020 (0.0006)  +0.0028    +0.0027 / +0.0022
+  trunc1    same, alpha 1                                    +0.0023 (0.0007)  +0.0022 (0.0006)  +0.0014    +0.0010 / +0.0027
+  tprod1    trunc offset on PRODUCTION rows only             +0.0022 (0.0007)  +0.0021 (0.0006)  +0.0024    +0.0015 / +0.0026
+  trand1    trunc offset on RANDOM-LIKE rows only            +0.0006 (0.0006)  -0.0006 (0.0006)  +0.0004    -0.0001 / +0.0005
+  lgbpos    LightGBM native learned position GAM (rank x
+            rank-from-end buckets; random-like own ids)      +0.0024 (0.0007)  +0.0017 (0.0007)  +0.0019    +0.0029 / +0.0010
+  posfeat   rank + rank-from-end as features, (20, 50) at
+            inference (EDA b4)                               +0.0013 (0.0008)  +0.0014 (0.0008)  +0.0014    +0.0017 / +0.0002
+  exam0.5   0.5 x log theta_rand(rank) on production rows    +0.0008 (0.0007)  +0.0015 (0.0006)  +0.0019    +0.0022 / +0.0006
+  exam1     1.0 x log theta_rand(rank)                       +0.0006 (0.0007)  +0.0012 (0.0008)  +0.0009    +0.0023 / -0.0006
+  exam1+trunc1                                               +0.0018 (0.0007)  +0.0023 (0.0007)  +0.0024
+  prodctr1  1.0 x log PRODUCTION CTR(rank) (confounded)      -0.0006 (0.0008)  +0.0001 (0.0009)  +0.0007    +0.0020 / -0.0024
+  dom       NN-style domain input (prod 0 / p_random; 1 at
+            inference)                                       +0.0005 (0.0007)  +0.0018 (0.0007)  +0.0010    +0.0006 / +0.0004
+  dom+trunc1                                                 +0.0021 (0.0007)  +0.0039 (0.0007)  +0.0026    +0.0008 / +0.0028
+  addX      +30K extra random-like feeds (180K total)        +0.0011 (0.0006)  +0.0013 (0.0006)  +0.0019
+  pool3     random-like feeds weight 3                       -0.0005 (0.0007)  -0.0002 (0.0007)  -0.0010
+  coldw2    weight 2 on the top-quartile cold-share feeds
+            (label-free)                                     -0.0001 (0.0006)  +0.0009 (0.0006)  +0.0002    -0.0010 / +0.0004
+  droplast  drop feeds with a last-item positive             +0.0005 (0.0006)  -0.0002 (0.0006)  +0.0007
+  rnd70     keep a random 70% of production feeds (size)     -0.0015 (0.0006)  -0.0008 (0.0006)  -0.0002
+  rho70     keep the top-70% RHO excess (NN rho70 analogue)  -0.0041 (0.0009)  -0.0037 (0.0010)  -0.0032    -0.0029 / -0.0043
+  rho85                                           (1 seed)   -0.0023 (0.0012)  -0.0002 (0.0012)  -0.0013
+  rhoinv85  drop the 15% HIGHEST-excess feeds     (1 seed)   -0.0034 (0.0011)  -0.0003 (0.0010)  -0.0010    -0.0058 / +0.0011
+  rhoinv70  drop the 30% highest-excess feeds     (1 seed)   -0.0060 (0.0012)  -0.0030 (0.0011)  -0.0022    -0.0104 / -0.0000
+  ips3      per-feed weight 1/theta_rand(rank of positive),
+            clipped [1/3, 3] (CALIBRATED propensities)       -0.0058 (0.0008)  -0.0048 (0.0008)  -0.0050    -0.0061 / -0.0050
+  droptop   drop production feeds with a positive at rank<=2 -0.0082 (0.0009)  -0.0087 (0.0010)  -0.0072    -0.0105 / -0.0059
+
+5.2 Reading.
+  (a) Every lever that re-weights or selects production feeds AGAINST production agreement hurts, in proportion to how
+      hard it pushes: droptop -0.008 > ips3 -0.006 > rho70 -0.004 (NN official -0.0035) > rnd70 (pure size) -0.0015. Even
+      correctly calibrated, mild IPS (weights 0.33-1.5, ESS 87%) costs -0.006. Top-slot production positives are the
+      single most valuable training feeds for val. The production ranker's ordering is mostly signal for us: keep using
+      it as a teacher (K9) and do not de-bias it away. Selection in the OTHER direction (rhoinv: drop the hardest
+      feeds) also hurts, mostly on short feeds: removing feeds by learnability in either direction loses information.
+  (b) The one position correction that helps is END-OF-FEED (truncation) handling: a fixed offset for rank-from-end
+      0-2, +0.0022..+0.0024 val (z 3.4-3.8) and +0.0020..+0.0022 holdout, robust to alpha 0.5-1.2 (Optuna), and it stops the
+      base model's decay with more rounds (trunc1 0.3735 at 500 rounds vs base 0.3695). The gain sits in PRODUCTION
+      feeds (tprod1 +0.0022 / +0.0021 holdout vs trand1 +0.0006 / -0.0006): in a production feed the last shown item is, by construction, a
+      production-DEEP item clicked at a 23.5% rate (truncation), so without the offset the model learns "features of
+      items the production ranker puts last are good" - an anti-production confound that is pure noise on val.
+      Dropping those feeds instead (droplast) is neutral: the feeds carry useful information elsewhere; only the
+      position-explained part of their label must be explained away.
+  (c) The examination (RandTopN) offset is weakly positive (+0.0006..+0.0008 val, +0.0012..+0.0015 holdout, n.s. on
+      val) and adds nothing on top of the truncation offset (exam1+trunc1 +0.0018 vs trunc1 +0.0023). The confounded
+      production-CTR offset (the old tr300k_offset design) is negative (-0.0006, -0.0024 on M>=50): removing the
+      relevance half of the slope hurts.
+  (d) Exploration data: more distinct random-like feeds help about as much as any extra data (addX +0.0011 for +20%
+      feeds; rnd70 size effect -0.0015 for -21%); up-weighting them hurts (pool3 -0.0005; Optuna prefers w_pool ~0.56).
+      The NN-style domain input helps the train-period random-like holdout (+0.0018) but not val (+0.0005);
+      with the truncation offset the holdout gain adds up (dom+trunc1 holdout +0.0039) while val stays at +0.0021.
+  (e) Cold-rich (label-free) up-weighting: neutral on val (-0.0001), +0.0009 holdout. Not a lever.
+
+5.3 Why the NN never saw the truncation gain (14_rev_index_check.py). Every NN / MLP position tower in this project
+  indexed rank-from-end as rev = clamp(M-1-pos, 0) with the RAW shown position (nn/model.py forward; solvers
+  loss_zoo.py:202). 85.5% of train feeds have gaps (removed already-viewed items, mean 7.9 per feed), so the index-0
+  bucket holds 13.5 candidates per production M>=50 feed with a 2.6% click rate instead of the true last item's 23.5%
+  (prod M<50: 3.4 candidates, 9.1% vs 12.1%; random-like: 4.7 candidates, 6.8% vs 28.4%). The end-of-feed component
+  of the tower (rev_aux -0.0010, nn_report round 1; base vs nopos -0.0002; MLP 'pos' -0.0006) was therefore never a
+  test of truncation handling. The GBDT results that use the TRUE rank-from-end (EDA b4: rkend 57% of gain, +0.0042;
+  LightGBM position GAM +0.0022 / +0.0024 here; fixed offset +0.0023) all agree. Ready inputs for an NN arm:
+  out/nn_artifacts/train_rkend_true.npy, train_rank_true.npy (int16, flat train order) and trunc_lift.json
+  (log lifts: prod M<50 rkend0 1.00 / rkend1 0.54 / rkend2 2.01; prod M>=50 2.81 / -0.20 / -0.22; random-like
+  3.31 / 0.04 / 0.03).
+
+5.4 Optuna (09_optuna_usage.py, user's request "try things like optuna if needed"). Pre-declared: TPE over alpha_exam
+  [0,1.5], alpha_trunc [0,1.5], ips_clip {off,1.5,2,3}, w_pool [0.5,4] (log), drop_hi [0,0.3]; 36 trials (3 workers x 12,
+  seed 0, 400 rounds), objective = TUNE half of val (user hash); CONFIRM half untouched; best trial re-fit with seeds 1-2
+  for both best and base, accept iff CONFIRM delta > 2 SE and holdout delta >= 0.
+  - fANOVA importance: drop_hi 0.85, alpha_exam 0.11, w_pool 0.02, alpha_trunc 0.01, ips_clip 0.01 (any learnability
+    drop dominates, and always downwards). Top trials all have alpha_trunc 0.9-1.4, drop_hi < 0.05, no IPS.
+  - Best TUNE trial #22: exam 0.40 + trunc 1.21 + w_pool 0.56, TUNE 0.37465 (base at 400 rounds ~0.3703).
+  - CONFIRMATION (pre-declared rule): best vs base, seeds 1-2 re-fit, CONFIRM half +0.0019 +- 0.0012 (z 1.6), TUNE half
+    +0.0039 +- 0.0011 (the winner's curse halves it), full val +0.0029 +- 0.0008, holdout +0.0017 +- 0.0008.
+    NOT ACCEPTED (needs > 2 SE on CONFIRM). The tuned combination is no better than the single truncation offset
+    (trunc0.5: +0.0024 val200, CONFIRM-read +0.0028): the extra knobs (exam offset, pool down-weight) are noise-level.
+    Optuna's useful output is negative: every region with IPS or any learnability drop is clearly worse.
+  - Files: out/gb/optuna_usage.db, optuna_trials.csv, optuna_confirm.json, optuna_trial<k>_val.npy.
+
+---------------------------------------------------------------------------------------------------------------------
+6. WHAT WAS ALREADY TRIED (position / data usage), with sources
+---------------------------------------------------------------------------------------------------------------------
+- Learned position tower g(pos)+g'(M-1-pos), dropped at inference: NN round 1 neutral (base 0.37361 vs nopos 0.37385,
+  nn_report.md round-1 table); MLP proxy -0.0006 +- 0.0003 val / +0.0002 holdout (sol_solvers 2.1). All recipes since
+  run --no_pos. End-of-feed-only tower (rev_aux) -0.001 vs nopos_aux.
+- Position as GBDT feature, fixed at inference (EDA b1-b4 XGB +0.004..+0.007 over naive; LGB tr300k_feat at pos 0
+  -0.0025); LightGBM native position GAM +0.0022 (1 seed, deep_gbdt_ranking 2.3).
+- IPS: XGBoost lambdarank_unbiased full IPW -0.0022, sqrt -0.0002 (learned, confounded propensities).
+- Fixed offset from the production CTR curve (LGB tr300k_offset, alpha 1): -0.0009.
+- Production order as a TEACHER: aux MSE +0.002, K9 listwise +0.0024 (adopted); tau 30 -0.0009, PL20 / aux 1.0
+  null; aux anneal 0.5 in the cooldown (aa5) STOP.
+- Domain token (production soft-mixed by p_random; random-like at inference): neutral, kept (nn_report v2).
+- Exploration feeds: stage 2 +0.001; up-weighting inside the main run -0.001 (pw_aux_sim); cooldown mix 0.3 collapse,
+  0.1 memorises; m02 ADOPTED (+0.0012 val / +0.0013 hold); m0 vs m02 coldpos -0.0023 (z -4.5); pp02 (p>0.2, +47%
+  feeds) STOP (val -0.00074); short random-like feeds in the pool -0.0005 (proxy); augmentation of pool batches STOP.
+- Learnability selection (rho70) and recency (rec33): STOP at stage 1 (section 4; r6_eval_cd_w4.txt).
+- AutoDebias / KDCRec-style meta-weighting: parked as too heavy (deep_position_bias_random 7); clean-teacher K3 (P7)
+  depends on the rho reference.
+
+---------------------------------------------------------------------------------------------------------------------
+7. PROPOSED EXPERIMENTS (ranked; each checked against COVERAGE_MAP / EXPERIMENT_REGISTRY / reports)
+---------------------------------------------------------------------------------------------------------------------
+E1  TRUNC-NN: true rank-from-end (truncation) offset in the NN training loss            [priority 1]
+    Mechanism: production feeds end right after the last click, so the last shown item - a production-DEEP item - is
+      positive 23.5% of the time (M>=50; 12-33% at rkend 0/2 in short feeds). A position-blind model learns
+      "features of items the ranker puts last are good" (anti-production noise). A fixed training-only logit offset
+      a*L[group, rkend] for rkend 0-2 (group = prod M<50 / prod M>=50 / random-like; L from
+      out/nn_artifacts/trunc_lift.json) explains those clicks away; inference unchanged. Variant: 12 learned scalars
+      (group x rkend 0/1/2/>=3), i.e. the old rev tower correctly indexed and coarse.
+    Protocol: guarded flag in a NEW cd_arms5.py (flag-off bit-identity as for wave 4) that loads
+      out/nn_artifacts/train_rkend_true.npy into the batch (b["rkend"]); listwise logits + offset on training batches
+      only (not the K9 aux, not eval/predict). Stage A: 2-epoch from-scratch paired screen (r7 harness, seeds 23/24), fixed
+      a=1 vs base; read val, holdout, M<50/M>=50. Stage B (A >= 0 on val and holdout): CD re-cool from @77500 with m02 +
+      offset in the cooldown, roots 101-104 vs m02 (wave-4 rules). Stage C (B passes): from-scratch 10-epoch members.
+    Expected: +0.0005..+0.0015 per member (proxy +0.0024 val / +0.0020 holdout, stable over alpha 0.5-1.2); P ~0.35.
+    Cost: A ~1.5 GPU-h, B ~2 GPU-h, C ~4.5 GPU-h per member. Kill: A pooled d_val < 0 or d_hold < 0; B stage-1 futility.
+    Already tried: only MIS-INDEXED towers: g(pos)+g'(M-1-pos) in nn/model.py (round 1: base 0.37361 vs nopos 0.37385;
+      rev_aux -0.0010, nn_report.md), MLP proxy 'pos' -0.0006 (sol_solvers 2.1, loss_zoo.py:202); COVERAGE_MAP lists
+      "position tower CLOSED (old recipe)". Correct rank-from-end exists only in GBDT: EDA b4 +0.0042 (rkend 57% of gain),
+      LightGBM position GAM +0.0022 (deep_gbdt_ranking 2.3), this proxy +0.0023. Never in the NN.
+
+E2  DOMAIN-DIAG: where does the production-specific half live?                         [priority 1, ~10 GPU-min]
+    Mechanism / protocol: gpu_domain_diag.py re-scores 300K production feeds with the @77500 snapshots under the
+      INFERENCE domain token (random-like). If L_ref - L_snap falls from 0.0265 toward the val 0.0131, the domain token
+      already absorbs the production-specific fit and E3 has no room; if it stays, the bias sits in the shared trunk
+      and transfers to val, which favours E1/E3. Read per M bin and per rank of the positive (04 tables).
+    Expected: decision value only. Cost: ~5 min per root on one GPU. Kill: n/a.
+    Already tried: none. The domain token was judged only by val (K2 "neutral", nn_report v2); rho_score.py scored the
+      snapshots with the TRAINING token only.
+
+E3  EXAM-NN: calibrated examination offset 0.5*log theta_rand(rank) on production rows   [priority 3, conditional]
+    Mechanism: removes only the examination half of the production slope (section 2), keeps the relevance half.
+    Protocol: second arm of E1 stage A/B (E1 + exam 0.5), only if E2 shows the production-specific share stays in the
+      trunk. Expected 0..+0.0008 (proxy alone +0.0008 val / +0.0015 holdout; on top of trunc +0.0000); P ~0.15.
+    Cost: +1 arm in E1 (~1.5-2 GPU-h). Kill: same as E1; drop if E1+exam <= E1.
+    Already tried: learned position tower (above); fixed offset from the CONFOUNDED production CTR curve
+      (src/train_lgb.py --pos_mode offset, logs/tr300k_offset.log -0.0009; prodctr1 here -0.0006); XGBoost IPW with
+      learned (confounded) propensities -0.0022 (deep_gbdt_ranking 2.3). An offset calibrated on random-like feeds
+      (RandTopN, deep_position_bias_random 4.1) was never run in any model before this proxy.
+
+E4  FRONT-LOADED REPLAY: same exploration dose as m02, moved to the high-lr half            [priority 2]
+    Mechanism: c0 (mix 0.1) and rec33 track m02 until ~step 8-10K of 19.7K and lose only in the low-lr half (late
+      memorisation: c0 r101 -0.0035 val at the end; rec33 holdout-best steps 7-11K, -0.0021 val / -0.0084 coldpos);
+      m0 (no replay) ties m02 on val but loses cold positives (z -4.5).
+      Exposure teaches cold handling; repetition at low lr hurts. Linear decay mix(t) = 0.04*(1 - t/T_cd) keeps 0.65
+      extra pool passes but puts 75% of them in the first half.
+    Protocol: CD harness, roots 101-104 vs m02, wave-3 stage rules; report coldpos and M<50 slices descriptively.
+    Expected: 0..+0.0006 per member; P ~0.15. Cost ~2 GPU-h. Kill: stage-1 val < 0 or holdout < 0 vs m02.
+    Already tried: constant cooldown mixes 0 / 0.02 / 0.1 / 0.3 (COVERAGE_MAP; r6_eval_cd_m0_vs_m02.txt), pool size
+      pp02, pool augmentation, cooldown length / wd / dropout / aux anneal (all STOP vs m02). No time-varying mix.
+
+E5  SHORT-EXPLORATION RELABEL: domain token and K9 weight for short random-like feeds      [priority 4]
+    Mechanism: nn/train.py:160 sets p_random = 0 for M<50, so ~214K exploration feeds (EDA posterior: 351K short feeds
+      with p > 0.5; the 04g posterior is built from the feature-proxy z and the gap share, not from labels, but is weak
+      for M<50) get the production domain token and a K9 target that is a random order. Use p (soft) for the token and
+      (1-p) for the K9 weight on M<50 too; they stay out of the replay pool.
+    Protocol: cooldown-only CD arm (roots 101-104 vs m02), M<50 slice reported. Expected 0..+0.0004; P ~0.15.
+    Cost ~2 GPU-h. Kill: stage-1 rules; any M<50 slice < -1 SE.
+    Already tried: short random-like feeds as cooldown POOL members -0.0005 (sol_solvers 2.6 proxy) and as from-scratch
+      training data (+0.0038 on M<50 vs production, sol_solvers 2.3); token/K9 treatment of short feeds never varied.
+
+Not proposed (closed by this analysis or before; do not spend GPU): learnability/RHO selection or curricula of
+production feeds in either direction (NN rho70 -0.0035, z -5.7; proxy rho70 -0.0041, rhoinv70 -0.006); IPS on production
+feeds, even calibrated (proxy -0.0058); dropping top-slot or last-item feeds (-0.008 / 0); up-weighting exploration
+feeds beyond m02 (pool3 -0.0005; NN main-phase -0.001; mix >= 0.1 memorises); recency streams (rec33 -0.0021); P7
+clean-teacher toward the pool-only reference (the reference lacks exactly the production knowledge that rho70 showed
+to be valuable); cold-share up-weighting (coldw2 -0.0005).
+Process note: the CPU GBDT proxy (07_gbdt_arms.py, ~3 CPU-min per arm at 12 threads) reproduced the NN rho70 result in
+sign and size; use it to pre-screen every future data-composition / weighting arm before GPU time. Do not use it for
+aux-loss or architecture questions.
+
+---------------------------------------------------------------------------------------------------------------------
+8. FILES
+---------------------------------------------------------------------------------------------------------------------
+Scripts (all CPU, read-only on project data): 01_feed_table.py (per-train-feed table), 02_val_holdout_loss.py (val /
+holdout per-feed CE and NDCG for ref, snapshots, F7, F7x), 03_signal_accounting.py (composition, gradient units,
+positions, RandTopN), 04_rho_anatomy.py (excess segments, imitation slope, prod-vs-val advantage, rho70 composition),
+05_val_prod_agreement.py (inconclusive: it_tr_pos is a raw item-mean position, not a usable production proxy),
+08_holdout_position.py, 10_val_adv_segments.py, 11_cold_exposure.py, 13_val_cold_members.py, 14_rev_index_check.py,
+15_nn_artifacts.py, 06_gbdt_cache.py + 07_gbdt_arms.py + 12_summarize_gbdt.py (GBDT proxy), 09_optuna_usage.py
+(Optuna study + confirmation), gpu_domain_diag.py (E2; written, NOT run - GPU).
+Outputs: out/train_feeds.parquet, out/0*_*.csv, out/theta_rand_rank.npy, out/ctr_prod_rank.npy,
+out/val_feed_losses.parquet, out/holdout_feed_losses.parquet, out/04_prod_losses.parquet, out/gb/res_*.{npz,json},
+out/12_gbdt_summary.csv, out/nn_artifacts/{train_rank_true.npy, train_rkend_true.npy, trunc_lift.json,
+theta_rand_rank.npy}; logs out_*.log.

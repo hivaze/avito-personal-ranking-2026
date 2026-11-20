@@ -1,0 +1,25 @@
+PRE-REGISTRATION of the labelled read of arm hz2n. Written 2026-11-15T07:37:51Z by the builder, BEFORE any hz2n run exists (no GPU job of this arm has been started;
+the builder has opened no val / test / holdout label). These are EXPECTATIONS [I], not results. Same read as hz / hz2: 16-pool arm minus 16-pool of the
+comparison arm at the last step (@last), paired per feed over the 14,423 val feeds; stale-val = nn_x/w5/stale_pred.py (scenario both_pre2both).
+
+Basis of the expectation: (1) the encoder swap is a small change in output space next to the popularity view itself: with the re-cool init checkpoint, before any
+step, mean |d within-feed z of the logit| = 0.011 over all cells and 0.022 on newly cold cells for "feats_n minus the 6b view of hz2/feats", against 0.16 for
+"hz2 view minus stored inputs" [M, logs/test_cd_arms6c_p4c.log]; (2) removing the item-ID part of the encoder score at INFERENCE costs 0.00000-0.00005 on as-built
+models [D, hz2_review.md MAJOR 2]; (3) the tell is label-relevant in training (within-feed AUC 0.528 on hz2-cold rows [D, same]); (4) paired SE of a 16-pool
+difference between two hz2-type arms is about 0.00047 [D, E_kd_predeclared.txt 07:15Z, row hz2 - hz].
+
+ arm (HZCD_DIR)                      | comparison | val: expected [80% interval]      | stale-val (both_pre2both): expected [80% interval] | in-period holdout (reported only)
+ hz2n  as asked (feats_n)            | hz2        |  0.0000 [-0.0006, +0.0006]        | +0.0002 [-0.0005, +0.0009]                         | -0.0002 [-0.0008, +0.0004]
+ hz2n  as asked (feats_n)            | ref        | +0.0003 [-0.0006, +0.0012]        | +0.0016 [+0.0006, +0.0027]                         | -0.0030 [-0.0040, -0.0020]
+ hz2nF both heads (feats_nF)         | hz2        |  0.0000 [-0.0006, +0.0006]        | +0.0001 [-0.0006, +0.0008]                         | -0.0003 [-0.0010, +0.0004]
+ hzn   as asked (feats_hn)           | hz         |  0.0000 [-0.0005, +0.0005]        | +0.0001 [-0.0005, +0.0007]                         | -0.0001 [-0.0005, +0.0003]
+ hznFS (feats_hnFS)                  | hz         |  0.0000 [-0.0005, +0.0005]        | +0.0002 [-0.0005, +0.0009]                         | -0.0002 [-0.0007, +0.0003]
+ hz2Ln as asked (feats_Ln)           | hz2        |  0.0000 [-0.0007, +0.0007]        | +0.0002 [-0.0006, +0.0010]                         | -0.0006 [-0.0015, +0.0003]
+
+Plain statement: I expect NO arm of this family to separate from its base arm (hz2 or hz) by more than 1.5 SE on val or on stale-val. The most likely outcome is
+a null against the base arm with the base arm's advantage over ref kept. A result outside an interval above is information about my model of the effect, not a
+success criterion; the lead's RULE hz governs the arm.
+Asymmetry to keep in mind when reading stale-val (not a prediction): the witness scenario both_pre2both replaces the fe head only. The "as asked" arms are trained on
+exactly that pattern (fe head without ID, new head with ID on newly cold rows); the F arms are trained on the test pattern (no ID in either head). So both_pre2both
+is biased toward "as asked" and against F by construction; the like-for-like witness for F is both_pre2full (stale_pred_full.py in this directory, GPU, not run by me).
+My expectation for F minus "as asked" (same base view): both_pre2both stale-val -0.0001 [-0.0007, +0.0005]; both_pre2full stale-val +0.0002 [-0.0004, +0.0008].

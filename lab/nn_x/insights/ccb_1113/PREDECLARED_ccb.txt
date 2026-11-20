@@ -1,0 +1,226 @@
+Fri Nov 13 18:31:28 UTC 2026
+CCB-1113: PRE-DECLARATION of the 16-item CPU closure batch (reports/EXTERNAL_SCAN_1113.md §2.3; item details in §1 and
+scratchpad/ext/synth/checks.json). Written BEFORE any number of this batch was computed. Workflow a workflow run
+(CURRENT_STATUS Log 18:24). One batch, one bar, Holm over 16. No GPU.
+
+=====================================================================================================================
+A. RULES (all agents)
+=====================================================================================================================
+- CPU only: CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 MKL_NUM_THREADS=12 OPENBLAS_NUM_THREADS=12 POLARS_MAX_THREADS=12
+  (numba: NUMBA_NUM_THREADS=12). Python = <repo>/.venv/bin/python.
+- Read-only on the project. New files ONLY under
+  /tmp/scratchpad/ccb/<agent>/ . Builders that exist in
+  the project (feats_v2/seq_/feat_covis.py, feats_v2/life_/ts_train_stream.py, eda/errors/feed_structure/05_kappa_oracles.py,
+  nn_x/insights/data_usage/07_gbdt_arms.py, nn_x/audit/itemprior/audit_itemprior.py, scratchpad/ext/xcheck193/*.py) are
+  COPIED into the agent dir and run from there (no numba cache written into the project). Do not edit reports/, src/, nn_x/
+  (the only project write of this batch is this file's copy and the synthesiser's nn_x/insights/ccb_1113/RESULT.md).
+- No data or user identity leaves the machine. Quarantined files (data/feats_quarantine, preds_quarantine) are never read.
+- Leak rules (CURRENT_STATUS §3): never the same user's LATER snapshots or anything derived from them; no own-feed labels;
+  user_id 0 is one pooled bucket; val labels only inside the nested user-grouped folds.
+- Every number in any report must come from a script that was run, cited as path + printed output line.
+
+=====================================================================================================================
+B. PROTOCOL (identical for every item unless the item says otherwise)
+=====================================================================================================================
+B1 Base (val). b = zf( 0.5*zf(preds/ens_G3_ft_val.npy) + 0.5*zf(preds/ens_G3_to_val.npy) ), zf = within-feed z
+   (nn_x/audit/features/lib_av.feed_z_nanmin), exactly nn_x/audit/features/s04_resid_probe.py. Sanity assert: mean per-feed
+   NDCG(b) = 0.40032 +- 0.00002 over the 14,423 val feeds (1,389,971 rows) with src/metrics.ndcg_per_feed.
+B2 Base (holdout). The 30K random-like train holdout (preds/holdout/holdout_meta.npy rows = (M, offset), holdout_y.npy).
+   b_h = zf( mean_k zf(preds/holdout/nn_<k>_holdout.npy) ) over the 20 train-only G3 members
+   k in {v23_gru_pre2s_s501..s506, r6_cd_m02_r101..r107, r6_cd_m02_p70k_r101..r107} (no FT branch exists on the holdout).
+   Sanity assert: mean NDCG(b_h) = 0.32379 +- 0.00002. Holdout feed ids / train days are reproduced exactly as
+   nn_x/w10/r3/s_readout.py lines 59-69 (rng 12345 choice over p_random > 0.9 & M >= 50; asserts on M).
+   LATE column = holdout day index >= 11 (Sep 17-19, 8,279 feeds); EARLY = day index <= 2 (Sep 6-8, 7,823 feeds);
+   day index = (timestamp + 10800)//86400 - min over the holdout feeds.
+B3 Folds. sklearn GroupKFold(n_splits=5) over val feeds grouped by user_id, no shuffle (= s04 / nn/finetune.py).
+B4 Residual model LIN (listwise softmax, multi-positive): s = beta*b + sum_j [ w_j1*zf(x_j) + w_j2*(pctrank_feed(x_j) - 0.5)
+   + w_j3*isnan(x_j) ] (isnan term only when x_j has NaN), loss = -sum y*s + sum_feeds npos_f*log sum_feed exp(s),
+   L-BFGS-B from beta = 0.94, others 0, maxiter 200 (s04 nll / fit_lin, unchanged). Control = the same fit on [b] alone.
+   The construction's columns x_j are listed per item in §C; ALL of an item's primary columns enter ONE LIN (one test per
+   item). Per-feed monotone transforms of b (calibration, temperature, log p) are excluded from every construction: they are
+   no-ops for per-feed NDCG. Feed-constant quantities (user aggregates) can enter only as interactions with candidate-level
+   columns (C10); a feed-constant column alone is a no-op and is not tested.
+B5 Nested val delta. Each fold's LIN and control are fitted on the other 4 folds and scored on the held-out fold; paired
+   per-feed delta d_f = NDCG(LIN) - NDCG(control) over all 14,423 feeds; delta = mean d_f, SE = sd(d_f)/sqrt(14,423),
+   z = delta/SE, one-sided p = 1 - Phi(z).
+B6 Holdout transfer. Refit LIN and control on ALL val feeds (theta_full); apply theta_full to the holdout columns built with
+   the SAME transforms (zf, pctrank, isnan on holdout feeds); holdout delta = mean over 30,000 feeds of NDCG(theta_full . G_h)
+   - NDCG(b_h) (the control is monotone in b_h), with SE and z; same for the LATE and EARLY subsets.
+B7 pmix. src/pmix.wmean_se(d_f, pmix.weights()['private']) on the nested val per-feed deltas (veto only; never promotes).
+B8 Reported as information (never gating): slices M<50, M>=50, Tue (day <= min+1), Thu, coldpos, warmpos (s04 SL), the
+   EARLY holdout column, the s04 noise band (-0.00047..+0.00022) next to each delta, and 4 N(0,1) noise columns run once in
+   the same LIN harness by one agent (calibration of the null).
+B9 Cross-user statistics (co-visitation, item strength, consensus, any count over other users' feeds):
+   - val rows: source = all train feeds (days 20702-20716) + OTHER users' val feeds on STRICTLY EARLIER days (val day 20718
+     rows see train only; day 20720/20721 rows also see days 20718/20719). Test feeds (days 20722-20725) are later than val
+     and are NEVER a source for val. Same non-zero user's sequences are skipped.
+   - holdout rows (train day d): source = train feeds of days < d, same non-zero user skipped, the 30K holdout feeds never a
+     source of labels.
+   - Label-derived statistics (C06, C12) use val labels only inside the training folds (B5) and the full val only for theta_full.
+B10 Own-history constructions (C02, C03, C13, C08) use only the feed's own history arrays (data/flat/<split>/hist_*), the
+   candidate arrays and the int8 item embeddings (data/competition/<split>/item_embeddings/data.memmap); holdout rows come from
+   data/flat/train for the 30K holdout feeds. Label-free.
+B11 STOP rules: an item whose construction cannot be built leak-free, or whose declared coverage gate fails, enters the Holm
+   family with p = 1 and is CLOSED (reason recorded). No item may be re-specified after its first number is seen; any extra
+   variant computed is labelled INFORMATION and can neither pass nor rescue the item.
+
+=====================================================================================================================
+C. THE 16 ITEMS (id, name, xref, construction = the LIN extra columns, data source, build needed, prior P)
+=====================================================================================================================
+C01 GBDT-OOF score and leaf-SVD64 (Stage 0) [x1.1, x4.0; P 0.015]
+  Build: LightGBM lambdarank (500 trees, num_leaves 63, lr 0.05, min_data_in_leaf 500, label_gain [0,1],
+  lambdarank_truncation_level 300, seed 0, 12 threads) on the cb26 XM rows = the 134,118 exploration-subset train feeds
+  (p_random > 0.5, M >= 50, the 30K holdout excluded; nn_x/cb26/cbdata.py) with the E3 feature list (174 columns,
+  nn_x/cb26/data/e3_xm_yeti.json 'features'). pred_leaf on val and holdout rows (out-of-sample for both). One-hot leaves ->
+  TruncatedSVD(64, randomized, seed 0) fitted on a 2M-row uniform sample of the TRAINING rows; project val and holdout.
+  PRIMARY columns: leafsvd_01..leafsvd_64 (64 x [z, pctrank]).
+  INFORMATION: [b, gbdt score] vs [b]; [b, score, leafSVD64] vs [b, score] (the spec's discriminator).
+  Caveat (PRETRAIN_PLAN:312): a fail closes the residual form only, not the NN-input form.
+  Data: data/feats/{train,val} + nn_x/cb26 index helpers. needs_build: yes. CPU ~2-3 h.
+C02 Streak / EWMA + per-type same-category recency [x2.8; P 0.01]
+  Columns (S = cos(candidate, history item) on L2-normalised int8 vectors, k = hpos (0 = newest), valid = history item has
+  a vector; w_k = exp(-k/tau)):
+   dmean_tau = sum w S / sum w; dlse_tau = (1/5) log(sum w exp(5S) / sum w); dcat_tau = sum w 1[cat_h = cat_c] / sum w,
+     tau in {4, 16, 64} (9 columns; empty -> NaN);
+   dlse16_t1s1, dcat16_t1s1 = the tau 16 versions over event_type 1 & source 1 events only (2 columns);
+   strike = sum_{k<16} 2^-k * 1[cat_h(k) = cat_c] (1 column);
+   rec_e1, rec_e4, rec_e23 = -log1p(min hpos of a same-category history event of type 1 / type 4 / type 2 or 3), NaN if none
+   (3 columns). Total 15 primary columns.
+  Data: data/flat/<split>/hist_{category_id,emb_idx,event_type,event_source,hpos,fidx}, cand_category_id, cand_emb_idx,
+  embeddings memmap. needs_build: yes. CPU ~45 min.
+C03 Latent geometry (EMBEDDINGS §5.2 gate + f2-supervised 16-d location) [x2.11; P 0.02]
+  Columns:
+   loc16 = cos(P c~, mean_h P h~) in the 16-d feed-level subspace nn_x/emb/structure/cache/feedlevel_subspace16.npy, with
+     ~ = minus the split's category mean vector (val: val_cat_means.npy; holdout: train category means), label-free (s08 e);
+   mode6, mode96 = 1[candidate on the same side of dim 6 (>12) / dim 96 (>40) as the history's dominant side]; NaN when
+     neither side holds >= 80% of the feed's history vectors (s09);
+   g_shift = cos(W e_c, p8) - cos(W e_c, pall), p8 / pall = mean of W e_h over the last 8 / all history events;
+   g_f2res = zf(f2) - zf(f2_hat), f2_hat = (W e_c) . p32 (p32 = mean of W e_h over the last 32 events);
+   g_cmatch = share of contacted (event types 2/3) history items with cos(W e_h, W e_c) >= 0.9 (NaN if none);
+   W (16 x 128) fitted ONCE label-free by ridge (lambda 1.0, torch CPU 12 threads) of within-feed z(f2) on (W e_c) . p32
+   over a 2M-row uniform sample of train candidate rows excluding the 30K holdout feeds. 6 primary columns.
+  Data: embeddings memmaps, data/flat/<split>/cand_f2, hist_*. needs_build: yes. CPU ~2 h.
+C04 Co-vis variants + OTTO-7th NB log-lift [x1.10; P 0.01]
+  Copy feats_v2/seq_/feat_covis.py; source rule changed to B9 (strictly earlier DAYS for val; days < d for holdout).
+  Columns: seq_cv_w5, seq_cv_fwd5, seq_cv_t1, seq_cv_seqs (as defined in feat_covis.py docstring), plus
+   nb_loglift = log P(c) + sum_{i=1..10} ((11 - i)/10) * loglift((h_i, type_i) -> c), h_i = i-th newest history item,
+   loglift = log[(n(h,type -> c) + 0.1) / (n(h,type) * P(c) + 0.1)] with n counted as co-occurrence within +-5 positions in
+   the B9 source and P(c) = occurrences of c / total occurrences in that source (log P(c) = log((n_c + 1)/(N + 1))).
+  5 primary columns. Data: data/flat/{train,val} histories via feats_v2/seq_/sources.py. needs_build: yes. CPU 2-3 h.
+C05 IDF / IUF / Swing / BM25 co-vis counts [x6.2, x10.0, x16.1; P 0.015]
+  Copy of feat_covis.py with the B9 source. Columns:
+   cv_iuf = sum over hits w_h/d * 1/log(2 + L_s) (L_s = source sequence length);
+   cv_idf = sum over history items x of w_x * idf_x / d, idf_x = log((N_seq + 1)/(1 + df_x));
+   cv_bm25 = sum_x idf_x * (n_x*(k1+1))/(n_x + k1), k1 = 1.2, n_x = hit count of x with c;
+   cv_invd20_idfdamp = invd20 with each history weight 0.95^hpos multiplied by 1/log(2 + pop_x);
+   swing_max = max over the last 32 unique history items h of sum_{u<v in U(c,h)} 1/(1 + |I_u ∩ I_v|), U(c,h) = source
+     sequences holding both c and h within +-20 positions (cap 200), I = item set of the sequence (cap 256); computed only
+     where 1-hop co-vis is non-zero, else 0.
+  5 primary columns. Data: as C04. needs_build: yes. CPU 1.5-2 h (+swing).
+C06 Bradley-Terry / first-choice item strength [x16.7; P 0.015]
+  theta_i maximises sum_feeds sum_pos [theta_i - log sum_{j in feed} exp theta_j] - lambda*||theta||^2, lambda = 3 FIXED
+  (1 and 10 = information), sparse L-BFGS over items seen >= 1 time; unseen items theta = 0 (flagged by bt_seen = 0).
+  Source feeds: train feeds with p_random > 0.5 and >= 1 positive, 30K holdout excluded, B9 day rule (val: all train days;
+  holdout day d: days < d, one fit per holdout day). No val labels in the source (train only).
+  Columns: bt_theta, bt_seen (1[item in source]) -> 2 primary columns.
+  INFORMATION: nested contrast vs the CTR prior it_tr_coec.
+  Data: data/flat/train cand_item_id, cand_target, feeds.parquet; eda/labels_position/out/train_prandom.npz.
+  needs_build: yes. CPU ~1 h (+ per-day holdout fits).
+C07 Item trend / lifecycle at a gap-matched as-of [x9.0; P 0.015]
+  Copy of feats_v2/life_/ts_train_stream.py. Columns: it_n7, it_trend = log((dec24 + .5)/(dec72 + .5)), it_slope7 = OLS
+  slope of daily counts over 7 days / mean, it_q95gap = as-of time - 0.95 quantile of the item's dated interaction times
+  (days), exhaust = c_ndays / age_days(f4). As-of: val = TR_END (Sep 20 00:00 MSK); holdout rows = feed-day start - 5 d
+  (spec parity with the 2-9 day val/test gap). 5 primary columns. FEATURES_REVIEW rule-5 check printed first (information).
+  Data: data/flat/train dated interactions, f4. needs_build: yes. CPU ~1 h.
+C08 EMDE multi-partition sketch [x5.9; P 0.015]
+  32 independent partitions of the L2-normalised int8 item vector, each = 6 Gaussian random projections (seed 0) cut at
+  per-projection quantiles (fitted on a 5M-row label-free sample of history + candidate rows of train/val/test) -> K=64
+  buckets. Per feed, sketch S_n = recency-weighted (exp(-hpos/64)), L1-normalised bucket histogram of the history per
+  partition. Columns: emde_all_k64 = mean_n log(1e-4 + S_n[b_n(c)]); emde_e1, emde_e4, emde_c23 (types 2+3), emde_dlv (types
+  5,6,8) = the same over those event types; emde_all_k64_lift = emde_all_k64 - mean_n log P_global(b_n(c)).
+  6 primary columns (the spec's k16/k256/unweighted/s1/s2 variants = information only).
+  Data: embeddings memmaps, data/flat hist_*. needs_build: yes. CPU ~2 h.
+C09 RP3beta whole-sequence walk [x15.7; P 0.01]
+  Copy of feat_covis.py Index with the B9 source. For candidate c: over c's latest 500 source occurrences, for each source
+  sequence s containing c (WHOLE sequence), for every item x in s that is in the feed's history add
+  0.95^hpos(x) / (len(s) * deg(x)) (deg = posting count of x in the source); rp3b05 = that sum / deg(c)^0.5 (beta 0.5 fixed);
+  p3a = the same with beta = 0. 2 primary columns. Coverage printed (information).
+  Data: as C04. needs_build: yes. CPU 1-2 h.
+C10 User aggregates close-out (F26 + F27) [x17.3, x17.4; P 0.015]
+  Feed-constant aggregates a_g (standardised with val mean/sd, the same constants applied to the holdout):
+   F26: log1p(H), u0 = 1[user_id = 0], u_het{1,2,3,4,10}_share, tte_u_ctr, tte_u_imp, u_contact32, u_fav32;
+   F27: hist_n_uniq_cat, ent32, ent32_top, entall, entall_top
+   (definitions: scratchpad/ext/xcheck193/build_user.py and data/feats/<split>; holdout tte_u_* rebuilt as-of days < d from
+   data/flat/train labels of OTHER feeds of the same user with day < d only).
+  Cues q_k (10): f1_z, f2_z, f3_z, f4_z, f5_z, cos_u_z, seq_max_all_z, cat_cnt_all_z, it_hist_all_luo_z, cat_min_hpos.
+  CONTROL for this item = LIN[b, q_1..q_10]; PRIMARY = control + the 150 interactions a_g * zf(q_k) (z only, no pctrank).
+  Delta = PRIMARY - CONTROL (nested and holdout alike).
+  INFORMATION: inter_resid.py GBM T - C rerun on val and holdout.
+  Data: data/feats/{val,train}, scratchpad/ext/xcheck193/user_feats_val.npz (+ holdout build). needs_build: yes (holdout side,
+  interactions). CPU ~1 h.
+C11 Typed implicit rating cvx [x7.0; P 0.015]
+  Copy of feat_covis.py (B9 source) with the accumulator split by the event type of the USER's history item x:
+   cvx_g1 (type 1), cvx_g2 (types 2,3,4), cvx_g3 (types 5..10), each = sum 0.95^hpos / d over hits within +-20;
+   cvx_intent = cvx_g2 / (cvx_g1 + cvx_g2 + cvx_g3 + 1e-9); cvx_tw = sum w_t 0.95^hpos / d with w = {g1: 1, g2: 6, g3: 3}.
+  5 primary columns. Data: as C04. needs_build: yes. CPU ~1 h.
+C12 Metric-optimal post-processing key B, residual form [x3.2; P 0.01]
+  From eda/errors/feed_structure/05_kappa_oracles.py (copied): p_i = logistic calibration of b (fitted on the training folds);
+  EN_i = 1 + sum_{j != i in feed} min(1, p_j * lift(cos_ij bin, samecat_ij)) with the lift table (EDGES of 05) fitted on
+  the training folds' labels only; kappaB_i = log(1/IDCG(EN_i)) - log(1/EN_i) (interpolated on N = 1..M).
+  PRIMARY column: kappaB (1 column; log p itself is a monotone transform of b and is excluded). For the holdout the
+  calibration and lift table are fitted on all val. INFORMATION: the deterministic key log p + kappaB, nested.
+  Data: preds/ens_G3_{ft,to}_val.npy, holdout members, embeddings, categories. needs_build: yes. CPU ~1 h.
+C13 Pending-favourite (saved, not contacted) [x8.11; P 0.01]
+  Per feed, per distinct history item_id: n_e4 and any e2/e3/e5/e6/e8 event on the same item (within the 256 window).
+  P_u = items with odd n_e4 and no contact/delivery event. Columns: p1 = max cos(c, P_u items with a vector) (NaN if none);
+  p2 = p1 - max cos(c, all e4 items); p3 = |P_u items in cat(c)| / (|P_u| + 1). 3 primary columns.
+  Data: data/flat/<split>/hist_{item_id,event_type,emb_idx,category_id,fidx}. needs_build: yes. CPU ~15 min.
+C14 Cross-feed prediction consensus [x1.4; P 0.01]
+  cons_i = mean over OTHER users' feeds that contain item i AND satisfy B9 (val: val feeds of strictly earlier days; test
+  excluded; holdout: other holdout feeds of days < d) of the TRAIN-ONLY G3 within-feed z of i (val: zf(ens_G3_to_val);
+  holdout: b_h). FT-branch scores are never used. n = number of such feeds. Columns: cons_shr = cons * n/(n + 5) (0 if n = 0),
+  lcnt = log1p(n). 2 primary columns.
+  COVERAGE GATE (declared): if rows with n >= 1 are < 10% of val rows -> STOP, p = 1, CLOSED (coverage printed first).
+  needs_build: yes. CPU < 1 h.
+C15 PLE / PCGrad pre-gate (gradient cosine main vs K9) [x12.3; P 0.02]
+  NOT a residual construction. Run on CPU (scratch copy of nn_x/w5 model/train code, device cpu, 12 threads):
+  checkpoints nn_x/w5/ckpt/w5_e10_base_s951@70000.pt and s952@70000.pt (plateau; @60000 is not on disk, disclosed) and
+  @last for both; 64 training batches (fixed seed 0, the recipe's loader); per batch the cosine between the gradients of
+  the main listwise loss and the K9 aux loss on every shared 2-D trunk matrix. PROCEED flag iff the median cosine is < 0 on
+  >= 1/3 of the matrices at @70000 for BOTH seeds.
+  BATCH VERDICT: this item has no nested val delta, so it cannot meet the bar -> enters Holm with p = 1 and is CLOSED under
+  this batch; the PROCEED/CLOSE flag is reported as INFORMATION only (any GPU follow-up needs its own pre-declaration and
+  the user's go-ahead). needs_build: yes (gradient script). CPU ~1 h.
+C16 REGIME4 Step 0 (Sep-12 production-regime indicator, GBDT proxy) [x3.9; P 0.01]
+  Scratch copy of nn_x/insights/data_usage/07_gbdt_arms.py with a new arm 'regime': extra feature post12 = 1[production row
+  (p_random <= 0.5) and feed timestamp >= 2026-09-12 00:00 MSK], 0 otherwise and 0 for every val/holdout row at inference.
+  Both models (base and regime) on the 07 U sample (150K natural-mix train feeds) with every 30K-holdout feed removed
+  (asserted), 400 rounds, seeds 0/1/2, scores averaged over seeds. Val / 30K-holdout X built in the 07 layout
+  (out/gb/feats.json) from data/feats/{val,train}.
+  PRIMARY column: regcorr = zf(s_regime) - zf(s_base) (1 column).
+  INFORMATION: the spec's own kill read (proxy val of regime / drop-pre / drop-post vs base, > 1 SE?).
+  needs_build: yes. CPU ~1 h.
+
+=====================================================================================================================
+D. THE BAR (pre-declared; one read per item)
+=====================================================================================================================
+An item PASSES iff ALL of:
+ (1) nested val delta (B5) >= +0.0005, AND
+ (2) Holm-corrected one-sided p <= 0.02275 over the 16 items (step-down: sort the 16 p-values ascending; the k-th smallest
+     is rejected iff p_(j) <= 0.02275/(16 - j + 1) for every j <= k). Equivalent z thresholds (k-th smallest p):
+     k=1 2.984 | 2 2.964 | 3 2.943 | 4 2.920 | 5 2.895 | 6 2.868 | 7 2.837 | 8 2.803 | 9 2.765 | 10 2.721 | 11 2.670 |
+     12 2.608 | 13 2.531 | 14 2.428 | 15 2.278 | 16 2.000. Items with no test (C15, any STOP) enter with p = 1.
+ (3) holdout delta with the full-val weight (B6) >= 0 (point estimate), AND
+ (4) LATE-holdout delta (Sep 17-19, 8,279 feeds) >= 0 (point estimate), AND
+ (5) pmix (B7) >= -1 SE (veto only).
+Everything else is CLOSED. EARLY column, slices and noise band are information.
+A PASS means only "worth the item's next stage as written in checks.json (its own pre-declared GPU/NN rule)"; nothing is
+pooled, fine-tuned, or submitted from this batch, and the frozen pick-1 rule is untouched.
+
+E. KNOWN WEAKNESSES (DATA_PIPELINE_1113 §2, disclosed in advance)
+- Positive controls of this residual lens recover only ~15% of a known input gap (§2.4): a CLOSED here closes the post-hoc
+  residual form; it is weak evidence about training-time (NN-input) value. The synthesis must say so per item.
+- Val-fitted residuals transfer negatively to the holdout (an uninformative tilt costs about -0.0002..-0.0004; 82/94 label-free
+  constructions were negative there), so criterion (3) is conservative.
+- Multiplicity: ~16 looks at nominal 2 SE would give ~0.3 false passes; Holm keeps the family-wise rate at 0.02275.
+- The holdout is M >= 50 only and popularity-fresh; the late column is the closest holdout analogue of test timing.

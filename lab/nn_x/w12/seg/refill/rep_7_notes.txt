@@ -1,0 +1,21 @@
+## 7. Limits, deviations, hard rules, files
+
+**Limits of the read.**
+- The replay shows recovered events in slots trained for other depths (pass c) or beyond every trained position (pass d). It measures whether the events carry model-usable information, not what a retrained model would gain. Calibration g says the slot substitution itself is harmless (rho_g 1.23 [0.64, 2.69]).
+- Up to 28 of the 34 precomputed inputs and the organisers' user embedding stay on the stored 256 events in every pass: all contrasts are lower bounds in magnitude, numerator and denominator alike.
+- The decision sample is in train format (per-type caps twice as deep in half of the capped feeds, earlier snapshot 2.9 days back); val is the test-like sample (9.6 days; test 14.2) and is half as large. Val numerators are larger than holdout ones in both designs (+0.0027 against +0.0012 / +0.0015), inside their SE.
+- CPU and GPU runs of the same pass differ in NDCG on 8-9% of capped feeds (tie order of the top-16 retrieval among repeated items); all passes here ran on one device with one code path, so paired contrasts are not affected in expectation.
+- 36 rows of `out_s3.txt` carry a threshold label (6 OPEN, 30 UNDECIDED, 0 CLOSE); only the row declared in block 0 is the verdict. Family, bucket, pooled and length-matched rows are companions.
+
+**Deviations from the brief, all declared before the first labelled number unless marked.**
+- Two recovery definitions (T, U) instead of one, because the label-free step showed that "the 128 events beyond the cap" exist for 6-7% of qualifying feeds only. The verdict row stayed the literal one (T).
+- Pool = member-equal mean of per-feed score z (the project's `feed_z`), not rank z as the brief words it.
+- Pass (d) needed a convention (`rec` index held at 255 beyond position 255); the brief assumed no positional embedding.
+- "Exact-match rate" of the positive check is reported by position and by membership, with the decomposition that explains why the positional rate is low.
+- Flock on the lane lock with a 30-minute limit instead of an unbounded wait (obtained at once).
+- AFTER the read (blocks 2-3 of the declaration): `s3b` integrity checks, `s3c_pooled.py` (pooled forms of contrasts printed per set only), `s3d_table.py` (levels), `out_parity.txt` (label-free). No statistic of block 0 was changed or re-run; the rule was read once.
+- Not done: the fine-tuned branch was not replayed (train-only checkpoints only); the 192 + 64 line is reported but carries no decision.
+
+**Hard rules.** GPU: one process (PID [n]), GPU N only, inference only, 9.8 minutes, launched under the lane lock with 3 compute processes and 88,742 MiB free, lock held until the process was visible; nothing else touched a GPU. CPU: one process at a time, 12 threads, resident memory a few GB (all train arrays memory-mapped, only the needed rows read). No process signalled. Writes only in `nn_x/w12/seg/refill/` and this report (the lane lock file under `nn_x/w5/logs/locks/` was opened as the lane protocol prescribes; no bytecode written into `nn_x/w5`). No network, no install, no submission file. Leak rules: only snapshots with a strictly smaller timestamp; user_id 0 excluded; no label in any input (labels are read by `s3_read.py` and its addenda only, on finished score files); members held-out (`args.holdout = [n]`).
+
+**Files** (`nn_x/w12/seg/refill/`): `DECLARATION.txt`, `PROGRESS.md`; `align_lib.py` (LCS alignment, union timeline), `s1_align.py` -> `out_s1.txt`, `out/align_{holdout,val,test}.npz`; `s1b_poscheck.py` -> `out_s1b.txt`; `s2_replay.py` + `run_gpu7.sh` -> `out_s2.txt`, `out/scores_<set>_<member>.npz` (20 passes each), `out/meta_<set>.npz`; `s3_read.py` -> `out_s3.txt`, `out/s3_results.json`; `s3c_pooled.py` -> `out_s3c.txt`; `s3d_table.py` -> `out_s3d.txt`; `out_s3b_checks.txt`; `out_parity.txt`; report parts `rep_*.txt` and `build_report.py`.

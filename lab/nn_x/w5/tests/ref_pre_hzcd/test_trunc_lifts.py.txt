@@ -1,0 +1,636 @@
+"""Tests of train.py --trunc_lifts (TRUNC-PROD with per-M-bucket production lifts; cd_arms5.load_lifts_mbucket /
+trunc_groups_mb / trunc_coef_mb / TruncOffset(mb_path=...)), the lane.sh arms E:trunc2 / B:truncp2 and
+nn_x/w5/trunc_lifts_mbucket.json (review/make_trunc_lifts.py). Pre-change copies: tests/ref_pre_tl/*.txt (md5.txt).
+
+  cpu part:  CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 .venv/bin/python nn_x/w5/tests/test_trunc_lifts.py cpu
+  gpu part:  CUDA_VISIBLE_DEVICES=<one id> OMP_NUM_THREADS=12 .venv/bin/python nn_x/w5/tests/test_trunc_lifts.py gpu
+             (3 sequential e2e subprocesses of 39 CD steps, ~4 min)
+CPU part
+  L0 code identity vs the pre-change copies.
+     (a) train.py minus the --trunc_lifts add_argument and the `a.trunc_lifts` operand of the wave-5 setup guard == the
+         previous train.py (AST, docstrings stripped); parse(): trunc_lifts defaults to ''.
+     (b) cd_arms5.py: every previous top-level statement unchanged (AST) and in the same order, except TruncOffset and
+         setup_wave5, which equal the previous ones after removing the inserted `if mb_path:` blocks, the mb_path
+         parameter / keyword, the `mb_path = ...` assignment and the new method _init_mbucket; the only new top-level
+         names are the M-bucket helpers. With mb_path == '' (the default) the previous code runs.
+     (c) lane.sh: DRY commands of every previous job (A base/trunc/auxf 23-24, B m02ref/truncp/auxf 101-107, E
+         base/trunc/auxf 951-954) byte-identical to the previous lane.sh; E:trunc2 / B:truncp2 (parsed with train.py's
+         parser) == E:base / B:m02ref + {trunc_off 1.0, trunc_lifts <abs json>} == E:trunc / B:truncp + {trunc_lifts};
+         bash -n.
+  L1 json: lifts recomputed independently (per-candidate (1-p_soft)-weighted rates, lift_by_m.py style; float64 pool
+     rule) == the json's raw lifts (|d| < 1e-9) and unweighted counts; applied lifts == raw where no shrink is applied;
+     buckets [1,16] [17,32] [33,49] [50,inf); == the review numbers (lift_by_m.py, 2 decimals).
+  L2 TruncOffset on the FULL train split (CPU): mb_path '' -> rk3 / coef bitwise == the PREVIOUS module's TruncOffset
+     (the live trunc / truncp arms are unchanged); mb_path json -> coef == a * L_json[bucket(M)] * (1 - p_soft) (float32,
+     bucket by explicit lo <= M <= hi) for production feeds; pool (NN p > 0.5, M >= 50) / holdout rows 0; rkend >= 3
+     column 0; every bucket has non-zero rows; setup_wave5 refuses --trunc_lifts without --trunc_off.
+  L3 TruncOffset.offset on real MiniSplit batches (feeds of every bucket + hidden-exploration M<50 + pool + holdout) ==
+     brute force from data/flat/train/cand_pos.npy (rkend recomputed per feed from the shown positions, flat-order tie
+     rule) + the json bucket table + p_soft; 0 on pool / holdout / padding.
+GPU part (deterministic wrapper tests/e2e_w5.py; 39 CD steps from v17_pre2s_s101@77500, cooldown_mix 0.2)
+  G1 previous code (ref_pre_tl train.py + cd_arms5.py in a scratch copy) vs new code, both `--trunc_off 1 --cliplog 10`:
+     identical batch sequence, train-mode model logits, loss-input logits, logged metric lines, TRUNC log line and
+     checkpoint (bitwise).
+  G2 new `--trunc_off 1 --trunc_lifts <json> --cliplog 10`: same batch sequence and first-batch model logits as G1;
+     for EVERY batch the loss-input logits == model logits + brute-force bucket offset (rkend from cand_pos); zero on
+     pool / holdout feeds; non-zero in every bucket; M-bucket log line.
+Writes nn_x/w5/logs/test_trunc_lifts_<part>.log (+ .json). Test runs are named w5_ttl_*; their outputs are deleted.
+"""
+import argparse
+import ast
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+import types
+
+PART = sys.argv[1] if len(sys.argv) > 1 else "cpu"
+assert PART in ("cpu", "gpu"), "usage: test_trunc_lifts.py cpu|gpu"
+_CVD = os.environ.get("CUDA_VISIBLE_DEVICES", "x")
+if PART == "cpu":
+    assert _CVD == "", "cpu part: run with CUDA_VISIBLE_DEVICES=''"
+else:
+    assert re.fullmatch(r"\d", _CVD), "gpu part: CUDA_VISIBLE_DEVICES=<exactly one GPU id>"
+    os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+NT = min(12, int(os.environ.get("OMP_NUM_THREADS", "12")))
+import numpy as np  # noqa: E402
+import polars as pl  # noqa: E402
+import torch  # noqa: E402
+
+torch.set_num_threads(NT)
+HERE = os.path.dirname(os.path.abspath(__file__))
+W5 = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
+sys.path.insert(1, W5)
+import warnings  # noqa: E402
+
+warnings.filterwarnings("ignore", message=".*CUDA is not available.*")
+import cd_arms as CA  # noqa: E402
+import cd_arms5 as C5  # noqa: E402
+
+ROOT = "<repo>"
+PY = f"{ROOT}/.venv/bin/python"
+REF = f"{HERE}/ref_pre_tl"
+TRAIN_PY, LANE, JSON = f"{W5}/train.py", f"{W5}/lane.sh", f"{W5}/trunc_lifts_mbucket.json"
+JSON_ABS = "<repo>/nn_x/w5/trunc_lifts_mbucket.json"  # the path lane.sh passes
+INIT = f"{ROOT}/nn/ckpt/v17_pre2s_s101@77500.pt"
+SCR = os.environ.get("T5_SCRATCH", "/tmp/scratchpad/t5")
+os.makedirs(SCR, exist_ok=True)
+os.makedirs(f"{W5}/logs", exist_ok=True)
+LOG = open(f"{W5}/logs/test_trunc_lifts_{PART}.log", "w")
+RES = {"checks": []}
+FAIL = []
+BUCKETS_WANT = [(1, 16), (17, 32), (33, 49), (50, None)]
+
+
+def P(*a):
+    s = " ".join(str(x) for x in a)
+    print(s, flush=True)
+    LOG.write(s + "\n")
+    LOG.flush()
+
+
+def check(name, ok, info=""):
+    P(f"  [{'PASS' if ok else 'FAIL'}] {name} {info}")
+    RES["checks"].append(dict(name=name, ok=bool(ok), info=str(info)))
+    if not ok:
+        FAIL.append(name)
+
+
+def load_module(name, path):
+    """Import a frozen .txt copy as a module (no bytecode cache written)."""
+    m = types.ModuleType(name)
+    m.__file__ = path
+    exec(compile(open(path).read(), path, "exec"), m.__dict__)
+    return m
+
+
+def load_parse(path):
+    tree = ast.parse(open(path).read())
+    fn = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "parse"][0]
+    ns = {"argparse": argparse, "POOL_P_DEFAULT": CA.POOL_P_DEFAULT}
+    exec(compile(ast.Module(body=[fn], type_ignores=[]), "train_parse", "exec"), ns)
+
+    def parse(argv):
+        sys.argv = ["train.py"] + argv
+        return ns["parse"]()
+    return parse
+
+
+def strip_doc(tree):
+    for n in [tree] + [x for x in ast.walk(tree) if isinstance(x, (ast.FunctionDef, ast.ClassDef))]:
+        if n.body and isinstance(n.body[0], ast.Expr) and isinstance(n.body[0].value, ast.Constant) \
+                and isinstance(n.body[0].value.value, str):
+            n.body = n.body[1:] or [ast.Pass()]
+    return tree
+
+
+def train_meta():
+    f = pl.read_parquet(f"{ROOT}/data/flat/train/feeds.parquet", columns=["M", "cand_off"])
+    M = f["M"].to_numpy().astype(np.int64)
+    pr = np.load(C5.PRANDOM_PATH)
+    p = np.nan_to_num(pr["p_random"].astype(np.float32), nan=0.0)
+    p[M < 50] = 0.0
+    cand = np.where((p > 0.9) & (M >= 50))[0]
+    hold = np.sort(np.random.default_rng(12345).choice(cand, 30000, replace=False))
+    return dict(M=M, off=f["cand_off"].to_numpy().astype(np.int64), p=p, hold=hold, p_soft=C5.p_soft_all(n=len(M)))
+
+
+def json_table():
+    """(list of (lo, hi), L [nb, 3]) read directly from the json (applied values)."""
+    j = json.load(open(JSON))
+    return [(b["lo"], b["hi"]) for b in j["buckets"]], np.array([[b[f"rkend{k}"] for k in range(3)] for b in j["buckets"]])
+
+
+def bucket_of(m, edges):
+    for i, (lo, hi) in enumerate(edges):
+        if lo <= m and (hi is None or m <= hi):
+            return i
+    raise AssertionError(m)
+
+
+def rkend_from_pos(pos):
+    """True rank from the end of one feed from its shown positions (flat order): #{pos_j > pos_i} + #{j > i, pos_j == pos_i}."""
+    pos = np.asarray(pos).astype(np.int64)
+    eq = np.triu(pos[None, :] == pos[:, None], k=1).sum(1)
+    return (pos[None, :] > pos[:, None]).sum(1) + eq
+
+
+def expected_feed_offsets(f, meta, edges, L, holdset, cp):
+    """Brute-force offsets (float32) of every candidate of train feed f in flat order, a = 1."""
+    M, p, ps = meta["M"], meta["p"], meta["p_soft"]
+    m = int(M[f])
+    if (M[f] >= 50 and p[f] > 0.5) or f in holdset:
+        return np.zeros(m, np.float32)
+    o = int(meta["off"][f])
+    rk = rkend_from_pos(cp[o:o + m])
+    b = bucket_of(int(M[f]), edges)
+    out = np.zeros(m, np.float32)
+    for i, r in enumerate(rk):
+        if r <= 2:
+            out[i] = np.float32((1.0 * L[b, r]) * (1.0 - float(ps[f])))
+    return out
+
+
+class FakeTr:
+    def __init__(self, meta, dev="cpu"):
+        self.M_np, self.cand_off_np = meta["M"], meta["off"]
+        self.n, self.n_cand, self.device = len(meta["M"]), int(meta["M"].sum()), torch.device(dev)
+
+
+# ================================================================================================= CPU part
+class StripTL(ast.NodeTransformer):
+    """New train.py -> previous train.py: drop the --trunc_lifts add_argument and the `a.trunc_lifts` guard operand."""
+
+    def __init__(self):
+        self.n_arg = self.n_op = 0
+
+    def visit_Expr(self, n):
+        v = n.value
+        if (isinstance(v, ast.Call) and isinstance(v.func, ast.Attribute) and v.func.attr == "add_argument" and v.args
+                and isinstance(v.args[0], ast.Constant) and v.args[0].value == "--trunc_lifts"):
+            self.n_arg += 1
+            return None
+        return self.generic_visit(n)
+
+    def visit_BoolOp(self, n):
+        keep = [x for x in n.values if ast.unparse(x) != "a.trunc_lifts"]
+        self.n_op += len(n.values) - len(keep)
+        n.values = keep
+        return self.generic_visit(n)
+
+
+class StripMB(ast.NodeTransformer):
+    """New cd_arms5 TruncOffset / setup_wave5 -> previous: drop `if mb_path:` blocks, the mb_path parameter / keyword /
+    assignment and the _init_mbucket method."""
+
+    def __init__(self):
+        self.removed = []
+
+    def visit_If(self, n):
+        if ast.unparse(n.test) == "mb_path":
+            self.removed.append("if mb_path")
+            return None
+        return self.generic_visit(n)
+
+    def visit_Assign(self, n):
+        if [ast.unparse(t) for t in n.targets] == ["mb_path"]:
+            self.removed.append(ast.unparse(n))
+            return None
+        return self.generic_visit(n)
+
+    def visit_FunctionDef(self, n):
+        if n.name == "_init_mbucket":
+            self.removed.append("def _init_mbucket")
+            return None
+        names = [x.arg for x in n.args.args]
+        if "mb_path" in names:
+            i = names.index("mb_path")
+            nd = len(n.args.defaults)
+            j = i - (len(names) - nd)
+            assert j == nd - 1 and isinstance(n.args.defaults[j], ast.Constant) and n.args.defaults[j].value == ""
+            n.args.args.pop(i)
+            n.args.defaults.pop(j)
+            self.removed.append(f"param mb_path of {n.name}")
+        return self.generic_visit(n)
+
+    def visit_Call(self, n):
+        k0 = len(n.keywords)
+        n.keywords = [k for k in n.keywords if not (k.arg == "mb_path" and ast.unparse(k.value) == "mb_path")]
+        if len(n.keywords) != k0:
+            self.removed.append(f"kw mb_path in {ast.unparse(n.func)}()")
+        return self.generic_visit(n)
+
+
+def top_key(n):
+    if isinstance(n, (ast.FunctionDef, ast.ClassDef)):
+        return n.name
+    if isinstance(n, ast.Assign):
+        return "=" + ",".join(ast.unparse(t) for t in n.targets)
+    return ast.unparse(n)[:60]
+
+
+def lane_dry(script, jobs):
+    r = subprocess.run(["bash", script, "0", jobs], capture_output=True, text=True, env={**os.environ, "DRY": "1"})
+    return r.returncode, r.stdout, r.stderr
+
+
+def l0_code():
+    P("\n== L0 code identity vs the pre-change copies (tests/ref_pre_tl)")
+    rec = dict(line.split()[::-1] for line in open(f"{REF}/md5.txt"))
+    import hashlib
+    okm = {k: hashlib.md5(open(f"{REF}/{k}", "rb").read()).hexdigest() == v for k, v in rec.items()}
+    check("ref_pre_tl copies intact (md5.txt)", all(okm.values()) and len(okm) == 3, okm)
+    # (a) train.py
+    st = StripTL()
+    new_t = strip_doc(st.visit(ast.parse(open(TRAIN_PY).read())))
+    old_t = strip_doc(ast.parse(open(f"{REF}/train.py.txt").read()))
+    check("train.py minus [--trunc_lifts add_argument, `a.trunc_lifts` guard operand] == previous train.py (AST)",
+          ast.dump(new_t) == ast.dump(old_t) and st.n_arg == 1 and st.n_op == 1, f"removed args {st.n_arg} ops {st.n_op}")
+    parse = load_parse(TRAIN_PY)
+    a0 = parse(["--variant", "w5_x"])
+    old_parse = load_parse(f"{REF}/train.py.txt")
+    d0 = {k: v for k, v in vars(a0).items() if k != "trunc_lifts"}
+    check("parse(): trunc_lifts default '' and every other default == the previous parser",
+          a0.trunc_lifts == "" and d0 == vars(old_parse(["--variant", "w5_x"])))
+    # (b) cd_arms5.py
+    new_m = ast.parse(open(f"{W5}/cd_arms5.py").read())
+    old_m = ast.parse(open(f"{REF}/cd_arms5.py.txt").read())
+    nb_, ob_ = new_m.body[1:], old_m.body[1:]  # module docstrings excluded
+    nk = {top_key(n): n for n in nb_}
+    ok_k = [top_key(n) for n in ob_]
+    bad = []
+    sm = StripMB()
+    for n in ob_:
+        k = top_key(n)
+        if k not in nk:
+            bad.append(f"missing {k}")
+            continue
+        nn = nk[k]
+        if k in ("TruncOffset", "setup_wave5"):
+            import copy
+            nn = sm.visit(copy.deepcopy(nn))
+        if ast.dump(nn) != ast.dump(n):
+            bad.append(f"changed {k}")
+    order = [k for k in (top_key(n) for n in nb_) if k in ok_k]
+    extra = sorted(set(nk) - set(ok_k))
+    want_extra = sorted(["=MB_LIFT_PATH", "bucket_names", "import hashlib", "load_lifts_mbucket",
+                         "trunc_coef_mb", "trunc_groups_mb"])
+    check("cd_arms5.py: previous top-level statements unchanged and in order; TruncOffset / setup_wave5 == previous after "
+          "removing the mb_path additions; new names = the M-bucket helpers only",
+          not bad and order == ok_k and extra == want_extra
+          and sorted(set(sm.removed)) == sorted({"if mb_path", "def _init_mbucket", "param mb_path of __init__",
+                                                 "kw mb_path in TruncOffset()",
+                                                 "mb_path = getattr(a, 'trunc_lifts', '') or ''"}),
+          f"bad {bad}; extra {extra}; removed {sm.removed}")
+    # (c) lane.sh
+    old_jobs = ([f"A:{a}:{s}" for s in (23, 24) for a in ("base", "trunc", "auxf")]
+                + [f"B:{a}:{r}" for r in range(101, 108) for a in ("m02ref", "truncp", "auxf")]
+                + [f"E:{a}:{s}" for s in range(951, 955) for a in ("base", "trunc", "auxf")])
+    rc_o, out_o, _ = lane_dry(f"{REF}/lane.sh.txt", " ".join(old_jobs))
+    rc_n, out_n, _ = lane_dry(LANE, " ".join(old_jobs))
+    check(f"lane.sh DRY: all {len(old_jobs)} previous jobs print byte-identical commands to the previous lane.sh",
+          rc_o == rc_n == 0 and out_o == out_n and out_n.count(" train.py ") == len(old_jobs),
+          f"{out_n.count(' train.py ')} commands")
+    new_jobs = [f"E:trunc2:{s}" for s in range(951, 955)] + [f"B:truncp2:{r}" for r in range(101, 105)]
+    rc2, out2, err2 = lane_dry(LANE, " ".join(new_jobs + ["E:base:951", "E:trunc:951", "B:m02ref:101", "B:truncp:101"]))
+    cmds = {}
+    for ln in out2.splitlines():
+        if " train.py " in ln:
+            argv = ln.split(" train.py ", 1)[1].split()
+            cmds[argv[argv.index("--variant") + 1]] = vars(parse(argv))
+    P("  DRY commands of the new arms:")
+    for ln in out2.splitlines():
+        if "trunc2" in ln or "truncp2" in ln:
+            P("    " + ln)
+    RES["dry_new"] = [ln for ln in out2.splitlines() if "trunc2" in ln or "truncp2" in ln]
+
+    def diff(a, b):
+        return {k: (a[k], b[k]) for k in a if k != "variant" and a[k] != b[k]}
+    okE = okB = True
+    infos = []
+    for s in range(951, 955):
+        base, tr, t2 = cmds.get("w5_e10_base_s951"), cmds.get("w5_e10_trunc_s951"), cmds.get(f"w5_e10_trunc2_s{s}")
+        dB = diff(base, t2)
+        dB.pop("seed", None)
+        dT = diff(tr, t2)
+        dT.pop("seed", None)
+        okE &= (dB == {"trunc_off": (0.0, 1.0), "trunc_lifts": ("", JSON_ABS)} and dT == {"trunc_lifts": ("", JSON_ABS)}
+                and t2["seed"] == s)
+        infos.append(dB)
+    for r in range(101, 105):
+        base, tr, t2 = cmds.get("w5_cd_m02ref_r101"), cmds.get("w5_cd_truncp_r101"), cmds.get(f"w5_cd_truncp2_r{r}")
+        dB = diff(base, t2)
+        dT = diff(tr, t2)
+        for d in (dB, dT):
+            d.pop("seed", None)
+            d.pop("init", None)
+        okB &= (dB == {"trunc_off": (0.0, 1.0), "trunc_lifts": ("", JSON_ABS)} and dT == {"trunc_lifts": ("", JSON_ABS)}
+                and t2["seed"] == 900 + r and t2["init"].endswith(f"v17_pre2s_s{r}@77500.pt"))
+    check("E:trunc2:951-954 == E:base + {trunc_off 1.0, trunc_lifts json} == E:trunc + {trunc_lifts json}; seed = 951-954",
+          rc2 == 0 and okE, infos[0])
+    check("B:truncp2:101-104 == B:m02ref + {trunc_off 1.0, trunc_lifts json} == B:truncp + {trunc_lifts json}; CDSEED "
+          "900 + root, init v17_pre2s_s<root>@77500", rc2 == 0 and okB, err2[-200:])
+    rc_bad = [lane_dry(LANE, j)[0] for j in ("A:trunc2:23", "B:trunc2:101", "E:truncp2:951")]
+    check("trunc2 is a stage-E arm and truncp2 a stage-B arm only (other combinations refused)", all(rc_bad), rc_bad)
+    check("bash -n lane.sh", subprocess.run(["bash", "-n", LANE]).returncode == 0)
+
+
+def l1_json(meta):
+    P("\n== L1 trunc_lifts_mbucket.json == independent recomputation")
+    j = json.load(open(JSON))
+    edges, Lapp = json_table()
+    check("buckets [1,16] [17,32] [33,49] [50,inf)", edges == BUCKETS_WANT, edges)
+    M, n = meta["M"], len(meta["M"])
+    ps = meta["p_soft"]
+    pn = ps.copy()  # lift_by_m.py's float64 NN rule
+    pn[M < 50] = 0
+    fid = np.repeat(np.arange(n), M)
+    rk = np.minimum(np.load(C5.RKEND_PATH), 3)
+    y = np.load(f"{ROOT}/data/flat/train/cand_target.npy").astype(np.float64)
+    hold = np.zeros(n, bool)
+    hold[meta["hold"]] = True
+    rec, ok, cnt = {}, True, {}
+    for bi, (lo, hi) in enumerate(edges):
+        fsel = (M >= lo) & ((M <= hi) if hi is not None else True) & ~((M >= 50) & (pn > 0.5)) & ~hold
+        sel = fsel[fid]
+        rr, yy, w = rk[sel], y[sel], 1 - ps[fid[sel]]
+        rate = np.array([(yy * w)[rr == k].sum() / w[rr == k].sum() for k in range(4)])
+        lift = np.log(rate[:3] / rate[3])
+        pos = [int(yy[rr == k].sum()) for k in range(4)]
+        jb = j["buckets"][bi]
+        ok &= (np.abs(lift - np.array(jb["raw"])).max() < 1e-9 and pos == jb["pos"] and int(fsel.sum()) == jb["n_feeds"])
+        app = np.array([jb[f"rkend{k}"] for k in range(3)])
+        ok &= bool(np.array_equal(app, np.array(jb["raw"]))) if not jb["shrink_applied"] else True
+        rec[jb["name"]] = np.round(lift, 4).tolist()
+        cnt[jb["name"]] = dict(feeds=int(fsel.sum()), pos_rk0_1_2_ge3=pos, shrink=jb["shrink_applied"])
+    check("json raw lifts == recomputed ((1-p_soft)-weighted, production feeds, holdout + pool excluded; |d| < 1e-9); "
+          "unweighted positives and feed counts equal; applied == raw (no bucket needed a shrink)", ok, rec)
+    P(f"  info: counts {cnt}")
+    want = {"M1-16": [-1.82, 0.44, 1.82], "M17-32": [0.89, 0.46, 1.73], "M33-49": [2.41, -0.41, -0.42]}
+    got = {k: [round(x, 2) for x in v] for k, v in rec.items() if k in want}
+    check("== the review numbers (lift_by_m.py) for M1-16 / M17-32 / M33-49 (2 decimals)", got == want, got)
+    lo, L = C5.load_lifts_mbucket(JSON)
+    check("load_lifts_mbucket(): lo [1,17,33,50], rows == json applied lifts, random-like row and rkend>=3 column zero",
+          lo.tolist() == [1, 17, 33, 50] and np.array_equal(L[:4, :3], Lapp) and not L[4].any() and not L[:, 3].any())
+    RES["lifts"] = dict(raw=rec, counts=cnt)
+    del y, rk, fid
+
+
+def l2_trunc(meta):
+    P("\n== L2 TruncOffset on the FULL train split (CPU)")
+    old = load_module("cd_arms5_pre_tl", f"{REF}/cd_arms5.py.txt")
+    tr = FakeTr(meta)
+    pnn = meta["p"].astype(np.float64)
+    logs = []
+    t_new = C5.TruncOffset(1.0, tr, pnn, meta["hold"], logs.append)
+    t_old = old.TruncOffset(1.0, tr, pnn, meta["hold"], logs.append)
+    check("mb_path '' (default): rk3 and coef bitwise == the previous module (live trunc / truncp arms unchanged); same "
+          "log line", torch.equal(t_new.rk3, t_old.rk3) and torch.equal(t_new.coef, t_old.coef)
+          and re.sub(r"; \d+s$", "", logs[0]) == re.sub(r"; \d+s$", "", logs[1]), logs[0][:160])
+    t_mb = C5.TruncOffset(1.0, tr, pnn, meta["hold"], logs.append, mb_path=JSON)
+    P(f"  log: {logs[-1]}")
+    edges, L = json_table()
+    M, p, ps = meta["M"], meta["p"], meta["p_soft"]
+    pool = (M >= 50) & (p > 0.5)
+    exp = np.zeros((len(M), 4), np.float32)
+    nzb = []
+    for bi, (lo, hi) in enumerate(edges):
+        sel = (M >= lo) & ((M <= hi) if hi is not None else True) & ~pool
+        sel[meta["hold"]] = False
+        exp[sel, :3] = ((1.0 * L[bi][None, :]) * (1.0 - ps[sel])[:, None]).astype(np.float32)
+        nzb.append(int(np.count_nonzero(exp[sel, :3])))
+    coef = t_mb.coef.numpy()
+    check("mb_path json: coef == a * L_json[bucket(M)] * (1 - p_soft) (float32, exact) for production feeds; pool / "
+          "holdout rows and rkend>=3 column 0; non-zero rows in every bucket",
+          np.array_equal(coef, exp) and not coef[pool].any() and not coef[meta["hold"]].any() and not coef[:, 3].any()
+          and all(x > 0 for x in nzb) and torch.equal(t_mb.rk3, t_new.rk3), f"non-zero cells per bucket {nzb}")
+    check("M-bucket log line names the json, its md5 and the 4 buckets",
+          "M-bucket lifts (--trunc_lifts" in logs[-1] and all(f"prod {x}" in logs[-1] for x in
+                                                               ("M1-16", "M17-32", "M33-49", "M>=50")))
+    a = argparse.Namespace(trunc_off=0.0, trunc_lifts=JSON, aux_norm="batch", cliplog=0, loss="softmax")
+    try:
+        C5.setup_wave5(a, tr, None, torch.from_numpy(meta["p"]), meta["hold"], [], 0, 1, print)
+        refused = False
+    except AssertionError as e:
+        refused = "--trunc_off" in str(e)
+    check("setup_wave5 refuses --trunc_lifts without --trunc_off", refused)
+    return t_mb
+
+
+def l3_batches(meta, t_mb):
+    P("\n== L3 TruncOffset.offset on real MiniSplit batches == brute force from cand_pos + the json table")
+    from mini_split import MiniSplit
+    M, p, ps = meta["M"], meta["p"], meta["p_soft"]
+    holdset = set(meta["hold"].tolist())
+    hmask = np.zeros(len(M), bool)
+    hmask[meta["hold"]] = True
+    pool = (M >= 50) & (p > 0.5)
+    rng = np.random.default_rng(7)
+    groups = {"M4-16": (M <= 16), "M17-32": (M >= 17) & (M <= 32), "M33-49": (M >= 33) & (M <= 49),
+              "M>=50 prod": (M >= 50) & ~pool, "M<50 p_soft>0.5": (M < 50) & (ps > 0.5), "pool": pool & ~hmask,
+              "holdout": hmask}
+    feeds = np.unique(np.concatenate([rng.choice(np.flatnonzero(g & (M <= 400)), 24, replace=False)
+                                      for g in groups.values()]))
+    ms = MiniSplit("train", feeds, xt_names=None)
+    crow = np.concatenate([np.arange(meta["off"][f], meta["off"][f] + M[f]) for f in ms.src_feeds])
+    to = object.__new__(C5.TruncOffset)
+    to.rk3 = t_mb.rk3[torch.from_numpy(crow)]
+    to.coef = t_mb.coef[torch.from_numpy(ms.src_feeds)]
+    cp = np.load(f"{ROOT}/data/flat/train/cand_pos.npy", mmap_mode="r")
+    edges, L = json_table()
+    exp_f = {int(f): expected_feed_offsets(int(f), meta, edges, L, holdset, cp) for f in ms.src_feeds}
+    bad = nb = 0
+    nz = {k: 0 for k in groups}
+    zero_ok = True
+    for fb in ms.batches(np.arange(ms.n), 8192, 64, shuffle=True, rng=np.random.default_rng(0)):
+        b = ms.gather(fb, with_pos=True)
+        o_ = to.offset(b).numpy()
+        ci, cm = b["ci"].numpy(), b["cmask"].numpy()
+        for i, f in enumerate(fb):
+            src = int(ms.src_feeds[f])
+            e = np.zeros(o_.shape[1], np.float32)
+            loc = ci[i, cm[i]] - ms.cand_off_np[f]
+            e[cm[i]] = exp_f[src][loc]
+            bad += int(not np.array_equal(o_[i], e))
+            for k, g in groups.items():
+                if g[src]:
+                    nz[k] += int(np.count_nonzero(o_[i]))
+            if pool[src] or src in holdset:
+                zero_ok &= not o_[i].any()
+        nb += 1
+    check(f"offset == brute force (rkend from cand_pos, bucket table, 1 - p_soft) on {nb} batches / {ms.n} feeds; 0 on "
+          f"padding", bad == 0, f"mismatching feed rows {bad}")
+    check("non-zero offsets in every production bucket (incl. the hidden-exploration M<50 feeds, scaled by 1 - p_soft); "
+          "exactly 0 on pool and holdout feeds", zero_ok and nz["pool"] == 0 and nz["holdout"] == 0
+          and all(nz[k] > 0 for k in ("M4-16", "M17-32", "M33-49", "M>=50 prod")), nz)
+
+
+# ================================================================================================= GPU part
+E2E = ("--init {init} --epochs 0.004 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 "
+       "--aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.2 --loss_norm feed --holdout 30000 "
+       "--select_on holdout --eval_every 20 --seed 811 --no_test")
+WD = f"{ROOT}/nn_x/w5"  # common.py writes every run's outputs here (absolute paths)
+
+
+def outputs(v):
+    fs = [f"{WD}/logs/{v}.log", f"{WD}/logs/{v}.json", f"{WD}/logs/{v}_cliplog.npz"]
+    for x in (v, f"{v}@last"):
+        fs += [f"{WD}/ckpt/{x}.pt", f"{WD}/preds/nn_{x}_trainonly_val.npy", f"{WD}/preds/nn_{x}_trainonly_test.npy",
+               f"{WD}/preds/holdout/nn_{x}_holdout.npy"]
+    return fs
+
+
+def clean(v):
+    for f in outputs(v):
+        if os.path.exists(f):
+            os.remove(f)
+
+
+def e2e_run(code_dir, v, extra):
+    rec = f"{SCR}/rec_{v}.npz"
+    cmd = [PY, f"{code_dir}/tests/e2e_w5.py", f"{code_dir}/train.py", rec, "--variant", v] + E2E.format(init=INIT).split() \
+        + extra
+    t0 = time.time()
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=code_dir, env={**os.environ, "OMP_NUM_THREADS": str(NT)})
+    open(f"{SCR}/{v}.stdout", "w").write(r.stdout + "\n" + r.stderr)
+    P(f"  ran {v} from {code_dir} ({time.time() - t0:.0f}s, rc {r.returncode})")
+    assert r.returncode == 0, r.stderr[-3000:]
+    return dict(np.load(rec, allow_pickle=True)), open(f"{WD}/logs/{v}.log").read()
+
+
+def metric_lines(log):
+    return [re.sub(r" [\d.]+ min", "", ln) for ln in log.splitlines() if ln.startswith("step ") or ln.startswith("BEST")]
+
+
+def trunc_line(log):
+    return [re.sub(r"; \d+s$", "", ln.split("wave-5 TRUNC-PROD", 1)[1]) for ln in log.splitlines()
+            if "wave-5 TRUNC-PROD" in ln]
+
+
+def batches_of(rec, key):
+    sh, out, k = rec["shapes"], [], 0
+    for b_, m_ in sh:
+        out.append(rec[key][k:k + b_ * m_].reshape(b_, m_))
+        k += b_ * m_
+    return out
+
+
+def ck_equal(a, b):
+    ca = torch.load(a, map_location="cpu", weights_only=False)["state_dict"]
+    cb = torch.load(b, map_location="cpu", weights_only=False)["state_dict"]
+    return ca.keys() == cb.keys() and all(torch.equal(ca[k], cb[k]) for k in ca)
+
+
+def g_e2e(meta):
+    P("\n== G e2e (deterministic wrapper, 39 CD steps from v17_pre2s_s101@77500, cooldown_mix 0.2)")
+    names = ["w5_ttl_pre_on", "w5_ttl_new_on", "w5_ttl_new_tl"]
+    for v in names:
+        clean(v)
+    pre = f"{SCR}/w5_pre_tl_code"  # previous train.py + cd_arms5.py with every other module of this checkout
+    shutil.rmtree(pre, ignore_errors=True)
+    os.makedirs(f"{pre}/tests")
+    for f in os.listdir(W5):
+        if f.endswith(".py"):
+            shutil.copy(f"{W5}/{f}", f"{pre}/{f}")
+    shutil.copy(f"{HERE}/e2e_w5.py", f"{pre}/tests/e2e_w5.py")
+    shutil.copy(f"{REF}/train.py.txt", f"{pre}/train.py")
+    shutil.copy(f"{REF}/cd_arms5.py.txt", f"{pre}/cd_arms5.py")
+    try:
+        ra, la = e2e_run(pre, names[0], ["--trunc_off", "1", "--cliplog", "10"])
+        rb, lb = e2e_run(W5, names[1], ["--trunc_off", "1", "--cliplog", "10"])
+        check("G1 --trunc_off 1 (no --trunc_lifts), previous vs new code: identical batch sequence, model logits and "
+              "loss-input logits (offset), 39 batches",
+              np.array_equal(ra["fidx"], rb["fidx"]) and np.array_equal(ra["off"], rb["off"])
+              and np.array_equal(ra["lg_model"], rb["lg_model"]) and np.array_equal(ra["lg_loss"], rb["lg_loss"])
+              and len(ra["off"]) - 1 == 39)
+        check("G1 previous vs new: identical logged metric lines and TRUNC-PROD line; bit-identical checkpoint",
+              metric_lines(la) == metric_lines(lb) and len(metric_lines(lb)) >= 3 and trunc_line(la) == trunc_line(lb)
+              and len(trunc_line(lb)) == 1 and ck_equal(f"{WD}/ckpt/{names[0]}.pt", f"{WD}/ckpt/{names[1]}.pt"),
+              metric_lines(lb)[-1] if metric_lines(lb) else "")
+        rc_, lc = e2e_run(W5, names[2], ["--trunc_off", "1", "--trunc_lifts", JSON_ABS, "--cliplog", "10"])
+        sh = rb["shapes"][0]
+        check("G2 --trunc_lifts: same batch sequence as G1 and identical first-batch model logits (same init / data)",
+              np.array_equal(rc_["fidx"], rb["fidx"]) and int(rc_["n_loss"]) == int(rc_["n_model"]) == 39
+              and np.array_equal(rc_["lg_model"][:sh[0] * sh[1]], rb["lg_model"][:sh[0] * sh[1]]))
+        cp = np.load(f"{ROOT}/data/flat/train/cand_pos.npy", mmap_mode="r")
+        edges, L = json_table()
+        holdset = set(meta["hold"].tolist())
+        M, p = meta["M"], meta["p"]
+        lgm, lgl, cis = batches_of(rc_, "lg_model"), batches_of(rc_, "lg_loss"), batches_of(rc_, "ci")
+        bad, nz_rand, nzb, cache = 0, 0, [0] * len(edges), {}
+        for i in range(39):
+            fb = rc_["fidx"][rc_["off"][i]:rc_["off"][i + 1]]
+            ci = cis[i]
+            exp = np.zeros(ci.shape, np.float32)
+            for a_, f in enumerate(fb):
+                f = int(f)
+                if f not in cache:
+                    cache[f] = expected_feed_offsets(f, meta, edges, L, holdset, cp)
+                cols = np.flatnonzero(ci[a_] >= 0)
+                exp[a_, cols] = cache[f][ci[a_, cols] - meta["off"][f]]
+            bad += int(not np.array_equal(lgl[i], lgm[i] + exp))
+            d = lgl[i] - lgm[i]
+            for a_, f in enumerate(fb):
+                if (M[f] >= 50 and p[f] > 0.5) or int(f) in holdset:
+                    nz_rand += int(np.count_nonzero(d[a_]))
+                else:
+                    nzb[bucket_of(int(M[f]), edges)] += int(np.count_nonzero(d[a_]))
+        check("G2 for EVERY training batch: loss-input logits == model logits + brute-force bucket offset (rkend from "
+              "cand_pos, json table, 1 - p_soft; exact fp32)", bad == 0, f"{bad} mismatching batches")
+        check("G2 offsets: 0 on every pool / holdout feed; non-zero in every M bucket", nz_rand == 0 and all(nzb),
+              f"pool {nz_rand}, per bucket {nzb}")
+        check("G2 log: M-bucket TRUNC-PROD line (json path + md5 + 4 buckets); training changed vs G1",
+              any("M-bucket lifts (--trunc_lifts " + JSON_ABS in ln for ln in lc.splitlines())
+              and not ck_equal(f"{WD}/ckpt/{names[2]}.pt", f"{WD}/ckpt/{names[1]}.pt"),
+              trunc_line(lc)[0][:200] if trunc_line(lc) else "")
+        RES["e2e"] = dict(g1_lines=metric_lines(lb), g2_lines=metric_lines(lc), g2_trunc=trunc_line(lc))
+    finally:
+        for v in names:
+            clean(v)
+        shutil.rmtree(pre, ignore_errors=True)
+
+
+def main():
+    t_all = time.time()
+    P(f"== nn_x/w5 --trunc_lifts tests, part {PART} ({time.ctime()}, CPU threads {NT})")
+    meta = train_meta()
+    if PART == "cpu":
+        l0_code()
+        l1_json(meta)
+        t_mb = l2_trunc(meta)
+        l3_batches(meta, t_mb)
+    else:
+        g_e2e(meta)
+    RES["failed"] = FAIL
+    P(f"\n== {len(RES['checks']) - len(FAIL)}/{len(RES['checks'])} checks passed; failed: {FAIL}; "
+      f"{time.time() - t_all:.0f}s")
+    json.dump(RES, open(f"{W5}/logs/test_trunc_lifts_{PART}.json", "w"), indent=1, default=str)
+    return 0 if not FAIL else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

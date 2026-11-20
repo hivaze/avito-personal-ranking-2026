@@ -1,0 +1,133 @@
+2026-11-16T06:23:46Z === finish_fdn.sh start (pid 1502386): key FDN16P20, 16 all-data nx3 students + the stored P20 part of FD16P20 ===
+2026-11-16T06:23:46Z waiting: 0 of 16 fine-tunes complete
+2026-11-16T10:03:46Z waiting: 2 of 16 fine-tunes complete
+2026-11-16T10:08:46Z waiting: 9 of 16 fine-tunes complete
+2026-11-16T10:13:46Z waiting: 12 of 16 fine-tunes complete
+2026-11-16T10:18:46Z waiting: 13 of 16 fine-tunes complete
+2026-11-16T10:28:46Z waiting: 14 of 16 fine-tunes complete
+2026-11-16T10:33:46Z waiting: 15 of 16 fine-tunes complete
+2026-11-16T10:39:46Z STEP 1: all 16 fine-tunes exist (test and val_oof)
+2026-11-16T10:39:46Z STEP 2: structural acceptance A1 (no metric)
+=== accept_fdn_twinfree.py structure: 16 all-data students ===
+A1 structure (no metric is computed):
+  abl_fd10_nx3kd05w192_s951: A1 ok
+  abl_fd10_nx3kd05w192_s952: A1 ok
+  abl_fd10_nx3kd05w192_s953: A1 ok
+  abl_fd10_nx3kd05w192_s954: A1 ok
+  abl_fd10_nx3kd05w192_s955: A1 ok
+  abl_fd10_nx3kd05w192_s956: A1 ok
+  abl_fd10_nx3kd05w192_s957: A1 ok
+  abl_fd10_nx3kd05w192_s958: A1 ok
+  abl_fd10_nx3kd05t25w192_s951: A1 ok
+  abl_fd10_nx3kd05t25w192_s952: A1 ok
+  abl_fd10_nx3kd05t25w192_s953: A1 ok
+  abl_fd10_nx3kd05t25w192_s954: A1 ok
+  abl_fd10_nx3kd05t25w192_s955: A1 ok
+  abl_fd10_nx3kd05t25w192_s956: A1 ok
+  abl_fd10_nx3kd05t25w192_s957: A1 ok
+  abl_fd10_nx3kd05t25w192_s958: A1 ok
+RESULT (structure only): no structural defect
+2026-11-16T10:39:48Z STEP 3: A7.5 order gate waits: stage B not read (<repo>/nn_x/w12/nx3/out/stage_b_read.txt missing) (no val number of the file is computed before it)
+2026-11-16T11:04:48Z STEP 3: A7.5 order gate met: stage A and stage B are read
+2026-11-16T11:04:48Z    stage_a_read.txt:  VERDICT: NOT SHOWN at this power (0.71-0.80 for a member-level +0.001, 0.24-0.29 for +0.0005, 0.09-0.13 for +0.0003; critic/out/c04_rule_null.txt). natural - permuted on val + 2 SE = +0.00247 >= +0.0005 -> not closed at
+2026-11-16T11:04:48Z    stage_b_read.txt:  VERDICT: DESCRIPTIVE RECORD (A7.3: stage A is not a PASS [NOT]; this is not a second test and no file becomes a pick candidate from it). By the clauses of B it would read: clauses failing ['B1', 'B2', 'B3', 'B8'] (poole
+2026-11-16T11:04:48Z STEP 4: twin-free acceptance A2 / A3 (+ T)
+=== accept_fdn_twinfree.py full: 16 all-data students ===
+A1 structure (no metric is computed):
+  abl_fd10_nx3kd05w192_s951: A1 ok
+  abl_fd10_nx3kd05w192_s952: A1 ok
+  abl_fd10_nx3kd05w192_s953: A1 ok
+  abl_fd10_nx3kd05w192_s954: A1 ok
+  abl_fd10_nx3kd05w192_s955: A1 ok
+  abl_fd10_nx3kd05w192_s956: A1 ok
+  abl_fd10_nx3kd05w192_s957: A1 ok
+  abl_fd10_nx3kd05w192_s958: A1 ok
+  abl_fd10_nx3kd05t25w192_s951: A1 ok
+  abl_fd10_nx3kd05t25w192_s952: A1 ok
+  abl_fd10_nx3kd05t25w192_s953: A1 ok
+  abl_fd10_nx3kd05t25w192_s954: A1 ok
+  abl_fd10_nx3kd05t25w192_s955: A1 ok
+  abl_fd10_nx3kd05t25w192_s956: A1 ok
+  abl_fd10_nx3kd05t25w192_s957: A1 ok
+  abl_fd10_nx3kd05t25w192_s958: A1 ok
+A2 positive control (IN-SAMPLE holdout lift) and A3 member level on val:
+ nx3kd05w192: held-out wide students w5_e10_kd05w192_s951-958 mean out-of-sample holdout 0.32259; accepted all-data students w5_fd10_kd05w192_s951-958: in-sample lift +0.01625..+0.01730 (band +0.01425..+0.01930), train-only val 0.39940 (min 0.39872, max 0.40035), FT val 0.39904
+  abl_fd10_nx3kd05w192_s951: A2 in-sample holdout 0.33925 lift +0.01667 ok | A3 train-only val 0.40035, FT val 0.39989
+  abl_fd10_nx3kd05w192_s952: A2 in-sample holdout 0.33904 lift +0.01645 ok | A3 train-only val 0.39918, FT val 0.39853
+  abl_fd10_nx3kd05w192_s953: A2 in-sample holdout 0.33963 lift +0.01704 ok | A3 train-only val 0.40025, FT val 0.40006
+  abl_fd10_nx3kd05w192_s954: A2 in-sample holdout 0.34002 lift +0.01744 ok | A3 train-only val 0.39900, FT val 0.39845
+  abl_fd10_nx3kd05w192_s955: A2 in-sample holdout 0.33928 lift +0.01669 ok | A3 train-only val 0.39987, FT val 0.39991
+  abl_fd10_nx3kd05w192_s956: A2 in-sample holdout 0.33945 lift +0.01687 ok | A3 train-only val 0.39843, FT val 0.39808
+  abl_fd10_nx3kd05w192_s957: A2 in-sample holdout 0.33908 lift +0.01649 ok | A3 train-only val 0.39986, FT val 0.39895
+  abl_fd10_nx3kd05w192_s958: A2 in-sample holdout 0.34005 lift +0.01746 ok | A3 train-only val 0.39911, FT val 0.39905
+ nx3kd05t25w192: held-out wide students w5_e10_kd05t25w192_s951-958 mean out-of-sample holdout 0.32252; accepted all-data students w5_fd10_kd05t25w192_s951-958: in-sample lift +0.01630..+0.01753 (band +0.01430..+0.01953), train-only val 0.39951 (min 0.39911, max 0.40027), FT val 0.39912
+  abl_fd10_nx3kd05t25w192_s951: A2 in-sample holdout 0.33894 lift +0.01642 ok | A3 train-only val 0.39941, FT val 0.39932
+  abl_fd10_nx3kd05t25w192_s952: A2 in-sample holdout 0.33956 lift +0.01704 ok | A3 train-only val 0.40062, FT val 0.39969
+  abl_fd10_nx3kd05t25w192_s953: A2 in-sample holdout 0.33961 lift +0.01709 ok | A3 train-only val 0.40070, FT val 0.40021
+  abl_fd10_nx3kd05t25w192_s954: A2 in-sample holdout 0.33955 lift +0.01704 ok | A3 train-only val 0.39978, FT val 0.39978
+  abl_fd10_nx3kd05t25w192_s955: A2 in-sample holdout 0.33970 lift +0.01718 ok | A3 train-only val 0.40083, FT val 0.40066
+  abl_fd10_nx3kd05t25w192_s956: A2 in-sample holdout 0.34006 lift +0.01754 ok | A3 train-only val 0.39938, FT val 0.39928
+  abl_fd10_nx3kd05t25w192_s957: A2 in-sample holdout 0.33951 lift +0.01699 ok | A3 train-only val 0.39975, FT val 0.39937
+  abl_fd10_nx3kd05t25w192_s958: A2 in-sample holdout 0.33854 lift +0.01603 ok | A3 train-only val 0.39975, FT val 0.39954
+A3 pools on val (paired per feed; information, no band):
+  trainonly_val: 8-pool nx3kd05w192 0.40134 minus 8-pool w5_fd10_kd05w192 (0.40113): +0.00020+-0.00048
+  trainonly_val: 8-pool nx3kd05t25w192 0.40213 minus 8-pool w5_fd10_kd05t25w192 (0.40160): +0.00053+-0.00048
+  trainonly_val: 16-pool nx3 0.40216 minus 16-pool w5_fd10 (the base pool of FD16P20) (0.40161): +0.00055+-0.00042
+  n2cpv3s3_val_oof: 8-pool nx3kd05w192 0.40122 minus 8-pool w5_fd10_kd05w192 (0.40094): +0.00028+-0.00050
+  n2cpv3s3_val_oof: 8-pool nx3kd05t25w192 0.40164 minus 8-pool w5_fd10_kd05t25w192 (0.40122): +0.00043+-0.00053
+  n2cpv3s3_val_oof: 16-pool nx3 0.40171 minus 16-pool w5_fd10 (the base pool of FD16P20) (0.40118): +0.00053+-0.00046
+T  twins of nx3kd05w192 (held-out students abl_e10_nx3kd05w192_s951 .. abl_e10_nx3kd05w192_s958, selected checkpoints): in-sample holdout 0.33948 minus the twins' out-of-sample holdout 0.32251 = +0.01696; train-only val, all-data 8-pool 0.40134 minus held-out 8-pool 0.40152: -0.00018+-0.00048  (stored wide students, accept_twins F at 16: A3 +0.00004 +- 0.00042)
+RESULT: no structural defect, positive control in band
+2026-11-16T11:04:56Z STEP 5: bash nn_x/w12/kd/fd/fd_finish.sh FDN16P20
+FDN16P20: 20 members, 0 prediction files missing
+FDN16P20 | members 20 | {'same': 40, 'prefix': 0, 'differ': 0, 'nosrc': 0, 'nocopy': 0} | applied
+references (final val): W8 0.40165 | W16 0.40158 | W8P20 0.40214   public: W8 0.394486, W16 0.394483, W8P20 0.395009
+FDN16P20: 16 base + 4 pop-light members at w 0.2 | final val 0.40283 | FT 0.40196 TO 0.40252
+   vs W8    : +0.00118+-0.00049 | M<50 +0.00086+-0.00089 M>=50 +0.00140+-0.00056 | pmix public +0.00144+-0.00061 private +0.00159+-0.00075 | test corr 0.9965 | paired public SE 0.00064
+   vs W16   : +0.00125+-0.00046 | M<50 +0.00069+-0.00082 M>=50 +0.00163+-0.00052 | pmix public +0.00130+-0.00055 private +0.00144+-0.00067 | test corr 0.9974 | paired public SE 0.00059
+   vs W8P20 : +0.00069+-0.00045 | M<50 +0.00082+-0.00086 M>=50 +0.00059+-0.00049 | pmix public +0.00081+-0.00056 private +0.00080+-0.00067 | test corr 0.9973 | paired public SE 0.00059
+   written <repo>/subs/cand_FDN16P20kd_r4.parquet | members: abl_fd10_nx3kd05w192_s951,abl_fd10_nx3kd05w192_s952,abl_fd10_nx3kd05w192_s953,abl_fd10_nx3kd05w192_s954,abl_fd10_nx3kd05w192_s955,abl_fd10_nx3kd05w192_s956,abl_fd10_nx3kd05w192_s957,abl_fd10_nx3kd05w192_s958,abl_fd10_nx3kd05t25w192_s951,abl_fd10_nx3kd05t25w192_s952,abl_fd10_nx3kd05t25w192_s953,abl_fd10_nx3kd05t25w192_s954,abl_fd10_nx3kd05t25w192_s955,abl_fd10_nx3kd05t25w192_s956,abl_fd10_nx3kd05t25w192_s957,abl_fd10_nx3kd05t25w192_s958,abl_fd10_pop1kd05w192_s951,abl_fd10_pop1kd05w192_s952,abl_fd10_pop1kd05w192_s953,abl_fd10_pop1kd05w192_s954
+gate exit 0
+D val new 0.40283 ref 0.40214 delta +0.00069 +- 0.00045
+   M<50      n=  5893 delta +0.00082 +- 0.00086
+   M>=50     n=  8530 delta +0.00059 +- 0.00049
+   Tue       n=  7543 delta +0.00040 +- 0.00064
+   Thu       n=  6880 delta +0.00100 +- 0.00063
+   LEAK PROBE has_later - no_later gain: +0.00076 +- 0.00344 (low power on val: few has-later feeds)
+E predicted public 0.3947 private 0.3974 (+-0.003); ref 0.3940 / 0.3967
+F new-vs-ref per-feed Spearman: val mean 0.9929 p5 0.9804 | test mean 0.9932 p5 0.9815
+GATE: PASS  (FAIL 0, WARN 0)
+d039fdcefe79a165a1cb304b35eb0b55810b84211e41a96a7e5c2059628f4ae1  subs/cand_FDN16P20kd_r4.parquet
+2026-11-16T11:05:07Z    gate file nn_x/w12/kd/out/gate_FDN16P20kd.txt: GATE: PASS  (FAIL 0, WARN 0)
+2026-11-16T11:05:07Z    input audit lines of the gate for the nx3 members (a NAME check only; the rule asks for a construction review of the new input files in addition):
+  abl_fd10_nx3kd05w192_s951: 37 train-stage inputs audited, fine-tune n2cpv3s3 audited
+  abl_fd10_nx3kd05w192_s952: 37 train-stage inputs audited, fine-tune n2cpv3s3 audited
+  abl_fd10_nx3kd05w192_s953: 37 train-stage inputs audited, fine-tune n2cpv3s3 audited
+2026-11-16T11:05:07Z STEP 6: sha256
+d039fdcefe79a165a1cb304b35eb0b55810b84211e41a96a7e5c2059628f4ae1  subs/cand_FDN16P20kd_r4.parquet
+2026-11-16T11:05:07Z STEP 7: pair description against FD16P20
+references (final val): W8 0.40165 | W16 0.40158 | W8P20 0.40214   public: W8 0.394486, W16 0.394483, W8P20 0.395009
+FD16P20: 16 base + 4 pop-light members at w 0.2 | final val 0.40271 | FT 0.40190 TO 0.40213
+   vs W8    : +0.00106+-0.00047 | M<50 +0.00022+-0.00087 M>=50 +0.00165+-0.00052 | pmix public +0.00138+-0.00058 private +0.00148+-0.00071 | test corr 0.9967 | paired public SE 0.00061
+   vs W16   : +0.00113+-0.00043 | M<50 +0.00005+-0.00080 M>=50 +0.00188+-0.00049 | pmix public +0.00124+-0.00053 private +0.00133+-0.00065 | test corr 0.9976 | paired public SE 0.00056
+   vs W8P20 : +0.00058+-0.00043 | M<50 +0.00018+-0.00082 M>=50 +0.00085+-0.00047 | pmix public +0.00075+-0.00053 private +0.00069+-0.00064 | test corr 0.9975 | paired public SE 0.00056
+FDN16P20: 16 base + 4 pop-light members at w 0.2 | final val 0.40283 | FT 0.40196 TO 0.40252
+   vs W8    : +0.00118+-0.00049 | M<50 +0.00086+-0.00089 M>=50 +0.00140+-0.00056 | pmix public +0.00144+-0.00061 private +0.00159+-0.00075 | test corr 0.9965 | paired public SE 0.00064
+   vs W16   : +0.00125+-0.00046 | M<50 +0.00069+-0.00082 M>=50 +0.00163+-0.00052 | pmix public +0.00130+-0.00055 private +0.00144+-0.00067 | test corr 0.9974 | paired public SE 0.00059
+   vs W8P20 : +0.00069+-0.00045 | M<50 +0.00082+-0.00086 M>=50 +0.00059+-0.00049 | pmix public +0.00081+-0.00056 private +0.00080+-0.00067 | test corr 0.9973 | paired public SE 0.00059
+PAIR FDN16P20 - FD16P20: final +0.00011+-0.00038 (z +0.29) | M<50 +0.00064+-0.00072 M>=50 -0.00025+-0.00042 | pmix public +0.00006+-0.00049 private +0.00011+-0.00061 | FT branch +0.00005+-0.00041 TO branch +0.00039+-0.00037 | test corr 0.9987
+PAIR DESCRIPTION FDN16P20kd minus FD16P20kd (per-feed val NDCG, paired; 14423 val feeds; computed from preds/ens_<tag>_*.npy)
+  final val: FDN16P20kd 0.40283 | FD16P20kd 0.40271 | delta +0.00011 +- 0.00038 (z +0.29)
+  M<50 (n 5893): +0.00064 +- 0.00072 (z +0.89) | M>=50 (n 8530): -0.00025 +- 0.00042 (z -0.61)
+  private-mix view (src/pmix.py): +0.00011 +- 0.00061 (z +0.18) | public-mix view: +0.00006 +- 0.00049 (z +0.12)
+  FT branch alone: +0.00005 +- 0.00041 (z +0.13) | train-only branch alone: +0.00039 +- 0.00037 (z +1.04)
+  test: correlation of the final scores 0.9987; per-feed Spearman mean 0.9958, 5th percentile 0.9879 (28595 test feeds)
+  paired public SE of the val delta at the public feed count (sd / sqrt(8562)): 0.00050
+FILE RULE of the nx3 block for FDN16P20kd against FD16P20kd (val clauses only): final val delta >= +1 SE: NO (+0.00011 vs SE 0.00038) | private-mix delta >= 0: yes (+0.00011) | val M<50 >= -1 SE: yes (+0.00064 vs -0.00072)  ->  val clauses DO NOT HOLD
+2026-11-16T11:05:19Z STEP 8: status by the rule
+2026-11-16T11:05:19Z    file of record: subs/cand_FDN16P20kd_r4.parquet | gate: GATE: PASS  (FAIL 0, WARN 0) -> A7.4 (i) met
+2026-11-16T11:05:19Z    A7.4 (ii) harness / wiring check of stage A: HARNESS_VERDICT=OK -> met
+2026-11-16T11:05:19Z    A7.4 (iii): to be labelled in docs/04 as 'experimental, not a pick candidate' unless A7.2 holds (the lead writes docs; this script does not).
+2026-11-16T11:05:19Z    A7.4 reading rule for its PUBLIC score (FD16P20 0.394892; paired sd ~0.0003): >= 0.39550 evidence for the bundle (still needs A7.2 or a replication for a pick); 0.39430..0.39550 no information; < 0.39430 evidence of a train/test mismatch (the bundle is closed unless A and B both PASS).
+2026-11-16T11:05:19Z    A7.2 (pick admissibility unchanged): stage A PASS no, stage B PASS no -> EXPERIMENTAL, NOT A PICK CANDIDATE: an information reading only (A7.4)
+2026-11-16T11:05:19Z === finish_fdn.sh end. Nothing was submitted; text for the ledger = this file (<repo>/nn_x/w12/nx3/out/fdn_finish.txt). ===

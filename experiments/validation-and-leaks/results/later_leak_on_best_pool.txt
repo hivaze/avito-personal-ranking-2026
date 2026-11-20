@@ -1,0 +1,74 @@
+# Read-out copied from the raw run log (not published), unchanged below this line.
+[    0.4s] G3 val 0.40032
+[    0.4s] feeds of val/test users by split: [{'sid': 0, 'len': 20374}, {'sid': 1, 'len': 13765}, {'sid': 2, 'len': 27416}]
+[    1.1s] linked hist rows 12081362 cand rows 5764076
+
+=== Coverage: same-user feed orderings (non-zero users) ===
+val/all      feeds  14423 | later feed same split   25 | later in test   94 | later in val   25 | earlier train  4386 | earlier val   25 | earlier test    0 | same-ts other feed   0
+   gap to next same-split feed (h): median 13.1, q25 2.3, q75 45.3, <=1h 0.16, <=6h 0.40, <=24h 0.60
+test/public   feeds   8562 | later feed same split   59 | later in test   59 | later in val    0 | earlier train  2590 | earlier val   29 | earlier test   17 | same-ts other feed   0
+test/private  feeds  20033 | later feed same split   49 | later in test   49 | later in val    0 | earlier train  5738 | earlier val   65 | earlier test   91 | same-ts other feed   0
+test/all      feeds  28595 | later feed same split  108 | later in test  108 | later in val    0 | earlier train  8328 | earlier val   94 | earlier test  108 | same-ts other feed   0
+   gap to next same-split feed (h): median 23.2, q25 11.3, q75 47.6, <=1h 0.05, <=6h 0.18, <=24h 0.53
+
+=== Val candidate flags (base rate 0.0158) ===
+  later_hist any(val+test)     rows   184 feeds  110 target rate 0.935 positives 172
+  later_hist val-only          rows    38 feeds   25 target rate 0.974 positives 37
+  later_cand any               rows   123 feeds   46 target rate 0.000 positives 0
+  later_cand val-only          rows    47 feeds   13 target rate 0.000 positives 0
+  earlier_hist (past info)     rows   635 feeds  484 target rate 0.038 positives 24
+  earlier_cand (past info)     rows  2542 feeds 1224 target rate 0.016 positives 41
+    first-occurrence type  1: rows  147 target rate 0.966
+    first-occurrence type  2: rows   11 target rate 0.545
+    first-occurrence type  3: rows    7 target rate 0.857
+    first-occurrence type  4: rows   14 target rate 0.929
+    first-occurrence type  5: rows    1 target rate 1.000
+    first-occurrence type  6: rows    4 target rate 1.000
+    has type1/src1 event later: rows 142 rate 0.979; without: rows 42 rate 0.786
+
+=== Val gain on top of G3 (push leaked items to top / later-candidates to bottom) ===
+  later_hist any                                   delta +0.00454 ± 0.00047 (z +9.7) | affected feeds  110: 0.382 -> 0.977 (per-feed +0.595 ± 0.024)
+  later_hist any + later_cand                      delta +0.00454 ± 0.00047 (z +9.7) | affected feeds  113: 0.381 -> 0.960 (per-feed +0.579 ± 0.025)
+  later_hist val-only                              delta +0.00105 ± 0.00023 (z +4.6) | affected feeds   25: 0.380 -> 0.984 (per-feed +0.604 ± 0.055)
+  later_hist val-only + later_cand val-only        delta +0.00105 ± 0.00023 (z +4.6) | affected feeds   25: 0.380 -> 0.984 (per-feed +0.604 ± 0.055)
+  later_hist any, type-1/src-1 only                delta +0.00371 ± 0.00042 (z +8.8) | affected feeds   89: 0.379 -> 0.980 (per-feed +0.602 ± 0.025)
+  later_cand any only (push down)                  delta +0.00001 ± 0.00001 (z +1.3) | affected feeds   46: 0.323 -> 0.326 (per-feed +0.003 ± 0.002)
+
+  per-affected-feed gain by gap to the next same-user feed (any split), later_hist any:
+    gap (0,1] h: feeds with later feed    4, affected    4 (1.00); gain per feed-with-later-feed +0.618, per affected +0.618
+    gap (1,6] h: feeds with later feed    6, affected    6 (1.00); gain per feed-with-later-feed +0.608, per affected +0.608
+    gap (6,24] h: feeds with later feed    5, affected    5 (1.00); gain per feed-with-later-feed +0.592, per affected +0.592
+    gap (24,72] h: feeds with later feed   29, affected   28 (0.97); gain per feed-with-later-feed +0.568, per affected +0.588
+    gap (72,1000000000.0] h: feeds with later feed   73, affected   67 (0.92); gain per feed-with-later-feed +0.547, per affected +0.596
+
+=== Projection to test ===
+  public   feeds  8562, with later same-user test feed   59 (0.2063%); projected gain gap-matched +0.00399, flat +0.00386 | (0,1]:2x+0.618 (1,6]:7x+0.608 (6,24]:13x+0.592 (24,72]:35x+0.568 (72,1000000000.0]:2x+0.547
+  private  feeds 20033, with later same-user test feed   49 (0.1714%); projected gain gap-matched +0.00144, flat +0.00137 | (0,1]:3x+0.618 (1,6]:7x+0.608 (6,24]:25x+0.592 (24,72]:14x+0.568 (72,1000000000.0]:0x+0.547
+  all      feeds 28595, with later same-user test feed  108 (0.3777%); projected gain gap-matched +0.00220, flat +0.00211 | (0,1]:5x+0.618 (1,6]:14x+0.608 (6,24]:38x+0.592 (24,72]:49x+0.568 (72,1000000000.0]:2x+0.547
+  public   test feeds with >=1 later_hist candidate 57, with later_cand 33, either 58; flagged rows 108 / 138
+  private  test feeds with >=1 later_hist candidate 46, with later_cand 22, either 48; flagged rows 75 / 78
+
+=== Later-feed user-embedding variant (val feeds whose user has a later feed in val/test) ===
+  feeds with a later feed: 117; candidate rows 12927; corr(cos_own, cos_next) on those rows 0.777
+  single-score NDCG on feeds with later feed: cos(ue_own)    0.3194 (G3 there 0.3834)
+  single-score NDCG on feeds with later feed: cos(ue_next)   0.3557 (G3 there 0.3834)
+    G3 + 0.1 * z(cos own     ) on affected feeds: per-feed -0.0034 ± 0.0038 (z -0.89, n=117); overall -0.00003
+    G3 + 0.1 * z(cos next    ) on affected feeds: per-feed +0.0021 ± 0.0053 (z +0.39, n=117); overall +0.00002
+    G3 + 0.1 * z(cos next-own) on affected feeds: per-feed +0.0001 ± 0.0017 (z +0.07, n=117); overall +0.00000
+    G3 + 0.2 * z(cos own     ) on affected feeds: per-feed -0.0010 ± 0.0081 (z -0.12, n=117); overall -0.00001
+    G3 + 0.2 * z(cos next    ) on affected feeds: per-feed +0.0060 ± 0.0078 (z +0.77, n=117); overall +0.00005
+    G3 + 0.2 * z(cos next-own) on affected feeds: per-feed +0.0048 ± 0.0033 (z +1.49, n=117); overall +0.00004
+    G3 + 0.3 * z(cos own     ) on affected feeds: per-feed -0.0009 ± 0.0084 (z -0.11, n=117); overall -0.00001
+    G3 + 0.3 * z(cos next    ) on affected feeds: per-feed +0.0073 ± 0.0083 (z +0.88, n=117); overall +0.00006
+    G3 + 0.3 * z(cos next-own) on affected feeds: per-feed +0.0111 ± 0.0051 (z +2.20, n=117); overall +0.00009
+    G3 + 0.5 * z(cos own     ) on affected feeds: per-feed +0.0003 ± 0.0099 (z +0.03, n=117); overall +0.00000
+    G3 + 0.5 * z(cos next    ) on affected feeds: per-feed +0.0148 ± 0.0115 (z +1.29, n=117); overall +0.00012
+    G3 + 0.5 * z(cos next-own) on affected feeds: per-feed +0.0193 ± 0.0101 (z +1.90, n=117); overall +0.00016
+    G3 + 1.0 * z(cos own     ) on affected feeds: per-feed -0.0149 ± 0.0118 (z -1.27, n=117); overall -0.00012
+    G3 + 1.0 * z(cos next    ) on affected feeds: per-feed +0.0189 ± 0.0135 (z +1.40, n=117); overall +0.00015
+    G3 + 1.0 * z(cos next-own) on affected feeds: per-feed +0.0330 ± 0.0166 (z +1.99, n=117); overall +0.00027
+    on top of item leak: + 0.3 * z(next-own): per-feed -0.0021 ± 0.0057 (z -0.38); overall vs leak-only -0.00002
+    on top of item leak: + 0.5 * z(next-own): per-feed -0.0047 ± 0.0066 (z -0.71); overall vs leak-only -0.00004
+    PAST-ONLY: G3 + 0.2 * z(cos prev - own) on feeds with an earlier val/test feed: per-feed -0.0025 ± 0.0033 (z -0.75, n=25)
+    PAST-ONLY: G3 + 0.5 * z(cos prev - own) on feeds with an earlier val/test feed: per-feed -0.0076 ± 0.0111 (z -0.68, n=25)
+[   13.2s] done 01

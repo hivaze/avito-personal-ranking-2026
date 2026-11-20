@@ -1,0 +1,84 @@
+{
+ "checks": [
+  {
+   "name": "G1 flags OFF, previous vs new train.py: identical training-gather sequence (24 steps incl. pool), model-input batches, train-mode logits and loss-input logits",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "G1 identical logged metric lines; bit-identical checkpoint and val preds",
+   "ok": true,
+   "info": "BEST step 24 val_ndcg 0.39119; train time"
+  },
+  {
+   "name": "G1 no val-sourced batch anywhere in either run; every eval-mode val call carries no dom row (unchanged scoring); eval holdout calls carry the train dom; predict / eval_subset never see a ValPool",
+   "ok": true,
+   "info": "eval counts {'val|tr|dom=False': 120, 'train|tr|dom=True': 164}"
+  },
+  {
+   "name": "G2 --val_mix 0.5 --val_fold 0 vs flags OFF: the 24 TRAIN gathers (regular + m02 pool streams, incl. the replaced steps) are identical; 1-23 steps feed a val batch; at every other step the model-input feed ids == flags OFF; train-mode logits bitwise-identical before the first val step",
+   "ok": true,
+   "info": "val steps 12 at [0, 1, 2, 4, 7, 8, 12, 15, 16, 19, 21, 23]; first val step 0"
+  },
+  {
+   "name": "G2 val batches: fidx - n_train are val feeds of the folds != 0 (never fold 0); dom rows (0, 1, 0); pos = arange; y / ccat == the val split's flat arrays at the batch rows; xt columns 0 / 3 == attach_xt(feat_cache val) brute force; train batches keep their (1-p, p, 0) dom",
+   "ok": true,
+   "info": "fidx True oof 0 dom True y/ccat True pos True xt True train dom True"
+  },
+  {
+   "name": "G2 eval-mode: every val call carries no dom (val scoring unchanged), no eval batch is val-sourced, holdout evals carry the train dom; predict / eval_subset never see the ValPool",
+   "ok": true,
+   "info": "eval counts {'val|tr|dom=False': 160, 'train|tr|dom=True': 328}"
+  },
+  {
+   "name": "G2 log: setup line (fold 0 held out, 11538 cooldown feeds, random-like token), per-eval lines at steps 12 and 24 with the val-batch count == the recorded val steps and OOF / in-sample NDCG, selected-checkpoint line; json args",
+   "ok": true,
+   "info": "['wave-5 valcd: from step 0 (of 24) each NON-pool cooldown step trains on a batch of LABELLED VAL feeds w.p. 0.5 (own RNG seed 813; the m02 draws / batches are un', 'wave-5 valcd [step 12]: val batches 6 (2074 feeds, 1 passes started), mean val-batch loss 2.3234; val NDCG OOF fold 0 (2885 feeds) 0.40011 | in-sample folds != ', 'wave-5 valcd [step 24]: val batches 12 (3323 feeds, 1 passes started), mean val-batch loss 1.9709; val NDCG OOF fold 0 (2885 feeds) 0.40073 | in-sample folds !=', 'wave-5 valcd [selected step 24]: val batches 12 (3323 feeds, 1 passes started), mean val-batch loss 1.9709; val NDCG OOF fold 0 (2885 feeds) 0.40073 | in-sample']"
+  },
+  {
+   "name": "G2 hygiene outputs written (selected + @last checkpoints, val preds, holdout preds); checkpoint differs from flags OFF; val preds cover every val feed (finite, non-zero on fold 0 too)",
+   "ok": true,
+   "info": "[True, True, True, True, True, True]"
+  }
+ ],
+ "e2e_g1": {
+  "off_lines": [
+   "step 12/24 loss 4.4137 val_ndcg 0.39025 holdout_ndcg 0.31703 lr 6.87e-04 cd_loss_reg 4.1957 cd_loss_pool 3.6701",
+   "step 24/24 loss 0.0000 val_ndcg 0.39119 holdout_ndcg 0.31770 lr 1.01e-04 cd_loss_reg 4.3878 cd_loss_pool 2.9858",
+   "BEST step 24 val_ndcg 0.39119; train time"
+  ]
+ },
+ "e2e_g2": {
+  "off_lines": [
+   "step 12/24 loss 4.4137 val_ndcg 0.39025 holdout_ndcg 0.31703 lr 6.87e-04 cd_loss_reg 4.1957 cd_loss_pool 3.6701",
+   "step 24/24 loss 0.0000 val_ndcg 0.39119 holdout_ndcg 0.31770 lr 1.01e-04 cd_loss_reg 4.3878 cd_loss_pool 2.9858",
+   "BEST step 24 val_ndcg 0.39119; train time"
+  ],
+  "on_lines": [
+   "step 12/24 loss 1.9946 val_ndcg 0.39424 holdout_ndcg 0.31762 lr 6.87e-04 cd_loss_reg 4.0887 cd_loss_pool 2.5149",
+   "step 24/24 loss 0.0000 val_ndcg 0.39507 holdout_ndcg 0.31783 lr 1.01e-04 cd_loss_reg 0.0000 cd_loss_pool 1.9615",
+   "BEST step 24 val_ndcg 0.39507; train time"
+  ],
+  "val_steps": [
+   0,
+   1,
+   2,
+   4,
+   7,
+   8,
+   12,
+   15,
+   16,
+   19,
+   21,
+   23
+  ],
+  "valcd_lines": [
+   "wave-5 valcd: from step 0 (of 24) each NON-pool cooldown step trains on a batch of LABELLED VAL feeds w.p. 0.5 (own RNG seed 813; the m02 draws / batches are unchanged): fold 0 of 5 held out (OOF 2885 feeds), cooldown val feeds 11538 (folds (2885, 2885, 2885, 2884, 2884)), 51 batches per pass, expected val batches 10 (~0.2 passes); val batches carry the random-like domain token (0.0, 1.0, 0.0), p_random 1 (aux weight 0), fidx offset 3151208; selection on the holdout; 0.0s",
+   "wave-5 valcd [step 12]: val batches 6 (2074 feeds, 1 passes started), mean val-batch loss 2.3234; val NDCG OOF fold 0 (2885 feeds) 0.40011 | in-sample folds != 0 (11538 feeds) 0.39278",
+   "wave-5 valcd [step 24]: val batches 12 (3323 feeds, 1 passes started), mean val-batch loss 1.9709; val NDCG OOF fold 0 (2885 feeds) 0.40073 | in-sample folds != 0 (11538 feeds) 0.39365",
+   "wave-5 valcd [selected step 24]: val batches 12 (3323 feeds, 1 passes started), mean val-batch loss 1.9709; val NDCG OOF fold 0 (2885 feeds) 0.40073 | in-sample folds != 0 (11538 feeds) 0.39365"
+  ]
+ },
+ "failed": []
+}

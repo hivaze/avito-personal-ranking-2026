@@ -1,0 +1,11 @@
+pattern 0 (= ref2 - ref): bucket z val +1.88 holdout +0.90 pooled +1.97; user-cluster SE val 0.00104 (plain 0.00104), holdout 0.00067 (plain 0.00067)
+60 random swap patterns (A/A by construction):
+  bucket z val                  : mean -0.19, sd 0.92, share |z| >= 1.96 0.083, share z >= 2.5 0.000
+  bucket z holdout              : mean +0.12, sd 0.76, share |z| >= 1.96 0.000, share z >= 2.5 0.000
+  bucket pooled z               : mean -0.05, sd 0.79, share |z| >= 1.96 0.017, share z >= 2.5 0.000
+  all-feeds z val               : mean -0.22, sd 1.53, share |z| >= 1.96 0.217, share z >= 2.5 0.017
+  all-feeds z holdout           : mean -0.03, sd 0.92, share |z| >= 1.96 0.017, share z >= 2.5 0.000
+  all-feeds pooled z            : mean -0.18, sd 1.27, share |z| >= 1.96 0.117, share z >= 2.5 0.000
+  bucket pooled z (cluster SE)  : mean -0.05, sd 0.79, share |z| >= 1.96 0.017, share z >= 2.5 0.000
+  mean SE val bucket plain 0.00110 / cluster 0.00110; holdout bucket plain 0.00058 / cluster 0.00058
+Note: swap patterns share members, so they are not independent draws; sd near 1 means the plain SE is calibrated.

@@ -1,0 +1,13 @@
+path check of the day, member w5_fd10_kd05w192_s951; C = suffix mixft3
+member val NDCG: A (mixctl3) 0.399268 | A' (mixctl3b) 0.399398 | C (mixft3) 0.399009 | S (n2cpv3s3) 0.399344
+stored control vs stored control (A/A band):
+  A  vs A': 1-corr raw 6.559e-09 (corr 1.0000000) | 1-corr rank-z 9.696e-07 | max |raw diff| 0.0251 | NDCG diff -0.000131 +- 0.000064 | feeds with identical NDCG 0.936
+  A  vs S : 1-corr raw 6.943e-09 (corr 1.0000000) | 1-corr rank-z 9.697e-07 | max |raw diff| 0.0285 | NDCG diff -0.000076 +- 0.000052 | feeds with identical NDCG 0.937
+  A' vs S : 1-corr raw 7.217e-09 (corr 1.0000000) | 1-corr rank-z 9.698e-07 | max |raw diff| 0.0391 | NDCG diff +0.000054 +- 0.000062 | feeds with identical NDCG 0.938
+today's control vs the stored controls:
+  C  vs A : 1-corr raw 1.078e-05 (corr 0.9999892) | 1-corr rank-z 1.913e-03 | max |raw diff| 1.3322 | NDCG diff -0.000259 +- 0.000395 | feeds with identical NDCG 0.436
+  C  vs A': 1-corr raw 1.077e-05 (corr 0.9999892) | 1-corr rank-z 1.913e-03 | max |raw diff| 1.3296 | NDCG diff -0.000389 +- 0.000394 | feeds with identical NDCG 0.437
+  C  vs S : 1-corr raw 1.076e-05 (corr 0.9999892) | 1-corr rank-z 1.913e-03 | max |raw diff| 1.3264 | NDCG diff -0.000335 +- 0.000395 | feeds with identical NDCG 0.437
+CRITERION 1 (1-corr): max(d(C,A), d(C,A')) = 1.078e-05 <= 1.5 x d(A,A') = 9.838e-09: FAIL
+CRITERION 2 (member NDCG): max(n(C,A), n(C,A')) = 0.000389 <= max(n(A,A') = 0.000131, 2 x se = 0.000129): FAIL
+PATH CHECK: FAIL -> stop

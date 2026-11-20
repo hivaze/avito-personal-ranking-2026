@@ -1,0 +1,24 @@
+ARM  (8): abl_e10_pop1_s951 .. abl_e10_pop1_s958
+CTL  (4): abl_e10_xdrop_pop_s951 .. abl_e10_xdrop_pop_s954
+== selected checkpoints
+  val                                n  14423 | member +0.00064 +- 0.00060 (z +1.07; per-feed SE 0.00053, seed SE 0.00060; 6/8 arm members above the control mean) | pool +0.00113 +- 0.00075 (z +1.51)
+  val, private mix                   n  14423 | member +0.00033 +- 0.00082 (z +0.40; per-feed SE 0.00082, seed SE 0.00070; 5/8 arm members above the control mean) | pool +0.00063 +- 0.00116 (z +0.55)
+  val, public mix                    n  14423 | member +0.00040 +- 0.00067 (z +0.60; per-feed SE 0.00067, seed SE 0.00062; 6/8 arm members above the control mean) | pool +0.00072 +- 0.00094 (z +0.77)
+  val M>=50                          n   8530 | member +0.00054 +- 0.00059 (z +0.92; per-feed SE 0.00059, seed SE 0.00048; 6/8 arm members above the control mean) | pool +0.00071 +- 0.00081 (z +0.88)
+  val M<50                           n   5893 | member +0.00078 +- 0.00098 (z +0.79; per-feed SE 0.00098, seed SE 0.00083; 6/8 arm members above the control mean) | pool +0.00174 +- 0.00142 (z +1.23)
+  holdout, all feeds                 n  30000 | member +0.00177 +- 0.00033 (z +5.35; per-feed SE 0.00033, seed SE 0.00013; 8/8 arm members above the control mean) | pool +0.00241 +- 0.00044 (z +5.55)
+  holdout, lag-view feeds (Sep 12-19) n  15225 | member +0.00221 +- 0.00046 (z +4.83; per-feed SE 0.00046, seed SE 0.00033; 8/8 arm members above the control mean) | pool +0.00299 +- 0.00060 (z +4.94)
+  holdout, Sep 12-14 (val-like lag)  n   6946 | member +0.00266 +- 0.00068 (z +3.89; per-feed SE 0.00068, seed SE 0.00058; 8/8 arm members above the control mean) | pool +0.00340 +- 0.00088 (z +3.85)
+  holdout, Sep 17-19 (test-like lag) n   8279 | member +0.00184 +- 0.00069 (z +2.67; per-feed SE 0.00062, seed SE 0.00069; 8/8 arm members above the control mean) | pool +0.00264 +- 0.00083 (z +3.19)
+== last step
+  val                                n  14423 | member +0.00090 +- 0.00054 (z +1.66; per-feed SE 0.00054, seed SE 0.00040; 6/8 arm members above the control mean) | pool +0.00081 +- 0.00076 (z +1.06)
+  val, private mix                   n  14423 | member +0.00030 +- 0.00082 (z +0.37; per-feed SE 0.00082, seed SE 0.00050; 4/8 arm members above the control mean) | pool -0.00089 +- 0.00118 (z -0.75)
+  val, public mix                    n  14423 | member +0.00050 +- 0.00067 (z +0.74; per-feed SE 0.00067, seed SE 0.00045; 6/8 arm members above the control mean) | pool -0.00036 +- 0.00095 (z -0.37)
+  val M>=50                          n   8530 | member +0.00052 +- 0.00061 (z +0.86; per-feed SE 0.00061, seed SE 0.00036; 7/8 arm members above the control mean) | pool +0.00030 +- 0.00083 (z +0.36)
+  val M<50                           n   5893 | member +0.00145 +- 0.00100 (z +1.45; per-feed SE 0.00100, seed SE 0.00087; 6/8 arm members above the control mean) | pool +0.00154 +- 0.00142 (z +1.09)
+  holdout, all feeds                 n  30000 | member +0.00197 +- 0.00033 (z +6.00; per-feed SE 0.00033, seed SE 0.00017; 8/8 arm members above the control mean) | pool +0.00237 +- 0.00043 (z +5.47)
+  holdout, lag-view feeds (Sep 12-19) n  15225 | member +0.00239 +- 0.00046 (z +5.23; per-feed SE 0.00046, seed SE 0.00035; 8/8 arm members above the control mean) | pool +0.00256 +- 0.00060 (z +4.25)
+  holdout, Sep 12-14 (val-like lag)  n   6946 | member +0.00281 +- 0.00069 (z +4.06; per-feed SE 0.00069, seed SE 0.00061; 8/8 arm members above the control mean) | pool +0.00272 +- 0.00087 (z +3.15)
+  holdout, Sep 17-19 (test-like lag) n   8279 | member +0.00204 +- 0.00079 (z +2.58; per-feed SE 0.00061, seed SE 0.00079; 8/8 arm members above the control mean) | pool +0.00242 +- 0.00083 (z +2.90)
+== DECISION (selected checkpoints; member level): z_val +1.07, z_holdout(lag-view feeds) +4.83, pooled z +4.17; private-mix z +0.40; pool deltas val +0.00113, holdout(lag-view) +0.00299; holdout(lag-view) at the last step +0.00239
+   clauses: z_val >= 1, z_holdout >= 1, pooled >= 2, private-mix z >= -1, both pool deltas >= 0, last-step holdout >= 0  ->  PASS (subject to the stale-val clause, read separately)

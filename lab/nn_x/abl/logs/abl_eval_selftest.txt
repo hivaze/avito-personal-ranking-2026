@@ -1,0 +1,40 @@
+#### SELFTEST (stand-in runs; 'last' read = the stored selected checkpoint; verdicts meaningless)
+== ABLATION SCREEN (2-epoch from-scratch, base = A_BASE + HYG, seeds (23, 24), primary = last checkpoint; rules in the abl_eval.py docstring, frozen 2026-11-13 00:08 UTC)
+== runs: selected step / total | selected val, holdout (in-training eval) | last val, holdout | minutes
+  r7:r7_base_s23                 best  19670/19670 | sel val 0.39408 hold 0.31779 | last val 0.39408 hold 0.31779 | 35 min
+  r7:r7_base_s24                 best  19670/19670 | sel val 0.39334 hold 0.31749 | last val 0.39334 hold 0.31749 | 27 min
+  r7:r7_dwa_s23                  best  19670/19670 | sel val 0.39421 hold 0.31740 | last val 0.39421 hold 0.31740 | 37 min
+  r7:r7_dwa_s24                  best  19670/19670 | sel val 0.39448 hold 0.31738 | last val 0.39448 hold 0.31738 | 38 min
+  r7:r7_nope_s23                 (missing)
+  r7:r7_nope_s24                 (missing)
+
+== dwa (SCALE-UP: r7 dwa stand-in (selftest)) vs base (B = arm, delta = arm - base)
+    VAL  r7_dwa_s23 0.39421 vs r7_base_s23 0.39408: +0.00013
+    VAL  r7_dwa_s24 0.39448 vs r7_base_s24 0.39334: +0.00114
+    HOLD r7_dwa_s23 0.31739 vs r7_base_s23 0.31780: -0.00040
+    HOLD r7_dwa_s24 0.31737 vs r7_base_s24 0.31751: -0.00014
+  [last] VAL  pooled: all +0.00064+-0.00042 (z +1.53)  M<50 +0.00208+-0.00080 (z +2.59)  M>=50 -0.00036+-0.00043 (z -0.85)  Tue +0.00070+-0.00058 (z +1.21)  Thu +0.00057+-0.00060 (z +0.95)  coldpos +0.00126+-0.00082 (z +1.54)  warmpos +0.00029+-0.00056 (z +0.52)
+  [last] HOLD pooled: all -0.00027+-0.00023 (z -1.18)  late20% -0.00023+-0.00049 (z -0.47)
+  [last] val SE_cal 0.00048 (z_cal +1.32)
+  [last] hold SE_cal 0.00025 (z_cal -1.07)
+    VAL  r7_dwa_s23 0.39421 vs r7_base_s23 0.39408: +0.00013
+    VAL  r7_dwa_s24 0.39448 vs r7_base_s24 0.39334: +0.00114
+    HOLD r7_dwa_s23 0.31739 vs r7_base_s23 0.31780: -0.00040
+    HOLD r7_dwa_s24 0.31737 vs r7_base_s24 0.31751: -0.00014
+  [selected (info)] VAL  pooled: all +0.00064+-0.00042 (z +1.53)  M<50 +0.00208+-0.00080 (z +2.59)  M>=50 -0.00036+-0.00043 (z -0.85)  Tue +0.00070+-0.00058 (z +1.21)  Thu +0.00057+-0.00060 (z +0.95)  coldpos +0.00126+-0.00082 (z +1.54)  warmpos +0.00029+-0.00056 (z +0.52)
+  [selected (info)] HOLD pooled: all -0.00027+-0.00023 (z -1.18)  late20% -0.00023+-0.00049 (z -0.47)
+  MINUTES base [35.4, 27.2] arm [37.4, 37.7] -> ratio 1.20
+  PMIX private-mix pooled delta +0.00040 +- 0.00063 (z +0.64); < -1 SE: no
+  STALE-VAL: pending (missing 4 stale preds: r7_base_s23 r7_dwa_s23 r7_base_s24 r7_dwa_s24)
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent +0.00055+-0.00033 (pos 0.460)  warm|mid -0.00013+-0.00015 (pos 0.110)  warm|novel -0.00026+-0.00013 (pos 0.127)  cold|recent +0.00049+-0.00020 (pos 0.219)  cold|mid +0.00001+-0.00008 (pos 0.038)  cold|novel -0.00003+-0.00006 (pos 0.046)  cat#1|w3+ +0.00008+-0.00015 (pos 0.347)  total +0.00063+-0.00042 (pos 1.000)
+  ==> dwa: val +0.00064 (SE_cal 0.00048, z_cal +1.32; seeds +0.00013 +0.00114), holdout -0.00027 (z_cal -1.07; seeds -0.00040 -0.00014) -> FAIL
+
+== nope (ABLATION: missing stand-in): incomplete (needs base + arm, seeds (23, 24), last-checkpoint val + holdout preds)
+
+== SUMMARY (last checkpoints; delta = arm - base, pooled over seeds; ABLATION worth = -delta)
+  arm          type      val d (z_cal)        hold d (z_cal)      M<50     M>=50    Tue      Thu      coldpos  warmpos  late20%  pmix     stale    min  -> verdict
+  dwa          SCALE-UP  +0.00064 (+1.32)  -0.00027 (-1.07)  +0.00208 -0.00036 +0.00070 +0.00057 +0.00126 +0.00029 -0.00023 +0.00040 +nan 1.20 -> FAIL
+
+== COMPONENT WORTH on the current recipe (ablation arms; -delta; val / holdout; +SE_cal)
+#### SELFTEST OK: read ['dwa']

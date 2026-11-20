@@ -1,0 +1,87 @@
+{
+  "args": {
+    "variant": "s2_attn_retr_s24",
+    "out": "ftb_attn_retr_s24",
+    "epochs": 6,
+    "lr": 5e-05,
+    "wd": 0.02,
+    "warmup": 30,
+    "cand_budget": 8192,
+    "max_feeds": 128,
+    "loss": "softmax",
+    "loss_norm": "batch",
+    "folds": 5,
+    "seeds": 1,
+    "drop": null,
+    "from_scratch": false,
+    "extra": "it_cand_cnt_train,it_tr_coec,it_tr_coec_rk,it_tr_coec_z,it_tr_coec_gap,it_tr_ctr,it_tr_pos,u_tr_ctr,u_tr_feeds,hour,centrality,it_hist_all_luo,it_hist_all_luo_rk,it_hist_all_luo_z,it_hist_all_luo_gap,it_hist_et1_luo,it_hist_et2_luo,it_hist_et3_luo,it_hist_et4_luo,it_hist_et5_luo,it_hist_et6_luo,it_hist_et7_luo,it_hist_et8_luo,it_hist_et9_luo,it_hist_et10_luo,seq_cv_invd20,seq_cv_invd20_rk,seq_cv_pop,seq_cv_norm,seq_max_all,seq_top3,seq_argmax_hpos,ctx_nd_c80,ctx_nd_c90,ctx_nd_c95,ctx_nd_dupb_f1,ctx_nd_dupb_h,ctx_nd_dupb_u,ctx_nd_hcent,ctx_nd_knn_f1,ctx_nd_knn_h,ctx_nd_knn_h_dev,ctx_nd_knn_u,ctx_nd_knn_u_dev,ctx_nd_max,ctx_nd_mean,ctx_nd_top5h,ctx_nd_top5u,ctx_nd_ucent",
+    "extra_lr_mult": 10.0,
+    "add_random": 0,
+    "pseudo": "",
+    "w_test": 0.3,
+    "pseudo_n": 12000,
+    "pseudo_T": 1.0,
+    "select": "snapshot"
+  },
+  "oof_by_epoch": [
+    0.3841870842084478,
+    0.3862943727734833,
+    0.3869561689094082,
+    0.38667482802910536,
+    0.3851583564306447,
+    0.3841262118156843,
+    0.382710678540951
+  ],
+  "best_epoch": 2,
+  "oof_ndcg_best_epoch": 0.3869561689094082,
+  "oof_ndcg_snapshot": 0.3866094307621913,
+  "saved": "snapshot",
+  "fold_curves": [
+    [
+      0.37620118754120174,
+      0.37910189970598723,
+      0.38042474342240234,
+      0.3798303099503955,
+      0.3788831549618302,
+      0.37799631018998303,
+      0.37617353375931245
+    ],
+    [
+      0.3780517012583703,
+      0.38245058488881717,
+      0.3832424062068241,
+      0.3829074645414071,
+      0.38029781959077463,
+      0.37858809000969657,
+      0.37673619396866526
+    ],
+    [
+      0.38903694720746845,
+      0.3929400596915822,
+      0.3936766123850765,
+      0.3934587187143633,
+      0.3923212303149103,
+      0.39054904287353664,
+      0.3896217371636159
+    ],
+    [
+      0.39369232705838486,
+      0.3943098310197201,
+      0.3937277582077652,
+      0.3933427599678191,
+      0.39089203576172993,
+      0.39086554220909486,
+      0.3897542411588817
+    ],
+    [
+      0.3839564727537273,
+      0.38267101095175127,
+      0.38371054649720393,
+      0.383836214291542,
+      0.3833989190775234,
+      0.38263389251746066,
+      0.38126962859974817
+    ]
+  ],
+  "minutes": 12.716636228561402
+}

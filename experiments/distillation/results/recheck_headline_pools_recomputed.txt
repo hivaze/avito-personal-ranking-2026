@@ -1,0 +1,32 @@
+# Copy of the raw run log (not published; audit of 2026-11-14): the headline train-only pools recomputed from the stored predictions, val / holdout NDCG, at the holdout-selected checkpoint and at the last step.
+== R1 headline TO pools (val / holdout), selected and @last
+ base x4          sel   val 0.39887 hold 0.32328 | @last val 0.39934 hold 0.32287 | sel-last val -0.00047+-0.00036 hold +0.00041+-0.00019
+ kd05 x4          sel   val 0.40085 hold 0.32349 | @last val 0.40076 hold 0.32342 | sel-last val +0.00008+-0.00017 hold +0.00007+-0.00009
+ kd05w192 x4      sel   val 0.40134 hold 0.32408 | @last val 0.40138 hold 0.32403 | sel-last val -0.00004+-0.00020 hold +0.00005+-0.00011
+ kd05t25w192 x4   sel   val 0.40100 hold 0.32412 | @last val 0.40094 hold 0.32420 | sel-last val +0.00006+-0.00021 hold -0.00009+-0.00012
+ W8               sel   val 0.40157 hold 0.32456 | @last val 0.40170 hold 0.32447 | sel-last val -0.00014+-0.00020 hold +0.00009+-0.00011
+ N8               sel   val 0.40119 hold 0.32372 | @last val 0.40121 hold 0.32374 | sel-last val -0.00002+-0.00012 hold -0.00002+-0.00006
+   kd05 x4 - base x4 sel  : val +0.00198+-0.00061 hold +0.00021+-0.00036
+   kd05 x4 - base x4 @last: val +0.00143+-0.00060 hold +0.00055+-0.00036
+   kd05w192 x4 - base x4 sel  : val +0.00247+-0.00065 hold +0.00080+-0.00038
+   kd05w192 x4 - base x4 @last: val +0.00205+-0.00065 hold +0.00115+-0.00037
+   kd05t25w192 x4 - base x4 sel  : val +0.00213+-0.00068 hold +0.00084+-0.00039
+   kd05t25w192 x4 - base x4 @last: val +0.00161+-0.00067 hold +0.00133+-0.00038
+   W8 - N8 sel: val +0.00038+-0.00049 hold +0.00083+-0.00028 | @last: val +0.00050+-0.00050 hold +0.00073+-0.00028
+== final files (0.5 z(FT)+0.5 z(TO)) on val
+ W8   final 0.40165 FT 0.40087 TO 0.40157 | final-TO +0.00009+-0.00043 | FT-TO -0.00069+-0.00061
+ S16  final 0.40173 FT 0.40085 TO 0.40172 | final-TO +0.00001+-0.00041 | FT-TO -0.00087+-0.00060
+ C3   final 0.40101 FT 0.40043 TO 0.40103 | final-TO -0.00002+-0.00039 | FT-TO -0.00060+-0.00057
+ G3   final 0.40032 FT 0.39984 TO 0.40035 | final-TO -0.00003+-0.00039 | FT-TO -0.00052+-0.00058
+   W8-C3 final val +0.00064+-0.00055 (per-feed sd 0.0660; SE of a public delta ~ 0.00071, private ~ 0.00047)
+   W8-G3 final val +0.00133+-0.00058 (per-feed sd 0.0694; SE of a public delta ~ 0.00075, private ~ 0.00049)
+   W8-S16 final val -0.00008+-0.00034 (per-feed sd 0.0404; SE of a public delta ~ 0.00044, private ~ 0.00029)
+   C3-G3 final val +0.00069+-0.00040 (per-feed sd 0.0479; SE of a public delta ~ 0.00052, private ~ 0.00034)
+== R2 inherited selection: teacher tf11 members = r6_cd_m02_r101-107 + base s951-954
+ teacher tf11 pool holdout (selected members) 0.32371
+  no @last for r6_cd_m02_r101@last -> partial: base4 part only
+  base4 pool sel-last +0.00041+-0.00019
+  tf11 with base @last (r6 selected): 0.32373  sel-thismix -0.00002+-0.00011
+== W8 (sel / @last) vs G3 TO pool and C3 TO pool on the holdout
+ W8     hold 0.32456 | -G3 (0.32379) +0.00076+-0.00033 z +2.28 | -C3 (0.32306) +0.00149+-0.00034
+ W8@last hold 0.32447 | -G3 (0.32379) +0.00068+-0.00034 z +2.02 | -C3 (0.32306) +0.00141+-0.00034

@@ -1,0 +1,93 @@
+WIDTH-GATE (reports/SOLVER_POWER_1113.md section 6.3 item 1, the repaired SCALE-DIAG; gates BIGPOOL 6.2): PRE-DECLARED READ-OUT RULE,
+frozen 2026-11-14T00:08Z (`date -u` 2026-11-14T00:07:59Z at the check below), BEFORE any WIDTH-GATE run started: no w11_wg_* log, claim,
+checkpoint, prediction or stale file existed under nn_x/w11/width (find count 0), no GAP-probe output existed, some GPUs held no compute
+process (GPUs N: another agent's abl_e10_xdrop_pre2_s951/952, not touched). Implementation agent: WIDTH-GATE (private code copy
+nn_x/w11/width/, CODE only: nn_x/w5/*.py + cd_arms11.py + lane_wg.sh + tests/; outputs in nn_x/w11/width/{ckpt,logs,preds}).
+
+QUESTION (6.3): is ranker capacity recipe-limited (Muon's sqrt-width over-step, cooldown memorisation) or not?
+
+STEP 0 - GAP PROBE (inference only, information; nn_x/w11/width/gap_probe.py -> nn_x/w11/width/logs/gap_probe.{txt,json}; also copied
+  to nn_x/w5/logs/w5_widthgate_gap_probe.txt). Snapshots @77500 (plateau end, before step 78,680 where the cooldown-pool replay begins):
+  v29 d192 m02 s711-715 (5; nn/ckpt/v29_d192_m02_s<s>@77500.pt), v30 d128 m02 s901-906 (6; nn/ckpt/v30_f7_m02_s<s>@77500.pt),
+  w5_e10_base d128 s951-956 (6; nn_x/w5/ckpt/w5_e10_base_s<s>@77500.pt). Main-loss listwise CE in eval mode (model.eval(), bf16 autocast,
+  use_pos False, the train domain token [1-p, p, 0] exactly as in training; NO aux term): per feed -sum_i (y_i / sum y) log softmax(logits)_i
+  over the valid candidates, mean over feeds with >= 1 positive (the train loss's `valid` convention), on three 30K feed sets of the TRAIN
+  split, M >= 50 throughout: (H) the fixed 30K holdout (train.py's selection: p_random > 0.9, M >= 50, rng 12345; never trained on);
+  (R) 30K in-sample random-like feeds (p_random > 0.9, M >= 50, NOT in the holdout; rng 777 out of 59,794); (P) 30K in-sample production
+  feeds (p_random < 0.1, M >= 50; rng 778 out of 1,266,693). GAP = CE(H) - CE(R) (same feed type, trained-on vs never seen); CE(P) and the
+  NDCG of each set are context. Per family mean +- SE over seeds; d192 - d128 (Welch over 5 vs 12 and 5 vs 6). READING (information, no
+  gate): a larger GAP at d192 than at d128 = the wider model memorises its training feeds (DATA-limited: more labelled data would pay);
+  an equal GAP with equal CE(R) = INFORMATION-limited (the function is the same; width adds nothing to fit).
+
+STEP 1 - RUNS (nn_x/w11/width/lane_wg.sh = the nn_x/w5/lane.sh stage-B CD harness verbatim: 2-epoch re-cool of the @77500 snapshot with
+  B_BASE "--epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10
+  --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000" + HYG "--save_last
+  --save_holdout --select_min_step 12000 --cliplog 50", seed CDSEED = 900 + root for EVERY arm, arm flags appended LAST, test preds written
+  as in the harness; GPUs N 1 2 3, two lanes per GPU, each launch gated on <= 3 compute processes and >= 60 GB free):
+  d192 (roots 711-715 = v29_d192_m02_s<root>@77500.pt; cfg d 192, heads 6, 2.12M params), variant w11_wg_d192_<arm>_r<root>, seeds 1611-1615:
+    (a) m02    = control, no arm flag
+    (b) drop02 = --drop_cd 0.2 (nn_x/w5 cd_arms.py set_dropout = the nn_x/r6 flag: p 0.2 on every nn.Dropout and attention-probability
+                 site from step 0 of the re-cool; the checkpoint cfg keeps drop 0.1)
+    (c) mup    = --mup_base 128 (cd_arms11.py): Muon lr multiplier sqrt(128/192) = 0.8165 on the 39 Muon matrices whose fan-in grows with
+                 the width (hidden q/k/v/o/g, ff, c_mlp.2, retr.Z, head.1, aux_head.1), 1.0 on the 7 fixed-fan-in input projections
+                 (c_lin, c_mlp.0, retr.wk, retr.t1, retr.t2, u_lin, h_lin); applied INSIDE the step loop right after the per-step reset
+                 g["lr"] = lr_at(step) (g["lr"] = lr_at(step) * g["lr_mult"]), so the reset cannot erase it; the effective lr of one hidden
+                 (cross.0.attn.q), one input (c_lin) and one fixed (retr.wk) matrix is logged at every eval; Muon's decoupled weight decay
+                 (param *= 1 - lr * wd) uses the same group lr and therefore ALSO scales by 0.8165 on the scaled matrices (stated, not
+                 corrected); AdamW groups untouched. Spectral step of a hidden matrix: 0.2 * lr * 0.8165 * sqrt(192) = 2.2627 lr = the d128
+                 value 0.2 * lr * sqrt(128).
+  d128 (roots 901-905 = v30_f7_m02_s<root>@77500.pt; d 128, heads 4, 1.01M params; the same 10-epoch m02 recipe at d128), arm (a) only:
+    variant w11_wg_d128_m02_r<root>, seeds 1801-1805 = the MATCHED d128 re-cool control (same harness, same CDSEED rule, same wall).
+  20 runs (15 d192 + 5 d128). Flag OFF = bit-identical (tests/test_width.py: AST proof + CPU end-to-end identity on the miniature split
+  for the d128 AND the d192 root + a one-step delta-ratio unit test; GPU plumbing smoke w11_smoke_* whose outputs are deleted). Test
+  results are reported in the read-out; a test failure before launch -> fix + an ADDENDUM here (the rule below does not change).
+
+GO RULE TO STEP 2 (reports/SOLVER_POWER_1113.md 6.3 item 1, verbatim): "best d192 arm - matched d128 re-cool >= +0.0008 val AND >= +0.0004
+  holdout, with no rise in member corr to the base; the 12 full-run d128 seeds (v30 + w5_e10_base) are reported as information. Otherwise
+  close ranker width for good."
+  Operationalisation (frozen here):
+  * read = member level, SELECTED checkpoint (holdout-best among evals at step >= 12,000; the harness's judge), train-only val preds
+    (data/flat/val, 14,420 feeds) and the 30K holdout preds; @last checkpoint = information.
+  * "d192 arm - matched d128 re-cool" = pooled per-feed paired delta (nn_x/r6/r6_eval.py compare: mean over the 5 pairs of per-feed
+    NDCG deltas, SE = sd / sqrt(n feeds)), pairing root 711<->901, 712<->902, 713<->903, 714<->904, 715<->905 (the roots are independent
+    seeds, so the pairing only shapes the per-feed SE; the point estimate equals the difference of the two 5-member means). The
+    across-root Welch SE (5 vs 5 member means) is reported next to it. The thresholds are on the POINT ESTIMATES.
+  * "best d192 arm" = the arm with the highest pooled val delta among (a) (b) (c) on the selected checkpoints (chosen BEFORE the holdout
+    is read; the multiplicity of 3 arms is disclosed, the thresholds are ~2-4x the single-member MDE).
+  * "no rise in member corr to the base": base = the frozen pick-1 TO branch F7x = member-equal within-feed z-mean of r6_cd_m02_r101-107
+    (nn_x/r6/preds, selected checkpoints, val); member corr = Pearson of a member's within-feed z val scores with the base's. No rise
+    iff mean corr(best d192 arm's 5 members, base) - mean corr(5 d128 re-cools, base) <= +1 Welch SE (over roots). A rise means the wider
+    member is a closer copy of the existing pool, which would void BIGPOOL's premise.
+  * verdict: GO iff all three clauses hold; otherwise CLOSE ("close ranker width for good", including BIGPOOL and any width arm under
+    pseudo volume). Information next to the verdict (never promoters): holdout late (Sep 17-19 MSK, 8,279 feeds) and early (Sep 6-8, 7,823)
+    columns and late20%; val slices M<50 / M>=50 / Tue / Thu / coldpos / warmpos; pmix (veto >= -1 SE per the 11-13 16:10 amendment);
+    stale-val (nn_x/w11/width/stale_pred.py 'both_pre2both' on the selected checkpoints; the project's standard veto at -1 SE for any
+    cold/warm trade); the 5-member pool deltas; per-root deltas; per-arm vs control (a) deltas at d192 ((b) - (a), (c) - (a)) with their
+    same-root corr; the plateau-vs-end picture (in-training holdout at selection vs @last); wall times; the CLIPLOG shares; the muP
+    effective-lr lines. A GO that fails a standard veto is reported as "GO with veto <x>" for the lead (Step 2 is NOT launched by this
+    agent in any case).
+  * the 12 full-run d128 seeds (v30_f7_m02_s901-906 from nn/logs + archive/preds, w5_e10_base_s951-956 from nn_x/w5) = information: their
+    selected val / holdout member means vs the d192 arms (and the @77500 -> selected cooldown gains from the training histories).
+  * one read-out at the end (nn_x/w11/width/wg_eval.py -> nn_x/w5/logs/w5_eval_B_widthgate.{txt,json}); in-training holdout numbers in
+    the run logs are progress monitoring only and decide nothing; INCOMPLETE if a run of an arm is missing (the arm is then read on the
+    roots present and marked so).
+
+STEP 2 (only on GO; NOT launched by this agent; 6.3 verbatim): "500-step smoke on an unshared GPU first. Then d384 (7.91M parameters) with
+  the Step-1 winner's recipe x 4 fresh seeds, 10 epochs, --save_steps at 70% / 79%; optionally a second arm x 2 seeds as information."
+  Step-2 kill (6.3): "member val < +0.0012 OR holdout < +0.0006 against the 12-seed d128 base (about 3% false passes, about 0.95 power at
+  +0.002)". ~25 GPU-h. On a Step-2 pass: BIGPOOL (6.2) under its own pre-declaration.
+
+HOUSE RULES (7.4): some GPUs only for this agent; <= 3 compute processes and >= 60 GB free before every launch; CUDA_VISIBLE_DEVICES = one
+  id; 12 CPU threads per process; setsid nohup lanes; real PIDs (checked in /proc/<pid>/cmdline) in nn_x/w11/width/RUNNING.txt and
+  nn_x/w5/logs/RUNNING_w5.txt; stop only own processes by exact PID; no edits to reports/, nn_x/w5/*.py, nn_x/w5/lane.sh; information
+  lane firewalled from the frozen set (nothing here enters a submission); no fine-tune, no pool, no submission.
+
+ADDENDUM 1 - 2026-11-14T00:16:16Z (written right before the Step-1 launch; no w11_wg_* run file existed): tests PASSED 29/29 CPU
+  (nn_x/w11/width/logs/test_width_cpu.log: AST proof, parser defaults, lane DRY commands, call sites, guards, one-step delta ratio
+  0.8165 on all 39 scaled matrices with the 7 fixed and AdamW bitwise identical, CPU end-to-end flag OFF bit-identical to the frozen
+  nn_x/w5 code on the d128 AND the d192 root over 40 steps, flag ON mechanism live with the logged lr ratio 0.8165) + 2/2 GPU
+  (plumbing smoke w11_smoke_wg_d192_mup_r711 on GPU N, 75 steps, val 0.39196 at step 50; outputs deleted, log kept as
+  logs/smoke_wg_d192_mup.log). Three test-EXPECTATION fixes were needed before 29/29 (no code change to train.py / cd_arms11.py):
+  e2e variants renamed w5_twg_* (the frozen w5 code accepts only the w5_ prefix), the printed-lr tolerance (%.3e), and single-threaded
+  CPU arithmetic for the one-step A/B comparison. The GAP probe (Step 0) finished at 00:16Z: nn_x/w11/width/logs/gap_probe.txt.
+  Step 1 launched at 2026-11-14T00:16:16Z: 8 lanes (some GPUs x 2), jobs in logs/jobs_widthgate.txt.

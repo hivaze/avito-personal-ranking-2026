@@ -1,0 +1,27 @@
+val feeds 14423, user groups 14398 (user 0 -> singletons)
+observed val (gain vs Cd +- paired SE): Cd 0.39901 (+0.00000+-0.00000), Pall 0.39896 (-0.00005+-0.00033), Pall+F7x 0.39942 (+0.00041+-0.00034), PF7x 0.39974 (+0.00073+-0.00036), F7x 0.40097 (+0.00196+-0.00058), PF7x+F7x70 0.39993 (+0.00092+-0.00037), G3 0.40032 (+0.00131+-0.00049), G-70 0.40019 (+0.00118+-0.00051), M2 0.40094 (+0.00192+-0.00053)
+
+== decide4 (val-best of 6): full-sample val-best = M2
+  bootstrap selection frequencies: PF7x 0.00, Pall 0.00, PF7x+F7x70 0.01, G3 0.02, G-70 0.03, M2 0.94
+  optimism of the selected pool's gain vs Cd: bootstrap (truth = observed) +0.00004; null (all equal) +0.00032
+  split-half: gain of the half-A winner vs Cd on A +0.00195, on B +0.00180; optimism +0.00014 (half-sample) -> ~+0.00010 at full-sample noise
+  M2 observed gain vs Cd +0.00192; minus optimism -> +0.00188 (bootstrap) .. +0.00161 (null)
+
+== decide3+decide4 union (8): full-sample val-best = F7x
+  bootstrap selection frequencies: Pall 0.00, Pall+F7x 0.00, PF7x 0.00, F7x 0.53, PF7x+F7x70 0.00, G3 0.01, G-70 0.01, M2 0.45
+  optimism of the selected pool's gain vs Cd: bootstrap (truth = observed) +0.00014; null (all equal) +0.00037
+  split-half: gain of the half-A winner vs Cd on A +0.00210, on B +0.00174; optimism +0.00036 (half-sample) -> ~+0.00026 at full-sample noise
+  M2 observed gain vs Cd +0.00192; minus optimism -> +0.00178 (bootstrap) .. +0.00156 (null)
+
+== (a) m02 arm gate (CURRENT_STATUS 10:55: member val +0.00117 +- 0.00039 vs c0, gate val > 2 SE; holdout +0.00134 +- 0.00022)
+  if true val effect = 0.00050: E[observed | passed gate] - true = +0.00051
+  if true val effect = 0.00080: E[observed | passed gate] - true = +0.00030
+  if true val effect = 0.00117: E[observed | passed gate] - true = +0.00011
+  if true val effect = 0.00134: E[observed | passed gate] - true = +0.00006
+  conditional MLE of the true val effect given the gate: +0.00097 (observed +0.00117; shrink +0.00020)
+  The holdout effect of the same arm (+0.00134, z 6) was not gated on val, so the arm itself is real; the gate optimism on val is ~1e-4.
+
+== Public-noise scale of the shortfall (context only; nothing fitted on public)
+  PF7x  val gain +0.00073+-0.00036 | public gain +0.00064+-0.00047 (SE from the val per-feed SD, n_pub 8562) | val - public +0.00009+-0.00059 (z 0.15)
+  G3    val gain +0.00131+-0.00049 | public gain +0.00074+-0.00063 (SE from the val per-feed SD, n_pub 8562) | val - public +0.00057+-0.00080 (z 0.71)
+  M2    val gain +0.00192+-0.00053 | public gain +0.00035+-0.00068 (SE from the val per-feed SD, n_pub 8562) | val - public +0.00157+-0.00086 (z 1.82)

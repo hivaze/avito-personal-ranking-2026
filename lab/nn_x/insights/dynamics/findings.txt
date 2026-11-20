@@ -1,0 +1,312 @@
+TRAINING DYNAMICS AND SCHEDULES - findings (CPU only; step logs + existing preds; 2026-11-12 ~18:00 UTC)
+Dir: <repo>/nn_x/insights/dynamics   (scripts a1..a8 + parse_logs.py; outputs *.txt / *.csv)
+
+DATA. 205 runs / 5,483 evals parsed from nn/logs (v12-v30) and nn_x/r6/logs (r6_cd_*, r6_a4u_e10, r6_cset_e10); the LAST
+segment of each log is used (a restart starts from scratch). 10-epoch runs: eval every 2500, cooldown = steps > 78680
+(exactly epochs 8-9), lr(k) = lr0 (0.03 + 0.97 (1 - sqrt(k/19670))). Re-cools (r6 CD harness): --init snapshot, fresh
+optimizer, warmup 0, cooldown_frac 1 => the SAME lr(k) as the original cooldown (checked to 3 digits in the logs), eval
+every 1000. "P" = a run's plateau mean (5 evals 67.5k-77.5k); for a re-cool, P of its F7 original. Paired SE over
+roots unless stated. v30 (F7 recipe + m02 from scratch) has only 2 complete seeds (s901/s902) - marked PRELIMINARY.
+The pool-loss diagnostic (cd_pool - cd_reg) turned out uninformative (dominated by batch composition, identical
+across roots that share a data seed, plus the aux-weight anneal) and is not used.
+
+======================================================================================================================
+0. TL;DR
+======================================================================================================================
+ 1. m02's gain is entirely "not declining". Inside the CD harness (same snapshot, same data seed) c0 (mix .1), m02 and
+    m0 are indistinguishable on val until k ~ 10k (holdout separates from k ~ 6k); then mix .1 declines (-0.0027 val /
+    -0.0023 hold from its peak) while m02/m0 keep rising to the end. Same in all 4 from-scratch family pairs (m02 -
+    mix.1 ~ 0 up to 87.5k, then +0.002 to +0.011 at the end). Every mix.1 val peak sits where the lr has decayed to
+    ~6e-4..1e-3, whatever the starting lr (1e-3 or 2e-3), i.e. after ~2 pool passes at 10% replay.
+ 2. m02 vs m0 is a pure cold/warm trade: val difference within +-0.0004 at EVERY k, holdout -0.0002..-0.0007 at every
+    k (m02 below m0). Pool-dose shape knobs (ramps) are therefore expected to move only the cold/warm balance (val ~0).
+ 3. lr 1e-3 leads lr 2e-3 during the WHOLE stable phase (+0.0006..+0.0010 val, +0.0006..+0.0009 hold, every bin
+    10k-77.5k, z 3-6) and loses it in the cooldown (cooldown gain +0.0005 vs +0.0023 with mix.1; +0.0013 vs +0.0027
+    with m02) because it peaks earlier and declines more (mix.1 -0.0043 vs -0.0022; m02, phase-matched 87.5k->97.5k:
+    lr1 -0.0009 val / -0.0007 hold vs lr2 (v30, n2) -0.0007 / +0.0003 and F7x ~0).
+ 4. The re-cool val excess is REAL at trajectory level, not only a selection artifact, and it is larger than the
+    CDSEED test suggested when measured against the right reference. Against the F7 mix.1 originals at matched cooldown
+    position: +0.0005 +- 0.0002 (c0, 11 runs); the rest of the +0.0012-0.0014 selected-checkpoint gap is selection luck
+    (+0.0005; the 1000-step grid harvests val+hold luck jointly) and position. Against the SAME recipe from scratch
+    (v30, F7 + m02, n=2, PRELIMINARY): F7x's cooldown gain over the trunk plateau is +0.0043 val / +0.0030 hold vs v30
+    +0.0023 / +0.0028 -> +0.0020 val at equal holdout (late gap diff +0.0017 +- ~0.0005). lr jump: excluded (no jump).
+    Data order: excluded as the driver (seeds 811/812/813 all show it; the shared-order contribution is ~+0.0001).
+    Leading hypothesis: optimizer-state reset (fresh AdamW moments / Muon momentum, no warmup): no first-eval transient,
+    the offset builds in the first ~4-6k high-lr steps and then persists; it co-occurs with cold-candidate promotion
+    (pubdiag p5 label-free: +0.017 z val / +0.015 public / +0.013 private). Decisive cheap test now possible: v30 saved
+    @77500 snapshots -> re-cool them and compare with the SAME trunks' own continuous cooldown (E2).
+ 5. From-scratch m02 members are "honest": val and holdout gains agree. Per member vs their mix.1 sibling family:
+    F7-recipe +0.0006/+0.0005 (n2), GRU +0.0014/+0.0011, d192 +0.0018/+0.0012, lr1 +0.0010/+0.0004. GRU m02 equals F7x
+    on holdout (0.31992 vs 0.31999) without the re-cool val excess. Expect new D2 trunks (v30) to look ~0.001-0.0015
+    worse than F7x on val at equal holdout - a val-based rule will under-rate them.
+ 6. m02 makes members more alike (pairwise within-feed-z corr, val): F7 0.941 -> F7x 0.950; GRU 0.941 -> 0.951;
+    d192 0.932 -> 0.948; lr1 0.938 -> 0.937 (lr1 still selects mid-cooldown). Not re-cool-specific: it is the
+    end-of-cooldown selection removing the plateau iterate noise that was the diversity source. Cost at pool level
+    (a8, 3-member TO pools, gain over the mean member): val F7 +0.0032 -> F7x +0.0029, GRU +0.0030 -> +0.0027, d192
+    +0.0035 -> +0.0026, lr1 +0.0036 -> +0.0032; holdout +0.0028 -> +0.0025, +0.0028 -> +0.0022, +0.0033 -> +0.0025,
+    +0.0029 -> +0.0028. So m02's holdout gain (per member: F7x +0.0009, GRU +0.0011, d192 +0.0012, lr1 +0.0004)
+    shrinks to +0.0004..+0.0006 per 3-pool (F7x +0.0006, GRU +0.0004, d192 +0.0005, lr1 +0.0004); val per member
+    +0.0010..+0.0021 -> per 3-pool +0.0007..+0.0020 (F7x +0.0020, GRU +0.0012, d192 +0.0011, lr1 +0.0007).
+    (GRU/d192 m02 have 3 members = a single subset.)
+ 7. A re-cool is ~98% its trunk: same trunk + different cooldown data order corr 0.982 (m02) / 0.963 (c0); a shared data
+    seed adds only +0.0015 corr; seed-mixed 4-pools vs single-seed 4-pools of the same roots: holdout +0.00015/+0.00025,
+    val -0.0002/0.0000. Re-cools are not a diversity factory.
+ 8. Eval curves are step-locked to the batch sequence: re-cool residuals agree across the 57 runs that share data seed
+    811 with SE 0.00003-0.00006 per step (e.g. k=9000 val +0.00068, k=12000 -0.00057). Most "eval jitter" is driven
+    by the recent batches, not by the trunk. One CDSEED for all roots couples all roots' selection luck.
+ 9. Epoch-phase sawtooth (new): late-epoch evals beat early-epoch evals by +0.00025 val / +0.00029 hold (z 4.3 / 7.0;
+    57 unique-seed 10-epoch runs; +0.00016 per eval inside an epoch, -0.00015 across a boundary); ~2x larger inside the
+    cooldown (+0.0005 val / +0.0004 hold, 3 data seeds). Snapshots: @77500 phase 0.88 (good), @70000/@60000 phase
+    0.10-0.12 (bad). The 87.5k (phase 0.90) holdout-argmax of the scratch m02 runs and part of the 87.5k->90k drop are
+    this effect.
+10. Selection under m02 adds ~nothing: sel - last val -0.00009 (re-cools), +0.00004 (GRU); only lr1/d192 (+0.0007/
+    +0.0009) still need it. Seeds cannot be triaged early: within-family corr(v40k, selected val) +0.09,
+    corr(plateau P, selected) +0.39 - member quality is decided in the cooldown.
+11. Tail averaging / lr floor / Muon momentum have no headroom in the curves: under m02/m0 the late-cooldown jitter falls
+    3x (val 0.00068 -> 0.00023, hold 0.00043 -> 0.00016 at lr < 1e-4); bound for a tail EMA <= +0.0001 per member
+    (and a diversity cost). With mix .1 the jitter stays 0.0005-0.0007 at lr < 1e-4: the replayed pool keeps moving the
+    iterate (another memorisation signature).
+12. Optuna over schedule knobs is not recommended: effects <= 0.0005 vs single-run val sd 0.0008-0.0011 (holdout
+    0.0003-0.0005) and step-locked data-order noise; a TPE study would chase noise unless each trial is >= 4 roots with
+    root-specific seeds (then ~2 lane-h per trial).
+
+======================================================================================================================
+1. WHERE THE GAIN HAPPENS (a1_phases.txt A1.1-A1.3; family means; stable gain = P - v(10k))
+======================================================================================================================
+family                  n  P_val    stable gain  slope/10k(40-77.5k) cd gain(ma3 peak)  final-P   decline  sel-P   cd share
+F7 pre2s lr2 mix.1      7  0.39247  +0.00435     +0.00016             +0.00233           +0.00013  -0.00219  +0.00213  33%
+F9 pre2s lr1 mix.1      6  0.39333  +0.00475     +0.00022             +0.00045           -0.00389  -0.00433  +0.00052  10%
+F10 GRU lr2 mix.1       6  0.39244  +0.00379     +0.00023             +0.00202           +0.00064  -0.00138  +0.00237  38%
+F12 d192 lr2 mix.1      7  0.39239  +0.00374     -0.00002             +0.00164           -0.00816  -0.00980  +0.00132  26%
+F11 DIN lr2 mix.1       4  0.39036  +0.00295     +0.00021             +0.00043           -0.01239  -0.01281  +0.00060  17%
+F6 cvnd lr1 mix.1       6  0.39246  +0.00464     +0.00031             +0.00065           -0.00376  -0.00441  +0.00048   9%
+F5 cvnd lr2 mix.3       6  0.39191  +0.00382     +0.00013             +0.00013           -0.02634  -0.02648  +0.00056  13%
+a4u / cset e10 mix.1  6/5  0.3929   +0.0041      +0.0002              +0.0019/+0.0021    -0.0004   -0.0023/-0.0026  +0.0020  33%
+F13g GRU lr2 m02        3  0.39246  +0.00351     +0.00022             +0.00376           +0.00374  -0.00002  +0.00378  52%
+F13l pre2s lr1 m02      7  0.39351  +0.00443     +0.00026             +0.00122           +0.00043  -0.00079  +0.00134  23%
+d192 lr2 m02 (v29)      3  0.39222  +0.00391     +0.00010             +0.00294           +0.00264  -0.00030  +0.00329  46%
+F7 lr2 m02 (v30) PRELIM 2  0.39248  +0.00457     +0.00018             +0.00243           +0.00234  -0.00008  +0.00269  37%
+(holdout columns in a1_phases.txt; same picture: e.g. F7 cd gain +0.0017, F13g +0.0031, v30 +0.0028.)
+- Stable phase: 10k -> plateau gives +0.0035..+0.0047; the last 3.8 epochs (40k-77.5k) add only +0.0006..+0.0010
+  (slope +0.00016..+0.00026 per 10k; d192 flat). The cooldown gives 33-38% of the total (10k -> selected) gain for lr2
+  mix.1 and 37-52% with m02.
+- Re-cools (a2 A2.5, gain over the F7 originals' P): F7x m02 +0.00438 val / +0.00304 hold (ma3 peak at k 18.0k,
+  decline -0.0001); F7x70 +0.0041/+0.0031; m0 +0.0043/+0.0036; c0 +0.0031/+0.0015 at k 8.4k then -0.0027/-0.0023;
+  d0 (no dropout) +0.0023/+0.0010 at k 5.8k then -0.0096/-0.0081 (dropout is THE anti-memorisation brake in the
+  cooldown: d0's collapse equals d192's mix.1 collapse, -0.0098); cf4 +0.0030/+0.0025 then -0.0015; e3 +0.0038/+0.0029.
+- Peak positions under mix .1 (ma3 val peak -> lr at the peak): F7 k 7.7k (7.8e-4), F10 6.7k (8.7e-4), F12 4.9k (1.0e-3),
+  F9 3.4k (6.0e-4, from 1e-3), F6 3.4k (6.0e-4), cvnd lr2 10.1k (6.1e-4), c0 re-cool 8.4k (7.3e-4). Memorisation
+  overtakes denoising once lr < ~6-10e-4 with 10% pool replay (= after ~2 pool passes). With m02: F13l peaks at 5.2k
+  (5.0e-4), d192 at 10.8k (5.6e-4), v30 at ~15k (3e-4), GRU and F7x at the end.
+
+======================================================================================================================
+2. COOLDOWN SHAPE: m02 vs mix .1 (a1 A1.4, a2 A2.6)
+======================================================================================================================
+From scratch, (m02 - mix.1) of (val - own P) by step (80k 82.5k 85k 87.5k 90k 92.5k 95k 97.5k 98.35k):
+  F7 recipe (v30 n2):  -.0008 -.0004 -.0005 +.0004 +.0001 +.0016 +.0019 +.0016 +.0022
+  lr1 (F13l n7):       -.0001 +.0008 +.0007 +.0015 +.0018 +.0031 +.0035 +.0037 +.0043   (SE ~0.0004-0.0005)
+  GRU (F13g n3):       -.0008 +.0002 -.0008 +.0005 +.0027 +.0022 +.0030 +.0032 +.0031
+  d192 (v29 n3):       +.0002 +.0006 +.0001 +.0028 +.0045 +.0074 +.0092 +.0095 +.0108
+Harness, data-order paired (7 roots, seed 811), val | hold by k:
+  m02 - c0 : k<=10k: -0.0000..+0.0006 | -0.0004..+0.0011 ; 12k +0.0021|+0.0023 ; 16k +0.0030|+0.0034 ; end +0.0039|+0.0039
+  m0  - c0 : same shape, end +0.0039|+0.0043
+  m02 - m0 : val within +-0.0004 at every k; hold -0.0002..-0.0007 from k 3k on (m02 never above m0 on holdout)
+  w10 (wd .1) - c0: -0.0005..-0.0018 for k<=8k, then +0.0019 at the end (wd delays memorisation, costs early)
+  d20 - c0: ~-0.0004 early, +0.0026|+0.0019 at the end ; d0 - c0: -0.0076|-0.0066 at the end
+  aa5, aug, pp02 - c0: <= +0.0008 early, +0.0008..+0.0020 at the end (all only slow the mix.1 decline)
+=> Every cooldown arm measured so far acts in the second half of the cooldown (k > ~9k, lr < ~7e-4) by changing how
+   much is memorised there; none changes the first half. Futility reads of new cooldown-data arms at k <= 8k are
+   uninformative for this mechanism (a big early deficit, like rho70 -0.003 at 5k, is still informative as a negative).
+
+======================================================================================================================
+3. lr 1e-3 vs 2e-3 OVER TIME (a1 A1.6; lr1 - lr2, val | hold, family means +- unpaired SE)
+======================================================================================================================
+           F9 - F7 (pre2s, mix.1)           F6 - cvnd lr2 (mix.1; n 6 vs 2)    F13l - v30 (m02; n 7 vs 2, PRELIM)
+[2-7k]     -0.00002+-25 | -0.00048+-13       -0.0012 | -0.0005                  +0.00001 | -0.00052
+[10-20k]   +0.00080+-22 | +0.00055+-17       +0.0006 | +0.0003                  +0.00106 | +0.00059
+[22-40k]   +0.00064+-18 | +0.00080+-09       +0.0003 | +0.0006                  +0.00061 | +0.00061
+[42-60k]   +0.00086+-15 | +0.00077+-14       +0.0010 | +0.0006                  +0.00095 | +0.00084
+[62-77k]   +0.00085+-24 | +0.00068+-11       +0.0012 | +0.0004                  +0.00102 | +0.00087
+[80-87k]   -0.00084+-40 | -0.00110+-22       -0.0008 | -0.0008                  +0.00036 | -0.00020
+[90-98k]   -0.00277+-47 | -0.00270+-28       -0.0035 | -0.0021                  -0.00052 | -0.00079
+selected:  -0.00074 | -0.00066 ; cooldown gain -0.0019 ; decline -0.0021 (F9 vs F7)
+Mechanism (consistent with all three pairs): the plateau iterate noise scales with lr, so lr1 sits higher on the
+plateau but has less to "denoise"; and its cooldown starts at 1e-3, so a larger share of the 2 cooldown epochs is
+spent below the ~6e-4 level where memorisation wins (F9 peaks 3.4k into the cooldown, F7 at 7.7k). m02 removes the
+pool part of the memorisation (lr1 decline -0.0043 -> -0.0008) but not the regular-data part. Net: lr2 > lr1 at the
+end by ~+0.0007 val / +0.0007 hold (registry +0.0008). No action except: do not invest in lr1 families; if one is
+used, its cooldown should be shorter or floored (it wants to stop near lr ~5e-4).
+
+======================================================================================================================
+4. FROM-SCRATCH m02 vs RE-COOLS
+======================================================================================================================
+- Shape: re-cool m02 (F7x, F7x70, cs813) rise to the end (selected k ~19.0k; end - peak -0.0001). From scratch: GRU
+  rises to the end; F7 recipe (v30) val flat after ~87.5k (phase-matched 87.5k->97.5k: val -0.0007, hold +0.0003);
+  lr1 and d192 still decline (phase-matched val -0.0009 / -0.0010, hold -0.0007 / -0.0015) -> they still need
+  selection (sel - last +0.0009 / +0.0007), the others do not.
+- Gain over the trunk plateau at the end of the cooldown, val | hold: F7x +0.0043|+0.0030, F7x70 +0.0040|+0.0030,
+  m02_cs813 +0.0040|+0.0029 vs v30 +0.0023|+0.0028, GRU m02 +0.0037|+0.0032, d192 m02 +0.0026|+0.0014 (after decline).
+  Holdout gains of re-cools and from-scratch m02 agree; val gains of re-cools are higher (section 5).
+- Member strength (selected, val / hold): F7x 0.39667/0.31999; GRU m02 0.39624/0.31992; d192 m02 0.39551/0.31961;
+  v30 0.39518/0.31965 (n2); F13l 0.39485/0.31886. m02 increment from scratch vs the mix.1 sibling: F7 +0.0006/+0.0005
+  (n2), GRU +0.0014/+0.0011, d192 +0.0018/+0.0012, lr1 +0.0010/+0.0004 (unpaired; SE ~0.0004-0.0006). Compare the
+  re-cool estimate F7x - F7 (same roots): +0.0021/+0.0009 - val-heavy.
+- Correlation / diversity (a6_corr.txt, a8_poolgain.txt): see TL;DR 6.
+  3-member TO pools (mean over subsets), val | holdout: F7 0.39769|0.32190, F7x 0.39968|0.32248; F10 0.39775|0.32169,
+  F13g 0.39896|0.32211; F12 0.39705|0.32169, d192 m02 0.39814|0.32215; F9 0.39740|0.32134, F13l 0.39808|0.32171.
+  Holdout m02 increment at 3-pool level: +0.0004..+0.0006 for every family (re-cool and scratch alike); the val
+  increment is largest for the re-cool (+0.0020 vs +0.0007..+0.0012 from scratch) - the re-cool excess again.
+
+======================================================================================================================
+5. THE RE-COOL VAL EXCESS: DECOMPOSITION AND MECHANISM (a2, a3, a7)
+======================================================================================================================
+What differs between a re-cool and the original cooldown (code-level, nn_x/r6/train.py): (i) only state_dict is loaded
+-> AdamW moments and Muon momentum start at zero, warmup 0 (first AdamW steps are sign-like, size ~lr = 2e-3 per
+coordinate on every AdamW parameter: embeddings incl. the domain token, LayerNorm, biases, the 1-output heads);
+(ii) a fresh data permutation (seed 811/812/813) instead of epochs 8-9 of the run's own seed; (iii) 1180 fewer stable
+steps (@77500 vs 78680); (iv) eval/selection grid 1000 vs 2500. The lr schedule is IDENTICAL (no lr jump).
+
+Decomposition vs the F7 originals (holdout-selected; val gap = (re-cool - F7) val minus (re-cool - F7) hold):
+arm (n)              sel gap           = trend gap at the selected points + luck gap       traj gap (matched k, all 9 pos)
+c0 cs811 (7)         +0.00137+-0.00038   +0.00083+-0.00035                 +0.00053+-29     +0.00061+-0.00022
+c0 cs813 (4)         +0.00116+-0.00025   +0.00058+-0.00027                 +0.00058+-44     +0.00031+-0.00017
+m02 cs811 = F7x (7)  +0.00118+-0.00037   +0.00107+-0.00033                 +0.00011+-08     +0.00039+-0.00019
+m02 cs813 (4)        +0.00090+-0.00051   +0.00042+-0.00058                 +0.00048+-17     +0.00030+-0.00023
+m02 p70k cs812 (7)   +0.00072+-0.00038   +0.00065+-0.00030                 +0.00007+-21     -0.00004+-0.00018
+m0 cs811 (7)         +0.00064+-0.00032   +0.00057+-0.00040                 +0.00007+-17     +0.00005+-0.00022
+(luck = value at the argmax minus a cubic-in-sqrt(k) trend. F7 originals: holdout luck +0.00047+-14 but val luck
++0.00009 at their argmax; c0 re-cools: val luck +0.0008, hold luck +0.0006 - the finer grid and the step-locked
+data-order fingerprint make val and holdout luck co-occur.)
+But the F7 originals are a mix.1 reference whose own late cooldown drifts val-over-holdout (+0.0009 late gap), so for
+m02 arms the matched-k comparison understates the effect. The same-recipe reference (a7_v30_vs_f7x.txt, v30 n=2):
+  k:          1320    3820    6320    8820    11320   13820   16320   18820   19670
+  v30 v|h   +.0001|+.0008 +.0015|+.0015 +.0018|+.0022 +.0027|+.0024 +.0018|+.0021 +.0021|+.0020 +.0023|+.0025 +.0020|+.0027 +.0023|+.0028
+  F7x v|h   +.0008|+.0006 +.0021|+.0009 +.0028|+.0020 +.0037|+.0021 +.0029|+.0024 +.0037|+.0024 +.0040|+.0028 +.0042|+.0030 +.0043|+.0030
+  gap diff  +.0008  +.0013  +.0012  +.0013  +.0008  +.0012  +.0014  +.0020  +.0018
+  -> late (k >= 16.3k) val-minus-hold gap F7x - v30 = +0.0017 +- 0.0002 (SE from F7x only; with v30's seed sd the
+     honest SE is ~0.0005); at selection: val +0.0015 +- 0.0003, hold +0.0002 +- 0.0002. PRELIMINARY (n=2).
+  Across all from-scratch m02 runs (v27/v29/v30, 8 runs) the selected val-minus-hold gap over P is +0.0003 (sd 0.0008);
+  re-cool arms +0.0005..+0.0013 (F7x +0.0011). Re-cool excess vs scratch ~ +0.0008 +- 0.0004.
+Hypotheses:
+  - lr jump: EXCLUDED (identical lr(k); the snapshot was taken at lr 2e-3).
+  - data order: EXCLUDED as driver. Three seeds (811/812/813) and two snapshots (@70000, @77500) all show it; the shared
+    fingerprint contributes ~+0.0001 at the c0-selected steps; same-trunk/different-order members correlate 0.98.
+  - selection grid / luck: explains ~0.0005 of the +0.0013 measured vs the F7 originals, not the trajectory-level part.
+  - snapshot state: @77500 is 0.0008 "val-low / hold-high" vs P (it is a late-epoch phase point, hold +0.00044); that
+    biases AGAINST a val excess, so it is not the cause.
+  - optimizer-state reset (fresh AdamW/Muon state, warmup 0): REMAINING leading hypothesis. Signatures: no transient at
+    the first eval (k=1000 change minus the original's 77.5k->80k change: gap -0.0005+-0.0006 / +0.0006+-0.0009),
+    early-cooldown holdout lag of the re-cools (k 1.3-3.8k: hold mostly -0.0005..-0.0011 vs the original, val -0.0012..
+    +0.0003; seed-811 arms ~0 on val, seed-813 arms -0.0007..-0.0012), the
+    val-over-holdout offset is in place by k ~4-6k (early gap +0.0004..+0.0009 vs the originals' +0.00015) and then
+    persists or grows. It travels with cold-candidate promotion (p5). A restart kick that un-learns in-period fine
+    structure (which the in-period holdout uses and the post-period val does not) fits these shapes.
+  Whether the excess transfers to test is NOT answerable from curves (the cold promotion does transfer as behaviour).
+
+======================================================================================================================
+6. NOISE STRUCTURE (a3, a4, a5)
+======================================================================================================================
+- Within-run eval jitter (rms successive diff / sqrt 2): plateau val 0.0007-0.0011, hold 0.0004-0.0007; cooldown
+  re-cool m02 val 0.00068 (lr>8e-4) -> 0.00046 -> 0.00054 -> 0.00039 -> 0.00023 (lr<1e-4); hold 0.00043 -> 0.00016;
+  m0 similar (0.00017 at the end); c0 stays 0.0005-0.0007 val / 0.0004 hold to the very end.
+- Step-locked data-order fingerprint: smooth-detrended residuals of the 57 seed-811 re-cools at a given step agree with
+  SE 0.00003-0.00006 (val: k 2k +0.00021, 4k -0.00021, 9k +0.00068, 10k +0.00037, 12k -0.00057, 14k +0.00033,
+  17k +0.00033; hold 17k +0.00040, 12k -0.00048). Arms of one root are well paired; roots sharing one seed are not
+  independent for anything selection-related.
+- Prediction-level effect of a shared order is small (a4): same seed/different trunk corr 0.9490 (m02 811), 0.9477
+  (813) vs different seed/different trunk 0.9473; c0 0.9399/0.9454 vs 0.9385. Same trunk/different order 0.9816 (m02),
+  0.9625 (c0); m02 vs p70k same root 0.9728; m02 vs c0 same root 0.9715; independent full runs 0.9367 (F7), 0.935 (v28).
+  4-member pools, same 8 runs regrouped: seed-mixed - single-seed: m02 val -0.00023+-19, hold +0.00015+-11;
+  c0 val -0.00000+-24, hold +0.00025+-13.
+- Epoch-phase sawtooth (a5_phase.txt): residual by phase (unique-seed runs, n 57): ~0.05 val -0.00008 hold -0.00012;
+  ~0.30 -0.00007/-0.00007; ~0.55 -0.00002/+0.00002; ~0.82 +0.00017/+0.00017. Per-run contrast 0.82 - 0.05: val
+  +0.00025+-6 (38/57 runs positive), hold +0.00029+-4 (50/57); lr1 +0.00037/+0.00037, lr2 +0.00019/+0.00024. Cooldown
+  (re-cools, k 8-9k minus 11-12k): seed 811 +0.00081/+0.00026, 812 +0.00050/+0.00097, 813 +0.00031/-0.00003.
+  Training loss shows no phase pattern (+-0.005 noise). Mechanism unknown; candidate: short-interval repeats of examples
+  around random-reshuffle boundaries (examples near the end of epoch e can re-appear early in e+1) acting as a transient
+  over-weighting that the model's memory window feels, more so at low lr. It is a measurement bias of ~0.0003 between
+  checkpoints at different phases; the final checkpoint (end of epoch 9 / end of the re-cool) is at the good phase.
+- Seed persistence (a3 A3.2): between-seed sd of val: v20k 0.0002-0.0007, P 0.0003-0.0007, selected 0.0005-0.0013;
+  pooled within-family corr: (v20k,P) -0.09, (v40k,P) +0.09, (P,sel) +0.39, (v40k,sel) +0.09, (P,last) +0.17,
+  (sel val, sel hold) +0.24. No early seed triage.
+
+======================================================================================================================
+7. SELECTION (a1 A1.5, a3)
+======================================================================================================================
+- Holdout-selected minus last (val): F7 +0.0020, F9 +0.0044, F10 +0.0017, F12 +0.0095 (mix.1); F7x -0.00009, GRU m02
+  +0.00004, F13l +0.0009, d192 m02 +0.0007; v30 selected 95000/98350.
+- Holdout argmax luck (vs smooth trend): 10-epoch nn/ runs +0.0005-0.0008 (p2: +0.00074), re-cools +0.0002-0.0006.
+  For end-rising m02 families the argmax buys nothing but luck and turns the holdout into a selector.
+- 87.5k (phase 0.90) is the holdout argmax for 6/7 F13l and 3/3 d192 m02 runs; the next eval (90k, phase 0.15) is
+  depressed by the boundary effect (~0.0003 of the observed 0.0006-0.0013 drop).
+
+======================================================================================================================
+8. SCHEDULE IDEAS vs EVIDENCE (what the curves say; COVERAGE_MAP status)
+======================================================================================================================
+- m02 mix ramp (0 -> 4%) / front-loaded pool: COVERAGE_MAP has m02 (ADOPTED), m0 (CLOSED vs m02), mix .1 / .3, pp02
+  (STOP), aug (STOP); no time-varying mix. Curves: m02 = m0 on val at every k (TL;DR 2), replay damage only after ~2
+  passes at lr < ~6e-4. A ramp at equal dose (0.94 pass) moves the cold/warm balance only; expected val ~0, coldpos
+  +-0.002. LOW priority (E6).
+- Exploration share in the STABLE phase: tried in the old recipe as up-weighting exploration feeds in the main run
+  (nn_report: -0.001). The stable phase is not where m02 acts. LOW, not proposed.
+- Warmup length: NEVER varied (COVERAGE_MAP). First eval (2.5k) shows no lr-dependent damage (lr1 - lr2 val -0.00002).
+  No signal; not proposed. (Warmup matters for RE-COOLS - see E2.)
+- Cooldown lr floor (3%): NEVER. m02 re-cools still gain +0.0002-0.0003 val in the last 3.3k steps (lr < 2.5e-4), so
+  raising the floor would cost; lowering it has <= +0.0001 room. Not proposed (except lr1-type families, E5 note).
+- Muon momentum in the cooldown: NEVER. Late m02 jitter is already 0.0002; larger momentum = less gradient noise,
+  and r7 found lower gradient noise harmful (batch x2 -0.0015). Not proposed.
+- EMA/SWA of the cooldown tail: plateau averaging CLOSED (diversity). Tail bound <= +0.0001 per member (jitter 0.0002-
+  0.0004 at lr < 2e-4; scaling the plateau avg3 result +0.0007 at jitter 0.0008 by variance), and it would push member
+  corr further up. Not proposed.
+- Checkpoint selection by a val-like criterion: under m02 the selection position is ~the end anyway; what matters is
+  using the end (no selection) and keeping the holdout clean (E3). A cold-aware holdout criterion would need per-eval
+  holdout predictions (not logged) - not worth it now.
+- Longer/shorter cooldown: CLOSED (wave 3). Earlier cooldown as a COST lever (COVERAGE_MAP P1, OPEN): late plateau adds
+  only +0.0006-0.0010 at P over 3.8 epochs; F7x70 (@70000) vs F7x: -0.0004 val / 0 hold (partly the bad snapshot phase).
+  Compute is not the binding constraint for the next 4 weeks, so not proposed.
+
+======================================================================================================================
+9. PROPOSED EXPERIMENTS (ranked)
+======================================================================================================================
+E1 [0 GPU, HIGH] Same-recipe calibration of the re-cool excess. Re-run `parse_logs.py && a7_v30_vs_f7x.py` when >= 4
+   v30_f7_m02 seeds are complete (s903/s904 ~19:30-20:00 UTC; s905/906 later). Pre-declare: late val-minus-hold gap
+   (F7x - v30) >= +0.0006 -> the re-cool discount is real and its size is this number (replace the CDSEED-based D);
+   <= +0.0002 -> drop the re-cool-specific discount. Report selected val/hold too.
+E2 [~4-8 lane-h, HIGH-MEDIUM] Paired re-cool A/B on the v30 trunks (decisive mechanism test). nn/ckpt/
+   v30_f7_m02_s90x@77500.pt exist (s901-s903 now, s904 soon). Arm A: plain m02 re-cool of each v30 snapshot with the
+   standard CD command (nn_x/r6/train.py --init <abs path> + cd_lane's CD flags + --cooldown_mix 0.02, seed 9xx; needs
+   a NEW lane script or an INIT override because cd_lane.sh only resolves v17 / r6_<tag>_e10 snapshots; variant e.g.
+   r6_cd_m02_v30_s901) vs the SAME trunk's own continuous m02 cooldown (v30 log steps 80k..98.35k; preds when
+   best = last): root-paired, same recipe, only the procedure differs. Arm B (optional, needs a new flag in a NEW copy of the harness): --opt_warm
+   200 = 200 steps at lr 0 that only fill AdamW moments / Muon momentum, then the identical cooldown. Read: matched-k
+   val-minus-hold gap and selected val/hold, A - continuous and B - A. Predictions: A shows +0.0008..+0.0015 if the
+   procedure is causal; B removes >= half of it if the optimizer reset is the mechanism. Kill: A - continuous gap
+   <= +0.0003 on 4 roots -> nothing to explain, stop. Already tried: CDSEED-813 (data order only; shared F7 mix.1
+   reference), pubdiag p5; no optimizer-state or same-recipe test in COVERAGE_MAP ("warmup 500 ... NEVER").
+E3 [0 GPU, HIGH] Selection hygiene for m02 members: member = LAST checkpoint for end-rising families (F7 recipe, GRU,
+   re-cools; sel - last <= 0.0001), holdout kept as an unselected estimate. For new D2 launches add 98350 to
+   --save_steps (or --keep last); for lr1/d192 keep selection but only among epoch-end evals (87.5k vs 97.5k/98.35k,
+   phase 0.90-1.0). Expected: val 0, removes +0.0002-0.0008 holdout luck per member from pool holdout numbers (the Dec-9
+   S* rule then compares like with like). Already tried: p2_ckpt measured the luck; no rule change; COVERAGE_MAP has
+   nothing on keep=last under m02.
+E4 [0 GPU, MEDIUM, hygiene] CD harness: CDSEED = 900 + root (same for all arms of a root), snapshots only at epoch ends
+   (k x 9835, e.g. 68845 / 78680) for any future branch, and phase-matched checkpoint comparisons. Expected <= +0.0002
+   holdout at pool level (a4) plus validity (independent roots). Already tried: CDSEED-813 = one alternative seed for
+   all roots; "vary CDSEED in all future re-cools" was pre-declared only for gap813 <= 0.0002.
+E5 [~6-10 lane-h, LOW-MEDIUM] Memorisation brake for the trunks that still decline under m02 (d192: v29@77500 x3;
+   lr1: v28@77500 x7 at --lr 0.001): re-cool m02 vs m02 + --drop_cd 0.2 (d20), root-paired. Mechanism: d0 (no dropout)
+   reproduces the d192 collapse (-0.0096 vs -0.0098), d20 slowed the c0 decline by +0.0026 at the end; d192/lr1 m02
+   still lose 0.0009-0.0015 after k ~9k. Expected +0.0004-0.0008 at the END for those families (selection-free
+   members). Kill: d20 - m02 end val < 0 or hold < 0 on stage 1. Already tried: d0/d20 only on F7 roots with mix .1
+   (wave 2b STOP vs c0: d20 val -0.00015 / hold +0.00031 at selection) - never with m02, never on d192/lr1.
+E6 [~4-6 lane-h, LOW] Pool-dose shape at fixed dose: ramp-up (mix 0 -> 4% linear in k) vs m02 on F7 roots 101-104
+   with root-specific seeds; needs a new flag (time-varying cooldown_mix) in a new harness copy. Judge by member val
+   >= 0, holdout >= 0, coldpos and pmix (private-mix) only as tie-breakers. Expected val ~0 (m02 = m0 on val), so run
+   only if a GPU lane is idle. Already tried: m02 / m0 / c0 / pp02 / aug / mix .3, all flat-dose.
+Not proposed (with reason): stable-phase exploration share (old -0.001), warmup, lr floor, Muon momentum, tail EMA,
+Optuna over schedule knobs (SNR; TL;DR 12), earlier cooldown as a cost lever (compute not binding).
+
+FILES: parse_logs.py -> runs.csv, curves.csv | fams.py | a1_phases.py -> a1_phases.txt, a1_runs.csv, a1_shape.csv |
+a2_recool.py -> a2_recool.txt, a2_recool_runs.csv, a2_arm_pairs.csv | a3_noise.py -> a3_noise.txt, a3_jitter.csv,
+a3_luck.csv | a4_dataorder.py -> a4_dataorder.txt | a5_phase.py -> a5_phase.txt | a6_corr.py -> a6_corr.txt |
+a7_v30_vs_f7x.py -> a7_v30_vs_f7x.txt (re-run when v30 completes) | a8_poolgain.py -> a8_poolgain.txt

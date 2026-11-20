@@ -1,0 +1,20 @@
+=== 2026-11-15T09:26:19Z staleft_review: SUGGESTED read of the W16 extension, written BEFORE its files exist (4 of 20 jobs done; no W16-pool number has been read by anyone) ===
+Why a second clause is needed [M, out/extra_checks.txt]: the pool statistic of the lead's rule is not stable under the choice of members. Over 8 four-member pools drawn
+from the same 8 W8 members (4 complementary partitions) the P=1.0 final stale-val delta ranges -0.00026 .. +0.00042 (SD 0.00023) while each carries a paired per-feed SE of
+0.00025-0.00028; the study's own partition (s951-952 / s953-954) is the most favourable of the four. The per-feed SE does not contain this member-set noise.
+SUGGESTED RULE for the W16 read (the lead decides; this is a reviewer's proposal, not the lead's rule):
+ STALE-FT (P=1.0) is RE-OPENED iff, on the 16-member pool against its 1-seed P=0 control, ALL of:
+  (1) final fresh-val delta >= 0                      (the lead's clause)
+  (2) final stale-val delta >= +2 SE                  (the lead's clause)
+  (3) final stale-val delta at pmix-private >= 0      (the population the idea is for; it reads -0.00006 +- 0.00044 on W8)
+  (4) both complementary 8-member halves (s951-954 = W8, s955-958) have final stale-val delta > 0, AND the two architecture halves (kd05w192 x8, kd05t25w192 x8) as well.
+ Otherwise STALE-FT stays closed. A re-open means "build the 3-seed branch for the P20-form file and read the P20 form", not "ship".
+
+=== 2026-11-15T09:44:26Z CORRECTION of one sentence above + a better statistic (still before any W16-pool read; the W16 controls have not run) ===
+WRONG above: "The per-feed SE does not contain this member-set noise." Measured since (out/poolsize2.txt): 49-75% of the per-feed variance of a pool delta IS member-combination noise
+(it re-draws when one member changes), so the per-feed SE of ONE pool read is an honest SE for that one draw. What follows instead: (a) reads on different member subsets are nearly
+independent draws, so one pool read near +2 SE is weak evidence when the other subsets disagree; (b) the per-feed delta AVERAGED over member subsets is a tighter estimator of the
+expected pool effect. On W8 it reads, P = 1.0 final stale-val: k=4 +0.00017 +- 0.00014, k=6 +0.00027 +- 0.00017, k=7 +0.00020 +- 0.00020 (the single 8-pool read: +0.00054 +- 0.00028).
+SUGGESTED statistic for the W16 read, replacing clause (2) and (4) above; clauses (1) and (3) stay:
+  (2') per-feed final stale-val delta averaged over the 16 leave-one-member-out 15-member pools >= +2 SE of that average (per-feed SE),
+  (4') the same average for the 8-member halves (s951-954, s955-958) is > 0 in both.

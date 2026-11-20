@@ -1,0 +1,192 @@
+TAIL ERROR ANATOMY, G3 final val (preds/ens_G3_final_val.npy). Run 2026-11-13 05:28:13 UTC
+sanity: G3 val NDCG 0.40032 (recorded 0.40032); feeds 14423, candidates 1389971, positives 21983
+feeds with >=1 positive 14423 (1.0000); TAIL 7379 (0.5116) / HEAD 7044
+loss (1-NDCG): total 8649.2 = 0.59968/feed; tail share 0.6601; mean NDCG tail 0.2263, head 0.5826
+[cosines computed in 2s; candidates without embedding 0.0002, without any cos to history 0.0144]
+feeds without any negative: 0 (their top-neg statistics are NaN)
+
+=== §2 TAIL vs HEAD (feed level; focal positive = best-ranked positive; top neg = best-ranked negative) ===
+  columns: head mean | tail mean | tail-head +- user-clustered SE | same with M-decile fixed effects
+ -- feed descriptors --
+  M                                            head      61.7 | tail     129.5 | diff +67.7768 +- 1.2940 | M-adj +0.6288 +- 0.2020   (n 7044/7379)
+  log M                                        head    3.5426 | tail    4.5921 | diff +1.0495 +- 0.0161 | M-adj +0.0111 +- 0.0021   (n 7044/7379)
+  median M: head 32, tail 109; share M>=50: head 0.381, tail 0.792
+  history length H                             head     171.8 | tail     174.7 | diff +2.8437 +- 1.3443 | M-adj +3.7816 +- 1.5365   (n 7044/7379)
+  H at the 256 cap                             head    0.2808 | tail    0.2979 | diff +0.0171 +- 0.0076 | M-adj +0.0209 +- 0.0087   (n 7044/7379)
+  H = 0 (empty history)                        head    0.0121 | tail    0.0148 | diff +0.0027 +- 0.0019 | M-adj +0.0020 +- 0.0023   (n 7044/7379)
+  user_id 0 share                              head    0.0464 | tail    0.0449 | diff -0.0016 +- 0.0035 | M-adj -0.0098 +- 0.0042   (n 7044/7379)
+  n positives (label side)                     head    1.6520 | tail    1.4021 | diff -0.2500 +- 0.0293 | M-adj -0.7002 +- 0.0485   (n 7044/7379)
+  positive rate npos/M (label side)            head    0.0614 | tail    0.0175 | diff -0.0439 +- 0.0008 | M-adj -0.0084 +- 0.0004   (n 7044/7379)
+ -- the positive's category --
+  share of candidates in positive's category   head    0.3228 | tail    0.2604 | diff -0.0623 +- 0.0035 | M-adj -0.0506 +- 0.0039   (n 7044/7379)
+  n candidates in positive's category          head      18.9 | tail      34.3 | diff +15.3948 +- 0.5706 | M-adj -3.8937 +- 0.4908   (n 7044/7379)
+  rank of focal positive (0-based)             head       2.4 | tail      37.0 | diff +34.5554 +- 0.4325 | M-adj +27.7478 +- 0.3386   (n 7044/7379)
+  n same-category candidates above positive    head       1.2 | tail      11.2 | diff +9.9602 +- 0.1818 | M-adj +7.4709 +- 0.1415   (n 7044/7379)
+  n other-category candidates above positive   head       1.2 | tail      25.8 | diff +24.5952 +- 0.3897 | M-adj +20.2769 +- 0.2937   (n 7044/7379)
+  share of beaters in the positive's category  head    0.5224 | tail    0.3662 | diff -0.1562 +- 0.0072 | M-adj -0.2420 +- 0.0079   (n 5192/7379)
+  pos within-category rank / (n same-cat - 1)  head    0.1519 | tail    0.3892 | diff +0.2373 +- 0.0046 | M-adj +0.3290 +- 0.0043   (n 6434/7078)
+  pos is its category's top item               head    0.4936 | tail    0.1403 | diff -0.3533 +- 0.0072 | M-adj -0.2632 +- 0.0087   (n 7044/7379)
+  top neg in positive's category               head    0.5392 | tail    0.3559 | diff -0.1833 +- 0.0081 | M-adj -0.2693 +- 0.0090   (n 7044/7379)
+  pos category in history (any)                head    0.9580 | tail    0.9053 | diff -0.0527 +- 0.0042 | M-adj -0.0697 +- 0.0047   (n 7044/7379)
+  pos category in newest-5 events              head    0.7263 | tail    0.5363 | diff -0.1900 +- 0.0079 | M-adj -0.2669 +- 0.0085   (n 7044/7379)
+  pos category = newest event's category       head    0.5097 | tail    0.3381 | diff -0.1715 +- 0.0081 | M-adj -0.2373 +- 0.0090   (n 7044/7379)
+  top-neg category in history (any)            head    0.9700 | tail    0.9691 | diff -0.0009 +- 0.0029 | M-adj -0.0074 +- 0.0033   (n 7044/7379)
+  top-neg category in newest-5 events          head    0.7851 | tail    0.8267 | diff +0.0416 +- 0.0066 | M-adj -0.0101 +- 0.0074   (n 7044/7379)
+  pos category share of history                head    0.3506 | tail    0.2842 | diff -0.0663 +- 0.0048 | M-adj -0.0901 +- 0.0054   (n 7044/7379)
+  top-neg category share of history            head    0.3635 | tail    0.3542 | diff -0.0093 +- 0.0047 | M-adj -0.0203 +- 0.0054   (n 7044/7379)
+ -- popularity (it_hist_all_luo) --
+  log1p pop, positive                          head    2.0759 | tail    1.7435 | diff -0.3324 +- 0.0284 | M-adj -0.4706 +- 0.0323   (n 7044/7379)
+  log1p pop, top neg                           head    2.2431 | tail    2.2956 | diff +0.0525 +- 0.0294 | M-adj +0.0526 +- 0.0335   (n 7044/7379)
+  log1p pop, positive - top neg                head   -0.1672 | tail   -0.5521 | diff -0.3849 +- 0.0384 | M-adj -0.5232 +- 0.0431   (n 7044/7379)
+  log1p pop, positive - feed median            head    0.8871 | tail    0.5692 | diff -0.3179 +- 0.0277 | M-adj -0.4828 +- 0.0317   (n 7044/7379)
+  P(pos pop > feed median)                     head    0.5999 | tail    0.5185 | diff -0.0814 +- 0.0082 | M-adj -0.1268 +- 0.0093   (n 7044/7379)
+  P(pos pop > top-neg pop) (ties .5)           head    0.4661 | tail    0.4001 | diff -0.0661 +- 0.0079 | M-adj -0.0901 +- 0.0090   (n 7044/7379)
+  pos pop within-feed percentile               head    0.5982 | tail    0.5346 | diff -0.0636 +- 0.0047 | M-adj -0.0842 +- 0.0053   (n 7044/7379)
+  pos is cold (pop 0)                          head    0.2419 | tail    0.3224 | diff +0.0805 +- 0.0075 | M-adj +0.1083 +- 0.0084   (n 7044/7379)
+  top neg is cold (pop 0)                      head    0.2085 | tail    0.2025 | diff -0.0061 +- 0.0067 | M-adj -0.0045 +- 0.0076   (n 7044/7379)
+ -- embedding similarity to the history --
+  cos max to history, positive                 head    0.8989 | tail    0.8508 | diff -0.0482 +- 0.0017 | M-adj -0.0664 +- 0.0018   (n 6956/7266)
+  cos max to history, top neg                  head    0.9150 | tail    0.9226 | diff +0.0076 +- 0.0013 | M-adj -0.0042 +- 0.0014   (n 6958/7268)
+  cos max, positive - top neg                  head   -0.0161 | tail   -0.0718 | diff -0.0558 +- 0.0019 | M-adj -0.0622 +- 0.0020   (n 6956/7266)
+  cos max to newest 5, positive                head    0.7599 | tail    0.6687 | diff -0.0912 +- 0.0029 | M-adj -0.1302 +- 0.0032   (n 6954/7265)
+  cos max to newest 5, top neg                 head    0.7937 | tail    0.8162 | diff +0.0225 +- 0.0028 | M-adj -0.0093 +- 0.0031   (n 6956/7267)
+  cos max newest 5, positive - top neg         head   -0.0339 | tail   -0.1476 | diff -0.1137 +- 0.0035 | M-adj -0.1211 +- 0.0038   (n 6954/7265)
+  pos cos-max within-feed percentile           head    0.7295 | tail    0.6011 | diff -0.1284 +- 0.0042 | M-adj -0.1835 +- 0.0045   (n 7044/7379)
+  pos cos-newest5 within-feed percentile       head    0.7228 | tail    0.5760 | diff -0.1468 +- 0.0047 | M-adj -0.2120 +- 0.0049   (n 7044/7379)
+  cos to user_emb, positive - top neg          head   -0.0103 | tail   -0.0474 | diff -0.0371 +- 0.0015 | M-adj -0.0453 +- 0.0016   (n 7042/7377)
+  pos near-duplicate of a history item (cos>.98) head    0.1449 | tail    0.0497 | diff -0.0952 +- 0.0049 | M-adj -0.1302 +- 0.0060   (n 7044/7379)
+  top neg near-duplicate of a history item     head    0.1962 | tail    0.2361 | diff +0.0399 +- 0.0068 | M-adj -0.0104 +- 0.0080   (n 7044/7379)
+  pos item_id itself in history                head    0.0000 | tail    0.0000 | diff +0.0000 +- 0.0000 | M-adj +0.0000 +- 0.0000   (n 7044/7379)
+  top neg item_id itself in history            head    0.0000 | tail    0.0000 | diff +0.0000 +- 0.0000 | M-adj +0.0000 +- 0.0000   (n 7044/7379)
+ -- f1..f5 (positive vs top neg) --
+  f1: positive - top neg                       head   -0.0330 | tail   -0.1513 | diff -0.1183 +- 0.0042 | M-adj -0.1360 +- 0.0045   (n 7044/7379)
+  f1: P(pos > top neg) (ties .5)               head    0.4401 | tail    0.2858 | diff -0.1543 +- 0.0077 | M-adj -0.1660 +- 0.0088   (n 7044/7379)
+  f1: pos within-feed percentile               head    0.7057 | tail    0.5765 | diff -0.1291 +- 0.0044 | M-adj -0.1842 +- 0.0047   (n 7044/7379)
+  f2: positive - top neg                       head   -0.0151 | tail   -0.0140 | diff +0.0011 +- 0.0062 | M-adj -0.0034 +- 0.0070   (n 7044/7379)
+  f2: P(pos > top neg) (ties .5)               head    0.4793 | tail    0.4885 | diff +0.0093 +- 0.0069 | M-adj +0.0131 +- 0.0078   (n 7044/7379)
+  f2: pos within-feed percentile               head    0.4960 | tail    0.4949 | diff -0.0012 +- 0.0046 | M-adj -0.0062 +- 0.0052   (n 7044/7379)
+  f3: positive - top neg                       head   -0.0317 | tail   -0.1325 | diff -0.1008 +- 0.0045 | M-adj -0.1231 +- 0.0048   (n 7044/7379)
+  f3: P(pos > top neg) (ties .5)               head    0.4648 | tail    0.3590 | diff -0.1058 +- 0.0059 | M-adj -0.1260 +- 0.0065   (n 7044/7379)
+  f3: pos within-feed percentile               head    0.6623 | tail    0.5654 | diff -0.0969 +- 0.0040 | M-adj -0.1378 +- 0.0044   (n 7044/7379)
+  f4: positive - top neg                       head   -0.0135 | tail   -0.0207 | diff -0.0072 +- 0.0059 | M-adj -0.0288 +- 0.0068   (n 7044/7379)
+  f4: P(pos > top neg) (ties .5)               head    0.4730 | tail    0.4740 | diff +0.0010 +- 0.0083 | M-adj -0.0259 +- 0.0095   (n 7044/7379)
+  f4: pos within-feed percentile               head    0.5699 | tail    0.5304 | diff -0.0395 +- 0.0047 | M-adj -0.0432 +- 0.0053   (n 7044/7379)
+  f5: positive - top neg                       head   -0.0191 | tail   -0.0801 | diff -0.0610 +- 0.0061 | M-adj -0.0686 +- 0.0069   (n 7044/7379)
+  f5: P(pos > top neg) (ties .5)               head    0.4771 | tail    0.4126 | diff -0.0646 +- 0.0082 | M-adj -0.0686 +- 0.0094   (n 7044/7379)
+  f5: pos within-feed percentile               head    0.5992 | tail    0.5396 | diff -0.0596 +- 0.0045 | M-adj -0.0788 +- 0.0050   (n 7044/7379)
+  f4 positive (level)                          head    0.5663 | tail    0.5342 | diff -0.0321 +- 0.0042 | M-adj -0.0351 +- 0.0049   (n 7044/7379)
+  f4 top neg (level)                           head    0.5798 | tail    0.5549 | diff -0.0249 +- 0.0043 | M-adj -0.0063 +- 0.0050   (n 7044/7379)
+ -- G3 score --
+  G3 within-feed z of the positive             head    1.3183 | tail    0.5155 | diff -0.8028 +- 0.0114 | M-adj -1.1834 +- 0.0111   (n 7044/7379)
+  G3 within-feed z of the top neg              head    1.6555 | tail    1.9680 | diff +0.3125 +- 0.0082 | M-adj +0.0196 +- 0.0080   (n 7044/7379)
+
+near-duplicate (cos>0.98 to any history item): focal positive tail 0.0497 / head 0.1449; ANY positive near-dup: tail 0.0623 / head 0.1695; all negatives 0.0367, all positives 0.0872
+  tail feeds with near-dup focal positive: 367; their median rank 17; near-dup NEGATIVES above it: median 3, mean 4.9
+
+=== §2b CUE AUCs: focal positive vs the negatives ranked ABOVE it (tail beaters) and vs all negatives ===
+  P(cue_pos > cue_neg), ties 0.5, pairs with a NaN cue dropped; pooled over pairs, user-clustered SE
+  pop it_hist_all_luo      tail vs beaters 0.448+-0.005 | tail vs all neg 0.545+-0.004 | head vs all neg 0.609+-0.005 | head vs negs below pos 0.615+-0.005
+  pop it_hist_et1_luo      tail vs beaters 0.445+-0.005 | tail vs all neg 0.545+-0.004 | head vs all neg 0.613+-0.005 | head vs negs below pos 0.619+-0.005
+  cos max to history       tail vs beaters 0.373+-0.005 | tail vs all neg 0.630+-0.004 | head vs all neg 0.782+-0.004 | head vs negs below pos 0.798+-0.004
+  cos max newest-5         tail vs beaters 0.367+-0.004 | tail vs all neg 0.607+-0.004 | head vs all neg 0.793+-0.004 | head vs negs below pos 0.809+-0.004
+  cos mean newest-5        tail vs beaters 0.374+-0.004 | tail vs all neg 0.601+-0.004 | head vs all neg 0.774+-0.004 | head vs negs below pos 0.789+-0.004
+  cos to user_emb          tail vs beaters 0.366+-0.004 | tail vs all neg 0.626+-0.004 | head vs all neg 0.765+-0.004 | head vs negs below pos 0.779+-0.004
+  cat in history           tail vs beaters 0.470+-0.003 | tail vs all neg 0.538+-0.002 | head vs all neg 0.565+-0.001 | head vs negs below pos 0.568+-0.001
+  cat in newest-5          tail vs beaters 0.426+-0.004 | tail vs all neg 0.560+-0.003 | head vs all neg 0.678+-0.003 | head vs negs below pos 0.687+-0.003
+  cat = newest event cat   tail vs beaters 0.446+-0.003 | tail vs all neg 0.543+-0.003 | head vs all neg 0.643+-0.004 | head vs negs below pos 0.650+-0.004
+  cat share of history     tail vs beaters 0.423+-0.005 | tail vs all neg 0.570+-0.003 | head vs all neg 0.646+-0.004 | head vs negs below pos 0.653+-0.004
+  item in history          tail vs beaters 0.500+-0.000 | tail vs all neg 0.500+-0.000 | head vs all neg 0.500+-0.000 | head vs negs below pos 0.500+-0.000
+  f1                       tail vs beaters 0.382+-0.005 | tail vs all neg 0.607+-0.004 | head vs all neg 0.754+-0.004 | head vs negs below pos 0.768+-0.004
+  f2                       tail vs beaters 0.507+-0.004 | tail vs all neg 0.494+-0.004 | head vs all neg 0.502+-0.005 | head vs negs below pos 0.502+-0.005
+  f3                       tail vs beaters 0.411+-0.005 | tail vs all neg 0.591+-0.003 | head vs all neg 0.691+-0.003 | head vs negs below pos 0.701+-0.004
+  f4                       tail vs beaters 0.458+-0.005 | tail vs all neg 0.536+-0.004 | head vs all neg 0.560+-0.005 | head vs negs below pos 0.563+-0.005
+  f5                       tail vs beaters 0.452+-0.005 | tail vs all neg 0.549+-0.004 | head vs all neg 0.615+-0.004 | head vs negs below pos 0.621+-0.005
+
+=== §2d PARETO DOMINANCE: negatives that are >= the focal positive on EVERY monotone cue at once ===
+  any scoring that is non-decreasing in each cue ranks such a negative at or above the positive (ties pessimistic);
+  cues used: those with head-feed cue AUC >= 0.6 vs all negatives; NaN cue -> the pair is not counted as dominated
+  item_id of a candidate present in its own feed's history: 0.000000 of all candidates
+  8 cues (pop, cos max, cos newest-5, cos user_emb, cat in newest-5, f1, f3, f5)
+     tail: feeds with >=1 dominating negative 0.509, with >=8 0.125; dominating negatives per feed mean 3.6, median 1
+     head: feeds with >=1 dominating negative 0.156, with >=8 0.005; dominating negatives per feed mean 0.3, median 0
+     tail feeds with >=8 dominating negatives hold 0.087 of ALL val loss; the minimal rank any monotone scoring can give the focal positive in tail feeds: median 1 vs its G3 rank median 23
+  5 cues (cos max, cos newest-5, cat in newest-5, f1, f3)
+     tail: feeds with >=1 dominating negative 0.869, with >=8 0.506; dominating negatives per feed mean 17.2, median 8
+     head: feeds with >=1 dominating negative 0.534, with >=8 0.090; dominating negatives per feed mean 2.8, median 1
+     tail feeds with >=8 dominating negatives hold 0.341 of ALL val loss; the minimal rank any monotone scoring can give the focal positive in tail feeds: median 8 vs its G3 rank median 23
+  3 cues (cos max, f1, pop)
+     tail: feeds with >=1 dominating negative 0.815, with >=8 0.396; dominating negatives per feed mean 12.8, median 5
+     head: feeds with >=1 dominating negative 0.444, with >=8 0.065; dominating negatives per feed mean 2.0, median 0
+     tail feeds with >=8 dominating negatives hold 0.269 of ALL val loss; the minimal rank any monotone scoring can give the focal positive in tail feeds: median 5 vs its G3 rank median 23
+
+=== §2c WITHIN- vs CROSS-CATEGORY decomposition of the lost NDCG (exact, Shapley over the two oracles) ===
+  W = within-category oracle: each category keeps its rank slots, positives move to their category's earliest slots
+  C = category oracle: all candidates of positive-containing categories move above the rest (relative order kept)
+  WC = both; residual 1 - f(WC) = interleaving of >= 2 positive categories
+  check: f(WC) vs f(CW) max |diff| 0.00e+00; mean f0 0.40032 fW 0.69404 fC 0.57088 fWC 0.97869
+  all         loss/feed 0.5997 (n 14423): within (Shapley) 0.585+-0.003; cross (Shapley) 0.380+-0.003; interleave 0.036+-0.001; within (W first) 0.490+-0.004; cross (W first) 0.510+-0.004
+  tail        loss/feed 0.7737 (n 7379): within (Shapley) 0.580+-0.004; cross (Shapley) 0.388+-0.004; interleave 0.032+-0.001; within (W first) 0.450+-0.005; cross (W first) 0.550+-0.005
+  head        loss/feed 0.4174 (n 7044): within (Shapley) 0.594+-0.005; cross (Shapley) 0.363+-0.006; interleave 0.043+-0.002; within (W first) 0.567+-0.006; cross (W first) 0.433+-0.006
+  tail M<50   loss/feed 0.7399 (n 1533): within (Shapley) 0.459+-0.009; cross (Shapley) 0.532+-0.009; interleave 0.010+-0.001; within (W first) 0.354+-0.010; cross (W first) 0.646+-0.010
+  tail M>=50  loss/feed 0.7825 (n 5846): within (Shapley) 0.611+-0.004; cross (Shapley) 0.352+-0.004; interleave 0.037+-0.001; within (W first) 0.474+-0.005; cross (W first) 0.526+-0.005
+  oracle gains on ALL val (per feed): W +0.2937, C +0.1706, WC +0.5784
+
+=== §4 WHERE THE TAIL LOSS IS: exact per-positive split of 1-NDCG ===
+  positive j (0-based order among the feed's positives, rank r_j) carries (disc(j) - disc(r_j)) / IDCG; sums to 1-NDCG
+  popularity terciles of ALL val positives (it_hist_all_luo): cuts 1 / 11; share of positives with pop 0: 0.303
+  -- by popularity group (absolute): share of TAIL loss +- SE | share of ALL val loss | share of tail positives | mean loss per tail positive | NDCG-pts per val feed
+     T1 (<= 1)                    0.418 +- 0.005 | 0.276 | 0.417 | 0.5525 | 0.1653
+     T2 (<= 11)                   0.274 +- 0.005 | 0.181 | 0.276 | 0.5475 | 0.1085
+     T3 (> 11)                    0.308 +- 0.005 | 0.203 | 0.307 | 0.5548 | 0.1220
+  -- by within-feed popularity third: share of TAIL loss +- SE | share of ALL val loss | share of tail positives | mean loss per tail positive | NDCG-pts per val feed
+     feed-bottom third            0.349 +- 0.005 | 0.230 | 0.347 | 0.5542 | 0.1380
+     feed-middle third            0.285 +- 0.005 | 0.188 | 0.285 | 0.5511 | 0.1128
+     feed-top third               0.366 +- 0.005 | 0.242 | 0.367 | 0.5501 | 0.1450
+  -- by category vs history: share of TAIL loss +- SE | share of ALL val loss | share of tail positives | mean loss per tail positive | NDCG-pts per val feed
+     cat in newest-5              0.518 +- 0.006 | 0.342 | 0.532 | 0.5381 | 0.2052
+     cat in hist, not newest-5    0.379 +- 0.005 | 0.250 | 0.376 | 0.5559 | 0.1501
+     cat NOT in history           0.102 +- 0.003 | 0.068 | 0.092 | 0.6140 | 0.0406
+  -- 3x3: category vs history (rows) x absolute popularity group (cols): share of TAIL loss (share of tail positives)
+     cat in newest-5              T1 (<= 1): 0.243 (0.248) | T2 (<= 11): 0.142 (0.148) | T3 (> 11): 0.133 (0.136)
+     cat in hist, not newest-5    T1 (<= 1): 0.135 (0.134) | T2 (<= 11): 0.105 (0.105) | T3 (> 11): 0.139 (0.138)
+     cat NOT in history           T1 (<= 1): 0.039 (0.036) | T2 (<= 11): 0.028 (0.024) | T3 (> 11): 0.036 (0.032)
+  -- same 3x3 for HEAD feeds (share of head loss), for contrast
+     cat in newest-5              T1 (<= 1): 0.249 (0.260) | T2 (<= 11): 0.195 (0.197) | T3 (> 11): 0.216 (0.231)
+     cat in hist, not newest-5    T1 (<= 1): 0.089 (0.087) | T2 (<= 11): 0.082 (0.075) | T3 (> 11): 0.117 (0.107)
+     cat NOT in history           T1 (<= 1): 0.015 (0.014) | T2 (<= 11): 0.014 (0.011) | T3 (> 11): 0.023 (0.018)
+  -- tail feeds by focal-positive cell: n feeds | mean NDCG | Shapley within share | cross share
+     cat in newest-5              x T1 (<= 1)        n  1805 | NDCG 0.230 | within 0.797 | cross 0.172 | median rank 22
+     cat in newest-5              x T2 (<= 11)       n  1091 | NDCG 0.236 | within 0.765 | cross 0.194 | median rank 20
+     cat in newest-5              x T3 (> 11)        n  1061 | NDCG 0.238 | within 0.762 | cross 0.194 | median rank 19
+     cat in hist, not newest-5    x T1 (<= 1)        n   943 | NDCG 0.215 | within 0.406 | cross 0.569 | median rank 27
+     cat in hist, not newest-5    x T2 (<= 11)       n   748 | NDCG 0.224 | within 0.384 | cross 0.583 | median rank 24
+     cat in hist, not newest-5    x T3 (> 11)        n  1032 | NDCG 0.224 | within 0.342 | cross 0.628 | median rank 24
+     cat NOT in history           x T1 (<= 1)        n   261 | NDCG 0.200 | within 0.312 | cross 0.678 | median rank 36
+     cat NOT in history           x T2 (<= 11)       n   189 | NDCG 0.205 | within 0.286 | cross 0.702 | median rank 32
+     cat NOT in history           x T3 (> 11)        n   249 | NDCG 0.209 | within 0.238 | cross 0.749 | median rank 30
+
+  -- what moving tail positives up would buy (focal positive only, other items unchanged; val NDCG points) --
+     to rank 8 (just into top-8; r=7)     +0.04515
+     rank halved                          +0.02485
+     rank x0.9                            +0.00395
+     up by 1                              +0.00193
+
+=== §3 IS FAILURE PREDICTABLE FROM THE FEED ALONE? nested user-grouped 5-fold logistic, label-free feed stats ===
+  [LR] M only (logM, logM^2)                                chosen C per fold [0.001, 0.001, 10.0, 0.001, 10.0]
+  [LR] A: M, H, entropy, user0, pop spread, cos spread      chosen C per fold [1.0, 1.0, 1.0, 1.0, 1.0]
+  [LR] B: A + category/near-dup/f-spread shares             chosen C per fold [1.0, 1.0, 1.0, 1.0, 1.0]
+  [LR] C: B + G3 score shape (gap, top-1 z, entropy)        chosen C per fold [10.0, 0.001, 10.0, 10.0, 10.0]
+  base rate P(tail) 0.5116; tail rate by M decile: 0+:0.01 12+:0.18 22+:0.36 32+:0.44 48+:0.56 67+:0.62 91+:0.66 124+:0.71 173+:0.77 247+:0.78
+  model | OOF AUC +- cluster-bootstrap SE | AUC within M deciles (pair-weighted) | AUC - M-only
+  LR M only (logM, logM^2)                                     0.7664 +- 0.0038 | strat 0.5112 | +0.0000 +- 0.0000
+  LR A: M, H, entropy, user0, pop spread, cos spread           0.7696 +- 0.0038 | strat 0.5336 | +0.0032 +- 0.0010
+  LR B: A + category/near-dup/f-spread shares                  0.7714 +- 0.0038 | strat 0.5488 | +0.0050 +- 0.0013
+  LR C: B + G3 score shape (gap, top-1 z, entropy)             0.7732 +- 0.0038 | strat 0.5576 | +0.0068 +- 0.0014
+  HGB on C features (fixed params, 5-fold)                     0.7728 +- 0.0038 | strat 0.5570 | +0.0063 +- 0.0016
+  LR-C top 50% risk feeds: tail rate 0.713 (rest 0.310), share of all loss 0.579
+  LR-C top 20% risk feeds: tail rate 0.769 (rest 0.447), share of all loss 0.241
+  within M<50: tail rate 0.260; AUC M-only 0.7350, A 0.7550, B 0.7569, C 0.7598, HGB 0.7604
+  within M>=50: tail rate 0.685; AUC M-only 0.6020, A 0.6035, B 0.6090, C 0.6111, HGB 0.6110
+  descriptive standardized LR-B coefficients (full fit, C=1): logM +4.30, logM2 -2.87, cand_cat_entropy -0.12, f3_sd -0.11, hist_cat_entropy +0.11, ncat_over_M +0.10, cat_in_hist_share -0.10, neardup_share -0.10, cos_gap -0.07, cat_in_n5_share +0.07, f1_sd -0.06, Hcap +0.05
+
+[done in 21s]

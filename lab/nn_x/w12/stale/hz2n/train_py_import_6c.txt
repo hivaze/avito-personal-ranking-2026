@@ -1,0 +1,4 @@
+OLD (nn_x/w5/train.py line 56):
+from cd_arms6b import save_holdout_hz, setup_hzcd  # wave-5 hzcd; 6b = cd_arms6 + env HZCD_DIR / HZ2_KEEP (hz2 view, reports/STALE_1115/hz2.md); identical when both are unset
+NEW:
+from cd_arms6c import save_holdout_hz, setup_hzcd  # wave-5 hzcd; 6c = cd_arms6b + optional encoder-score columns pre2_hz_* in HZCD_DIR (hz2n, reports/STALE_1115/hz2n.md); identical to 6b when HZCD_DIR holds none

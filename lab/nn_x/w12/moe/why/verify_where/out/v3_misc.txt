@@ -1,0 +1,21 @@
+== (1) 1%-trimmed mean of per-feed val deltas: SE from trimmed sd (analyst) vs winsorised sd/(1-2g) vs bootstrap (2000) ==
+  A - ref4: raw -0.00086+-0.00057 | trimmed -0.00074  SE(trimmed sd) 0.00033  SE(winsorised) 0.00051  SE(bootstrap) 0.00051
+  B - ref4: raw -0.00144+-0.00057 | trimmed -0.00122  SE(trimmed sd) 0.00034  SE(winsorised) 0.00050  SE(bootstrap) 0.00051
+  C - ref4: raw -0.00069+-0.00058 | trimmed -0.00049  SE(trimmed sd) 0.00034  SE(winsorised) 0.00050  SE(bootstrap) 0.00051
+  null ref4b - ref4: raw -0.00138+-0.00056 | trimmed -0.00107  SE(trimmed sd) 0.00033  SE(winsorised) 0.00049  SE(bootstrap) 0.00048
+  mean(A,B,C) - refN: raw -0.00043+-0.00033 | trimmed -0.00033  SE(trimmed sd) 0.00022  SE(winsorised) 0.00027  SE(bootstrap) 0.00027
+== (2) corr(X - ref4, ref4b - ref4) on val per feed: arms vs control X that shares nothing with the arms ==
+  A                     : corr +0.507
+  B                     : corr +0.480
+  C                     : corr +0.475
+  t25 4-pool s951-954   : corr +0.448
+  t25 4-pool s955-958   : corr +0.506
+  t25N                  : corr +0.581
+== (3) @last checkpoints: arm 4-pool (@last) minus reference pools (@last) ==
+  @last ref4 val rank 1/70 (ref4 - mean +0.00061)
+  A@last: vs ref4@last val +0.00009+-0.00056 hold +0.00026+-0.00031 | vs refN@last val +0.00070+-0.00046 hold +0.00024+-0.00026
+  B@last: vs ref4@last val -0.00093+-0.00056 hold +0.00028+-0.00032 | vs refN@last val -0.00031+-0.00048 hold +0.00026+-0.00027
+  C@last: vs ref4@last val -0.00016+-0.00056 hold +0.00042+-0.00033 | vs refN@last val +0.00045+-0.00047 hold +0.00040+-0.00028
+== (4) lagged holdout: seed-null of the DiD (priv_v3 - lag0) over the 35 disjoint 4-vs-4 reference splits ==
+  SD of DiD over 35 splits 0.00052; z sd 1.44; typical per-feed SE 0.00036
+  ref4 minus mean of 70 subsets: lag0 -0.00002 priv_v3 -0.00006

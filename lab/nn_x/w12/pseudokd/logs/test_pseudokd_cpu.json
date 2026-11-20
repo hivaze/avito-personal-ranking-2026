@@ -1,0 +1,71 @@
+{
+ "part": "cpu",
+ "passed": 49,
+ "total": 49,
+ "fails": [],
+ "res": {
+  "c0": {
+   "removed": {
+    "import cd_pseudokd": 1,
+    "add_argument --pseudo_ratio": 1,
+    "add_argument --pseudo_gap_min": 1,
+    "add_argument --pseudo_gap_max": 1,
+    "add_argument --pseudo_w": 1,
+    "add_argument --pseudo_tmax": 1,
+    "add_argument --pseudo_head": 1,
+    "add_argument --pseudo_noset": 1,
+    "pseudo = None": 1,
+    "if a.pseudo_ratio > 0": 1,
+    "if pseudo is not None and step < pseudo.t_end": 1,
+    "if pseudo is not None": 2
+   },
+   "own_lines": [
+    "from cd_pseudokd import setup_pseudo  # pseudokd: wave-11 PSEUDO-DIRECT pseudo-feed co-training on the KD student (OFF by default)",
+    "pseudo = None  # pseudokd (cd_pseudokd.py): stays None unless --pseudo_ratio > 0",
+    "if pseudo is not None and step < pseudo.t_end:  # pseudokd (cd_pseudokd.py): plateau steps only; loss += w * pseudo CE",
+    "if pseudo is not None:  # pseudokd: pseudo-feed statistics since the last eval",
+    "if pseudo is not None:  # pseudokd: the context-free head (training-only) and the cumulative statistics"
+   ],
+   "launch": [
+    "(cd <repo>/nn_x/w5 && PYTHONPATH=<repo>/nn_x/w5) <repo>/.venv/bin/python <repo>/lab/nn_x/w12/pseudokd/train.py --variant w5_e10_kd05w192ps_s951 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 951 --kd_file <repo>/nn_x/w12/kd/out/teacher_mean11.npy --kd_w 0.5 --d 192 --pseudo_ratio 1.0 --pseudo_w 0.3 --pseudo_head 1 --pseudo_gap_min 16 --pseudo_gap_max 64 --pseudo_tmax 63",
+    "(cd <repo>/nn_x/w5 && PYTHONPATH=<repo>/nn_x/w5) <repo>/.venv/bin/python <repo>/lab/nn_x/w12/pseudokd/train.py --variant w5_e10_kd05w192ps_s952 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 952 --kd_file <repo>/nn_x/w12/kd/out/teacher_mean11.npy --kd_w 0.5 --d 192 --pseudo_ratio 1.0 --pseudo_w 0.3 --pseudo_head 1 --pseudo_gap_min 16 --pseudo_gap_max 64 --pseudo_tmax 63"
+   ]
+  },
+  "c1": {
+   "n_pseudo": 123,
+   "n_batches": 16,
+   "n_draws": 186,
+   "drop_tgt": 63,
+   "drop_neg": 0,
+   "t_mean": 30.15447154471545,
+   "g_mean": 39.28455284552845,
+   "locality_compared": 97,
+   "worst_rel": 0.0
+  },
+  "e2e": {
+   "off_lines": [
+    "step 10/40 loss 4.5385 val_ndcg 0.32013 holdout_ndcg 0.32598 lr 2.00e-03",
+    "step 20/40 loss 0.0000 val_ndcg 0.31576 holdout_ndcg 0.35734 lr 2.00e-03",
+    "step 30/40 loss 0.0000 val_ndcg 0.33075 holdout_ndcg 0.33894 lr 6.99e-04 cd_loss_reg 5.1292 cd_loss_pool 3.0288",
+    "step 40/40 loss 0.0000 val_ndcg 0.33612 holdout_ndcg 0.33491 lr 1.09e-04 cd_loss_reg 2.5378 cd_loss_pool 1.4771",
+    "BEST step 20 val_ndcg 0.31576; train time"
+   ],
+   "on_lines": [
+    "step 10/40 loss 4.6461 val_ndcg 0.33159 holdout_ndcg 0.33836 lr 2.00e-03",
+    "step 20/40 loss 0.0000 val_ndcg 0.31812 holdout_ndcg 0.37042 lr 2.00e-03",
+    "step 30/40 loss 0.0000 val_ndcg 0.33287 holdout_ndcg 0.35995 lr 6.99e-04 cd_loss_reg 5.1420 cd_loss_pool 3.0312",
+    "step 40/40 loss 0.0000 val_ndcg 0.33763 holdout_ndcg 0.35922 lr 1.09e-04 cd_loss_reg 2.5594 cd_loss_pool 1.4799",
+    "BEST step 20 val_ndcg 0.31812; train time"
+   ],
+   "on_pseudo": [
+    "wave-11 PSEUDO-DIRECT: --pseudo_ratio 1.0 (ceil(R B) draws per plateau step, steps 0..19 of 40; the cooldown 20 steps stays on real feeds), target = new type-1/source-1 event at t <= 63, g ~ U[16, 64], history = events at index >= t + g re-indexed, negatives = the source feed's non-clicked candidates (minus items seen at index < t + g), f1-f5 / xt = 0, user_emb = 0, domain row 2, K9 aux 0, loss += 0.3 * listwise(norm feed, denom 8); context-free head ON (183 params, AdamW no-decay group); set attention on pseudo rows on; source rows blocked as holdout users: 0 of 94 training feeds (17 holdout users)",
+    "pseudokd port (lab/nn_x/w12/pseudokd/cd_pseudokd.py): real feeds keep their target (KD mixture, kd_w 0.5, T 1.0); pseudo-feeds: one-hot on the slot-0 history event (no teacher logits exist for it); sources = rows of the gathered REAL training batch only (own stored history at index >= t + g, own candidates / clicks), never val / holdout users / test",
+    "wave-11 PSEUDO step 10: 10 steps with pseudo-feeds of 10 plateau steps since the last eval; 22 pseudo-feeds (= positives) from 39 draws (dropped: no eligible target 17, no negative 0; source rows blocked as holdout users 0); mean M' 105.7 H' 143.2 t 27.7 g 40.2; mean pseudo CE per feed 4.1285 (weight 0.3, ratio 1.0, gap 16-64, tmax 63, head on, noset 0, pseudo until step 20)",
+    "wave-11 PSEUDO step 20: 10 steps with pseudo-feeds of 10 plateau steps since the last eval; 39 pseudo-feeds (= positives) from 55 draws (dropped: no eligible target 16, no negative 0; source rows blocked as holdout users 0); mean M' 152.7 H' 122.6 t 32.7 g 35.2; mean pseudo CE per feed 4.6391 (weight 0.3, ratio 1.0, gap 16-64, tmax 63, head on, noset 0, pseudo until step 20)"
+   ],
+   "n_steps": 40,
+   "t_cool": 20,
+   "n_pseudo": 61
+  }
+ }
+}

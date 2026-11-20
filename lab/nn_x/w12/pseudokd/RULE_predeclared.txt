@@ -1,0 +1,29 @@
+PSEUDO-KD 2-seed screen: decision rule, fixed 2026-11-17 (written before any run of the arm exists; no number of the arm has been read).
+Rule text as given by the lead in the task: "KILL unless pooled member val delta >= +0.0008, pmix-private >= 0, and no val M half < -1 SE."
+
+Arm       E:kd05w192ps = lane.sh E:kd05w192 (teacher_mean11, kd_w 0.5, d 192, xt cvnd_pre2s, 10 epochs, holdout 30000) + --pseudo_ratio 1.0
+          --pseudo_w 0.3 --pseudo_head 1 --pseudo_gap_min 16 --pseudo_gap_max 64 --pseudo_tmax 63; variants w5_e10_kd05w192ps_s951 / _s952.
+Reference the STORED runs w5_e10_kd05w192_s951 / _s952 (same seeds, paired per feed and per seed).
+Files     train-only predictions of the SELECTED checkpoint (nn_x/w5/preds/nn_<v>_trainonly_val.npy), member score = per-feed rank-z
+          (pc_common.Meta.z), NDCG = pc_common.ndcg_fast (= src/metrics.ndcg_per_feed, pessimistic ties). Public scores never enter.
+
+Quantities (all on the 14,423 val feeds; d_f = per-feed delta):
+  member delta  d_f = mean over the 2 seeds of NDCG_f(arm member s) - mean over the 2 seeds of NDCG_f(ref member s)
+                (= the "member" figure of lab/nn_x/w12/kd/arm_read8.py on its val line; the figure the 07-what-failed.md record of the
+                wave-11 pseudo-feeds reports: "member +0.00108 +- 0.00072"). This is the "pooled member val delta" of the rule: the
+                member deltas of the two seeds pooled (averaged) per feed.
+  pmix-private  the private-mix weighted mean of the same d_f (lab/src/pmix.py weights()['private'], wmean_se).
+  M halves      mean and SE of the same d_f over the val feeds with M < 50 and with M >= 50.
+
+RULE (all three must hold, else KILL):
+  (1) member val delta mean >= +0.0008
+  (2) pmix-private weighted mean of d_f >= 0 (point estimate)
+  (3) for each M half: mean >= -1 x its SE
+Reported but NOT part of the decision: the 2-seed pool delta (NDCG of the per-feed z-mean of the 2 arm members minus that of the 2
+reference members) with the same three views; pmix-public; holdout (selected and @last) member / pool deltas; arm_read8.py output.
+If the pool view and the member view would give different verdicts, read_pk.py prints that line explicitly; the decision stays on the
+member view as defined above.
+
+Read command (CPU only, read-only):
+  cd <repo> && CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 .venv/bin/python lab/nn_x/w12/pseudokd/read_pk.py kd05w192ps 951,952
+  cd <repo> && CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 .venv/bin/python lab/nn_x/w12/kd/arm_read8.py kd05w192ps 951,952 kd05w192 951,952

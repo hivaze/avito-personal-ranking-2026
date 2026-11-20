@@ -1,0 +1,141 @@
+{
+ "checks": [
+  {
+   "name": "CD flags OFF vs frozen w5: identical training-batch sequence (39 batches, incl. pool steps)",
+   "ok": true,
+   "info": "39"
+  },
+  {
+   "name": "CD flags OFF vs frozen w5: identical train-mode model logits and loss-input logits",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "CD flags OFF vs frozen w5: identical logged loss / val / holdout / BEST lines",
+   "ok": true,
+   "info": "BEST step 20 val_ndcg 0.39150; train time"
+  },
+  {
+   "name": "CD flags OFF vs frozen w5: bit-identical checkpoint and val preds",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "abl flags with --init are refused (assert before any data loads)",
+   "ok": true,
+   "info": "-xt_rel_extra / --retr_cat / --xt_add have no effect with --init (inputs and architecture come from the checkpoint cfg)"
+  },
+  {
+   "name": "--xt_add with --init is refused (assert before any data loads)",
+   "ok": true,
+   "info": "-xt_rel_extra / --retr_cat / --xt_add have no effect with --init (inputs and architecture come from the checkpoint cfg)"
+  },
+  {
+   "name": "from-scratch flags OFF vs frozen w5: identical training-batch sequence (73 batches, incl. pool steps)",
+   "ok": true,
+   "info": "73"
+  },
+  {
+   "name": "from-scratch flags OFF vs frozen w5: identical train-mode model logits and loss-input logits",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "from-scratch flags OFF vs frozen w5: identical logged loss / val / holdout / BEST lines",
+   "ok": true,
+   "info": "BEST step 73 val_ndcg 0.31820; train time"
+  },
+  {
+   "name": "from-scratch flags OFF vs frozen w5: bit-identical checkpoint and val preds (selected + @last; holdout preds too)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "from-scratch run: selection at step >= 25 only; @last checkpoint + holdout preds written",
+   "ok": true,
+   "info": "73"
+  },
+  {
+   "name": "abl_t_fs_xpop: checkpoint cfg (xt_names, xt_rel, xt_idcols, xt_relonly, n_dense) == the C1 layout",
+   "ok": true,
+   "info": "(26, [22, 23, 24], None, [22, 23, 24], 92)"
+  },
+  {
+   "name": "abl_t_fs_xpop: same training-batch sequence as flags OFF (the data order is shared); checkpoint differs (changes training)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "abl_t_fs_xpop: setup log line of the abl flag present",
+   "ok": true,
+   "info": "[\"abl xt_exclude: dropped 8 of 34 xt columns ['seq_cv_invd20', 'seq_cv_pop', 'seq_cv_norm', 'it_hist_all_luo', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo']; 26 kept\"]"
+  },
+  {
+   "name": "abl_t_fs_xrel: checkpoint cfg (xt_names, xt_rel, xt_idcols, xt_relonly, n_dense) == the C1 layout",
+   "ok": true,
+   "info": "(34, [0, 3, 30, 31, 32, 1, 4, 10, 17], [0, 1, 2, 3, 4, 5, 6, 7], [30, 31, 32], 112)"
+  },
+  {
+   "name": "abl_t_fs_xrel: same training-batch sequence as flags OFF (the data order is shared); checkpoint differs (changes training)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "abl_t_fs_xrel: setup log line of the abl flag present",
+   "ok": true,
+   "info": "[\"abl xt_rel_extra: within-feed rank/z also for ['seq_cv_pop', 'it_hist_et1_luo', 'ctx_nd_knn_h', 'ctx_nd_ucent'] (preset indices [1, 4, 10, 17]; xt_rel [0, 3, 30, 31, 32] -> [0, 3, 30, 31, 32, 1, 4, 10, 17]; +8 dense inputs)\"]"
+  },
+  {
+   "name": "abl_t_fs_rcat: checkpoint cfg retr_cat 16 and retr_cat.* tensors (same names as retr.*); xt layout == the base layout",
+   "ok": true,
+   "info": "14 retr_cat tensors"
+  },
+  {
+   "name": "abl_t_fs_rcat: same training-batch sequence as flags OFF; FIRST-batch train-mode logits and loss-input logits bit-identical to flags OFF (exact no-op at init); later batches differ (Z learns); checkpoint differs",
+   "ok": true,
+   "info": "first batch 32768 logits; max |d| later 1.741e-02"
+  },
+  {
+   "name": "abl_t_fs_rcat: setup log line present; params line larger than flags off",
+   "ok": true,
+   "info": "[\"abl retr_cat: second HistRetrieval over the candidate's SAME-CATEGORY history items, m 16, zero-init Z (exact no-op at init; dedicated dropout generator), 0.056M params; cfg retr_cat=16\"]"
+  },
+  {
+   "name": "abl_t_fs_pop1: checkpoint cfg (xt_names ending in xp_imp_c50, xt_rel, xt_idcols, xt_relonly, n_dense) == the C5 pop1 layout",
+   "ok": true,
+   "info": "(27, [22, 23, 24], None, [22, 23, 24], 93)"
+  },
+  {
+   "name": "abl_t_fs_pop1: same training-batch sequence as flags OFF; checkpoint differs; selected + @last holdout preds written",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "abl_t_fs_pop1: setup log lines of both flags present (xt_exclude first, then xt_add); train-stage features line lists 27 columns",
+   "ok": true,
+   "info": "[\"abl xt_exclude: dropped 8 of 34 xt columns ['seq_cv_invd20', 'seq_cv_pop', 'seq_cv_norm', 'it_hist_all_luo', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo']; 26 kept\", \"abl xt_add: appended 1 xt columns ['xp_imp_c50'] after the 26 kept (indices [26]; +1 dense inputs)\"]"
+  },
+  {
+   "name": "stale_pred.py runs on the xdrop_pop and xrel_more checkpoints (inputs from the cfg): both stale-val files written; xdrop_pop uses only the pre2 overrides",
+   "ok": true,
+   "info": "([\"['pre2_fe', 'pre2_fe_s', 'pre2_fe_z']\", \"['it_hist_all_luo', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo', 'pre2_fe', 'pre2_fe_s', 'pre2_fe_z', 'seq_cv_invd20', 'seq_cv_norm', 'seq_cv_pop']\", \"['pre2_fe', 'pre2_fe_s', 'pre2_fe_z']\"], '')"
+  },
+  {
+   "name": "stale_pred.py runs on the pop1 checkpoint (27 inputs from the cfg incl. xp_imp_c50): stale-val file written; only the pre2 overrides used (xp_imp_c50 has no private-like counterfactual: it stays at its val value)",
+   "ok": true,
+   "info": "[\"['pre2_fe', 'pre2_fe_s', 'pre2_fe_z']\"]"
+  }
+ ],
+ "cd_lines": [
+  "step 20/39 loss 4.4137 val_ndcg 0.39150 holdout_ndcg 0.31773 lr 6.46e-04 cd_loss_reg 4.3933 cd_loss_pool 3.8214",
+  "step 39/39 loss 0.0000 val_ndcg 0.39181 holdout_ndcg 0.31767 lr 8.50e-05 cd_loss_reg 2.4591 cd_loss_pool 2.8444",
+  "BEST step 20 val_ndcg 0.39150; train time"
+ ],
+ "fs_lines": [
+  "step 25/73 loss 4.8921 val_ndcg 0.29045 holdout_ndcg 0.22746 lr 5.00e-05",
+  "step 50/73 loss 0.0000 val_ndcg 0.30066 holdout_ndcg 0.23475 lr 1.00e-04",
+  "step 73/73 loss 2.5427 val_ndcg 0.31820 holdout_ndcg 0.24727 lr 1.46e-04 cd_loss_reg 2.3588 cd_loss_pool 0.0000",
+  "BEST step 73 val_ndcg 0.31820; train time"
+ ],
+ "failed": []
+}

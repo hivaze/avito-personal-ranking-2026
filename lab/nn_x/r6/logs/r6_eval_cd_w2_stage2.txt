@@ -1,0 +1,41 @@
+== r6 Q1 wave 2, STAGE 2 PASS-CD on roots (101, 102, 103, 104, 105, 106, 107): member val > 2 SE AND holdout >= 0 AND 7-member ensemble vs c0 holdout >= 0 and val >= -1 SE AND no val slice < -2 SE (coldpos < -1 SE -> stale-val replay)
+== runs: selected (holdout-best) step / total | selected val, holdout | end - selected (decline) val, holdout
+  r6:r6_cd_c0_r101         best   9000/19670 | sel val 0.39640 hold 0.31912 | end-sel val -0.00276 hold -0.00173 | 24 min
+  r6:r6_cd_c0_r102         best  10000/19670 | sel val 0.39724 hold 0.31867 | end-sel val -0.00319 hold -0.00293 | 34 min
+  r6:r6_cd_c0_r103         best   5000/19670 | sel val 0.39458 hold 0.31860 | end-sel val -0.00230 hold -0.00239 | 36 min
+  r6:r6_cd_c0_r104         best  10000/19670 | sel val 0.39621 hold 0.31915 | end-sel val -0.00470 hold -0.00249 | 36 min
+  r6:r6_cd_c0_r105         best   5000/19670 | sel val 0.39411 hold 0.31816 | end-sel val -0.00063 hold -0.00325 | 50 min
+  r6:r6_cd_c0_r106         best   6000/19670 | sel val 0.39501 hold 0.31847 | end-sel val -0.00289 hold -0.00238 | 49 min
+  r6:r6_cd_c0_r107         best   6000/19670 | sel val 0.39497 hold 0.31831 | end-sel val -0.00197 hold -0.00308 | 47 min
+  -> c0    mean best step    7286  mean end-sel val -0.00263 hold -0.00260  (n 7)
+  r6:r6_cd_m0_r101         best  19000/19670 | sel val 0.39684 hold 0.32082 | end-sel val +0.00022 hold -0.00017 | 51 min
+  r6:r6_cd_m0_r102         best  19000/19670 | sel val 0.39634 hold 0.32070 | end-sel val -0.00009 hold -0.00024 | 50 min
+  r6:r6_cd_m0_r103         best  19000/19670 | sel val 0.39649 hold 0.32056 | end-sel val +0.00054 hold -0.00008 | 45 min
+  r6:r6_cd_m0_r104         best  17000/19670 | sel val 0.39688 hold 0.32104 | end-sel val +0.00000 hold -0.00053 | 30 min
+  r6:r6_cd_m0_r105         best  19000/19670 | sel val 0.39626 hold 0.32053 | end-sel val +0.00043 hold -0.00013 | 37 min
+  r6:r6_cd_m0_r106         best  19000/19670 | sel val 0.39674 hold 0.32012 | end-sel val -0.00044 hold -0.00004 | 36 min
+  r6:r6_cd_m0_r107         best  19000/19670 | sel val 0.39728 hold 0.32014 | end-sel val -0.00001 hold -0.00013 | 12 min
+  -> m0    mean best step   18714  mean end-sel val +0.00009 hold -0.00019  (n 7)
+
+== m0 vs c0, roots 101-107 (B = arm)
+  VAL  r6:r6_cd_m0_r101 0.39684 vs r6:r6_cd_c0_r101 0.39640: all +0.00044+-0.00085 (z +0.52)  M<50 +0.00094+-0.00157 (z +0.60)  M>=50 +0.00009+-0.00095 (z +0.10)  Tue +0.00016+-0.00115 (z +0.14)  Thu +0.00075+-0.00126 (z +0.59)  coldpos -0.00295+-0.00175 (z -1.68)  warmpos +0.00191+-0.00113 (z +1.70)
+  VAL  r6:r6_cd_m0_r102 0.39634 vs r6:r6_cd_c0_r102 0.39724: all -0.00090+-0.00080 (z -1.12)  M<50 -0.00240+-0.00150 (z -1.60)  M>=50 +0.00014+-0.00088 (z +0.16)  Tue -0.00174+-0.00111 (z -1.57)  Thu +0.00003+-0.00116 (z +0.02)  coldpos -0.00452+-0.00165 (z -2.74)  warmpos +0.00008+-0.00107 (z +0.08)
+  VAL  r6:r6_cd_m0_r103 0.39649 vs r6:r6_cd_c0_r103 0.39458: all +0.00191+-0.00088 (z +2.18)  M<50 +0.00277+-0.00163 (z +1.70)  M>=50 +0.00132+-0.00097 (z +1.37)  Tue +0.00296+-0.00121 (z +2.45)  Thu +0.00076+-0.00127 (z +0.60)  coldpos +0.00209+-0.00175 (z +1.19)  warmpos +0.00254+-0.00117 (z +2.17)
+  VAL  r6:r6_cd_m0_r104 0.39688 vs r6:r6_cd_c0_r104 0.39621: all +0.00067+-0.00084 (z +0.79)  M<50 -0.00023+-0.00156 (z -0.15)  M>=50 +0.00129+-0.00093 (z +1.38)  Tue +0.00068+-0.00120 (z +0.56)  Thu +0.00066+-0.00118 (z +0.56)  coldpos -0.00725+-0.00177 (z -4.09)  warmpos +0.00398+-0.00110 (z +3.61)
+  VAL  r6:r6_cd_m0_r105 0.39626 vs r6:r6_cd_c0_r105 0.39411: all +0.00215+-0.00085 (z +2.51)  M<50 +0.00325+-0.00158 (z +2.05)  M>=50 +0.00139+-0.00094 (z +1.47)  Tue +0.00151+-0.00115 (z +1.31)  Thu +0.00285+-0.00127 (z +2.25)  coldpos +0.00711+-0.00171 (z +4.16)  warmpos +0.00041+-0.00114 (z +0.36)
+  VAL  r6:r6_cd_m0_r106 0.39674 vs r6:r6_cd_c0_r106 0.39501: all +0.00173+-0.00087 (z +2.00)  M<50 +0.00059+-0.00164 (z +0.36)  M>=50 +0.00251+-0.00093 (z +2.70)  Tue +0.00106+-0.00120 (z +0.88)  Thu +0.00246+-0.00124 (z +1.97)  coldpos +0.01052+-0.00178 (z +5.92)  warmpos -0.00168+-0.00114 (z -1.47)
+  VAL  r6:r6_cd_m0_r107 0.39728 vs r6:r6_cd_c0_r107 0.39497: all +0.00232+-0.00086 (z +2.69)  M<50 +0.00117+-0.00160 (z +0.73)  M>=50 +0.00311+-0.00095 (z +3.27)  Tue +0.00266+-0.00121 (z +2.21)  Thu +0.00193+-0.00123 (z +1.58)  coldpos +0.01025+-0.00169 (z +6.07)  warmpos -0.00061+-0.00116 (z -0.52)
+  VAL  pooled: all +0.00119+-0.00038 (z +3.16)  M<50 +0.00087+-0.00069 (z +1.26)  M>=50 +0.00141+-0.00042 (z +3.36)  Tue +0.00104+-0.00052 (z +1.99)  Thu +0.00135+-0.00054 (z +2.48)  coldpos +0.00218+-0.00076 (z +2.87)  warmpos +0.00095+-0.00050 (z +1.89)
+  HOLD r6:r6_cd_m0_r101 0.32081 vs r6:r6_cd_c0_r101 0.31912: all +0.00169+-0.00049 (z +3.43)  late20% +0.00122+-0.00109 (z +1.12)
+  HOLD r6:r6_cd_m0_r102 0.32070 vs r6:r6_cd_c0_r102 0.31867: all +0.00203+-0.00047 (z +4.28)  late20% +0.00041+-0.00105 (z +0.39)
+  HOLD r6:r6_cd_m0_r103 0.32058 vs r6:r6_cd_c0_r103 0.31862: all +0.00196+-0.00051 (z +3.88)  late20% +0.00237+-0.00118 (z +2.00)
+  HOLD r6:r6_cd_m0_r104 0.32104 vs r6:r6_cd_c0_r104 0.31914: all +0.00190+-0.00048 (z +3.95)  late20% +0.00201+-0.00103 (z +1.95)
+  HOLD r6:r6_cd_m0_r105 0.32053 vs r6:r6_cd_c0_r105 0.31816: all +0.00237+-0.00050 (z +4.78)  late20% +0.00258+-0.00109 (z +2.37)
+  HOLD r6:r6_cd_m0_r106 0.32012 vs r6:r6_cd_c0_r106 0.31849: all +0.00163+-0.00050 (z +3.29)  late20% +0.00292+-0.00107 (z +2.73)
+  HOLD r6:r6_cd_m0_r107 0.32013 vs r6:r6_cd_c0_r107 0.31831: all +0.00182+-0.00049 (z +3.71)  late20% +0.00234+-0.00108 (z +2.17)
+  HOLD pooled: all +0.00191+-0.00022 (z +8.79)  late20% +0.00198+-0.00049 (z +4.01)
+  ENS VAL 7-member arm vs 7-member c0: all +0.00067+-0.00057 (z +1.16)  (c0 ens 0.39953, arm ens 0.40019)
+  ENS HOLD 7-member arm vs 7-member c0: all +0.00127+-0.00031 (z +4.03)  (c0 ens 0.32195, arm ens 0.32321)
+  same-root corr arm vs c0 (val, within-feed z): 0.9738 0.9734 0.9690 0.9720 0.9673 0.9691 0.9687
+  gates: member val > 2 SE OK; member holdout >= 0 OK; ensemble holdout >= 0 OK; ensemble val >= -1 SE OK; no val slice < -2 SE OK
+  ==> m0: PASS-CD

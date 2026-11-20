@@ -1,0 +1,36 @@
+PREDECLARED at 2026-11-13 04:44:58 UTC (written before any result of this item was computed)
+
+ITEM: RECYCLE Step 0 (CPU, information readout). Sweep: reports/TRICKS_SWEEP_1113.md §3 #2.
+Nothing is adopted or submitted. No GPU. CPU numpy, 12 threads.
+
+POPULATIONS
+  P1 val G3      : preds/ens_G3_final_val.npy, labels data/flat/val/cand_target.npy, feeds data/flat/val/feeds.parquet
+  P2 holdout G3  : member-equal per-feed z-mean (population sd, +1e-9) of the 20 G3 members' holdout preds
+                   (F10 v23_gru_pre2s_s501-506, F7x r6_cd_m02_r101-107, F7x70 r6_cd_m02_p70k_r101-107),
+                   meta preds/holdout/holdout_meta.npy, labels holdout_y.npy. Sanity: its NDCG must reproduce 0.32379 (+-1e-5).
+                   The holdout is M>=50 only by construction (rule in nn_x/r6/train.py l.211), so its M<50 bucket is empty.
+  P3 val G3 TO   : preds/ens_G3_to_val.npy (item (d); information only).
+
+DEFINITIONS (all per feed, metric = src/metrics.ndcg_per_feed: binary gain, log2 discount, pessimistic ties,
+feeds without positives = 1, unweighted mean over feeds)
+  base order   : sort by score desc, ties negatives-first (pessimistic), exactly as ndcg_per_feed.
+  (a) ceiling_K: keep the base order, but inside the first K positions put all positives first; positions > K unchanged.
+                 K = 3, 5, 8, 16, 32. gain_K = ceil_K - base. headroom H = 1 - base.
+                 headshare_K = gain_K / H  ("share of the NDCG headroom to 1.0 that sits inside the top-K").
+  (b) pair AUC : within-feed (positive, negative) pairs; score_pos > score_neg counts 1, tie 0.5.
+                 AUC_head8 = pairs with BOTH items in the top-8 of the base order; AUC_all = all within-feed pairs.
+                 PRIMARY statistic = pooled (micro, every pair weight 1). Feed-macro (mean over feeds with >= 1 such pair)
+                 is reported as information only.
+  (c) rank of every positive in the base order (1-based), shares at 1, 2-3, 4-8, 9-16, >16, by M<50 / M>=50 / all
+      (PRIMARY = all positives; the best-ranked positive per feed is reported as information only).
+  (d) (a)-(c) for P3.
+
+READING RULE (as given in the item; evaluated on P1 AND P2):
+  The head-recycle family (RECYCLE v2, head-only cascade) stays QUEUED only if
+      headshare_8 >= 0.40   AND   AUC_head8 (pooled) < 0.75
+  on BOTH P1 (val G3) and P2 (holdout G3). Otherwise it is CLOSED (the head is already well ordered / the error is in
+  the tail). P3 (train-only pool, item d) is information only and cannot change the verdict.
+  Secondary check, reported only (from TRICKS_SWEEP_1113 §3 #2): "drop the arm if the top-8 ceiling gain < +0.01";
+  it can only close, never open, the family.
+  All other numbers (M buckets, Tue/Thu, ceilings at K != 8, feed-macro AUC, best-positive ranks, feeds with no positive
+  in the top-8) are information only.

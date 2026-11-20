@@ -1,0 +1,103 @@
+{
+  "rule": "E1: after L23 and L24 finish, read only their holdout lines; if for either seed the holdout-best evaluation is the final one and it beats the previous evaluation, re-run both seeds once with --epochs 4 and judge A1/A2 on those runs (at most one extension; R23 gets the same guard only if the P4B exception would otherwise fire)",
+  "L": [
+    "llm06_L1_s23",
+    "llm06_L1_s24"
+  ],
+  "seeds": {
+    "llm06_L1_s23": {
+      "n_evals": 8,
+      "best_step": 1400,
+      "final_step": 1516,
+      "final": 0.2989017157524225,
+      "previous": 0.2995163175182201,
+      "final_is_best": false,
+      "final_beats_previous": false,
+      "still_improving": false,
+      "trace": [
+        [
+          200,
+          0.29328
+        ],
+        [
+          400,
+          0.293302
+        ],
+        [
+          600,
+          0.295584
+        ],
+        [
+          800,
+          0.298111
+        ],
+        [
+          1000,
+          0.298156
+        ],
+        [
+          1200,
+          0.298669
+        ],
+        [
+          1400,
+          0.299516
+        ],
+        [
+          1516,
+          0.298902
+        ]
+      ]
+    },
+    "llm06_L1_s24": {
+      "n_evals": 8,
+      "best_step": 1512,
+      "final_step": 1512,
+      "final": 0.29928133534786755,
+      "previous": 0.2984424773886144,
+      "final_is_best": true,
+      "final_beats_previous": true,
+      "still_improving": true,
+      "trace": [
+        [
+          200,
+          0.293035
+        ],
+        [
+          400,
+          0.295904
+        ],
+        [
+          600,
+          0.296833
+        ],
+        [
+          800,
+          0.297564
+        ],
+        [
+          1000,
+          0.298093
+        ],
+        [
+          1200,
+          0.297797
+        ],
+        [
+          1400,
+          0.298442
+        ],
+        [
+          1512,
+          0.299281
+        ]
+      ]
+    }
+  },
+  "extend": true,
+  "L_judged": [
+    "llm06_L1_e4_s23",
+    "llm06_L1_e4_s24"
+  ],
+  "decided_utc": "2026-11-12 08:14:43"
+}

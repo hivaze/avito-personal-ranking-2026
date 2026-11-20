@@ -1,0 +1,91 @@
+{
+ "n_feeds": 40000,
+ "rows": 5970455,
+ "n_feat": 177,
+ "threads": 12,
+ "pool_build_s": 2.0568220615386963,
+ "quantize_s": NaN,
+ "load": [
+  87.90771484375,
+  90.53271484375,
+  86.81103515625
+ ],
+ "catboost": "1.2.10",
+ "rows_cfg": [
+  {
+   "name": "YetiRank (Classic) = cb26 settings on CPU",
+   "loss": "YetiRank",
+   "kw": {},
+   "total_s": 21.250019073486328,
+   "setup_s": 6.52057409286499,
+   "med_iter_s": 1.610194206237793,
+   "mean_iter_s": 1.61202039037432,
+   "n_iter": 10
+  },
+  {
+   "name": "YetiRank:mode=NDCG",
+   "loss": "YetiRank:mode=NDCG",
+   "kw": {},
+   "total_s": 26.458146810531616,
+   "setup_s": 6.678481817245483,
+   "med_iter_s": 2.220951557159424,
+   "mean_iter_s": 2.220195702144078,
+   "n_iter": 10
+  },
+  {
+   "name": "YetiRank:mode=NDCG;num_neighbors=3",
+   "loss": "YetiRank:mode=NDCG;num_neighbors=3",
+   "kw": {},
+   "total_s": 36.92735004425049,
+   "setup_s": 8.189420223236084,
+   "med_iter_s": 3.167849540710449,
+   "mean_iter_s": 3.1859734739576067,
+   "n_iter": 10
+  },
+  {
+   "name": "LambdaMart:norm=false",
+   "loss": "LambdaMart:norm=false",
+   "kw": {},
+   "total_s": 10.557094812393188,
+   "setup_s": 5.575575351715088,
+   "med_iter_s": 0.5491580963134766,
+   "mean_iter_s": 0.5499744074685233,
+   "n_iter": 10
+  },
+  {
+   "name": "QuerySoftMax",
+   "loss": "QuerySoftMax",
+   "kw": {},
+   "total_s": 21.759924173355103,
+   "setup_s": 6.851012706756592,
+   "med_iter_s": 1.6692793369293213,
+   "mean_iter_s": 1.6610528060368128,
+   "n_iter": 10
+  },
+  {
+   "name": "QueryRMSE (teacher logit label)",
+   "loss": "QueryRMSE",
+   "kw": {},
+   "total_s": 14.020467519760132,
+   "setup_s": 9.2151460647583,
+   "med_iter_s": 0.5015730857849121,
+   "mean_iter_s": 0.5144901956830706,
+   "n_iter": 10
+  },
+  {
+   "name": "YetiRank Lossguide max_leaves 255 depth 16 min_data_in_leaf 100",
+   "loss": "YetiRank",
+   "kw": {
+    "grow_policy": "Lossguide",
+    "max_leaves": 255,
+    "depth": 16,
+    "min_data_in_leaf": 100
+   },
+   "total_s": 27.022835969924927,
+   "setup_s": 7.413671493530273,
+   "med_iter_s": 2.172959804534912,
+   "mean_iter_s": 2.1401475157056535,
+   "n_iter": 10
+  }
+ ]
+}

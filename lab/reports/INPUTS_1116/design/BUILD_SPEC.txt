@@ -1,0 +1,78 @@
+BUILD SPEC of the trained-input bundle NX (design: reports/INPUTS_1116/DESIGN.md; rule: RULE_LEDGER.txt). CPU only.
+Written 2026-11-16 by the designer. Nothing here has been built. The builder writes NEW files only, with exclusive create, and prints every check.
+
+0. CALENDAR AND NAMES (nn_x/w12/stale/hz2/hz2_common.py; verified in design/out/p03_walk_coverage.txt and by the slot table of DESIGN.md 1.2)
+   slot = MSK day - 20702. Sep 6 = slot 0. Dense train slots: 0-8 and 11-13 (Sep 15-16 missing). Dense cutoff of val / test rows: slot 14.
+   val feeds: slot 16 (7,542) and 18 (6,878). test: public slots 20, 21 a.m.; private 21 p.m., 22, 23.
+   L_f = nn_x/w12/stale/hz2/feats_L/train/hz2_lag.npy (int8, 3,151,208 feeds; 666,704 / 811,819 / 835,005 / 837,680 feeds at 6 / 7 / 8 / 9 days:
+   the test lag distribution; the 30,000 holdout feeds keep the lag every lagged-holdout tool gave them). Read-only; do not rebuild.
+
+1. THE LAG VIEW (train rows; the 30,000 holdout feeds are train rows and get it too; used unchanged for all-data members)
+   cut'_f = max(slot_f - L_f, 5).   has_f = 1 iff slot_f >= 6   (1,470,065 of 3,151,208 feeds; 15,225 of the 30,000 holdout feeds)
+   A has = 1 feed reads ONLY sources dated before 00:00 MSK of slot cut'_f, i.e. 5-7 dense days (slots 0 .. cut'_f - 1), plus the sparse trickle of 1.2.
+   Resulting lag (slot_f - cut'_f): slot 6 / 7 / 8 -> 1 / 2 / 3 days (val-like; val rows are 2 and 4 days after the cutoff);
+                                    slot 11 -> 6; slot 12 -> 6 or 7; slot 13 -> 6, 7 or 8 days (test-like; test rows are 6-9 days after it).
+   has = 0 feeds (slots 0-5): every NX file holds NaN on all their rows.
+
+2. FAMILY W: whole-sequence co-visitation walk (label-free). Kernel = function rp3 of nn_x/insights/ccb_1113/scratch/tester3/c09_build.py:
+     p3a(c)    = sum over the latest 500 source sequences s that hold c of  sum_{x in s, x != c, x in the feed's history} 0.95^hpos(x) / (len(s) * deg(x))
+     rp3b05(c) = p3a(c) / deg(c)^0.5          deg = number of DENSE source sequences that hold the item, floor 1 (same rule in every split)
+   Source sequences = de-duplicated histories: the latest member feed of each non-zero user + every user-0 member feed (feats_v2/seq_/sources.py).
+   Every sequence of the row's own non-zero user is skipped. User 0 is never linked: each user-0 feed is its own anonymous sequence.
+   2.1 dense members
+       train row (lag view):  train feeds on slots < cut'_f          -> three indexes (cut' = 5, 6, 7; 8 for the 34 feeds of slot 14)
+       val / test row:        all train feeds (slots 0-14)             (the convention of the adopted seq_cv_* inputs)
+       stale-val twin:        train feeds on slots < slot_f - L_f, L_f = hz2_common.assign_lags(feed_id)[1]   (cut 7..12: 7-10 dense days; out/p06_lagview_counts.txt)
+   2.2 sparse members (paths only; they do not enter deg)
+       train row:             train feeds with hz2_common.sparse_flag(feed_id) (the shared 1/37 sample) on slots >= cut'_f with timestamp < own timestamp
+       val / test row:        val and test feeds with timestamp < own timestamp
+       stale-val twin:        sparse-sample train feeds on slots >= its cut, plus val feeds with timestamp < own timestamp
+   2.3 files (float32, flat candidate order of data/flat/<split>/, NaN on has = 0 train feeds)
+       nx_rp3_z   within-feed z of log1p(K * rp3b05) over ALL candidates of the feed (zeros are values), 0 if the feed has no non-zero value, clipped to +-5
+       nx_rp3_rk  within-feed mid-rank percentile of rp3b05 minus 0.5  (in [-0.5, 0.5]; a missing feed reads 0 after the loader's NaN -> 0)
+       nx_p3a_z   as nx_rp3_z for p3a
+       K = one constant for all splits = 1 / (median non-zero rp3b05 of val rows); likewise for p3a. Print both.
+       The loader derives has:nx_rp3_z from the NaN pattern of nx_rp3_z.
+
+3. FAMILY T: first-choice click strength of the item on exploration feeds (a LABEL statistic). Fit = fit_bt of c06_build.py, lambda 3:
+     theta maximises sum over source feeds, over their positives, of [theta_i - log sum_{j in feed} exp theta_j] - 3 * ||theta||^2
+   Source feeds = TRAIN feeds with p_random > 0.5 and >= 1 positive, the 30,000 holdout feeds EXCLUDED in every split (so one set of arrays serves held-out
+   and all-data members). No val label and no test row is ever a source.
+     train row (lag view):  the fit on source feeds of slots < cut'_f   (three fits: cut' = 5, 6, 7; 8 for slot 14)
+     val / test row:        the fit on all source feeds (= cache/c06_val.npz for val; test is new)
+     stale-val twin:        the fit on source feeds of slots < slot_f - L_f   (six fits, cut 7..12)
+   Files: nx_bt_z    within-feed z of theta over all candidates (unseen item: theta = 0, a value), clipped to +-5
+          nx_bt_rk   within-feed mid-rank percentile of theta minus 0.5
+          nx_bt_seen 1 if the item has >= 1 row in the source of that fit, else 0
+          all three NaN on has = 0 train feeds.
+   The row's own feed is never in its source (it is dated after the cut). Feeds of the same user dated before the cut ARE in the source, as for any item
+   statistic of the project; the same (user, item) pair recurs on 0.18% of rows (reports/INPUTS_1116/raw_fields.md, check V2a).
+
+4. OUTPUT
+   data/feats/{train,val,test}/<name>.npy (246,745,836 / 1,389,971 / 2,904,806 rows) + hard links nn/feat_cache/{train,val,test}/<name>.npy, exclusive create
+   (precedent nn_x/abl/pop1/build_xp_imp_c50.py). Stale-val twins: <work dir>/staleval/<name>.npy (1,389,971 rows; never linked into nn/feat_cache).
+   Work dir (new): nn_x/nx/. 6 names: nx_rp3_z nx_rp3_rk nx_p3a_z nx_bt_z nx_bt_rk nx_bt_seen.
+
+5. CHECKS, all printed, all before any GPU process (bars are in RULE_LEDGER.txt STEP 0)
+   C1 code: the W kernel with cut = own day and no sparse members reproduces cache/c09_hold.npz (rp3b05, p3a) on all 4,630,966 holdout rows, max relative
+      difference <= 1e-5; the T fit with cut = own day reproduces cache/c06_hold.npz (theta_l3, seen_l3) to 1e-4 absolute.
+      Natural val arrays against cache/c09_val.npz / c06_val.npz: correlation printed (the val source rule differs by the earlier test feeds and by
+      timestamp instead of day for W; T must match c06_val to 1e-4).
+   C2 causality, every has = 1 train row: no dense member with slot >= cut'; no sparse member with timestamp >= own; no sequence of the own non-zero user;
+      no label of a feed with slot >= cut' in the T source; no holdout feed in any T source. Counts printed (all must be 0).
+   C3 coverage parity (label-free): non-zero share of rp3b05 and seen share of theta by the seven listing-age buckets of hz2_common.AGE_EDGES_D,
+      (i) test-like train rows (slots 11-13, feeds with p_random > 0.5 and M >= 50, not holdout) against private rows and against public rows of feeds with M >= 50;
+      (ii) val-like train rows (slots 6-8, same feed filter) against val rows of feeds with M >= 50. dZ = row-weighted mean absolute gap; bucket = largest
+      gap among buckets with >= 5% of rows.
+   C4 PSI of each of the 6 files (10 bins at val quantiles of the non-zero values + one bin for exact zero): train has = 1 rows (pool feeds) against val,
+      against public, against private; and val against private.
+   C5 by test day: share of non-default rows (rp3b05 > 0; seen) on test rows of slots 20, 21, 22, 23 next to val slots 16 and 18.
+   C6 placebo: 20 within-feed permutations of each family's z column through the lens of reports/INPUTS_1116/residual_rows/condlib.py.
+   C7 information at the lag: the same lens (score test given pool + 84 of the ranker's own input columns) for each column
+      (a) on the 30,000 holdout rows with the lag-view values (NaN -> 0 on the has = 0 feeds, so only the 15,225 lag-view feeds contribute),
+      (b) on val rows with the stale-val twin, (c) on val rows with the natural arrays (information). Usage example: design/p05_cond_DE.py.
+
+6. COST (12 threads; from the build logs of record)
+   W: c09_build.log 560 s for val + 30,000 holdout feeds with 14 day indexes; here 1.47M train feeds with 3 indexes + val + test + twin: about 1 h compute.
+   T: c06_build.log 190 s for 14 fits; here 3 + 1 + 6 fits and four row maps: about 10 min compute. Checks C1-C7: about 1 h. Writing the builder: 2-3 h.
+   Disk: 6 x 0.99 GB train arrays.

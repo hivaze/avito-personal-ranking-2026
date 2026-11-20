@@ -1,0 +1,79 @@
+{
+  "args": {
+    "variant": "s2_v4_cv_gru",
+    "d": 128,
+    "heads": 4,
+    "blocks": 2,
+    "hist_layers": 1,
+    "drop": 0.1,
+    "no_hist": false,
+    "no_set": false,
+    "no_pos": false,
+    "loss": "softmax",
+    "loss_norm": "feed",
+    "max_hist": 256,
+    "train_feeds": 0,
+    "epochs": 2.0,
+    "lr": 0.0002,
+    "wd": 0.02,
+    "warmup": 100,
+    "cand_budget": 32768,
+    "max_feeds": 512,
+    "eval_every": 400,
+    "seed": 0,
+    "no_test": false,
+    "aux_pos": 0.5,
+    "aux_mode": "mse",
+    "aux_tau": 10.0,
+    "ff": 2,
+    "sim_bias": 0,
+    "prand_base": -1.0,
+    "only_random": 0.5,
+    "keep": "last",
+    "intent": 0.0,
+    "xt": "",
+    "arch": "tf",
+    "id_buckets": 0,
+    "id_drop": 0.5,
+    "user0": false,
+    "domain": false,
+    "holdout": 30000,
+    "select_on": "val",
+    "init": "v4_cv_gru",
+    "pos_mode": "both",
+    "time_limit": 0
+  },
+  "best_step": 1288,
+  "val_ndcg": 0.38542536444037717,
+  "train_minutes": 2.550235426425934,
+  "history": [
+    {
+      "step": 400,
+      "loss": 1.7808275669813156,
+      "val_ndcg": 0.3849532930905514,
+      "holdout_ndcg": 0.3093653744081989,
+      "minutes": 0.8918153444925944
+    },
+    {
+      "step": 800,
+      "loss": 2.1607986837625504,
+      "val_ndcg": 0.3855849708702865,
+      "holdout_ndcg": 0.3096776258802161,
+      "minutes": 1.593165405591329
+    },
+    {
+      "step": 1200,
+      "loss": 2.1105561405420303,
+      "val_ndcg": 0.3852327891637984,
+      "holdout_ndcg": 0.30999664810790784,
+      "minutes": 2.28458255926768
+    },
+    {
+      "step": 1288,
+      "loss": 2.0529616475105286,
+      "val_ndcg": 0.38542536444037717,
+      "holdout_ndcg": 0.3099370290853006,
+      "minutes": 2.550167246659597
+    }
+  ]
+}

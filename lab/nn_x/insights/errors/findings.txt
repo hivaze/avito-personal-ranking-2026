@@ -1,0 +1,650 @@
+ERROR ANATOMY OF THE CURRENT BEST POOL G3 (and G3+NEW)  -- nn_x/insights/errors, 2026-11-12 17:05-17:50 UTC
+=====================================================================================================================
+Author: error-anatomy analyst (workflow wpatyoqh2). CPU only (CUDA_VISIBLE_DEVICES="", 12 threads per process). No GPU job
+was launched, nothing outside this directory was written, and no process I did not start was touched.
+
+Scope and protocol
+- G3 = member-equal pool F10 + F7x + F7x70 (20 members); final = 0.5 z(mean z(FT)) + 0.5 z(mean z(TO)), exactly as in
+  decide5.py. Rebuilt from member files: val 0.40032 (all 14,423 feeds), identical to preds/ens_G3_* (corr 1.0).
+- G3+NEW = "N1" = G3 + every complete from-scratch m02 member that passes decide5 gate (a) (single TO val >= 0.39467 AND
+  holdout >= 0.31799). At 17:32 UTC that is 12 members: v27_gru_m02_s511/513/515, v28_lr1_m02_s411/413/414/415/417,
+  v29_d192_m02_s711/712, v30_f7_m02_s901/902. Fails: v28 s412/s416, v29 s713. v30 s903/s904 not complete. N1 val 0.40007.
+- All tables use the 14,306 leak-free val feeds (117 feeds whose non-zero user has a later val/test feed are dropped), as
+  in the older err_* reports, so the numbers are directly comparable. G3 leak-free = 0.40046.
+- "+-" is a paired per-feed SE. Label-defined slices (cold/warm positives, novelty of the positive's category, rank of the
+  positive) are DESCRIPTIVE: they say where the loss is, not what causes it.
+- Old reference models: nf2 = nn_final2 (base of the four err_* lenses), nf3 = nn_final3 (err_SYNTHESIS snapshot copy).
+- Coldness: "cold (LUO)" = it_hist_all_luo == 0 (the decide5 coldpos definition); "cold (train bitmap)" = never seen in
+  train candidates or histories (old err_* definition). All-cold-positive feeds: 23.8% (LUO) vs 17.4% (bitmap).
+- Levers used for the response map (per-feed paired deltas, val):
+    FT half  = G3 final - G3 train-only half
+    m02      = F7x_to - F7b_to (7 roots, same re-cool harness, mix 0.02 vs 0.1)
+    a4u/cset = r6 e10 seeds s101/s102 TO pool - F7 s101/s102 TO pool (2 seeds, noisy)
+    GRU fam  = G3 - M2 (adding F10 to F7x+F7x70)
+    NEW      = N1 - G3
+    G3-nf2   = the whole generational change since the err_* lenses
+
+---------------------------------------------------------------------------------------------------------------------
+0. TL;DR
+---------------------------------------------------------------------------------------------------------------------
+1. THE POOL IS MEMBER-SATURATED. Pool NDCG vs number of members (random subsets, a - b/k fit) leaves only
+   +0.0002 val / +0.0002 holdout for infinitely many members of G3's kinds (G3: k->inf 0.40086 vs 0.40066 fitted at k=20).
+   G3+NEW: +0.0001. M2: +0.0004. Adding the 12 NEW members gives N1 - G3 = -0.00025 +- 0.00028 (val) and
+   -0.00017 +- 0.00016 holdout (0.32363 vs 0.32379; NEW pool alone 0.39955 val / 0.32323 holdout). More same-recipe seeds (D2) cannot move the pool. Only changes to the mean function can.
+2. MEMBER DISAGREEMENT IS NOISE-LIKE. The best-member-per-feed oracle over the 20 G3 members is +0.106 over the mean member.
+   20 synthetic "members" (G3 z + Gaussian noise with matched within-feed Spearman 0.964) give +0.125. The real-to-noise
+   ratio is 0.85, and a 7-member cross-family oracle (+0.071) equals a 7-seed single-family oracle (+0.072). This explains,
+   with an independent measurement, why stacking, routing and weighting stopped at <= +0.0003.
+3. WHERE THE LOSS IS (exact additive split of 1 - NDCG over positives; total 0.5995 per feed):
+   - 52% of positives are in G3's top (LSE) category and carry 47% of the loss. Most of it, 37% of all loss (43% under the
+     private mix), comes from positives that have >= 3 same-category candidates above them.
+   - Positives outside the top category: 48% of positives, 53% of loss.
+   - Positives at ranks 3-29 carry 58% of loss. Missed positives (rank >= M/2) carry only 13.6%.
+   - 49% of the NDCG-weighted misordering mass involves a negative in the TOP 3, and 73% a negative in the top 10.
+     Moving every positive up by one rank is worth +0.047, and 77% of that comes from positives at ranks 1-2.
+   The errors that matter are at the head of the list.
+4. TWO OLD ERROR CLASSES ARE STILL INFORMATION-LIMITED AND UNCHANGED SINCE THE err_* LENSES:
+   (a) Novel-category positives (category not among the last 8 history events): 32% of positives, 37% of loss. Against
+       recent-category negatives their AUC is 0.37-0.56, i.e. they are anti-ranked. Yet G3 is calibrated on them
+       (act/exp 0.95-1.01), and the exploration-intent oracle is unchanged (+0.0277 G3 vs +0.0281 nf2).
+   (b) Missed positives are systematic: 42% are missed by all 32 members and 61% by >= 90% of them. Feeds that contain one
+       cannot be predicted from observable features (AUC 0.566).
+   Category ranking moved only +0.0040 +- 0.0008 in category NDCG since nf2 (0.7803 -> 0.7843).
+5. EVERY RECENT LEVER WORKS ON ONE COLD-vs-WARM AXIS. m02, FT half, a4u, cset and NEW all gain on cold positives in recent
+   categories (+0.0005 to +0.0017 NDCG-points) and lose on warm positives in recent categories (-0.0003 to -0.0013).
+   Only m02 nets positive. The warm|recent cell (46% of positives, 42% of loss, the within-category discrimination of
+   established listings) responds to NO current lever. Only the generational change since nf2 moved it, providing +0.0061
+   of that change's +0.0143.
+6. NEW FINDING, a mechanism for the FT half: the TRAIN-ONLY half of every current family is miscalibrated by listing age.
+   Using exact age from f4 (life_ knots), act/exp is 1.136 +- 0.028 for listings aged 1-3 days, 1.06-1.14 for 6h-7d, and
+   0.957 +- 0.011 for listings older than 90 days.
+   - The miscalibration sits in young listings with LUO popularity 0-3 (1.08-1.14). That is the signature of
+     it_hist_*_luo counting other users' FUTURE snapshots: a young train-row listing has weeks of future to be counted in,
+     a val/test listing has little.
+   - nf2_tr was calibrated at 1-3d (1.024). The current, stronger generation over-trusts popularity on young listings.
+   - The FT half re-calibrates this (1-3d 1.035, >90d 0.994). That is exactly where it gains: feeds whose youngest
+     positive is <6h..3d +0.008..+0.011, feeds whose youngest positive is >90d -0.005. It is also why FT helps cold and
+     hurts warm.
+   - Value of the fix is small: a nested 7-bucket age offset gives G3_to +0.0006 +- 0.0004 and G3 +0.0003 +- 0.0003.
+7. FT HALF:
+   - Val pool: ~0 (-0.00001 +- 0.00039).
+   - Private-mix: +0.0006 +- 0.0006.
+   - Per member: final - TO +0.0006 (84% of 32 members > 0).
+   - It consistently hurts small feeds. FT-only - TO on M<50 is -0.0004 (66% of members negative); on M>=50 it is +0.0010
+     (88% positive).
+   - Nested routing of w_ft by M (<50 -> 0, >=50 -> 1, chosen in 5/5 folds) gives +0.00056 +- 0.00038 (G3) and
+     +0.00042 +- 0.00036 (N1). Not significant as a blend rule, but it is a clear FT-stage design target.
+8. PROGRESS vs THE err_* LENSES (G3 - nf2_oof = +0.0143 +- 0.0012):
+   - The gain is uniform across every observable segment (+0.010..+0.020), and cold-positive (+0.0143) and warm-positive
+     (+0.0148) feeds gain alike, so the nf3-era cold/warm trade was repaired.
+   - Missed positives fell from 20.9% to 18.3%; top-1 hit rose from 11.3% to 12.8%.
+   - The within-category oracle headroom shrank (0.2308 -> 0.2226); the category-oracle headroom did not (0.1715 -> 0.1708).
+   NOT improved:
+   - category ranking;
+   - cold+ vs warm- same-category AUC (0.599 -> 0.605, the least improved pair type);
+   - H=256 users (M-adjusted -0.013 +- 0.003, was -0.0145);
+   - users with 2-4 train feeds (-0.014, was -0.014);
+   - diverse histories (top category < 25% of history: -0.017);
+   - novel-category anti-ranking.
+
+---------------------------------------------------------------------------------------------------------------------
+1. Per-feed NDCG distribution (01_segments.log §1)
+---------------------------------------------------------------------------------------------------------------------
+Summary statistics (G3, all feeds):
+
+| statistic | value |
+|---|---|
+| mean | 0.40032 |
+| median | 0.316 |
+| sd | 0.247 |
+| quantiles q10 / q25 / q75 / q90 | 0.175 / 0.222 / 0.500 / 0.857 |
+| random-order mean | 0.289 |
+| mean lift over random, G3 | +0.111 |
+| mean lift over random, nf2_oof | +0.097 |
+
+Feed shares by NDCG bucket:
+
+| NDCG bucket | G3 | nf2_oof |
+|---|---|---|
+| < 0.2 | 17.3% | 19.0% |
+| 0.2-0.3 | 29.2% | 29.9% |
+| 0.3-0.4 | 18.9% | 19.3% |
+| 0.4-0.6 | 15.0% | 13.9% |
+| 0.6-1.0 | 10.2% | 9.6% |
+| = 1 | 9.4% | 8.4% |
+
+Loss is not concentrated: the worst 10% of feeds hold 14.1% of the loss, the worst 25% hold 34%, the worst 50% hold 65%.
+
+By the rank of the feed's BEST positive under G3:
+
+| best-positive rank | feeds | loss share | mean NDCG | nf2 feeds |
+|---|---|---|---|---|
+| 0 | 12.8% | 1.3% | 0.938 | 11.3% |
+| 1-2 | 15.3% | 11.2% | 0.561 | 14.7% |
+| 3-9 | 25.9% | 27.4% | 0.364 | 26.0% |
+| 10-29 | 25.6% | 32.0% | 0.250 | 25.7% |
+| 30..M/2 | 12.9% | 17.5% | 0.186 | 13.6% |
+| > M/2 | 7.6% | 10.6% | 0.163 | 8.7% |
+
+---------------------------------------------------------------------------------------------------------------------
+2. Segments (01_segments.log, segments_G3.csv)
+---------------------------------------------------------------------------------------------------------------------
+Columns:
+- val/pub/priv share: share of feeds in val, public test, private test (observable segments only).
+- G3: mean NDCG.
+- lift: loss share / feed share.
+- Madj: deviation from the M-ventile x npos cell mean (SE).
+- The remaining columns are paired deltas; +- SE is shown only where the delta is borderline.
+
+Observable segments:
+
+| segment | bucket | val | pub | priv | G3 | lift | Madj | G3-nf2 | FT half | m02 | NEW |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| M | 5-10 | 8.4 | 7.3 | 7.7 | 0.671 | 0.55 | +0.003 | +0.011 | -0.0006 | +0.0016 | -0.0003 |
+| M | 11-25 | 15.0 | 13.5 | 13.9 | 0.522 | 0.80 | -0.002 | +0.016 | -0.0018 | +0.0004 | -0.0001 |
+| M | 26-50 | 18.1 | 18.5 | 18.2 | 0.435 | 0.94 | -0.000 | +0.018 | -0.0012 | +0.0034 | -0.0007 |
+| M | 51-100 | 21.8 | 20.8 | 21.6 | 0.364 | 1.06 | +0.001 | +0.016 | +0.0006 | +0.0003 | +0.0002 |
+| M | 101-200 | 20.6 | 21.4 | 21.0 | 0.308 | 1.15 | +0.000 | +0.011 | +0.0008 | +0.0004 | -0.0002 |
+| M | 201-300 | 16.1 | 18.6 | 17.7 | 0.276 | 1.21 | -0.001 | +0.013 | +0.0015 | -0.0000 | -0.0005 |
+| H | 1-19 | 3.9 | 3.6 | 3.7 | 0.428 | 0.95 | +0.037 (0.010) | | | | |
+| H | 64-191 | 36.9 | 37.5 | 37.9 | 0.407 | 0.99 | +0.007 (0.003) | | | | |
+| H | 256 | 28.7 | 29.4 | 28.6 | 0.389 | 1.02 | -0.013 (0.003) | +0.016 | -0.0004 | +0.0013 | |
+| user | uid0 | 4.6 | 4.1 | 4.1 | 0.410 | 0.98 | +0.026 (0.009) | | +0.0048 (0.0019) | -0.0032 | |
+| user | 0 train feeds | 65.2 | 65.7 | 67.2 | 0.404 | 0.99 | +0.003 | | | | |
+| user | 1 train feed | 19.3 | 18.9 | 18.7 | 0.392 | 1.02 | -0.007 (0.004) | | | | |
+| user | 2-4 train feeds | 10.0 | 10.2 | 9.2 | 0.392 | 1.01 | -0.014 (0.005) | | | | |
+| cold share (LUO) | 15-30% | 22.1 | 11.0 | 6.6 | 0.409 | | +0.001 | | | | |
+| cold share (LUO) | 30-45% | 49.8 | 46.9 | 41.2 | 0.375 | | -0.005 (0.002) | | | | |
+| cold share (LUO) | >= 45% | 25.9 | 41.3 | 51.5 | 0.429 | | +0.010 (0.004) | | | | |
+| hour | 18-23 MSK | 25.1 | 18.1 | 36.9 | 0.385 | | -0.005 (0.003) | | | | |
+| hour | 00-05 | 9.2 | 16.1 | 7.3 | | | 0.000 | | | | |
+| day | Tue | | | | 0.401 | | | | | | -0.0008 (0.0004) |
+| day | Thu | | | | 0.399 | | | | | | +0.0004 (0.0004) |
+| history top-category share | < 25% (diverse) | 8.2 | 8.7 | 8.5 | | | -0.017 (0.006) | | | | |
+| history top-category share | >= 75% | 15.3 | 14.5 | 15.0 | | | +0.010 (0.005) | | | | |
+| feed max-category share | < 15% … >= 50% | | | | | | within +-0.004 | | | | |
+| feed n_cat | | | | | | | within +-0.009 | | | | |
+
+- Tue and Thu score the same once adjusted (Madj +0.0008 / -0.0009).
+- Feed category concentration ("dominant" vs "mixed" candidate sets) does not matter after M adjustment.
+
+Label-defined segments [L] (descriptive):
+
+| segment | bucket | share | G3 | lift | Madj | G3-nf2 | FT half | m02 | a4u | NEW |
+|---|---|---|---|---|---|---|---|---|---|---|
+| positives (LUO) | all-cold | 23.8 | 0.356 | 1.07 | -0.039 | +0.014 | +0.0025 | +0.0054 | +0.0090 | +0.0009 (0.0005) |
+| positives (LUO) | all-warm | 63.3 | 0.413 | 0.98 | +0.015 | +0.015 | -0.0013 | -0.0004 | -0.0036 | -0.0007 (0.0004) |
+| positives (LUO) | mixed | 13.0 | 0.418 | 0.97 | -0.002 | +0.012 | +0.0016 | -0.0004 | +0.0023 | -0.0004 |
+| positive's category novelty | last 8 events | 71.7 | 0.434 | 0.94 | +0.032 | +0.013 | | | | |
+| positive's category novelty | hpos 8-31 | 12.9 | 0.337 | 1.11 | -0.062 | +0.019 | | | | |
+| positive's category novelty | hpos >= 32 only | 8.9 | 0.296 | 1.17 | -0.106 | +0.018 | | | | |
+| positive's category novelty | never in history | 6.5 | 0.301 | 1.17 | -0.085 | +0.016 | | | | |
+| positive's category, G3 LSE rank | #1 | 57.9 | 0.460 | 0.90 | +0.052 | | | | | |
+| positive's category, G3 LSE rank | #2 | 17.5 | 0.374 | | -0.028 | | | | | |
+| positive's category, G3 LSE rank | #3 | 8.8 | 0.328 | | -0.072 | | | | | |
+| positive's category, G3 LSE rank | #4-6 | 10.8 | 0.271 | | -0.114 | | | | | |
+| positive's category, G3 LSE rank | #7+ | 5.0 | 0.204 | 1.33 | -0.136 | | | | | |
+| positive popularity, max LUO count | 0 | 23.8 | 0.356 | | -0.039 | | | | | |
+| positive popularity, max LUO count | 1-10 | 33.8 | 0.395 | | -0.006 | | | | | |
+| positive popularity, max LUO count | 11-100 | 32.7 | 0.420 | | +0.019 | | | | | |
+| positive popularity, max LUO count | 101-1000 | 9.4 | 0.458 | | +0.052 | | | | | |
+| youngest positive, exact age (11_age.log) | < 6h | 3.4 | | | +0.009 | | +0.0077 | | | |
+| youngest positive, exact age | 6-24h | 5.0 | | | +0.012 | | +0.0113 | | | |
+| youngest positive, exact age | 1-3d | 9.0 | | | -0.034 | | +0.0083 | +0.0031 | | |
+| youngest positive, exact age | 3-7d | 10.6 | | | -0.030 | | +0.0037 | | | |
+| youngest positive, exact age | 7-30d | 24.7 | | | -0.006 | | | | | |
+| youngest positive, exact age | 30-90d | 16.9 | | | +0.012 | | -0.0028 | | | |
+| youngest positive, exact age | > 90d | 30.5 | | | +0.016 | | -0.0053 | | | |
+| npos | 6+ | | | | +0.106 | | | | | |
+| npos | 3-5 | | | | -0.023 | | | | | |
+| npos | 1-2 | | | | 0.000 | | | | | |
+
+Positive popularity shows a steep monotone gradient. Positive age follows a U shape: 1-7-day listings are the hardest;
+listings under 24h are fine.
+
+---------------------------------------------------------------------------------------------------------------------
+3. Exact loss-mass decomposition (05_mass.log)
+---------------------------------------------------------------------------------------------------------------------
+Each positive owns (1/log2(j+2) - 1/log2(r_j+2)) / IDCG, where r_j is its rank and j is the ideal slot of its rank order.
+The shares sum exactly to the per-feed loss (verified). The private-mix columns use src/pmix.py weights (report only).
+
+Loss share by the positive's G3 category rank and its rank WITHIN that category:
+
+| category rank | within-category rank | positives | loss share | private-mix loss share |
+|---|---|---|---|---|
+| #1 | 0 (top of category) | 8.0% | 1.1% | 1.0% |
+| #1 | 1-2 | 9.2% | 8.5% | 8.5% |
+| #1 | 3-9 | 14.2% | 16.5% | 17.4% |
+| #1 | >= 10 | 20.5% | 20.9% | 25.7% |
+| #2 | (all) | 18.0% | 18.7% | 18.9% |
+| #3-4 | (all) | 16.1% | 18.1% | 15.9% |
+| #5+ | (all) | 14.1% | 16.2% | 12.5% |
+
+=> The largest single block is "right category, buried inside it" (37% val / 43% private-mix). Category mistakes
+   (#2+) carry 53% val / 47% private-mix.
+
+Loss share by positive class:
+
+| positive class | positives | loss share | private-mix: positives | private-mix: loss share |
+|---|---|---|---|---|
+| cold (LUO) | 30.3% | 31.0% | 37.2% | 37.9% |
+| novelty: last 8 events | 67.8% | 63.2% | | |
+| novelty: hpos 8-31 | 14.8% | 16.0% | | |
+| novelty: hpos >= 32 | 10.7% | 12.2% | | |
+| novelty: never in history | 6.6% | 8.6% | | |
+| warm, last-8 category | 46.0% | 41.9% | | 38.5% |
+| cold, last-8 category | 21.9% | 21.3% | | 26.9% |
+
+Loss share by the positive's overall rank:
+
+| positive rank | loss share |
+|---|---|
+| 0 | 0% |
+| 1-2 | 9.6% |
+| 3-9 | 25.6% |
+| 10-29 | 32.0% |
+| 30 .. < M/2 | 19.3% |
+| >= M/2 | 13.6% |
+
+Feed-level label mix, val -> private-mix:
+- cold-positive feeds 23.8% -> 29.1%;
+- warm-positive feeds 63.3% -> 55.9%;
+- positive in G3's top category 57.9% -> 62.6%.
+Private carries more cold positives but, in the pmix reweighting, more of them sit in the right category.
+
+---------------------------------------------------------------------------------------------------------------------
+4. Headroom oracles (02_oracles.log, 06_within.log)
+---------------------------------------------------------------------------------------------------------------------
+Gains over the base (leak-free); nf2_oof is the base of the err_* lenses.
+
+| oracle | G3 | N1 | nf2_oof |
+|---|---|---|---|
+| category oracle: positive categories first, model order inside | +0.1708 | +0.1710 | +0.1715 |
+| within-category oracle, blocks (segments-lens definition) | +0.2226 | +0.2220 | +0.2308 |
+| within-category oracle, reassign inside each (feed, category) cell (category_intent definition) | +0.2935 | +0.2933 | +0.2983 |
+| perfect re-order of the model's top-3 | +0.0573 | +0.0576 | +0.0541 |
+| perfect re-order of the model's top-10 | +0.2106 | +0.2111 | +0.2076 |
+| perfect re-order of the model's top-30 | +0.4026 | +0.4034 | +0.4000 |
+| exploration-intent oracle (15.4% of feeds; boost novel categories) | +0.0277 | +0.0281 | +0.0281 |
+| cold-intent oracle (23.8% of feeds; boost cold candidates) | +0.0376 | +0.0374 | +0.0364 |
+| warm-intent oracle (63.3% of feeds; demote cold) | +0.0188 | +0.0189 | +0.0195 |
+| cold + warm intent oracle | +0.0464 | +0.0462 | +0.0460 |
+| near-duplicate oracle, cos > 0.95 (G3; nf2 from the old lens) | +0.0161 | | +0.0172 |
+| near-duplicate oracle, cos > 0.9 (G3; nf2 from the old lens) | +0.0434 | | +0.0457 |
+| best member per feed, 20 G3 members (over G3) | +0.1025 | | |
+| best member per feed, 32 G3+NEW members (over G3) | +0.1195 | | |
+| best family pool per feed (F10 / F7x / F7x70) | +0.0198 | | |
+| best of the FT / TO halves per feed | +0.0126 | | |
+
+Noise calibration of the member oracle:
+- Matched synthetic noise (sigma 0.2, within-feed Spearman to G3 0.967 vs the members' 0.964): best-of-20 = +0.125 over
+  the mean synthetic member. The real members give +0.106, a ratio of 0.85.
+- 7 F7x seeds: +0.072 over their mean. 7 members across 3 families: +0.071. Family diversity is indistinguishable from
+  seed noise at the per-feed level.
+
+Readings:
+- The intent oracles (+0.028..+0.046) are large but need a detector. Every feed-level detector tried so far nets about 0:
+  err_missed_positives §4 (exploration detector -0.0005), err_segments §6, SOLUTIONS_REVIEW §2.
+- The cross-category headroom has not moved in two model generations; the within-category headroom shrinks slowly.
+
+---------------------------------------------------------------------------------------------------------------------
+5. NDCG-weighted pairwise error mass (03_pairs.log, 08_levers.log)
+---------------------------------------------------------------------------------------------------------------------
+Mass = sum over misordered (positive, negative) pairs of |1/log2(r_n+2) - 1/log2(r_p+2)| / IDCG (LambdaRank weights).
+
+Same- vs cross-category:
+
+| pair group | share of pairs | AUC | share of mass |
+|---|---|---|---|
+| same category | 26.5% | 0.693 | 34.2% |
+| cross category | 73.5% | 0.752 | 65.9% |
+
+By the negative's rank:
+
+| negative's rank | share of mass | same-category part |
+|---|---|---|
+| 0-2 | 48.6% | 18.4% |
+| 3-9 | 24.8% | |
+| 10-29 | 17.4% | |
+| 30+ | 9.3% | |
+
+By the positive's category novelty (category-novelty classes):
+
+| positive class | share of pairs | AUC | share of mass |
+|---|---|---|---|
+| last 8 events | 69% | 0.791 | 58% |
+| hpos 8-31 | 14% | 0.682 | 17% |
+| hpos >= 32 | 10% | 0.575 | 15% |
+| never in history | 6% | 0.531 | 11% |
+
+The worst cells are a novel-category positive against a last-8-category negative:
+
+| positive class vs last-8-category negative | AUC | share of mass |
+|---|---|---|
+| hpos 8-31 positive | 0.556 | 12.2% |
+| hpos >= 32 positive | 0.433 | 11.3% |
+| never-in-history positive | 0.365 | 6.7% |
+
+Together these three cells are 12.8% of pairs and 30% of the mass.
+
+Coldness (train bitmap) AUC, G3 vs nf2_oof:
+
+| pair type | category | nf2_oof | G3 | change |
+|---|---|---|---|---|
+| warm+ / warm- | same | 0.657 | 0.677 | +0.021 |
+| warm+ / warm- | cross | 0.713 | 0.731 | +0.018 |
+| warm+ / cold- | same | 0.763 | 0.789 | +0.026 |
+| cold+ / warm- | same | 0.599 | 0.605 | +0.006 (least improved; 4.5% of pairs, 7.4% of mass) |
+| cold+ / warm- | cross | 0.683 | 0.694 | +0.011 |
+| cold+ / cold- | same | 0.702 | 0.721 | +0.019 |
+| overall | | 0.719 | 0.736 | |
+
+---------------------------------------------------------------------------------------------------------------------
+6. Worst 10% feeds (04_worst_mp.log, 05_mass.log)
+---------------------------------------------------------------------------------------------------------------------
+Raw worst 10%:
+- mean NDCG 0.156; 14.4% of the loss.
+- These are big feeds: M 193 vs 96, n_cat 16.3 vs 12.0.
+- Low top-1 softmax probability: 0.037 vs 0.109.
+- The positive's category is not G3's top category in 69% of them (vs 42%); novel in 33% (vs 15%); never in history in
+  16% (vs 6.5%).
+- 37% are cold-positive feeds (vs 24%).
+- Observable features predict membership with AUC 0.85, almost all of it M.
+
+Worst 10% by the standardized M x npos residual (the feeds that are bad FOR THEIR SIZE):
+- mean M 55; best-positive percentile rank 0.544 vs 0.231 overall.
+- Lifts vs all feeds:
+
+| feature | lift |
+|---|---|
+| positive's category G3 rank >= 3 | 1.93 |
+| positive's category novel (>= 32 or never) | 1.85 |
+| positive's category not G3's top | 1.45 |
+| cold-positive feed | 1.12 |
+| H = 256 | 1.10 |
+| uid0 | 0.79 |
+| npos = 1 | 0.78 |
+| warm-positive feed | 0.78 |
+
+=> The worst feeds are category-intent misses, mostly to rarely or never visited categories, not cold-item misses.
+
+---------------------------------------------------------------------------------------------------------------------
+7. Missed positives, MP = rank >= M/2 (04_worst_mp.log, 06_within.log)
+---------------------------------------------------------------------------------------------------------------------
+Size of the problem:
+- MP share fell from 20.9% (nf2_oof) and 20.8% (v5 in err_missed_positives) to 18.3% (3,988 of 21,759) under G3.
+- 23.7% of feeds contain an MP. They score NDCG 0.284 vs 0.437 for the rest and hold 28.3% of the loss.
+
+Systematic, not variance (32 members, final scores):
+- 42.3% of G3's MPs are missed by every member, 61.5% by >= 90% of members, only 4.1% by < 50%.
+- 7.8% of all positives are missed by all members.
+
+Who they are, by class (MP rate; share of MPs; act/exp):
+
+| class | share of positives | MP rate | share of MPs | act/exp |
+|---|---|---|---|---|
+| recent category, warm | 57% | 10.6% | 33% | 0.998 |
+| recent category, cold | 25.7% | 18.7% | 26% | 1.016 |
+| novel category (>= 32), warm | 12.7% | 37.7% | 26% | 0.975 |
+| novel category (>= 32), cold | 4.6% | 58.2% | 15% | 1.011 |
+
+Calibrated everywhere: the low ranks are justified by what the model can see.
+
+Candidate descriptors, MP vs TP3 (positive in the top 3) vs FA3 (negative in the top 3) vs all negatives. "pct" is the
+within-feed percentile:
+
+| descriptor | MP | TP3 | FA3 | all negatives |
+|---|---|---|---|---|
+| pre2_fe pct | 0.39 | 0.82 | 0.81 | 0.50 |
+| maxsim32 pct | 0.41 | 0.79 | 0.77 | 0.50 |
+| f1 pct | 0.42 | 0.75 | 0.73 | 0.50 |
+| category in last 8 events | 41% | 84% | 82% | 51% |
+| category never in history | 18% | 3% | 3% | 16% |
+| median history events of type 1 in the category | 4 | 20 | 19 | 7 |
+| cold (LUO) | 0.41 | 0.23 | 0.21 | 0.38 |
+
+MPs look like average negatives; TP3 and FA3 look like each other, so the head errors are among plausible items.
+
+Other facts:
+- Re-interactions do not exist: 0 of 1.39M val candidates appear in the user's own history, so "seen item" signals cannot
+  help.
+- Feeds that contain an MP are not predictable from observable feed features (user-grouped LR AUC 0.566; old lens <= 0.55).
+
+Same-category "beaters" (negatives scored above a positive in its own category):
+- 74.6% of positives have at least one; the mean is 9.1 per positive.
+- Compared with its beaters, the positive is colder (+0.10), younger (-1.25 days), less popular (-0.37 log LUO), and less
+  history-similar (pre2 -0.12, maxsim -0.08, cos_u -0.09 percentile).
+- Beaters are not near-duplicates of the positive: mean cosine 0.70 vs 0.67 for same-category negatives below it, and only
+  6.5% have cos > 0.9.
+=> Within-category errors are "the user picked the less obvious item". They are not twin listings.
+
+---------------------------------------------------------------------------------------------------------------------
+8. Calibration by listing age: what the FT half actually does (12_age_calib.log, 14_age_pop_calib.log, 13_age_offset.log)
+---------------------------------------------------------------------------------------------------------------------
+Exact listing age comes from f4 via data/feats/life_f4_age_knots.npy (feat_life_.md: f4 IS the age). act/exp is computed
+under the within-feed softmax, with the temperature fitted by likelihood (1.0 for all current pools).
+
+| score | <6h | 6-24h | 1-3d | 3-7d | 7-30d | 30-90d | >90d |
+|---|---|---|---|---|---|---|---|
+| G3_to | 0.918 | 1.060 | **1.136 +- 0.028** | 1.058 | 1.035 | 0.975 | **0.957 +- 0.011** |
+| G3_ft | 0.880 | 0.956 | 1.035 | 1.000 | 1.027 | 0.992 | 0.994 |
+| G3 | 0.900 | 1.007 | 1.085 | 1.028 | 1.031 | 0.983 | 0.975 |
+| F7x_to | 0.901 | 1.045 | 1.120 | 1.048 | 1.035 | 0.980 | 0.962 |
+| F7b_to (mix 0.1) | 0.918 | 1.064 | 1.136 | 1.056 | 1.036 | 0.977 | 0.956 |
+| F10_to | 0.949 | 1.082 | 1.153 | 1.066 | 1.037 | 0.974 | 0.950 |
+| nf2_tr (old) | 0.827 | 0.970 | 1.024 | 0.955 | 1.032 | 1.019 | 0.994 |
+
+- m02 reduces the miscalibration slightly (F7x_to vs F7b_to), and GRU (F10) has the most, consistent with
+  "GRU fam" losing cold positives.
+
+Age x LUO-popularity cells, act/exp of G3_to vs G3_ft:
+
+| age, LUO count | G3_to | G3_ft |
+|---|---|---|
+| 1-7d, 0 | 1.076 +- 0.022 | 1.000 |
+| 1-7d, 1-3 | 1.141 +- 0.038 | 1.060 |
+| 7-30d, 0 | 1.085 +- 0.029 | 1.074 |
+| > 30d, any count | 0.96-0.975 | 0.97-1.015 |
+
+- Mechanism (src/features_luo.py): it_hist_all counts an item's occurrences in ALL history snapshots of all splits.
+  LUO removes only the same user's later snapshots, so the count includes OTHER users' future snapshots.
+- A young listing on a train row therefore accumulates popularity from the rest of train, val and test. A young
+  val/test listing has far less future. The model learns that a young listing with a low count is bad; at val/test time
+  young listings have low counts for a different reason (no future yet), so they are under-ranked.
+- This is the parity issue behind RESEARCH_SWEEP P4 ("it_hist zero rate 17.5% Sep 6 -> 29.7% Sep 19 vs 45.6% private")
+  and behind feat_new it_hist_hz.
+- The candidate age mix is the same in val, public and private (e.g. <6h 6.2 / 4.9 / 6.2%; >90d 33.6 / 33.8 / 33.9%), so
+  this is a train->(val, test) shift, not a val->test shift.
+
+Value of fixing it by offsets (pre-declared in 13_age_offset.py; nested, user-grouped 5-fold, conditional-logit fit):
+
+| base | 7-bucket age offset | cold offset | age + cold |
+|---|---|---|---|
+| G3_to | +0.00060 +- 0.00040 | | +0.00061 |
+| G3 | +0.00025 +- 0.00032 | +0.00029 +- 0.00014 (coef 0.017 z, negligible) | +0.00038 +- 0.00033 |
+| N1 | +0.00016 | +0.00002 | +0.00016 |
+
+The FT half already captures most of it. Calibration offsets are worth <= +0.0006 at the TO level.
+
+FT half by member (10_ft_by_M.log, 32 members):
+
+| quantity | value | members > 0 |
+|---|---|---|
+| final - TO, all feeds | +0.00060 | 84% |
+| final - TO, M < 50 | +0.00015 | |
+| final - TO, M >= 50 | +0.00091 | |
+| final - TO, cold-positive feeds | +0.0031 | 97% |
+| final - TO, warm-positive feeds | -0.00057 | 19% |
+| FT-only - TO, M < 50 | -0.00042 | 34% |
+| FT-only - TO, M >= 50 | +0.00097 | 88% |
+
+At pool level these member gains vanish (G3 FT pool 0.39984 < TO pool 0.40035): the FT halves are more alike across
+members than the TO halves.
+
+Nested routing of w_ft by observable segment (09_ft_route.log; grid 0..1; pre-declared 2 segmentations):
+
+| segmentation | G3 | N1 | chosen w_ft |
+|---|---|---|---|
+| M < 50 / M >= 50 | +0.00056 +- 0.00038 | +0.00042 +- 0.00036 | 0 for M < 50 in 5/5 folds; 1.0 (G3) or 0.75 (N1) for M >= 50 |
+| feed cold share | +0.00004 | -0.00004 | |
+
+=> Neither routing passes 2 SE. The COVERAGE_MAP closure of w_ft / segment weights stands as a blend rule. The M
+   asymmetry is consistent across members, so it is an FT-design target (proposal X3).
+
+---------------------------------------------------------------------------------------------------------------------
+9. Lever-response map (08_levers.log): change in summed per-positive loss, NDCG points per feed (+ = lever helps)
+---------------------------------------------------------------------------------------------------------------------
+Positive share per class: warm|recent 0.460, warm|mid 0.110, warm|novel 0.127, cold|recent 0.219, cold|mid 0.038,
+cold|novel 0.046; positive in G3's top category 0.519.
+
+| lever | total | warm|recent | warm|mid | warm|novel | cold|recent | cold|mid | cold|novel | G3top | notTop |
+|---|---|---|---|---|---|---|---|---|---|---|
+| G3 vs nf2_oof | +.01434 | +.00610 | +.00146 | +.00241 | +.00326 | +.00077 | +.00034 | +.00968 | +.00467 |
+| FT half | -.00001 | -.00040 | -.00001 | -.00012 | +.00050 | -.00001 | +.00003 | +.00005 | -.00006 |
+| m02 | +.00096 | -.00064 | -.00008 | +.00032 | +.00102 | +.00015 | +.00020 | +.00073 | +.00023 |
+| a4u | +.00013 | -.00118 | -.00062 | -.00012 | +.00173 | +.00011 | +.00022 | +.00004 | +.00009 |
+| cset | -.00018 | -.00131 | +.00002 | -.00064 | +.00159 | +.00008 | +.00008 | +.00002 | -.00020 |
+| NEW (N1 vs G3) | -.00025 | -.00029 | -.00002 | -.00014 | +.00018 | +.00002 | +.00001 | -.00023 | -.00002 |
+| GRU fam (G3 vs M2) | -.00063 | +.00002 | -.00006 | -.00004 | -.00037 | -.00006 | -.00012 | -.00056 | -.00008 |
+
+Class SEs (feed-clustered) are about 0.0001-0.0007 (full table in the log).
+
+Regime x coldness (05_mass.log), deltas per feed:
+
+| positive in G3-top category / positives | share | G3 | loss% | G3-nf2 | FT half | m02 | a4u | NEW |
+|---|---|---|---|---|---|---|---|---|
+| top / warm | 0.341 | 0.489 | 29.1 | +0.019 | -0.0016 | -0.0004 | -0.0046 | -0.0013 |
+| top / cold | 0.138 | 0.402 | 13.7 | +0.017 | +0.0036 | +0.0063 | +0.0098 | +0.0013 |
+| off / warm | 0.292 | 0.325 | 32.8 | +0.010 | -0.0010 | -0.0004 | -0.0025 | +0.0000 |
+| off / cold | 0.100 | 0.294 | 11.7 | +0.011 | +0.0011 | +0.0040 | +0.0079 | +0.0005 |
+
+Private-mix lever deltas (pmix weights; report only):
+
+| lever | val | private-mix |
+|---|---|---|
+| FT half | -0.00001 +- 0.00039 | +0.00063 +- 0.00059 |
+| m02 | +0.00096 | +0.00083 +- 0.00088 |
+| a4u | +0.00013 | -0.00074 +- 0.00125 |
+| NEW | -0.00025 | 0.00000 +- 0.00043 |
+| GRU fam | -0.00063 | -0.00073 +- 0.00051 |
+
+Reading:
+- Every recent lever moves NDCG along one warm<->cold axis. Their net is set by the cold share of the evaluation mix.
+- The warm|recent cell is where the generational gains came from (+0.0061). Every current lever is 0 or negative there.
+- The off-top warm cell (29% of feeds, 33% of loss, 62% of the category-oracle headroom) is untouched by everything,
+  including the generational change (+0.010 there vs +0.019 in top / warm).
+
+---------------------------------------------------------------------------------------------------------------------
+10. Variance vs bias (07_scaling.log)
+---------------------------------------------------------------------------------------------------------------------
+Pool NDCG vs number of members k (random subsets; fit a - b/k on k >= 2):
+
+| members sampled | single member TO val | k->inf, TO val | k->inf, final val | k->inf, holdout | headroom left at full k |
+|---|---|---|---|---|---|
+| G3 (20) | 0.3956 | 0.40092 | 0.40086 | 0.32379 | +0.00025 TO, +0.00019 final, +0.00022 holdout |
+| G3+NEW (random subsets of the 32 members, k <= 30) | | 0.40049 | 0.40039 | 0.32378 | +0.00013-0.00016 |
+| M2 (14; 7 trunks re-cooled twice) | | 0.40113 | 0.40117 | 0.32376 | +0.0004 |
+
+- Cold-positive TO NDCG saturates at about 0.354 by k = 8.
+=> The remaining NDCG mass is bias in the mean function, not ensemble variance.
+- About 0.0045 of single-member noise is already averaged away (single 0.3956 -> pool 0.4005). Another ~0.0002 is left.
+- NEW members do not raise the asymptote: N1's k->inf value is BELOW G3's.
+- The from-scratch v30 F7-m02 members (TO 0.3953 / 0.3951) are weaker on val than the re-cooled F7x members (0.3967),
+  consistent with the procedural re-cool val excess (CDSEED-813).
+
+---------------------------------------------------------------------------------------------------------------------
+11. Comparison with the older err_* reports
+---------------------------------------------------------------------------------------------------------------------
+IMPROVED (G3 vs nf2_oof, leak-free):
+- Overall: +0.0143 +- 0.0012.
+- Uniform across M, H, user, cold share, hour, day, n_cat. Every bucket is +0.005..+0.023 (H0 and <15%-cold buckets are
+  noisy).
+- Cold/warm trade repaired:
+  - nf3 vs nf2 had cold -0.021 / warm +0.011 (err_SYNTHESIS §3.1);
+  - G3 vs nf2 is cold +0.014 / warm +0.015.
+  - Calibration of cold items: nf2_tr act/exp 0.928 -> G3_to 1.028.
+- Ranking quality:
+  - MP rate 20.9% -> 18.3%;
+  - top-3 positives 18.0% -> 19.6%;
+  - top-1 positive 11.3% -> 12.8%;
+  - mean percentile rank of positives 0.293 -> 0.275.
+- Within-category:
+  - same-category AUC 0.674 -> 0.693;
+  - the within-category oracle shrank (0.2308 -> 0.2226 blocks; 0.2983 -> 0.2935 reassign);
+  - G3's category-oracle level (0.5712) rose by +0.0136 over nf2's (0.5576): most of the gain is within-category ordering.
+- Novel-category feeds improved like the rest:
+  - h8-31 +0.019, h>=32 +0.018, never +0.016, last8 +0.013;
+  - but their AUC vs recent-category negatives is still < 0.56.
+
+NOT IMPROVED:
+- Category ranking:
+  - category NDCG 0.7803 -> 0.7843 (+0.0040 +- 0.0008);
+  - top-1 category hit 0.571 -> 0.578;
+  - category-oracle headroom 0.1715 -> 0.1708;
+  - err_category_intent's saturation verdict holds.
+- Exploration-intent oracle +0.028 (unchanged). MP feeds are still unpredictable (AUC 0.566).
+- cold+ vs warm- same-category AUC 0.599 -> 0.605.
+- Structural user segments, after M adjustment:
+  - H=256: -0.013 (was -0.0145);
+  - users with 2-4 train feeds: -0.014 (was -0.014);
+  - short histories +0.037 and uid0 +0.026 (were +0.031 / +0.026).
+  Long and diverse histories remain the hardest users, and having train history does not help.
+- Near-duplicate oracle: +0.016 (was +0.017). Within-group discrimination is essentially unchanged.
+- Calibration by novelty is unchanged. G3's act/exp is 0.95-1.02 for every class, so the remaining error is not a bias
+  that a prior or offset can fix.
+
+---------------------------------------------------------------------------------------------------------------------
+12. Which segments respond to which levers (summary for planning)
+---------------------------------------------------------------------------------------------------------------------
+| cell (share of loss) | levers that move it | evidence | prior for new work |
+|---|---|---|---|
+| warm positive in a recent category (42% of loss; overlaps the 'right category but buried' block, 37%) | only generational train-stage changes (cvnd/pre2s/Muon: +0.0061); every current arm 0 or negative | | a NEW mechanism for within-category discrimination (X1); ID / collaborative signal (X5) |
+| cold, recent category (21%; 27% private-mix) | m02 +0.0010, a4u +0.0017, cset +0.0016, FT +0.0005 | all paid for by warm|recent | parity of popularity inputs (X2) may remove the cause instead of trading |
+| novel-category positives (37%) | m02 +0.0005, generational +0.004; nothing else | calibrated, anti-ranked: needs intent information we do not have | stop |
+| category choice (#2+ categories, 53%) | generational +0.0047 | category NDCG saturated | stop (do not reopen category heads) |
+| small feeds M < 50 (34% of loss) | FT hurts; m02 +0.0004..+0.0034 helps | | FT design (X3) |
+| ensemble variance | <= +0.0002 left | | stop same-recipe seeding beyond pick needs (X4) |
+
+---------------------------------------------------------------------------------------------------------------------
+13. Proposed experiments (detail in the structured output; ordered by expected value / cost)
+---------------------------------------------------------------------------------------------------------------------
+X1. Within-(feed, category) listwise auxiliary loss in the m02 cooldown (cd_lane arm "wcat" vs m02, roots 101-104).
+X2. Popularity-parity cooldown: train-row it_hist_*_luo -> data/feats_new/train/it_hist_hz_* during the cooldown only.
+    Before any GPU, read wave-4 rec33 (P4) through the age x popularity act/exp table (12_age_calib.py / 14_*); this
+    costs 0 GPU.
+X3. FT stage feed-size design, as a dimension in the running Optuna FT study (nn_x/ftopt): exclude or down-weight M < 50
+    feeds in the FT loss; judge at pool level with M slices.
+X4. Asymptote gate for new seed families (CPU, minutes): continue seeding a family only if its k->inf TO asymptote (fit as
+    in 07_scaling.py) beats G3's (0.4009 val / 0.3238 holdout).
+X5. P8 ID-channel CPU gate re-targeted at the warm|recent within-category cell. Gate on (warm positive, warm same-category
+    beater) pairs in G3-top categories, with a nested blend restricted to that cell.
+
+---------------------------------------------------------------------------------------------------------------------
+14. Files (all under <repo>/nn_x/insights/errors/)
+---------------------------------------------------------------------------------------------------------------------
+Shared code:
+- lib.py: loaders and the decide5 pool replica.
+- run_all.sh: reruns everything (about 13 min CPU).
+
+Scripts and their logs (logs/<name>.log; logs/pre_v30/ = the run before v30 s901/s902 completed):
+
+| script | content |
+|---|---|
+| 00_build.py | pools, members, per-feed table |
+| 01_segments.py | distribution and segment tables (also writes segments_G3.csv) |
+| 02_oracles.py | headroom oracles, member-oracle noise calibration |
+| 03_pairs.py | NDCG-weighted pair mass by type |
+| 04_worst_mp.py | worst-10% feeds, missed positives, member agreement |
+| 05_mass.py | exact per-positive loss decomposition, regime x coldness map, category NDCG, private-mix shares |
+| 06_within.py | same-category beaters, near-duplicate oracle, calibration by class |
+| 07_scaling.py | pool-size curves, k->inf |
+| 08_levers.py | lever response by positive class, lambda mass by negative rank, private-mix lever deltas |
+| 09_ft_route.py | nested w_ft routing |
+| 10_ft_by_M.py | per-member FT effect by M and coldness |
+| 11_age.py, 12_age_calib.py, 14_age_pop_calib.py | exact listing age analyses |
+| 13_age_offset.py | nested age / cold offsets (pre-declared in its docstring) |
+
+Cached data:
+- out/: feed_table.parquet, cand_scores.npz (z-scores of every pool or half used), member_ndcg.npz, cand_cat_minh.npy,
+  cold_luo.npy, per_positive_loss.npy, member_miss_frac.npy.
+- out_pre_v30/: the same before v30 was added.

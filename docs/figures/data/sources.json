@@ -1,0 +1,82 @@
+{
+ "about": "Small data files read by scripts/figures. Source fields and columns give a path from the repository root when the file is published, and otherwise the plain name of a working record that is not published. Scores are NDCG over feeds: validation 14,423 feeds, public 8,562 test feeds, private 20,033.",
+ "files": {
+  "public_scores.csv": {
+   "what": "The 40 scored submissions in the order their public score was logged.",
+   "columns": {
+    "order": "1 to 40",
+    "date_utc": "day on which the score was logged",
+    "logged_utc": "time the score was logged; empty for the first four files, whose send time was not recorded",
+    "short_id": "name of the file in the working records",
+    "label": "plain description used in figures",
+    "public_ndcg": "public score with the precision of the record",
+    "val_ndcg": "validation score of the file; empty when none was computed",
+    "val_usable": "0 when the validation score is missing or inflated by the later-feed leak",
+    "in_level_fit": "1 for the 18 files behind the level line of level_line.json",
+    "family": "generation of the file",
+    "is_team_best": "1 when the score was strictly above every earlier team score (it stays 1 after a later file beats it)",
+    "members_train_on": "whether the members' training held out the 30,000 holdout feeds",
+    "file": "file name of the submission parquet"
+   },
+   "derived_from": "the submission notes of the lab, the status log (including its part of 2026-11-11) and the decision ledger, none of them published; the source column names the record and the date or block of each entry. Rows 31 to 40 (17 to 19 Nov) come from the decision ledger alone; their validation scores were re-read from the stored pools (not published; rows 31 to 37 on 2026-11-18, rows 38 to 40 on 2026-11-19) and agree with the ledger to 0.00001."
+  },
+  "leaderboard.csv": {
+   "what": "Eight fetched snapshots of the public board and three rows in which only the team score is new.",
+   "derived_from": "status log entries (not published), lab/nn_x/audit/top1/out_lb_snapshot_2026-11-12T2200Z.txt, the decision ledger block 2026-11-17T23:46:07Z (not published) for the row of 2026-11-17, and the public leaderboard page fetched on 2026-11-18T03:33:53Z and 2026-11-19T03:34:51Z",
+   "note": "No snapshot was fetched between 2026-11-13T19:43Z and 2026-11-18T03:33Z; the rival scores of the rows in between are carried forward. Other teams appear by rank only."
+  },
+  "level_line.json": {
+   "what": "The line public = 0.0074 + 0.963 x validation and the files it was fitted on.",
+   "derived_from": "lab/reports/RECHECK_1114/lb_stats.md section 1.1; decision ledger block 2026-11-15T20:30:59Z (not published)"
+  },
+  "final_picks.json": {
+   "what": "The two files selected for the private leaderboard (file, sha256, scores, members) and the earlier picks 1 and 2.",
+   "derived_from": "decision ledger blocks 2026-11-18T02:33:28Z and 2026-11-19T03:32:47Z (not published); sha256 checked against the submission files (not published) on 2026-11-19"
+  },
+  "calendar.csv": {
+   "what": "Feeds per calendar day (Moscow time) in train, the 30,000-feed holdout, validation and test, with the public and private parts of each test day.",
+   "derived_from": "timestamps of the feeds.parquet of each flattened split (not published); the holdout is redrawn with the trainer's rule (exploration probability above 0.9, 50 or more candidates, seed 12345); public is timestamp < 1790497920"
+  },
+  "staleness.csv": {
+   "what": "Mean days since a candidate item was last seen in train (items seen in train only) and the mean feed time, per evaluation set.",
+   "derived_from": "lab/reports/DATA_PIPELINE_1113.md section 3.1 for the days; the feeds.parquet of each flattened split (not published) for the mean times"
+  },
+  "pipeline_stages.csv": {
+   "what": "The nine stages of the final pipeline with hardware, recorded run time and GPU-hours.",
+   "derived_from": "the solution notes of the lab (not published) and the logs named in the source column (not published)",
+   "note": "GPU-hours are sums of the logged wall-clock minutes of runs on shared GPUs, so they are upper bounds."
+  },
+  "model.json": {
+   "what": "Widths, counts and parameter totals of the ranker.",
+   "derived_from": "lab/nn_x/w5/model.py and the configuration stored in the checkpoints of the final members (checkpoints not published)"
+  },
+  "distillation.json": {
+   "what": "Teacher composition, the target weight and the three gains shown in the distillation figure.",
+   "derived_from": "decision ledger, read-out 2026-11-14T05:18:17Z and block of 2026-11-14 17:32Z (not published); the teacher dump logs (not published)"
+  },
+  "ensemble.json": {
+   "what": "Mix weights and the validation scores of the branches of the two final files, of FD16P20 (pick 1 until 2026-11-18) and of W8P20 (pick 2 until 2026-11-19).",
+   "derived_from": "lab/nn_x/w12/kd/build_r4.py and lab/nn_x/w12/kd/build_r3.py; a rebuild of FD16P20 and W8P20 from the stored member predictions on 2026-11-16; the stored pools of FD16P20@m0.4_0.2 read on 2026-11-18 and of FDX16P20:ps on 2026-11-19 (stored predictions and pools are not published)"
+  },
+  "near_copies.csv": {
+   "what": "Public scores of the 17 scored files of the final family (full-view distilled students plus popularity-light students) and the paired standard error of each difference to FD16P20.",
+   "derived_from": "decision ledger blocks 2026-11-15T14:34:22Z, 2026-11-16T01:31:43Z, 2026-11-16T11:55:37Z, 2026-11-17T16:53:16Z, 2026-11-17T23:46:07Z, 2026-11-18T02:30:32Z, 2026-11-19T03:31:53Z and 2026-11-19T03:32:58Z (not published)",
+   "columns": {
+    "label": "one-line description used in the figure; short feeds have fewer than 50 candidates, long feeds 50 or more",
+    "paired_se_vs_fd16p20": "standard deviation of the per-feed validation difference to FD16P20 divided by sqrt(8562), the formula of lab/nn_x/w12/kd/build_r4.py",
+    "se_source": "ledger: as logged in the decision ledger (not published) when the score was read; recomputed: the same formula applied on 2026-11-18 and 2026-11-19 to the stored validation pools (not published), which reproduces the logged values to 0.00001 (the ledger gives about 0.0003 for FD16P20@m0.4_0.2 and about 0.00037 for FDXH16P20:ps)",
+    "final_pick": "1 or 2 for the two final picks, 0 otherwise"
+   }
+  },
+  "experiments_outcomes.csv": {
+   "what": "Number of catalogue entries per theme and outcome, one row per theme of docs/07-what-failed.md.",
+   "derived_from": "the catalogue tables of docs/07-what-failed.md, counted by scripts/figures/count_catalogue.py (run it after every edit of the catalogue; --check reports a mismatch)",
+   "note": "label is a shortened theme name for the figure; three themes are shortened."
+  },
+  "work_loop.json": {
+   "what": "Counts behind the work-loop figure: days, messages from the person, context summaries of the lead session, workflows, uploads per day.",
+   "derived_from": "the working records of the project (not published), 2026-11-11 to 2026-11-19",
+   "note": "The message count is approximate (about 165). The lower panel of the figure is a design from docs/13-how-the-work-was-run.md and has no data."
+  }
+ }
+}

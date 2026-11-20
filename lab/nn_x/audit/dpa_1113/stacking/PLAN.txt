@@ -1,0 +1,33 @@
+Fri Nov 13 14:58:56 UTC 2026
+PLAN (lens = second level on top of G3), written BEFORE any number of this study was computed.
+Members: G3 = F10 (v23_gru_pre2s_s501-506) + F7x (r6_cd_m02_r101-107) + F7x70 (r6_cd_m02_p70k_r101-107), 20 members.
+Reference: G3 spec = 0.5 z(mean_m z(ft_m)) + 0.5 z(mean_m z(to_m)); holdout reference = z(mean_m z(to_m)) (TO only).
+Folds: GroupKFold(5) by user (user0 = singletons) = the exact FT folds (nn_x/stack/nnstack/data/val_fold.npy, verified).
+Val read: nested (fit on 4 folds, apply to 5th) OOF per-feed NDCG, paired delta vs G3, SE = max(iid, user-clustered).
+Holdout read: fit on FULL val, apply to the holdout TO form (members' to scores), paired delta vs the holdout TO reference, user-clustered SE.
+pmix: private-mix weighted val delta (src/pmix.weights()['private']), SE by n_eff.
+Slices: M<50, M>=50, Tue, Thu on val; late20 / wkday / wkend on holdout (info).
+
+E1 (c) pooling functions, no fitted parameter, applied per half then the G3 0.5/0.5 spec (holdout: TO half):
+   rankmean, rankgauss, spow0.5, spow2 (signed power of z), rpow0.25 / rpow4 (mean of pct-rank^p), clip2 (z winsorised +-2),
+   trim10, trim20, median, lse_T0.5, lse_T1 (T log mean exp(z/T)), rawc (feed-centred raw mean), gscale (raw/global sd).
+E2 (d) per-family weights a=(F10,F7x,F7x70), simplex step 0.05 (231 pts) x w_ft in {0.3,0.4,0.5,0.6,0.7}: argmax NDCG on 4 folds -> OOF;
+   full-val argmax family weights -> holdout. Also the full-val and holdout surfaces (context only).
+E3 (a) feed-conditional weights: per bucket of ONE variable (M: <50/50-99/>=100; cold share tertiles; user0; H tertiles; Tue/Thu
+   diagnostic only - not transferable to test days): a1 = w_ft per bucket (family ME), a2 = family weights per bucket (w_ft .5),
+   a3 = both; plus a2 on M x cold (6 cells). Control = the unconditional E2 fit of the same parameters.
+E4 (b) LightGBM second level, residual (init_score = 2 x pool z), lambdarank, leaves 15, min_data 1000, l2 100, lr 0.03,
+   ff 0.8, bagging 0.8, FIXED rounds {100, 300}, seeds {1,2,3}:
+   B0 [pool z] (control); B1 [pool z, pool pct, feed feats (logM, logH, user0, cold share), cand feats (cold flag)];
+   B2 [pool z, pool pct, 20 member z (0.5 ft + 0.5 to), 3 family z ft, 3 family z to, member sd, feed feats];
+   B3 = B2 + cand feats. TO-only twins (B0to, B2to; reference = TO pool) give the holdout read.
+E5 (b) tiny MLP residual (score = pool z + MLP(x), 32 hidden, dropout 0.1, AdamW wd 1e-2, listwise softmax CE, fixed epochs),
+   same inputs as B0/B2, 3 seeds, TO-only twins for the holdout read.
+E6 near-copy: within-feed corr with G3 on val and test, top-1 change share.
+
+ACCEPTANCE (pre-declared):
+  PASS-STRICT: val OOF delta vs G3 > +2 SE AND holdout delta > +2 SE (TO form; for w_ft-only items no holdout read exists -> cannot pass strict).
+  PASS-WEAK (project hygiene): val > +2 SE AND holdout z >= 0 AND pmix >= -1 SE AND no val slice (M<50, M>=50, Tue, Thu) < -2 SE.
+  Learned arms (GBDT/MLP/conditional weights) must also beat their matched control by > 2 SE on val (paired), else the gain is the machinery.
+  Multiplicity is disclosed (count of tests); a lone 2-SE pass among K tests is flagged as a chance maximum.
+  Near-copy: test within-feed corr with G3 > 0.995 -> expected public effect = 0.2 x val delta (VAL_PUBLIC_1113 k ~0.05-0.2).

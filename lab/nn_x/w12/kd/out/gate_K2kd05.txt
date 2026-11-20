@@ -1,0 +1,20 @@
+A file validity checked
+B reproduction: min per-feed Spearman 0.999999
+  w5_e10_kd05_s951: 34 train-stage inputs audited, fine-tune n2cpv3s3 audited
+  w5_e10_kd05_s952: 34 train-stage inputs audited, fine-tune n2cpv3s3 audited
+  w5_e10_kd05_s953: 34 train-stage inputs audited, fine-tune n2cpv3s3 audited
+  w5_e10_kd05_s954: 34 train-stage inputs audited, fine-tune n2cpv3s3 audited
+D val new 0.40119 ref 0.40101 delta +0.00018 +- 0.00028
+   M<50      n=  5893 delta -0.00008 +- 0.00054
+   M>=50     n=  8530 delta +0.00036 +- 0.00029
+   Tue       n=  7543 delta +0.00017 +- 0.00040
+   Thu       n=  6880 delta +0.00019 +- 0.00039
+   user0     n=   658 delta -0.00094 +- 0.00181
+   has_later n=   117 delta +0.00469 +- 0.00213
+   no_later  n= 14306 delta +0.00014 +- 0.00028
+   LEAK PROBE has_later - no_later gain: +0.00455 +- 0.00215 (low power on val: few has-later feeds)
+[WARN] D leak probe: gain larger on has-later feeds (2 < z <= 3): run the controlled check
+E predicted public 0.3931 private 0.3957 (+-0.003); ref 0.3929 / 0.3955
+F new-vs-ref per-feed Spearman: val mean 0.9975 p5 0.9930 | test mean 0.9976 p5 0.9930
+
+GATE: PASS with WARN  (FAIL 0, WARN 1)

@@ -1,0 +1,120 @@
+val: 14423 feeds; members 20
+  val r6_cd_m02_r101: ndcg 0.39730  (5s)
+  val r6_cd_m02_r102: ndcg 0.39728  (1s)
+  val r6_cd_m02_r103: ndcg 0.39563  (1s)
+  val r6_cd_m02_r104: ndcg 0.39678  (1s)
+  val r6_cd_m02_r105: ndcg 0.39702  (1s)
+  val r6_cd_m02_r106: ndcg 0.39652  (2s)
+  val r6_cd_m02_r107: ndcg 0.39617  (1s)
+  val v28_lr1_m02_s411: ndcg 0.39510  (1s)
+  val v28_lr1_m02_s412: ndcg 0.39429  (2s)
+  val v28_lr1_m02_s413: ndcg 0.39526  (2s)
+  val v28_lr1_m02_s414: ndcg 0.39552  (2s)
+  val v28_lr1_m02_s415: ndcg 0.39497  (1s)
+  val v28_lr1_m02_s416: ndcg 0.39376  (1s)
+  val v28_lr1_m02_s417: ndcg 0.39507  (1s)
+  val v23_gru_pre2s_s501: ndcg 0.39487  (1s)
+  val v23_gru_pre2s_s502: ndcg 0.39441  (1s)
+  val v23_gru_pre2s_s503: ndcg 0.39480  (1s)
+  val v23_gru_pre2s_s504: ndcg 0.39466  (1s)
+  val v23_gru_pre2s_s505: ndcg 0.39580  (1s)
+  val v23_gru_pre2s_s506: ndcg 0.39429  (1s)
+overall: ndcg 0.39548; CE 3.7375; P_pos 0.0692; CE category part 1.4313 + within-category part 2.3062
+
+-- slice: M bin
+slice | feeds% | ndcg | headroom% | CEgrad% (gL1) | Lambda% | Sm% | Sl% | Sm/Sl (rel) | Smz/Slz (rel) | lam/gL (rel) | mean CE | P_pos | logit sd
+M[5,10) |   7.2 | 0.6832 |   3.8 |   5.8 |   1.3 |   7.6 |   5.7 |  1.33 |  1.37 |  0.22 | 1.637 | 0.260 | 0.92
+M[10,20) |  10.4 | 0.5492 |   7.8 |   9.6 |   3.3 |  12.0 |   9.6 |  1.25 |  1.28 |  0.34 | 2.348 | 0.143 | 1.01
+M[20,30) |   9.3 | 0.4683 |   8.1 |   9.0 |   4.3 |  10.7 |   9.0 |  1.19 |  1.23 |  0.48 | 2.892 | 0.090 | 1.04
+M[30,50) |  13.9 | 0.4229 |  13.3 |  14.0 |   8.7 |  15.8 |  14.0 |  1.13 |  1.15 |  0.63 | 3.286 | 0.067 | 1.07
+M[50,75) |  12.6 | 0.3699 |  13.1 |  12.9 |  10.5 |  13.2 |  12.9 |  1.02 |  1.03 |  0.81 | 3.755 | 0.046 | 1.10
+M[75,100) |   9.5 | 0.3423 |  10.3 |   9.8 |   9.8 |   9.6 |   9.8 |  0.98 |  0.99 |  1.01 | 4.075 | 0.037 | 1.12
+M[100,150) |  12.9 | 0.3109 |  14.7 |  13.5 |  16.4 |  11.9 |  13.5 |  0.88 |  0.89 |  1.22 | 4.445 | 0.028 | 1.14
+M[150,200) |   8.0 | 0.2923 |   9.4 |   8.4 |  13.0 |   7.0 |   8.4 |  0.83 |  0.83 |  1.54 | 4.786 | 0.021 | 1.15
+M[200,250) |   6.4 | 0.2741 |   7.7 |   6.8 |  11.9 |   4.9 |   6.8 |  0.73 |  0.71 |  1.75 | 5.024 | 0.019 | 1.17
+M[250,301) |   9.7 | 0.2705 |  11.7 |  10.2 |  20.8 |   7.3 |  10.2 |  0.71 |  0.69 |  2.03 | 5.238 | 0.020 | 1.17
+
+-- slice: K (#positives)
+slice | feeds% | ndcg | headroom% | CEgrad% (gL1) | Lambda% | Sm% | Sl% | Sm/Sl (rel) | Smz/Slz (rel) | lam/gL (rel) | mean CE | P_pos | logit sd
+K=1 |  74.5 | 0.3908 |  75.1 |  74.7 |  62.1 |  72.8 |  74.7 |  0.97 |  0.97 |  0.83 | 3.563 | 0.066 | 1.08
+K=2 |  15.4 | 0.3917 |  15.5 |  15.4 |  19.1 |  15.8 |  15.4 |  1.03 |  1.04 |  1.24 | 4.089 | 0.070 | 1.12
+K=3 |   5.0 | 0.4060 |   4.9 |   5.0 |   8.0 |   5.4 |   5.0 |  1.08 |  1.09 |  1.61 | 4.368 | 0.076 | 1.14
+K>=4 |   5.1 | 0.4642 |   4.5 |   4.9 |  10.8 |   5.9 |   4.9 |  1.21 |  1.23 |  2.20 | 4.598 | 0.106 | 1.16
+
+-- slice: positive coldness (label-defined, descriptive)
+slice | feeds% | ndcg | headroom% | CEgrad% (gL1) | Lambda% | Sm% | Sl% | Sm/Sl (rel) | Smz/Slz (rel) | lam/gL (rel) | mean CE | P_pos | logit sd
+all-pos-cold |  23.7 | 0.3524 |  25.4 |  24.0 |  20.6 |  20.8 |  24.0 |  0.87 |  0.85 |  0.86 | 3.815 | 0.057 | 1.08
+some-cold |  13.1 | 0.4115 |  12.7 |  12.9 |  21.0 |  13.7 |  12.9 |  1.07 |  1.09 |  1.63 | 4.353 | 0.082 | 1.14
+all-pos-warm |  63.2 | 0.4083 |  61.9 |  63.1 |  58.4 |  65.5 |  63.1 |  1.04 |  1.04 |  0.93 | 3.582 | 0.071 | 1.09
+
+-- slice: history length H
+slice | feeds% | ndcg | headroom% | CEgrad% (gL1) | Lambda% | Sm% | Sl% | Sm/Sl (rel) | Smz/Slz (rel) | lam/gL (rel) | mean CE | P_pos | logit sd
+H=0 |   1.3 | 0.3681 |   1.4 |   1.3 |   1.3 |   1.6 |   1.3 |  1.18 |  1.22 |  0.98 | 3.723 | 0.075 | 1.03
+H[1,32) |   5.9 | 0.4140 |   5.7 |   5.8 |   5.3 |   5.3 |   5.8 |  0.92 |  0.94 |  0.93 | 3.611 | 0.085 | 1.18
+H[32,128) |  22.1 | 0.4016 |  21.9 |  22.1 |  21.2 |  20.5 |  22.1 |  0.93 |  0.93 |  0.96 | 3.699 | 0.072 | 1.14
+H[128,256) |  41.7 | 0.3977 |  41.6 |  41.7 |  42.1 |  42.0 |  41.7 |  1.01 |  1.01 |  1.01 | 3.740 | 0.069 | 1.09
+H=256 |  29.0 | 0.3852 |  29.4 |  29.1 |  30.0 |  30.7 |  29.1 |  1.05 |  1.06 |  1.03 | 3.790 | 0.064 | 1.05
+
+-- slice: user 0
+slice | feeds% | ndcg | headroom% | CEgrad% (gL1) | Lambda% | Sm% | Sl% | Sm/Sl (rel) | Smz/Slz (rel) | lam/gL (rel) | mean CE | P_pos | logit sd
+user0 |   4.6 | 0.4022 |   4.5 |   4.5 |   4.6 |   4.3 |   4.5 |  0.96 |  0.98 |  1.03 | 3.697 | 0.087 | 1.21
+user>0 |  95.4 | 0.3952 |  95.5 |  95.5 |  95.4 |  95.7 |  95.5 |  1.00 |  1.00 |  1.00 | 3.739 | 0.068 | 1.09
+
+-- slice: best positive's rank percentile (label-defined, descriptive)
+slice | feeds% | ndcg | headroom% | CEgrad% (gL1) | Lambda% | Sm% | Sl% | Sm/Sl (rel) | Smz/Slz (rel) | lam/gL (rel) | mean CE | P_pos | logit sd
+bestpos top10% |  37.0 | 0.5873 |  25.3 |  35.1 |  47.4 |  57.0 |  35.1 |  1.62 |  1.72 |  1.35 | 3.177 | 0.117 | 1.14
+10-30% |  33.1 | 0.3234 |  37.0 |  33.6 |  26.6 |  33.0 |  33.6 |  0.98 |  0.88 |  0.79 | 3.737 | 0.053 | 1.09
+30-60% |  22.0 | 0.2486 |  27.3 |  22.9 |  17.7 |   9.1 |  22.9 |  0.40 |  0.31 |  0.77 | 4.190 | 0.032 | 1.05
+bottom 40% |   7.9 | 0.2066 |  10.4 |   8.4 |   8.3 |   0.9 |   8.4 |  0.10 |  0.08 |  1.00 | 5.109 | 0.014 | 1.00
+
+-- where the gradient on NEGATIVES goes (val, member-averaged; share of total negative mass)
+neg rank bucket | CE mass% | Lambda mass% | ratio Lambda/CE
+[0,5) |  32.2 |  35.2 |  1.09
+[5,20) |  32.3 |  24.2 |  0.75
+[20,50) |  20.0 |  18.4 |  0.92
+[50,100) |  10.2 |  12.7 |  1.24
+[100,400) |   5.2 |   9.5 |  1.83
+above best positive |  47.6 |  49.2 |  1.03
+between positives |  10.3 |  12.7 |  1.23
+below all positives |  42.1 |  38.2 |  0.91
+negatives sharing a category with some positive | CE  39.0 | Lambda  40.2 | ratio  1.03
+multi-positive anti-gradient: share of positives with p_i > 1/K: 0.0026; anti mass / total CE grad mass 0.00007; among K>=2 feeds: 0.0050
+CE decomposition by K: K=1: cat 1.416 within 2.148; K=2: cat 1.459 within 2.629; K=3: cat 1.541 within 2.827
+
+holdout: 30000 feeds (M>=50, random-like train)
+  hold r6_cd_m02_r101: ndcg 0.32003  (6s)
+  hold r6_cd_m02_r102: ndcg 0.31989  (6s)
+  hold r6_cd_m02_r103: ndcg 0.32020  (6s)
+  hold r6_cd_m02_r104: ndcg 0.32066  (6s)
+  hold r6_cd_m02_r105: ndcg 0.31959  (6s)
+  hold r6_cd_m02_r106: ndcg 0.31982  (6s)
+  hold r6_cd_m02_r107: ndcg 0.31972  (6s)
+  hold v28_lr1_m02_s411: ndcg 0.31899  (6s)
+  hold v28_lr1_m02_s412: ndcg 0.31914  (6s)
+  hold v28_lr1_m02_s413: ndcg 0.31925  (6s)
+  hold v28_lr1_m02_s414: ndcg 0.31904  (6s)
+  hold v28_lr1_m02_s415: ndcg 0.31831  (6s)
+  hold v28_lr1_m02_s416: ndcg 0.31909  (6s)
+  hold v28_lr1_m02_s417: ndcg 0.31823  (7s)
+  hold v23_gru_pre2s_s501: ndcg 0.31904  (6s)
+  hold v23_gru_pre2s_s502: ndcg 0.31854  (6s)
+  hold v23_gru_pre2s_s503: ndcg 0.31915  (6s)
+  hold v23_gru_pre2s_s504: ndcg 0.31850  (6s)
+  hold v23_gru_pre2s_s505: ndcg 0.31873  (7s)
+  hold v23_gru_pre2s_s506: ndcg 0.31915  (6s)
+
+-- slice: holdout M bin
+slice | feeds% | ndcg | headroom% | CEgrad% (gL1) | Lambda% | Sm% | Sl% | Sm/Sl (rel) | Smz/Slz (rel) | lam/gL (rel) | mean CE | P_pos | logit sd
+M[50,75) |  19.2 | 0.3771 |  17.5 |  18.8 |  11.3 |  22.9 |  18.8 |  1.22 |  1.25 |  0.60 | 3.749 | 0.049 | 1.14
+M[75,100) |  15.0 | 0.3481 |  14.3 |  14.8 |  10.9 |  16.6 |  14.8 |  1.12 |  1.13 |  0.74 | 4.080 | 0.039 | 1.16
+M[100,150) |  20.5 | 0.3222 |  20.4 |  20.5 |  18.3 |  21.0 |  20.5 |  1.02 |  1.03 |  0.89 | 4.394 | 0.032 | 1.18
+M[150,200) |  13.5 | 0.3011 |  13.8 |  13.6 |  14.8 |  12.8 |  13.6 |  0.94 |  0.94 |  1.09 | 4.705 | 0.026 | 1.19
+M[200,250) |  12.4 | 0.2821 |  13.1 |  12.5 |  15.9 |  10.7 |  12.5 |  0.85 |  0.84 |  1.27 | 4.987 | 0.021 | 1.20
+M[250,301) |  19.5 | 0.2734 |  20.8 |  19.7 |  28.8 |  16.0 |  19.7 |  0.81 |  0.80 |  1.46 | 5.197 | 0.019 | 1.21
+
+-- slice: holdout K
+slice | feeds% | ndcg | headroom% | CEgrad% (gL1) | Lambda% | Sm% | Sl% | Sm/Sl (rel) | Smz/Slz (rel) | lam/gL (rel) | mean CE | P_pos | logit sd
+K=1 |  64.3 | 0.2918 |  66.9 |  64.8 |  55.1 |  59.4 |  64.9 |  0.92 |  0.91 |  0.85 | 4.425 | 0.023 | 1.17
+K=2 |  19.5 | 0.3374 |  19.0 |  19.4 |  21.3 |  20.9 |  19.4 |  1.07 |  1.08 |  1.10 | 4.555 | 0.034 | 1.18
+K=3 |   7.6 | 0.3713 |   7.0 |   7.5 |   9.6 |   8.8 |   7.5 |  1.18 |  1.19 |  1.29 | 4.635 | 0.047 | 1.20
+K>=4 |   8.6 | 0.4365 |   7.2 |   8.2 |  13.9 |  10.9 |   8.2 |  1.32 |  1.36 |  1.69 | 4.769 | 0.077 | 1.21

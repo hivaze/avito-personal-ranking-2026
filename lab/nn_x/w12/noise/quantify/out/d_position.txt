@@ -1,0 +1,71 @@
+train feeds 3151208, rows 246745836; loaded 0s
+random p>0.9: 89794 feeds, 13871521 rows, 160133 clicks, rate 0.01154, last item positive 0.2881, share of clicks on the last item 0.162 (2s)
+random p>0.5: 164118 feeds, 24372573 rows, 299037 clicks, rate 0.01227, last item positive 0.2843, share of clicks on the last item 0.156 (2s)
+production p<0.05: 1009617 feeds, 138098861 rows, 2177216 clicks, rate 0.01577, last item positive 0.2259, share of clicks on the last item 0.105 (2s)
+
+=== random-order reference: random p>0.9 ===
+  share of production clicks owed to above-average examination (top slots), sum a(1-1/e)+ / A: 0.1009 ± 0.0015
+  clicks lost to below-average examination (deep slots), sum a(1/e-1)+ / A: 0.0526 ± 0.0013
+  click mass relocated across rank cells by examination (TV of actual vs flat-exam counterfactual): 0.0824 ± 0.0014
+  net change of the click count under a flat examination, 1 - CF/A: 0.0483 ± 0.0003
+  row-weighted sd of log e(rank) inside production feeds (logit-scale position offset): 0.1622 ± 0.0027
+  ESS/n of IPS weights 1/e over production clicks: 0.9589 ± 0.0010
+  IPS weights normalised to mean 1 over clicks: min 0.441 max 1.365
+share of non-last clicks on display ranks 0-4: random 0.0654 | production 0.1343 (rows there: 0.0326 / 0.0368)
+non-last base rate: random 0.00974 | production 0.01422
+    rank  rate rand     ± se  rate prod     ± se  exam e(c)    ± se prod/rand rel    ± se   (e and rel: mean over M bins with support)
+       0    0.02512  0.00050    0.09149  0.00028      2.171   0.048         2.789   0.067
+       1    0.02225  0.00046    0.05710  0.00024      1.925   0.046         1.964   0.053
+       2    0.01748  0.00043    0.04163  0.00019      1.552   0.042         1.775   0.049
+     3-4    0.01645  0.00031    0.03456  0.00012      1.474   0.029         1.542   0.032
+     5-9    0.01497  0.00019    0.02861  0.00008      1.332   0.018         1.421   0.020
+   10-19    0.01356  0.00014    0.02251  0.00005      1.205   0.012         1.239   0.013
+   20-49    0.01180  0.00008    0.01577  0.00003      1.050   0.006         0.994   0.006
+   50-99    0.00959  0.00006    0.01167  0.00002      0.938   0.005         0.874   0.004
+ 100-199    0.00733  0.00006    0.00835  0.00002      0.883   0.005         0.811   0.004
+    200+    0.00642  0.00008    0.00722  0.00003      0.827   0.011         0.804   0.012
+    last    0.28806  0.00163    0.22586  0.00042     25.920   0.206         0.555   0.005
+per M bin: relocation metrics | e(rank 0) | rel(rank 0)
+<repo>/lab/nn_x/w12/noise/quantify/d_position.py:92: RuntimeWarning: invalid value encountered in scalar divide
+  bar_r = Cr[:-1].sum() / Rr[:-1].sum(); bar_p = Cp[:-1].sum() / Rp[:-1].sum()
+<repo>/lab/nn_x/w12/noise/quantify/d_position.py:111: RuntimeWarning: invalid value encountered in divide
+  out.update(rate_r=Cr / Rr, rate_p=Cp / Rp, top5_r=Cr[:4].sum() / Cr[:-1].sum(), top5_p=Cp[:4].sum() / Cp[:-1].sum(),
+  M 50-74: n_rand 17310 n_prod 248142 | excess 0.1097 missing 0.0609 tv 0.0894 | 2.181 | 2.057
+  M 75-99: n_rand 13476 n_prod 173317 | excess 0.0950 missing 0.0481 tv 0.0797 | 1.858 | 2.704
+  M 100-149: n_rand 18045 n_prod 214797 | excess 0.1032 missing 0.0533 tv 0.0853 | 2.382 | 2.443
+  M 150-199: n_rand 12336 n_prod 135975 | excess 0.0989 missing 0.0489 tv 0.0798 | 2.161 | 3.094
+  M 200-249: n_rand 11169 n_prod 129457 | excess 0.1061 missing 0.0555 tv 0.0850 | 2.309 | 3.335
+  M 250-300: n_rand 17458 n_prod 107929 | excess 0.0901 missing 0.0467 tv 0.0725 | 2.137 | 3.101
+
+=== random-order reference: random p>0.5 ===
+  share of production clicks owed to above-average examination (top slots), sum a(1-1/e)+ / A: 0.1129 ± 0.0010
+  clicks lost to below-average examination (deep slots), sum a(1/e-1)+ / A: 0.0639 ± 0.0010
+  click mass relocated across rank cells by examination (TV of actual vs flat-exam counterfactual): 0.0950 ± 0.0010
+  net change of the click count under a flat examination, 1 - CF/A: 0.0490 ± 0.0002
+  row-weighted sd of log e(rank) inside production feeds (logit-scale position offset): 0.1876 ± 0.0019
+  ESS/n of IPS weights 1/e over production clicks: 0.9469 ± 0.0008
+  IPS weights normalised to mean 1 over clicks: min 0.373 max 1.375
+share of non-last clicks on display ranks 0-4: random 0.0752 | production 0.1343 (rows there: 0.0339 / 0.0368)
+non-last base rate: random 0.01043 | production 0.01422
+    rank  rate rand     ± se  rate prod     ± se  exam e(c)    ± se prod/rand rel    ± se   (e and rel: mean over M bins with support)
+       0    0.03204  0.00045    0.09149  0.00027      2.609   0.041         2.315   0.038
+       1    0.02617  0.00039    0.05710  0.00022      2.141   0.038         1.750   0.034
+       2    0.02011  0.00032    0.04163  0.00019      1.660   0.031         1.661   0.034
+     3-4    0.01869  0.00024    0.03456  0.00013      1.560   0.022         1.458   0.022
+     5-9    0.01649  0.00015    0.02861  0.00007      1.381   0.012         1.371   0.013
+   10-19    0.01476  0.00010    0.02251  0.00005      1.234   0.008         1.208   0.009
+   20-49    0.01250  0.00006    0.01577  0.00003      1.049   0.004         0.994   0.004
+   50-99    0.00997  0.00005    0.01167  0.00002      0.921   0.004         0.890   0.004
+ 100-199    0.00756  0.00004    0.00835  0.00002      0.868   0.004         0.825   0.004
+    200+    0.00657  0.00007    0.00722  0.00004      0.816   0.008         0.814   0.009
+    last    0.28426  0.00117    0.22586  0.00039     24.073   0.147         0.598   0.004
+per M bin: relocation metrics | e(rank 0) | rel(rank 0)
+  M 50-74: n_rand 34150 n_prod 248142 | excess 0.1232 missing 0.0754 tv 0.1040 | 2.511 | 1.787
+  M 75-99: n_rand 25767 n_prod 173317 | excess 0.1128 missing 0.0641 tv 0.0978 | 2.359 | 2.129
+  M 100-149: n_rand 34538 n_prod 214797 | excess 0.1150 missing 0.0650 tv 0.0976 | 2.729 | 2.132
+  M 150-199: n_rand 22767 n_prod 135975 | excess 0.1162 missing 0.0647 tv 0.0975 | 2.818 | 2.372
+  M 200-249: n_rand 19182 n_prod 129457 | excess 0.1117 missing 0.0602 tv 0.0919 | 2.775 | 2.775
+  M 250-300: n_rand 27714 n_prod 107929 | excess 0.0965 missing 0.0521 tv 0.0790 | 2.460 | 2.694
+
+rank-0 lift over the non-last base rate: production 6.43x = examination 2.58x (random-order curve) x relevance 2.50x; log share of the lift due to position 0.509
+done 111s

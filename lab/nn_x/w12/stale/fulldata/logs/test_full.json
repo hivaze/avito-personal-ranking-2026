@@ -1,0 +1,204 @@
+{
+ "checks": [
+  {
+   "name": "w5 (a) frozen reference == ref/md5.txt",
+   "ok": true,
+   "info": "e4b5f0d74035fefac9b1ea31aabd83ff"
+  },
+  {
+   "name": "w5 (a) live source file still == the frozen reference",
+   "ok": true,
+   "info": "live e4b5f0d74035fefac9b1ea31aabd83ff (if FAIL: the live file changed after the copy; re-derive the copy)"
+  },
+  {
+   "name": "w5 (b) stripped statement counts == expected",
+   "ok": true,
+   "info": "{'import': 1, 'add_argument': 1, 'fd_none': 1, 'if_flag': 1, 'if_fd': 7, 'ifexp': 2, 'boolop': 2}"
+  },
+  {
+   "name": "w5 (b) AST(copy minus FULLDATA statements) == AST(reference)",
+   "ok": true,
+   "info": "145493 chars of AST dump compared"
+  },
+  {
+   "name": "w5 (e) no fd / FullData / a.holdout_in_train node survives the strip",
+   "ok": true,
+   "info": "0"
+  },
+  {
+   "name": "w5 (e) `fd`: 2 assignments (None; FullData(...) inside `if a.holdout_in_train`), 17 reads; a.holdout_in_train read once",
+   "ok": true,
+   "info": "names 19 stores 2 flag reads 1"
+  },
+  {
+   "name": "w5 (c) textual diff: only guarded additions / 4 conditional rewrites, nothing deleted",
+   "ok": true,
+   "info": "added lines 35 (incl. docstring), rewritten 4, deleted 0, offending []"
+  },
+  {
+   "name": "w5 (d) --holdout_in_train default False; all 88 other defaults == reference",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "w5 (d) flag parses to True and changes no other argument",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "w5 (e) no module of nn_x/w5 mentions cd_full",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "w5 (e) no file named like a code-dir module in this directory (import shadowing)",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "abl (a) frozen reference == ref/md5.txt",
+   "ok": true,
+   "info": "1317bdae7d63e726d80440e50552b9c8"
+  },
+  {
+   "name": "abl (a) live source file still == the frozen reference",
+   "ok": true,
+   "info": "live 1317bdae7d63e726d80440e50552b9c8 (if FAIL: the live file changed after the copy; re-derive the copy)"
+  },
+  {
+   "name": "abl (b) stripped statement counts == expected",
+   "ok": true,
+   "info": "{'import': 1, 'add_argument': 1, 'fd_none': 1, 'if_flag': 1, 'if_fd': 7, 'ifexp': 2, 'boolop': 2}"
+  },
+  {
+   "name": "abl (b) AST(copy minus FULLDATA statements) == AST(reference)",
+   "ok": true,
+   "info": "139039 chars of AST dump compared"
+  },
+  {
+   "name": "abl (e) no fd / FullData / a.holdout_in_train node survives the strip",
+   "ok": true,
+   "info": "0"
+  },
+  {
+   "name": "abl (e) `fd`: 2 assignments (None; FullData(...) inside `if a.holdout_in_train`), 17 reads; a.holdout_in_train read once",
+   "ok": true,
+   "info": "names 19 stores 2 flag reads 1"
+  },
+  {
+   "name": "abl (c) textual diff: only guarded additions / 4 conditional rewrites, nothing deleted",
+   "ok": true,
+   "info": "added lines 35 (incl. docstring), rewritten 4, deleted 0, offending []"
+  },
+  {
+   "name": "abl (d) --holdout_in_train default False; all 88 other defaults == reference",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "abl (d) flag parses to True and changes no other argument",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "abl (e) no module of nn_x/abl mentions cd_full",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "abl (e) no file named like a code-dir module in this directory (import shadowing)",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "w5 and abl copies carry the same patch (line for line)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "put_back restores the 200000 feeds before the removal (30000 holdout feeds back); a.keep -> 'last'",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "put_back restores the 20000 feeds before the removal (2977 holdout feeds back); a.keep -> 'last'",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "put_back refuses a feed list that is not (before minus holdout)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "refused with --xfold",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "refused with --xfold_unlab",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "refused with --val_mix",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "refused with --hcap",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "refused with --rec_q",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "refused with --rho_file",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "refused with --trunc_off",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "refused with --prand2",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "refused with --only_random",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "refused with --time_limit",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "refused with --holdout",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "insample() returns nan, logs 'IN-SAMPLE', stores the value",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "abl parser lacks xfold / prand2: getattr defaults used",
+   "ok": true,
+   "info": "FullData reads them with getattr(a, name, default)"
+  },
+  {
+   "name": "file suffix",
+   "ok": true,
+   "info": ""
+  }
+ ]
+}

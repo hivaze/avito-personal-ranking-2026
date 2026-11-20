@@ -1,0 +1,176 @@
+{
+ "checks": [
+  {
+   "name": "ref_pre_tl copies intact (md5.txt)",
+   "ok": true,
+   "info": "{'cd_arms5.py.txt': True, 'lane.sh.txt': True, 'train.py.txt': True}"
+  },
+  {
+   "name": "train.py minus the wave-7 statements (exact set) minus the valcd statements (exact set) minus the hzcd statements (exact set) minus [--trunc_lifts add_argument, `a.trunc_lifts` guard operand] == previous train.py (AST)",
+   "ok": true,
+   "info": "removed args 1 ops 1; hzcd {'import cd_arms6': 1, 'add_argument --hzcd': 1, 'tr_hz = None': 1, 'if a.hzcd': 3, 'ifexp tr_hz': 1}; valcd {'import cd_arms7': 1, 'add_argument --val_mix': 1, 'add_argument --val_fold': 1, 'valcd = None': 1, 'if a.val_mix > 0': 1, 'if valcd is not None and step >= t_cool and valcd.draw(is_pool)': 1, 'if valcd is not None and valcd.is_val': 1, 'if valcd is not None': 2}; w7 {'import cd_arms8': 1, 'add_argument --rdrop_cd': 1, 'add_argument --sam_cd': 1, 'rdrop, sam = None, None': 1, 'if a.rdrop_cd > 0': 1, 'if a.sam_cd > 0': 1, 'if rdrop is not None and step >= t_cool': 1, 'if sam is not None and step >= t_cool': 1, 'if rdrop is not None': 1, 'if sam is not None': 1}"
+  },
+  {
+   "name": "parse(): trunc_lifts default '' (hzcd False, val_mix 0, val_fold -1, rdrop_cd 0, sam_cd 0: later flags) and every other default == the previous parser",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms5.py: previous top-level statements unchanged and in order; TruncOffset / setup_wave5 == previous after removing the mb_path additions; new names = the M-bucket helpers only",
+   "ok": true,
+   "info": "bad []; extra ['=MB_LIFT_PATH', 'bucket_names', 'import hashlib', 'load_lifts_mbucket', 'trunc_coef_mb', 'trunc_groups_mb']; removed ['param mb_path of __init__', 'if mb_path', 'def _init_mbucket', \"mb_path = getattr(a, 'trunc_lifts', '') or ''\", 'if mb_path', 'kw mb_path in TruncOffset()']"
+  },
+  {
+   "name": "lane.sh DRY: all 39 previous jobs print byte-identical commands to the previous lane.sh",
+   "ok": true,
+   "info": "39 commands"
+  },
+  {
+   "name": "E:trunc2:951-954 == E:base + {trunc_off 1.0, trunc_lifts json} == E:trunc + {trunc_lifts json}; seed = 951-954",
+   "ok": true,
+   "info": "{'trunc_off': (0.0, 1.0), 'trunc_lifts': ('', '<repo>/nn_x/w5/trunc_lifts_mbucket.json')}"
+  },
+  {
+   "name": "B:truncp2:101-104 == B:m02ref + {trunc_off 1.0, trunc_lifts json} == B:truncp + {trunc_lifts json}; CDSEED 900 + root, init v17_pre2s_s<root>@77500",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "trunc2 is a stage-E arm and truncp2 a stage-B arm only (other combinations refused)",
+   "ok": true,
+   "info": "[1, 1, 1]"
+  },
+  {
+   "name": "bash -n lane.sh",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "buckets [1,16] [17,32] [33,49] [50,inf)",
+   "ok": true,
+   "info": "[(1, 16), (17, 32), (33, 49), (50, None)]"
+  },
+  {
+   "name": "json raw lifts == recomputed ((1-p_soft)-weighted, production feeds, holdout + pool excluded; |d| < 1e-9); unweighted positives and feed counts equal; applied == raw (no bucket needed a shrink)",
+   "ok": true,
+   "info": "{'M1-16': [-1.8223, 0.4426, 1.8225], 'M17-32': [0.888, 0.4584, 1.7322], 'M33-49': [2.409, -0.4114, -0.4232], 'M>=50': [2.8015, -0.1974, -0.2235]}"
+  },
+  {
+   "name": "== the review numbers (lift_by_m.py) for M1-16 / M17-32 / M33-49 (2 decimals)",
+   "ok": true,
+   "info": "{'M1-16': [-1.82, 0.44, 1.82], 'M17-32': [0.89, 0.46, 1.73], 'M33-49': [2.41, -0.41, -0.42]}"
+  },
+  {
+   "name": "load_lifts_mbucket(): lo [1,17,33,50], rows == json applied lifts, random-like row and rkend>=3 column zero",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "mb_path '' (default): rk3 and coef bitwise == the previous module (live trunc / truncp arms unchanged); same log line",
+   "ok": true,
+   "info": "wave-5 TRUNC-PROD: a 1.0; lifts prod M<50 [1.0038, 0.5449, 2.0131] / prod M>=50 [2.8071, -0.195, -0.2199] (rkend 0/1/2; random-like 0); prod M<50 1605861 feeds,"
+  },
+  {
+   "name": "mb_path json: coef == a * L_json[bucket(M)] * (1 - p_soft) (float32, exact) for production feeds; pool / holdout rows and rkend>=3 column 0; non-zero rows in every bucket",
+   "ok": true,
+   "info": "non-zero cells per bucket [2013921, 1725705, 1077957, 4143687]"
+  },
+  {
+   "name": "M-bucket log line names the json, its md5 and the 4 buckets",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "setup_wave5 refuses --trunc_lifts without --trunc_off",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "offset == brute force (rkend from cand_pos, bucket table, 1 - p_soft) on 19 batches / 168 feeds; 0 on padding",
+   "ok": true,
+   "info": "mismatching feed rows 0"
+  },
+  {
+   "name": "non-zero offsets in every production bucket (incl. the hidden-exploration M<50 feeds, scaled by 1 - p_soft); exactly 0 on pool and holdout feeds",
+   "ok": true,
+   "info": "{'M4-16': 126, 'M17-32': 84, 'M33-49': 78, 'M>=50 prod': 72, 'M<50 p_soft>0.5': 111, 'pool': 0, 'holdout': 0}"
+  }
+ ],
+ "dry_new": [
+  "lane: <repo>/.venv/bin/python train.py --variant w5_e10_trunc2_s951 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 951 --trunc_off 1.0 --trunc_lifts <repo>/nn_x/w5/trunc_lifts_mbucket.json",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_e10_trunc2_s952 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 952 --trunc_off 1.0 --trunc_lifts <repo>/nn_x/w5/trunc_lifts_mbucket.json",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_e10_trunc2_s953 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 953 --trunc_off 1.0 --trunc_lifts <repo>/nn_x/w5/trunc_lifts_mbucket.json",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_e10_trunc2_s954 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 954 --trunc_off 1.0 --trunc_lifts <repo>/nn_x/w5/trunc_lifts_mbucket.json",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_truncp2_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1001 --trunc_off 1.0 --trunc_lifts <repo>/nn_x/w5/trunc_lifts_mbucket.json",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_truncp2_r102 --init <repo>/nn/ckpt/v17_pre2s_s102@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1002 --trunc_off 1.0 --trunc_lifts <repo>/nn_x/w5/trunc_lifts_mbucket.json",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_truncp2_r103 --init <repo>/nn/ckpt/v17_pre2s_s103@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1003 --trunc_off 1.0 --trunc_lifts <repo>/nn_x/w5/trunc_lifts_mbucket.json",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_truncp2_r104 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1004 --trunc_off 1.0 --trunc_lifts <repo>/nn_x/w5/trunc_lifts_mbucket.json"
+ ],
+ "lifts": {
+  "raw": {
+   "M1-16": [
+    -1.8223,
+    0.4426,
+    1.8225
+   ],
+   "M17-32": [
+    0.888,
+    0.4584,
+    1.7322
+   ],
+   "M33-49": [
+    2.409,
+    -0.4114,
+    -0.4232
+   ],
+   "M>=50": [
+    2.8015,
+    -0.1974,
+    -0.2235
+   ]
+  },
+  "counts": {
+   "M1-16": {
+    "feeds": 671307,
+    "pos_rk0_1_2_ge3": [
+     8028,
+     76667,
+     358932,
+     366447
+    ],
+    "shrink": false
+   },
+   "M17-32": {
+    "feeds": 575235,
+    "pos_rk0_1_2_ge3": [
+     57604,
+     38880,
+     168150,
+     554799
+    ],
+    "shrink": false
+   },
+   "M33-49": {
+    "feeds": 359319,
+    "pos_rk0_1_2_ge3": [
+     129174,
+     7570,
+     7445,
+     423778
+    ],
+    "shrink": false
+   },
+   "M>=50": {
+    "feeds": 1381229,
+    "pos_rk0_1_2_ge3": [
+     324047,
+     16099,
+     15703,
+     2594512
+    ],
+    "shrink": false
+   }
+  }
+ },
+ "failed": []
+}

@@ -1,0 +1,116 @@
+== N2: per-feed correlation of the screen deltas (pool 951-954 minus a reference pool), paired per feed
+  val     shared Ra    : corr(dA,dB) +0.538 corr(dA,dC) +0.474 corr(dB,dC) +0.464 | sd dA 0.0687 dB 0.0690 dC 0.0692
+  val     split refs   : corr(A-Ra, B-Rb) +0.043 corr(A-Rb, C-Ra) +0.009 corr(B-Rb... A-Ra) n/a | corr(A-Rb, B-Rb) +0.534 corr(B-Rb, C-Rb) +0.473
+  val     vs Rbar70    : corr(dA,dB) +0.313 corr(dA,dC) +0.219 corr(dB,dC) +0.222
+  val     reference term (Ra - Rbar70): per-feed var share in dA 0.31 dB 0.31 dC 0.31; mean +0.00057+-0.00032 = share of the mean delta: A +0.66 B +0.40 C +0.82
+  holdout shared Ra    : corr(dA,dB) +0.519 corr(dA,dC) +0.456 corr(dB,dC) +0.459 | sd dA 0.0541 dB 0.0554 dC 0.0581
+  holdout split refs   : corr(A-Ra, B-Rb) +0.028 corr(A-Rb, C-Ra) -0.023 corr(B-Rb... A-Ra) n/a | corr(A-Rb, B-Rb) +0.546 corr(B-Rb, C-Rb) +0.481
+  holdout vs Rbar70    : corr(dA,dB) +0.304 corr(dA,dC) +0.232 corr(dB,dC) +0.238
+  holdout reference term (Ra - Rbar70): per-feed var share in dA 0.34 dB 0.33 dC 0.30; mean -0.00001+-0.00018 = share of the mean delta: A +0.04 B +0.02 C +0.02
+  member-level (mean member NDCG) deltas vs the same-seed reference, per seed (val / holdout):
+    A: s951 +0.00068/+0.00027 | s952 -0.00020/-0.00033 | s953 -0.00034/-0.00021 | s954 -0.00070/-0.00033
+    B: s951 -0.00044/-0.00000 | s952 -0.00113/-0.00095 | s953 -0.00088/+0.00008 | s954 -0.00075/-0.00012
+    C: s951 +0.00024/+0.00029 | s952 -0.00101/-0.00037 | s953 -0.00070/+0.00063 | s954 -0.00058/+0.00023
+  reference member NDCG per seed (val / holdout): s951 0.39859/0.32258 | s952 0.39968/0.32298 | s953 0.39914/0.32263 | s954 0.39931/0.32247 | s955 0.39948/0.32247 | s956 0.39861/0.32228 | s957 0.39866/0.32251 | s958 0.39868/0.32276
+
+== N3: diversity and pool gain per 4-group (selected checkpoints, member-equal z pools)
+  [val] 70 reference 4-subsets: gain mean +0.00175 sd 0.00029 [min +0.00097 max +0.00254]; rho mean 0.9723 sd 0.0003 [min 0.9718 max 0.9728]; corr(gain, 1-rho) over subsets +0.08
+  [val] group                            rho   ambig   member     pool      gain  gain-gain(Ra) paired  | gain rank among 70 ref subsets
+  [val] Ra(ref 951-954)              0.9722 0.0208 0.39918 0.40134 +0.00216  +0.00000+-0.00000  | 65/70 below
+  [val] Rb(ref 955-958)              0.9724 0.0207 0.39886 0.39996 +0.00110  -0.00105+-0.00045  | 1/70 below
+  [val] A:kd05w192moeffn             0.9708 0.0219 0.39904 0.40048 +0.00144  -0.00072+-0.00046  | 11/70 below
+  [val] B:kd05w192moevo              0.9640 0.0270 0.39838 0.39990 +0.00152  -0.00064+-0.00047  | 12/70 below
+  [val] C:kd05w192b3ff1              0.9668 0.0249 0.39867 0.40065 +0.00198  -0.00018+-0.00046  | 58/70 below
+  [val] kd05t25w192 a-half           0.9723 0.0208 0.39952 0.40100 +0.00148  -0.00068+-0.00045  | 11/70 below
+  [val] kd05t25w192 b-half           0.9729 0.0203 0.39973 0.40152 +0.00179  -0.00037+-0.00045  | 37/70 below
+  [val] kd08w192 a-half              0.9904 0.0072 0.40029 0.40042 +0.00013  -0.00203+-0.00042  | 0/70 below
+  [val] kd08w192 b-half              0.9897 0.0077 0.40026 0.40034 +0.00008  -0.00208+-0.00042  | 0/70 below
+  [val] kwwd0 a-half                 0.9580 0.0315 0.39677 0.39915 +0.00238  +0.00022+-0.00049  | 69/70 below
+  [val] kwwd0 b-half                 0.9551 0.0337 0.39737 0.39932 +0.00195  -0.00021+-0.00049  | 58/70 below
+  [val] kwwd01 a-half                0.9659 0.0256 0.39834 0.40095 +0.00260  +0.00044+-0.00047  | 70/70 below
+  [val] kwwd01 b-half                0.9628 0.0279 0.39809 0.40053 +0.00245  +0.00029+-0.00046  | 69/70 below
+  [val] kwwd05 a-half                0.9810 0.0142 0.39940 0.40059 +0.00119  -0.00096+-0.00043  | 3/70 below
+  [val] kwwd05 b-half                0.9827 0.0130 0.39977 0.40060 +0.00083  -0.00133+-0.00043  | 0/70 below
+  [val] kwaux0 a-half                0.9683 0.0238 0.39712 0.39919 +0.00207  -0.00008+-0.00047  | 62/70 below
+  [val] kwaux0 b-half                0.9694 0.0230 0.39772 0.39932 +0.00160  -0.00056+-0.00047  | 17/70 below
+  [val] kd05w192ps a-half            0.9747 0.0190 0.39994 0.40159 +0.00165  -0.00051+-0.00045  | 20/70 below
+  [val] kd05w192ps b-half            0.9749 0.0188 0.39902 0.40095 +0.00193  -0.00023+-0.00045  | 53/70 below
+  [val] kd05w224                     0.9693 0.0231 0.39935 0.40160 +0.00225  +0.00009+-0.00046  | 67/70 below
+  [val] kd05w192gru                  0.9728 0.0204 0.39973 0.40134 +0.00160  -0.00056+-0.00046  | 18/70 below
+  [val] kdmixw192                    0.9691 0.0231 0.39900 0.40104 +0.00205  -0.00011+-0.00046  | 61/70 below
+  [val] kwaux1                       0.9740 0.0195 0.39929 0.40111 +0.00182  -0.00034+-0.00044  | 40/70 below
+  [val] kwd2                         0.9773 0.0170 0.39918 0.40066 +0.00148  -0.00068+-0.00044  | 11/70 below
+  [val] kwh30                        0.9754 0.0184 0.39899 0.40035 +0.00136  -0.00080+-0.00045  | 8/70 below
+  [val] kwh6                         0.9710 0.0217 0.39877 0.40081 +0.00204  -0.00012+-0.00045  | 61/70 below
+  [val] kwr32                        0.9705 0.0221 0.39902 0.40036 +0.00133  -0.00082+-0.00047  | 6/70 below
+  [val] kwsb2                        0.9713 0.0215 0.39913 0.40081 +0.00168  -0.00048+-0.00045  | 26/70 below
+  [val] kwwd10                       0.9848 0.0114 0.39894 0.39965 +0.00071  -0.00144+-0.00045  | 0/70 below
+  [val] kw256d2                      0.9730 0.0203 0.39837 0.39970 +0.00133  -0.00083+-0.00045  | 6/70 below
+  [val] kd05g2w192                   0.9702 0.0224 0.39914 0.40080 +0.00166  -0.00049+-0.00045  | 23/70 below
+  [val] kd03g2w192                   0.9548 0.0339 0.39762 0.40093 +0.00331  +0.00115+-0.00050  | 70/70 below
+  [val] linear fit over the 70 ref subsets: gain = +0.0893 + -0.0900 * rho; predicted gain at the arms' rho: A: pred +0.00189 obs +0.00144, B: pred +0.00250 obs +0.00152, C: pred +0.00225 obs +0.00198
+  [val] linear fit over all 32 groups (arms + halves): gain = +0.0676 + -0.0679 * rho; corr -0.85
+  [holdout] 70 reference 4-subsets: gain mean +0.00150 sd 0.00016 [min +0.00110 max +0.00177]; rho mean 0.9738 sd 0.0002 [min 0.9733 max 0.9742]; corr(gain, 1-rho) over subsets -0.48
+  [holdout] group                            rho   ambig   member     pool      gain  gain-gain(Ra) paired  | gain rank among 70 ref subsets
+  [holdout] Ra(ref 951-954)              0.9737 0.0197 0.32267 0.32408 +0.00141  +0.00000+-0.00000  | 21/70 below
+  [holdout] Rb(ref 955-958)              0.9738 0.0196 0.32250 0.32407 +0.00156  +0.00015+-0.00025  | 41/70 below
+  [holdout] A:kd05w192moeffn             0.9724 0.0207 0.32252 0.32428 +0.00176  +0.00035+-0.00025  | 69/70 below
+  [holdout] B:kd05w192moevo              0.9664 0.0252 0.32242 0.32437 +0.00196  +0.00054+-0.00025  | 70/70 below
+  [holdout] C:kd05w192b3ff1              0.9684 0.0237 0.32286 0.32447 +0.00161  +0.00020+-0.00026  | 50/70 below
+  [holdout] kd05t25w192 a-half           0.9735 0.0199 0.32259 0.32412 +0.00153  +0.00011+-0.00025  | 37/70 below
+  [holdout] kd05t25w192 b-half           0.9742 0.0194 0.32244 0.32380 +0.00136  -0.00006+-0.00025  | 12/70 below
+  [holdout] kd08w192 a-half              0.9907 0.0070 0.32338 0.32397 +0.00060  -0.00082+-0.00023  | 0/70 below
+  [holdout] kd08w192 b-half              0.9901 0.0074 0.32336 0.32371 +0.00035  -0.00106+-0.00023  | 0/70 below
+  [holdout] kwwd0 a-half                 0.9600 0.0300 0.32134 0.32359 +0.00226  +0.00085+-0.00027  | 70/70 below
+  [holdout] kwwd0 b-half                 0.9582 0.0313 0.32114 0.32345 +0.00231  +0.00090+-0.00027  | 70/70 below
+  [holdout] kwwd01 a-half                0.9670 0.0247 0.32180 0.32375 +0.00196  +0.00054+-0.00026  | 70/70 below
+  [holdout] kwwd01 b-half                0.9651 0.0261 0.32198 0.32394 +0.00196  +0.00055+-0.00027  | 70/70 below
+  [holdout] kwwd05 a-half                0.9820 0.0135 0.32262 0.32355 +0.00093  -0.00049+-0.00024  | 0/70 below
+  [holdout] kwwd05 b-half                0.9833 0.0125 0.32270 0.32354 +0.00084  -0.00058+-0.00024  | 0/70 below
+  [holdout] kwaux0 a-half                0.9705 0.0221 0.32092 0.32248 +0.00156  +0.00015+-0.00026  | 41/70 below
+  [holdout] kwaux0 b-half                0.9716 0.0213 0.32122 0.32297 +0.00175  +0.00034+-0.00026  | 68/70 below
+  [holdout] kd05w192ps a-half            0.9757 0.0182 0.32252 0.32380 +0.00127  -0.00014+-0.00025  | 6/70 below
+  [holdout] kd05w192ps b-half            0.9763 0.0178 0.32311 0.32432 +0.00121  -0.00020+-0.00025  | 3/70 below
+  [holdout] kd05w224                     0.9711 0.0217 0.32270 0.32424 +0.00154  +0.00012+-0.00025  | 39/70 below
+  [holdout] kd05w192gru                  0.9743 0.0193 0.32268 0.32390 +0.00122  -0.00019+-0.00025  | 3/70 below
+  [holdout] kdmixw192                    0.9706 0.0221 0.32236 0.32421 +0.00184  +0.00043+-0.00026  | 70/70 below
+  [holdout] kwaux1                       0.9753 0.0185 0.32302 0.32436 +0.00134  -0.00007+-0.00025  | 8/70 below
+  [holdout] kwd2                         0.9785 0.0161 0.32238 0.32362 +0.00124  -0.00017+-0.00025  | 3/70 below
+  [holdout] kwh30                        0.9768 0.0174 0.32254 0.32342 +0.00088  -0.00053+-0.00025  | 0/70 below
+  [holdout] kwh6                         0.9726 0.0206 0.32273 0.32464 +0.00191  +0.00050+-0.00025  | 70/70 below
+  [holdout] kwr32                        0.9721 0.0209 0.32241 0.32365 +0.00124  -0.00017+-0.00025  | 3/70 below
+  [holdout] kwsb2                        0.9729 0.0203 0.32232 0.32365 +0.00134  -0.00008+-0.00025  | 8/70 below
+  [holdout] kwwd10                       0.9854 0.0110 0.32233 0.32317 +0.00084  -0.00057+-0.00025  | 0/70 below
+  [holdout] kw256d2                      0.9745 0.0191 0.32209 0.32333 +0.00125  -0.00017+-0.00025  | 3/70 below
+  [holdout] kd05g2w192                   0.9717 0.0212 0.32252 0.32410 +0.00158  +0.00017+-0.00025  | 47/70 below
+  [holdout] kd03g2w192                   0.9576 0.0318 0.32136 0.32393 +0.00257  +0.00116+-0.00027  | 70/70 below
+  [holdout] linear fit over the 70 ref subsets: gain = -0.3206 + +0.3308 * rho; predicted gain at the arms' rho: A: pred +0.00105 obs +0.00176, B: pred -0.00092 obs +0.00196, C: pred -0.00028 obs +0.00161
+  [holdout] linear fit over all 32 groups (arms + halves): gain = +0.0611 + -0.0613 * rho; corr -0.95
+  [val] seed-level sd of a 4-pool gain (35 disjoint splits, rms(diff)/sqrt2): 0.00032
+  [holdout] seed-level sd of a 4-pool gain (35 disjoint splits, rms(diff)/sqrt2): 0.00018
+
+== same-seed vs cross-seed member correlation (Pearson of per-feed z; val / holdout)
+  [val] ref-ref (different seeds, 28 pairs): mean 0.9723 sd 0.0005 min 0.9713 max 0.9734
+  [val] A           : arm-ref same seed 0.9730 | arm-ref cross seed 0.9716 (same-cross +0.0014) | arm-arm within 0.9708 [0.9690, 0.9722]
+  [val] B           : arm-ref same seed 0.9695 | arm-ref cross seed 0.9677 (same-cross +0.0018) | arm-arm within 0.9640 [0.9629, 0.9648]
+  [val] C           : arm-ref same seed 0.9701 | arm-ref cross seed 0.9693 (same-cross +0.0009) | arm-arm within 0.9668 [0.9638, 0.9697]
+  [val] kd05t25w192 : arm-ref same seed 0.9761 | arm-ref cross seed 0.9720 (same-cross +0.0041) | arm-arm within 0.9726 [0.9715, 0.9732]
+  [val] kd08w192    : arm-ref same seed 0.9809 | arm-ref cross seed 0.9798 (same-cross +0.0011) | arm-arm within 0.9900 [0.9893, 0.9905]
+  [val] kwwd0       : arm-ref same seed 0.9640 | arm-ref cross seed 0.9617 (same-cross +0.0023) | arm-arm within 0.9563 [0.9527, 0.9594]
+  [val] kwwd01      : arm-ref same seed 0.9708 | arm-ref cross seed 0.9676 (same-cross +0.0032) | arm-arm within 0.9643 [0.9602, 0.9676]
+  [val] kwwd05      : arm-ref same seed 0.9790 | arm-ref cross seed 0.9760 (same-cross +0.0030) | arm-arm within 0.9819 [0.9791, 0.9834]
+  [val] kwaux0      : arm-ref same seed 0.9682 | arm-ref cross seed 0.9670 (same-cross +0.0011) | arm-arm within 0.9689 [0.9669, 0.9705]
+  [val] kd05w192ps  : arm-ref same seed 0.9742 | arm-ref cross seed 0.9725 (same-cross +0.0017) | arm-arm within 0.9749 [0.9741, 0.9758]
+  [val] ref within Ra 0.9722 within Rb 0.9724 across Ra-Rb 0.9723
+  [hold] ref-ref (different seeds, 28 pairs): mean 0.9738 sd 0.0004 min 0.9729 max 0.9746
+  [hold] A           : arm-ref same seed 0.9744 | arm-ref cross seed 0.9731 (same-cross +0.0013) | arm-arm within 0.9724 [0.9706, 0.9740]
+  [hold] B           : arm-ref same seed 0.9715 | arm-ref cross seed 0.9697 (same-cross +0.0018) | arm-arm within 0.9664 [0.9656, 0.9677]
+  [hold] C           : arm-ref same seed 0.9717 | arm-ref cross seed 0.9708 (same-cross +0.0008) | arm-arm within 0.9684 [0.9651, 0.9714]
+  [hold] kd05t25w192 : arm-ref same seed 0.9772 | arm-ref cross seed 0.9732 (same-cross +0.0040) | arm-arm within 0.9738 [0.9726, 0.9744]
+  [hold] kd08w192    : arm-ref same seed 0.9819 | arm-ref cross seed 0.9808 (same-cross +0.0011) | arm-arm within 0.9904 [0.9897, 0.9909]
+  [hold] kwwd0       : arm-ref same seed 0.9660 | arm-ref cross seed 0.9638 (same-cross +0.0023) | arm-arm within 0.9590 [0.9560, 0.9612]
+  [hold] kwwd01      : arm-ref same seed 0.9724 | arm-ref cross seed 0.9692 (same-cross +0.0032) | arm-arm within 0.9661 [0.9630, 0.9689]
+  [hold] kwwd05      : arm-ref same seed 0.9801 | arm-ref cross seed 0.9772 (same-cross +0.0029) | arm-arm within 0.9827 [0.9803, 0.9840]
+  [hold] kwaux0      : arm-ref same seed 0.9698 | arm-ref cross seed 0.9687 (same-cross +0.0010) | arm-arm within 0.9711 [0.9694, 0.9728]
+  [hold] kd05w192ps  : arm-ref same seed 0.9754 | arm-ref cross seed 0.9738 (same-cross +0.0016) | arm-arm within 0.9760 [0.9754, 0.9770]
+  [hold] ref within Ra 0.9737 within Rb 0.9738 across Ra-Rb 0.9738

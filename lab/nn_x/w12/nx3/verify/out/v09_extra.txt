@@ -1,0 +1,34 @@
+[     0s] === 1. leaky variants, clear margin (|dz| > 1e-3 or |drank| > 1e-4 against V0)
+[     0s]   val | own user admitted: clearly different rows 53022 in 402 feeds; of them the installed value is closer to the leaky variant on 0 rows
+[     0s]   val | sparse source at/after the own time admitted: clearly different rows 795863 in 7194 feeds; of them the installed value is closer to the leaky variant on 0 rows
+[     1s]   val | user 0 linked: clearly different rows 31791 in 271 feeds; of them the installed value is closer to the leaky variant on 0 rows
+[     1s]   val | zero pattern from the z file: no mismatch
+[     1s]   val | zero pattern from the RANK file (rank above the feed minimum) against my walk > 0: mismatches 0; feeds without any zero row: 0
+[     1s]   test | own user admitted: clearly different rows 107675 in 795 feeds; of them the installed value is closer to the leaky variant on 0 rows
+[     1s]   test | sparse source at/after the own time admitted: clearly different rows 1065421 in 9093 feeds; of them the installed value is closer to the leaky variant on 0 rows
+[     1s]   test | user 0 linked: clearly different rows 51636 in 420 feeds; of them the installed value is closer to the leaky variant on 0 rows
+[     1s]   test | zero-pattern mismatch at flat row 862031: my raw rp3b05 3.353e-10 (log1p(K x) = 6.477e-05), installed z - feed minimum 0.00e+00, installed rank - feed minimum 0.0000 (the rank file separates it)
+[     1s]   test | zero pattern from the RANK file (rank above the feed minimum) against my walk > 0: mismatches 1; feeds without any zero row: 1
+[     2s]   twin | own user admitted: clearly different rows 38376 in 310 feeds; of them the installed value is closer to the leaky variant on 0 rows
+[     2s]   twin | sparse source at/after the own time admitted: clearly different rows 318347 in 2809 feeds; of them the installed value is closer to the leaky variant on 0 rows
+[     2s]   twin | user 0 linked: clearly different rows 25723 in 231 feeds; of them the installed value is closer to the leaky variant on 0 rows
+[     2s]   twin | zero pattern from the z file: no mismatch
+[     2s]   twin | zero pattern from the RANK file (rank above the feed minimum) against my walk > 0: mismatches 0; feeds without any zero row: 0
+[     2s]   train sample | own user admitted: clearly different rows 19925 in 142 feeds; of them the installed value is closer to the leaky variant on 0 rows
+[     2s]   train sample | sparse source at/after the own time admitted: clearly different rows 631216 in 6170 feeds; of them the installed value is closer to the leaky variant on 0 rows
+[     2s]   train sample | user 0 linked: clearly different rows 41518 in 371 feeds; of them the installed value is closer to the leaky variant on 0 rows
+[     2s]   train sample | zero-pattern mismatch at flat row 162555358: my raw rp3b05 6.993e-07 (log1p(K x) = 1.267e-01), installed z - feed minimum 0.00e+00, installed rank - feed minimum 0.0000 (the rank file separates it)
+[     2s]   train sample | zero pattern from the RANK file (rank above the feed minimum) against my walk > 0: mismatches 1; feeds without any zero row: 1
+[     2s] === 3. my admitted (row, sequence) pairs against the builder's C2 audit (which skips query feeds with an empty history)
+[     2s]   val natural: my pairs 17378572, of them on feeds with H = 0: 160503; difference 17218069; builder 17218069; equal: True
+[     2s]   test natural: my pairs 32876719, of them on feeds with H = 0: 134917; difference 32741802; builder 32741802; equal: True
+[     2s]   val twin: my pairs 12927366, of them on feeds with H = 0: 118843; difference 12808523; builder 12808523; equal: True
+[     2s]   train lag view: my pairs over all has = 1 feeds 1398646525; builder 1388410566 (difference 10235959 = pairs of the 16195 has = 1 feeds with an empty history; not stored per row in v03)
+[     2s] === 4. the val row that is non-zero in the stored c09_val (day admission) and zero in the build of record
+[     2s]   val row 574427: stored c09_val p3a 8.997e-08; mine 0; my admitted occurrences of the candidate 1216 (cap 500); contributing sequences under the cap 351 -> the 500-occurrence cap moved the window: True
+[     2s] === 5. model-side clamp (inputs are standardised with f_mean / f_std and clamped to +-6): smoke nx3 checkpoint statistics
+[     3s]   f_mean / f_std at dense indices 94, 95, 96 (nx_rp3_z, nx_rp3_rk, has): -0.0031 / 0.6367; 0.0000 / 0.1413; 0.4571 / 0.4982
+[     4s]   train: rows with nx_rp3_z above the clamp (3.817): 0.01364 of the non-NaN rows; standardised sd on non-NaN rows 1.471; standardised value of a has = 0 row +0.005
+[     4s]   val: rows with nx_rp3_z above the clamp (3.817): 0.01703 of the non-NaN rows; standardised sd on non-NaN rows 1.420; standardised value of a has = 0 row +0.005
+[     4s]   test: rows with nx_rp3_z above the clamp (3.817): 0.01765 of the non-NaN rows; standardised sd on non-NaN rows 1.382; standardised value of a has = 0 row +0.005
+[     4s] DONE

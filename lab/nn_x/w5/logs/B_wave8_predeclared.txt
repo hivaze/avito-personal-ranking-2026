@@ -1,0 +1,33 @@
+nn_x/w5 STAGE-B WAVE 8 (cooldown BATCH SIZE = number of cooldown steps; from the E-BATCH finding of 11-13 11:3x: a 4x-batch run reaches the
+same plateau but its 4x-shorter cooldown adds nothing, while the standard cooldown adds +0.0035 holdout -> the cooldown gain is a function
+of the number of small-batch steps): PRE-DECLARED READ-OUT RULE, frozen 2026-11-13T11:38:01Z (date -u), BEFORE the first wave-8 run started: no
+w5_cd_cbs05_r* / w5_cd_cbs2_r* log, claim, checkpoint, prediction or stale file existed (0 matching files).
+RUNS (lane.sh stage B = the CD harness: 2-epoch re-cool of nn/ckpt/v17_pre2s_s<root>@77500.pt with B_BASE + HYG, roots 101-104,
+  variant w5_cd_<arm>_r<root>, seed CDSEED = 900 + root; arm flags appended LAST; every other flag = the existing reference
+  w5_cd_m02ref_r<root>; GPUs N <ids>, one job per GPU at a time via the lane claims):
+  cbs05 = B_BASE + --cand_budget 16384 --max_feeds 256 --eval_every 2000 --select_min_step 24000  (HALF batch -> ~2x cooldown steps ~39k;
+          the eval cadence and the selection floor are scaled so that the selected checkpoint is chosen among the same fraction of the run)
+  cbs2  = B_BASE + --cand_budget 65536 --max_feeds 1024 --eval_every 500 --select_min_step 6000   (DOUBLE batch -> ~2x fewer steps ~9.8k; control arm)
+  Reference: the EXISTING w5_cd_m02ref_r<root> (selected + @last val / holdout preds and stale-val preds present for roots 101-104).
+  The loss is a per-feed mean (train.py divides by max_feeds), so the gradient scale is unchanged across arms; lr 2e-3 is kept in both arms.
+RULE: identical in substance to wave 7 (logs/B_wave7_predeclared.txt), primary arm = cbs05 (reported first; ties in p -> cbs05): per arm,
+  pooled over roots 101-104, paired per val feed vs w5_cd_m02ref_r<root> on the SELECTED checkpoint (holdout-best at step >= select_min_step;
+  last = info): PASS iff ALL of (1) pooled member val delta > +2 SE, Holm-corrected over the two arms (family alpha = P(z > 2) = 0.02275 one-sided;
+  the smaller p must be <= alpha/2, i.e. z >= 2.2776, then the other arm at alpha, z >= 2.0; if the smaller p fails, gate (1) fails for both);
+  (2) pooled member holdout delta >= 0; (3) no val slice among M<50, M>=50, Tue, Thu < -2 SE; (4) pmix private-mix pooled val delta >= -1 SE;
+  (5) the 4-root pool holdout delta >= +2 SE; (6) stale-val pooled member delta >= 0 (stale_pred.py 'both_pre2both', selected checkpoints;
+  missing -> PENDING, never PASS). STOP otherwise; INCOMPLETE if any of the 4 runs of an arm is missing. No clause (7) (no SAM).
+  Diagnostics as in wave 7 (same-root corr, coldpos / warmpos, per-root deltas, pool val, last read, levers, cliplog, futility note), plus
+  the number of cooldown steps and the wall time per run.
+  PASS -> the arm's flags become the cooldown recipe for a 7-root family (roots 101-107, new pre-declaration) and the pool decision vs G3
+  follows decide6/7 (H > +1 SE, V >= 0, slices, pmix, presub; pick-1 replacement only at H >= 2 SE and V >= 0).
+Read-out: nn_x/w5/w5_eval_wave8.py (= w5_eval_wave7.py with ARMS cbs05 / cbs2, primary cbs05, output logs/w5_eval_B_wave8.{txt,json});
+  stale preds via nn_x/w5/stale_pred.py on one GPU for the 8 arm runs (selected + @last) before the read-out (scratchpad wait_w8_readout.sh).
+
+ADDENDUM 1 — 2026-11-13T12:01:37Z (no w5_cd_cbs025_* file existed; cbs05 / cbs2 runs in progress, none finished, no read-out):
+INFORMATION ARM cbs025 = B_BASE + --cand_budget 8192 --max_feeds 128 --eval_every 4000 --select_min_step 48000 (QUARTER batch,
+  ~79k cooldown steps; cadence and selection floor scaled by 4), roots 101-104, GPUs N, variant w5_cd_cbs025_r<root>, CDSEED 900 + root.
+  It extends the wave-8 dose-response (2x / 1x / 0.5x / 0.25x batch in the cooldown) and is NOT part of the Holm family of the two
+  decision arms: its read-out (w5_eval_wave8.py cbs025 -> logs/w5_eval_B_wave8_cbs025.txt, stale preds included) is information.
+  It can only become a decision arm through a NEW pre-declaration, and only if cbs05 PASSES or is within 1 SE of passing gate (1).
+  bs4lr4 note (12:00Z): a 4x-batch cooldown at lr 4e-3 recovers +0.0012 holdout vs +0.0035 at 1x batch -> the per-step view stands.

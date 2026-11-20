@@ -1,0 +1,21 @@
+=== label-free parity of the stale-val inputs, 2026-11-15T04:59:53Z ===
+test feeds: public 8562, private 20033; val feeds 14423; lagged subset feeds 13424
+
+column | zero share / median / p90 of log1p(value) on non-zero rows: val as stored | STALE-VAL override | test public | test private | lagged subset lag0 | lagged subset private-like
+it_hist_all_luo    | 0.379 / 2.30 / 4.41 | 0.485 / 2.20 / 4.25 | 0.428 / 2.30 / 4.41 | 0.456 / 2.30 / 4.41 | 0.255 / 2.48 / 4.47 | 0.469 / 2.30 / 4.33
+it_hist_et1_luo    | 0.411 / 1.95 / 3.97 | 0.515 / 1.79 / 3.83 | 0.458 / 1.95 / 3.97 | 0.485 / 1.95 / 3.97 | 0.289 / 2.08 / 4.04 | 0.497 / 1.95 / 3.93
+it_hist_et2_luo    | 0.689 / 1.10 / 2.56 | 0.749 / 1.10 / 2.40 | 0.715 / 1.10 / 2.56 | 0.728 / 1.10 / 2.56 | 0.610 / 1.10 / 2.56 | 0.732 / 1.10 / 2.48
+it_hist_et3_luo    | 0.713 / 1.39 / 2.77 | 0.773 / 1.39 / 2.64 | 0.740 / 1.39 / 2.77 | 0.751 / 1.39 / 2.77 | 0.638 / 1.39 / 2.77 | 0.757 / 1.39 / 2.64
+it_hist_et4_luo    | 0.749 / 1.39 / 3.04 | 0.795 / 1.39 / 2.89 | 0.767 / 1.39 / 3.04 | 0.775 / 1.39 / 3.04 | 0.700 / 1.39 / 3.04 | 0.787 / 1.39 / 2.94
+seq_cv_invd20      | 0.887 / 0.03 / 0.44 | 0.890 / 0.03 / 0.44 | 0.898 / 0.03 / 0.41 | 0.902 / 0.02 / 0.40 | 0.889 / 0.04 / 0.49 | 0.902 / 0.03 / 0.49
+seq_cv_norm        | 0.887 / 0.01 / 0.10 | 0.890 / 0.01 / 0.10 | 0.898 / 0.00 / 0.09 | 0.902 / 0.00 / 0.09 | 0.889 / 0.01 / 0.11 | 0.902 / 0.01 / 0.11
+seq_cv_pop         | 0.420 / 2.20 / 4.20 | 0.474 / 2.30 / 4.29 | 0.464 / 2.20 / 4.22 | 0.476 / 2.20 / 4.19 | 0.389 / 2.08 / 4.06 | 0.490 / 2.20 / 4.16
+pre2_fe            | 0.000 / 2.77 / 3.03 | 0.000 / 2.77 / 3.03 | 0.000 / 2.77 / 3.03 | 0.000 / 2.78 / 3.03 | 0.000 / 2.80 / 3.05 | n/a
+
+feed cold share (share of candidates with it_hist_all_luo == 0), mean over feeds [M>=50 feeds | M<50 feeds]:
+   val as stored                0.381 [0.381 | 0.381]  (share of feeds with M<50: 0.409)
+   STALE-VAL                    0.486 [0.486 | 0.487]  (share of feeds with M<50: 0.409)
+   test public                  0.429 [0.429 | 0.430]  (share of feeds with M<50: 0.387)
+   test private                 0.459 [0.456 | 0.464]  (share of feeds with M<50: 0.392)
+   lagged subset lag0           0.256 [0.256 | nan]  (share of feeds with M<50: 0.000)
+   lagged subset private-like   0.471 [0.471 | nan]  (share of feeds with M<50: 0.000)

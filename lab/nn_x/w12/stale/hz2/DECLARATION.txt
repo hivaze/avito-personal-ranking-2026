@@ -1,0 +1,203 @@
+=== 2026-11-15T02:34:09Z hz2: DESIGN + GATE CRITERIA + CALIBRATION RULE. Written before any hz2 column exists and before any comparison of a view with val / test rows. ===
+(Done so far: code reading; logs/sizes.log = feed counts per day, sparse-sample counts per day, distinct item counts, two as-built train-row quantiles. No label opened.)
+
+FACTS (logs/sizes.log, label-free). Day slots: slot 0 = Sep 6 (MSK day 20702) ... slot 14 = Sep 20, slot 23 = Sep 29.
+  dense train days = slots 0-8 (Sep 6-14) and 11-13 (Sep 17-19): 203,548-291,760 feeds per day; slot 9 (Sep 15) 42 feeds, slot 10 none, slot 14 (Sep 20) 34 feeds.
+  val = slots 16 / 18 (7,542 / 6,878 feeds, + 3 stragglers on 17 / 19); test = slots 20 / 21 / 22 / 23 (6,050 / 7,367 / 7,578 / 7,600).
+  A val / test row therefore sees, RELATIVE TO THE DENSE CUTOFF c = slot 14 (Sep 20 00:00 MSK):
+     dense snapshot days  DPAT = c + {-14..-6, -3, -2, -1}   (12 days; c-5 and c-4 are the Sep 15-16 hole)
+     sparse snapshot days PAT  = c + {2, 4, 6, 7, 8, 9}        (about 1/37 of the dense density)
+     lag of the row L = day(row) - c: val 2 / 4, public 6 (6,050 feeds) / 7 (2,512), private 7 (4,855) / 8 (7,578) / 9 (7,600).
+
+DEFINITION OF THE TRAIN-ROW COUNTERPART ("hz2", causal replay of the test observation process at the row's own calendar position)
+  Per feed f (ALL 3,151,208 train feeds, the 30,000 holdout feeds included: their rows give a causal lagged holdout through save_holdout_hz):
+    part_f  = public-like with probability 8,562 / 28,595, else private-like   (hash of feed_id, label-free)
+    L_f     = lag in days drawn inside the part from the test feed counts above (public {6, 7}, private {7, 8, 9}; the poplag hash and cdf, so a
+              private-like holdout feed has the lag poplag's private-like view gave it, a public-like one the lag of poplag's public-like view)
+    d_f     = MSK day of the feed;  c_f = d_f - L_f (the feed's lagged dense cutoff, a day boundary).
+    sparse days of the feed S_f = (c_f + {2, 4, 6, 7, 8, 9}) restricted to days with data that are <= d_f. The own day (offset L_f) is always one of them.
+    sparse snapshots = train feeds of the shared 1/37 hash sample (feat_new/hz_common.sparse_flag) on a sparse day.
+  Per candidate row (item j): p = MSK day of the listing's creation time t_f - age(f4) (data/feats/life_f4_age_knots.npy; capped f4 = old).
+    T    = {c_f + o : o in {-14..-6, -3, -2, -1}, c_f + o >= p}   = the dense days on which a test row of this lag and listing age can see the listing; X_test = |T|.
+    A    = T restricted to days >= Sep 6 (every such day is a dense train day because c_f <= Sep 13).
+    EXACT rows (A = T; includes X_test = 0, i.e. listings created on or after the cutoff): dense window W = A, factor r = 1.
+          This is the plain rule "dense counts up to T - lag, with the Sep 15-16 hole replayed"; it needs no calibration and no listing age.
+    TRUNCATED rows (A smaller than T: the listing was alive before Sep 6, where no data exist; the test-like value is not observable):
+          c_r = min(d_f, max(c_f, Sep 6 + m days))            (m = minimum dense depth kept when the calendar allows it; ONE calibrated parameter)
+          W   = the earliest min(X_test, n) dense train days in [Sep 6, c_r), n = number of dense train days there (the hole days c_f-5, c_f-4 are NOT
+                removed for truncated rows: depth is scarce); r = min(X_test / |W|, 4) (depth correction of the first moment; 0 days -> no dense part).
+          Days of W on or after c_f are "fill" days (causal but fresher than the lag); a sparse day that is in W is not counted twice.
+  NOTHING IS COUNTED AFTER THE ROW'S OWN DAY, in any column; no dense snapshot of the own day is counted (W ends before d_f).
+  The nine inputs:
+    it_hist_{all,et1..et4} = r * (occurrences of j in the histories of the train snapshots of the days in W)
+                             + occurrences in the sparse snapshots of the days S_f not in W + occurrences in the row's own snapshot (if not yet counted)
+                             - occurrences in counted snapshots of the SAME non-zero user with a later timestamp (stored LUO rule; only same-day sparse ones can exist).
+    seq_cv_{invd20,pop}    = the stored kernel (feats_v2/seq_/feat_covis.py) over: dense members = for each non-zero user the latest train feed among the days W
+                             (every user-0 feed of those days), sparse members = sparse snapshots of the days S_f not in W with ts < own ts; sequences of the same
+                             non-zero user skipped; most recent 3000 member occurrences; value = r * dense part + sparse part; pop capped at 3000;
+                             seq_cv_norm = invd20 / sqrt(pop + 1) from the combined values.
+    xp_imp_c50             = log1p(min(r * (train impressions of j on the days W), 50))   (test rows count train impressions only: no sparse part).
+  OWN USER: the stored rule of each column is kept, because the val check below requires the same code to reproduce the stored val columns: it_hist counts the
+    row's own snapshot and EARLIER snapshots of the user (a test row has them), never a later one; seq_cv skips every sequence of the user; xp_imp counts earlier
+    impressions only. The task text says "nothing from the row's own user": I read it as "nothing that can carry the row's label = no later snapshot / own-day
+    impression of the user", which holds; dropping the own snapshot would make train rows differ from test rows. Stated in the report.
+  NOT CAUSALLY BUILDABLE (stated now): the dense data start on Sep 6, the lag is 6-9 d and the test depth is 12 d, so a row needs 18-23 d of past for an exact
+    replay of an old listing; the train data span 14 d. For truncated rows hz2 is an approximation whose quality falls with the feed's day (Sep 6: no past at all).
+    Gate numbers are therefore also given by day group (Sep 6-8, Sep 9-12, Sep 13-14, Sep 17-19).
+
+CODE CHECKS (before any view is used):
+  V1 val rows, same kernels, c = Sep 20, W = all train days, sparse = every val / test snapshot (the stored transductive rule): all nine columns vs the stored
+     val columns (nn/feat_cache/val): it_hist_*, seq_cv_pop exact; seq_cv_invd20 / seq_cv_norm / xp_imp_c50 max |diff| <= 1e-4 relative. Also reported, information:
+     the same val rows with the strictly causal sparse rule (sparse days <= own day).
+  V2 a random sample of train feeds, same kernels with the as-built rules (it_hist: all train days + all val / test snapshots minus later same-user; seq_cv and
+     xp_imp: train days before the own day): vs the stored train columns, same tolerances.
+  V3 CAUSALITY AUDIT: an independent plain-numpy recount on a random sample of train feeds lists every counted (row, snapshot) pair of the hz2 view:
+     share of pairs with snapshot day > row day must be 0; share of pairs of the same non-zero user with snapshot ts > row ts must be 0; the recount must equal the kernel.
+
+CALIBRATION OF m (label-free, one parameter, it_hist_all only, cheap): m in {0, 2, 3, 4, 5, 6, 8, 12}. Population trPool (below), private-like feeds vs private test rows.
+  m* = the SMALLEST m (most lag-faithful) for which it_hist_all meets G1 (dZ <= 0.05) and G2 (no bucket with >= 5% of rows above 0.10) below; if no m meets both,
+  m* = argmin dZ. The same m* is used for all nine inputs and both parts. Disclosure owed: the truncated-row part of the view is calibrated to test coverage, not derived.
+
+GATE (label-free; the poplag G1-G5 form). Populations of view rows: trPool = train feeds with p_random > 0.5, M >= 50, not holdout (the cooldown pool, 134,118 feeds)
+  = DECISION population; trHold = the 30,000 holdout feeds; trAll = all train feeds (information: production feeds carry a more popular item mix).
+  Reference rows: private test rows of feeds with M >= 50 for the private-like feeds of the view; public test rows (M >= 50) for the public-like feeds.
+  Age buckets from f4: <1d, 1-3d, 3-7d, 7-10d, 10-24d, 24-76d, >76d (incl. capped). Per column and bucket: zero share and mean of the model-scale value
+  (attach_xt transform: log1p for it_hist / seq_cv; xp_imp_c50 as is). SD = SD of the model-scale column on the reference rows.
+  dZ = view-row-weighted mean over buckets of |zero share(view) - zero share(reference)|; dM = the same for |mean difference| / SD.
+  PASS (per part) iff ALL of:
+   G1 dZ <= 0.05 for the three primaries it_hist_all_luo, seq_cv_pop, xp_imp_c50;
+   G2 no bucket holding >= 5% of the view rows has |zero-share difference| > 0.10, for the three primaries;
+   G3 dM <= 0.20 for the three primaries;
+   G4 dZ of it_hist_all_luo <= 1/3 of the dZ of the as-built column on the same rows;
+   G5 secondary columns (it_hist_et1..4_luo, seq_cv_invd20, seq_cv_norm): dZ <= 0.10 and dM <= 0.30 each.
+  The same table is produced for three views of the same rows: as-built columns; the existing half-dose hz view (it_hist_hz_* for the five it_hist columns, the
+  other four as built); hz2. Verdicts: hz2 PASS / FAIL per part on trPool (decision), and the same on trPool restricted to feed days >= Sep 13 ("late", secondary
+  verdict, declared now because truncation is known to dominate earlier days). trHold and trAll tables are information. One shot: no construction change after the gate
+  except a bug fix that the code checks V1-V3 expose.
+
+=== 2026-11-15T02:45:07Z ADDENDUM 1: code checks, calibration result, and a SECOND variant. Written before any hz2 column file is built and before any gate run. ===
+CODE CHECKS (logs/v1.log, logs/v2.log): V1 PASS (val rows, stored rule: it_hist_* and seq_cv_pop exact on 1,389,971 rows, the three float columns within 3e-6);
+  V2 PASS (20,000 random train feeds, 1,580,265 rows, as-built rules: same result). The kernels are the stored builders with free day masks.
+CALIBRATION (logs/calib.log; trPool private-like feeds, it_hist_all, vs private rows): no m meets G1 and G2 on all days:
+  m = 0 / 2 / 3 / 4 / 5 / 6 / 8 / 12 -> dZ 0.309 / 0.126 / 0.105 / 0.092 / 0.083 / 0.076 / 0.068 / 0.064; largest bucket 0.481 ... 0.104 (as built: dZ 0.259).
+  RULE AS WRITTEN -> m* = 12 (argmin dZ). The PRIMARY view (feats/) is built with m = 12 and judged by the gate as declared.
+MY OBJECTION TO MY OWN RULE (I apply it anyway): logs/diag_m.log (label-free, run after the calibration) shows that the all-day statistic is dominated by feed days
+  Sep 6-8, where a causal view has 0-2 dense days whatever m is (old listings: zero share 0.57 against 0.20 on private rows for every m >= 2). On those days m changes
+  nothing; on later days a large m buys coverage by giving up the lag: at m = 12 the nearest dense day of an old listing is 1-2 d before the row on every day, so old
+  listings (53% of rows) are not stale at all; at m <= 4 it is 8.6-9.1 d before the row on Sep 17-19 and 4.5-8 d on Sep 13-14. The calibration criterion cannot see lag.
+SECOND VARIANT "hz2L" (lag-first), declared now: the same construction with m_L = the smallest m of the same grid that meets G1 and G2 for it_hist_all on trPool
+  private-like feeds of days >= Sep 13 (the "late" subset already named in the declaration); if no m meets both on that subset, hz2L is not built.
+  hz2L is written to feats_L/ and passes through the same G1-G5 table (tag "L"). It does not replace the primary verdict; it is a second, separately judged candidate.
+KEEP-MASK OPTION, declared now: file hz2_keep_rows.npy = truncated rows of feeds on Sep 6-8 (0-2 dense days in the past: a causal value does not exist). The drop-in can
+  leave these rows on the stored columns (env HZ2_KEEP). The gate reports the views with the mask applied as "hz2k" / "hz2Lk" (information; no verdict of its own
+  replaces the declared ones).
+TRANSDUCTIVE SPARSE RULE (information, logs/diag_m.log): counting the sparse days after the row as a test row does lowers the zero share of listings younger than 7 d by
+  0.011-0.020 (0.989 / 0.947 / 0.905 -> 0.978 / 0.928 / 0.885 against 0.975 / 0.916 / 0.859 on private rows). The views stay strictly causal as the task demands.
+
+=== 2026-11-15T02:51:48Z ADDENDUM 2: LABELLED HOLDOUT READ through the hz2 views (train-holdout labels only; no val / test label). Written before any prediction through an hz2 view exists. ===
+PURPOSE: validation of the view, not a pick rule. poplag measured the staleness cost with a view that counts dense days AFTER the row on early holdout days (reviewer issue 1).
+  The hz2 view is causal, so the same 12 members (W8 = w5_e10_{kd05w192,kd05t25w192}_s951-954; pop1kd = abl_e10_pop1kd05t25_s951-954) scored through it give the first causal
+  estimate of that cost on the 30,000 holdout feeds (every holdout feed carries an hz2 lag: 30% public-like, 70% private-like).
+METHOD: hold_infer.py = poplag's CPU fp32 path (control VALID in poplag.md 1.3), view columns from feats/ (primary) and feats_L/ (lag-first); lag-0 predictions = poplag's
+  cache/pred_lag0_<member>.npy (same code path). hold_read.py: pools = member mean of per-feed z; NDCG = src/metrics.py; +- = 1 SE paired per feed.
+QUANTITIES (fixed now): dW = NDCG(W8 pool | view) - NDCG(W8 pool | stored); dP = the same for the pop1kd pool; S(0.2) under the view and D = S_view - S_stored;
+  each on all 30,000 feeds, on days >= Sep 13 (13,424 feeds), per day group, per part and per lag. DECISION SUBSET for every statement below: days >= Sep 13
+  (the subset on which poplag's gate held and on which the lag of old listings is real in hz2L); Sep 17-19 is reported next to it (the only days with 2+ lagged dense days for all lags).
+EXPECTATION written before the read (mechanism = "the W8 members rank by popularity inputs they were never trained to see stale / sparse"):
+  E1 dW < 0 on days >= Sep 13 with |dW| >= 0.0015 for BOTH views (poplag private-like: -0.0033 +- 0.0008; reviewer, causal days Sep 17-19: -0.0020 +- 0.0009);
+  E2 |dP| <= 0.0010 on the same feeds (poplag: -0.0005 +- 0.0004);
+  E3 D > 0 (poplag: +0.00074 +- 0.00040), i.e. the pop-light admixture stops costing under the view.
+  E4 (dose, hz2L vs hz2 primary): old listings are stale in hz2L and fresh in the primary on Sep 17-19, so dW(hz2L) <= dW(primary) there (more loss with real lag).
+WHAT WOULD COUNT AGAINST THE MECHANISM: dW >= -0.0005 on days >= Sep 13 under both views (the loss poplag measured would then be a product of its non-causal windows), or
+  dP <= dW (the pop-light pool losing as much as W8). Either result is reported as "staleness cost NOT reproduced by a causal view".
+READ ONCE per view; no construction change after the read. Early days (Sep 6-12) are reported but carry no weight: the view has no past there.
+
+=== 2026-11-15T03:11:46Z ADDENDUM 3 (before any labelled number): scope of the holdout scoring cut to the declared decision subset ===
+At machine load 145 one d192 member on 30,000 feeds took more than 9 min on 12 threads (poplag: 4-6 min); 12 members x 2 views would not fit the budget. I stopped my own
+run (PID 4045232, hold_infer.py feats, no member finished, nothing read) and restarted both views on the holdout feeds of days >= Sep 13 only (13,424 feeds = the decision subset
+of ADDENDUM 2). Quantities on "all 30,000" and on Sep 6-12 are therefore NOT produced unless time remains; expectations E1-E4 and the counter-criteria are unchanged.
+
+=== 2026-11-15T03:16:53Z ADDENDUM 4: MODEL-FREE CONDITIONAL CHECK (information only; written before it is computed). ===
+The gate compares marginal distributions; it cannot show that a view has the test-like RELATION between the input and the label. Model-free descriptive statistic, no model, no selection:
+  A(x) = mean over feeds of the within-feed AUC of one input x (positives against negatives of the same feed, ties at 0.5), +- 1 SE over feeds; also restricted to rows of listings older
+  than 24 d (feeds with a positive and a negative among them) = the rows whose lag differs between the primary view (fresh) and hz2L (lagged on late days).
+  Inputs: it_hist_all, seq_cv_invd20, xp_imp_c50. Populations: trPool private-like feeds of days >= Sep 13 and of Sep 17-19 under the views as built / hz / hz2 / hz2L (TRAIN labels);
+  val feeds with M >= 50 with the stored val columns (VAL labels, used only for this descriptive number: lag 2-4 d, depth 12 d). No test label exists.
+  Reading fixed now: staleness should lower A. Expected order for it_hist_all on old listings: as built (window around the row) > hz2 primary (fresh past) > val (lag 2-4) and hz2L (lag 6-8 on Sep 17-19) lowest.
+  If hz2L is NOT below the primary on old listings of Sep 17-19, the lag of old listings carries no information loss and the two views are equivalent for training.
+  No decision follows from this check.
+
+=== 2026-11-15T03:34:12Z ADDENDUM 5 (RESUMED RUN; written before any labelled holdout number exists: no hold_read output file, 2 of 12 members scored per view). ===
+STATE AT RESUME: the first run was cut at 03:22Z by an account limit. Its two scoring jobs survived (PID 4054265 = hold_infer.py feats all late, PID 4054267 = hold_infer.py feats_L all late,
+  both started 03:11Z from this directory; checked by /proc/<pid>/cmdline). They are left running; nothing is restarted. No view file, gate or rule is changed.
+READ SCRIPT (hold_read.py), changes fixed now, before the read:
+  (a) it reads the "late" prediction files cache/hpred_<view>_late_<member>.npy (rows of the other 16,576 feeds are NaN; the script asserts that the NaN rows are exactly
+      the rows of holdout feeds of days < Sep 13 and prints no number for those feeds);
+  (b) every subset is inside days >= Sep 13 (13,424 feeds): all, Sep 13-14, Sep 17-19, private-like, public-like, private-like Sep 17-19, per lag 6 / 7 / 8 / 9;
+  (c) E4 is read as the PAIRED difference per feed NDCG(W8 pool | hz2L) - NDCG(W8 pool | hz2 primary) on Sep 17-19 (and, information, on days >= Sep 13), mean +- SE;
+      E4 holds iff that difference on Sep 17-19 is <= 0; it counts as "resolved" only if |difference| >= 2 SE, otherwise "the two views are not separated";
+  (d) information, no rule: poplag's v3 view on the same feeds (nn_x/w12/next/poplag/cache/pred_priv_v3_<member>.npy, private-like lags for every feed): W8 / pop1kd pool
+      under v3 minus stored, and the paired difference hz2 - v3 of the W8 pool on the private-like feeds of days >= Sep 13 (same lag in both views) and of Sep 17-19
+      (where v3 is causal as well: the two should agree);
+  (e) information: per member view - stored; weights 0.1 / 0.3 of the admixture.
+JUDGING (unchanged from ADDENDUM 2, restated so that the read cannot move it): decision subset = days >= Sep 13.
+  E1 dW <= -0.0015 under BOTH views; E2 |dP| <= 0.0010 under both; E3 D = S_view(0.2) - S_stored(0.2) > 0 under both; E4 as in (c).
+  AGAINST THE MECHANISM: dW >= -0.0005 under both views, or dP <= dW under either view -> reported as "staleness cost NOT reproduced by a causal view".
+  In between (-0.0015 < dW < -0.0005): "reproduced in sign, smaller than poplag's -0.0033".
+ADDITIONAL LABEL-FREE CHECKS OF THE RESUMED RUN (criteria fixed now):
+  C1 full-coverage structural causality check on ALL 246,745,836 rows and both views: highest dense day slot in row_dmask < the feed's day slot; highest sparse day slot in
+     feed_smask <= the feed's day slot; every dense slot is one of the 12 dense train days. PASS iff 0 violating rows / feeds.
+  C2 cache re-check before trusting the first run's files: audit.py logic on a NEW random sample (seed 11 instead of 3; 40 feeds per day group, seq recount on 12 per group)
+     for feats and feats_L: PASS iff 0 pairs after the row day, 0 later same-user pairs, recount == files within 1e-4 relative on all nine columns.
+  C3 file integrity: every column file has 246,745,836 float32 values, no NaN / inf / negative value; hz2_lag in {6,7,8,9}; lag shares by part equal the test feed shares within 0.005.
+
+=== 2026-11-15T03:38:33Z ADDENDUM 6: "HZ11" = the EXISTING half-dose hz models of 11-12 against their references THROUGH the causal hz2 view (train-holdout labels only). Written before any such prediction exists. ===
+WHY: the open question for the hz2 arm is whether the staleness cost is a train / test MISMATCH that training on stale-like inputs removes, or pure information loss (PREREG F3).
+  Four models already trained with a (half-dose) stale-like view exist: H = w5_cd_hzcd_r101..104 (hard labels, 2-epoch re-cool of v17_pre2s roots 101-104 with --hzcd, 11-12),
+  R = w5_cd_m02ref_r101..104 (the same re-cool without --hzcd; paired by root). Both are d128, same 34 xt inputs as W8. No GPU and no new training are needed to ask
+  which of the two does better when the inputs are test-like: this is the lagged-holdout witness (W4 of the 02:15Z policy) for the 11-12 hz arm, at half the training dose.
+METHOD: hold_infer2.py (= hold_infer.py, the poplag CPU fp32 path; plus view name "stored" = every column as stored = CPU lag-0 replay), selected checkpoints nn_x/w5/ckpt/<v>.pt,
+  holdout feeds of days >= Sep 13 (13,424 feeds; the subset where the hz2 gate holds for both parts), PRIMARY view (feats). Pools = mean of per-feed z of the 4 members.
+  Path control (before the read is trusted): CPU "stored" replay of each of the 8 models against its stored GPU bf16 holdout file nn_x/w5/preds/holdout/nn_<v>_holdout.npy on the same feeds:
+  VALID iff per-model |NDCG(CPU) - NDCG(GPU file)| <= 0.0005 and the per-feed mean Spearman-free check corr(z CPU, z GPU) >= 0.999 on rows.
+QUANTITIES (paired per feed, mean +- SE, 13,424 feeds; also Sep 13-14 / Sep 17-19 / private-like / public-like, information):
+  Q_view   = NDCG(pool H | hz2 view) - NDCG(pool R | hz2 view)
+  Q_stored = NDCG(pool H | stored)   - NDCG(pool R | stored)          (CPU replay both; the 11-12 reading on all 30,000 feeds from the GPU files was -0.00052 +- 0.00019)
+  I        = Q_view - Q_stored                                         (how much of the in-period deficit of the hz arm turns around under test-like inputs)
+  dR, dH   = view - stored for each pool (the staleness cost of the reference and of the hz-trained pool); member-level mean of the 4 paired single-model Q_view.
+EXPECTATION written now (mechanism M, half dose: the hz view closes 33% of the it_hist gap and none of the seq_cv gap): Q_stored < 0 (about -0.0005); Q_view > 0, central +0.0006,
+  80% interval [0.0000, +0.0015]; I > 0, central +0.0011; |dH| < |dR| (the hz-trained pool loses less).
+READING, fixed now: "SUPPORTS M" iff Q_view >= +1 SE AND I >= +2 SE(I).  "AGAINST M at half dose" iff I <= 0 or Q_view <= -1 SE (a model trained on half-dose stale inputs is not better
+  under full-dose test-like inputs than one that never saw them).  Otherwise "not separated at 4 models / 13,424 feeds".
+  Consequence for PREREG_hz2_arm.txt (no change of its text): "SUPPORTS M" makes E-e the likely outcome; "AGAINST" is an early warning for F3 and is reported in the verdict.
+ALSO (information, same script): the same H / R pools through the lag-first view (feats_L) if CPU time remains; not part of the reading.
+
+=== 2026-11-15T03:44:55Z ADDENDUM 7: label-free information check of an input family OUTSIDE the hz2 view (no rule, no decision; written before it is computed). ===
+The stale-val scenario ("both_pre2both", nn_x/w5/stale_pred.py) perturbs, besides the 8 popularity inputs, the trajectory-encoder scores pre2_fe / pre2_fe_z / pre2_fe_s (no-ID score on newly
+cold rows). The hz2 view does not touch them (task scope = the 8 W8 inputs + xp_imp_c50). pre2_gap.py measures how far train rows are from test rows in that family, by listing age:
+share of rows without an encoder score (has:pre2_fe = 0), share of rows whose item-ID contribution pre2_id_contrib is exactly 0, mean |pre2_fe_z - pre2_new_z| (model scale, clip +-5),
+for trPool private-like feeds of days >= Sep 13 (train rows as built), val rows of feeds with M >= 50, private and public test rows of feeds with M >= 50, and the stale-val override
+(nn_x/r6/stale_cf/pre2both_*.npy on the val rows). Reported as a LIMIT of hz2 ("what a full-dose view would still miss"); nothing is built from it in this task.
+
+=== 2026-11-15T04:53:49Z ADDENDUM 8: RESULT OF THE HZ11 READ (ADDENDUM 6) AND A SECOND, POST-HOC READ ON THE @last CHECKPOINTS. Written after the selected-checkpoint read (logs/hz11_read_feats.txt) and before any @last prediction through a view exists. ===
+RESULT AS DECLARED (selected checkpoints, 13,424 feeds, path control VALID): Q_view +0.00067 +- 0.00041 (z +1.64); Q_stored +0.00044 +- 0.00040; I +0.00023 +- 0.00048 (z +0.49); dR -0.00376 +- 0.00073, dH -0.00352 +- 0.00069.
+  READING BY THE RULE AS WRITTEN: "not separated at 4 models / 13,424 feeds" (Q_view >= +1 SE holds; I >= +2 SE does not). Not "AGAINST". Member level (declared as a reported quantity, not part of the reading):
+  Q_view +0.00064 +- 0.00031 (z +2.09), I +0.00085 +- 0.00034 (z +2.51). My written expectation "Q_stored about -0.0005" was WRONG at pool level on these feeds (+0.00044).
+WHAT I LEARNED FROM THE CONSISTENCY CHECK (logs/hz11_consistency.txt; my code reproduces nn_x/w5/logs/w5_eval_B_hzcd.txt exactly: member @last -0.00052 +- 0.00019, 4-pool @last -0.00067 +- 0.00027):
+  (i) the 11-12 rule judged the @last checkpoints (its primary), ADDENDUM 6 used the SELECTED ones. The selected checkpoint of every run is chosen on these same 30,000 holdout feeds with fresh inputs;
+      on the selected 4-pool the in-period reading on days >= Sep 13 is +0.00061 +- 0.00039, on @last it is -0.00042 +- 0.00038. The selected-checkpoint Q_stored is therefore contaminated by selection on the
+      evaluation feeds, and I = Q_view - Q_stored inherits it.
+  (ii) the in-period deficit of the hz arm sits on the early days (@last 4-pool: Sep 9-12 -0.00102 +- 0.00046, Sep 13-14 -0.00114 +- 0.00061, Sep 17-19 +0.00003 +- 0.00048).
+SECOND READ "HZ11-last" (POST HOC: chosen after seeing the first read; reported next to it, it does not replace it): the same eight models at their @last checkpoints (nn_x/w5/ckpt/<v>@last.pt = the checkpoints the
+  11-12 rule judged; free of selection on the holdout), same feeds, same view (feats), same quantities, same path control (against nn_<v>@last_holdout.npy), SAME READING RULE as ADDENDUM 6:
+  "SUPPORTS M" iff Q_view >= +1 SE AND I >= +2 SE(I); "AGAINST M at half dose" iff I <= 0 or Q_view <= -1 SE; otherwise "not separated".
+  Expectation written now: Q_stored about -0.0004 (the GPU-file value above; known, not a prediction); Q_view >= 0; I > 0, central +0.0008.
+  Because this read was added after a first look, a "SUPPORTS" here is weaker evidence than a pre-planned one: I will report it as "supports, post hoc" and give both reads the same space.
+INFORMATION, declared now (train-holdout labels, existing CPU lag-0 predictions of poplag, no new scoring): S(0.2) of the pop1kd admixture and (W8 pool - pop1kd pool) by holdout day group
+  (Sep 6-8 / 9-12 / 13-14 / 17-19) under STORED inputs on all 30,000 feeds. Question: is the in-period holdout's negative sign on popularity-light contrasts carried by the early days, where the as-built
+  it_hist columns count dense days after the row? No decision; reported as a property of the witness.
+
+=== 2026-11-15T05:19:30Z ADDENDUM 9 (before any @last number through a view has been read: logs/hz11_read_feats_last.txt does not exist): the fourth cell of the HZ11 table, INFORMATION only. ===
+Read so far: (selected, primary view) = the declared read, "not separated" (pool Q_view +0.00067 +- 0.00041); (selected, lag-first view) = declared information: Q_view +0.00124 +- 0.00043, I +0.00080 +- 0.00051.
+Pending: (@last, primary) = ADDENDUM 8, post hoc, same rule. Added now so that all four cells are on the table and none is picked afterwards: (@last, lag-first view), same quantities, NO reading rule of its own.
+The report gives the four cells side by side with equal weight; the declared reading stays the one of ADDENDUM 6, the post-hoc one that of ADDENDUM 8.

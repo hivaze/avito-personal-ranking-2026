@@ -1,0 +1,19 @@
+== GATE-CAL val / block pre2 (xdrop_pre2, seeds (951, 952)): ablated pool 0.39776, with-input twin pool 0.39837
+   TRUE pool-level NN-input value of the block: +0.00061 +- 0.00083 (z +0.7)
+   (column not in the feature store, skipped: pre2_fe_s )
+   (column not in the feature store, skipped: pre2_new_s )
+   linear nested pre2_fe_z_fz           +0.00008 +- 0.00046  w [0.2, 0.05]
+   linear nested pre2_new_z_fz          -0.00023 +- 0.00046  w [0.2, 0.05]
+   linear nested pre2_hmax32_fz         +0.00039 +- 0.00043  w [0.2, 0.05]
+   (i) LINEAR NESTED best single column (post hoc pick, optimistic): pre2_hmax32_fz +0.00039 +- 0.00043 = 0.63 of true
+  [pre2-control(no signal)] fit half 1: scale 1.0, cfg 0, rounds 0, inner gain +0.00000 -> other half +0.00000 +- 0.00000 (n 7242) [21s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]
+  [pre2-control(no signal)] fit half 0: scale 1.0, cfg 0, rounds 0, inner gain +0.00000 -> other half +0.00000 +- 0.00000 (n 7181) [42s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]
+  [pre2-control(no signal)] BOTH halves: +0.00000 +- 0.00000 (z +0.00) over 14423 feeds; all-feed mean +0.00000; top gain: hour 0.00, guest 0.00, base_z 0.00, base_rk 0.00, M 0.00, H 0.00
+  [pre2-block] fit half 1: scale 1.0, cfg 2, rounds 10, inner gain +0.00078 -> other half -0.00060 +- 0.00041 (n 7242) [23s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 22, 12, -3, 41, 16, 14], [0, 11, 10, -34, 18, -27, -69], [0, 78, 15, -5, -91, -48, -78]]
+  [pre2-block] fit half 0: scale 1.0, cfg 0, rounds 0, inner gain +0.00000 -> other half +0.00000 +- 0.00000 (n 7181) [45s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, -24, -52, -90, -164, -172, -143], [0, -56, -114, -202, -233, -229, -260], [0, -45, -76, -130, -179, -265, -456]]
+  [pre2-block] BOTH halves: -0.00030 +- 0.00020 (z -1.47) over 14423 feeds; all-feed mean -0.00030; top gain: pre2_hmax32 0.21, pre2_new_z 0.14, pre2_fe_z_fz 0.11, pre2_new_z_fz 0.11, M 0.10, H 0.09, hour 0.09, pre2_hmax32_fz 0.08
+   (ii) MONOTONE GBDT RESIDUAL: control +0.00000 +- 0.00000 | block -0.00030 +- 0.00020 = -0.49 of true (+0.00061 +- 0.00083)

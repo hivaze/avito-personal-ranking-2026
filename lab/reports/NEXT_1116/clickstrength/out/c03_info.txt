@@ -1,0 +1,63 @@
+[     0s] RULE.txt md5 5b526db8dd62f7de28d502c5399575b8; lens md5 c4a1ad8f427a8d064902bab8fd799b23, condlib md5 afbecdf49891f1207696b2ffc0e35c3d
+[     0s] views: holdout feeds 30000 (with a view 15225), pool feeds with a view 69171; newest source slots in use [2, 3, 4, 5, 7, 8, 13]
+[     0s]    hold: 30000 feeds, rows 4630966; feeds by lag (-1 = no view) {-1: 14775, 3: 3555, 5: 3391, 8: 2027, 9: 3054, 10: 3198}
+[     0s]    pool: 69171 feeds, rows 10253859; feeds by lag (-1 = no view) {3: 15802, 5: 15272, 8: 9190, 9: 14355, 10: 14552}
+[     0s]    val_nat: 14423 feeds, rows 1389971; feeds by lag (-1 = no view) {3: 7542, 4: 1, 5: 6878, 6: 2}
+[     0s]    val_twin: 14423 feeds, rows 1389971; feeds by lag (-1 = no view) {8: 2960, 9: 4583, 10: 6878, 11: 2}
+[     0s]    test_nat: 28595 feeds, rows 2904806; feeds by lag (-1 = no view) {7: 6050, 8: 7367, 9: 7578, 10: 7600}
+[    45s] 
+=== witness H: feeds 30000, rows 4630966; control block 83 columns + nx_rp3_z, nx_rp3_rk; pool NDCG 0.32460 ===
+[    45s]   checks: nx_rp3_z under the null model that holds it: cz +0.000 (must be 0); under the null model without nx3: cz +4.98 (record: H +4.98, T +6.46, N +6.78)
+[    51s]   F1 cs3a_c: stored entered array against its recomputation from the stored float32 statistic: max abs difference 1.19e-07; cz of the recomputation +1.220
+[    51s]   F1 cs3a_c | cz +1.220 (without the constant factor +1.220; second score path +1.220) | coefficient per unit of the entered value +0.1562 | nats per feed 0.000024 | R2 with the null model 0.007 | without nx3 in the null +1.30
+[    68s]       P0 within-feed permutations (100): mean -0.10, sd 1.01, max |cz| 3.23; at or beyond the read: 20 of 100
+[    99s]       P1 placebo within strata of imp3 (100): mean -0.10, sd 0.96, min -2.10, max +1.81; (read - mean) / sd = +1.37; at or beyond the read 23 of 100; corr(placebo, entered) -0.002
+[   131s]       P2 placebo within strata of the form own expected clicks (100): mean +0.01, sd 0.98, min -2.09, max +2.94; (read - mean) / sd = +1.24; at or beyond the read 25 of 100; corr(placebo, entered) +0.015
+[   132s]       information: slots 6-8 +1.30 | slots 11-13 +0.37 | lag 3 d +1.78 | lag 5 d -0.05 | lag 8 d +1.93 | lag 9 d -0.55 | lag 10 d -0.36
+[   133s]   F2 cs3x_c: stored entered array against its recomputation from the stored float32 statistic: max abs difference 1.49e-08; cz of the recomputation +1.853
+[   133s]   F2 cs3x_c | cz +1.853 (without the constant factor +1.853; second score path +1.853) | coefficient per unit of the entered value +2.9619 | nats per feed 0.000054 | R2 with the null model 0.002 | without nx3 in the null +1.88
+[   149s]       P0 within-feed permutations (100): mean -0.11, sd 0.95, max |cz| 2.77; at or beyond the read: 5 of 100
+[   178s]       P1 placebo within strata of imp3 (100): mean +0.14, sd 1.06, min -2.42, max +2.23; (read - mean) / sd = +1.61; at or beyond the read 7 of 100; corr(placebo, entered) +0.001
+[   207s]       P2 placebo within strata of the form own expected clicks (100): mean +0.36, sd 0.93, min -1.71, max +2.43; (read - mean) / sd = +1.61; at or beyond the read 6 of 100; corr(placebo, entered) +0.023
+[   208s]       information: slots 6-8 +2.87 | slots 11-13 -0.44 | lag 3 d +2.71 | lag 5 d +1.28 | lag 8 d +1.24 | lag 9 d -1.28 | lag 10 d -0.41
+[   217s] 
+=== witness T: feeds 14423, rows 1389971; control block 84 columns + nx_rp3_z, nx_rp3_rk; pool NDCG 0.40144 ===
+[   217s]   checks: nx_rp3_z under the null model that holds it: cz +0.000 (must be 0); under the null model without nx3: cz +6.46 (record: H +4.98, T +6.46, N +6.78)
+[   218s]   F1 cs3a_c: stored entered array against its recomputation from the stored float32 statistic: max abs difference 1.19e-07; cz of the recomputation +1.386
+[   218s]   F1 cs3a_c | cz +1.386 (without the constant factor +1.386; second score path +1.386) | coefficient per unit of the entered value +0.2704 | nats per feed 0.000064 | R2 with the null model 0.006 | without nx3 in the null +1.38
+[   223s]       P0 within-feed permutations (100): mean -0.03, sd 0.81, max |cz| 1.93; at or beyond the read: 9 of 100
+[   232s]       P1 placebo within strata of imp3 (100): mean -0.04, sd 1.02, min -2.59, max +2.57; (read - mean) / sd = +1.40; at or beyond the read 17 of 100; corr(placebo, entered) -0.001
+[   241s]       P2 placebo within strata of the form own expected clicks (100): mean +0.15, sd 0.93, min -1.77, max +2.65; (read - mean) / sd = +1.34; at or beyond the read 12 of 100; corr(placebo, entered) +0.016
+[   241s]       information: pmix-public weights +0.21 | pmix-private weights +0.12 | slot 16 +2.06 | slot 18 -0.25 | lag 8 d +1.33 | lag 9 d +1.57 | lag 10 d -0.25
+[   241s]   F2 cs3x_c: stored entered array against its recomputation from the stored float32 statistic: max abs difference 7.45e-09; cz of the recomputation +2.172
+[   241s]   F2 cs3x_c | cz +2.172 (without the constant factor +2.172; second score path +2.172) | coefficient per unit of the entered value +5.6076 | nats per feed 0.000166 | R2 with the null model 0.002 | without nx3 in the null +2.17
+[   246s]       P0 within-feed permutations (100): mean +0.04, sd 0.99, max |cz| 2.45; at or beyond the read: 3 of 100
+[   254s]       P1 placebo within strata of imp3 (100): mean -0.16, sd 1.00, min -3.51, max +1.75; (read - mean) / sd = +2.34; at or beyond the read 4 of 100; corr(placebo, entered) +0.002
+[   263s]       P2 placebo within strata of the form own expected clicks (100): mean +0.27, sd 1.00, min -2.31, max +2.65; (read - mean) / sd = +1.91; at or beyond the read 2 of 100; corr(placebo, entered) +0.032
+[   263s]       information: pmix-public weights +1.65 | pmix-private weights +1.57 | slot 16 +1.55 | slot 18 +1.52 | lag 8 d +1.51 | lag 9 d +0.78 | lag 10 d +1.52
+[   272s] 
+=== witness N: feeds 14423, rows 1389971; control block 84 columns + nx_rp3_z, nx_rp3_rk; pool NDCG 0.40144 ===
+[   272s]   checks: nx_rp3_z under the null model that holds it: cz +0.000 (must be 0); under the null model without nx3: cz +6.78 (record: H +4.98, T +6.46, N +6.78)
+[   273s]   F1 cs3a_c: stored entered array against its recomputation from the stored float32 statistic: max abs difference 2.38e-07; cz of the recomputation +2.113
+[   273s]   F1 cs3a_c | cz +2.113 (without the constant factor +2.113; second score path +2.113) | coefficient per unit of the entered value +0.3466 | nats per feed 0.000159 | R2 with the null model 0.007 | without nx3 in the null +2.09
+[   278s]       P0 within-feed permutations (100): mean -0.31, sd 0.98, max |cz| 2.58; at or beyond the read: 4 of 100
+[   287s]       P1 placebo within strata of imp3 (100): mean -0.09, sd 1.02, min -2.19, max +2.67; (read - mean) / sd = +2.16; at or beyond the read 2 of 100; corr(placebo, entered) +0.002
+[   296s]       P2 placebo within strata of the form own expected clicks (100): mean -0.56, sd 0.94, min -2.43, max +2.29; (read - mean) / sd = +2.84; at or beyond the read 5 of 100; corr(placebo, entered) +0.021
+[   296s]       information: pmix-public weights +0.99 | pmix-private weights +0.45 | slot 16 +1.83 | slot 18 +1.13 | lag 3 d +1.83 | lag 5 d +1.13
+[   297s]   F2 cs3x_c: stored entered array against its recomputation from the stored float32 statistic: max abs difference 1.49e-08; cz of the recomputation +1.682
+[   297s]   F2 cs3x_c | cz +1.682 (without the constant factor +1.682; second score path +1.682) | coefficient per unit of the entered value +3.3189 | nats per feed 0.000094 | R2 with the null model 0.002 | without nx3 in the null +1.64
+[   301s]       P0 within-feed permutations (100): mean -0.09, sd 0.99, max |cz| 2.75; at or beyond the read: 8 of 100
+[   310s]       P1 placebo within strata of imp3 (100): mean -0.01, sd 0.94, min -2.33, max +2.20; (read - mean) / sd = +1.79; at or beyond the read 10 of 100; corr(placebo, entered) -0.001
+[   319s]       P2 placebo within strata of the form own expected clicks (100): mean -0.41, sd 1.06, min -2.68, max +2.34; (read - mean) / sd = +1.97; at or beyond the read 13 of 100; corr(placebo, entered) +0.034
+[   319s]       information: pmix-public weights +1.82 | pmix-private weights +1.83 | slot 16 +0.64 | slot 18 +1.83 | lag 3 d +0.64 | lag 5 d +1.83
+[   319s] 
+=== g1 (Holm over the two forms, alpha = 1 - Phi(2.5) = 0.00621; z bar for the smaller p_form 2.736, then 2.500) ===
+[   319s]   F2 cs3x_c: cz H +1.85 (P0 sd 0.95 -> scaled +1.85), T +2.17 (P0 sd 0.99 -> scaled +2.17); p_form 0.0319 against the Holm bar 0.00310 (z 2.74 on both): MISS; within-feed permutations at or beyond the read H / T: 5 / 3 of 100 (MISS) -> g1 MISS; N (information) +1.68
+[   319s]   F1 cs3a_c: cz H +1.22 (P0 sd 1.01 -> scaled +1.21), T +1.39 (P0 sd 0.81 -> scaled +1.39); p_form 0.1134 against the Holm bar 0.00621 (z 2.50 on both): MISS; within-feed permutations at or beyond the read H / T: 20 / 9 of 100 (MISS) -> g1 MISS; N (information) +2.11
+[   319s] === g2 (both witnesses: |mean P1| < 1.5, |mean P2| < 1.5, (read - mean) / sd >= 2.5 against P1 and against P2) ===
+[   319s]   F1 cs3a_c: H P1: mean -0.10 (ok), click part +1.37 (MISS); H P2: mean +0.01 (ok), click part +1.24 (MISS); T P1: mean -0.04 (ok), click part +1.40 (MISS); T P2: mean +0.15 (ok), click part +1.34 (MISS) -> g2 MISS
+[   319s]   F2 cs3x_c: H P1: mean +0.14 (ok), click part +1.61 (MISS); H P2: mean +0.36 (ok), click part +1.61 (MISS); T P1: mean -0.16 (ok), click part +2.34 (MISS); T P2: mean +0.27 (ok), click part +1.91 (MISS) -> g2 MISS
+[   319s] === numbers of the HOLDOUT-ONLY clause (printed in any case): cz on T at the pmix-private weights (bar +1.7), N cz (bar +2.0) ===
+[   319s]   F1 cs3a_c: T at pmix-private weights +0.12; N +2.11; N at pmix-private weights +0.45
+[   319s]   F2 cs3x_c: T at pmix-private weights +1.57; N +1.68; N at pmix-private weights +1.83
+[   319s] DONE

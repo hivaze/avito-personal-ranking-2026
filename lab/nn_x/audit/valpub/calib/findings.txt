@@ -1,0 +1,174 @@
+VAL <-> PUBLIC CALIBRATION AND RESIDUAL ANATOMY (nn_x/audit/valpub/calib, 2026-11-13, CPU only, 12 threads, new files only)
+=====================================================================================================================
+Scripts: vplib.py (shared), c1_calib.py (part 1), c2_reweight.py (part 2), c3_transfer.py (part 3), c4_private.py (part 4),
+c5_extra.py (supplements). Logs/JSON in out/. Per-feed val NDCG of the 7 modern pools and v10 rebuilt from preds/ and verified
+against the recorded val scores to 1e-5 (Cd .39901, Pall .39896, PF7x .39974, G3 .40032, M2 .40094, S2 .40088, TOonly .40035,
+v10 .39399). Holdout per-feed NDCG of the 5 train-only pools rebuilt from preds/holdout (matches nn_x/pubdiag/shift to 1e-6).
+Public scores are used as DATA (the user asked for this analysis); the overlay (public = G3 to 6 digits) is a control only.
+Conventions: ± = paired per-feed SE; "contrast" = pool minus G3; public paired SE of a contrast = sqrt(Var_w(d)/8562) under the
+public M x cold weights (the 'MCw' model of nn_x/pubdiag/noise, which matched the realised residuals); covariances between the
+six contrasts (they share G3) are carried in full; val-sampling noise of weighted means is added.
+
+---------------------------------------------------------------------------------------------------------------------
+0. BOTTOM LINE (what the 7 modern public readings say and do not say)
+---------------------------------------------------------------------------------------------------------------------
+B1. Within the modern generation, VAL DIFFERENCES DO NOT TRANSFER TO PUBLIC. The 7 pools span 0.00198 on val and 0.00074 on
+    public; the val->public rank correlation is +0.04; OLS slope of public on val over the 7 = 0.10 ± 0.13; the transfer factor
+    of the 6 contrasts vs G3 is k_v = 0.16 ± 0.34 (GLS with full covariance; 95% CI [-0.51, 0.83]; 1:1 is 2.4 SE away, 0 is
+    inside). "No real public differences at all" fits as well as anything (chi2(6) 2.15, p 0.91). (c1 1a/1e, c2 2b, c3 3c)
+B2. The HOLDOUT DOES TRANSFER. On the 4-5 contrasts that have a train-only form, public delta = holdout delta with no fitted
+    parameter: chi2(4) 0.27 (p 0.99) for Cd/Pall/PF7x/M2 (0.72 on 5 df with TOonly), per-contrast |z| <= 0.35; fitted k_h = 1.13
+    ± 1.16. Profile of public = lam*val + (1-lam)*holdout: minimum at lam = -0.1, 1-sigma interval [-0.5, +0.3]; lam = 1 (pure val)
+    p 0.18. At the absolute level, public = a + c*holdout fits the 5 pools with LOO rmse 0.00017 (c = 1.10 ± 0.31) vs 0.00044 for
+    val on the same 5 pools. (c1 1b/1c, c3 3d, c5 i)
+B3. The val excess over the holdout sits in the TRAIN-ONLY half of each pool, not in the FT half: val TO-half delta minus holdout
+    delta is -0.00098 ± 0.00058 (Cd), -0.00073 ± 0.00052 (Pall), -0.00031 ± 0.00046 (PF7x), +0.00068 ± 0.00037 (M2), i.e. the
+    m02 ("late-cooldown, checkpoint picked on val") members look better on val than on the holdout AND than on public; the FT half
+    tracks the TO half within 1 SE for every pool (ft - to: +0.00063 ± 0.00055, +0.00006, -0.00011, -0.00024). So the leak is val
+    SELECTION of members (and of pools: M2, S2 were val-chosen), not the OOF fine-tune. (c5 ii, c3 3e)
+B4. NO VAL FEED REWEIGHTING REPRODUCES PUBLIC. Over 40 pre-specified weightings (uniform; public M; M x cold; hour5/hour24; M x hour;
+    cold x hour; M x cold x hour; M x user; user; H; category-in-history; n_cat; top category; luo-cold; M x luo-cold; M x cold x H;
+    subsets M<50 / M>=50 / Tue / Thu / cold>.3 / cold<=.3 / cold>=.45 / cold<.15 / user0 / tr0 / tr1+ / H>=192 / H<64 / H=256 /
+    H<=19 / cih>.95 / cih<=.8 / hour 14-24 / 0-13 / 0-9 / luo>.5 / luo<=.35) none is rejected (all p >= 0.09, because the public
+    SEs are 0.0005-0.0008) and none beats the zero model. Every composition-matched weighting (public M x cold x hour etc.) still
+    predicts M2/S2 at +0.0005..+0.0008 where public reads -0.0004: z -1.6..-2.1. The three "best" subsets (cold>=.45 only, cih<=.8,
+    H<64; chi2 2.1-2.6) have n_eff 1.2K-3.7K and win only through their large val-sampling SE; their implied "effective val"
+    (user0 13-22%, H 29-135, cold 100% > 0.3) is nothing like public (user0 4%, H 175, cold>.3 73%). The 1-parameter tilt families
+    that fit (f1_mean theta +4.1, tr0 theta -2.1) move the val mean of the tilted variable far outside the public range (f1 0.55 vs
+    0.39; tr0 0.18 vs 0.66): label fits, not composition. Conclusion: the public shortfall of the val-best pools is not a covariate
+    shift that a reweighting can emulate; it is selection. (c2 2a-2d)
+B5. The "re-cool share" story is not separable from "val selection" / "val-holdout discrepancy" / "generic shrinkage": the predictor
+    vectors are collinear across the 6 contrasts (corr share~d_val 0.96, share~disc 0.97, sel~d_val 0.81). All 1-parameter residual
+    models are accepted (chi2 0.7-7.8); by leave-one-contrast-out the val-holdout-discrepancy model is best (LOO sum z^2 0.73; beta
+    -1.07 ± 0.45, i.e. the entire val excess over the holdout is removed on public), then generic shrinkage (3.10), val-selection
+    indicator (3.69; s = -0.00088 ± 0.00042), re-cool share (5.86; b = -0.00140 ± 0.00078), FT-half excess (8.94), FT weight
+    (10.79). Differences of < ~2 in LOO sum z^2 are not evidence with 5-6 points. What 6 contrasts cannot decide: whether the
+    excess is "m02" per se or "anything picked on val"; the holdout does not need that distinction. (c3 3b/3c/3f)
+B6. PRIVATE PROJECTION. Private differs from public in hour (14-24h 0.60 vs 0.36; 18-24h 0.37 vs 0.18), weekday share (0.76 vs 0),
+    and the cold tail (cold>=.45: 0.33 vs 0.21; cold>.3: 0.84 vs 0.74); M, H, user0, tr0, category-in-history, f1 are identical
+    (c4 4a). Private-oriented val reweightings move every pool's val delta by < 0.0004 (c4 4b): composition is not the lever. The
+    holdout reweighted to private hour x weekend equals the plain holdout to < 0.0002 (c4 4c). Combined (holdout + public with
+    composition correction, inverse-variance) private delta vs G3: TOonly -0.00001 ± 0.00010 (holdout cannot see w_ft; public says
+    -0.00038 ± 0.00065), PF7x -0.00017 ± 0.00022, M2 -0.00025 ± 0.00019, S2 -0.00031 ± 0.00046, Pall -0.00042 ± 0.00025, Cd
+    -0.00059 ± 0.00027. Ranking G3 > TOonly ~ PF7x > M2 > S2 > Pall > Cd, unchanged under every leave-one-out k_v (0.04-0.22).
+    The realised private paired SE between near-copies is 0.0003-0.0005, so the realised private order within ±0.0005 is a coin
+    flip; G3 stays pick 1 on this evidence and nothing here promotes anything over it. (c4 4e/4f)
+
+---------------------------------------------------------------------------------------------------------------------
+1. CALIBRATION (part 1; out/c1_calib.log)
+---------------------------------------------------------------------------------------------------------------------
+1a. public = a + c*val, 11 files (4 old + 7 modern): a +0.0071, c 0.964 ± 0.033, resid sd 0.00079, LOO rmse 0.00089. Slope-1
+    model: offset -0.00728, LOO rmse 0.00083 (equivalent). Residuals are STRUCTURED by generation and by val selection:
+    v3 -0.0009, v4 +0.0002, v5 +0.0003, v10 +0.0011, Cd +0.0005, Pall +0.0009, PF7x +0.0004, G3 -0.0000, M2 -0.0010, S2 -0.0009,
+    TOonly -0.0005. Fit on 4 old + Cd (c 1.038) and predict the 6 later modern: misses -0.0001 (Pall), -0.0006 (PF7x), -0.0011
+    (G3), -0.0021 (M2), -0.0020 (S2), -0.0016 (TOonly); mean -0.00125, rmse 0.00146: the cross-generation slope (~1) is the wrong
+    slope for within-generation differences.
+1b. 7 modern only: a +0.353, c 0.098 ± 0.126, resid sd 0.00025, LOO rmse 0.00029; slope fixed 0: LOO rmse 0.00026 (best);
+    slope fixed 1: LOO rmse 0.00083 (worst). Public spread / val spread = 0.37; Spearman +0.04.
+1c. holdout -> public (Cd, Pall, PF7x, G3, M2): c 1.103 ± 0.307, resid sd 0.00015, LOO rmse 0.00017; slope-1: LOO rmse 0.00014.
+    Same 5 pools with val: c 0.160 ± 0.174, LOO rmse 0.00044 (slope-1: 0.00085). Adding TOonly (holdout = G3's) as a 6th point:
+    c 0.73 ± 0.42, LOO rmse 0.00029 (TOonly's -0.00047 is the one reading the holdout cannot address: it is about w_ft).
+1d. combinations public = a + c*(lam*val + (1-lam)*holdout) on the 5 pools: LOO rmse rises monotonically from 0.00017 (lam 0) to
+    0.00044 (lam 1); free 2-predictor OLS b_val -0.23, b_hold +1.76 (2 dof; LOO rmse 0.00014). lam is not identifiable to better
+    than ±0.5 from 5 points, but every point of the profile favours the holdout.
+1e. reweighted / subset val as the single predictor of the 7 public scores (free slope): every weighting gives LOO rmse
+    0.00022-0.00030 and c 0.0-0.25 (uniform 0.098, M-only 0.105, M x cold 0.104, hour5 0.109, M x cold x hour 0.105, M<50 0.016,
+    M>=50 0.183, Tue 0.125, Thu 0.061, cold>.3 0.059, cold>=.45 -0.046, user0 0.057, tr0 0.072, tr1+ -0.060, H>=192 0.049, H<64
+    0.247, cih<=.8 0.198). With slope fixed at 1 the best is M x cold x hour (0.00070) and the worst user0 (0.00180): none is
+    close to the free-slope floor. Correlation of the 6 val deltas with the 6 public deltas: +0.30 uniform; highest cih<=.8 +0.58,
+    H<64 +0.56, M>=50 +0.48 (6 points; not significant). Which single predictor is best out of sample: the HOLDOUT (LOO rmse
+    0.00017 on 5 points), then any val weighting with slope ~0 (0.00026-0.00030); no val reweighting improves on uniform val.
+
+---------------------------------------------------------------------------------------------------------------------
+2. REWEIGHTING SEARCH (part 2; out/c2_reweight.log) - the 6 exact public deltas vs G3
+---------------------------------------------------------------------------------------------------------------------
+   public: Cd -0.00074, Pall -0.00038, PF7x -0.00010, M2 -0.00039, S2 -0.00035, TOonly -0.00047.
+   uniform val expectation: -0.00131, -0.00136, -0.00058, +0.00062, +0.00056, +0.00003 -> chi2(6) 8.01 p 0.24, z = +0.71 +1.38
+   +0.75 -1.81 -2.00 -0.79. M x cold (pmix public): chi2 6.10 p 0.41 (z -1.93 for M2 and S2). M x cold x hour5: 6.30 p 0.39.
+   All 40 fixed weightings: chi2 2.1-11.1; none rejected, none fits M2/S2 (every composition-matched weighting leaves them at
+   z -1.5..-2.4 except subsets with n_eff < 4K). Zero model chi2 2.15; shrinkage k = 0.15 ± 0.35 chi2(5) 1.97 (LOO sum z^2 3.1);
+   with intercept a -0.00036 ± 0.00037, k 0.20 ± 0.35.
+   Tilt families w = exp(theta x) on the public M x cold base (1 fitted parameter, LOO over contrasts): cold_share theta +4.2
+   (chi2 4.9, LOO 6.7; implied mean cold 0.43 vs public 0.37), logM +8 (n_eff 963; degenerate), hour +0.8 (6.0; mean hour 14.4
+   vs public 11.4: wrong direction), tr0 -2.1 (2.8; tr0 share 0.18 vs public 0.66), f1_mean +4.1 (2.2, LOO 1.5; f1 0.55 vs 0.39).
+   No tilt both lowers chi2 and lands on the public composition. The "effective val that public rewards" is therefore NOT a
+   sub-population of val: public rewards the holdout ordering (section 3), i.e. train-period, selection-free differences.
+   Caveat on power: with public SEs of 0.0005-0.0008 per contrast, chi2(6) can only reject weightings that mis-predict by
+   > ~0.0015 somewhere; the test has ~50% power against the uniform expectation and essentially none to pick among weightings
+   that differ by < 0.0005 in their expectations (every composition weighting does). This search can tell that composition
+   does not explain M2/S2; it cannot rank composition weightings against each other.
+
+---------------------------------------------------------------------------------------------------------------------
+3. TRANSFER-RATIO ANATOMY (part 3; out/c3_transfer.log, out/c5_extra.log)
+---------------------------------------------------------------------------------------------------------------------
+   residuals (public - uniform val): Cd +0.00057 (z +0.71), Pall +0.00097 (+1.39), PF7x +0.00048 (+0.75), M2 -0.00100 (-1.81),
+   S2 -0.00090 (-1.97), TOonly -0.00051 (-0.80); 1:1 transfer chi2(6) 7.99 p 0.24; constant offset a -0.00047 ± 0.00038.
+   1-parameter models (GLS; chi2 | LOO sum z^2): val-holdout discrepancy beta -1.07 ± 0.45 (0.75 on 4 df | 0.73); generic
+   shrinkage k 0.16 ± 0.34 (2.00 | 3.10); val-selected indicator s -0.00088 ± 0.00042 (3.57 | 3.69); re-cool share b -0.00140 ±
+   0.00078 (4.72 | 5.86); FT-half excess h +0.63 ± 0.72 (5.45 on 3 | 8.94); FT weight f +0.0005 ± 0.0012 (7.82 | 10.79).
+   Holdout as the direct predictor: r = d_hold chi2(5) 0.72 p 0.98 (z Cd -0.17, Pall +0.09, PF7x +0.15, M2 -0.35, TOonly -0.75);
+   k_h 1.13 ± 1.16; two-predictor k_v -0.13 ± 0.53, k_h +1.36 ± 1.52 (corr -0.65). On the same 5 contrasts val alone: k_v 0.22 ±
+   0.36 chi2(4) 1.68. The agreement is tighter than chance (P(chi2_4 <= 0.72) = 0.05): the SEs overstate the disagreement, if
+   anything.
+   TO-half -> public ratios: Cd 0.47, Pall 0.32, PF7x 0.19, M2 -0.77; holdout -> public: 1.23, 0.86, 0.49, 2.14 (noisy, all
+   consistent with 1).
+   Winner's curse: M2's val SE vs G3 is 0.00034, S2's 0.00028; a 10-20-look val max inflates by 0.0007; observed public-val
+   -0.0010 ± 0.0006 and -0.0009 ± 0.0005; M2's val-holdout +0.0008. Consistent with selection, not proof.
+   What 7 points cannot decide: m02-specific vs any-val-selected excess (collinear); whether TOonly's -0.00047 is real (z -0.8;
+   the holdout is blind to it); whether k_v is 0 or 0.4 (both inside the CI). What they do decide: k_v = 1 is out (2.4 SE from
+   the 6 contrasts; the 4-old+Cd extrapolation misses the modern files by -0.0013 on average), and the holdout ordering is not
+   contradicted anywhere.
+
+---------------------------------------------------------------------------------------------------------------------
+4. PRIVATE (part 4; out/c4_private.log)
+---------------------------------------------------------------------------------------------------------------------
+   composition (val | holdout | public | private): mean M 96 | 154 | 104 | 101; M<50 0.41 | 0 | 0.39 | 0.39; cold>.3 0.43 | - |
+   0.74 | 0.84; cold>=.45 0.08 | - | 0.21 | 0.33; cold>=.6 0.01 | - | 0.03 | 0.05; luo-cold>.5 0.14 | - | 0.24 | 0.33; 14-24h
+   0.48 | 0.52 | 0.36 | 0.60; 18-24h 0.25 | 0.32 | 0.18 | 0.37; weekend 0 | 0.32 | 1.00 | 0.24; user0 0.046 | 0.051 | 0.041 |
+   0.041; tr0 0.65 | - | 0.66 | 0.67; H 173 | - | 175 | 174; cih 0.845 | - | 0.847 | 0.847. Private by day: Sun 4855 (cold .39),
+   Mon 7578 (.40), Tue 7600 (.42).
+   Best available private proxy, given what fit public: the HOLDOUT (selection-free; its weekday/weekend and hour splits of the
+   contrasts agree within 1.5 SE; private-hour x weekend reweighting changes it by < 0.0002), with the public reading as the
+   second, independent estimate after an (immaterial, k_v x (E_priv - E_pub) < 0.0001) composition correction, and val only as
+   a shrunk (k_v 0.15) tie-breaker. Private-reweighted val (M x cold x hour5, n_eff 5.9K) for the record: Cd -0.00081 ± 0.00077,
+   Pall -0.00084 ± 0.00067, PF7x -0.00040 ± 0.00061, M2 +0.00079 ± 0.00051, S2 +0.00073 ± 0.00045, TOonly -0.00007 ± 0.00059.
+   Holdout (plain | private-weighted): Cd -0.00060 ± 0.00027 | -0.00057; Pall -0.00045 ± 0.00025 | -0.00043; PF7x -0.00020 ±
+   0.00022 | -0.00019; M2 -0.00018 ± 0.00019 | -0.00023 (weekday -0.00043 ± 0.00023, weekend +0.00035 ± 0.00030; the one split
+   that moves, and it moves AGAINST M2 on private's 76% weekdays).
+   Combined private delta vs G3 (section 0 B6): G3 0 > TOonly -0.00001 ± 0.00010 > PF7x -0.00017 ± 0.00022 > M2 -0.00025 ±
+   0.00019 > S2 -0.00031 ± 0.00046 > Pall -0.00042 ± 0.00025 > Cd -0.00059 ± 0.00027. P(pool beats G3 on private): 0.47, 0.22,
+   0.09, 0.25, 0.04, 0.02. Pick 2 ordering among hedges without m02 members: Pall above Cd by 0.00017 ± 0.00037 (nothing).
+   What private can still do that neither lens sees: the 1-2 extra days of staleness (cold>=.45 tail 0.33 vs public 0.21; no
+   labelled sample has it; nn_x/pubdiag/shift p3 slices put the modern contrasts at -0.0007..+0.0001 on cold>=.45 val feeds,
+   i.e. the m02-heavy pools gain nothing there), and M<50 feeds (39% of private; the holdout is M>=50 only; the val M<50 subset
+   transfers at c 0.02 ± 0.10 to public, c1 1e).
+
+---------------------------------------------------------------------------------------------------------------------
+5. PRE-REGISTERED RULE (stated for future use; the numbers in it were fixed on 2026-11-13 and are not re-fitted per candidate)
+---------------------------------------------------------------------------------------------------------------------
+   For a new candidate C vs the current pick G3, before any public look: H_C = holdout paired delta (train-only pool, SE_h);
+   V_C = uniform val delta (SE_v); V'_C = M x cold x hour5 private-weighted val delta. E_C = H_C + 0.15 V'_C.
+   Pick-1 switch: H_C >= +1 SE_h AND E_C > 0 AND V_C >= -1 SE_v AND presub PASS; among qualifiers the highest E_C.
+   Public readout of C = verification against the pre-stated expectation r_C ~ H_C: |r_C - H_C| > 2.5 sqrt(SE_pub^2 + SE_h^2)
+   declares the holdout lens broken for that candidate class and reverts to "G3 stays". Candidates without a train-only form
+   (stackers, FT-only files, overlays, w_ft variants) have no H_C: not eligible for pick 1; pick 2 only if r_C >= -1 SE_pub.
+   Val remains a gate (no slice < -2 SE, pmix >= -1 SE), never the ranking criterion between near-copies. This rule would have
+   kept G3 at every decision point of 11-12 and would not have spent public slots on M2 / S2 / TOonly readouts.
+
+---------------------------------------------------------------------------------------------------------------------
+6. WHAT 7 MODERN POINTS CAN AND CANNOT SUPPORT (read before quoting any number above)
+---------------------------------------------------------------------------------------------------------------------
+   CAN: reject 1:1 val transfer within the generation (2.4 SE; replicated as the -0.0013 mean miss of the old-era calibration on
+   the 6 later files); state that no composition reweighting of val reproduces the M2/S2 shortfall (all leave z <= -1.5); state
+   that the holdout predicts the public contrasts with no free parameter (p 0.98-0.99) and the absolute public level with LOO
+   rmse 0.00017; locate the val excess in the train-only (val-selected-checkpoint) half.
+   CANNOT: give k_v to better than ±0.35; separate m02-share from val-selection from generic shrinkage (collinear predictors);
+   rank composition weightings against each other; say anything about w_ft beyond "TOonly -0.00047 ± 0.0006" (one reading, no
+   holdout form); promise the holdout ordering holds on private's cold tail and M<50 feeds (unobserved by the holdout); exclude
+   that the holdout-public agreement (P(chi2 <= obs) 0.05) is partly luck. A single further share-0 or val-selected-low-share
+   public reading would break the collinearity; the user's budget decides whether that is worth a slot (predicted readings under
+   the three models are within 0.9 SE of each other for Pall/F10only, c2_03 of critique2, so probably not).
+Inputs read: nn_x/pubdiag/noise/*.txt, nn_x/pubdiag/shift/{p1_holdout_perfeed.npz,desc_*.parquet,p3,p5,p6 logs}, nn_x/audit/
+critique2/critique2.txt + out/c2_03_pubresid.log, nn_x/audit/publicprobe/findings.txt, reports/{eda_shift_overlap,review_shift,
+sol_advval,INSIGHTS_1112,CURRENT_STATUS,EXPERIMENT_REGISTRY}.md, src/{calib,pmix,metrics,common,stack_val,make_sub}.py,
+eda/errors/segments/{feed_table,test_segments}.parquet + segdefs.py, preds/ens_*, preds/nnstk_g3gate3r_*, preds/holdout/*.

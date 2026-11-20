@@ -1,0 +1,62 @@
+feeds 14423 rows 1389971 positives 21983  K=0 feeds 0  actual NDCG 0.40294 ± 0.00207  (record: 0.40293)
+tied adjacent score pairs inside feeds: 0
+T fitted on half A 1.0036, on half B 1.0113; applied: T_A
+
+(A) expected NDCG if labels were drawn from the model's (sharpened) probabilities, same K per feed, model order
+    t  T_eff    R  E[NDCG]   MC se  draw sd   half A   half B K=1 exact NLL/pos act  entropy   E[v_f] var mu_f draw share
+ 1.25  1.255  150  0.37661 0.00005  0.00165  0.37735  0.37586   0.37049      3.9719    3.835  0.03673  0.01868      0.663
+ 1.00  1.004  400  0.40137 0.00003  0.00172  0.40207  0.40065   0.39522      3.9604    3.722  0.04113  0.02046      0.668
+ 0.98  0.984  150  0.40390 0.00005  0.00180  0.40461  0.40319   0.39777      3.9606    3.710  0.04153  0.02067      0.668
+ 0.96  0.963  150  0.40666 0.00005  0.00168  0.40747  0.40584   0.40042      3.9610    3.697  0.04202  0.02084      0.668
+ 0.95  0.953  150  0.40794 0.00005  0.00150  0.40872  0.40716   0.40179      3.9613    3.691  0.04224  0.02095      0.668
+ 0.94  0.943  150  0.40936 0.00005  0.00186  0.41005  0.40866   0.40320      3.9617    3.684  0.04243  0.02104      0.668
+ 0.92  0.923  150  0.41231 0.00005  0.00151  0.41308  0.41154   0.40609      3.9627    3.670  0.04293  0.02122      0.669
+ 0.90  0.903  150  0.41530 0.00005  0.00176  0.41603  0.41456   0.40912      3.9641    3.655  0.04339  0.02145      0.669
+ 0.80  0.803  400  0.43287 0.00003  0.00184  0.43353  0.43220   0.42655      3.9781    3.568  0.04606  0.02253      0.672
+ 0.70  0.703  150  0.45543 0.00006  0.00197  0.45598  0.45487   0.44888      4.0101    3.452  0.04910  0.02391      0.673
+ 0.60  0.602  400  0.48506 0.00004  0.00186  0.48557  0.48455   0.47821      4.0749    3.294  0.05239  0.02547      0.673
+ 0.50  0.502  150  0.52502 0.00006  0.00173  0.52532  0.52473   0.51765      4.2023    3.075  0.05562  0.02720      0.672
+columns: E[NDCG] = mean over feeds of the per-feed expected NDCG (exact for K=1, R draws for K>1); draw sd = sd over draws of the val-size mean; E[v_f] = mean per-feed draw variance; var mu_f = variance across feeds of the expected NDCG; draw share = E[v_f] / (E[v_f] + var mu_f) = share of the model-implied per-feed variance that is the label draw alone
+
+actual minus calibrated expectation: +0.00157 ± 0.00175 (half A +0.00278 ± 0.00248, half B +0.00035 ± 0.00248)
+actual NDCG percentile among the 400 draws: 0.818
+observed per-feed variance of NDCG 0.06170; model-implied total 0.06158; label-draw part E[v_f] 0.04113 = 0.667 of the observed; R^2 of actual on expected 0.283 (var mu / observed 0.332)
+sharpness needed for +0.0032 val (= leader's +0.00305 public via the level-line slope 0.963): t = 0.975, i.e. logits 1.025x as large and still calibrated
+
+per M bin (t = 1): n | actual | expected | actual-exp ± se | per-feed sd: total observed, draw-only | draw share of observed var
+  M   5- 30:  4056 | 0.5601 | 0.5721 | -0.0120 ± 0.0038 | 0.2649 0.2419 | 0.834
+  M  31-100:  5061 | 0.3886 | 0.3831 | +0.0055 ± 0.0030 | 0.2264 0.2079 | 0.843
+  M 101-200:  2985 | 0.3098 | 0.3027 | +0.0071 ± 0.0033 | 0.1890 0.1709 | 0.817
+  M 201-300:  2321 | 0.2793 | 0.2697 | +0.0095 ± 0.0035 | 0.1818 0.1465 | 0.649
+
+(A2) one temperature per M bin, fitted on half A (the global T is over-confident on short feeds, under-confident on long)
+  M   5- 30: T_A 1.1208  (T_B 1.1537)
+  M  31-100: T_A 1.0024  (T_B 1.0157)
+  M 101-200: T_A 0.9683  (T_B 0.9783)
+  M 201-300: T_A 0.9530  (T_B 0.9287)
+  E[NDCG] 0.39877 (half A 0.39948, half B 0.39806); draw sd of the val mean 0.00169; actual - expected +0.00416 ± 0.00175 (half B, out of sample: +0.00294 ± 0.00248)
+  label-draw part E[v_f] 0.04122 = 0.668 of the observed per-feed variance; R^2 0.282
+  M   5- 30: actual - expected +0.0035 ± 0.0038  (half B +0.0019 ± 0.0054)
+  M  31-100: actual - expected +0.0054 ± 0.0030  (half B +0.0026 ± 0.0043)
+  M 101-200: actual - expected +0.0030 ± 0.0033  (half B +0.0031 ± 0.0047)
+  M 201-300: actual - expected +0.0041 ± 0.0035  (half B +0.0052 ± 0.0050)
+  sharpened t=0.8: E[NDCG] 0.43028  draw sd of the val mean 0.00180
+  sharpened t=0.6: E[NDCG] 0.48273  draw sd of the val mean 0.00203
+
+K=1 feeds: mean -log p(click) 3.5447 ± 0.0127 vs mean entropy 3.5555; mean log M 3.9173  -> information the model extracts: 0.3726 nats per click
+
+(B) by number of positives K (t = 1)
+     K  feeds  share mean M         actual expected          act-exp loss sh act loss sh rd feed sd act feed sd draw grp-mean draw sd
+  1-1   10742  0.745   84.3 0.3987 ± 0.0025   0.3952 +0.0034 ± 0.0022       0.750      0.752      0.2635       0.2177          0.00217
+  2-2    2217  0.154  117.1 0.3977 ± 0.0043   0.4019 -0.0042 ± 0.0036       0.155      0.154      0.2047       0.1645          0.00362
+  3-3     726  0.050  142.6 0.4151 ± 0.0070   0.4157 -0.0007 ± 0.0058       0.049      0.049      0.1888       0.1402          0.00538
+  4-4     306  0.021  161.1 0.4236 ± 0.0097   0.4282 -0.0047 ± 0.0081       0.020      0.020      0.1691       0.1253          0.00731
+  5-9     357  0.025  163.6 0.4787 ± 0.0087   0.4838 -0.0052 ± 0.0065       0.022      0.021      0.1637       0.1126          0.00560
+ 10-400    75  0.005  184.3 0.6076 ± 0.0170   0.6245 -0.0169 ± 0.0123       0.003      0.003      0.1460       0.0824          0.00981
+
+(B2) same 14,423 feeds and model order, labels drawn with a forced K (t = 1): level and per-feed draw sd
+  K=1: E[NDCG] 0.37425  per-feed draw sd 0.2118  draw share of model-implied var 0.692  sd of a val-size mean from the draw alone 0.00176
+  K=2: E[NDCG] 0.45196  per-feed draw sd 0.1691  draw share of model-implied var 0.517  sd of a val-size mean from the draw alone 0.00141
+  K=3: E[NDCG] 0.51102  per-feed draw sd 0.1471  draw share of model-implied var 0.412  sd of a val-size mean from the draw alone 0.00122
+  K=5: E[NDCG] 0.59688  per-feed draw sd 0.1202  draw share of model-implied var 0.295  sd of a val-size mean from the draw alone 0.00100
+done 147s

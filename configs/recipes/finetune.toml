@@ -1,0 +1,24 @@
+# Fine-tune of a trained member on the validation days (avito_ranker/training/finetune.py).
+# Every member of the final ensembles was fine-tuned with exactly these values.
+
+file_tag = "n2cpv3s3"            # tag in the names of the prediction files and of the log; the ensemble recipes call it finetune_tag
+
+# Folds
+n_folds = 5                      # GroupKFold by user; each feed of a not-logged-in session is a group of its own
+seeds = 3                        # fine-tune runs per fold; the fold's scores are their mean
+
+# Optimiser: AdamW
+learning_rate = 5e-5
+extras_learning_rate_multiplier = 10.0   # the branch of the 42 extras starts from zero, so it gets 10x the rate
+weight_decay = 0.02              # on every parameter
+gradient_clip = 1.0              # largest global L2 norm of the gradient
+
+# Schedule
+epochs = 4
+warmup_steps = 30                # linear warm-up, then a cosine from 1 to 0 over all steps of the run
+ema_decay = 0.99                 # moving average of the weights; its state after the last step is the fold model
+ema_start_epoch = 0.5            # the average starts half-way through the first epoch
+
+# Batches: feeds of similar size, at most this many feeds and padded candidates
+max_feeds = 128
+max_candidates = 8192

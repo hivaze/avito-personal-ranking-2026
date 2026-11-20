@@ -1,0 +1,65 @@
+# Ranker of the popularity-light view: the 8 inputs that count how often an item was seen or
+# co-visited are left out and one clipped exposure count is added. 27 pre-computed inputs,
+# dense block of 93 columns, 2,114,613 parameters.
+# Why this view exists. The eight popularity inputs describe an item by what users did with it up
+# to the last train day, so they age: a warm item was last seen in train 1.75 days before a holdout
+# row on average, 9.34 days before a public test row and 11.23 days before a private one, a
+# staleness no member saw in training. Members without these inputs err differently on popular
+# items, and their pool enters the final files at a fixed weight of 0.2, set before any file with
+# it had a score and never scanned. On public it added +0.00052 to the 8 full-view students of
+# W8P20, and the best click-label file (8 members of this view added to the best click-label pool,
+# with a 3-seed fine-tune) scored +0.00063 over that pool. The holdout, whose popularity inputs are
+# fresh, read both pairs negative.
+
+[model]
+d_model = 192            # width of every token
+n_heads = 4
+n_history_layers = 1     # self-attention blocks over [user, history]
+n_blocks = 2             # (candidates -> history, candidates -> candidates) pairs
+ffn_multiplier = 2
+dropout = 0.1
+retrieval_slots = 16     # history items retrieved per candidate
+n_finetune_extras = 0    # the fine-tune stage sets 42
+
+[view]
+# One entry per pre-computed input, in the column order of the dense block.
+#   file        array <feature cache>/<split>/<file>.npy
+#   scaling     log_count = log1p(max(x, 0)); clip_5, clip_10 = clip to that range;
+#               presence = 1 where the stored value exists
+#   rank_and_z  also feed the within-feed percentile rank and z-score (computed in the model)
+#   keep_raw    false: only the rank and z-score enter, because the raw scale differs between splits
+inputs = [
+  # Content-similarity neighbours among the candidates of the feed.
+  { file = "ctx_nd_hcent", scaling = "clip_10" },
+  { file = "ctx_nd_knn_f1", scaling = "clip_10" },
+  { file = "ctx_nd_knn_h", scaling = "clip_10" },
+  { file = "ctx_nd_knn_h_dev", scaling = "clip_10" },
+  { file = "ctx_nd_knn_u", scaling = "clip_10" },
+  { file = "ctx_nd_knn_u_dev", scaling = "clip_10" },
+  { file = "ctx_nd_max", scaling = "clip_10" },
+  { file = "ctx_nd_top5h", scaling = "clip_10" },
+  { file = "ctx_nd_top5u", scaling = "clip_10" },
+  { file = "ctx_nd_ucent", scaling = "clip_10" },
+  # How the candidates compete for the newest history items: hard ranks, then softmax shares.
+  { file = "ctx_hn_top1w", scaling = "clip_10" },
+  { file = "ctx_hn_rrw", scaling = "clip_10" },
+  { file = "ctx_hn_bestrk", scaling = "clip_10" },
+  { file = "ctx_hn_margin", scaling = "clip_10" },
+  { file = "ctx_hn_soft05", scaling = "clip_10" },
+  { file = "ctx_hn_e1_rrw", scaling = "clip_10" },
+  { file = "ctx_hs_mutual", scaling = "clip_10" },
+  { file = "ctx_hs_k128", scaling = "clip_10" },
+  { file = "ctx_hs_e1", scaling = "clip_10" },
+  { file = "ctx_hs_t10", scaling = "clip_10" },
+  # Scores of the self-supervised trajectory encoder: within-feed z-scores of its two
+  # objectives, their rescaled raw scores, the best match with the 32 newest history items,
+  # and a flag for rows that have a score at all.
+  { file = "pre2_fe_z", scaling = "clip_5" },
+  { file = "pre2_new_z", scaling = "clip_5" },
+  { file = "pre2_fe_s", scaling = "clip_10", rank_and_z = true, keep_raw = false },
+  { file = "pre2_new_s", scaling = "clip_10", rank_and_z = true, keep_raw = false },
+  { file = "pre2_hmax32", scaling = "clip_10", rank_and_z = true, keep_raw = false },
+  { file = "pre2_fe", scaling = "presence" },
+  # Exposure: log1p(min(impressions of the item in train feeds, 50)).
+  { file = "xp_imp_c50", scaling = "clip_10" },
+]

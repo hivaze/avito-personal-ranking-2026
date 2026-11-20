@@ -1,0 +1,185 @@
+
+=== C4: e10 presence vs user_id 0 ===
+val: user0 feeds 658 (4.562%); P(e10|u0) all 0.723, H>0 0.861; P(e10|u>0) all 0.0369, H>0 0.0371; share of u0 with H=0 0.160
+test: user0 feeds 1179 (4.123%); P(e10|u0) all 0.745, H>0 0.878; P(e10|u>0) all 0.0363, H>0 0.0363; share of u0 with H=0 0.152
+
+=== C1: delivery-type (e5/e6/e8) share of history events per category ===
+shape: (54, 8)
+┌─────┬─────────────┬──────────┬─────────┬────────┬────────┬────────┬────────┐
+│ cat ┆ vert        ┆ n_events ┆ n_deliv ┆ share  ┆ val    ┆ test   ┆ train  │
+│ --- ┆ ---         ┆ ---      ┆ ---     ┆ ---    ┆ ---    ┆ ---    ┆ ---    │
+│ i64 ┆ str         ┆ i64      ┆ i64     ┆ f64    ┆ f64    ┆ f64    ┆ f64    │
+╞═════╪═════════════╪══════════╪═════════╪════════╪════════╪════════╪════════╡
+│ 0   ┆ ?           ┆ 696      ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 1   ┆ ?           ┆ 1        ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 2   ┆ Transport   ┆ 2526117  ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 9   ┆ RealEstate  ┆ 108796   ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 10  ┆ RealEstate  ┆ 1181890  ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 11  ┆ RealEstate  ┆ 603248   ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 12  ┆ RealEstate  ┆ 140166   ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 25  ┆ RealEstate  ┆ 98258    ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 26  ┆ Transport   ┆ 254816   ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 30  ┆ RealEstate  ┆ 82710    ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 31  ┆ RealEstate  ┆ 16167    ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 48  ┆ Jobs        ┆ 919558   ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 49  ┆ Jobs        ┆ 31379    ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 51  ┆ Business    ┆ 28191    ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 52  ┆ Travel      ┆ 4125     ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 53  ┆ Jobs        ┆ 2451     ┆ 0       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 50  ┆ Services    ┆ 1552176  ┆ 3       ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 ┆ 0.0000 │
+│ 38  ┆ Animals     ┆ 127888   ┆ 84      ┆ 0.0007 ┆ 0.0008 ┆ 0.0010 ┆ 0.0005 │
+│ 27  ┆ Home        ┆ 331450   ┆ 291     ┆ 0.0009 ┆ 0.0012 ┆ 0.0012 ┆ 0.0007 │
+│ 35  ┆ Animals     ┆ 127275   ┆ 143     ┆ 0.0011 ┆ 0.0029 ┆ 0.0020 ┆ 0.0006 │
+│ 34  ┆ Animals     ┆ 149424   ┆ 194     ┆ 0.0013 ┆ 0.0024 ┆ 0.0018 ┆ 0.0010 │
+│ 36  ┆ Animals     ┆ 55850    ┆ 95      ┆ 0.0017 ┆ 0.0028 ┆ 0.0035 ┆ 0.0011 │
+│ 19  ┆ Hobby       ┆ 40445    ┆ 264     ┆ 0.0065 ┆ 0.0078 ┆ 0.0077 ┆ 0.0060 │
+│ 37  ┆ Animals     ┆ 34536    ┆ 282     ┆ 0.0082 ┆ 0.0126 ┆ 0.0080 ┆ 0.0076 │
+│ 5   ┆ Transport   ┆ 324064   ┆ 3165    ┆ 0.0098 ┆ 0.0074 ┆ 0.0119 ┆ 0.0096 │
+│ 47  ┆ Home        ┆ 448463   ┆ 8309    ┆ 0.0185 ┆ 0.0224 ┆ 0.0232 ┆ 0.0168 │
+│ 4   ┆ Transport   ┆ 80540    ┆ 3882    ┆ 0.0482 ┆ 0.0592 ┆ 0.0598 ┆ 0.0437 │
+│ 24  ┆ Business    ┆ 129195   ┆ 7925    ┆ 0.0613 ┆ 0.0701 ┆ 0.0821 ┆ 0.0545 │
+│ 6   ┆ Home        ┆ 1513602  ┆ 123004  ┆ 0.0813 ┆ 0.0977 ┆ 0.0890 ┆ 0.0769 │
+│ 17  ┆ Electronics ┆ 72039    ┆ 6387    ┆ 0.0887 ┆ 0.0886 ┆ 0.0988 ┆ 0.0860 │
+│ 7   ┆ Home        ┆ 1252462  ┆ 116087  ┆ 0.0927 ┆ 0.1119 ┆ 0.1104 ┆ 0.0852 │
+│ 42  ┆ Electronics ┆ 100040   ┆ 11916   ┆ 0.1191 ┆ 0.1260 ┆ 0.1395 ┆ 0.1127 │
+│ 29  ┆ Electronics ┆ 533687   ┆ 70032   ┆ 0.1312 ┆ 0.1440 ┆ 0.1491 ┆ 0.1247 │
+│ 20  ┆ Hobby       ┆ 236221   ┆ 33561   ┆ 0.1421 ┆ 0.1545 ┆ 0.1571 ┆ 0.1368 │
+│ 8   ┆ Home        ┆ 525161   ┆ 77339   ┆ 0.1473 ┆ 0.1615 ┆ 0.1646 ┆ 0.1403 │
+│ 22  ┆ Hobby       ┆ 86217    ┆ 12974   ┆ 0.1505 ┆ 0.1840 ┆ 0.1855 ┆ 0.1366 │
+│ 14  ┆ Personal    ┆ 331766   ┆ 53435   ┆ 0.1611 ┆ 0.1850 ┆ 0.1888 ┆ 0.1504 │
+│ 41  ┆ Electronics ┆ 180582   ┆ 30340   ┆ 0.1680 ┆ 0.1821 ┆ 0.1916 ┆ 0.1598 │
+│ 3   ┆ Transport   ┆ 2604040  ┆ 444603  ┆ 0.1707 ┆ 0.1945 ┆ 0.1909 ┆ 0.1621 │
+│ 39  ┆ Animals     ┆ 179401   ┆ 31285   ┆ 0.1744 ┆ 0.2020 ┆ 0.1916 ┆ 0.1654 │
+│ 18  ┆ Electronics ┆ 382959   ┆ 68860   ┆ 0.1798 ┆ 0.1938 ┆ 0.1958 ┆ 0.1734 │
+│ 21  ┆ Hobby       ┆ 540871   ┆ 103485  ┆ 0.1913 ┆ 0.2126 ┆ 0.2201 ┆ 0.1797 │
+│ 46  ┆ Electronics ┆ 76138    ┆ 14585   ┆ 0.1916 ┆ 0.2029 ┆ 0.2161 ┆ 0.1843 │
+│ 44  ┆ Electronics ┆ 271203   ┆ 53063   ┆ 0.1957 ┆ 0.2114 ┆ 0.2211 ┆ 0.1871 │
+│ 16  ┆ Personal    ┆ 751515   ┆ 148348  ┆ 0.1974 ┆ 0.2124 ┆ 0.2154 ┆ 0.1907 │
+│ 23  ┆ Hobby       ┆ 526057   ┆ 107193  ┆ 0.2038 ┆ 0.2302 ┆ 0.2273 ┆ 0.1937 │
+│ 45  ┆ Hobby       ┆ 155508   ┆ 32951   ┆ 0.2119 ┆ 0.2336 ┆ 0.2482 ┆ 0.1984 │
+│ 40  ┆ Electronics ┆ 63558    ┆ 13507   ┆ 0.2125 ┆ 0.2425 ┆ 0.2443 ┆ 0.1989 │
+│ 13  ┆ Personal    ┆ 3844831  ┆ 841395  ┆ 0.2188 ┆ 0.2434 ┆ 0.2429 ┆ 0.2088 │
+│ 43  ┆ Electronics ┆ 77271    ┆ 17473   ┆ 0.2261 ┆ 0.2234 ┆ 0.2483 ┆ 0.2195 │
+│ 32  ┆ Home        ┆ 336861   ┆ 77678   ┆ 0.2306 ┆ 0.2585 ┆ 0.2546 ┆ 0.2190 │
+│ 15  ┆ Personal    ┆ 1173854  ┆ 307277  ┆ 0.2618 ┆ 0.2839 ┆ 0.2887 ┆ 0.2519 │
+│ 33  ┆ Personal    ┆ 453842   ┆ 129058  ┆ 0.2844 ┆ 0.3073 ┆ 0.3151 ┆ 0.2729 │
+│ 28  ┆ Hobby       ┆ 293172   ┆ 86106   ┆ 0.2937 ┆ 0.3066 ┆ 0.3181 ┆ 0.2847 │
+└─────┴─────────────┴──────────┴─────────┴────────┴────────┴────────┴────────┘
+
+=== val: 14423 feeds, 1,389,971 cands ===
+C2 f2 home level (f2 == feed mode of non-zero f2):
+   home vs all others       | strata feed            : MH OR 0.757  (log se 0.018, z -15.8)  n_flag 629,947  informative strata 14,227
+   home vs all others       | strata feed x vertical : MH OR 0.804  (log se 0.017, z -12.6)  n_flag 629,947  informative strata 48,715
+   home vs all others       | strata feed x category : MH OR 0.823  (log se 0.019, z -10.4)  n_flag 629,947  informative strata 68,097
+   home vs other non-zero   | strata feed            : MH OR 0.745  (log se 0.018, z -16.0)  n_flag 629,947  informative strata 14,014
+   home vs other non-zero   | strata feed x vertical : MH OR 0.783  (log se 0.019, z -13.1)  n_flag 629,947  informative strata 45,005
+   home vs other non-zero   | strata feed x category : MH OR 0.804  (log se 0.022, z -10.1)  n_flag 629,947  informative strata 61,514
+shape: (11, 4)
+┌─────────────┬────────────┬────────┬────────┐
+│ v           ┆ home_share ┆ ctr    ┆ len    │
+│ ---         ┆ ---        ┆ ---    ┆ ---    │
+│ str         ┆ f64        ┆ f64    ┆ u32    │
+╞═════════════╪════════════╪════════╪════════╡
+│ Travel      ┆ 0.2905     ┆ 0.0065 ┆ 926    │
+│ Services    ┆ 0.7288     ┆ 0.0117 ┆ 124456 │
+│ RealEstate  ┆ 0.5858     ┆ 0.0142 ┆ 137515 │
+│ Business    ┆ 0.2847     ┆ 0.0151 ┆ 8437   │
+│ Hobby       ┆ 0.3665     ┆ 0.0152 ┆ 107084 │
+│ Jobs        ┆ 0.6991     ┆ 0.0152 ┆ 44971  │
+│ Animals     ┆ 0.4339     ┆ 0.0154 ┆ 45127  │
+│ Home        ┆ 0.5316     ┆ 0.0158 ┆ 237252 │
+│ Transport   ┆ 0.3192     ┆ 0.0158 ┆ 303487 │
+│ Electronics ┆ 0.3986     ┆ 0.0171 ┆ 83001  │
+│ Personal    ┆ 0.3684     ┆ 0.0184 ┆ 297715 │
+└─────────────┴────────────┴────────┴────────┘
+C3 near-type flags (cos >= 0.8), feeds having the type(s):
+   near e1                      | strata feed            : MH OR 2.789 (log se 0.018, z +57.6) n_flag 707,796 inf 13,829
+   near e1                      | strata feed x vertical : MH OR 2.452 (log se 0.021, z +43.3) n_flag 707,796 inf 42,645
+   near e1                      | strata feed x category : MH OR 2.282 (log se 0.025, z +33.5) n_flag 707,796 inf 56,653
+   near e7|e9, not near e1      | strata feed            : MH OR 0.833 (log se 0.083, z -2.2) n_flag 22,685 inf 4,208
+   near e7|e9, not near e1      | strata feed x vertical : MH OR 1.117 (log se 0.093, z +1.2) n_flag 22,685 inf 6,041
+   near e7|e9, not near e1      | strata feed x category : MH OR 1.156 (log se 0.090, z +1.6) n_flag 22,685 inf 6,284
+   near e9, not near e1         | strata feed            : MH OR 0.858 (log se 0.113, z -1.4) n_flag 7,617 inf 1,787
+   near e9, not near e1         | strata feed x vertical : MH OR 1.252 (log se 0.148, z +1.5) n_flag 7,617 inf 2,220
+   near e9, not near e1         | strata feed x category : MH OR 1.375 (log se 0.156, z +2.0) n_flag 7,617 inf 2,251
+   near e2|e3, not near e1      | strata feed            : MH OR 1.021 (log se 0.042, z +0.5) n_flag 52,881 inf 8,028
+   near e2|e3, not near e1      | strata feed x vertical : MH OR 1.124 (log se 0.042, z +2.8) n_flag 52,881 inf 13,406
+   near e2|e3, not near e1      | strata feed x category : MH OR 1.088 (log se 0.048, z +1.8) n_flag 52,881 inf 14,641
+   near e5|e6|e8, not near e1   | strata feed            : MH OR 1.277 (log se 0.073, z +3.4) n_flag 14,591 inf 3,371
+   near e5|e6|e8, not near e1   | strata feed x vertical : MH OR 1.221 (log se 0.076, z +2.6) n_flag 14,591 inf 4,207
+   near e5|e6|e8, not near e1   | strata feed x category : MH OR 1.145 (log se 0.093, z +1.5) n_flag 14,591 inf 4,531
+   near e4, not near e1         | strata feed            : MH OR 1.121 (log se 0.050, z +2.3) n_flag 25,734 inf 5,005
+   near e4, not near e1         | strata feed x vertical : MH OR 1.231 (log se 0.065, z +3.2) n_flag 25,734 inf 7,400
+   near e4, not near e1         | strata feed x category : MH OR 1.273 (log se 0.071, z +3.4) n_flag 25,734 inf 7,759
+shape: (6, 3)
+┌────────────┬──────────┬───────┐
+│ v          ┆ n_near79 ┆ share │
+│ ---        ┆ ---      ┆ ---   │
+│ str        ┆ u32      ┆ f64   │
+╞════════════╪══════════╪═══════╡
+│ Services   ┆ 6406     ┆ 0.282 │
+│ Home       ┆ 4569     ┆ 0.201 │
+│ Transport  ┆ 3625     ┆ 0.160 │
+│ RealEstate ┆ 2805     ┆ 0.124 │
+│ Jobs       ┆ 1640     ┆ 0.072 │
+│ Personal   ┆ 1030     ┆ 0.045 │
+└────────────┴──────────┴───────┘
+
+=== train_explore40k: 40000 feeds, 2,294,445 cands ===
+C2 f2 home level (f2 == feed mode of non-zero f2):
+   home vs all others       | strata feed            : MH OR 0.843  (log se 0.011, z -16.2)  n_flag 1,042,718  informative strata 38,132
+   home vs all others       | strata feed x vertical : MH OR 0.874  (log se 0.011, z -12.1)  n_flag 1,042,718  informative strata 87,021
+   home vs all others       | strata feed x category : MH OR 0.893  (log se 0.015, z -7.5)  n_flag 1,042,718  informative strata 112,615
+   home vs other non-zero   | strata feed            : MH OR 0.836  (log se 0.011, z -15.9)  n_flag 1,042,718  informative strata 37,168
+   home vs other non-zero   | strata feed x vertical : MH OR 0.859  (log se 0.012, z -12.6)  n_flag 1,042,718  informative strata 81,034
+   home vs other non-zero   | strata feed x category : MH OR 0.881  (log se 0.013, z -9.7)  n_flag 1,042,718  informative strata 103,139
+shape: (11, 4)
+┌─────────────┬────────────┬────────┬────────┐
+│ v           ┆ home_share ┆ ctr    ┆ len    │
+│ ---         ┆ ---        ┆ ---    ┆ ---    │
+│ str         ┆ f64        ┆ f64    ┆ u32    │
+╞═════════════╪════════════╪════════╪════════╡
+│ Travel      ┆ 0.3171     ┆ 0.0057 ┆ 1050   │
+│ Services    ┆ 0.7245     ┆ 0.0183 ┆ 201551 │
+│ Business    ┆ 0.3294     ┆ 0.0207 ┆ 13247  │
+│ RealEstate  ┆ 0.5848     ┆ 0.0228 ┆ 210988 │
+│ Transport   ┆ 0.3227     ┆ 0.0239 ┆ 438467 │
+│ Hobby       ┆ 0.3691     ┆ 0.0245 ┆ 179703 │
+│ Home        ┆ 0.5392     ┆ 0.0246 ┆ 390631 │
+│ Animals     ┆ 0.4454     ┆ 0.0255 ┆ 70225  │
+│ Electronics ┆ 0.4072     ┆ 0.0267 ┆ 148895 │
+│ Jobs        ┆ 0.6990     ┆ 0.0278 ┆ 74072  │
+│ Personal    ┆ 0.3650     ┆ 0.0294 ┆ 565616 │
+└─────────────┴────────────┴────────┴────────┘
+C3 near-type flags (cos >= 0.8), feeds having the type(s):
+   near e1                      | strata feed            : MH OR 2.261 (log se 0.012, z +65.6) n_flag 1,252,870 inf 33,819
+   near e1                      | strata feed x vertical : MH OR 2.005 (log se 0.014, z +48.1) n_flag 1,252,870 inf 74,403
+   near e1                      | strata feed x category : MH OR 1.829 (log se 0.015, z +41.6) n_flag 1,252,870 inf 90,992
+   near e7|e9, not near e1      | strata feed            : MH OR 0.942 (log se 0.047, z -1.3) n_flag 34,470 inf 6,527
+   near e7|e9, not near e1      | strata feed x vertical : MH OR 1.125 (log se 0.055, z +2.1) n_flag 34,470 inf 8,373
+   near e7|e9, not near e1      | strata feed x category : MH OR 1.176 (log se 0.061, z +2.7) n_flag 34,470 inf 8,342
+   near e9, not near e1         | strata feed            : MH OR 0.808 (log se 0.085, z -2.5) n_flag 12,008 inf 2,675
+   near e9, not near e1         | strata feed x vertical : MH OR 0.889 (log se 0.094, z -1.2) n_flag 12,008 inf 3,047
+   near e9, not near e1         | strata feed x category : MH OR 0.987 (log se 0.112, z -0.1) n_flag 12,008 inf 2,976
+   near e2|e3, not near e1      | strata feed            : MH OR 1.019 (log se 0.027, z +0.7) n_flag 91,600 inf 14,703
+   near e2|e3, not near e1      | strata feed x vertical : MH OR 1.050 (log se 0.034, z +1.4) n_flag 91,600 inf 20,638
+   near e2|e3, not near e1      | strata feed x category : MH OR 1.071 (log se 0.034, z +2.0) n_flag 91,600 inf 21,617
+   near e5|e6|e8, not near e1   | strata feed            : MH OR 1.203 (log se 0.044, z +4.2) n_flag 28,832 inf 6,423
+   near e5|e6|e8, not near e1   | strata feed x vertical : MH OR 1.145 (log se 0.045, z +3.0) n_flag 28,832 inf 7,481
+   near e5|e6|e8, not near e1   | strata feed x category : MH OR 1.152 (log se 0.053, z +2.6) n_flag 28,832 inf 7,925
+   near e4, not near e1         | strata feed            : MH OR 1.002 (log se 0.038, z +0.1) n_flag 38,993 inf 8,345
+   near e4, not near e1         | strata feed x vertical : MH OR 1.091 (log se 0.047, z +1.9) n_flag 38,993 inf 10,578
+   near e4, not near e1         | strata feed x category : MH OR 1.076 (log se 0.057, z +1.3) n_flag 38,993 inf 10,686
+shape: (6, 3)
+┌────────────┬──────────┬───────┐
+│ v          ┆ n_near79 ┆ share │
+│ ---        ┆ ---      ┆ ---   │
+│ str        ┆ u32      ┆ f64   │
+╞════════════╪══════════╪═══════╡
+│ Services   ┆ 9738     ┆ 0.283 │
+│ Home       ┆ 6992     ┆ 0.203 │
+│ Transport  ┆ 5423     ┆ 0.157 │
+│ RealEstate ┆ 3183     ┆ 0.092 │
+│ Jobs       ┆ 2845     ┆ 0.083 │
+│ Personal   ┆ 1773     ┆ 0.051 │
+└────────────┴──────────┴───────┘

@@ -1,0 +1,94 @@
+{
+  "args": {
+    "variant": "s2_optim_muon_s23",
+    "out": "ftb_optim_muon_s23",
+    "epochs": 6,
+    "lr": 5e-05,
+    "wd": 0.02,
+    "warmup": 30,
+    "cand_budget": 8192,
+    "max_feeds": 128,
+    "loss": "softmax",
+    "loss_norm": "batch",
+    "folds": 5,
+    "seeds": 1,
+    "drop": null,
+    "from_scratch": false,
+    "extra": "it_cand_cnt_train,it_tr_coec,it_tr_coec_rk,it_tr_coec_z,it_tr_coec_gap,it_tr_ctr,it_tr_pos,u_tr_ctr,u_tr_feeds,hour,centrality,it_hist_all_luo,it_hist_all_luo_rk,it_hist_all_luo_z,it_hist_all_luo_gap,it_hist_et1_luo,it_hist_et2_luo,it_hist_et3_luo,it_hist_et4_luo,it_hist_et5_luo,it_hist_et6_luo,it_hist_et7_luo,it_hist_et8_luo,it_hist_et9_luo,it_hist_et10_luo,seq_cv_invd20,seq_cv_invd20_rk,seq_cv_pop,seq_cv_norm,seq_max_all,seq_top3,seq_argmax_hpos,ctx_nd_c80,ctx_nd_c90,ctx_nd_c95,ctx_nd_dupb_f1,ctx_nd_dupb_h,ctx_nd_dupb_u,ctx_nd_hcent,ctx_nd_knn_f1,ctx_nd_knn_h,ctx_nd_knn_h_dev,ctx_nd_knn_u,ctx_nd_knn_u_dev,ctx_nd_max,ctx_nd_mean,ctx_nd_top5h,ctx_nd_top5u,ctx_nd_ucent",
+    "extra_lr_mult": 10.0,
+    "add_random": 0,
+    "pseudo": "",
+    "w_test": 0.3,
+    "pseudo_n": 12000,
+    "pseudo_T": 1.0,
+    "select": "snapshot",
+    "decay": "const",
+    "ema": 0.0,
+    "ema_start": 0.5,
+    "lpft_epochs": 0,
+    "lpft_lr": 0.0005
+  },
+  "oof_by_epoch": [
+    0.3848187754725875,
+    0.38732767965657977,
+    0.38754512902193117,
+    0.38610140769813206,
+    0.38550396732870224,
+    0.38414293557580326,
+    0.3820836703315705
+  ],
+  "best_epoch": 2,
+  "oof_ndcg_best_epoch": 0.38754512902193117,
+  "oof_ndcg_snapshot": 0.38690280423742385,
+  "saved": "snapshot",
+  "fold_curves": [
+    [
+      0.37861936546439695,
+      0.38287397137497436,
+      0.3817809593234136,
+      0.3811719743212989,
+      0.38118948426382676,
+      0.3786772733032273,
+      0.37659439630319336
+    ],
+    [
+      0.381413417057757,
+      0.3839822797783688,
+      0.38435675627382715,
+      0.38101316833001087,
+      0.3820619982648352,
+      0.38152558403448733,
+      0.3782294606104895
+    ],
+    [
+      0.38862338179993045,
+      0.39081840072221746,
+      0.39205997787601116,
+      0.3905439298052586,
+      0.3874109857142333,
+      0.3868813380767731,
+      0.38671614476797567
+    ],
+    [
+      0.3895664312146617,
+      0.3912919157149079,
+      0.39141430299103636,
+      0.3913190571148835,
+      0.38964364424938924,
+      0.3873859257856787,
+      0.3843921004720635
+    ],
+    [
+      0.3858732929780972,
+      0.38767332458531983,
+      0.3881151873740753,
+      0.38646084205049763,
+      0.38721575238761424,
+      0.38624640987278624,
+      0.3844878830025053
+    ]
+  ],
+  "ema_oof_by_epoch": null,
+  "oof_ndcg_ema_final": null,
+  "minutes": 9.91449831724167
+}

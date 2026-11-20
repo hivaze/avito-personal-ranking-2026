@@ -1,0 +1,54 @@
+P1 (PRETRAIN_PLAN_1113 section 4, E6-reduced): label-free trajectory clustering diagnostic.
+PRE-DECLARED at 2026-11-13T05:14:50Z (date -u), before any P1 result was computed. Script: nn_x/pretrain2/P1/cluster_diag.py (CPU, 12 threads).
+
+CLUSTERS (label-free)
+- Fit sample: train latest snapshot per non-zero user, holdout feeds excluded, random 150,000 feeds (numpy seed 0).
+- Key ue: organisers' user_emb (int8 128) -> float, L2-normalised.
+- Key hp: history profile from the feed's own history only (hpos 0 = newest):
+  B1 category shares over the last 32 events (54 codes, sqrt / Hellinger);
+  B2 event-type shares over the last 32 events (10 codes);
+  B3 length log1p(H);
+  B4 recency: exp-decay (half-life 8 events) weighted mean item content vector over the last 64 events
+     (split's own item_embeddings table, int8 128, rows with emb_idx -1 skipped), PCA to 16 dims fitted on the fit sample.
+  Every column standardised on the fit sample, then each block scaled to total variance 1 (equal block weight).
+  ("recency" is read as recency-weighted content because history events have no timestamps.)
+- k-means (sklearn KMeans, n_init=4, random_state=0), K in {8, 32}, fitted on the fit sample only; assignment of val (14,423),
+  holdout (30,000 train feeds, nn_x/r6/train.py rule), test (28,595) by nearest centroid.
+- Negative control (information only): random cluster labels, K in {8, 32}, seed 0.
+
+BASES
+- Families f in {F10 = v23_gru_pre2s_s501-506, F7x = r6_cd_m02_r101-107, F7x70 = r6_cd_m02_p70k_r101-107}.
+- val: FT_f = mean_m z(nn_m_n2cpv3_val_oof), TO_f = mean_m z(nn_m_trainonly_val) (z = per-feed z, stack_val.feed_rank_z[:,1]).
+  score(w) = 0.5 z(sum_f w_f FT_f) + 0.5 z(sum_f w_f TO_f); G3 = w (6,7,7)/20.
+- holdout: H_f = mean_m z(nn_m_holdout); score(w) = sum_f w_f H_f; G3 = w (6,7,7)/20.
+- Weight grid: simplex step 0.1 (66 points) plus the G3 point = 67 candidates.
+- FT/TO mix (test 2, val only): a z(FT_G3) + (1-a) z(TO_G3), a in {0, 0.1, ..., 1}; G3 = 0.5.
+
+PROTOCOL (tests 1 and 2)
+- Nested: user-grouped 5-fold (user 0 = singletons), 2 fold seeds (0, 1), per-feed deltas averaged over the 2 seeds.
+- Global arm: the grid point maximising mean NDCG on the training folds. Per-cluster arm: for each cluster the grid point
+  maximising mean NDCG on that cluster's training-fold feeds; raw (argmax) and shrunk (objective (S_c(w) + tau * mean_all(w)) / (n_c + tau),
+  tau = 1000 feeds) variants. Clusters with no training-fold feed fall back to the global choice.
+- val: selection and evaluation on the leak-free 14,306 feeds (qt.leak_mask); holdout: all 30,000 feeds, nested within the holdout.
+- Primary contrast: per-feed delta = NDCG(per-cluster nested) - NDCG(global nested); mean +- SE (sd/sqrt(n)).
+  Also reported: both arms vs fixed G3, private-mix (src/pmix.py) delta +- SE on val.
+- Test 1 arms: key {ue, hp} x K {8, 32} x {raw, shrunk} = 8 arms.
+
+GATE (test 1, the only gate that can PASS)
+- PASS iff, for at least one of the 8 arms: delta_val >= +0.001 AND delta_val / SE_val >= 3.58
+  (the 3-SE one-sided level, alpha 0.00135, Bonferroni-adjusted over 8 arms) AND delta_holdout > 0 for the same arm
+  AND private-mix delta_val >= -1 SE (veto, plan section 4 harness).
+- The plan's stricter holdout clause (holdout >= +0.0005) is reported next to it; if the two disagree the verdict is
+  written 'PASS (task gate) / FAIL (plan gate)'.
+- Otherwise: CLOSED (trajectory-type conditioning: clusters, FiLM, MoE, intent tokens), per plan section 6 kill criteria.
+- Test 2 (FT/TO mix per cluster) has no holdout lens (FT models have no holdout predictions): information only;
+  a val delta >= +0.001 at 3.58 SE would be recorded as 'val-only signal, no holdout lens', never as PASS.
+
+INFORMATION (no gate role)
+- Per-cluster G3 NDCG (val leak-free, holdout) +- SE; per-cluster mean residual after OLS on log M, log1p H, user0
+  (+ feed cold share on val); one-way ANOVA F of the residual on cluster; cluster-level correlation of val vs holdout residuals.
+- Buried-cell concentration by cluster on val (nn_x/r3/stage0_gate.py definition).
+- val -> holdout transfer: per-cluster family weights fitted on all leak-free val feeds, applied to the holdout, vs val-global weights.
+- Test 3 shift diagnostic (label-free): cluster shares for fit sample / holdout / val / test public (ts < 1790497920) /
+  test private, JS divergences, largest share shifts with binomial SE, and val G3 NDCG reweighted to the public / private
+  cluster mix (+- SE, compared with pmix).

@@ -1,0 +1,45 @@
+f1_only(rt)                              NDCG=0.3367 | vs base: -0.0000+-0.0016 | vs ALL(no als): -0.0138+-0.0018 | vs ALL+als: -0.0170+-0.0018
+base                                     NDCG=0.3368 | vs ALL(no als): -0.0137+-0.0015 | vs ALL+als: -0.0169+-0.0016
+ALL(no als)                              NDCG=0.3505 | vs base: +0.0137+-0.0015 | vs ALL+als: -0.0032+-0.0011
+base+cf_als                              NDCG=0.3474 | vs base: +0.0107+-0.0014 | vs ALL(no als): -0.0031+-0.0014 | vs ALL+als: -0.0063+-0.0013
+ALL+als                                  NDCG=0.3537 | vs base: +0.0169+-0.0016 | vs ALL(no als): +0.0032+-0.0011
+ALL+als-cf_i2v                           NDCG=0.3522 | vs base: +0.0155+-0.0016 | vs ALL(no als): +0.0017+-0.0012 | vs ALL+als: -0.0015+-0.0010
+base+cf_als+cf_i2v                       NDCG=0.3490 | vs base: +0.0122+-0.0015 | vs ALL(no als): -0.0015+-0.0013 | vs ALL+als: -0.0047+-0.0012
+base+cf_als+pop_train+future_hist        NDCG=0.3522 | vs base: +0.0154+-0.0015 | vs ALL(no als): +0.0017+-0.0013 | vs ALL+als: -0.0015+-0.0011
+ALL+als-own_hist_cat-user_cat_train      NDCG=0.3528 | vs base: +0.0160+-0.0016 | vs ALL(no als): +0.0023+-0.0011 | vs ALL+als: -0.0009+-0.0010
+ALL+als-item_te                          NDCG=0.3523 | vs base: +0.0155+-0.0016 | vs ALL(no als): +0.0018+-0.0011 | vs ALL+als: -0.0014+-0.0010
+ALL+als-pop_train-pop_transductive       NDCG=0.3537 | vs base: +0.0170+-0.0016 | vs ALL(no als): +0.0032+-0.0012 | vs ALL+als: +0.0000+-0.0010
+
+Top-30 features by gain share in ALL+als:
+  M                                        0.1420
+  cat                                      0.1332
+  f1                                       0.0587
+  f5                                       0.0508
+  f3                                       0.0395
+  oh_cat_cnt_last20                        0.0370
+  cf_als_samecat                           0.0341
+  f4                                       0.0331
+  cf_als_exp5                              0.0286
+  ite_mean_pos                             0.0267
+  cf_i2vp_samecat_exp10                    0.0256
+  cf_als_dot                               0.0248
+  pop_age_first_seen_h                     0.0235
+  pop_age_last_seen_h                      0.0235
+  f2                                       0.0228
+  cf_i2v_d128_e10_nf0_io_k5                0.0211
+  rep_future_hist                          0.0192
+  cf_i2v_d128_e10_nf0_cos_k256             0.0186
+  cf_als_lastk20                           0.0184
+  oh_cat_share                             0.0162
+  oh_cat_cnt_et1                           0.0161
+  ite_coec_Ef_a20                          0.0155
+  oh_H                                     0.0154
+  cf_i2v_d128_e10_nf0_maxcos_k5            0.0144
+  oh_cat_cnt                               0.0140
+  cf_i2vp_et1_exp5                         0.0131
+  cf_i2v_d128_e10_nf0_cos_k20              0.0119
+  cf_i2vp_exp2                             0.0115
+  pop_trhist_et1                           0.0115
+  ite_ctr_a20                              0.0104
+pessimistic-tie NDCG 0.3536947781977386 with f1 tiebreak 0.3536983380850301
+[  391.8s] done

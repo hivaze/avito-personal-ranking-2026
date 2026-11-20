@@ -1,0 +1,41 @@
+== r6 Q1 wave 2, STAGE 2 PASS-CD on roots (101, 102, 103, 104, 105, 106, 107): member val > 2 SE AND holdout >= 0 AND 7-member ensemble vs c0 holdout >= 0 and val >= -1 SE AND no val slice < -2 SE (coldpos < -1 SE -> stale-val replay)
+== runs: selected (holdout-best) step / total | selected val, holdout | end - selected (decline) val, holdout
+  r6:r6_cd_c0_r101         best   9000/19670 | sel val 0.39640 hold 0.31912 | end-sel val -0.00276 hold -0.00173 | 24 min
+  r6:r6_cd_c0_r102         best  10000/19670 | sel val 0.39724 hold 0.31867 | end-sel val -0.00319 hold -0.00293 | 34 min
+  r6:r6_cd_c0_r103         best   5000/19670 | sel val 0.39458 hold 0.31860 | end-sel val -0.00230 hold -0.00239 | 36 min
+  r6:r6_cd_c0_r104         best  10000/19670 | sel val 0.39621 hold 0.31915 | end-sel val -0.00470 hold -0.00249 | 36 min
+  r6:r6_cd_c0_r105         best   5000/19670 | sel val 0.39411 hold 0.31816 | end-sel val -0.00063 hold -0.00325 | 50 min
+  r6:r6_cd_c0_r106         best   6000/19670 | sel val 0.39501 hold 0.31847 | end-sel val -0.00289 hold -0.00238 | 49 min
+  r6:r6_cd_c0_r107         best   6000/19670 | sel val 0.39497 hold 0.31831 | end-sel val -0.00197 hold -0.00308 | 47 min
+  -> c0    mean best step    7286  mean end-sel val -0.00263 hold -0.00260  (n 7)
+  r6:r6_cd_m02_r101        best  17000/19670 | sel val 0.39730 hold 0.32005 | end-sel val -0.00015 hold -0.00001 | 24 min
+  r6:r6_cd_m02_r102        best  19670/19670 | sel val 0.39728 hold 0.31990 | end-sel val +0.00000 hold +0.00000 | 36 min
+  r6:r6_cd_m02_r103        best  19670/19670 | sel val 0.39563 hold 0.32021 | end-sel val +0.00000 hold +0.00000 | 36 min
+  r6:r6_cd_m02_r104        best  19000/19670 | sel val 0.39678 hold 0.32066 | end-sel val +0.00057 hold -0.00038 | 23 min
+  r6:r6_cd_m02_r105        best  19000/19670 | sel val 0.39702 hold 0.31960 | end-sel val +0.00007 hold -0.00009 | 51 min
+  r6:r6_cd_m02_r106        best  19670/19670 | sel val 0.39652 hold 0.31981 | end-sel val +0.00000 hold +0.00000 | 50 min
+  r6:r6_cd_m02_r107        best  19000/19670 | sel val 0.39617 hold 0.31974 | end-sel val +0.00013 hold -0.00014 | 45 min
+  -> m02   mean best step   19001  mean end-sel val +0.00009 hold -0.00009  (n 7)
+
+== m02 vs c0, roots 101-107 (B = arm)
+  VAL  r6:r6_cd_m02_r101 0.39730 vs r6:r6_cd_c0_r101 0.39640: all +0.00090+-0.00087 (z +1.04)  M<50 +0.00095+-0.00158 (z +0.60)  M>=50 +0.00087+-0.00098 (z +0.88)  Tue +0.00091+-0.00119 (z +0.76)  Thu +0.00089+-0.00126 (z +0.70)  coldpos -0.00139+-0.00176 (z -0.79)  warmpos +0.00226+-0.00115 (z +1.96)
+  VAL  r6:r6_cd_m02_r102 0.39728 vs r6:r6_cd_c0_r102 0.39724: all +0.00005+-0.00082 (z +0.06)  M<50 -0.00143+-0.00151 (z -0.95)  M>=50 +0.00107+-0.00091 (z +1.17)  Tue -0.00074+-0.00115 (z -0.64)  Thu +0.00090+-0.00117 (z +0.77)  coldpos -0.00159+-0.00166 (z -0.96)  warmpos +0.00044+-0.00110 (z +0.40)
+  VAL  r6:r6_cd_m02_r103 0.39563 vs r6:r6_cd_c0_r103 0.39458: all +0.00106+-0.00091 (z +1.16)  M<50 +0.00058+-0.00167 (z +0.35)  M>=50 +0.00139+-0.00101 (z +1.37)  Tue +0.00193+-0.00125 (z +1.54)  Thu +0.00010+-0.00132 (z +0.08)  coldpos +0.00420+-0.00181 (z +2.32)  warmpos +0.00024+-0.00121 (z +0.20)
+  VAL  r6:r6_cd_m02_r104 0.39678 vs r6:r6_cd_c0_r104 0.39621: all +0.00058+-0.00083 (z +0.70)  M<50 +0.00077+-0.00154 (z +0.50)  M>=50 +0.00044+-0.00091 (z +0.49)  Tue +0.00099+-0.00117 (z +0.85)  Thu +0.00012+-0.00116 (z +0.11)  coldpos -0.00112+-0.00173 (z -0.65)  warmpos +0.00134+-0.00109 (z +1.22)
+  VAL  r6:r6_cd_m02_r105 0.39702 vs r6:r6_cd_c0_r105 0.39411: all +0.00291+-0.00089 (z +3.26)  M<50 +0.00598+-0.00165 (z +3.62)  M>=50 +0.00079+-0.00099 (z +0.80)  Tue +0.00271+-0.00121 (z +2.24)  Thu +0.00313+-0.00132 (z +2.37)  coldpos +0.00856+-0.00183 (z +4.69)  warmpos +0.00129+-0.00119 (z +1.08)
+  VAL  r6:r6_cd_m02_r106 0.39652 vs r6:r6_cd_c0_r106 0.39501: all +0.00151+-0.00088 (z +1.72)  M<50 -0.00097+-0.00165 (z -0.59)  M>=50 +0.00323+-0.00095 (z +3.39)  Tue +0.00110+-0.00122 (z +0.90)  Thu +0.00197+-0.00127 (z +1.55)  coldpos +0.01074+-0.00181 (z +5.93)  warmpos -0.00213+-0.00116 (z -1.83)
+  VAL  r6:r6_cd_m02_r107 0.39617 vs r6:r6_cd_c0_r107 0.39497: all +0.00120+-0.00087 (z +1.38)  M<50 +0.00038+-0.00159 (z +0.24)  M>=50 +0.00177+-0.00098 (z +1.82)  Tue +0.00163+-0.00122 (z +1.33)  Thu +0.00074+-0.00124 (z +0.60)  coldpos +0.01192+-0.00173 (z +6.90)  warmpos -0.00283+-0.00116 (z -2.44)
+  VAL  pooled: all +0.00117+-0.00039 (z +2.97)  M<50 +0.00089+-0.00072 (z +1.24)  M>=50 +0.00137+-0.00045 (z +3.06)  Tue +0.00122+-0.00055 (z +2.21)  Thu +0.00112+-0.00057 (z +1.98)  coldpos +0.00448+-0.00079 (z +5.68)  warmpos +0.00009+-0.00053 (z +0.16)
+  HOLD r6:r6_cd_m02_r101 0.32003 vs r6:r6_cd_c0_r101 0.31912: all +0.00091+-0.00049 (z +1.85)  late20% +0.00036+-0.00109 (z +0.33)
+  HOLD r6:r6_cd_m02_r102 0.31989 vs r6:r6_cd_c0_r102 0.31867: all +0.00123+-0.00048 (z +2.56)  late20% +0.00061+-0.00107 (z +0.57)
+  HOLD r6:r6_cd_m02_r103 0.32020 vs r6:r6_cd_c0_r103 0.31862: all +0.00158+-0.00051 (z +3.07)  late20% +0.00122+-0.00119 (z +1.02)
+  HOLD r6:r6_cd_m02_r104 0.32066 vs r6:r6_cd_c0_r104 0.31914: all +0.00151+-0.00048 (z +3.14)  late20% +0.00135+-0.00107 (z +1.26)
+  HOLD r6:r6_cd_m02_r105 0.31959 vs r6:r6_cd_c0_r105 0.31816: all +0.00143+-0.00051 (z +2.80)  late20% +0.00196+-0.00117 (z +1.68)
+  HOLD r6:r6_cd_m02_r106 0.31982 vs r6:r6_cd_c0_r106 0.31849: all +0.00133+-0.00051 (z +2.62)  late20% +0.00261+-0.00109 (z +2.40)
+  HOLD r6:r6_cd_m02_r107 0.31972 vs r6:r6_cd_c0_r107 0.31831: all +0.00141+-0.00051 (z +2.80)  late20% +0.00243+-0.00112 (z +2.17)
+  HOLD pooled: all +0.00134+-0.00022 (z +5.98)  late20% +0.00151+-0.00051 (z +2.93)
+  ENS VAL 7-member arm vs 7-member c0: all +0.00108+-0.00059 (z +1.85)  (c0 ens 0.39953, arm ens 0.40061)
+  ENS HOLD 7-member arm vs 7-member c0: all +0.00137+-0.00033 (z +4.18)  (c0 ens 0.32195, arm ens 0.32332)
+  same-root corr arm vs c0 (val, within-feed z): 0.9714 0.9738 0.9669 0.9738 0.9656 0.9662 0.9668
+  gates: member val > 2 SE OK; member holdout >= 0 OK; ensemble holdout >= 0 OK; ensemble val >= -1 SE OK; no val slice < -2 SE OK
+  ==> m02: PASS-CD

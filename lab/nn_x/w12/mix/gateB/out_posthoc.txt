@@ -1,0 +1,68 @@
+=== D1 NULL DISTRIBUTION of the M-rule contrast under same-recipe 4-of-16 subsets (pop := subset, base := the other 12); w_ft = 0.5
+FD16: 44 subsets | T = M-rule - const 0.2: mean +0.00009 sd 0.00015 min -0.00029 q10 -0.00011 q50 +0.00010 q90 +0.00027 max +0.00043 | mean paired SE of one T 0.00013 | share T > 0: 0.77
+      T25 = M-rule - const 0.25: mean +0.00016 sd 0.00014 q10 +0.00001 q90 +0.00037 share > 0 0.91 | long feeds E(.4)-E(.2): mean +0.00015 sd 0.00025 | short feeds E(.4)-E(.2): mean +0.00003 sd 0.00045
+      structured subsets (recipe x seed half) T: +0.00009 -0.00029 +0.00027 +0.00030 | T25: +0.00038 -0.00016 +0.00039 +0.00040
+W16: 44 subsets | T = M-rule - const 0.2: mean +0.00004 sd 0.00008 min -0.00011 q10 -0.00007 q50 +0.00003 q90 +0.00015 max +0.00025 | mean paired SE of one T 0.00013 | share T > 0: 0.66
+      T25 = M-rule - const 0.25: mean -0.00001 sd 0.00009 q10 -0.00013 q90 +0.00010 share > 0 0.48 | long feeds E(.4)-E(.2): mean +0.00007 sd 0.00014 | short feeds E(.4)-E(.2): mean +0.00009 sd 0.00038
+      structured subsets (recipe x seed half) T: -0.00011 +0.00008 -0.00009 +0.00025 | T25: -0.00015 -0.00006 +0.00005 +0.00004
+real compositions (base + 4 popularity-light students): T = M-rule - plain 0.2 | long-feed E(.4)-E(.2) | short-feed E(.4)-E(.2) | rank in the null of its own base set | (T - null mean) / null sd
+  FD16  + FDP : T +0.00026+-0.00021 | long +0.00044 (null z +1.18) | short +0.00053 (null z +1.11) | above 38 of 44 | null z +1.18 | plain level 0.40271
+  W16   + P1w : T +0.00071+-0.00021 | long +0.00119 (null z +7.91) | short -0.00119 (null z -3.39) | above 44 of 44 | null z +7.91 | plain level 0.40214
+  W16   + P1d : T +0.00043+-0.00022 | long +0.00073 (null z +4.63) | short -0.00019 (null z -0.72) | above 44 of 44 | null z +4.63 | plain level 0.40172
+  FD16  + P1w : T +0.00032+-0.00022 | long +0.00054 (null z +1.58) | short -0.00018 (null z -0.48) | above 43 of 44 | null z +1.58 | plain level 0.40234
+  W16   + FDP : T +0.00061+-0.00022 | long +0.00104 (null z +6.80) | short -0.00021 (null z -0.78) | above 44 of 44 | null z +6.80 | plain level 0.40201
+  FD16  + P1d : T -0.00028+-0.00021 | long -0.00047 (null z -2.49) | short +0.00109 (null z +2.36) | above 1 of 44 | null z -2.49 | plain level 0.40230
+
+=== D2 CROSS-MEMBER-SET NESTED (fold fits of A applied to the held-out users of B; grid families)
+fit on FD16P4 -> scored on W16P4 (PLAIN 0.402141, MRULE 0.402847): cross-nested minus PLAIN | minus MRULE | [own-nested of W16P4 minus PLAIN for comparison]
+  CONSTp  +0.00020+-0.00029 | -0.00051+-0.00021 | [-0.00023]
+  CONST2  -0.00003+-0.00029 | -0.00073+-0.00023 | [-0.00000]
+  MSTEP   -0.00009+-0.00033 | -0.00079+-0.00025 | [+0.00043]
+  STUMP1  +0.00007+-0.00029 | -0.00063+-0.00027 | [-0.00038]
+  PSTUMP  +0.00003+-0.00027 | -0.00068+-0.00022 | [-0.00031]
+fit on W16P4 -> scored on FD16P4 (PLAIN 0.402714, MRULE 0.402975): cross-nested minus PLAIN | minus MRULE | [own-nested of FD16P4 minus PLAIN for comparison]
+  CONSTp  -0.00002+-0.00027 | -0.00028+-0.00023 | [+0.00039]
+  CONST2  +0.00003+-0.00030 | -0.00023+-0.00025 | [+0.00017]
+  MSTEP   +0.00023+-0.00027 | -0.00003+-0.00016 | [+0.00024]
+  STUMP1  -0.00019+-0.00030 | -0.00045+-0.00024 | [+0.00065]
+  PSTUMP  -0.00027+-0.00028 | -0.00053+-0.00023 | [+0.00035]
+
+=== D3 POOLED-TENSOR NESTED (fit on the mean tensor of FD16P4 and W16P4, training users; scored on each composition, held-out users)
+  pooled-fit CONSTp  scored on FD16P4: minus PLAIN +0.00028+-0.00030 | minus MRULE +0.00002+-0.00022
+  pooled-fit MSTEP   scored on FD16P4: minus PLAIN +0.00011+-0.00028 | minus MRULE -0.00015+-0.00017
+  pooled-fit STUMP1  scored on FD16P4: minus PLAIN -0.00014+-0.00028 | minus MRULE -0.00040+-0.00022
+  pooled-fit CONSTp  scored on W16P4: minus PLAIN +0.00014+-0.00028 | minus MRULE -0.00056+-0.00020
+  pooled-fit MSTEP   scored on W16P4: minus PLAIN +0.00031+-0.00028 | minus MRULE -0.00039+-0.00018
+  pooled-fit STUMP1  scored on W16P4: minus PLAIN -0.00031+-0.00028 | minus MRULE -0.00102+-0.00022
+  pooled-fit CONSTp  mean of the two compositions: minus PLAIN +0.00021+-0.00023 | minus MRULE -0.00027+-0.00017
+  pooled-fit MSTEP   mean of the two compositions: minus PLAIN +0.00021+-0.00023 | minus MRULE -0.00027+-0.00014
+  pooled-fit STUMP1  mean of the two compositions: minus PLAIN -0.00023+-0.00023 | minus MRULE -0.00071+-0.00017
+  MSTEP picks: [((50, 0.15, 0.5), 5), ((50, 0.1, 0.55), 5), ((50, 0.2, 0.55), 4), ((50, 0.1, 0.65), 3), ((50, 0.4, 0.55), 1), ((50, 0.1, 0.45), 1)]
+  CONSTp picks: [(0.4, 20), (0.35, 3), (0.3, 2)]
+  STUMP1 picks: [('lM', 11), ('lH', 7), ('f4m', 6), ('cold', 1)]
+  all-feed pooled fits (IN-SAMPLE): MSTEP {'cut': 50, 'lo': 0.1, 'hi': 0.55} | CONSTp {'wp': 0.4, 'wf': 0.5} | STUMP1 {'feat': 'lH', 'cut': 5.472270673671475, 'lo': (0.45, 0.65), 'hi': (0.1, 0.25)}
+  pooled tensor (IN-SAMPLE): PLAIN 0.402427 | MRULE - PLAIN +0.00048+-0.00017 | const 0.4 - PLAIN +0.00035+-0.00024 | const 0.3 - PLAIN +0.00019+-0.00016
+  pooled M-RULE FAMILY table (IN-SAMPLE, cut 50, w_ft 0.5): rule minus PLAIN x 1e5; rows w_pop on M < 50, columns w_pop on M >= 50
+  lo\hi  0.00  0.05  0.10  0.15  0.20  0.25  0.30  0.35  0.40  0.45  0.50  0.55  0.60  0.65  0.70
+   0.00   -70   -52   -41   -27   -13    +7   +23   +32   +35   +39   +43   +43   +35   +39   +28
+   0.05   -64   -46   -35   -21    -7   +13   +29   +38   +41   +45   +49   +49   +41   +45   +34
+   0.10   -56   -37   -26   -12    +2   +22   +38   +47   +50   +54   +57   +58   +50   +54   +43
+   0.15   -56   -38   -27   -13    +1   +21   +38   +46   +49   +54   +57   +57   +49   +54   +42
+   0.20   -57   -39   -27   -14    -0   +20   +37   +45   +48   +53   +56   +56   +48   +53   +41
+   0.25   -71   -53   -41   -28   -14    +6   +23   +31   +34   +39   +42   +42   +34   +39   +27
+   0.30   -75   -57   -45   -32   -18    +2   +19   +27   +30   +35   +38   +38   +30   +35   +23
+   0.35   -74   -56   -44   -30   -17    +3   +20   +29   +32   +36   +39   +40   +31   +36   +25
+   0.40   -71   -53   -41   -27   -14    +6   +23   +32   +35   +39   +42   +43   +34   +39   +28
+   0.45   -86   -68   -57   -43   -29    -9    +7   +16   +19   +23   +27   +27   +19   +23   +12
+   0.50  -100   -82   -70   -56   -43   -23    -6    +3    +6   +10   +13   +14    +5   +10    -1
+  pooled dose by M decile (IN-SAMPLE): argmax w_pop at w_ft 0.5 and E(w) - E(0.2) x 1e5 at w = 0, .1, .3, .4, .5, .6
+   M [5, 12) n 1387: argmax 0.20 |   -69+-104   -61+- 65  -120+- 51   -82+- 85   -42+-116   -61+-146
+   M [12, 22) n 1440: argmax 0.40 |   +47+- 96   +55+- 62   +32+- 60   +82+- 87   -50+-118   -25+-139
+   M [22, 32) n 1453: argmax 0.10 |   -76+- 97   +53+- 71   -85+- 58   -86+- 90  -221+-114  -263+-138
+   M [32, 48) n 1477: argmax 0.25 |   -79+- 67   -53+- 43   -33+- 57   -73+- 87  -121+-106  -253+-133
+   M [48, 67) n 1432: argmax 0.35 |   -60+- 82    +8+- 47  +116+- 58  +170+- 91  +156+-119  +122+-133
+   M [67, 91) n 1459: argmax 0.60 |   -58+- 70   -24+- 44   +73+- 43   +65+- 75   +96+- 88  +124+-113
+   M [91, 124) n 1446: argmax 0.70 |   -29+- 72   -32+- 51  +127+- 53  +144+- 75  +174+- 87  +184+-103
+   M [124, 173) n 1426: argmax 0.20 |   -74+- 74   -35+- 55   -12+- 51   -28+- 73   -77+-100  -139+-124
+   M [173, 247) n 1452: argmax 0.80 |  -167+- 59   -87+- 38    +8+- 28   +42+- 50   +57+- 61   +15+- 71
+   M [247, 299] n 1451: argmax 0.65 |  -138+- 54   -85+- 40   +78+- 32  +110+- 44  +162+- 58  +178+- 71

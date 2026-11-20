@@ -1,0 +1,26 @@
+w12/moe GPU-7 parity smokes: output of smoke_report.py at ~04:42 UTC 2026-11-19, BEFORE the smoke checkpoints / preds were deleted (only logs and
+json kept). Smoke recipe = lane_moe.sh MOE_SMOKE=1 E:kd05w192:951 (20K train feeds, 1 epoch = 72 steps, evals every 25 steps).
+
+== flag-off parity, lab/nn_x/w5/train.py vs the copy (flags off): parity_w5 vs parity_copy
+  log lines: 22 vs 22; differing lines 8 (eval NDCG in the 5th decimal, cliplog medians in the 6th; sampled losses identical)
+  history (step, sampled loss, val, holdout):
+    w5  : (25, 4.1155805587768555, 0.31099198, 0.24858016), (50, 0.0, 0.33154649, 0.26311172), (72, 3.4151811599731445, 0.34946217, 0.27457838)
+    copy: (25, 4.1155805587768555, 0.31095903, 0.24859403), (50, 0.0, 0.33154536, 0.26310585), (72, 3.4151735305786133, 0.34951462, 0.27457087)
+  preds max |diff|: val 5.18e-03, val@last 5.18e-03, hold 5.43e-03, hold@last 5.43e-03, test 5.07e-03, test@last 5.07e-03 | bit-identical: False
+  checkpoint (selected / @last): same keys True, cfg identical True, tensors bit-identical False (max |diff| 3.64e-03)
+
+== GPU run-to-run control, lab/nn_x/w5/train.py twice (same args): parity_w5 vs parity_w5b
+  log lines: 22 vs 22; differing lines 9
+  history: w5b (25, 4.1155805587768555, 0.31098273, 0.24859424), (50, 0.0, 0.33155157, 0.26313651), (72, 3.415173053741455, 0.34947578, 0.27455528)
+  preds max |diff|: val 5.57e-03, val@last 5.57e-03, hold 6.01e-03, hold@last 6.01e-03, test 5.64e-03, test@last 5.64e-03 | bit-identical: False
+  checkpoint (selected / @last): same keys True, cfg identical True, tensors bit-identical False (max |diff| 3.25e-03)
+
+== GPU run-to-run control, the copy twice (flags off): parity_copy vs ref_diag
+  log lines: 22 vs 22; differing lines 8
+  history: ref_diag (25, 4.1155805587768555, 0.31101814, 0.24860430), (50, 0.0, 0.33154251, 0.26314729), (72, 3.4151663780212402, 0.34941907, 0.27458229)
+  preds max |diff|: val 5.84e-03, val@last 5.84e-03, hold 7.68e-03, hold@last 7.68e-03, test 6.12e-03, test@last 6.12e-03 | bit-identical: False
+  checkpoint (selected / @last): same keys True, cfg identical True, tensors bit-identical False (max |diff| 3.30e-03)
+
+READING: the GPU training of this recipe is not bit-reproducible run to run (w5 vs w5 differs as much as w5 vs the copy); the step-0 sampled
+loss is identical in all four runs and every difference is of the run-to-run size. The bit-exact flag-off proof is the CPU one
+(tests/test_moe_cpu.py T0 AST strip + T1 model / end-to-end trainer identity, logs/test_moe_cpu.log).

@@ -1,0 +1,19 @@
+=== W2a by segment (holdout, 30,000 feeds; arm = mean of A,B,C 4-pools minus refN; +- = 1 SE paired per feed) ===
+share of feeds whose positives are all popularity-cold (it_hist_all_luo == 0): lag0 0.099, priv_v3 0.286; any positive cold: lag0 0.212, priv_v3 0.494  (val: see seg_read: all-cold 0.237)
+-- reference refN: ALL lag0 +0.00031+-0.00019 priv +0.00004+-0.00019 DiD -0.00027+-0.00020
+   positives all pop>0 at lag0                                n  23640 | lag0 +0.00049+-0.00023 | priv_v3 +0.00017+-0.00023 | DiD -0.00031+-0.00025
+   some/all positives pop=0 at lag0                           n   6360 | lag0 -0.00035+-0.00026 | priv_v3 -0.00045+-0.00031 | DiD -0.00010+-0.00028
+   positives all pop>0 under priv_v3                          n  15185 | lag0 +0.00090+-0.00030 | priv_v3 +0.00061+-0.00030 | DiD -0.00028+-0.00032
+   some/all positives pop=0 under priv_v3                     n  14815 | lag0 -0.00029+-0.00023 | priv_v3 -0.00054+-0.00023 | DiD -0.00025+-0.00026
+   pop>0 at lag0 AND pop=0 under priv (made cold by lag)      n   8455 | lag0 -0.00025+-0.00036 | priv_v3 -0.00061+-0.00033 | DiD -0.00037+-0.00040
+   positives all seen in training                             n  25106 | lag0 +0.00050+-0.00022 | priv_v3 +0.00013+-0.00022 | DiD -0.00037+-0.00023
+   no positive seen in training                               n   2164 | lag0 -0.00117+-0.00067 | priv_v3 +0.00002+-0.00062 | DiD +0.00119+-0.00064
+-- reference ref4: ALL lag0 +0.00033+-0.00026 priv +0.00010+-0.00026 DiD -0.00022+-0.00030
+   positives all pop>0 at lag0                                n  23640 | lag0 +0.00052+-0.00032 | priv_v3 +0.00051+-0.00031 | DiD -0.00000+-0.00036
+   some/all positives pop=0 at lag0                           n   6360 | lag0 -0.00038+-0.00037 | priv_v3 -0.00141+-0.00044 | DiD -0.00103+-0.00042
+   positives all pop>0 under priv_v3                          n  15185 | lag0 +0.00111+-0.00041 | priv_v3 +0.00107+-0.00042 | DiD -0.00004+-0.00046
+   some/all positives pop=0 under priv_v3                     n  14815 | lag0 -0.00048+-0.00032 | priv_v3 -0.00088+-0.00030 | DiD -0.00041+-0.00036
+   pop>0 at lag0 AND pop=0 under priv (made cold by lag)      n   8455 | lag0 -0.00054+-0.00048 | priv_v3 -0.00048+-0.00041 | DiD +0.00006+-0.00055
+   positives all seen in training                             n  25106 | lag0 +0.00051+-0.00029 | priv_v3 +0.00040+-0.00029 | DiD -0.00010+-0.00034
+   no positive seen in training                               n   2164 | lag0 -0.00121+-0.00089 | priv_v3 -0.00130+-0.00094 | DiD -0.00009+-0.00096
+-- composition: lag0 deltas split by the priv_v3 pop-cold status: warm +0.00090, cold -0.00029; observed priv_v3 delta +0.00004 (lag0 delta on the same feeds +0.00031): within-feed change carries the DiD when the split by lagged status already shows it at lag0

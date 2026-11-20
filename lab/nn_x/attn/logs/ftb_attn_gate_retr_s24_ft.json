@@ -1,0 +1,87 @@
+{
+  "args": {
+    "variant": "s2_attn_gate_retr_s24",
+    "out": "ftb_attn_gate_retr_s24",
+    "epochs": 6,
+    "lr": 5e-05,
+    "wd": 0.02,
+    "warmup": 30,
+    "cand_budget": 8192,
+    "max_feeds": 128,
+    "loss": "softmax",
+    "loss_norm": "batch",
+    "folds": 5,
+    "seeds": 1,
+    "drop": null,
+    "from_scratch": false,
+    "extra": "it_cand_cnt_train,it_tr_coec,it_tr_coec_rk,it_tr_coec_z,it_tr_coec_gap,it_tr_ctr,it_tr_pos,u_tr_ctr,u_tr_feeds,hour,centrality,it_hist_all_luo,it_hist_all_luo_rk,it_hist_all_luo_z,it_hist_all_luo_gap,it_hist_et1_luo,it_hist_et2_luo,it_hist_et3_luo,it_hist_et4_luo,it_hist_et5_luo,it_hist_et6_luo,it_hist_et7_luo,it_hist_et8_luo,it_hist_et9_luo,it_hist_et10_luo,seq_cv_invd20,seq_cv_invd20_rk,seq_cv_pop,seq_cv_norm,seq_max_all,seq_top3,seq_argmax_hpos,ctx_nd_c80,ctx_nd_c90,ctx_nd_c95,ctx_nd_dupb_f1,ctx_nd_dupb_h,ctx_nd_dupb_u,ctx_nd_hcent,ctx_nd_knn_f1,ctx_nd_knn_h,ctx_nd_knn_h_dev,ctx_nd_knn_u,ctx_nd_knn_u_dev,ctx_nd_max,ctx_nd_mean,ctx_nd_top5h,ctx_nd_top5u,ctx_nd_ucent",
+    "extra_lr_mult": 10.0,
+    "add_random": 0,
+    "pseudo": "",
+    "w_test": 0.3,
+    "pseudo_n": 12000,
+    "pseudo_T": 1.0,
+    "select": "snapshot"
+  },
+  "oof_by_epoch": [
+    0.3847628786981808,
+    0.38744934048935264,
+    0.3877761201569365,
+    0.38700510026283186,
+    0.38596240041192553,
+    0.3854730280384174,
+    0.3838492898158127
+  ],
+  "best_epoch": 2,
+  "oof_ndcg_best_epoch": 0.3877761201569365,
+  "oof_ndcg_snapshot": 0.3873297192193142,
+  "saved": "snapshot",
+  "fold_curves": [
+    [
+      0.3763919598321447,
+      0.38026028410329094,
+      0.3781175907416981,
+      0.377228626690932,
+      0.37820536859088966,
+      0.3771344267195597,
+      0.37447300435206815
+    ],
+    [
+      0.3776202580097589,
+      0.38259160274760917,
+      0.38353771701946643,
+      0.3818244318255596,
+      0.38135896428733984,
+      0.3814096067650801,
+      0.38072943689810423
+    ],
+    [
+      0.3889947947697076,
+      0.39322051357756654,
+      0.3931014601134009,
+      0.3927430607249973,
+      0.3904194332207183,
+      0.3909787745524167,
+      0.3891422296663383
+    ],
+    [
+      0.39465906183555893,
+      0.39527598917772677,
+      0.39672077711978343,
+      0.3950619485740435,
+      0.39232859851624047,
+      0.3916740294433983,
+      0.3894354322389911
+    ],
+    [
+      0.3861522308410585,
+      0.3859004888534128,
+      0.3874060279098194,
+      0.38817063016351855,
+      0.3875023778865813,
+      0.38617069393079906,
+      0.3854688435652159
+    ]
+  ],
+  "minutes": 10.437969183921814
+}

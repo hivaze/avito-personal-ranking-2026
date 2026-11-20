@@ -1,0 +1,177 @@
+data loaded 1s: val rows 1389971, test rows 2904806, train-expl feeds 515023 rows 29734518
+distinct items (val+test+train-expl) 17012104
+fold sizes (feeds): [2885, 2885, 2885, 2884, 2884]
+G3 val NDCG 0.40032
+
+=== (V) item prior from VAL labels, OOF by FT folds, log-ratio form ===
+  [V] outer fold 0: chosen (50.0, 0.3), inner mean +0.00008, outer +0.00009 +- 0.00030 (n=2885)  33s
+  [V] outer fold 1: chosen (50.0, 0.3), inner mean +0.00008, outer +0.00074 +- 0.00036 (n=2885)  39s
+  [V] outer fold 2: chosen (50.0, 0.3), inner mean +0.00009, outer +0.00008 +- 0.00032 (n=2885)  45s
+  [V] outer fold 3: chosen (20.0, 0.15), inner mean +0.00019, outer -0.00017 +- 0.00025 (n=2884)  50s
+  [V] outer fold 4: chosen (20.0, 0.5), inner mean +0.00019, outer -0.00130 +- 0.00054 (n=2884)  56s
+chosen (a, beta) per outer fold: [(50.0, 0.3), (50.0, 0.3), (50.0, 0.3), (20.0, 0.15), (20.0, 0.5)]
+V log-ratio: nested delta -0.00011 +- 0.00016 (n=14423)  z=-0.68
+   M<50     -0.00043 +- 0.00029 (n=5893)  z=-1.45
+   M>=50    +0.00011 +- 0.00019 (n=8530)  z=0.56
+   Tue      -0.00008 +- 0.00020 (n=7543)  z=-0.37
+   Thu      -0.00015 +- 0.00026 (n=6880)  z=-0.57
+full-val OOF table argmax (a, beta) = (50.0, 0.3): +0.00018 +- 0.00014 (non-nested, used for the test setting)
+full-val OOF table (a, beta -> delta):
+   a=   5  b0.02:+0.00001  b0.05:+0.00002  b0.10:-0.00011  b0.15:+0.00008  b0.20:-0.00012  b0.30:-0.00044  b0.50:-0.00130
+   a=  20  b0.02:-0.00002  b0.05:-0.00000  b0.10:+0.00005  b0.15:+0.00007  b0.20:+0.00006  b0.30:-0.00004  b0.50:-0.00011
+   a=  50  b0.02:-0.00001  b0.05:-0.00000  b0.10:-0.00000  b0.15:+0.00002  b0.20:+0.00004  b0.30:+0.00018  b0.50:+0.00004
+val OOF coverage: rows>=1 0.1620, rows>=3 0.0200, feeds with any covered row 0.9567, positives covered 0.1542
+x_oof on covered rows: mean -0.012 sd 0.123; Tue-row coverage 0.1614 Thu-row coverage 0.1626
+
+--- (V) secondary: within-feed z(x) form ---
+  [Vz] outer fold 0: chosen (50.0, 0.02), inner mean -0.00009, outer -0.00057 +- 0.00049 (n=2885)  62s
+  [Vz] outer fold 1: chosen (20.0, 0.02), inner mean -0.00025, outer +0.00068 +- 0.00048 (n=2885)  67s
+  [Vz] outer fold 2: chosen (50.0, 0.02), inner mean -0.00005, outer +0.00024 +- 0.00039 (n=2885)  73s
+  [Vz] outer fold 3: chosen (50.0, 0.02), inner mean +0.00022, outer -0.00029 +- 0.00037 (n=2884)  80s
+  [Vz] outer fold 4: chosen (50.0, 0.05), inner mean -0.00011, outer -0.00146 +- 0.00064 (n=2884)  87s
+chosen: [(50.0, 0.02), (20.0, 0.02), (50.0, 0.02), (50.0, 0.02), (50.0, 0.05)]
+V z-form: nested delta -0.00028 +- 0.00022 (n=14423)  z=-1.31
+   M<50     -0.00077 +- 0.00042 (n=5893)  z=-1.83
+   M>=50    +0.00006 +- 0.00022 (n=8530)  z=0.26
+   Tue      -0.00033 +- 0.00028 (n=7543)  z=-1.21
+   Thu      -0.00022 +- 0.00033 (n=6880)  z=-0.67
+
+=== (C) category-level prior from VAL labels (OOF by FT folds) ===
+  [C] outer fold 0: chosen (20.0, 0.05), inner mean -0.00002, outer -0.00017 +- 0.00017 (n=2885)  92s
+  [C] outer fold 1: chosen (20.0, 0.15), inner mean +0.00007, outer -0.00028 +- 0.00036 (n=2885)  97s
+  [C] outer fold 2: chosen (50.0, 0.02), inner mean -0.00006, outer -0.00004 +- 0.00007 (n=2885)  102s
+  [C] outer fold 3: chosen (5.0, 0.02), inner mean -0.00008, outer +0.00016 +- 0.00021 (n=2884)  107s
+  [C] outer fold 4: chosen (50.0, 0.1), inner mean +0.00004, outer +0.00001 +- 0.00040 (n=2884)  112s
+chosen: [(20.0, 0.05), (20.0, 0.15), (50.0, 0.02), (5.0, 0.02), (50.0, 0.1)]
+C category: nested delta -0.00006 +- 0.00012 (n=14423)  z=-0.53
+   M<50     -0.00002 +- 0.00022 (n=5893)  z=-0.09
+   M>=50    -0.00009 +- 0.00013 (n=8530)  z=-0.70
+   Tue      -0.00013 +- 0.00014 (n=7543)  z=-0.94
+   Thu      +0.00001 +- 0.00020 (n=6880)  z=0.05
+
+=== time-forward: Tue-only source (other users) -> Thu feeds, nested over FT folds restricted to Thu ===
+  [Tue->Thu] outer fold 0: chosen (5.0, 0.15), inner mean +0.00007, outer -0.00052 +- 0.00059 (n=1406)  115s
+  [Tue->Thu] outer fold 1: chosen (20.0, 0.15), inner mean +0.00012, outer +0.00075 +- 0.00045 (n=1378)  118s
+  [Tue->Thu] outer fold 2: chosen (5.0, 0.05), inner mean +0.00021, outer -0.00011 +- 0.00033 (n=1360)  121s
+  [Tue->Thu] outer fold 3: chosen (5.0, 0.05), inner mean +0.00020, outer -0.00018 +- 0.00028 (n=1387)  124s
+  [Tue->Thu] outer fold 4: chosen (50.0, 0.2), inner mean +0.00010, outer -0.00006 +- 0.00021 (n=1349)  127s
+chosen: [(5.0, 0.15), (20.0, 0.15), (5.0, 0.05), (5.0, 0.05), (50.0, 0.2)]
+Tue->Thu time-forward: nested delta -0.00003 +- 0.00018 (n=6880)  z=-0.14
+   M<50     -0.00037 +- 0.00032 (n=2823)  z=-1.13
+   M>=50    +0.00021 +- 0.00020 (n=4057)  z=1.06
+   Thu      -0.00003 +- 0.00018 (n=6880)  z=-0.14
+Tue->Thu at the fixed full-val setting (50.0, 0.3): +0.00016 +- 0.00014 (n=6880)
+Thu rows covered by Tue items (not LUO, descriptive): 0.0953
+  [Thu->Tue] outer fold 0: chosen (5.0, 0.2), inner mean +0.00038, outer -0.00128 +- 0.00074 (n=1479)  131s
+  [Thu->Tue] outer fold 1: chosen (20.0, 0.02), inner mean -0.00000, outer +0.00001 +- 0.00004 (n=1507)  134s
+  [Thu->Tue] outer fold 2: chosen (50.0, 0.15), inner mean +0.00005, outer -0.00002 +- 0.00006 (n=1525)  137s
+  [Thu->Tue] outer fold 3: chosen (50.0, 0.15), inner mean +0.00015, outer -0.00013 +- 0.00008 (n=1497)  141s
+  [Thu->Tue] outer fold 4: chosen (5.0, 0.2), inner mean +0.00016, outer -0.00069 +- 0.00054 (n=1535)  145s
+chosen: [(5.0, 0.2), (20.0, 0.02), (50.0, 0.15), (50.0, 0.15), (5.0, 0.2)]
+Thu->Tue (backward, information): nested delta -0.00042 +- 0.00018 (n=7543)  z=-2.28
+   M<50     -0.00048 +- 0.00031 (n=3070)  z=-1.53
+   M>=50    -0.00038 +- 0.00022 (n=4473)  z=-1.69
+   Tue      -0.00042 +- 0.00018 (n=7543)  z=-2.28
+
+=== (T) item prior from TRAIN exploration-like feeds (p_random > 0.5), leave-user-out ===
+train-expl source p0 0.0251; val coverage rows>=1 0.4644 rows>=3 0.2428, feeds any 0.9973, positives 0.4907  148s
+  [T] outer fold 0: chosen (5.0, 0.02), inner mean +0.00028, outer +0.00047 +- 0.00038 (n=2885)  154s
+  [T] outer fold 1: chosen (50.0, 0.05), inner mean +0.00026, outer +0.00052 +- 0.00032 (n=2885)  159s
+  [T] outer fold 2: chosen (5.0, 0.05), inner mean +0.00040, outer +0.00048 +- 0.00056 (n=2885)  165s
+  [T] outer fold 3: chosen (5.0, 0.05), inner mean +0.00070, outer -0.00073 +- 0.00066 (n=2884)  171s
+  [T] outer fold 4: chosen (5.0, 0.05), inner mean +0.00048, outer +0.00013 +- 0.00061 (n=2884)  177s
+chosen: [(5.0, 0.02), (50.0, 0.05), (5.0, 0.05), (5.0, 0.05), (5.0, 0.05)]
+T train-expl: nested delta +0.00018 +- 0.00023 (n=14423)  z=0.75
+   M<50     +0.00062 +- 0.00047 (n=5893)  z=1.30
+   M>=50    -0.00013 +- 0.00022 (n=8530)  z=-0.57
+   Tue      +0.00024 +- 0.00030 (n=7543)  z=0.78
+   Thu      +0.00011 +- 0.00036 (n=6880)  z=0.30
+full-val argmax (a, beta) = (5.0, 0.05): +0.00041 +- 0.00028
+   a=   5  b0.02:+0.00032  b0.05:+0.00041  b0.10:+0.00007  b0.15:-0.00056  b0.20:-0.00128  b0.30:-0.00208  b0.50:-0.00765
+   a=  20  b0.02:+0.00015  b0.05:+0.00019  b0.10:+0.00021  b0.15:+0.00023  b0.20:-0.00012  b0.30:-0.00081  b0.50:-0.00194
+   a=  50  b0.02:+0.00008  b0.05:+0.00031  b0.10:+0.00024  b0.15:+0.00017  b0.20:+0.00025  b0.30:+0.00020  b0.50:-0.00080
+rows covered by both V and T: 0.1001; corr(x_V, x_T) on them: 0.047
+
+=== (U) union: z(G3) + b1 * x_V + b2 * x_T  (a_V, a_T fixed at the single-source full-val argmax) ===
+  [U] outer fold 0: chosen (0.3, 0.05), inner mean +0.00029, outer +0.00063 +- 0.00070 (n=2885)  190s
+  [U] outer fold 1: chosen (0.3, 0.05), inner mean +0.00025, outer +0.00140 +- 0.00073 (n=2885)  201s
+  [U] outer fold 2: chosen (0.2, 0.05), inner mean +0.00042, outer +0.00046 +- 0.00057 (n=2885)  212s
+  [U] outer fold 3: chosen (0.2, 0.05), inner mean +0.00072, outer -0.00054 +- 0.00068 (n=2884)  223s
+  [U] outer fold 4: chosen (0.0, 0.05), inner mean +0.00048, outer +0.00013 +- 0.00061 (n=2884)  234s
+chosen (b1, b2): [(0.3, 0.05), (0.3, 0.05), (0.2, 0.05), (0.2, 0.05), (0.0, 0.05)]
+U two-feature: nested delta +0.00042 +- 0.00029 (n=14423)  z=1.41
+   M<50     +0.00069 +- 0.00057 (n=5893)  z=1.21
+   M>=50    +0.00023 +- 0.00030 (n=8530)  z=0.75
+   Tue      +0.00053 +- 0.00041 (n=7543)  z=1.29
+   Thu      +0.00029 +- 0.00042 (n=6880)  z=0.69
+full-val argmax (b1, b2) = (0.2, 0.05): +0.00043 +- 0.00029
+--- count-union (s_V + w s_T, n_V + w n_T), pooled p0 ---
+  [Uc w=0.3] outer fold 0: chosen (50.0, 0.3), inner mean +0.00028, outer +0.00039 +- 0.00053 (n=2885)  242s
+  [Uc w=0.3] outer fold 1: chosen (50.0, 0.3), inner mean +0.00027, outer +0.00106 +- 0.00061 (n=2885)  249s
+  [Uc w=0.3] outer fold 2: chosen (50.0, 0.3), inner mean +0.00043, outer +0.00039 +- 0.00048 (n=2885)  257s
+  [Uc w=0.3] outer fold 3: chosen (50.0, 0.3), inner mean +0.00043, outer +0.00022 +- 0.00053 (n=2884)  264s
+  [Uc w=0.3] outer fold 4: chosen (50.0, 0.3), inner mean +0.00050, outer -0.00014 +- 0.00053 (n=2884)  271s
+chosen: [(50.0, 0.3), (50.0, 0.3), (50.0, 0.3), (50.0, 0.3), (50.0, 0.3)]
+count-union w=0.3: nested delta +0.00039 +- 0.00024 (n=14423)  z=1.60
+   M<50     +0.00055 +- 0.00044 (n=5893)  z=1.27
+   M>=50    +0.00027 +- 0.00027 (n=8530)  z=0.98
+   Tue      +0.00064 +- 0.00036 (n=7543)  z=1.80
+   Thu      +0.00010 +- 0.00032 (n=6880)  z=0.32
+  [Uc w=1.0] outer fold 0: chosen (5.0, 0.02), inner mean +0.00026, outer +0.00069 +- 0.00037 (n=2885)  277s
+  [Uc w=1.0] outer fold 1: chosen (5.0, 0.02), inner mean +0.00031, outer +0.00099 +- 0.00049 (n=2885)  285s
+  [Uc w=1.0] outer fold 2: chosen (5.0, 0.02), inner mean +0.00045, outer +0.00022 +- 0.00028 (n=2885)  292s
+  [Uc w=1.0] outer fold 3: chosen (5.0, 0.05), inner mean +0.00063, outer -0.00072 +- 0.00067 (n=2884)  299s
+  [Uc w=1.0] outer fold 4: chosen (5.0, 0.02), inner mean +0.00047, outer +0.00017 +- 0.00034 (n=2884)  306s
+chosen: [(5.0, 0.02), (5.0, 0.02), (5.0, 0.02), (5.0, 0.05), (5.0, 0.02)]
+count-union w=1.0: nested delta +0.00027 +- 0.00020 (n=14423)  z=1.33
+   M<50     +0.00039 +- 0.00039 (n=5893)  z=1.01
+   M>=50    +0.00019 +- 0.00021 (n=8530)  z=0.87
+   Tue      +0.00073 +- 0.00027 (n=7543)  z=2.76
+   Thu      -0.00024 +- 0.00031 (n=6880)  z=-0.76
+
+=== duplication check: x_V (OOF, a=50) vs NN popularity inputs (data/feats/val) ===
+   it_hist_all_luo        covered rows: pearson(x_V, f) +0.052  spearman -0.057 | all rows pearson +0.008
+   it_hist_all_luo_z      covered rows: pearson(x_V, f) +0.034  spearman -0.056 | all rows pearson +0.005
+   it_hist_all_luo_rk     covered rows: pearson(x_V, f) +0.051  spearman -0.058 | all rows pearson +0.010
+   it_hist_et1_luo        covered rows: pearson(x_V, f) +0.052  spearman -0.061 | all rows pearson +0.007
+   it_tr_ctr              covered rows: pearson(x_V, f) +0.034  spearman -0.018 | all rows pearson +0.011
+   it_tr_coec             covered rows: pearson(x_V, f) +0.039  spearman +0.015 | all rows pearson +0.021
+   it_cand_cnt_split_rk   covered rows: pearson(x_V, f) -0.040  spearman -0.484 | all rows pearson -0.088
+   it_cand_cnt_train      covered rows: pearson(x_V, f) +0.026  spearman -0.113 | all rows pearson -0.009
+   seq_cv_pop             covered rows: pearson(x_V, f) +0.047  spearman -0.054 | all rows pearson +0.007
+   full-val table (gamma on z(log1p it_hist_all_luo), beta on x_V): best (0.0, 0.3)
+   gamma=0.00  b0.00:+0.00000  b0.02:-0.00001  b0.05:-0.00000  b0.10:-0.00000  b0.15:+0.00002  b0.20:+0.00004  b0.30:+0.00018  b0.50:+0.00004
+   gamma=0.05  b0.00:-0.00084  b0.02:-0.00080  b0.05:-0.00076  b0.10:-0.00071  b0.15:-0.00064  b0.20:-0.00059  b0.30:-0.00069  b0.50:-0.00066
+   gamma=0.10  b0.00:-0.00256  b0.02:-0.00257  b0.05:-0.00258  b0.10:-0.00254  b0.15:-0.00254  b0.20:-0.00252  b0.30:-0.00265  b0.50:-0.00248
+   gamma=0.20  b0.00:-0.00665  b0.02:-0.00665  b0.05:-0.00673  b0.10:-0.00675  b0.15:-0.00667  b0.20:-0.00658  b0.30:-0.00657  b0.50:-0.00653
+   gamma=0.30  b0.00:-0.01210  b0.02:-0.01211  b0.05:-0.01216  b0.10:-0.01210  b0.15:-0.01208  b0.20:-0.01197  b0.30:-0.01193  b0.50:-0.01199
+   popularity term only (nested): +0.00000 +- 0.00000 (n=14423) chosen [(0.0, 0.0), (0.0, 0.0), (0.0, 0.0), (0.0, 0.0), (0.0, 0.0)]
+   x_V only (simple nested):        +0.00018 +- 0.00014 (n=14423) chosen [(0.0, 0.3), (0.0, 0.3), (0.0, 0.3), (0.0, 0.3), (0.0, 0.3)]
+   both (nested):                   +0.00018 +- 0.00014 (n=14423) chosen [(0.0, 0.3), (0.0, 0.3), (0.0, 0.3), (0.0, 0.3), (0.0, 0.3)]
+   increment of x_V given the popularity term: +0.00018 +- 0.00014 (n=14423)
+   OLS of x_V on popularity features (covered rows): R2 0.005
+   residualised x_V (simple nested): +0.00000 +- 0.00015 (n=14423) chosen [0.5, 0.3, 0.3, 0.3, 0.5]
+
+=== test coverage (leave-user-out) and projection ===
+   V(all val)     public : rows>=1 0.1428  rows>=3 0.0196  feeds with any covered row 0.9500
+   V(all val)     private: rows>=1 0.1200  rows>=3 0.0156  feeds with any covered row 0.9349
+   T(train-expl)  public : rows>=1 0.3951  rows>=3 0.2035  feeds with any covered row 0.9953
+   T(train-expl)  private: rows>=1 0.3676  rows>=3 0.1883  feeds with any covered row 0.9942
+   U(V or T)      public : rows>=1 0.4426  rows>=3 0.2087  feeds with any covered row 0.9967
+   U(V or T)      private: rows>=1 0.4035  rows>=3 0.1918  feeds with any covered row 0.9951
+   val OOF coverage V rows>=1 0.1620; val T coverage rows>=1 0.4644
+   projected test gain V public: nested val -0.00011 x coverage ratio 0.882 = -0.00010
+   projected test gain V private: nested val -0.00011 x coverage ratio 0.741 = -0.00008
+   projected test gain T public: nested val +0.00018 x coverage ratio 0.851 = +0.00015
+   projected test gain T private: nested val +0.00018 x coverage ratio 0.792 = +0.00014
+   projected test gain U public: nested val +0.00042 x coverage ratio 0.841 = +0.00035
+   projected test gain U private: nested val +0.00042 x coverage ratio 0.767 = +0.00032
+   ASSUMPTION: gain proportional to the covered share of candidate rows, same per-covered-row effect on test as on val (ignores colder test items and the longer val->test gap).
+
+=== pre-declared acceptance (plan.txt) ===
+V: nested -0.00011 +- 0.00016 (z -0.68) | worst slice z -1.45 | Tue->Thu -0.00003 +- 0.00018 | projected private -0.00008
+V verdict: REJECT
+T: nested +0.00018 +- 0.00023 (z 0.75) | worst slice z -0.57 | projected private +0.00014
+U: nested +0.00042 +- 0.00029 (z 1.41) | worst slice z 0.00 | projected private +0.00032
+U verdict (same rule, time-forward taken from V): REJECT
+done 331s

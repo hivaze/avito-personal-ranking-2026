@@ -1,0 +1,34 @@
+# PROBE (2026-11-17, lead; ledger 2026-11-17T15:07Z): FD16P20 with its 16 full-view students replaced by their all-data
+# re-cools of recipe "fsw50t" (lab/nn_x/w12/kd/fd/lane_fdx4.sh, same @77500 snapshots and seeds 1000+s); the popularity-light
+# part, weights and fine-tune are FD16P20's. Built by fd_finish.sh FDX16P20:fsw50t. Not a pick candidate (see the ledger).
+
+name = "FDX16P20_fsw50t"
+
+[members]
+full_view = [
+    "w5_fdxfsw50t_kd05w192_s951", "w5_fdxfsw50t_kd05w192_s952", "w5_fdxfsw50t_kd05w192_s953", "w5_fdxfsw50t_kd05w192_s954",
+    "w5_fdxfsw50t_kd05w192_s955", "w5_fdxfsw50t_kd05w192_s956", "w5_fdxfsw50t_kd05w192_s957", "w5_fdxfsw50t_kd05w192_s958",
+    "w5_fdxfsw50t_kd05t25w192_s951", "w5_fdxfsw50t_kd05t25w192_s952", "w5_fdxfsw50t_kd05t25w192_s953", "w5_fdxfsw50t_kd05t25w192_s954",
+    "w5_fdxfsw50t_kd05t25w192_s955", "w5_fdxfsw50t_kd05t25w192_s956", "w5_fdxfsw50t_kd05t25w192_s957", "w5_fdxfsw50t_kd05t25w192_s958",
+]
+popularity_light = [
+    "abl_fd10_pop1kd05w192_s951", "abl_fd10_pop1kd05w192_s952", "abl_fd10_pop1kd05w192_s953", "abl_fd10_pop1kd05w192_s954",
+]
+
+[weights]
+popularity_light = 0.2
+finetuned_branch = 0.5
+
+[files]
+finetune_tag = "n2cpv3s3"
+pool_tag = "FDX16P20_fsw50tkd"
+submission = "cand_FDX16P20_fsw50tkd_r4.parquet"
+
+[gate]
+reference_pool_tag = "W8P20kd"
+
+[record]
+sha256 = "9b2cf4710722d98cb5e90ddc354d6f53903c935d088c2f913d7f0813acb3cd26"
+val_ndcg = 0.40212
+public_ndcg = 0.0       # not submitted yet
+gate_output = "gate_FDX16P20_fsw50tkd.txt"

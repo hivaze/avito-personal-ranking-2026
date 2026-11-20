@@ -1,0 +1,44 @@
+PREDECLARED at 2026-11-13T04:46:10Z (date -u), before any result was computed (no replay, no NDCG, no corr yet).
+
+ITEM: HDROP-ALL diagnostic (reports/TRICKS_SWEEP_1113.md section 3 #3): history-dropout TTA replay at 10 epochs.
+No training. GPU N only (CUDA_VISIBLE_DEVICES=N launched only if nvidia-smi shows < 4 compute processes and >= 60 GB free),
+CPU readout with 12 threads. Nothing written outside nn_x/tricks/HDROP-ALL/. Nothing adopted, nothing submitted.
+
+MEMBERS: w5_e10_base_s951 and w5_e10_base_s952, the SELECTED checkpoints nn_x/w5/ckpt/w5_e10_base_s95{1,2}.pt
+(select_on holdout), loaded with the nn_x/abl model/data code (bit-identical to nn_x/w5 at flags off).
+
+SCORING (per member, same code path for every mode; batching = nn_x/abl common.predict: cand_budget 65536, max_feeds 1024,
+bf16 autocast, fp32 head):
+  val:     TF32 on, no 'dom' (Ranker.infer_domain 1)  == train.py's val predict  -> all 14,423 val feeds
+  holdout: TF32 off, tr.dom = [1-p, p, 0]              == cd_arms5.holdout_preds    -> the fixed 30,000 random-like train
+           holdout feeds (rng 12345 over p_random > 0.9 and M >= 50; asserted equal to preds/holdout/holdout_meta.npy)
+  (i)  ref : full history (unchanged batch).
+  (ii) d10 / d20 : history-event dropout at rate p in {0.1, 0.2}; 4 masks per rate (k = 0..3).
+       Mask: every valid event among the first min(H,256) is dropped independently with prob p, EXCEPT the newest event
+       (index 0, always kept); survivors compacted to a contiguous newest-first prefix in their original order (recency
+       indices shift, H := number of kept events); batch width unchanged (compaction in place). All in-model
+       history-derived inputs are recomputed from the new history exactly as solvers/r6/tta.py compact_hist does:
+       he_raw/hemb_ok/hmask/hcat/het/hes/H (+ hidx for completeness) -> dense similarity / category / H features,
+       history encoder, target attention, sim_bias, retrieval. Precomputed xt inputs (ctx_*, seq_cv_*, it_hist_*, pre2_*)
+       stay unchanged (as in T2; they cannot be recomputed in-model).
+       Masks from a torch.Generator on the GPU, seed 20261113 + 1000*r + 10*midx + k (r = 1 for p 0.1, 2 for p 0.2;
+       midx 0 = s951, 1 = s952; separate generators for val and holdout: +500000 for holdout).
+       TTA-averaged prediction = mean of the 4 passes' raw logits per candidate (as T2).
+  Replay check (info, not a gate; r6_tta lesson): ref vs stored preds (nn_x/w5/preds/nn_<v>_trainonly_val.npy,
+       nn_x/w5/preds/holdout/nn_<v>_holdout.npy): max|d|, Pearson, NDCG difference. Deltas are paired against ref.
+
+METRIC: src/metrics.ndcg_per_feed (binary gain, pessimistic ties). Paired per feed: delta = NDCG(mode) - NDCG(ref) of
+the same checkpoint; SE = sd(per-feed delta)/sqrt(n_feeds). Pooled over the 2 members = per-feed mean of the two
+members' deltas (SE from that per-feed series).
+CORR: "within-feed corr" = Pearson over all candidates of per-feed z-scores (r6_eval.corr / rho_x definition) between
+mode and ref of the same checkpoint; also reported: mean per-feed Pearson. Corr C = mean over the 2 members.
+
+DECISION (evaluated on VAL, rate 0.1, TTA-averaged, pooled over the 2 members; D = pooled delta, C = corr):
+  A. |D(0.1)| <= 0.0003 AND C(0.1) >= 0.999  -> model already robust to history dropout at 10 ep: HDROP-ALL CLOSED.
+  B. else if D(0.1) > +0.0005, or D(0.2) > +0.0005 (rate-0.2 TTA, the HDROP-ALL design rate)
+                                               -> HDROP-ALL stays QUEUED with that number (the larger one) as its prior.
+  C. otherwise                                 -> record and CLOSE.
+  Checked in the order A, B, C. Holdout deltas, rate 0.2, single-pass (un-averaged) deltas, 2-member z-mean ensemble
+  deltas and slices (val: M<50, M>=50, Tue, Thu with Tue iff (timestamp+10800)//86400 < 20720; H<64 / 64-191 / >=192;
+  holdout: H bins) are INFORMATION ONLY. The sweep's earlier wording ("per-member drop-robustness gap < +0.0002 -> close")
+  is reported alongside as information. No interim reads count; no re-runs with other rates/seeds/masks after the readout.

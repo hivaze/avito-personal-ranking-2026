@@ -1,0 +1,390 @@
+{
+ "checks": [
+  {
+   "name": "data.py byte-identical to nn_x/w5 (copy-time md5; nn_x/w5 file unchanged since)",
+   "ok": true,
+   "info": "10c30811ba56eb194eedae440a8a06c1"
+  },
+  {
+   "name": "cd_arms.py byte-identical to nn_x/w5 (copy-time md5; nn_x/w5 file unchanged since)",
+   "ok": true,
+   "info": "63f63425a758b546fbe8a4c23663a76b"
+  },
+  {
+   "name": "cd_arms4.py byte-identical to nn_x/w5 (copy-time md5; nn_x/w5 file unchanged since)",
+   "ok": true,
+   "info": "bf46b49b4294e1bfaf80caaed4a7c523"
+  },
+  {
+   "name": "cd_arms5.py byte-identical to nn_x/w5 (copy-time md5; nn_x/w5 file unchanged since)",
+   "ok": true,
+   "info": "4fa0b8145a833a65d0a54e857c74ff1a"
+  },
+  {
+   "name": "cd_arms6.py byte-identical to nn_x/w5 (copy-time md5; nn_x/w5 file unchanged since)",
+   "ok": true,
+   "info": "2801de7b00997422118f25344b9ef3b8"
+  },
+  {
+   "name": "cd_arms7.py byte-identical to nn_x/w5 (copy-time md5; nn_x/w5 file unchanged since)",
+   "ok": true,
+   "info": "00971e580dce4a2a8dc62eea4e49144f"
+  },
+  {
+   "name": "cd_arms8.py byte-identical to nn_x/w5 (copy-time md5; nn_x/w5 file unchanged since)",
+   "ok": true,
+   "info": "cd6e328920177b3e42aaa8e773104dbe"
+  },
+  {
+   "name": "blend.py byte-identical to nn_x/w5 (copy-time md5; nn_x/w5 file unchanged since)",
+   "ok": true,
+   "info": "d3993f0e436d5eb0b6d8f8351ebe10c9"
+  },
+  {
+   "name": "tests/mini_split.py byte-identical to nn_x/w5 (copy-time md5; nn_x/w5 file unchanged since)",
+   "ok": true,
+   "info": "667b108d756e01384f867aef9fa1bfc1"
+  },
+  {
+   "name": "tests/e2e_w5.py byte-identical to nn_x/w5 (copy-time md5; nn_x/w5 file unchanged since)",
+   "ok": true,
+   "info": "bc238ec05ea730c1214bf0710c4c8f47"
+  },
+  {
+   "name": "nn_x/w5 reference files unchanged since the copy (train / model / common / finetune / holdout_eval / stale_pred / lane)",
+   "ok": true,
+   "info": "{'train.py': True, 'model.py': True, 'common.py': True, 'finetune.py': True, 'holdout_eval.py': True, 'stale_pred.py': True, 'lane.sh': True}"
+  },
+  {
+   "name": "common.py AST-equal to nn_x/w5 up to string constants (output path nn_x/w9/hs1)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "train.py: the variant-prefix assert is the one normalised statement (w5_ -> w5_ | w9_)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "AST: train.py minus the HS1 statements (exact set) == nn_x/w5/train.py (flag-off path unchanged)",
+   "ok": true,
+   "info": "{'import cd_arms9': 1, 'add_argument --hist_src': 1, 'add_argument --hist_et': 1, 'if a.hist_src or a.hist_et': 2, \"if a.hist_src or a.hist_et or ck0['cfg'].get('hist_src') or ck0['cfg'].get('hist_et')\": 1, 'Ranker keyword': 2}"
+  },
+  {
+   "name": "AST: model.py minus the two Ranker.__init__ keywords and `if hist_src or hist_et` == nn_x/w5/model.py",
+   "ok": true,
+   "info": "{'__init__ keyword': 2, 'if hist_src or hist_et': 1}"
+  },
+  {
+   "name": "AST: holdout_eval.py minus the HS1 statements (exact set) == nn_x/w5/holdout_eval.py",
+   "ok": true,
+   "info": "{'import cd_arms9': 1, 'views = {}': 1, 'view_for(...) -> arg': 1}"
+  },
+  {
+   "name": "AST: stale_pred.py minus the HS1 statements (exact set) == nn_x/w5/stale_pred.py",
+   "ok": true,
+   "info": "{'import cd_arms9': 1, 'views = {}': 1, 'view_for(...) -> arg': 2}"
+  },
+  {
+   "name": "AST: finetune.py minus the HS1 statements (exact set) == nn_x/w5/finetune.py",
+   "ok": true,
+   "info": "{'import cd_arms9': 1, \"if ck['args'].get('hist_src') or ck['args'].get('hist_et')\": 2}"
+  },
+  {
+   "name": "lane.sh DRY: 10 commands; nn_x/w5 lane.sh DRY: 3 commands",
+   "ok": true,
+   "info": "(0, ['w5_e10_base_s951', 'w5_e10_hs1_s951', 'w5_e10_hs1_s952', 'w5_e10_hs1b_s951', 'w9_base_s23', 'w9_base_s24', 'w9_hs1_s23', 'w9_hs1_s24', 'w9_hs1b_s23', 'w9_hs1b_s24'], 0, ['w5_base_s23', 'w5_base_s24', 'w5_e10_base_s951'])"
+  },
+  {
+   "name": "A:base:23: w9_base_s23 == nn_x/w5 w5_base_s23 except the variant name",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "A:hs1:23 differs from A:base ONLY by hist_src '1'",
+   "ok": true,
+   "info": "{'hist_src': ('', '1')}"
+  },
+  {
+   "name": "A:hs1b:23 differs from A:base ONLY by hist_et '2,3,4,7,9'",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "A:base:24: w9_base_s24 == nn_x/w5 w5_base_s24 except the variant name",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "A:hs1:24 differs from A:base ONLY by hist_src '1'",
+   "ok": true,
+   "info": "{'hist_src': ('', '1')}"
+  },
+  {
+   "name": "A:hs1b:24 differs from A:base ONLY by hist_et '2,3,4,7,9'",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "E:base:951 identical to nn_x/w5 E:base:951 (same variant name w5_e10_base_s951)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "E:hs1:951 == E_BASE + HYG + seed + hist_src '1' only",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "E:hs1:952 == E_BASE + HYG + seed + hist_src '1' only",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "E:hs1b:951 == E_BASE + HYG + seed + hist_et only",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "lane.sh refuses GPUs N <ids> (DRY mode too)",
+   "ok": true,
+   "info": "[True, True, True, True, True, True]"
+  },
+  {
+   "name": "parse(): hist_src '' and hist_et '' by default; guard False; view_spec None",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "view_spec: '1' -> ((1,), ()); '2,3,4,7,9' -> ((), (2,3,4,7,9)); both; bad codes refused",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "nn_x/abl abl_base_s23 stored args == A_BASE + HYG (seed 23); differences only flags absent on one side at off values",
+   "ok": true,
+   "info": "{'rdrop_cd': (0.0, None), 'hist_src': ('', None), 'hist_et': ('', None), 'xt_rel_extra': (None, ''), 'xt_exclude': (None, ''), 'sam_cd': (0.0, None)}"
+  },
+  {
+   "name": "abl_base_s23: selected + @last val and holdout preds exist (the 2-epoch screen references)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "nn_x/abl abl_base_s24 stored args == A_BASE + HYG (seed 24); differences only flags absent on one side at off values",
+   "ok": true,
+   "info": "{'rdrop_cd': (0.0, None), 'hist_src': ('', None), 'hist_et': ('', None), 'xt_rel_extra': (None, ''), 'xt_exclude': (None, ''), 'sam_cd': (0.0, None)}"
+  },
+  {
+   "name": "abl_base_s24: selected + @last val and holdout preds exist (the 2-epoch screen references)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "nn_x/abl holdout_meta == nn_x/w5 holdout_meta (same fixed 30K holdout)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "train: view arrays == numpy-filtered compacted arrays (order preserved), H == per-feed s1 count, hist_off == cumsum, n_hist",
+   "ok": true,
+   "info": "events 38969 -> 14799, feeds 288"
+  },
+  {
+   "name": "train: every kept event has source 1; kept types subset of {1, 4, 7} (types 2 3 5 6 8 9 10 carry no source: dead per-type columns)",
+   "ok": true,
+   "info": "kept by type {1: 13155, 2: 0, 3: 0, 4: 1391, 5: 0, 6: 0, 7: 253, 8: 0, 9: 0, 10: 0}"
+  },
+  {
+   "name": "train: candidate / table / xt / user arrays are the SAME objects; the original split is untouched",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "train: stats == direct recomputation",
+   "ok": true,
+   "info": "{'events_before': 38969, 'events_after': 14799, 'feeds_empty_before': 59, 'feeds_empty_after': 69, 'feeds_emptied': 10, 'feeds_changed': 228}"
+  },
+  {
+   "name": "train: gather(view) == gather(numpy-filtered split) on every history tensor; candidate tensors == the original's",
+   "ok": true,
+   "info": "batch 74 feeds, 10 emptied"
+  },
+  {
+   "name": "train: --hist_et 2,3,4,7,9 view (model-5 filter) == numpy reference; kept types subset; combined src 1 & et 1,4 == reference",
+   "ok": true,
+   "info": "et view kept 0.3379 (empty after 0.2812); combined kept 0.3733"
+  },
+  {
+   "name": "val: view arrays == numpy-filtered compacted arrays (order preserved), H == per-feed s1 count, hist_off == cumsum, n_hist",
+   "ok": true,
+   "info": "events 35875 -> 11897, feeds 210"
+  },
+  {
+   "name": "val: every kept event has source 1; kept types subset of {1, 4, 7} (types 2 3 5 6 8 9 10 carry no source: dead per-type columns)",
+   "ok": true,
+   "info": "kept by type {1: 10168, 2: 0, 3: 0, 4: 1349, 5: 0, 6: 0, 7: 380, 8: 0, 9: 0, 10: 0}"
+  },
+  {
+   "name": "val: candidate / table / xt / user arrays are the SAME objects; the original split is untouched",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "val: stats == direct recomputation",
+   "ok": true,
+   "info": "{'events_before': 35875, 'events_after': 11897, 'feeds_empty_before': 14, 'feeds_empty_after': 15, 'feeds_emptied': 1, 'feeds_changed': 195}"
+  },
+  {
+   "name": "val: gather(view) == gather(numpy-filtered split) on every history tensor; candidate tensors == the original's",
+   "ok": true,
+   "info": "batch 65 feeds, 1 emptied"
+  },
+  {
+   "name": "val: --hist_et 2,3,4,7,9 view (model-5 filter) == numpy reference; kept types subset; combined src 1 & et 1,4 == reference",
+   "ok": true,
+   "info": "et view kept 0.4170 (empty after 0.0905); combined kept 0.3210"
+  },
+  {
+   "name": "view_for: identity (same object) without a stored view; cached view per spec; xt re-synced from the split on every call",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "check_init_view: same spec passes, a different spec (or none) is refused",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "Ranker(hist_src='1'): cfg carries hist_src / hist_et; nn_x/w5 model.py refuses such a cfg (TypeError = loud failure)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "Ranker without the keywords: cfg has no hist_src / hist_et key (flag-off checkpoints keep the nn_x/w5 cfg)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "dense_features on the view: finite everywhere; emptied feeds have H 0, no history mask, smax / smax8 / smax32 / lse / top3 = -1.5 and smean 0 (the empty-history values of the base)",
+   "ok": true,
+   "info": "40 emptied feeds, 8 empty before, 40 with s1 events"
+  },
+  {
+   "name": "full forward (eval + train mode, aux head) and the TabR retrieval run on the emptied feeds with finite outputs; retrieval output on emptied feeds == the zero-init Z bias (all mass on the sink)",
+   "ok": true,
+   "info": "logits torch.Size([88, 304])"
+  },
+  {
+   "name": "empty-slice share after the s1 view: val 2.97% / test 2.37% exactly as the skeptic (+-0.05 pt); train within 0.2 pt of the skeptic's sampled 2.87% (exact full-train value reported above)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "e2e ref_off completed (rc 0, 34s)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "e2e new_off completed (rc 0, 31s)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "e2e new_on completed (rc 0, 29s)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "new_off == ref_off: identical batch sequence (feeds, rows, H, sources), model logits, loss-input logits, eval / predict counts",
+   "ok": true,
+   "info": "{'fidx': True, 'off': True, 'shapes': True, 'ci': True, 'H': True, 'hes': True, 'lg_model': True, 'lg_loss': True, 'n_model': True, 'n_loss': True, 'n_eval': True, 'n_predict': True}; 38 training batches, 4 evals"
+  },
+  {
+   "name": "new_off == ref_off: logged step / BEST / holdout lines identical (times masked)",
+   "ok": true,
+   "info": "11 lines"
+  },
+  {
+   "name": "new_off == ref_off: bit-identical selected and @last checkpoints (state_dict, cfg, args up to the new flags)",
+   "ok": true,
+   "info": "{'selected': True, '@last': True}"
+  },
+  {
+   "name": "new_off == ref_off: bit-identical val / holdout preds (selected and @last)",
+   "ok": true,
+   "info": "{'nn__trainonly_val.npy': True, 'nn_@last_trainonly_val.npy': True, 'holdout/nn__holdout.npy': True, 'holdout/nn_@last_holdout.npy': True}"
+  },
+  {
+   "name": "new_on: every gathered history event of every training batch has source 1; H never above the off run's H per feed",
+   "ok": true,
+   "info": "24490 gathered events"
+  },
+  {
+   "name": "new_on: one view log line each for train / val / test",
+   "ok": true,
+   "info": "{'train': 1, 'val': 1, 'test': 1}"
+  },
+  {
+   "name": "new_on: checkpoint args + cfg and the json args carry hist_src '1'",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "new_on: val / test / holdout preds of the selected and @last checkpoints written",
+   "ok": true,
+   "info": "{'nn_w9_t9e2e_new_on_trainonly_val.npy': True, 'nn_w9_t9e2e_new_on_trainonly_test.npy': True, 'nn_w9_t9e2e_new_on@last_trainonly_val.npy': True, 'nn_w9_t9e2e_new_on@last_trainonly_test.npy': True, 'holdout/nn_w9_t9e2e_new_on_holdout.npy': True, 'holdout/nn_w9_t9e2e_new_on@last_holdout.npy': True}"
+  },
+  {
+   "name": "new_on CPU holdout parity: view_for(checkpoint args) + predict == train.py's saved holdout preds (bitwise); the same checkpoint on the FULL history differs (negative control)",
+   "ok": true,
+   "info": "corr(view, full) 0.8143"
+  },
+  {
+   "name": "new_on != new_off holdout preds (the view changes the model)",
+   "ok": true,
+   "info": "corr 0.9644"
+  }
+ ],
+ "lane_cmds": {
+  "w9_base_s23": "--variant w9_base_s23 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 23",
+  "w9_base_s24": "--variant w9_base_s24 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 24",
+  "w9_hs1_s23": "--variant w9_hs1_s23 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 23 --hist_src 1",
+  "w9_hs1_s24": "--variant w9_hs1_s24 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 24 --hist_src 1",
+  "w9_hs1b_s23": "--variant w9_hs1b_s23 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 23 --hist_et 2,3,4,7,9",
+  "w9_hs1b_s24": "--variant w9_hs1b_s24 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 24 --hist_et 2,3,4,7,9",
+  "w5_e10_base_s951": "--variant w5_e10_base_s951 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 951",
+  "w5_e10_hs1_s951": "--variant w5_e10_hs1_s951 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 951 --hist_src 1",
+  "w5_e10_hs1_s952": "--variant w5_e10_hs1_s952 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 952 --hist_src 1",
+  "w5_e10_hs1b_s951": "--variant w5_e10_hs1b_s951 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 951 --hist_et 2,3,4,7,9"
+ },
+ "empty_slice_shares": {
+  "train": {
+   "feeds": 3151208,
+   "s1_event_share": 0.37569606705247666,
+   "empty_before": 0.01111795857334711,
+   "empty_after": 0.029556601785727887,
+   "emptied": 0.018438643212380777
+  },
+  "val": {
+   "feeds": 14423,
+   "s1_event_share": 0.3376003731876216,
+   "empty_before": 0.013450738403938154,
+   "empty_after": 0.02967482493239964,
+   "emptied": 0.016224086528461485
+  },
+  "test": {
+   "feeds": 28595,
+   "s1_event_share": 0.3433019525423347,
+   "empty_before": 0.008567931456548347,
+   "empty_after": 0.023745410036719705,
+   "emptied": 0.015177478580171358
+  }
+ },
+ "e2e_seconds": {
+  "ref_off": 33.60974168777466,
+  "new_off": 31.46292519569397,
+  "new_on": 29.013689517974854
+ },
+ "failed": []
+}

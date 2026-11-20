@@ -1,0 +1,21 @@
+EQB FILE READ: details fixed before any prediction of this task exists (written 2026-11-15T23:14Z; rule = decision ledger (not published) block
+2026-11-15T23:08:02Z item Q6, applied as written; this note only fixes HOW the listed reads are computed, it adds no clause, dose or variant).
+
+Arm (one structure, one dose): the 5 train-stage inputs it_hist_{all,et1,et2,et3,et4}_luo of VAL rows replaced by reports/TRICKS_1115/web_shift_probe/cf/B_<name>.npy
+ (half dose, kappa 0.5; built label-free by s2_build.py; the curve m(E) was fitted on val + test rows pooled = transductive, no label). Every other input, every checkpoint
+ and the fine-tuned branch unchanged.
+Members: the 16 all-data wide members of FD16P20 = w5_fd10_kd05w192_s951..958 + w5_fd10_kd05t25w192_s951..958 (selected checkpoints nn_x/w5/ckpt/<v>.pt).
+Path: GPU, the stored files' own path (nn_x/w5/common.predict: bf16 autocast, tf32 on, SplitData default max_hist 256), NEW script nn_x/w12/eqb_1115/eqb_pred.py modelled on
+ nn_x/w5/stale_pred.py (feat_path switch). Reference = the same script, same process, same members with the STORED inputs (arm "base"); its equality with the stored
+ preds/nn_<v>_trainonly_val.npy is reported (correlation, max |difference|). The prediction script reads no label. One GPU process, GPU guard + per-GPU flock.
+File form (conventions imported from nn_x/w12/kd/build_r4.py: Z = feed_rank_z[:, 1], pool = member-equal mean of Z, spec('FD16P20') = 16 wide + 4 popularity-light at 0.2):
+ TO(kind)    = 0.8 Z(mean over the 16 members of Z(gpu_<v>_<kind>_val)) + 0.2 Z(stored popularity-light train-only pool = pool(abl_fd10_pop1kd05w192_s951..954)[train-only])
+ FILE(kind)  = 0.5 Z(preds/ens_FD16P20kd_ft_val.npy, stored, unchanged) + 0.5 Z(TO(kind)),   kind in {base, B}
+Labels: read ONCE by nn_x/w12/eqb_1115/eqb_read.py after all 32 prediction files exist. Per-feed NDCG = src/metrics.ndcg_per_feed (as build_r4.ev), delta d = arm - base per feed.
+Reads (the list of the task, nothing else): for FILE and for the train-only branch TO alone:
+ val (all 14,423 feeds), val M<50, val M>=50, pmix-public, pmix-private (src/pmix.weights, mean and SE by pmix.wmean_se), Tuesday (MSK day 20718) / Thursday (MSK day 20720),
+ feeds whose positives are ALL cold / feeds with NO cold positive (cold row = stored data/feats/val/it_hist_all_luo <= 0; feeds with at least one positive), each with the
+ paired SE (sd of the per-feed delta / sqrt(n); weighted form for pmix); per-member deltas (arm - base of each member alone) with paired SE and the count of positive members.
+RULE (ledger, exact): BUILD an experimental file iff FILE val delta >= 0 AND FILE pmix-private delta >= +1 SE AND FILE val M<50 delta >= -1 SE; otherwise CLOSED
+ (no test predictions, no file). The train-only branch, the day / cold slices and the member deltas carry no clause. No second dose, no other pooling, no other member set.
+Only if BUILD: test re-prediction on the same GPU path with cf_test/B_*.npy, path check on 2 members with the stored test inputs, staged parquet + gate (never pick 1).

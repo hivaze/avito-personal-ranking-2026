@@ -1,0 +1,43 @@
+== member level: Pearson of per-feed z (global) and mean per-feed Spearman, FT vs TO
+group           n | val: corr_z  spearman(mean over feeds)  RMS shift | test: corr_z  spearman  RMS shift | RMS test/val
+S:kd05w192       4 | 0.98880 0.98174 0.1496 | 0.99007 0.98377 0.1409 | 0.942
+S:kd05t25w192    4 | 0.98902 0.98189 0.1482 | 0.99029 0.98419 0.1393 | 0.940
+S:kd05           4 | 0.99061 0.98420 0.1371 | 0.99156 0.98593 0.1299 | 0.948
+S:kd05t25        4 | 0.99152 0.98517 0.1302 | 0.99243 0.98682 0.1230 | 0.945
+S:kd08           4 | 0.99044 0.98399 0.1383 | 0.99136 0.98558 0.1314 | 0.951
+H:m02            7 | 0.98844 0.98106 0.1519 | 0.98949 0.98293 0.1448 | 0.953
+H:m02p70k        7 | 0.98852 0.98148 0.1513 | 0.98950 0.98313 0.1446 | 0.956
+H:gru            6 | 0.98642 0.97852 0.1646 | 0.98725 0.98006 0.1595 | 0.969
+H:pop1           8 | 0.98896 0.98050 0.1485 | 0.99019 0.98269 0.1400 | 0.942
+
+== pool level (FT pool vs TO pool)
+ W8      val corr 0.99066 RMS 0.1366 | test corr 0.99163 RMS 0.1294 | RMS test/val 0.947
+ N8      val corr 0.99215 RMS 0.1253 | test corr 0.99290 RMS 0.1192 | RMS test/val 0.951
+ S16     val corr 0.99157 RMS 0.1298 | test corr 0.99239 RMS 0.1234 | RMS test/val 0.950
+ C3      val corr 0.99237 RMS 0.1235 | test corr 0.99303 RMS 0.1180 | RMS test/val 0.956
+ m02x7   val corr 0.99059 RMS 0.1372 | test corr 0.99133 RMS 0.1317 | RMS test/val 0.960
+ pop1x8  val corr 0.99124 RMS 0.1324 | test corr 0.99222 RMS 0.1247 | RMS test/val 0.942
+
+== member-member corr of z inside a branch (mean off-diagonal), val | test
+ S:kd05w192      val TO 0.9722 FT 0.9734 | test TO 0.9719 FT 0.9738
+ S:kd05t25w192   val TO 0.9723 FT 0.9732 | test TO 0.9718 FT 0.9734
+ W8              val TO 0.9726 FT 0.9736 | test TO 0.9722 FT 0.9739
+ N8              val TO 0.9781 FT 0.9792 | test TO 0.9779 FT 0.9793
+ H:m02           val TO 0.9497 FT 0.9585 | test TO 0.9491 FT 0.9587
+ H:pop1          val TO 0.9488 FT 0.9574 | test TO 0.9483 FT 0.9574
+ H:gru           val TO 0.9413 FT 0.9576 | test TO 0.9405 FT 0.9578
+
+== FT shift s_m = z_FT - z_TO: common-mode share = var(mean_m s_m) / mean_m var(s_m); mean pairwise corr of shifts
+ W8      val share 0.819 pair-corr 0.794 | test share 0.830 pair-corr 0.807
+ N8      val share 0.860 pair-corr 0.841 | test share 0.869 pair-corr 0.851
+ H:m02   val share 0.778 pair-corr 0.743 | test share 0.789 pair-corr 0.756
+ H:pop1  val share 0.757 pair-corr 0.724 | test share 0.757 pair-corr 0.723
+ C3      val share 0.610 pair-corr 0.599 | test share 0.611 pair-corr 0.601
+ val: corr(common shift W8, common shift C3) 0.904 | W8 vs N8 0.961 | RMS W8 0.1348 C3 0.1201 N8 0.1240
+ test: corr(common shift W8, common shift C3) 0.904 | W8 vs N8 0.965 | RMS W8 0.1277 C3 0.1148 N8 0.1179
+
+== fold-to-fold agreement on test (test_folds = per-fold per-feed z of the EMA-final model, 3-seed mean); students W8
+ w5_e10_kd05w192_s951         fold-fold corr of z 0.99654; corr of shifts 0.857; RMS single-fold shift 0.1548; RMS 5-fold-mean shift 0.1457; val OOF RMS 0.1539
+ w5_e10_kd05w192_s952         fold-fold corr of z 0.99652; corr of shifts 0.843; RMS single-fold shift 0.1487; RMS 5-fold-mean shift 0.1391; val OOF RMS 0.1476
+ w5_e10_kd05t25w192_s951      fold-fold corr of z 0.99667; corr of shifts 0.859; RMS single-fold shift 0.1536; RMS 5-fold-mean shift 0.1447; val OOF RMS 0.1528
+ w5_e10_kd05t25w192_s952      fold-fold corr of z 0.99657; corr of shifts 0.843; RMS single-fold shift 0.1468; RMS 5-fold-mean shift 0.1373; val OOF RMS 0.1463

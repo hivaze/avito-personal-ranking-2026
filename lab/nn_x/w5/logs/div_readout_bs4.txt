@@ -1,0 +1,6 @@
+DIVERSITY read-out bs4 seeds [951, 952] vs w5_e10_base (selected ckpt; rule E_batch_predeclared.txt amendment 1)
+(d1) pooled member: val -0.00262+-0.00080 | holdout -0.00209+-0.00048 -> NO (need both >= -0.0005)
+(d2) val: rho_x = corr(bs4 pool[951, 952], base pool[953,954]) 0.96386 | rho_bb = corr(base pool[951, 952], base pool[953,954]) 0.97364 | margin +0.00978 -> OK (need >= +0.005)
+     (info) holdout rho_x 0.96532 rho_bb 0.97527 margin +0.00995 | member corr: arm-base cross-seed 0.93566, base-base 0.94747, arm-arm 0.94292, same-seed arm-base 0.93623
+(d3) 2-member pool bs4 vs base[951, 952]: val -0.00208+-0.00091 | holdout -0.00226+-0.00054 -> NO
+VERDICT bs4: CLOSED (diversity clause)

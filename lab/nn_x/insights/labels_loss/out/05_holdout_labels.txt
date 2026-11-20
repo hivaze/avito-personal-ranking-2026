@@ -1,0 +1,22 @@
+holdout reconstructed: 30000 feeds; pool feeds 134118
+pool examination offsets (log rate ratio): g(rank) at 0,1,2,3,5,10,20,30,50,100: +0.99 +0.76 +0.51 +0.48 +0.31 +0.27 +0.10 +0.02 -0.07 -0.37
+h(rank from end) 0..7: +3.54 +0.30 +0.27 +0.15 +0.20 +0.15 +0.20 +0.24
+
+holdout CE (nats/feed): uniform 4.8961; offset only 4.4023; member 4.4958; member + offset 4.0891  -> offset removes 0.4067 nats (101.6% of the member's gain over uniform)
+within-feed corr(member z, shown rank) on random-like holdout: mean +0.0050 (should be ~0)
+share of holdout positives in the last 3 shown slots: 0.172; first 3 slots: 0.037
+
+member-mean rank percentile of holdout positives (0 = top) by SHOWN position (exploration feed, order random):
+  shown rank [0,3) (not last 3): n 1973, mean pct 0.274, P(top10%) 0.299
+  shown rank [3,10) (not last 3): n 3274, mean pct 0.276, P(top10%) 0.290
+  shown rank [10,30) (not last 3): n 7701, mean pct 0.273, P(top10%) 0.296
+  shown rank [30,100) (not last 3): n 18257, mean pct 0.266, P(top10%) 0.316
+  shown rank [100,300) (not last 3): n 13093, mean pct 0.255, P(top10%) 0.332
+  rank-from-end 0: n 8607, mean pct 0.255, P(top10%) 0.345
+  rank-from-end 1: n 305, mean pct 0.256, P(top10%) 0.334
+  rank-from-end 2: n 314, mean pct 0.276, P(top10%) 0.312
+
+holdout feeds with a later same-user feed: 5453; positives classified 10794
+  not in later history: n 959, mean pct 0.270, P(top10%) 0.312, share last-3 0.132
+  type-1 only: n 8150, mean pct 0.274, P(top10%) 0.299, share last-3 0.150
+  other event types (2..9): n 1685, mean pct 0.264, P(top10%) 0.327, share last-3 0.196

@@ -1,0 +1,98 @@
+{
+ "checks": [
+  {
+   "name": "no-op caps vs original split, pool batch, same seed: train logits, loss and all grads identical",
+   "ok": true,
+   "info": "loss 2.782204 vs 2.782204"
+  },
+  {
+   "name": "real caps, pool batch: loss changes (arm active), finite loss and grads",
+   "ok": true,
+   "info": "loss capped 2.781863 vs stored 2.782204"
+  },
+  {
+   "name": "no-op caps vs original split, regular batch, same seed: train logits, loss and all grads identical",
+   "ok": true,
+   "info": "loss 2.714862 vs 2.714862"
+  },
+  {
+   "name": "real caps, regular batch: loss changes (arm active), finite loss and grads",
+   "ok": true,
+   "info": "loss capped 2.715367 vs stored 2.714862"
+  },
+  {
+   "name": "per_feed_ce == listwise_loss of the feed alone / log M (bf16 batch-shape tolerance 5e-4)",
+   "ok": true,
+   "info": "max|d| 7.79e-06 over 264 feeds, mean L 0.9151"
+  },
+  {
+   "name": "flags OFF: identical training-batch sequence (feed ids of every step, incl. pool steps)",
+   "ok": true,
+   "info": "39 training batches"
+  },
+  {
+   "name": "flags OFF: identical per-batch history type counts / H (same histories gathered)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flags OFF: identical logged loss / val_ndcg / holdout_ndcg / BEST lines",
+   "ok": true,
+   "info": "BEST step 20 val_ndcg 0.39150; train time"
+  },
+  {
+   "name": "flags OFF: saved checkpoint bit-identical (every tensor)",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "flags OFF: val predictions bit-identical",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flags ON: every training batch gathered from the capped view",
+   "ok": true,
+   "info": "39 batches"
+  },
+  {
+   "name": "flags ON: caps respected in every training batch (max per-feed count of each capped type <= cap)",
+   "ok": true,
+   "info": "{1: 110, 4: 117, 6: 41, 8: 42, 10: 40}"
+  },
+  {
+   "name": "flags ON: every selection-holdout eval read the capped view; val predict did not",
+   "ok": true,
+   "info": "evals [True, True], val predicts capped [False, False, False]"
+  },
+  {
+   "name": "flags ON: recent batches only recent feeds, rho batches only stream feeds, no plain regular batch",
+   "ok": true,
+   "info": "{'pool': 4, 'recent': 6, 'rho': 29, 'regular': 0}"
+  },
+  {
+   "name": "flags ON: setup log lines present (hcap / rec / rho) and stream summary logged at each eval",
+   "ok": true,
+   "info": ""
+  }
+ ],
+ "e2e": {
+  "off_lines": [
+   "step 20/39 loss 4.4137 val_ndcg 0.39150 holdout_ndcg 0.31773 lr 6.46e-04 cd_loss_reg 4.3933 cd_loss_pool 3.8214",
+   "step 39/39 loss 0.0000 val_ndcg 0.39181 holdout_ndcg 0.31767 lr 8.50e-05 cd_loss_reg 2.4591 cd_loss_pool 2.8444",
+   "BEST step 20 val_ndcg 0.39150; train time"
+  ],
+  "on_lines": [
+   "step 20/39 loss 4.5022 val_ndcg 0.39266 holdout_ndcg 0.31748 lr 6.46e-04 cd_loss_reg 3.9147 cd_loss_pool 3.8223",
+   "step 39/39 loss 0.0000 val_ndcg 0.39299 holdout_ndcg 0.31748 lr 8.50e-05 cd_loss_reg 3.0910 cd_loss_pool 2.8447",
+   "BEST step 39 val_ndcg 0.39299; train time"
+  ],
+  "on_sources": {
+   "pool": 4,
+   "recent": 6,
+   "rho": 29,
+   "regular": 0
+  }
+ },
+ "failed": []
+}

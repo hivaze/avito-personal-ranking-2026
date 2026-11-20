@@ -1,0 +1,18 @@
+columns ['fidx', 'feed_id', 'timestamp', 'user_id', 'M', 'H', 'cand_off', 'hist_off']
+all train feeds feeds by slot [291760, 281767, 290992, 286479, 282716, 247429, 203548, 263115, 244596, 42, 0, 269029, 256678, 233023, 34]
+all train feeds rows by slot [23755568, 22253242, 22954158, 22039135, 21402195, 19191141, 16000942, 21017427, 18996470, 3091, 0, 20653225, 19952992, 18522726, 3524]
+   slots 6-8: feed shares 0.2862 0.3699 0.3439 | row shares 0.2857 0.3752 0.3391
+   slots 11-13: feed shares 0.3546 0.3383 0.3071 | row shares 0.3493 0.3374 0.3133
+pool feeds feeds by slot [11486, 10679, 11207, 11326, 10528, 9719, 8200, 11150, 11724, 0, 0, 13158, 12897, 12042, 2]
+pool feeds rows by slot [1691335, 1557458, 1649415, 1643293, 1526614, 1419205, 1192055, 1656163, 1717414, 0, 0, 1939443, 1922214, 1826570, 428]
+   slots 6-8: feed shares 0.2639 0.3588 0.3773 | row shares 0.2611 0.3627 0.3762
+   slots 11-13: feed shares 0.3454 0.3385 0.3161 | row shares 0.3410 0.3379 0.3211
+holdout feeds feeds by slot [2674, 2490, 2659, 2440, 2365, 2147, 1801, 2499, 2646, 0, 0, 2903, 2718, 2658, 0]
+holdout feeds rows by slot [417369, 390719, 405339, 371099, 351550, 328385, 276857, 386615, 413923, 0, 0, 447286, 423882, 417942, 0]
+   slots 6-8: feed shares 0.2593 0.3598 0.3809 | row shares 0.2570 0.3588 0.3842
+   slots 11-13: feed shares 0.3506 0.3283 0.3211 | row shares 0.3470 0.3288 0.3242
+val feeds by slot {16: 7542, 17: 1, 18: 6878, 19: 2} rows {16: 727571, 17: 190, 18: 661957, 19: 253}
+val natural lag (slot - 13): feeds {3: 0.5229, 4: 0.0001, 5: 0.4769, 6: 0.0001} | rows {3: np.float64(0.5234), 4: np.float64(0.0001), 5: np.float64(0.4762), 6: np.float64(0.0002)} | rows of feeds with M >= 50 {3: np.float64(0.5241), 4: np.float64(0.0002), 5: np.float64(0.4756), 6: np.float64(0.0002)}
+public feeds 8562 lag (slot - 13): feeds {7: np.float64(0.7066), 8: np.float64(0.2934)} | rows {7: np.float64(0.704), 8: np.float64(0.296)} | rows M >= 50 {7: np.float64(0.7031), 8: np.float64(0.2969)}
+private feeds 20033 lag (slot - 13): feeds {8: np.float64(0.2424), 9: np.float64(0.3783), 10: np.float64(0.3794)} | rows {8: np.float64(0.2496), 9: np.float64(0.3739), 10: np.float64(0.3765)} | rows M >= 50 {8: np.float64(0.2517), 9: np.float64(0.3735), 10: np.float64(0.3748)}
+p_random > 0.5 feeds (NaN -> 0, M < 50 -> 0 as holdout_feeds does): 164118 ; user 0 share train 0.039319524449036684

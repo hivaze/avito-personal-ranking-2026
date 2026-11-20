@@ -1,0 +1,118 @@
+folds: 10 seeds x 5, user-grouped (verified: every non-zero user id sits in exactly one fold); user-0 feeds 658 spread over folds [122 130 140 136 130]
+H cuts for HSTUMP (all-val quantiles, label-free): [ 93. 144. 191. 237. 256.]
+
+=== NESTED (10 seeds x 5 folds, reviewer folds); all minus PLAIN; +- = user-clustered SE [per-feed SE]; range = min..max over the 10 fold seeds ===
+--- C1 ('FD16', 'FDP')  fixed M-rule minus plain +0.00026+-0.00021
+  A                  in-sample +0.00054 | nested +0.00039+-0.00031 [0.00031] (z +1.25) range +0.00018..+0.00054 | minus fixed M-rule +0.00013+-0.00026 | minus nested C(M50) +0.00031+-0.00022 | pmix pub +0.00068 priv +0.00088
+  C(M50)             in-sample +0.00053 | nested +0.00008+-0.00028 [0.00028] (z +0.27) range -0.00002..+0.00021 | minus fixed M-rule -0.00018+-0.00020 | minus nested C(M50) +0.00000+-0.00000 | pmix pub +0.00011 priv +0.00021
+  C(M70)             in-sample +0.00052 | nested +0.00008+-0.00028 [0.00028] (z +0.29) range -0.00015..+0.00028 | minus fixed M-rule -0.00018+-0.00021 | minus nested C(M50) +0.00000+-0.00009 | pmix pub +0.00010 priv +0.00021
+  F(Hq)              in-sample +0.00076 | nested +0.00073+-0.00032 [0.00032] (z +2.28) range +0.00058..+0.00076 | minus fixed M-rule +0.00047+-0.00026 | minus nested C(M50) +0.00065+-0.00022 | pmix pub +0.00105 priv +0.00126
+  G(M3q)             in-sample +0.00070 | nested +0.00031+-0.00028 [0.00028] (z +1.10) range +0.00010..+0.00070 | minus fixed M-rule +0.00005+-0.00020 | minus nested C(M50) +0.00023+-0.00014 | pmix pub +0.00037 priv +0.00049
+  K(M70,Hq)          in-sample +0.00083 | nested +0.00042+-0.00026 [0.00026] (z +1.62) range +0.00009..+0.00061 | minus fixed M-rule +0.00016+-0.00024 | minus nested C(M50) +0.00034+-0.00019 | pmix pub +0.00044 priv +0.00044
+  CONSTp             in-sample +0.00048 | nested +0.00039+-0.00031 [0.00031] (z +1.28) range -0.00012..+0.00048 | minus fixed M-rule +0.00013+-0.00023 | minus nested C(M50) +0.00031+-0.00017 | pmix pub +0.00047 priv +0.00065
+  CONST2             in-sample +0.00054 | nested +0.00027+-0.00030 [0.00030] (z +0.91) range +0.00003..+0.00054 | minus fixed M-rule +0.00001+-0.00026 | minus nested C(M50) +0.00020+-0.00021 | pmix pub +0.00057 priv +0.00077
+  MSTEP50            in-sample +0.00053 | nested -0.00011+-0.00029 [0.00029] (z -0.37) range -0.00029..+0.00000 | minus fixed M-rule -0.00037+-0.00021 | minus nested C(M50) -0.00018+-0.00009 | pmix pub +0.00010 priv +0.00031
+  MSTEP(25,50,100)   in-sample +0.00067 | nested +0.00007+-0.00031 [0.00031] (z +0.22) range -0.00043..+0.00037 | minus fixed M-rule -0.00019+-0.00023 | minus nested C(M50) -0.00001+-0.00014 | pmix pub +0.00035 priv +0.00067
+  MSTEPc(20..150)    in-sample +0.00067 | nested +0.00005+-0.00027 [0.00027] (z +0.17) range -0.00042..+0.00031 | minus fixed M-rule -0.00022+-0.00019 | minus nested C(M50) -0.00003+-0.00013 | pmix pub +0.00026 priv +0.00058
+  HSTUMP             in-sample +0.00108 | nested +0.00057+-0.00030 [0.00030] (z +1.90) range +0.00027..+0.00082 | minus fixed M-rule +0.00031+-0.00028 | minus nested C(M50) +0.00049+-0.00026 | pmix pub +0.00076 priv +0.00096
+    picks C(M50): sub#0 [(0.4, 0.5), (0.5, 0.5)] x16; sub#0 [(0.4, 0.5), (0.6, 0.5)] x9; sub#0 [(0.1, 0.5), (0.6, 0.5)] x6; sub#0 [(0.1, 0.5), (0.5, 0.5)] x5 (of 50)
+    picks MSTEP50: sub#0 [(0.4, 0.5), (0.5, 0.5)] x8; sub#0 [(0.1, 0.5), (0.8, 0.5)] x6; sub#0 [(0.4, 0.5), (0.8, 0.5)] x5; sub#0 [(0.4, 0.5), (0.35, 0.5)] x4 (of 50)
+    picks MSTEP(25,50,100): sub#2 [(0.4, 0.5), (0.8, 0.5)] x17; sub#2 [(0.35, 0.5), (0.8, 0.5)] x7; sub#0 [(0.1, 0.5), (0.4, 0.5)] x4; sub#2 [(0.4, 0.5), (0.7, 0.5)] x4 (of 50)
+    picks MSTEPc(20..150): sub#1 [(0.1, 0.5), (0.4, 0.5)] x12; sub#1 [(0.1, 0.5), (0.35, 0.5)] x9; sub#4 [(0.4, 0.5), (0.8, 0.5)] x8; sub#4 [(0.35, 0.5), (0.8, 0.5)] x6 (of 50)
+    picks HSTUMP: sub#3 [(0.4, 0.65), (0.1, 0.25)] x15; sub#3 [(0.45, 0.65), (0.1, 0.25)] x6; sub#3 [(0.4, 0.65), (0.1, 0.35)] x5; sub#3 [(0.4, 0.7), (0.1, 0.35)] x3 (of 50)
+    picks F(Hq): sub#0 [(0.4, 0.7), (0.4, 0.5)] x48; sub#0 [(0.4, 0.7), (0.4, 0.3)] x2 (of 50)
+--- C2 ('FD8', 'FDP')  fixed M-rule minus plain +0.00051+-0.00021
+  A                  in-sample +0.00065 | nested +0.00033+-0.00032 [0.00032] (z +1.03) range +0.00020..+0.00044 | minus fixed M-rule -0.00018+-0.00028 | minus nested C(M50) +0.00014+-0.00023 | pmix pub +0.00067 priv +0.00082
+  C(M50)             in-sample +0.00051 | nested +0.00018+-0.00024 [0.00024] (z +0.77) range -0.00000..+0.00034 | minus fixed M-rule -0.00032+-0.00012 | minus nested C(M50) +0.00000+-0.00000 | pmix pub +0.00034 priv +0.00047
+  C(M70)             in-sample +0.00050 | nested +0.00007+-0.00026 [0.00026] (z +0.27) range -0.00008..+0.00020 | minus fixed M-rule -0.00044+-0.00018 | minus nested C(M50) -0.00011+-0.00010 | pmix pub +0.00020 priv +0.00029
+  F(Hq)              in-sample +0.00078 | nested +0.00048+-0.00033 [0.00033] (z +1.45) range +0.00029..+0.00072 | minus fixed M-rule -0.00003+-0.00028 | minus nested C(M50) +0.00029+-0.00023 | pmix pub +0.00075 priv +0.00091
+  G(M3q)             in-sample +0.00056 | nested +0.00003+-0.00025 [0.00025] (z +0.13) range -0.00025..+0.00016 | minus fixed M-rule -0.00048+-0.00014 | minus nested C(M50) -0.00015+-0.00008 | pmix pub +0.00014 priv +0.00022
+  K(M70,Hq)          in-sample +0.00071 | nested +0.00023+-0.00028 [0.00028] (z +0.81) range -0.00007..+0.00040 | minus fixed M-rule -0.00028+-0.00023 | minus nested C(M50) +0.00005+-0.00018 | pmix pub +0.00023 priv +0.00034
+  CONSTp             in-sample +0.00050 | nested +0.00040+-0.00032 [0.00032] (z +1.25) range -0.00010..+0.00050 | minus fixed M-rule -0.00011+-0.00024 | minus nested C(M50) +0.00022+-0.00015 | pmix pub +0.00062 priv +0.00080
+  CONST2             in-sample +0.00065 | nested +0.00025+-0.00032 [0.00032] (z +0.78) range +0.00001..+0.00036 | minus fixed M-rule -0.00026+-0.00028 | minus nested C(M50) +0.00007+-0.00023 | pmix pub +0.00057 priv +0.00072
+  MSTEP50            in-sample +0.00060 | nested +0.00001+-0.00033 [0.00033] (z +0.04) range -0.00019..+0.00014 | minus fixed M-rule -0.00050+-0.00023 | minus nested C(M50) -0.00017+-0.00018 | pmix pub +0.00032 priv +0.00054
+  MSTEP(25,50,100)   in-sample +0.00076 | nested +0.00025+-0.00034 [0.00034] (z +0.74) range +0.00012..+0.00049 | minus fixed M-rule -0.00026+-0.00026 | minus nested C(M50) +0.00007+-0.00019 | pmix pub +0.00068 priv +0.00102
+  MSTEPc(20..150)    in-sample +0.00079 | nested +0.00022+-0.00032 [0.00032] (z +0.70) range +0.00005..+0.00047 | minus fixed M-rule -0.00029+-0.00024 | minus nested C(M50) +0.00004+-0.00017 | pmix pub +0.00064 priv +0.00094
+  HSTUMP             in-sample +0.00099 | nested +0.00020+-0.00030 [0.00030] (z +0.65) range -0.00008..+0.00038 | minus fixed M-rule -0.00031+-0.00027 | minus nested C(M50) +0.00001+-0.00022 | pmix pub +0.00045 priv +0.00062
+    picks C(M50): sub#0 [(0.2, 0.5), (0.4, 0.5)] x23; sub#0 [(0.4, 0.5), (0.4, 0.5)] x15; sub#0 [(0.3, 0.5), (0.4, 0.5)] x4; sub#0 [(0.5, 0.5), (0.4, 0.5)] x3 (of 50)
+    picks MSTEP50: sub#0 [(0.45, 0.5), (0.75, 0.5)] x8; sub#0 [(0.2, 0.5), (0.75, 0.5)] x6; sub#0 [(0.45, 0.5), (0.4, 0.5)] x6; sub#0 [(0.2, 0.5), (0.4, 0.5)] x5 (of 50)
+    picks MSTEP(25,50,100): sub#2 [(0.4, 0.5), (0.8, 0.5)] x19; sub#0 [(0.55, 0.5), (0.4, 0.5)] x8; sub#2 [(0.45, 0.5), (0.8, 0.5)] x6; sub#2 [(0.35, 0.5), (0.8, 0.5)] x4 (of 50)
+    picks MSTEPc(20..150): sub#3 [(0.35, 0.5), (0.75, 0.5)] x16; sub#0 [(0.55, 0.5), (0.4, 0.5)] x10; sub#4 [(0.4, 0.5), (0.8, 0.5)] x5; sub#1 [(0.15, 0.5), (0.4, 0.5)] x3 (of 50)
+    picks HSTUMP: sub#3 [(0.4, 0.65), (0.15, 0.25)] x11; sub#3 [(0.5, 0.7), (0.25, 0.6)] x3; sub#3 [(0.4, 0.65), (0.15, 0.35)] x3; sub#3 [(0.5, 0.7), (0.15, 0.25)] x3 (of 50)
+    picks F(Hq): sub#0 [(0.4, 0.7), (0.4, 0.8)] x30; sub#0 [(0.4, 0.6), (0.4, 0.8)] x7; sub#0 [(0.4, 0.7), (0.4, 0.5)] x5; sub#0 [(0.3, 0.6), (0.3, 0.4)] x2 (of 50)
+--- C3 ('W16', 'P1w')  fixed M-rule minus plain +0.00071+-0.00021
+  A                  in-sample +0.00044 | nested +0.00008+-0.00030 [0.00030] (z +0.27) range -0.00023..+0.00044 | minus fixed M-rule -0.00062+-0.00025 | minus nested C(M50) -0.00055+-0.00026 | pmix pub -0.00005 priv -0.00006
+  C(M50)             in-sample +0.00080 | nested +0.00064+-0.00025 [0.00025] (z +2.52) range +0.00035..+0.00080 | minus fixed M-rule -0.00007+-0.00014 | minus nested C(M50) +0.00000+-0.00000 | pmix pub +0.00074 priv +0.00089
+  C(M70)             in-sample +0.00053 | nested +0.00033+-0.00021 [0.00021] (z +1.54) range +0.00006..+0.00053 | minus fixed M-rule -0.00038+-0.00015 | minus nested C(M50) -0.00031+-0.00013 | pmix pub +0.00040 priv +0.00054
+  F(Hq)              in-sample +0.00047 | nested -0.00009+-0.00029 [0.00029] (z -0.29) range -0.00047..+0.00025 | minus fixed M-rule -0.00079+-0.00024 | minus nested C(M50) -0.00072+-0.00025 | pmix pub -0.00028 priv -0.00030
+  G(M3q)             in-sample +0.00071 | nested +0.00043+-0.00027 [0.00027] (z +1.61) range +0.00009..+0.00069 | minus fixed M-rule -0.00027+-0.00018 | minus nested C(M50) -0.00020+-0.00015 | pmix pub +0.00051 priv +0.00062
+  K(M70,Hq)          in-sample +0.00070 | nested +0.00021+-0.00024 [0.00024] (z +0.87) range -0.00011..+0.00046 | minus fixed M-rule -0.00050+-0.00020 | minus nested C(M50) -0.00043+-0.00019 | pmix pub +0.00036 priv +0.00051
+  CONSTp             in-sample +0.00024 | nested -0.00015+-0.00024 [0.00024] (z -0.60) range -0.00035..+0.00000 | minus fixed M-rule -0.00085+-0.00020 | minus nested C(M50) -0.00078+-0.00022 | pmix pub -0.00015 priv -0.00008
+  CONST2             in-sample +0.00044 | nested -0.00014+-0.00030 [0.00030] (z -0.45) range -0.00056..+0.00032 | minus fixed M-rule -0.00084+-0.00025 | minus nested C(M50) -0.00077+-0.00025 | pmix pub -0.00028 priv -0.00029
+  MSTEP50            in-sample +0.00083 | nested +0.00050+-0.00026 [0.00026] (z +1.94) range +0.00032..+0.00071 | minus fixed M-rule -0.00021+-0.00014 | minus nested C(M50) -0.00014+-0.00007 | pmix pub +0.00064 priv +0.00083
+  MSTEP(25,50,100)   in-sample +0.00083 | nested +0.00050+-0.00026 [0.00026] (z +1.94) range +0.00032..+0.00071 | minus fixed M-rule -0.00021+-0.00014 | minus nested C(M50) -0.00014+-0.00007 | pmix pub +0.00064 priv +0.00083
+  MSTEPc(20..150)    in-sample +0.00083 | nested +0.00050+-0.00026 [0.00026] (z +1.94) range +0.00032..+0.00071 | minus fixed M-rule -0.00021+-0.00014 | minus nested C(M50) -0.00014+-0.00007 | pmix pub +0.00064 priv +0.00083
+  HSTUMP             in-sample +0.00068 | nested -0.00047+-0.00028 [0.00028] (z -1.67) range -0.00065..-0.00028 | minus fixed M-rule -0.00118+-0.00026 | minus nested C(M50) -0.00111+-0.00026 | pmix pub -0.00053 priv -0.00046
+    picks C(M50): sub#0 [(0.2, 0.5), (0.5, 0.5)] x39; sub#0 [(0.0, 0.5), (0.5, 0.5)] x7; sub#0 [(0.2, 0.5), (0.4, 0.5)] x3; sub#0 [(0.2, 0.5), (0.6, 0.5)] x1 (of 50)
+    picks MSTEP50: sub#0 [(0.2, 0.5), (0.45, 0.5)] x18; sub#0 [(0.2, 0.5), (0.55, 0.5)] x13; sub#0 [(0.2, 0.5), (0.65, 0.5)] x10; sub#0 [(0.0, 0.5), (0.45, 0.5)] x3 (of 50)
+    picks MSTEP(25,50,100): sub#1 [(0.2, 0.5), (0.45, 0.5)] x18; sub#1 [(0.2, 0.5), (0.55, 0.5)] x13; sub#1 [(0.2, 0.5), (0.65, 0.5)] x10; sub#1 [(0.0, 0.5), (0.45, 0.5)] x3 (of 50)
+    picks MSTEPc(20..150): sub#2 [(0.2, 0.5), (0.45, 0.5)] x18; sub#2 [(0.2, 0.5), (0.55, 0.5)] x13; sub#2 [(0.2, 0.5), (0.65, 0.5)] x10; sub#2 [(0.0, 0.5), (0.45, 0.5)] x3 (of 50)
+    picks HSTUMP: sub#0 [(0.8, 0.4), (0.4, 0.4)] x3; sub#1 [(0.55, 0.3), (0.2, 0.25)] x2; sub#2 [(0.5, 0.3), (0.25, 0.6)] x2; sub#1 [(0.65, 0.75), (0.2, 0.3)] x2 (of 50)
+    picks F(Hq): sub#0 [(0.4, 0.4), (0.4, 0.6)] x15; sub#0 [(0.4, 0.4), (0.4, 0.4)] x10; sub#0 [(0.3, 0.8), (0.3, 0.5)] x6; sub#0 [(0.5, 0.6), (0.5, 0.5)] x3 (of 50)
+--- C4 ('W8', 'P1w')  fixed M-rule minus plain +0.00043+-0.00019
+  A                  in-sample +0.00020 | nested -0.00020+-0.00015 [0.00015] (z -1.31) range -0.00058..+0.00002 | minus fixed M-rule -0.00063+-0.00020 | minus nested C(M50) -0.00045+-0.00026 | pmix pub -0.00019 priv -0.00027
+  C(M50)             in-sample +0.00056 | nested +0.00025+-0.00028 [0.00028] (z +0.90) range -0.00005..+0.00042 | minus fixed M-rule -0.00018+-0.00019 | minus nested C(M50) +0.00000+-0.00000 | pmix pub +0.00062 priv +0.00078
+  C(M70)             in-sample +0.00053 | nested +0.00034+-0.00022 [0.00022] (z +1.57) range +0.00022..+0.00053 | minus fixed M-rule -0.00009+-0.00016 | minus nested C(M50) +0.00009+-0.00016 | pmix pub +0.00048 priv +0.00056
+  F(Hq)              in-sample +0.00025 | nested -0.00034+-0.00021 [0.00021] (z -1.59) range -0.00057..-0.00015 | minus fixed M-rule -0.00076+-0.00021 | minus nested C(M50) -0.00058+-0.00026 | pmix pub -0.00018 priv -0.00011
+  G(M3q)             in-sample +0.00056 | nested +0.00026+-0.00028 [0.00028] (z +0.93) range +0.00004..+0.00045 | minus fixed M-rule -0.00017+-0.00020 | minus nested C(M50) +0.00001+-0.00014 | pmix pub +0.00065 priv +0.00086
+  K(M70,Hq)          in-sample +0.00076 | nested +0.00047+-0.00023 [0.00023] (z +2.04) range +0.00028..+0.00062 | minus fixed M-rule +0.00004+-0.00019 | minus nested C(M50) +0.00022+-0.00020 | pmix pub +0.00062 priv +0.00069
+  CONSTp             in-sample +0.00007 | nested -0.00033+-0.00014 [0.00014] (z -2.33) range -0.00063..-0.00013 | minus fixed M-rule -0.00075+-0.00018 | minus nested C(M50) -0.00057+-0.00024 | pmix pub -0.00022 priv -0.00021
+  CONST2             in-sample +0.00027 | nested -0.00032+-0.00018 [0.00018] (z -1.77) range -0.00055..+0.00002 | minus fixed M-rule -0.00075+-0.00020 | minus nested C(M50) -0.00057+-0.00025 | pmix pub -0.00036 priv -0.00041
+  MSTEP50            in-sample +0.00068 | nested +0.00041+-0.00028 [0.00028] (z +1.44) range +0.00010..+0.00063 | minus fixed M-rule -0.00002+-0.00020 | minus nested C(M50) +0.00016+-0.00010 | pmix pub +0.00074 priv +0.00087
+  MSTEP(25,50,100)   in-sample +0.00068 | nested +0.00041+-0.00028 [0.00028] (z +1.44) range +0.00010..+0.00063 | minus fixed M-rule -0.00002+-0.00020 | minus nested C(M50) +0.00016+-0.00010 | pmix pub +0.00074 priv +0.00087
+  MSTEPc(20..150)    in-sample +0.00068 | nested +0.00034+-0.00027 [0.00027] (z +1.25) range +0.00003..+0.00051 | minus fixed M-rule -0.00009+-0.00019 | minus nested C(M50) +0.00009+-0.00011 | pmix pub +0.00061 priv +0.00070
+  HSTUMP             in-sample +0.00082 | nested +0.00002+-0.00028 [0.00028] (z +0.06) range -0.00015..+0.00025 | minus fixed M-rule -0.00041+-0.00027 | minus nested C(M50) -0.00023+-0.00030 | pmix pub +0.00015 priv +0.00025
+    picks C(M50): sub#0 [(0.1, 0.5), (0.5, 0.5)] x21; sub#0 [(0.0, 0.5), (0.5, 0.5)] x13; sub#0 [(0.2, 0.5), (0.5, 0.5)] x10; sub#0 [(0.2, 0.5), (0.4, 0.5)] x2 (of 50)
+    picks MSTEP50: sub#0 [(0.15, 0.5), (0.55, 0.5)] x32; sub#0 [(0.15, 0.5), (0.45, 0.5)] x5; sub#0 [(0.15, 0.5), (0.5, 0.5)] x3; sub#0 [(0.1, 0.5), (0.55, 0.5)] x2 (of 50)
+    picks MSTEP(25,50,100): sub#1 [(0.15, 0.5), (0.55, 0.5)] x32; sub#1 [(0.15, 0.5), (0.45, 0.5)] x5; sub#1 [(0.15, 0.5), (0.5, 0.5)] x3; sub#1 [(0.1, 0.5), (0.55, 0.5)] x2 (of 50)
+    picks MSTEPc(20..150): sub#2 [(0.15, 0.5), (0.55, 0.5)] x24; sub#3 [(0.15, 0.5), (0.55, 0.5)] x6; sub#3 [(0.15, 0.5), (0.45, 0.5)] x6; sub#2 [(0.1, 0.5), (0.55, 0.5)] x2 (of 50)
+    picks HSTUMP: sub#1 [(0.55, 0.6), (0.25, 0.35)] x6; sub#0 [(0.55, 0.6), (0.3, 0.35)] x5; sub#0 [(0.55, 0.6), (0.25, 0.35)] x4; sub#1 [(0.5, 0.2), (0.25, 0.4)] x3 (of 50)
+    picks F(Hq): sub#0 [(0.5, 0.6), (0.5, 0.3)] x13; sub#0 [(0.3, 0.6), (0.3, 0.4)] x8; sub#0 [(0.3, 0.3), (0.3, 0.4)] x6; sub#0 [(0.2, 0.7), (0.2, 0.3)] x5 (of 50)
+
+=== T2 = mean of C1 and C3 nested vectors (A / B post hoc statistic), and mean over C1..C4 ===
+  A                  T2 +0.00024+-0.00024 | mean C1..C4 +0.00015+-0.00018
+  C(M50)             T2 +0.00036+-0.00022 | mean C1..C4 +0.00029+-0.00019
+  C(M70)             T2 +0.00021+-0.00020 | mean C1..C4 +0.00020+-0.00018
+  F(Hq)              T2 +0.00032+-0.00024 | mean C1..C4 +0.00020+-0.00019
+  G(M3q)             T2 +0.00037+-0.00022 | mean C1..C4 +0.00026+-0.00020
+  K(M70,Hq)          T2 +0.00031+-0.00020 | mean C1..C4 +0.00033+-0.00018
+  CONSTp             T2 +0.00012+-0.00022 | mean C1..C4 +0.00008+-0.00018
+  CONST2             T2 +0.00007+-0.00023 | mean C1..C4 +0.00002+-0.00019
+  MSTEP50            T2 +0.00020+-0.00023 | mean C1..C4 +0.00020+-0.00022
+  MSTEP(25,50,100)   T2 +0.00028+-0.00023 | mean C1..C4 +0.00031+-0.00022
+  MSTEPc(20..150)    T2 +0.00027+-0.00022 | mean C1..C4 +0.00028+-0.00020
+  HSTUMP             T2 +0.00005+-0.00023 | mean C1..C4 +0.00008+-0.00020
+  fixed M-rule       T2 +0.00048+-0.00017 | mean C1..C4 +0.00048+-0.00015
+
+=== CHECK 5: M-rule estimates per composition ===
+  C1: H2 fixed in-sample +0.00026+-0.00021 | H1 nested refit MSTEP50 -0.00011+-0.00029 (A-grid C(M50) +0.00008+-0.00028) | H1c cut free +0.00005+-0.00027 | H3 cross-set nested +0.00015+-0.00026 (A-grid +0.00024+-0.00026) | HEADLINE (H1+H3)/2 +0.00002+-0.00027 z +0.08 | pmix pub +0.00015+-0.00036 priv +0.00030+-0.00045 | fixed rule pmix pub +0.00027+-0.00029 priv +0.00038+-0.00036 | paired public SE 0.00028
+  C2: H2 fixed in-sample +0.00051+-0.00021 | H1 nested refit MSTEP50 +0.00001+-0.00033 (A-grid C(M50) +0.00018+-0.00024) | H1c cut free +0.00022+-0.00032 | H3 cross-set nested +0.00030+-0.00028 (A-grid +0.00023+-0.00028) | HEADLINE (H1+H3)/2 +0.00015+-0.00028 z +0.54 | pmix pub +0.00030+-0.00038 priv +0.00042+-0.00047 | fixed rule pmix pub +0.00059+-0.00028 priv +0.00072+-0.00034 | paired public SE 0.00027
+  C3: H2 fixed in-sample +0.00071+-0.00021 | H1 nested refit MSTEP50 +0.00050+-0.00026 (A-grid C(M50) +0.00064+-0.00025) | H1c cut free +0.00050+-0.00026 | H3 cross-set nested +0.00010+-0.00029 (A-grid +0.00019+-0.00027) | HEADLINE (H1+H3)/2 +0.00030+-0.00026 z +1.14 | pmix pub +0.00046+-0.00034 priv +0.00063+-0.00043 | fixed rule pmix pub +0.00081+-0.00027 priv +0.00093+-0.00034 | paired public SE 0.00027
+  C4: H2 fixed in-sample +0.00043+-0.00019 | H1 nested refit MSTEP50 +0.00041+-0.00028 (A-grid C(M50) +0.00025+-0.00028) | H1c cut free +0.00034+-0.00027 | H3 cross-set nested -0.00011+-0.00032 (A-grid +0.00018+-0.00022) | HEADLINE (H1+H3)/2 +0.00015+-0.00028 z +0.53 | pmix pub +0.00044+-0.00037 priv +0.00058+-0.00046 | fixed rule pmix pub +0.00076+-0.00026 priv +0.00092+-0.00033 | paired public SE 0.00025
+  H4 member-disjoint halves (fixed rule minus plain): HA +0.00005+-0.00022 | HB +0.00042+-0.00020 | WA +0.00020+-0.00020 | WB +0.00038+-0.00021
+  per-feed correlation of the fixed-rule contrast on long feeds: HA~HB 0.198 | WA~WB 0.202 | HA~WA (twins) 0.312 | HB~WB 0.220 | HA~WB 0.181 | C1~C3 0.298 | C1~C2 0.569 | C2~C4 0.315
+  mean of the 4 halves +0.00026+-0.00013 | mean of the 2 full-data halves +0.00023+-0.00016 | HB minus HA +0.00037+-0.00026
+
+=== SPECIFICITY of M as the gate: interaction I = mean D on M>=50 minus mean D on M<50 (D = E(.4,.5) - E(.2,.5)); exact randomisation of the gate (2000 random sets of the size of {M>=50}) ===
+  C1: D all +0.00048+-0.00032 | M>=50 +0.00044+-0.00036 | M<50 +0.00053+-0.00058 | I -0.00008+-0.00068 (z -0.12) | fixed M-rule +0.00026 vs random gate of equal size: mean +0.00028 sd 0.00016 q95 +0.00054 p 0.553 | M-rule minus constant 0.4 -0.00022+-0.00024
+  C2: D all +0.00050+-0.00032 | M>=50 +0.00086+-0.00035 | M<50 -0.00001+-0.00059 | I +0.00087+-0.00069 (z +1.26) | fixed M-rule +0.00051 vs random gate of equal size: mean +0.00030 sd 0.00016 q95 +0.00057 p 0.099 | M-rule minus constant 0.4 +0.00000+-0.00024
+  C3: D all +0.00022+-0.00030 | M>=50 +0.00119+-0.00035 | M<50 -0.00119+-0.00051 | I +0.00239+-0.00062 (z +3.83) | fixed M-rule +0.00071 vs random gate of equal size: mean +0.00013 sd 0.00014 q95 +0.00036 p 0.000 | M-rule minus constant 0.4 +0.00049+-0.00021
+  C4: D all -0.00007+-0.00029 | M>=50 +0.00072+-0.00032 | M<50 -0.00122+-0.00055 | I +0.00194+-0.00063 (z +3.06) | fixed M-rule +0.00043 vs random gate of equal size: mean -0.00004 sd 0.00014 q95 +0.00019 p 0.001 | M-rule minus constant 0.4 +0.00050+-0.00022
+  HA: D all +0.00034+-0.00033 | M>=50 +0.00008+-0.00036 | M<50 +0.00073+-0.00061 | I -0.00065+-0.00071 (z -0.91) | fixed M-rule +0.00005 vs random gate of equal size: mean +0.00020 sd 0.00016 q95 +0.00047 p 0.834 | M-rule minus constant 0.4 -0.00030+-0.00025
+  HB: D all +0.00045+-0.00031 | M>=50 +0.00070+-0.00034 | M<50 +0.00008+-0.00059 | I +0.00063+-0.00068 (z +0.92) | fixed M-rule +0.00042 vs random gate of equal size: mean +0.00026 sd 0.00015 q95 +0.00052 p 0.161 | M-rule minus constant 0.4 -0.00003+-0.00024
+  WA: D all -0.00043+-0.00031 | M>=50 +0.00033+-0.00033 | M<50 -0.00154+-0.00058 | I +0.00187+-0.00067 (z +2.80) | fixed M-rule +0.00020 vs random gate of equal size: mean -0.00025 sd 0.00015 q95 -0.00001 p 0.002 | M-rule minus constant 0.4 +0.00063+-0.00024
+  WB: D all +0.00013+-0.00032 | M>=50 +0.00064+-0.00035 | M<50 -0.00060+-0.00060 | I +0.00124+-0.00070 (z +1.78) | fixed M-rule +0.00038 vs random gate of equal size: mean +0.00008 sd 0.00016 q95 +0.00034 p 0.031 | M-rule minus constant 0.4 +0.00025+-0.00025
+  full-data mean (C1, C2): I +0.00039+-0.00060 | M<50 +0.00026+-0.00051
+  twins mean (C3, C4):     I +0.00216+-0.00054 | M<50 -0.00121+-0.00045
+  D on M<50, full-data minus twins: 16-base +0.00172+-0.00067 | 8-base +0.00121+-0.00072 | halves HA-WA +0.00227+-0.00079 HB-WB +0.00068+-0.00075
+done 5s

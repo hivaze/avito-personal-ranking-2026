@@ -1,0 +1,47 @@
+## 4. Read by the declared rule (step 3)
+
+rho = [N(c) - N(b)] / [N(a) - N(b)], 4-pool, paired per feed, user-cluster SE, 2,000-draw user bootstrap for the interval. OPEN iff rho >= 0.5 with the numerator at z >= 2 on the holdout and the same sign on val; CLOSE iff the numerator's upper 95% bound (mean + 1.96 SE) is below 25% of the denominator. All [M].
+
+### 4.1 The verdict row and the same row of the second design
+
+| | n (holdout) | numerator c - b | denominator a - b | rho [95%] | upper bound of the numerator vs 25% of the denominator | val numerator (n) | rule |
+|---|---|---|---|---|---|---|---|
+| **design 1 (T), literal: the verdict row** | 2,358 | +0.00117 +- 0.00082 (z 1.43) | +0.00262 +- 0.00154 (z 1.70) | **0.447** [-1.40, +2.80] | +0.00277 vs +0.00065 | +0.00269 +- 0.00157 (1,383) | **UNDECIDED** |
+| design 2 (U), literal | 3,123 | +0.00151 +- 0.00093 (z 1.62) | +0.00238 +- 0.00130 (z 1.83) | 0.632 [-1.21, +3.40] | +0.00332 vs +0.00060 | +0.00267 +- 0.00215 (1,878) | UNDECIDED |
+
+Neither condition is met in either design: no numerator reaches z = 2 on the holdout, and no upper bound comes near a quarter of the denominator. With the one-sided 1.645 form the upper bounds are +0.00251 and +0.00303: the same.
+
+**Why the rule could not decide on this sample** [D]. The denominator itself (the worth of the true events 129-256) is only 1.7-1.8 SE on the holdout read sets. With the measured SEs, OPEN required rho >= 0.63 (design 1) or 0.78 (design 2) and CLOSE required rho <= -0.36 or -0.52: only a recovery clearly above one half, or old events that hurt, could have been called. The review's "full recovery about 6 SE on the holdout" assumed several times more qualifying feeds than exist (3,235).
+
+### 4.2 The declared companion reads (same thresholds, not verdicts)
+
+| read | holdout numerator | holdout denominator | rho [95%] | val numerator | thresholds say |
+|---|---|---|---|---|---|
+| design 1, full fill (n = 128; pass c exactly as the rule words it) | +0.00387 +- 0.00367 (n 197) | +0.00144 +- 0.00403 | 2.68 [-13.4, +15.5] | +0.00837 +- 0.00578 (n 155) | UNDECIDED |
+| design 1, length-matched (denominator am - b) | +0.00117 +- 0.00082 | +0.00158 +- 0.00100 | 0.74 [-2.70, +5.13] | +0.00269 +- 0.00157 | UNDECIDED |
+| design 1, ceiling [am - b] / [a - b] (what perfect events of the same count would give) | | | 0.60 [-1.55, +2.55]; val 1.13 | | |
+| design 2, full fill (n = 128) | +0.00396 +- 0.00230 (n 791) | +0.00272 +- 0.00186 | 1.46 [-5.93, +9.60] | +0.00466 +- 0.00297 (n 1,051) | UNDECIDED |
+| design 2, length-matched | +0.00151 +- 0.00093 | +0.00170 +- 0.00099 | 0.88 [-1.49, +4.98] | +0.00267 +- 0.00215 | UNDECIDED |
+| design 2, ceiling | | | 0.71 [-0.65, +2.97]; val 0.65 [-0.37, +1.47] | | |
+| pooled holdout + val, design 1 literal (n 3,741) | +0.00173 +- 0.00078 (z 2.23) | +0.00264 +- 0.00133 | 0.66 [-0.13, +2.94] | | descriptive |
+| pooled holdout + val, design 2 literal (n 5,001) | +0.00194 +- 0.00099 (z 1.96) | +0.00301 +- 0.00113 | 0.65 [+0.01, +1.81] | | descriptive |
+| pooled, design 2 full fill (n 1,842) | +0.00436 +- 0.00196 (z 2.22) | +0.00319 +- 0.00177 | 1.37 [-2.47, +6.31] | | descriptive |
+
+The pooled rows use every labelled feed on which these members are out of sample (holdout and val read sets): there is no larger sample to replay on. They put the numerator at about 2 SE and rho near 0.65, with an interval that still includes zero in design 1.
+
+### 4.3 By member family
+
+| family | design | holdout numerator | holdout denominator | rho [95%] | val numerator | thresholds say | pooled numerator, rho [95%] |
+|---|---|---|---|---|---|---|---|
+| distilled (2 students) | 1 | +0.00159 +- 0.00087 (z 1.84) | +0.00212 +- 0.00152 | 0.75 [-4.16, +5.65] | +0.00186 +- 0.00172 | UNDECIDED | +0.00169 +- 0.00084 (z 2.02), 0.64 [-0.23, +2.97] |
+| hard-label (2 members) | 1 | +0.00177 +- 0.00084 (z 2.10) | +0.00319 +- 0.00148 | 0.56 [-0.08, +2.92] | +0.00200 +- 0.00164 | OPEN (sub-row) | +0.00186 +- 0.00081 (z 2.30), 0.66 [-0.02, +3.06] |
+| distilled | 2 | +0.00191 +- 0.00090 (z 2.12) | +0.00176 +- 0.00132 | 1.09 [-6.48, +6.92] | +0.00426 +- 0.00212 (z 2.00) | OPEN (sub-row) | +0.00279 +- 0.00097 (z 2.86), 0.97 [+0.35, +3.06] |
+| hard-label | 2 | +0.00166 +- 0.00093 (z 1.79) | +0.00206 +- 0.00127 | 0.81 [-4.59, +5.13] | +0.00250 +- 0.00203 | UNDECIDED | +0.00197 +- 0.00096 (z 2.07), 0.72 [+0.06, +2.50] |
+
+The two families do not differ: numerators +0.0016..+0.0019 on the holdout in all four cells, z 1.8-2.1. Two of the four cells cross the OPEN thresholds; with 36 threshold-labelled rows in `out_s3.txt` (6 read OPEN, 30 UNDECIDED, 0 CLOSE) that is not a verdict. The 4-pool numerators are a little below both families' (+0.0012 and +0.0015): pooling does not average NDCG deltas.
+
+### 4.4 Placebo, second line, direct pass
+
+- **Placebo (e in place of c)**: rho_e = -0.38 [-3.41, +2.94] (design 1, holdout), -0.44 (val); -0.95 [-7.67, +3.79] (design 2, holdout), +0.20 [-1.35, +2.10] (val). "Any extra events help" is not what the numerator measures: foreign events read at or below the empty slots, and the user's own events beat them by +0.0028 +- 0.0009 (design 1) and +0.0031 +- 0.0011 (design 2), pooled.
+- **192 + 64 line** (newest 192 + up to 64 recovered events, against the newest 192): design 1 holdout +0.00167 +- 0.00078 (z 2.13) on a denominator a - b192 of +0.00203 +- 0.00117 (rho 0.82 [-1.77, +5.03]); val +0.00108 +- 0.00159 on a negative denominator (-0.00093 +- 0.00186: no ratio). Design 2: +0.00032 +- 0.00072 (holdout), -0.00130 +- 0.00161 (val). The line carries no decision: its denominators are within 1.7 SE of zero on these read sets, and in design 2 the newest old-only events (mostly views removed by the per-type cap) add nothing on top of the newest 192.
+- **Pass (d) minus (a)**, the direct estimate for a model not trained for it: design 1 +0.00029 +- 0.00058 (holdout), +0.00186 +- 0.00132 (val), pooled +0.00087 +- 0.00061; design 2 +0.00037 +- 0.00071, -0.00064 +- 0.00172, pooled -0.00001 +- 0.00078. With the dense inputs recomputed (d2): +0.00101 +- 0.00068 and +0.00022 +- 0.00081 pooled. By family, pooled d1 - a: distilled +0.00025 +- 0.00074 / -0.00051 +- 0.00095; hard-label +0.00079 +- 0.00060 / +0.00126 +- 0.00083. Not distinguishable from zero.

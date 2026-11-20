@@ -1,0 +1,52 @@
+ERROR ANALYSIS OF THE FINAL MODEL: CODE RULES TO CORRECT ITS MISTAKES (2026-11-17)
+
+Question (owner, 2026-11-17): analyse the errors our model makes on validation and holdout, find heuristics in
+the features, and turn them into code rules that correct the wrong predictions.
+
+Design (fixed before any analysis; ledger entry 2026-11-17T01:37:42Z)
+- code/build_tables.py: one row per candidate, 66 columns: the FD16P20 score and its two branches (s_ft,
+  s_to), rank, score gaps, f1..f5, home region, cosines to the user and to the history (all, newest 1/5/10/32,
+  mean of 5, by event type: contact, order, favourite, lead, feed view, search view), near-copies in the
+  history and among candidates, the user's history in the candidate's category, category size and rank in
+  the feed, popularity, exposure, co-visitation, encoder scores, feed-level context. Own-feed data only.
+- DISCOVERY: validation users of one half, 7,214 feeds (FD16P20 NDCG 0.39939), the only labelled sample the
+  analysts saw (code/kit.py). CONFIRM: the other half by user, 7,209 feeds (0.40604), sealed. HOLDOUT: the
+  30,000 random-order train feeds scored by W8P20's train-only branch, whose members never trained on them
+  (0.32393), sealed. Test table built for application only.
+- Pass rule: CONFIRM delta >= +0.0002 and z at or above the Holm threshold over the submitted rules; holdout
+  veto at z <= -2.5 (except popularity-only rules); passing rules combined and re-confirmed; only then a test
+  file by code.
+- Workflow a workflow run: 8 Opus 5.5 analysts (xhigh), CPU only, one lens each: head of the list,
+  categories, inside categories and near-duplicates, feed segments and score shape, recent intent from the
+  history, popularity / freshness / cold, a learned residual model as an upper bound, and a feed-by-feed
+  deep dive of confident errors. 1.77M tokens, 38 min. Audit of all 478 tool calls and every file they
+  wrote (code/audit.py): 0 touches of the sealed data, label files or prediction files.
+
+Result: NOTHING PASSES. CLOSED.
+- About 9,900 rule variants in about 900 families were scored by cross-fitted NDCG on discovery. 7 of 8
+  analysts submitted no rule. One weak rule was submitted (small feeds under 40 candidates: + 0.05 z(hmax);
+  discovery +0.00074 +- 0.00031, best of 144 pairs). CONFIRM -0.00038 +- 0.00028 (z -1.36): no pass
+  (confirm_round1.json).
+- Exploratory read, declared ineligible beforehand: the two unsubmitted near-misses with rule files read
+  +0.00003 (z 0.39) and +0.00005 (z 0.19) on CONFIRM, -0.00001 and -0.00011 on HOLDOUT
+  (confirm_exploratory.json).
+
+What the analysts established (analysts_result.json, agents/*/notes.txt)
+- The score is a calibrated log-odds: a within-feed softmax of it has slope 0.98-1.04; observed/expected
+  positive rates stay within 0.93-1.07 across bins of every recency, similarity, category, popularity,
+  freshness and exposure column, and every leaf category has |z| <= 2.2.
+- Learned correctors cannot beat it out of fold: LightGBM residual models on 130 columns, cross-fitted,
+  reach at best +0.0004 (z 0.8) and lose up to -0.012 as they grow, while in-sample they gain +0.037.
+  Linear conditional logits lose 0.001-0.011. This bounds what any rule on these columns can gain at about 0.
+- Head: no subgroup of 308 bins where rank 2 beats rank 1; the s_ft / s_to mix is optimal at 0.5 overall,
+  in the head and in every segment; where the branches disagree, their blend is right most often.
+- Near-copies do not split clicks (the lower copy is slightly under-, not over-estimated), so there is
+  nothing for diversification to fix.
+- Real likelihood residuals exist (category size and share, recency in large feeds, Services slightly
+  over-ranked: O/E 0.93) but sit in the middle and tail of the list or are feed-level, and do not change
+  NDCG.
+- The feeds the model gets wrong are large (median 167 candidates vs 29), and their positives are the
+  12th-or-so item of a large category or exploration clicks with low similarity to recent history. Nothing
+  in the columns separates them; choices driven by photo or price would look like this.
+- Item prior from validation labels: items positive for another user are positive 1.79x as often, but cover
+  0.19% of rows (0.33% of test rows); best +0.00057 (z 1.82).

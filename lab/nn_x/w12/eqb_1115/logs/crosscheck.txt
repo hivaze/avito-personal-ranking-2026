@@ -1,0 +1,10 @@
+INPUT CHECK (label-free):
+   it_hist_all_luo: feat_cache == data/feats True | zero rows untouched True | warm share 0.621 | max |log1p(B) - log1p(stored) - 0.5 delta| on warm rows 8.19e-08 | rows with 0.5 delta > 0.025: 0.246, mean shift there 0.212
+   it_hist_et1_luo: feat_cache == data/feats True | zero rows untouched True | warm share 0.589 | max |log1p(B) - log1p(stored) - 0.5 delta| on warm rows 7.94e-08 | rows with 0.5 delta > 0.025: 0.232, mean shift there 0.208
+   it_hist_et2_luo: feat_cache == data/feats True | zero rows untouched True | warm share 0.311 | max |log1p(B) - log1p(stored) - 0.5 delta| on warm rows 6.95e-08 | rows with 0.5 delta > 0.025: 0.093, mean shift there 0.159
+   it_hist_et3_luo: feat_cache == data/feats True | zero rows untouched True | warm share 0.287 | max |log1p(B) - log1p(stored) - 0.5 delta| on warm rows 7.72e-08 | rows with 0.5 delta > 0.025: 0.088, mean shift there 0.161
+   it_hist_et4_luo: feat_cache == data/feats True | zero rows untouched True | warm share 0.251 | max |log1p(B) - log1p(stored) - 0.5 delta| on warm rows 7.56e-08 | rows with 0.5 delta > 0.025: 0.069, mean shift there 0.152
+CROSS-CHECK with critic_lib (own z / NDCG code): reference FILE 0.40271, train-only branch 0.40213
+   FILE val -0.00024 +- 0.00017 | pmix-public -0.00018 +- 0.00022 | pmix-private -0.00013 +- 0.00027 | M<50 -0.00038 +- 0.00033 | M>=50 -0.00014 +- 0.00018
+   train-only branch val +0.00014 +- 0.00022 | pmix-public +0.00003 +- 0.00029 | pmix-private -0.00011 +- 0.00036 | M<50 +0.00018 +- 0.00039 | M>=50 +0.00011 +- 0.00027
+   rule clauses: val >= 0 False | pmix-private >= +1 SE False | M<50 >= -1 SE False

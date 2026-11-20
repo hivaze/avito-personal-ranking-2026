@@ -1,0 +1,94 @@
+== WAVE-8 STAGE B (CD re-cool, roots (101, 102, 103, 104), reference w5_cd_m02ref_r<root>, CDSEED 900 + root; PRIMARY = SELECTED checkpoint, last = info). Rule (logs/B_wave8_predeclared.txt): PASS iff val > +2 SE (Holm over the two arms, primary cbs05) AND holdout >= 0 AND no val slice (M<50, M>=50, Tue, Thu) < -2 SE AND pmix >= -1 SE AND 4-root pool holdout >= +2 SE AND stale-val >= 0 ; STOP otherwise
+== runs: selected step / total | selected val, holdout (in-training eval) | last val, holdout | minutes
+  w5:w5_cd_m02ref_r101           best  19670/19670 | sel val 0.39721 hold 0.31976 | last val 0.39721 hold 0.31976 | 38 min
+  w5:w5_cd_m02ref_r102           best  17000/19670 | sel val 0.39727 hold 0.32010 | last val 0.39678 hold 0.31969 | 39 min
+  w5:w5_cd_m02ref_r103           best  19000/19670 | sel val 0.39646 hold 0.32026 | last val 0.39662 hold 0.32022 | 48 min
+  w5:w5_cd_m02ref_r104           best  19670/19670 | sel val 0.39602 hold 0.32024 | last val 0.39602 hold 0.32024 | 42 min
+  w5:w5_cd_cbs05_r101            best  39368/39368 | sel val 0.39669 hold 0.32060 | last val 0.39669 hold 0.32060 | 18 min
+  w5:w5_cd_cbs05_r102            best  39368/39368 | sel val 0.39705 hold 0.32028 | last val 0.39705 hold 0.32028 | 17 min
+  w5:w5_cd_cbs05_r103            best  38000/39368 | sel val 0.39703 hold 0.32065 | last val 0.39601 hold 0.32062 | 19 min
+  w5:w5_cd_cbs05_r104            best  36000/39368 | sel val 0.39645 hold 0.32026 | last val 0.39618 hold 0.32002 | 18 min
+  w5:w5_cd_cbs2_r101             best   8500/9834 | sel val 0.39732 hold 0.31997 | last val 0.39764 hold 0.31965 | 10 min
+  w5:w5_cd_cbs2_r102             best   9500/9834 | sel val 0.39718 hold 0.32014 | last val 0.39733 hold 0.32000 | 10 min
+  w5:w5_cd_cbs2_r103             best   8500/9834 | sel val 0.39535 hold 0.32035 | last val 0.39565 hold 0.32012 | 10 min
+  w5:w5_cd_cbs2_r104             best   8500/9834 | sel val 0.39597 hold 0.32033 | last val 0.39592 hold 0.32000 | 10 min
+
+== cbs05 (--cand_budget 16384 --max_feeds 256 --eval_every 2000 --select_min_step 24000) vs m02ref (B = arm); PRIMARY = selected checkpoints
+    VAL  w5_cd_cbs05_r101 0.39669 vs w5_cd_m02ref_r101 0.39721: -0.00052
+    VAL  w5_cd_cbs05_r102 0.39705 vs w5_cd_m02ref_r102 0.39727: -0.00022
+    VAL  w5_cd_cbs05_r103 0.39703 vs w5_cd_m02ref_r103 0.39646: +0.00057
+    VAL  w5_cd_cbs05_r104 0.39645 vs w5_cd_m02ref_r104 0.39602: +0.00043
+    HOLD w5_cd_cbs05_r101 0.32060 vs w5_cd_m02ref_r101 0.31979: +0.00081
+    HOLD w5_cd_cbs05_r102 0.32029 vs w5_cd_m02ref_r102 0.32010: +0.00019
+    HOLD w5_cd_cbs05_r103 0.32062 vs w5_cd_m02ref_r103 0.32027: +0.00035
+    HOLD w5_cd_cbs05_r104 0.32025 vs w5_cd_m02ref_r104 0.32025: -0.00000
+  [selected (PRIMARY)] VAL  pooled: all +0.00006+-0.00040 (z +0.16)  M<50 -0.00041+-0.00077 (z -0.53)  M>=50 +0.00039+-0.00043 (z +0.91)  Tue -0.00021+-0.00056 (z -0.38)  Thu +0.00036+-0.00059 (z +0.62)  coldpos +0.00063+-0.00081 (z +0.77)  warmpos -0.00025+-0.00054 (z -0.46)
+  [selected (PRIMARY)] HOLD pooled: all +0.00034+-0.00023 (z +1.46)  late20% -0.00001+-0.00051 (z -0.03)
+    VAL  w5_cd_cbs05_r101@last 0.39669 vs w5_cd_m02ref_r101@last 0.39721: -0.00052
+    VAL  w5_cd_cbs05_r102@last 0.39705 vs w5_cd_m02ref_r102@last 0.39678: +0.00027
+    VAL  w5_cd_cbs05_r103@last 0.39601 vs w5_cd_m02ref_r103@last 0.39662: -0.00062
+    VAL  w5_cd_cbs05_r104@last 0.39618 vs w5_cd_m02ref_r104@last 0.39602: +0.00016
+    HOLD w5_cd_cbs05_r101@last 0.32060 vs w5_cd_m02ref_r101@last 0.31979: +0.00081
+    HOLD w5_cd_cbs05_r102@last 0.32029 vs w5_cd_m02ref_r102@last 0.31969: +0.00060
+    HOLD w5_cd_cbs05_r103@last 0.32062 vs w5_cd_m02ref_r103@last 0.32024: +0.00038
+    HOLD w5_cd_cbs05_r104@last 0.32000 vs w5_cd_m02ref_r104@last 0.32025: -0.00024
+  [last (info)] VAL  pooled: all -0.00018+-0.00040 (z -0.44)  M<50 -0.00034+-0.00076 (z -0.45)  M>=50 -0.00006+-0.00042 (z -0.14)  Tue -0.00045+-0.00055 (z -0.82)  Thu +0.00012+-0.00058 (z +0.20)  coldpos -0.00012+-0.00080 (z -0.15)  warmpos -0.00045+-0.00053 (z -0.85)
+  [last (info)] HOLD pooled: all +0.00039+-0.00023 (z +1.70)  late20% +0.00038+-0.00050 (z +0.75)
+  ENS VAL 4-member arm vs 4-member ref: all -0.00013+-0.00056 (z -0.24) (ref 0.39969, arm 0.39955)
+  ENS HOLD 4-member arm vs 4-member ref: all +0.00021+-0.00031 (z +0.69) (ref 0.32265, arm 0.32286)
+  same-root corr arm vs m02ref (val, within-feed z, selected): 0.9782 0.9771 0.9785 0.9769 (mean 0.9777)
+  PMIX private-mix pooled delta +0.00019 +- 0.00062 (z +0.31); < -1 SE: no
+  STALE-VAL pooled delta (private-like inputs): +0.00053 +- 0.00040 (z +1.32); < -1 SE: no
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent +0.00032+-0.00031 (pos 0.460)  warm|mid -0.00007+-0.00014 (pos 0.110)  warm|novel -0.00030+-0.00013 (pos 0.127)  cold|recent +0.00032+-0.00019 (pos 0.219)  cold|mid -0.00007+-0.00008 (pos 0.038)  cold|novel -0.00014+-0.00006 (pos 0.046)  cat#1|w3+ +0.00002+-0.00014 (pos 0.347)  total +0.00007+-0.00041 (pos 1.000)
+  CLIPLOG w5_cd_m02ref_r101: cooldown clipped 0.000 (median 0.292); pool clipped 0.000 (median 0.243) | aux/main grad norm by Mpad 16:0.01 64:0.03 112:0.07 160:0.13 208:0.18 256:0.22 304:0.47
+  CLIPLOG w5_cd_cbs05_r101: cooldown clipped 0.001 (median 0.401); pool clipped 0.000 (median 0.335) | aux/main grad norm by Mpad 16:0.00 64:0.03 112:0.08 160:0.13 208:0.18 256:0.22 304:0.39
+  slices (selected): M<50 -0.00041+-0.00077 (z -0.53)  M>=50 +0.00039 (z +0.91)  Tue -0.00021 (z -0.38)  Thu +0.00036 (z +0.62)  coldpos +0.00063 (z +0.77)  warmpos -0.00025 (z -0.46)  | holdout late20% -0.00001
+  val gate input: z +0.156 (one-sided p 0.4379); unadjusted z > 2: no; futility note (val < 0 or holdout < 0): does not fire
+  other gates: holdout >= 0 OK; no val slice (M<50, M>=50, Tue, Thu) < -2 SE OK; pmix >= -1 SE OK; 4-root pool holdout >= +2 SE NO; stale-val >= 0 OK
+
+== cbs2 (--cand_budget 65536 --max_feeds 1024 --eval_every 500 --select_min_step 6000) vs m02ref (B = arm); PRIMARY = selected checkpoints
+    VAL  w5_cd_cbs2_r101 0.39732 vs w5_cd_m02ref_r101 0.39721: +0.00011
+    VAL  w5_cd_cbs2_r102 0.39718 vs w5_cd_m02ref_r102 0.39727: -0.00010
+    VAL  w5_cd_cbs2_r103 0.39535 vs w5_cd_m02ref_r103 0.39646: -0.00111
+    VAL  w5_cd_cbs2_r104 0.39597 vs w5_cd_m02ref_r104 0.39602: -0.00005
+    HOLD w5_cd_cbs2_r101 0.31997 vs w5_cd_m02ref_r101 0.31979: +0.00019
+    HOLD w5_cd_cbs2_r102 0.32013 vs w5_cd_m02ref_r102 0.32010: +0.00003
+    HOLD w5_cd_cbs2_r103 0.32034 vs w5_cd_m02ref_r103 0.32027: +0.00007
+    HOLD w5_cd_cbs2_r104 0.32034 vs w5_cd_m02ref_r104 0.32025: +0.00009
+  [selected (PRIMARY)] VAL  pooled: all -0.00029+-0.00036 (z -0.79)  M<50 -0.00036+-0.00068 (z -0.53)  M>=50 -0.00024+-0.00040 (z -0.59)  Tue -0.00093+-0.00050 (z -1.87)  Thu +0.00042+-0.00053 (z +0.80)  coldpos -0.00237+-0.00074 (z -3.20)  warmpos +0.00065+-0.00048 (z +1.33)
+  [selected (PRIMARY)] HOLD pooled: all +0.00009+-0.00020 (z +0.47)  late20% -0.00020+-0.00044 (z -0.46)
+    VAL  w5_cd_cbs2_r101@last 0.39764 vs w5_cd_m02ref_r101@last 0.39721: +0.00042
+    VAL  w5_cd_cbs2_r102@last 0.39733 vs w5_cd_m02ref_r102@last 0.39678: +0.00055
+    VAL  w5_cd_cbs2_r103@last 0.39565 vs w5_cd_m02ref_r103@last 0.39662: -0.00097
+    VAL  w5_cd_cbs2_r104@last 0.39592 vs w5_cd_m02ref_r104@last 0.39602: -0.00009
+    HOLD w5_cd_cbs2_r101@last 0.31968 vs w5_cd_m02ref_r101@last 0.31979: -0.00011
+    HOLD w5_cd_cbs2_r102@last 0.32000 vs w5_cd_m02ref_r102@last 0.31969: +0.00031
+    HOLD w5_cd_cbs2_r103@last 0.32012 vs w5_cd_m02ref_r103@last 0.32024: -0.00012
+    HOLD w5_cd_cbs2_r104@last 0.32001 vs w5_cd_m02ref_r104@last 0.32025: -0.00024
+  [last (info)] VAL  pooled: all -0.00002+-0.00035 (z -0.06)  M<50 -0.00034+-0.00067 (z -0.51)  M>=50 +0.00020+-0.00038 (z +0.53)  Tue -0.00069+-0.00048 (z -1.44)  Thu +0.00071+-0.00051 (z +1.38)  coldpos -0.00088+-0.00072 (z -1.22)  warmpos +0.00044+-0.00047 (z +0.94)
+  [last (info)] HOLD pooled: all -0.00004+-0.00020 (z -0.20)  late20% -0.00017+-0.00042 (z -0.40)
+  ENS VAL 4-member arm vs 4-member ref: all +0.00043+-0.00050 (z +0.87) (ref 0.39969, arm 0.40012)
+  ENS HOLD 4-member arm vs 4-member ref: all +0.00040+-0.00028 (z +1.45) (ref 0.32265, arm 0.32305)
+  same-root corr arm vs m02ref (val, within-feed z, selected): 0.9836 0.9832 0.9835 0.9836 (mean 0.9835)
+  PMIX private-mix pooled delta -0.00011 +- 0.00054 (z -0.19); < -1 SE: no
+  STALE-VAL pooled delta (private-like inputs): +0.00009 +- 0.00036 (z +0.26); < -1 SE: no
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent +0.00032+-0.00028 (pos 0.460)  warm|mid +0.00005+-0.00011 (pos 0.110)  warm|novel -0.00006+-0.00012 (pos 0.127)  cold|recent -0.00030+-0.00018 (pos 0.219)  cold|mid -0.00014+-0.00007 (pos 0.038)  cold|novel -0.00013+-0.00006 (pos 0.046)  cat#1|w3+ -0.00002+-0.00012 (pos 0.347)  total -0.00027+-0.00037 (pos 1.000)
+  CLIPLOG w5_cd_m02ref_r101: cooldown clipped 0.000 (median 0.292); pool clipped 0.000 (median 0.243) | aux/main grad norm by Mpad 16:0.01 64:0.03 112:0.07 160:0.13 208:0.18 256:0.22 304:0.47
+  CLIPLOG w5_cd_cbs2_r101: cooldown clipped 0.000 (median 0.209); pool clipped 0.000 (median 0.171) | aux/main grad norm by Mpad 16:0.01 64:0.03 112:0.05 160:0.13 208:0.14 256:0.32 304:0.24
+  slices (selected): M<50 -0.00036+-0.00068 (z -0.53)  M>=50 -0.00024 (z -0.59)  Tue -0.00093 (z -1.87)  Thu +0.00042 (z +0.80)  coldpos -0.00237 (z -3.20)  warmpos +0.00065 (z +1.33)  | holdout late20% -0.00020
+  val gate input: z -0.790 (one-sided p 0.7853); unadjusted z > 2: no; futility note (val < 0 or holdout < 0): fires
+  other gates: holdout >= 0 OK; no val slice (M<50, M>=50, Tue, Thu) < -2 SE OK; pmix >= -1 SE OK; 4-root pool holdout >= +2 SE NO; stale-val >= 0 OK
+
+== Holm step-down over 2 arm(s), family alpha 0.02275 (= P(z > 2)); order by p: ['cbs05', 'cbs2']; thresholds: first p <= 0.01138 (z >= 2.2776), then p <= 0.02275 (z >= 2.0)
+  cbs05 z +0.156 p 0.4379 Holm-adjusted p 0.8758 -> val gate NO
+  cbs2  z -0.790 p 0.7853 Holm-adjusted p 0.8758 -> val gate NO
+
+== summary (wave 8, stage B, SELECTED checkpoints, pooled over roots 101-104 vs m02ref)
+  cbs05 val +0.00006+-0.00040 (z +0.16, Holm p 0.8758) hold +0.00034+-0.00023 (z +1.46) | M<50 -0.00041 M>=50 +0.00039 Tue -0.00021 Thu +0.00036 coldpos +0.00063 warmpos -0.00025 | pmix +0.00019+-0.00062 | pool val -0.00013 hold +0.00021+-0.00031 (z +0.69) | stale +0.00053+-0.00040 | corr 0.9777 | last val -0.00018 hold +0.00039 -> STOP (val > +2 SE (Holm over 2 arms), 4-root pool holdout >= +2 SE)
+  cbs2  val -0.00029+-0.00036 (z -0.79, Holm p 0.8758) hold +0.00009+-0.00020 (z +0.47) | M<50 -0.00036 M>=50 -0.00024 Tue -0.00093 Thu +0.00042 coldpos -0.00237 warmpos +0.00065 | pmix -0.00011+-0.00054 | pool val +0.00043 hold +0.00040+-0.00028 (z +1.45) | stale +0.00009+-0.00036 | corr 0.9835 | last val -0.00002 hold -0.00004 -> STOP (val > +2 SE (Holm over 2 arms), 4-root pool holdout >= +2 SE)
+
+== registry-ready one-liners
+  w5_cd_cbs05_r101-104 (--cand_budget 16384 --max_feeds 256 --eval_every 2000 --select_min_step 24000) vs w5_cd_m02ref (CD harness, CDSEED 900+root, selected ckpt, pre-declared wave-8 rule with Holm): val +0.00006 +- 0.00040 (z +0.2, Holm p 0.876), holdout +0.00034 +- 0.00023 (z +1.5), pool hold +0.00021 (z +0.7), pmix +0.00019, stale +0.00053, coldpos +0.00063 / warmpos -0.00025, same-root corr 0.9777, @last val -0.00018 / hold +0.00039 -> STOP (val > +2 SE (Holm over 2 arms), 4-root pool holdout >= +2 SE) (nn_x/w5/logs/w5_eval_B_wave8.txt)
+  w5_cd_cbs2_r101-104 (--cand_budget 65536 --max_feeds 1024 --eval_every 500 --select_min_step 6000) vs w5_cd_m02ref (CD harness, CDSEED 900+root, selected ckpt, pre-declared wave-8 rule with Holm): val -0.00029 +- 0.00036 (z -0.8, Holm p 0.876), holdout +0.00009 +- 0.00020 (z +0.5), pool hold +0.00040 (z +1.4), pmix -0.00011, stale +0.00009, coldpos -0.00237 / warmpos +0.00065, same-root corr 0.9835, @last val -0.00002 / hold -0.00004 -> STOP (val > +2 SE (Holm over 2 arms), 4-root pool holdout >= +2 SE) (nn_x/w5/logs/w5_eval_B_wave8.txt)

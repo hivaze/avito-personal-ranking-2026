@@ -1,0 +1,13 @@
+=== W16P4: combiner control (constant weights). R4 PLAIN 0.402141, R4 MRULE 0.402847
+(i) at the plain weights (0.2, 0.5) and (iii) at the M-rule weights: combiner minus R4 (nothing fitted for ZM / RK / fixed-T SM)
+  ZM     plain +0.00000+-0.00000 | M-rule +0.00000+-0.00000
+  RK     plain -0.00145+-0.00031 | M-rule -0.00172+-0.00033
+  SM0.5  plain -0.00001+-0.00012 | M-rule +0.00008+-0.00012
+  SM1.0  plain +0.00005+-0.00009 | M-rule -0.00002+-0.00009
+  SM2.0  plain +0.00001+-0.00006 | M-rule -0.00013+-0.00006
+nested SM (T chosen on training folds) at fixed weights: plain -0.00001+-0.00008 {'SM2.0': 4, 'SM1.0': 20, 'SM0.5': 1} | M-rule +0.00008+-0.00012 {'SM0.5': 25}
+(ii) constant (w_pop, w_ft) [and T] chosen nested per combiner (5 x 5 user-grouped folds): nested combiner minus nested R4-CONST2 | minus R4 PLAIN | minus R4 MRULE | in-sample best constant minus R4 PLAIN
+  R4  +0.00000+-0.00000 | -0.00000+-0.00029 | -0.00071+-0.00024 | +0.00044 | top picks [((0.4, 0.4), 8), ((0.4, 0.45), 6), ((0.3, 0.55), 4)]
+  ZM  -0.00002+-0.00002 | -0.00002+-0.00029 | -0.00073+-0.00023 | +0.00043 | top picks [((0.4, 0.45), 7), ((0.4, 0.4), 6), ((0.3, 0.55), 4)]
+  RK  -0.00005+-0.00033 | -0.00005+-0.00039 | -0.00076+-0.00036 | +0.00044 | top picks [((0.45, 0.6), 11), ((0.45, 0.55), 5), ((0.55, 0.55), 3)]
+  SM  +0.00001+-0.00011 | +0.00001+-0.00029 | -0.00070+-0.00024 | +0.00050 | top picks [(('SM1.0', 0.45, 0.45), 10), (('SM2.0', 0.3, 0.55), 4), (('SM0.5', 0.45, 0.55), 3)]

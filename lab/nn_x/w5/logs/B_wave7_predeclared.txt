@@ -1,0 +1,31 @@
+nn_x/w5 STAGE-B WAVE 7 (cooldown regularisers; sweep item 'two-pass consistency regularisers', KL probe nn_x/tricks/rdrop_cd_kl/RESULT.txt: two-mask dropout symKL 0.0111 nats at the m02 cooldown end -> not inert): PRE-DECLARED READ-OUT RULE
+frozen 2026-11-13T05:34:50Z (`date -u`), BEFORE the first wave-7 run started: no w5_cd_{rdrop,sam}_r* log, claim, checkpoint, prediction or stale file existed at this time (0 matching files). Code: nn_x/w5/cd_arms8.py + the guarded hooks in train.py (md5 93b8c1001f95c3a21f7e43b9a4d5ba36), lane.sh arms B:rdrop / B:sam (md5 27e65105600b1e9db133cd4670b70aae); tests nn_x/w5/tests/test_w7.py (CPU 31/31 PASS at freeze time; the GPU identity part runs now on GPU N and must PASS before the launch).
+
+RUNS (lane.sh stage B = the CD harness: 2-epoch re-cool of nn/ckpt/v17_pre2s_s<root>@77500.pt with B_BASE + HYG, roots 101-104, variant w5_cd_<arm>_r<root>, seed CDSEED = 900 + root,
+  GPUs N and 6 only, <= 3 of my processes per GPU; arm flag appended LAST; every other flag = the existing reference w5_cd_m02ref_r<root> of the same root):
+  rdrop = B_BASE + --rdrop_cd 1.0 : on every cooldown step (= every step: --cooldown_frac 1.0) the SAME batch is forwarded a second time in train mode (independent dropout masks);
+          loss = 0.5 (L1 + L2) + 1.0 * sum_f valid_f symKL_f / max_feeds, symKL_f = 0.5 [KL(p1||p2) + KL(p2||p1)] of the two masked per-feed listwise softmaxes (fp32), feed-normalised like --loss_norm feed;
+          L = main listwise CE + K9 aux at the step's annealed weight (so the aux is averaged over both passes); the mean per-feed symKL is logged at every eval ('wave-7 RDROP' lines).
+  sam   = B_BASE + --sam_cd 0.05   : on every cooldown step g1 = grad(main + aux) at w (train.py's backward), eps = 0.05 * g1 / ||g1||_2 over ALL trainable parameters (one global L2 norm), second forward/backward at w + eps (fresh dropout masks),
+          w restored exactly from copies, then clip 1.0 and the AdamW + Muon steps use g2. ||eps||/||w|| (global L2) is logged at the first cooldown step; a run with ratio > 0.02 is INVALID.
+  Reference: the EXISTING w5_cd_m02ref_r<root> (selected + @last val / holdout preds and selected + @last stale-val preds present for roots 101-104 at freeze time).
+
+RULE (per arm, pooled over roots 101-104, paired per val feed vs w5_cd_m02ref_r<root> on the SELECTED checkpoint (holdout-best at step >= 12000, as wave 6); the LAST checkpoint is information only;
+  pooled = per-feed mean of the 4 paired deltas, SE = sd / sqrt(n_feeds), z = delta / SE; nn_x/r6/r6_eval.compare; member-equal z-mean ensembles for the pools):
+  PASS iff ALL of
+    (1) pooled member val delta > +2 SE, HOLM-corrected over the two arms: family alpha = P(z > 2) one-sided = 0.02275; p_i = P(Z > z_i); the arm with the smaller p must have p <= alpha/2
+        (z >= 2.2776) and, only if it does, the other arm is tested at p <= alpha (z >= 2.0); if the smaller p fails, gate (1) fails for both arms. If only one arm is readable, m = 1 (plain z > 2).
+        Primary arm = rdrop: reported first, its unadjusted z > 2 status is also reported as information, a tie in p is resolved in favour of rdrop. SAM's own precondition (7) is independent of this.
+    (2) pooled member holdout delta >= 0 (the fixed 30K random-like train holdout, selected checkpoints);
+    (3) no val slice among M<50, M>=50, Tue, Thu < -2 SE (slice z >= -2);
+    (4) src/pmix.py private-mix reweighted pooled val delta >= -1 SE;
+    (5) the 4-root pool holdout delta >= +2 SE (4-member arm z-mean vs 4-member m02ref z-mean, per-feed paired on the holdout, z >= 2);
+    (6) stale-val pooled member delta >= 0: val re-predicted under the project's private-like 'both_pre2both' inputs (nn_x/w5/stale_pred.py, selected checkpoints of the 4 arm runs vs the existing m02ref stale preds);
+        if an arm's stale preds cannot be produced, the arm is PENDING (never PASS) until they exist;
+    (7) SAM only: the first-cooldown-step ||eps||/||w|| <= 0.02 in all 4 run logs, otherwise the arm is INVALID (no verdict; reported).
+  STOP otherwise. INCOMPLETE if any of the 4 runs of an arm is missing (that arm is not gated).
+  Diagnostics (reported, never gates): the same-root within-feed correlation of the arm run to its m02ref (val, per-feed z-scores; reference: the m02ref-vs-r6-m02 same-root corr of the existing runs),
+    coldpos / warmpos val slices, per-root deltas, the holdout late20% slice, the 4-root pool val delta, the last-checkpoint read, levers / cliplog blocks, the logged RDROP mean symKL per eval and the SAM ratios,
+    the unadjusted (z > 2) val status of each arm, the wave 2-4 futility note (val < 0 or holdout < 0).
+  Read-out: nn_x/w5/w5_eval_wave7.py (a wrapper over the w5_eval.py / r6_eval.py functions; the existing w5_eval.py rules are untouched) -> nn_x/w5/logs/w5_eval_B_wave7.{txt,json}.
+  Adoption consequence of a PASS: the flag becomes a CANDIDATE change of the re-cool recipe, to be confirmed on roots 105-107 (stage 2, w5_eval.py PASS-CD rule) before any member is built with it; nothing is submitted from this wave.

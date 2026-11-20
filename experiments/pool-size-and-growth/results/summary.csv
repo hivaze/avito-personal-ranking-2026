@@ -1,0 +1,27 @@
+item,witness,value,uncertainty,source
+"law NDCG(n) = a - b/n, 8 wide students, train-only branch: a",val / holdout,0.40181 / 0.32472,,results/pool_composition_saturation.txt
+the 8-student pool against its own asymptote,val / holdout,-0.00024 / -0.00017,0.00012 / 0.00007,results/pool_composition_saturation.txt
+forecast 8 to 16 students by the law,val / holdout,+0.00016 / +0.00013,0.00002 / 0.00001,results/pool_composition_saturation.txt
+8 wide + 8 narrow students against 8 wide (file S16 against W8),val / holdout / public,+0.00008 / -0.00028 / -0.00041,0.00034 / 0.00019 / about 0.00044,lab/reports/RECHECK_1114/pool_composition.md
+16 wide students against 8 (file W16 against W8),public,0.39448337 against 0.394486,paired SE 0.00045,experiment registry (not published)
+best union containing the 8 wide students,holdout,+0.00010,0.00015,lab/reports/RECHECK_1114/pool_composition.md
+adding the best hard-label pool at 10% / 50% weight,holdout,-0.00030 / -0.00044,0.00009 / 0.00023,lab/reports/RECHECK_1114/pool_composition.md
+"forward selection fitted on val, read on the holdout",holdout,-0.00095,0.00028,lab/reports/RECHECK_1114/pool_composition.md
+"wide against narrow students, asymptote",val / holdout,+0.00043 / +0.00090,0.00053 / 0.00031,lab/reports/RECHECK_1114/pool_composition.md
+"mean correlation between members: same arm / different teacher, generation or width",val,0.9722 / 0.9718,,lab/reports/RECHECK_1114/pool_composition.md
+"law on 16 students, train-only branch: 16 to 32 / 16 to infinity",val,+0.00007 / +0.00015,0.00001 / 0.00003,results/ens_e2_law.txt
+file level with the popularity-light pool: 16+12 to 32+12 students,val,+0.00006,0.00001,results/ens_e2c_file_law.txt
+68-member union (32 wide + 36 popularity-light) against the 20-member file,val,0.40247 against 0.40271 (-0.00024),0.00028,results/ens_e4_build_68_and_60_members.txt
+68-member union against the 20-member file,public,0.3946427 against 0.394892 (-0.00025),paired SE 0.00036,decision ledger block 2026-11-16T01:31:43Z (not published)
+60-member all-data structure against the 20-member file,val,0.40216 against 0.40271 (-0.00056),0.00027,results/ens_e4_build_68_and_60_members.txt
+the 20-member file among the 495 possible draws of its 4 popularity-light students,val,"above 472 of 495 (mean 0.40249, sd 0.00013)",,lab/reports/TRICKS_1115/int_mega.md
+split-half correlation of the draw excess,val / public mix / private mix,-0.156 / -0.027 / -0.005,sd over splits 0.114 to 0.117,results/ens_e6_draws.txt
+"learned combiners, nested, against the 60-member structure",val,-0.00083 to +0.00020,0.00042 / 0.00034,lab/reports/TRICKS_1115/int_mega.md
+"rank pooling against mean-z pooling, 4 disjoint member sets",val,-0.00007 pooled (z -0.52),,results/ens_e3b_rank_pooling_replication.txt
+32 all-data wide students + 4 popularity-light against 16 + 4,val,0.40237 against 0.40271 (-0.00034),0.00025,decision ledger block 2026-11-16T03:26:21Z (not published)
+48 all-data wide students + 4 popularity-light against 16 + 4,val,0.40222 against 0.40271 (-0.00049),0.00028,decision ledger block 2026-11-16T05:59:49Z (not published)
+48 against 32,val,-0.00015,0.00019,decision ledger block 2026-11-16T05:59:49Z (not published)
+"16 new all-data students (seeds 959-966) as a pool against the first 16, train-only branch",val,-0.00086,0.00039,decision ledger block 2026-11-16T03:26:21Z (not published)
+"third block of 16 (seeds 967-974) against the first 16, train-only / fine-tuned branch",val,-0.00027 / +0.00003,0.00038 / 0.00041,decision ledger block 2026-11-16T05:59:49Z (not published)
+weight decay 0 for the students: 8-pool against the reference 8-pool,val / holdout,-0.00134 / -0.00011,0.00056 / 0.00031,decision ledger block 2026-11-16T03:26:21Z (03:38:09Z entry; not published)
+mean member correlation at weight decay 0 against the reference,val,0.9563 against 0.9723,,decision ledger block 2026-11-16T03:26:21Z (03:38:09Z entry; not published)

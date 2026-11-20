@@ -1,0 +1,36 @@
+## (i) positive check of the single-snapshot aligner (cap pretended 192; snapshot also cut to 192; truth = stored 193-256)
+holdout: feeds with a snapshot 3000; with >= 1 recovered event 2227; events 68854: exact position 0.464; true event 193-256 (any order) 0.752; ALSO among the stored newest 192 (placement error upper bound) 0.019
+train (non-holdout): feeds with a snapshot 3000; with >= 1 recovered event 2282; events 69539: exact position 0.515; true event 193-256 (any order) 0.779; ALSO among the stored newest 192 (placement error upper bound) 0.018
+val: feeds with a snapshot 2160; with >= 1 recovered event 1284; events 48507: exact position 0.365; true event 193-256 (any order) 0.666; ALSO among the stored newest 192 (placement error upper bound) 0.020
+test: feeds with a snapshot 3000; with >= 1 recovered event 1484; events 61513: exact position 0.332; true event 193-256 (any order) 0.645; ALSO among the stored newest 192 (placement error upper bound) 0.018
+
+## (ii) parity restricted to capped feeds (H = 256), k = 0 and k = 7, train vs test (extended feeds; written arrays)
+| train var | test var | train extended share (all feeds) | of capped | dose KS | dose mean train / test | gap KS | view-share KS | view share train / test | no-embedding share train / test |
+|---|---|---|---|---|---|---|---|---|---|
+| k0 capped | k0 capped | 0.0818 | 0.1934 | 0.090 | 38.0 / 41.5 | 0.776 | 0.144 | 0.263 / 0.169 | 0.275 / 0.265 |
+| k7 capped | k0 capped | 0.0218 | 0.0515 | 0.189 | 57.5 / 41.5 | 0.547 | 0.164 | 0.282 / 0.169 | 0.275 / 0.265 |
+| k7 capped | k7 capped | 0.0218 | 0.0515 | 0.178 | 57.5 / 42.6 | 0.580 | 0.162 | 0.282 / 0.170 | 0.275 / 0.266 |
+| val k0 capped | k0 capped | 0.0785 | 0.2711 | 0.076 | 36.4 / 41.5 | 0.315 | 0.015 | 0.167 / 0.169 | 0.256 / 0.265 |
+holdout capped-only k0: extended 2159 = 0.0720 of holdout feeds, 0.1861 of capped holdout feeds
+val capped-only k0: extended 1132 = 0.0785 of feeds, 0.2711 of capped feeds; mean events 36.4
+test capped-only k0: extended 2059 = 0.0720 of feeds, 0.2499 of capped feeds; mean events 41.5
+test public-like capped-only k0: 0.0772 of feeds
+test private-like capped-only k0: 0.0698 of feeds
+
+## (iii) dose-bin reweighting of train capped extended feeds (k = 0) to the test dose distribution
+dose bin | train | test | weight
+[1, 8) | 0.2244 | 0.1467 | 0.65
+[8, 16) | 0.1504 | 0.1447 | 0.96
+[16, 32) | 0.1848 | 0.2307 | 1.25
+[32, 64) | 0.2111 | 0.2521 | 1.19
+[64, 96) | 0.1259 | 0.1044 | 0.83
+[96, 128) | 0.0716 | 0.0583 | 0.81
+[128, 129) | 0.0319 | 0.0631 | 1.98
+ESS 0.923 of 257660 feeds; weights 0.65..1.98
+
+## (iv) generic history-format difference over ALL capped feeds (not specific to the extension): stored view share
+train: all capped feeds, stored view share mean 0.530, 5/50/95% [0.215, 0.492, 0.805]
+val: all capped feeds, stored view share mean 0.383, 5/50/95% [0.199, 0.406, 0.43]
+test: all capped feeds, stored view share mean 0.383, 5/50/95% [0.207, 0.406, 0.43]
+KS train vs test (all capped feeds) 0.527; val vs test 0.008
+done

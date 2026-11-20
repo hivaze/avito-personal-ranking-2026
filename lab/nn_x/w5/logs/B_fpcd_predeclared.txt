@@ -1,0 +1,79 @@
+nn_x/w10/fpcd STAGE-B WAVE 10 arm FPCD-lite = m02 re-cool (CD harness) with the Sep 6-8 pre2-blank train feeds MASKED OUT of the
+cooldown batches (reports/DATA_PIPELINE_1113.md 5.1 'T-1' = proposal P4 amended by both skeptics; mechanism under test = the
+pre2-FLAG FORMAT PARITY only: 27.45% of the training feeds (Sep 6-8 MSK) carry an all-NaN pre2 block = 9 of 104 inputs blank with
+has:pre2_fe = 0, a state that never occurs at inference; the popularity half of the original rationale is DROPPED, Sep 6-8 vs Sep 9-14
+popularity reliance differs by +0.0016 +- 0.0014 only).
+PRE-DECLARED READ-OUT RULE, frozen with `date -u` (see the timestamp line appended below) BEFORE the first arm run started: no
+w5_cd_fpcd_r* log, claim, checkpoint, prediction or stale file existed in nn_x/w5 or nn_x/w10/fpcd (0 matching files; verified below).
+
+PRE-GATE (inference only, GPU N, nn_x/w10/fpcd/pregate_pre2blank.py -> logs/pregate_pre2blank.txt, 16:45:45-16:46:02Z; pre-declared
+  by the skeptic: within-feed corr >= 0.99 -> CLOSE, < 0.98 -> run, 0.98-0.99 grey zone -> run as an information arm on idle GPUs =
+  the lead's standing instruction). r6_cd_m02_r101-104 on val, pre2 block zeroed (pre2_fe_z / pre2_new_z / pre2_fe_s / pre2_new_s /
+  pre2_hmax32 / has:pre2_fe = 0, the exact attach_xt image of the all-NaN Sep 6-8 train rows; normal-mode preds reproduce the stored
+  r6 preds bitwise):
+    within-feed Pearson (mean over feeds)  0.9904 / 0.9898 / 0.9893 / 0.9904  (4-root mean 0.9900; pooled 0.9910-0.9924)
+    within-feed Spearman (mean)            0.9839 / 0.9831 / 0.9825 / 0.9833
+    top-1 agreement                        0.839 / 0.832 / 0.831 / 0.838
+    val NDCG blank - normal                -0.00156 / -0.00225 / -0.00191 / -0.00241 (SE 0.00055)
+  Reading: 2 of 4 roots below 0.99 on the Pearson statistic, all 4 below 0.99 on the rank (Spearman) statistic that NDCG sees ->
+  neither branch fires = GREY ZONE (as the audit's own run, 0.989-0.990) -> run as a 4-root INFORMATION arm (GPUs N idle).
+
+MASKING SPEC (nn_x/w10/fpcd/cd_arms10.py; train.py --cd_exclude_days 0,1,2; OFF by default and bit-identical to nn_x/w5 at the
+  default: tests/test_fpcd.py cpu 26/26 = AST proof + lane DRY identity + full-set dose replication; gpu part = end-to-end identity
+  on 39 CD steps + masking proof, run before the launch and recorded in nn_x/w10/fpcd/logs/test_fpcd_gpu.log):
+  - excluded feeds = training feeds whose Moscow calendar day (floor((timestamp + 10800) / 86400)) is 20702 / 20703 / 20704 =
+    2026-09-06 / 07 / 08 (relative days 0,1,2 from the first train day); timestamps only, no labels; holdout feeds never in the
+    allowed set (leak guard asserted); 0.2743 of all train feeds, 0.2745 of the 3,121,208 training feeds, 0.2488 of the 134,118
+    m02 pool feeds (train.py's pool: p_random > 0.5 with M<50 zeroed).
+  - from the cooldown start (step 0 in the CD harness) EVERY cooldown batch is used minus its excluded feeds: the pre-computed regular
+    batches (train.py's all_batches, 2 epochs x 9,835 = 19,670 steps, same seed, same order) and the m02 exploration-pool batches
+    (the expl stream and each of its reshuffles). NO redraw, NO refill: the same 19,670 steps, the same lr / K9 / aux-anneal schedule,
+    the same pool decisions (mix RNG untouched, pool share stays ~0.02); each batch simply shrinks.
+    Realised (CPU replication of the exact batch sequences of seeds 1001-1004, logs/test_fpcd_dose.json): regular batch 317.4 ->
+    230.3 feeds (ratio 0.7255, min 7), pool batch ratio 0.7512; passes per allowed feed unchanged (2 regular; the pool stream is
+    consumed at the m02 rate).
+  - an EMPTY masked batch (all feeds excluded; only the 1-2-feed tail batch of an M bucket can do this) keeps its step and is filled
+    by splitting the largest masked batch of the same pass (same epoch / same pool reshuffle) in two; every allowed feed is still seen
+    exactly once per pass, no excluded feed ever appears, the step count is unchanged. Replication: 0 such events in the regular
+    batches of all 4 seeds and 0 in the first pool pass; later pool passes are logged ('split events').
+  - logged at every eval: cooldown steps (regular / pool, pool share), realised feeds per step vs unmasked and the ratio, pool passes
+    per allowed pool feed, split events; the setup line logs the days, dates, shares and the leak guard.
+  - everything else = the existing reference w5_cd_m02ref_r<root> (lane.sh stage B: B_BASE + HYG, --init nn/ckpt/v17_pre2s_s<root>@77500.pt,
+    --epochs 2 --lr 2e-3 --cooldown_frac 1.0 --cooldown_mix 0.02 --holdout 30000 --select_on holdout --select_min_step 12000
+    --save_last --save_holdout --cliplog 50; DRY-verified token for token, the arm flag appended LAST).
+
+RUNS: roots 101-104, variant w5_cd_fpcd_r<root>, seed CDSEED = 900 + root (1001-1004), nn_x/w10/fpcd/lane.sh (private code copy of
+  nn_x/w5; own ckpt / logs / preds), GPUs N and 7 only (2 lanes per GPU sharing the 4 jobs via mkdir claims; <= 3 compute processes
+  and >= 60 GB free checked before each launch; CUDA_VISIBLE_DEVICES = one id; 12 threads; setsid nohup; real PIDs from /proc in
+  nn_x/w10/fpcd/RUNNING.txt and nn_x/w5/logs/RUNNING_w5.txt). Reference = the EXISTING nn_x/w5 w5_cd_m02ref_r<root> (selected + @last val /
+  holdout preds and stale-val preds present for roots 101-104). Nothing is fine-tuned, pooled or submitted.
+
+RULE = the wave-8 stage-B rule (logs/B_wave8_predeclared.txt) for ONE arm (m = 1, no Holm correction), amended by the skeptics'
+  disclosed E-regime handicap (26% of the holdout = 7,823 feeds are the Sep 6-8 regime the arm stops cooling on): pooled over roots
+  101-104, paired per val feed vs w5_cd_m02ref_r<root> on the SELECTED checkpoint (holdout-best at step >= 12000; @last = info):
+  PASS iff ALL of
+    (1) pooled member val delta > +2 SE (one-sided z > 2.0);
+    (2) pooled member FULL-holdout delta >= -1 SE (the E-regime handicap, disclosed in advance);
+    (3) no val slice among M<50, M>=50, Tue, Thu < -2 SE;
+    (4) pmix private-mix pooled val delta >= -1 SE (veto);
+    (5) the 4-root pool (member-equal z-mean) holdout delta >= +2 SE;
+    (6) stale-val pooled member delta >= -1 SE (stale_pred.py 'both_pre2both', selected checkpoints; missing -> PENDING, never PASS).
+  STOP otherwise; INCOMPLETE if any of the 4 runs is missing.
+  INFORMATION columns (never gates): holdout LATE (Sep 9-19 MSK, days >= 20705, 22,177 feeds) and EARLY (Sep 6-8, 7,823 feeds) deltas
+  and dE - dL (expected negative by construction); per-root deltas; @last read; same-root within-feed corr to m02ref (near-copy
+  check: 0.993-0.997 for every past cooldown-data arm); coldpos / warmpos; levers; cliplog; pool val; realised feeds per step, pool
+  share and split events from the logs; wall time per run; the expected sign of the week-2 production tilt (share 0.462 -> 0.636
+  without Sep 6-8) = NEGATIVE on val M>=50 / Tue (external findings 5.4) is stated here as the skeptics asked.
+  STATUS: INFORMATION ARM (grey-zone pre-gate; prior 0.015 for >= +0.0005 member val with holdout / pmix not below). It stays an
+  information arm unless gate (1) holds; any PASS additionally needs, before any pick, the generational bar (CURRENT_STATUS 1: >= +0.002
+  val and within-feed corr < 0.99 to the pool), the TRICKS 4.2 clause (stale-val AND pmix >= +2 SE) and a 7-root confirmation (roots
+  105-107 + their m02ref references) under a NEW pre-declaration; nothing is adopted from this read-out alone.
+  DEVIATION from DATA_PIPELINE 5.1 disclosed: the rnd27 control arm (same masking on a seeded random 27.45% of the feeds) is NOT run
+  here (scope = one arm, 4 roots, 4-hour cap); without it a positive result cannot separate 'format' from 'less cooldown data' and would
+  need rnd27 under a new pre-declaration before stage 2.
+Read-out: nn_x/w10/fpcd/w5_eval_wave10_fpcd.py (= nn_x/w5/w5_eval_wave8.py with ARMS=("fpcd",), the single-arm rule above, gates (2) and
+  (6) at -1 SE, the holdout EARLY / LATE info slices) -> nn_x/w5/logs/w5_eval_B_fpcd.{txt,json}; the arm's logs / preds / stale preds are
+  copied from nn_x/w10/fpcd into nn_x/w5 with cp --update=none (never overwriting) so that the read-out reads them under the w5: names;
+  stale preds via nn_x/w10/fpcd/stale_pred.py (byte-identical to nn_x/w5/stale_pred.py, own paths) on GPU N for the 8 checkpoints
+  (selected + @last) before the read-out.
+2026-11-13T16:53:48Z FROZEN (date -u) before any arm run: files matching *w5_cd_fpcd_r* in nn_x/w5 and nn_x/w10/fpcd = 0 (must be 0)

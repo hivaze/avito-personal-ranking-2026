@@ -1,0 +1,368 @@
+== ABLATION SCREEN (2-epoch from-scratch, base = A_BASE + HYG, seeds (23, 24), primary = last checkpoint; rules in the abl_eval.py docstring, frozen 2026-11-13 00:08 UTC)
+== runs: selected step / total | selected val, holdout (in-training eval) | last val, holdout | minutes
+  abl:abl_base_s23               best  19000/19670 | sel val 0.39348 hold 0.31756 | last val 0.39364 hold 0.31754 | 37 min
+  abl:abl_base_s24               best  19670/19670 | sel val 0.39348 hold 0.31754 | last val 0.39348 hold 0.31754 | 37 min
+  abl:abl_no_aux_s23             best  19000/19670 | sel val 0.39156 hold 0.31506 | last val 0.39156 hold 0.31503 | 41 min
+  abl:abl_no_aux_s24             best  19670/19670 | sel val 0.39118 hold 0.31545 | last val 0.39118 hold 0.31545 | 41 min
+  abl:abl_no_retr_s23            best  19670/19670 | sel val 0.39038 hold 0.31484 | last val 0.39038 hold 0.31484 | 33 min
+  abl:abl_no_retr_s24            best  19000/19670 | sel val 0.38962 hold 0.31436 | last val 0.39001 hold 0.31434 | 34 min
+  abl:abl_retr32_s23             best  19670/19670 | sel val 0.39340 hold 0.31719 | last val 0.39340 hold 0.31719 | 51 min
+  abl:abl_retr32_s24             best  19670/19670 | sel val 0.39273 hold 0.31692 | last val 0.39273 hold 0.31692 | 51 min
+  abl:abl_retr32u_s23            best  19670/19670 | sel val 0.39333 hold 0.31802 | last val 0.39333 hold 0.31802 | 55 min
+  abl:abl_retr32u_s24            best  19670/19670 | sel val 0.39358 hold 0.31716 | last val 0.39358 hold 0.31716 | 55 min
+  abl:abl_xdrop_pop_s23          best  18000/19670 | sel val 0.39013 hold 0.30991 | last val 0.39141 hold 0.30976 | 44 min
+  abl:abl_xdrop_pop_s24          best  19670/19670 | sel val 0.39103 hold 0.31043 | last val 0.39103 hold 0.31043 | 45 min
+  abl:abl_xdrop_ctxnd_s23        best  19670/19670 | sel val 0.39225 hold 0.31732 | last val 0.39225 hold 0.31732 | 43 min
+  abl:abl_xdrop_ctxnd_s24        best  19670/19670 | sel val 0.39218 hold 0.31716 | last val 0.39218 hold 0.31716 | 43 min
+  abl:abl_no_sim_s23             best  19670/19670 | sel val 0.39313 hold 0.31749 | last val 0.39313 hold 0.31749 | 40 min
+  abl:abl_no_sim_s24             best  19000/19670 | sel val 0.39335 hold 0.31690 | last val 0.39311 hold 0.31670 | 41 min
+  abl:abl_no_domain_s23          best  19670/19670 | sel val 0.39410 hold 0.31774 | last val 0.39410 hold 0.31774 | 43 min
+  abl:abl_no_domain_s24          best  19670/19670 | sel val 0.39215 hold 0.31731 | last val 0.39215 hold 0.31731 | 43 min
+  abl:abl_xrel_more_s23          best  19670/19670 | sel val 0.39300 hold 0.31803 | last val 0.39300 hold 0.31803 | 42 min
+  abl:abl_xrel_more_s24          best  19000/19670 | sel val 0.39313 hold 0.31735 | last val 0.39335 hold 0.31733 | 44 min
+  abl:abl_lnorm_batch_s23        best  19670/19670 | sel val 0.39187 hold 0.31704 | last val 0.39187 hold 0.31704 | 43 min
+  abl:abl_lnorm_batch_s24        best  19670/19670 | sel val 0.39221 hold 0.31611 | last val 0.39221 hold 0.31611 | 43 min
+  abl:abl_blocks3_s23            best  19670/19670 | sel val 0.39349 hold 0.31806 | last val 0.39349 hold 0.31806 | 45 min
+  abl:abl_blocks3_s24            best  19670/19670 | sel val 0.39385 hold 0.31785 | last val 0.39385 hold 0.31785 | 45 min
+  abl:abl_no_set_s23             best  19670/19670 | sel val 0.39182 hold 0.31619 | last val 0.39182 hold 0.31619 | 18 min
+  abl:abl_no_set_s24             best  19670/19670 | sel val 0.39135 hold 0.31605 | last val 0.39135 hold 0.31605 | 11 min
+
+== no_aux (ABLATION: K9 production-order aux head (--aux_pos 0)) vs base (B = arm, delta = arm - base)
+    VAL  abl_no_aux_s23@last 0.39156 vs abl_base_s23@last 0.39364: -0.00208
+    VAL  abl_no_aux_s24@last 0.39118 vs abl_base_s24@last 0.39348: -0.00231
+    HOLD abl_no_aux_s23@last 0.31503 vs abl_base_s23@last 0.31754: -0.00251
+    HOLD abl_no_aux_s24@last 0.31545 vs abl_base_s24@last 0.31753: -0.00208
+  [last] VAL  pooled: all -0.00219+-0.00059 (z -3.72)  M<50 -0.00313+-0.00105 (z -2.97)  M>=50 -0.00155+-0.00068 (z -2.27)  Tue -0.00131+-0.00080 (z -1.63)  Thu -0.00317+-0.00087 (z -3.64)  coldpos -0.00732+-0.00121 (z -6.05)  warmpos -0.00024+-0.00078 (z -0.31)
+  [last] HOLD pooled: all -0.00229+-0.00035 (z -6.52)  late20% -0.00221+-0.00075 (z -2.93)
+  [last] val SE_cal 0.00064 (z_cal -3.43)
+  [last] hold SE_cal 0.00037 (z_cal -6.24)
+    VAL  abl_no_aux_s23 0.39156 vs abl_base_s23 0.39348: -0.00192
+    VAL  abl_no_aux_s24 0.39118 vs abl_base_s24 0.39348: -0.00231
+    HOLD abl_no_aux_s23 0.31508 vs abl_base_s23 0.31756: -0.00248
+    HOLD abl_no_aux_s24 0.31545 vs abl_base_s24 0.31753: -0.00208
+  [selected (info)] VAL  pooled: all -0.00211+-0.00060 (z -3.54)  M<50 -0.00299+-0.00106 (z -2.83)  M>=50 -0.00151+-0.00070 (z -2.17)  Tue -0.00133+-0.00081 (z -1.65)  Thu -0.00298+-0.00089 (z -3.36)  coldpos -0.00659+-0.00124 (z -5.30)  warmpos -0.00043+-0.00078 (z -0.54)
+  [selected (info)] HOLD pooled: all -0.00228+-0.00035 (z -6.48)  late20% -0.00200+-0.00076 (z -2.63)
+  MINUTES base [37.1, 37.5] arm [40.5, 40.7] -> ratio 1.09
+  PMIX private-mix pooled delta -0.00154 +- 0.00092 (z -1.67); < -1 SE: YES
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00003+-0.00047 (pos 0.460)  warm|mid -0.00005+-0.00018 (pos 0.110)  warm|novel -0.00019+-0.00017 (pos 0.127)  cold|recent -0.00158+-0.00030 (pos 0.219)  cold|mid -0.00017+-0.00009 (pos 0.038)  cold|novel -0.00023+-0.00009 (pos 0.046)  cat#1|w3+ +0.00021+-0.00022 (pos 0.347)  total -0.00224+-0.00059 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_no_aux_s23: warmup clipped 0.218 (median 0.429); plateau clipped 0.000 (median 0.278); cooldown clipped 0.000 (median 0.282); pool clipped 0.000 (median 0.235) | aux/main grad norm by Mpad 16:0.00 64:0.00 112:0.00 160:0.00 208:0.00 256:0.00 304:0.00
+  CLIPLOG abl_no_aux_s24: warmup clipped 0.038 (median 0.330); plateau clipped 0.000 (median 0.277); cooldown clipped 0.000 (median 0.276); pool clipped 0.000 (median 0.219) | aux/main grad norm by Mpad 16:0.00 64:0.00 112:0.00 160:0.00 208:0.00 256:0.00 304:0.00
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> no_aux: val -0.00219 (SE_cal 0.00064, z_cal -3.43; seeds -0.00208 -0.00231), holdout -0.00229 (z_cal -6.24; seeds -0.00251 -0.00208) -> LOAD-BEARING (worth val +0.00219, holdout +0.00229)
+
+== no_retr (ABLATION: history retrieval retr_m 16 + attn_gate (dropped)) vs base (B = arm, delta = arm - base)
+    VAL  abl_no_retr_s23@last 0.39038 vs abl_base_s23@last 0.39364: -0.00327
+    VAL  abl_no_retr_s24@last 0.39001 vs abl_base_s24@last 0.39348: -0.00347
+    HOLD abl_no_retr_s23@last 0.31485 vs abl_base_s23@last 0.31754: -0.00269
+    HOLD abl_no_retr_s24@last 0.31433 vs abl_base_s24@last 0.31753: -0.00320
+  [last] VAL  pooled: all -0.00337+-0.00070 (z -4.79)  M<50 -0.00306+-0.00129 (z -2.37)  M>=50 -0.00359+-0.00079 (z -4.55)  Tue -0.00201+-0.00098 (z -2.05)  Thu -0.00486+-0.00101 (z -4.82)  coldpos -0.00663+-0.00147 (z -4.52)  warmpos -0.00206+-0.00092 (z -2.23)
+  [last] HOLD pooled: all -0.00294+-0.00043 (z -6.84)  late20% -0.00250+-0.00097 (z -2.58)
+  [last] val SE_cal 0.00075 (z_cal -4.52)
+  [last] hold SE_cal 0.00044 (z_cal -6.64)
+    VAL  abl_no_retr_s23 0.39038 vs abl_base_s23 0.39348: -0.00310
+    VAL  abl_no_retr_s24 0.38962 vs abl_base_s24 0.39348: -0.00386
+    HOLD abl_no_retr_s23 0.31485 vs abl_base_s23 0.31756: -0.00271
+    HOLD abl_no_retr_s24 0.31436 vs abl_base_s24 0.31753: -0.00316
+  [selected (info)] VAL  pooled: all -0.00348+-0.00072 (z -4.82)  M<50 -0.00335+-0.00132 (z -2.54)  M>=50 -0.00357+-0.00081 (z -4.39)  Tue -0.00219+-0.00101 (z -2.18)  Thu -0.00489+-0.00104 (z -4.72)  coldpos -0.00403+-0.00152 (z -2.66)  warmpos -0.00326+-0.00095 (z -3.44)
+  [selected (info)] HOLD pooled: all -0.00293+-0.00044 (z -6.65)  late20% -0.00266+-0.00098 (z -2.70)
+  MINUTES base [37.1, 37.5] arm [33.4, 33.6] -> ratio 0.90
+  PMIX private-mix pooled delta -0.00429 +- 0.00102 (z -4.19); < -1 SE: YES
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00083+-0.00055 (pos 0.460)  warm|mid -0.00012+-0.00020 (pos 0.110)  warm|novel -0.00065+-0.00021 (pos 0.127)  cold|recent -0.00138+-0.00036 (pos 0.219)  cold|mid -0.00022+-0.00011 (pos 0.038)  cold|novel -0.00022+-0.00009 (pos 0.046)  cat#1|w3+ +0.00129+-0.00028 (pos 0.347)  total -0.00342+-0.00071 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_no_retr_s23: warmup clipped 0.126 (median 0.421); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.317); pool clipped 0.000 (median 0.262) | aux/main grad norm by Mpad 16:0.02 64:0.11 112:0.24 160:0.36 208:0.53 256:0.63 304:1.48
+  CLIPLOG abl_no_retr_s24: warmup clipped 0.146 (median 0.404); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.309); pool clipped 0.000 (median 0.246) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.40 208:0.52 256:0.74 304:1.06
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> no_retr: val -0.00337 (SE_cal 0.00075, z_cal -4.52; seeds -0.00327 -0.00347), holdout -0.00294 (z_cal -6.64; seeds -0.00269 -0.00320) -> LOAD-BEARING (worth val +0.00337, holdout +0.00294)
+
+== retr32 (SCALE-UP: retrieval depth 32 (--retr_m 32)) vs base (B = arm, delta = arm - base)
+    VAL  abl_retr32_s23@last 0.39340 vs abl_base_s23@last 0.39364: -0.00025
+    VAL  abl_retr32_s24@last 0.39273 vs abl_base_s24@last 0.39348: -0.00075
+    HOLD abl_retr32_s23@last 0.31719 vs abl_base_s23@last 0.31754: -0.00034
+    HOLD abl_retr32_s24@last 0.31691 vs abl_base_s24@last 0.31753: -0.00061
+  [last] VAL  pooled: all -0.00050+-0.00049 (z -1.01)  M<50 +0.00076+-0.00092 (z +0.83)  M>=50 -0.00136+-0.00054 (z -2.51)  Tue -0.00008+-0.00068 (z -0.12)  Thu -0.00095+-0.00072 (z -1.32)  coldpos +0.00075+-0.00107 (z +0.70)  warmpos -0.00120+-0.00064 (z -1.88)
+  [last] HOLD pooled: all -0.00048+-0.00028 (z -1.70)  late20% -0.00149+-0.00057 (z -2.63)
+  [last] val SE_cal 0.00055 (z_cal -0.90)
+  [last] hold SE_cal 0.00030 (z_cal -1.59)
+    VAL  abl_retr32_s23 0.39340 vs abl_base_s23 0.39348: -0.00008
+    VAL  abl_retr32_s24 0.39273 vs abl_base_s24 0.39348: -0.00075
+    HOLD abl_retr32_s23 0.31719 vs abl_base_s23 0.31756: -0.00036
+    HOLD abl_retr32_s24 0.31691 vs abl_base_s24 0.31753: -0.00061
+  [selected (info)] VAL  pooled: all -0.00042+-0.00050 (z -0.82)  M<50 +0.00070+-0.00093 (z +0.76)  M>=50 -0.00119+-0.00057 (z -2.10)  Tue -0.00008+-0.00069 (z -0.11)  Thu -0.00078+-0.00073 (z -1.07)  coldpos +0.00275+-0.00109 (z +2.51)  warmpos -0.00193+-0.00065 (z -2.94)
+  [selected (info)] HOLD pooled: all -0.00049+-0.00028 (z -1.72)  late20% -0.00148+-0.00058 (z -2.57)
+  MINUTES base [37.1, 37.5] arm [50.5, 50.6] -> ratio 1.36
+  PMIX private-mix pooled delta -0.00084 +- 0.00074 (z -1.14); < -1 SE: YES
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00026+-0.00038 (pos 0.460)  warm|mid -0.00029+-0.00015 (pos 0.110)  warm|novel -0.00024+-0.00015 (pos 0.127)  cold|recent +0.00003+-0.00026 (pos 0.219)  cold|mid +0.00019+-0.00008 (pos 0.038)  cold|novel -0.00000+-0.00007 (pos 0.046)  cat#1|w3+ +0.00026+-0.00019 (pos 0.347)  total -0.00057+-0.00050 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_retr32_s23: warmup clipped 0.128 (median 0.435); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.312); pool clipped 0.000 (median 0.258) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.23 160:0.37 208:0.54 256:0.64 304:1.46
+  CLIPLOG abl_retr32_s24: warmup clipped 0.146 (median 0.421); plateau clipped 0.000 (median 0.320); cooldown clipped 0.000 (median 0.302); pool clipped 0.000 (median 0.239) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.38 208:0.56 256:0.76 304:1.39
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> retr32: val -0.00050 (SE_cal 0.00055, z_cal -0.90; seeds -0.00025 -0.00075), holdout -0.00048 (z_cal -1.59; seeds -0.00034 -0.00061) -> FAIL
+
+== retr32u (SCALE-UP: retrieval depth 32 over distinct items + type counts (--retr_m 32 --retr_uniq --retr_tcnt)) vs base (B = arm, delta = arm - base)
+    VAL  abl_retr32u_s23@last 0.39333 vs abl_base_s23@last 0.39364: -0.00032
+    VAL  abl_retr32u_s24@last 0.39358 vs abl_base_s24@last 0.39348: +0.00010
+    HOLD abl_retr32u_s23@last 0.31800 vs abl_base_s23@last 0.31754: +0.00046
+    HOLD abl_retr32u_s24@last 0.31717 vs abl_base_s24@last 0.31753: -0.00036
+  [last] VAL  pooled: all -0.00011+-0.00054 (z -0.20)  M<50 +0.00090+-0.00097 (z +0.92)  M>=50 -0.00080+-0.00062 (z -1.29)  Tue +0.00045+-0.00074 (z +0.61)  Thu -0.00072+-0.00080 (z -0.90)  coldpos -0.00014+-0.00117 (z -0.12)  warmpos -0.00005+-0.00071 (z -0.07)
+  [last] HOLD pooled: all +0.00005+-0.00031 (z +0.16)  late20% -0.00070+-0.00066 (z -1.07)
+  [last] val SE_cal 0.00060 (z_cal -0.18)
+  [last] hold SE_cal 0.00033 (z_cal +0.15)
+    VAL  abl_retr32u_s23 0.39333 vs abl_base_s23 0.39348: -0.00015
+    VAL  abl_retr32u_s24 0.39358 vs abl_base_s24 0.39348: +0.00010
+    HOLD abl_retr32u_s23 0.31800 vs abl_base_s23 0.31756: +0.00044
+    HOLD abl_retr32u_s24 0.31717 vs abl_base_s24 0.31753: -0.00036
+  [selected (info)] VAL  pooled: all -0.00003+-0.00055 (z -0.05)  M<50 +0.00084+-0.00099 (z +0.85)  M>=50 -0.00063+-0.00064 (z -0.98)  Tue +0.00045+-0.00075 (z +0.60)  Thu -0.00055+-0.00081 (z -0.68)  coldpos +0.00185+-0.00118 (z +1.56)  warmpos -0.00077+-0.00072 (z -1.07)
+  [selected (info)] HOLD pooled: all +0.00004+-0.00031 (z +0.13)  late20% -0.00069+-0.00066 (z -1.05)
+  MINUTES base [37.1, 37.5] arm [55.2, 55.2] -> ratio 1.48
+  PMIX private-mix pooled delta -0.00051 +- 0.00083 (z -0.61); < -1 SE: no
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent +0.00008+-0.00042 (pos 0.460)  warm|mid -0.00009+-0.00017 (pos 0.110)  warm|novel -0.00004+-0.00016 (pos 0.127)  cold|recent -0.00019+-0.00028 (pos 0.219)  cold|mid +0.00004+-0.00009 (pos 0.038)  cold|novel -0.00001+-0.00008 (pos 0.046)  cat#1|w3+ +0.00046+-0.00021 (pos 0.347)  total -0.00021+-0.00055 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_retr32u_s23: warmup clipped 0.128 (median 0.434); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.309); pool clipped 0.000 (median 0.262) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.23 160:0.44 208:0.54 256:0.67 304:1.48
+  CLIPLOG abl_retr32u_s24: warmup clipped 0.146 (median 0.420); plateau clipped 0.000 (median 0.320); cooldown clipped 0.000 (median 0.302); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.09 112:0.20 160:0.38 208:0.56 256:0.75 304:1.40
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> retr32u: val -0.00011 (SE_cal 0.00060, z_cal -0.18; seeds -0.00032 +0.00010), holdout +0.00005 (z_cal +0.15; seeds +0.00046 -0.00036) -> FAIL
+
+== xdrop_pop (ABLATION: 8 popularity / co-visitation xt columns (--xt_exclude)) vs base (B = arm, delta = arm - base)
+    VAL  abl_xdrop_pop_s23@last 0.39141 vs abl_base_s23@last 0.39364: -0.00223
+    VAL  abl_xdrop_pop_s24@last 0.39103 vs abl_base_s24@last 0.39348: -0.00245
+    HOLD abl_xdrop_pop_s23@last 0.30977 vs abl_base_s23@last 0.31754: -0.00776
+    HOLD abl_xdrop_pop_s24@last 0.31044 vs abl_base_s24@last 0.31753: -0.00709
+  [last] VAL  pooled: all -0.00234+-0.00091 (z -2.58)  M<50 -0.00180+-0.00159 (z -1.13)  M>=50 -0.00271+-0.00107 (z -2.54)  Tue -0.00137+-0.00125 (z -1.09)  Thu -0.00340+-0.00131 (z -2.60)  coldpos +0.02273+-0.00159 (z +14.30)  warmpos -0.01283+-0.00124 (z -10.37)
+  [last] HOLD pooled: all -0.00743+-0.00060 (z -12.29)  late20% -0.00389+-0.00125 (z -3.12)
+  [last] val SE_cal 0.00094 (z_cal -2.49)
+  [last] hold SE_cal 0.00061 (z_cal -12.10)
+    VAL  abl_xdrop_pop_s23 0.39013 vs abl_base_s23 0.39348: -0.00335
+    VAL  abl_xdrop_pop_s24 0.39103 vs abl_base_s24 0.39348: -0.00245
+    HOLD abl_xdrop_pop_s23 0.30991 vs abl_base_s23 0.31756: -0.00765
+    HOLD abl_xdrop_pop_s24 0.31044 vs abl_base_s24 0.31753: -0.00709
+  [selected (info)] VAL  pooled: all -0.00290+-0.00091 (z -3.17)  M<50 -0.00242+-0.00160 (z -1.51)  M>=50 -0.00324+-0.00108 (z -2.99)  Tue -0.00246+-0.00126 (z -1.95)  Thu -0.00338+-0.00132 (z -2.55)  coldpos +0.02306+-0.00159 (z +14.52)  warmpos -0.01386+-0.00125 (z -11.09)
+  [selected (info)] HOLD pooled: all -0.00737+-0.00062 (z -11.97)  late20% -0.00381+-0.00128 (z -2.99)
+  MINUTES base [37.1, 37.5] arm [44.2, 45.0] -> ratio 1.19
+  PMIX private-mix pooled delta -0.00115 +- 0.00135 (z -0.86); < -1 SE: no
+  STALE-VAL: pending (missing 4 stale preds: abl_base_s23@last abl_xdrop_pop_s23@last abl_base_s24@last abl_xdrop_pop_s24@last)
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00594+-0.00075 (pos 0.460)  warm|mid -0.00074+-0.00025 (pos 0.110)  warm|novel -0.00100+-0.00024 (pos 0.127)  cold|recent +0.00430+-0.00039 (pos 0.219)  cold|mid +0.00064+-0.00013 (pos 0.038)  cold|novel +0.00041+-0.00013 (pos 0.046)  cat#1|w3+ +0.00172+-0.00035 (pos 0.347)  total -0.00234+-0.00091 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_xdrop_pop_s23: warmup clipped 0.148 (median 0.397); plateau clipped 0.000 (median 0.294); cooldown clipped 0.000 (median 0.286); pool clipped 0.000 (median 0.234) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.35 208:0.55 256:0.65 304:1.35
+  CLIPLOG abl_xdrop_pop_s24: warmup clipped 0.202 (median 0.423); plateau clipped 0.000 (median 0.295); cooldown clipped 0.000 (median 0.281); pool clipped 0.000 (median 0.227) | aux/main grad norm by Mpad 16:0.02 64:0.11 112:0.20 160:0.37 208:0.53 256:0.76 304:1.15
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> xdrop_pop: val -0.00234 (SE_cal 0.00094, z_cal -2.49; seeds -0.00223 -0.00245), holdout -0.00743 (z_cal -12.10; seeds -0.00776 -0.00709) -> LOAD-BEARING (worth val +0.00234, holdout +0.00743)
+
+== xdrop_ctxnd (ABLATION: 10 ctx_nd xt columns (--xt_exclude)) vs base (B = arm, delta = arm - base)
+    VAL  abl_xdrop_ctxnd_s23@last 0.39225 vs abl_base_s23@last 0.39364: -0.00139
+    VAL  abl_xdrop_ctxnd_s24@last 0.39218 vs abl_base_s24@last 0.39348: -0.00130
+    HOLD abl_xdrop_ctxnd_s23@last 0.31732 vs abl_base_s23@last 0.31754: -0.00022
+    HOLD abl_xdrop_ctxnd_s24@last 0.31715 vs abl_base_s24@last 0.31753: -0.00038
+  [last] VAL  pooled: all -0.00135+-0.00056 (z -2.40)  M<50 -0.00091+-0.00103 (z -0.89)  M>=50 -0.00165+-0.00063 (z -2.62)  Tue -0.00071+-0.00076 (z -0.93)  Thu -0.00205+-0.00083 (z -2.46)  coldpos -0.00240+-0.00117 (z -2.05)  warmpos -0.00132+-0.00074 (z -1.78)
+  [last] HOLD pooled: all -0.00030+-0.00033 (z -0.90)  late20% -0.00123+-0.00073 (z -1.68)
+  [last] val SE_cal 0.00061 (z_cal -2.20)
+  [last] hold SE_cal 0.00035 (z_cal -0.86)
+    VAL  abl_xdrop_ctxnd_s23 0.39225 vs abl_base_s23 0.39348: -0.00123
+    VAL  abl_xdrop_ctxnd_s24 0.39218 vs abl_base_s24 0.39348: -0.00130
+    HOLD abl_xdrop_ctxnd_s23 0.31732 vs abl_base_s23 0.31756: -0.00024
+    HOLD abl_xdrop_ctxnd_s24 0.31715 vs abl_base_s24 0.31753: -0.00038
+  [selected (info)] VAL  pooled: all -0.00127+-0.00057 (z -2.22)  M<50 -0.00096+-0.00102 (z -0.94)  M>=50 -0.00147+-0.00065 (z -2.26)  Tue -0.00070+-0.00077 (z -0.91)  Thu -0.00188+-0.00084 (z -2.23)  coldpos -0.00041+-0.00119 (z -0.34)  warmpos -0.00204+-0.00075 (z -2.72)
+  [selected (info)] HOLD pooled: all -0.00031+-0.00033 (z -0.93)  late20% -0.00122+-0.00074 (z -1.64)
+  MINUTES base [37.1, 37.5] arm [43.2, 43.0] -> ratio 1.16
+  PMIX private-mix pooled delta -0.00201 +- 0.00084 (z -2.39); < -1 SE: YES
+  STALE-VAL: pending (missing 4 stale preds: abl_base_s23@last abl_xdrop_ctxnd_s23@last abl_base_s24@last abl_xdrop_ctxnd_s24@last)
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00035+-0.00044 (pos 0.460)  warm|mid -0.00022+-0.00017 (pos 0.110)  warm|novel -0.00034+-0.00018 (pos 0.127)  cold|recent -0.00029+-0.00029 (pos 0.219)  cold|mid -0.00004+-0.00009 (pos 0.038)  cold|novel -0.00010+-0.00008 (pos 0.046)  cat#1|w3+ -0.00004+-0.00021 (pos 0.347)  total -0.00134+-0.00056 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_xdrop_ctxnd_s23: warmup clipped 0.140 (median 0.402); plateau clipped 0.000 (median 0.313); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.248) | aux/main grad norm by Mpad 16:0.03 64:0.11 112:0.23 160:0.40 208:0.53 256:0.63 304:1.48
+  CLIPLOG abl_xdrop_ctxnd_s24: warmup clipped 0.024 (median 0.367); plateau clipped 0.000 (median 0.310); cooldown clipped 0.000 (median 0.295); pool clipped 0.000 (median 0.235) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.20 160:0.38 208:0.57 256:0.77 304:1.34
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> xdrop_ctxnd: val -0.00135 (SE_cal 0.00061, z_cal -2.20; seeds -0.00139 -0.00130), holdout -0.00030 (z_cal -0.86; seeds -0.00022 -0.00038) -> LOAD-BEARING (worth val +0.00135, holdout +0.00030)
+
+== no_sim (ABLATION: sim_bias cosine attention prior (dropped)) vs base (B = arm, delta = arm - base)
+    VAL  abl_no_sim_s23@last 0.39313 vs abl_base_s23@last 0.39364: -0.00051
+    VAL  abl_no_sim_s24@last 0.39311 vs abl_base_s24@last 0.39348: -0.00038
+    HOLD abl_no_sim_s23@last 0.31748 vs abl_base_s23@last 0.31754: -0.00006
+    HOLD abl_no_sim_s24@last 0.31670 vs abl_base_s24@last 0.31753: -0.00083
+  [last] VAL  pooled: all -0.00044+-0.00046 (z -0.96)  M<50 -0.00055+-0.00088 (z -0.63)  M>=50 -0.00037+-0.00049 (z -0.76)  Tue +0.00021+-0.00063 (z +0.33)  Thu -0.00116+-0.00068 (z -1.72)  coldpos +0.00028+-0.00087 (z +0.32)  warmpos -0.00086+-0.00062 (z -1.38)
+  [last] HOLD pooled: all -0.00045+-0.00026 (z -1.70)  late20% -0.00044+-0.00055 (z -0.79)
+  [last] val SE_cal 0.00052 (z_cal -0.85)
+  [last] hold SE_cal 0.00028 (z_cal -1.57)
+    VAL  abl_no_sim_s23 0.39313 vs abl_base_s23 0.39348: -0.00035
+    VAL  abl_no_sim_s24 0.39335 vs abl_base_s24 0.39348: -0.00013
+    HOLD abl_no_sim_s23 0.31748 vs abl_base_s23 0.31756: -0.00008
+    HOLD abl_no_sim_s24 0.31690 vs abl_base_s24 0.31753: -0.00062
+  [selected (info)] VAL  pooled: all -0.00024+-0.00048 (z -0.50)  M<50 -0.00011+-0.00090 (z -0.12)  M>=50 -0.00033+-0.00053 (z -0.63)  Tue +0.00028+-0.00066 (z +0.42)  Thu -0.00081+-0.00070 (z -1.16)  coldpos +0.00386+-0.00093 (z +4.15)  warmpos -0.00206+-0.00065 (z -3.17)
+  [selected (info)] HOLD pooled: all -0.00035+-0.00027 (z -1.31)  late20% -0.00037+-0.00057 (z -0.66)
+  MINUTES base [37.1, 37.5] arm [40.4, 41.5] -> ratio 1.10
+  PMIX private-mix pooled delta -0.00133 +- 0.00069 (z -1.94); < -1 SE: YES
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00006+-0.00037 (pos 0.460)  warm|mid -0.00026+-0.00016 (pos 0.110)  warm|novel -0.00015+-0.00015 (pos 0.127)  cold|recent -0.00018+-0.00021 (pos 0.219)  cold|mid +0.00004+-0.00007 (pos 0.038)  cold|novel +0.00010+-0.00007 (pos 0.046)  cat#1|w3+ -0.00002+-0.00016 (pos 0.347)  total -0.00051+-0.00046 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_no_sim_s23: warmup clipped 0.128 (median 0.435); plateau clipped 0.000 (median 0.323); cooldown clipped 0.000 (median 0.313); pool clipped 0.000 (median 0.252) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.23 160:0.42 208:0.54 256:0.63 304:1.43
+  CLIPLOG abl_no_sim_s24: warmup clipped 0.146 (median 0.423); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.304); pool clipped 0.000 (median 0.246) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.57 256:0.75 304:1.30
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> no_sim: val -0.00044 (SE_cal 0.00052, z_cal -0.85; seeds -0.00051 -0.00038), holdout -0.00045 (z_cal -1.57; seeds -0.00006 -0.00083) -> INCONCLUSIVE (worth val +0.00044, holdout +0.00045)
+
+== no_domain (ABLATION: traffic-domain token (--domain dropped)) vs base (B = arm, delta = arm - base)
+    VAL  abl_no_domain_s23@last 0.39410 vs abl_base_s23@last 0.39364: +0.00046
+    VAL  abl_no_domain_s24@last 0.39215 vs abl_base_s24@last 0.39348: -0.00134
+    HOLD abl_no_domain_s23@last 0.31774 vs abl_base_s23@last 0.31754: +0.00020
+    HOLD abl_no_domain_s24@last 0.31731 vs abl_base_s24@last 0.31753: -0.00021
+  [last] VAL  pooled: all -0.00044+-0.00050 (z -0.88)  M<50 -0.00002+-0.00094 (z -0.02)  M>=50 -0.00073+-0.00054 (z -1.34)  Tue -0.00036+-0.00069 (z -0.52)  Thu -0.00053+-0.00073 (z -0.73)  coldpos +0.00185+-0.00100 (z +1.86)  warmpos -0.00143+-0.00067 (z -2.14)
+  [last] HOLD pooled: all -0.00001+-0.00028 (z -0.03)  late20% +0.00049+-0.00062 (z +0.80)
+  [last] val SE_cal 0.00056 (z_cal -0.79)
+  [last] hold SE_cal 0.00030 (z_cal -0.03)
+    VAL  abl_no_domain_s23 0.39410 vs abl_base_s23 0.39348: +0.00062
+    VAL  abl_no_domain_s24 0.39215 vs abl_base_s24 0.39348: -0.00134
+    HOLD abl_no_domain_s23 0.31774 vs abl_base_s23 0.31756: +0.00018
+    HOLD abl_no_domain_s24 0.31731 vs abl_base_s24 0.31753: -0.00021
+  [selected (info)] VAL  pooled: all -0.00036+-0.00051 (z -0.70)  M<50 -0.00008+-0.00096 (z -0.08)  M>=50 -0.00055+-0.00056 (z -0.98)  Tue -0.00035+-0.00071 (z -0.50)  Thu -0.00036+-0.00075 (z -0.48)  coldpos +0.00385+-0.00102 (z +3.76)  warmpos -0.00216+-0.00068 (z -3.15)
+  [selected (info)] HOLD pooled: all -0.00002+-0.00029 (z -0.06)  late20% +0.00051+-0.00064 (z +0.80)
+  MINUTES base [37.1, 37.5] arm [42.7, 42.8] -> ratio 1.15
+  PMIX private-mix pooled delta -0.00061 +- 0.00075 (z -0.81); < -1 SE: no
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00092+-0.00040 (pos 0.460)  warm|mid -0.00005+-0.00016 (pos 0.110)  warm|novel -0.00007+-0.00015 (pos 0.127)  cold|recent +0.00047+-0.00024 (pos 0.219)  cold|mid +0.00006+-0.00009 (pos 0.038)  cold|novel +0.00002+-0.00007 (pos 0.046)  cat#1|w3+ -0.00013+-0.00017 (pos 0.347)  total -0.00049+-0.00050 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_no_domain_s23: warmup clipped 0.118 (median 0.434); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.311); pool clipped 0.000 (median 0.268) | aux/main grad norm by Mpad 16:0.02 64:0.09 112:0.24 160:0.36 208:0.56 256:0.64 304:1.53
+  CLIPLOG abl_no_domain_s24: warmup clipped 0.202 (median 0.446); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.253) | aux/main grad norm by Mpad 16:0.02 64:0.09 112:0.20 160:0.40 208:0.59 256:0.72 304:1.22
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> no_domain: val -0.00044 (SE_cal 0.00056, z_cal -0.79; seeds +0.00046 -0.00134), holdout -0.00001 (z_cal -0.03; seeds +0.00020 -0.00021) -> INCONCLUSIVE (worth val +0.00044, holdout +0.00001)
+
+== xrel_more (SCALE-UP: within-feed rank/z for 4 more inputs (--xt_rel_extra)) vs base (B = arm, delta = arm - base)
+    VAL  abl_xrel_more_s23@last 0.39300 vs abl_base_s23@last 0.39364: -0.00064
+    VAL  abl_xrel_more_s24@last 0.39335 vs abl_base_s24@last 0.39348: -0.00013
+    HOLD abl_xrel_more_s23@last 0.31803 vs abl_base_s23@last 0.31754: +0.00049
+    HOLD abl_xrel_more_s24@last 0.31733 vs abl_base_s24@last 0.31753: -0.00020
+  [last] VAL  pooled: all -0.00039+-0.00049 (z -0.79)  M<50 +0.00009+-0.00090 (z +0.10)  M>=50 -0.00072+-0.00054 (z -1.32)  Tue +0.00025+-0.00066 (z +0.38)  Thu -0.00109+-0.00072 (z -1.52)  coldpos +0.00017+-0.00097 (z +0.18)  warmpos -0.00036+-0.00065 (z -0.55)
+  [last] HOLD pooled: all +0.00015+-0.00028 (z +0.53)  late20% +0.00009+-0.00059 (z +0.15)
+  [last] val SE_cal 0.00055 (z_cal -0.71)
+  [last] hold SE_cal 0.00030 (z_cal +0.50)
+    VAL  abl_xrel_more_s23 0.39300 vs abl_base_s23 0.39348: -0.00048
+    VAL  abl_xrel_more_s24 0.39313 vs abl_base_s24 0.39348: -0.00035
+    HOLD abl_xrel_more_s23 0.31803 vs abl_base_s23 0.31756: +0.00047
+    HOLD abl_xrel_more_s24 0.31734 vs abl_base_s24 0.31753: -0.00019
+  [selected (info)] VAL  pooled: all -0.00042+-0.00050 (z -0.84)  M<50 +0.00001+-0.00092 (z +0.01)  M>=50 -0.00071+-0.00056 (z -1.28)  Tue +0.00037+-0.00067 (z +0.55)  Thu -0.00128+-0.00074 (z -1.73)  coldpos +0.00312+-0.00101 (z +3.09)  warmpos -0.00170+-0.00066 (z -2.57)
+  [selected (info)] HOLD pooled: all +0.00014+-0.00029 (z +0.50)  late20% +0.00002+-0.00061 (z +0.03)
+  MINUTES base [37.1, 37.5] arm [41.5, 43.8] -> ratio 1.14
+  PMIX private-mix pooled delta -0.00049 +- 0.00073 (z -0.67); < -1 SE: no
+  STALE-VAL: pending (missing 4 stale preds: abl_base_s23@last abl_xrel_more_s23@last abl_base_s24@last abl_xrel_more_s24@last)
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00022+-0.00039 (pos 0.460)  warm|mid +0.00010+-0.00016 (pos 0.110)  warm|novel -0.00012+-0.00016 (pos 0.127)  cold|recent -0.00011+-0.00024 (pos 0.219)  cold|mid +0.00002+-0.00009 (pos 0.038)  cold|novel -0.00009+-0.00007 (pos 0.046)  cat#1|w3+ -0.00003+-0.00017 (pos 0.347)  total -0.00041+-0.00049 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_xrel_more_s23: warmup clipped 0.122 (median 0.440); plateau clipped 0.000 (median 0.331); cooldown clipped 0.000 (median 0.321); pool clipped 0.000 (median 0.261) | aux/main grad norm by Mpad 16:0.02 64:0.09 112:0.22 160:0.36 208:0.50 256:0.59 304:1.71
+  CLIPLOG abl_xrel_more_s24: warmup clipped 0.044 (median 0.387); plateau clipped 0.000 (median 0.330); cooldown clipped 0.000 (median 0.312); pool clipped 0.000 (median 0.248) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.19 160:0.40 208:0.55 256:0.68 304:1.20
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> xrel_more: val -0.00039 (SE_cal 0.00055, z_cal -0.71; seeds -0.00064 -0.00013), holdout +0.00015 (z_cal +0.50; seeds +0.00049 -0.00020) -> FAIL
+
+== lnorm_batch (ABLATION: K1 per-feed loss normalisation (--loss_norm batch)) vs base (B = arm, delta = arm - base)
+    VAL  abl_lnorm_batch_s23@last 0.39187 vs abl_base_s23@last 0.39364: -0.00178
+    VAL  abl_lnorm_batch_s24@last 0.39221 vs abl_base_s24@last 0.39348: -0.00127
+    HOLD abl_lnorm_batch_s23@last 0.31704 vs abl_base_s23@last 0.31754: -0.00050
+    HOLD abl_lnorm_batch_s24@last 0.31611 vs abl_base_s24@last 0.31753: -0.00141
+  [last] VAL  pooled: all -0.00152+-0.00050 (z -3.03)  M<50 -0.00211+-0.00095 (z -2.23)  M>=50 -0.00112+-0.00054 (z -2.07)  Tue -0.00076+-0.00070 (z -1.08)  Thu -0.00236+-0.00072 (z -3.28)  coldpos -0.00053+-0.00104 (z -0.51)  warmpos -0.00208+-0.00066 (z -3.16)
+  [last] HOLD pooled: all -0.00096+-0.00030 (z -3.23)  late20% -0.00110+-0.00065 (z -1.70)
+  [last] val SE_cal 0.00056 (z_cal -2.72)
+  [last] hold SE_cal 0.00031 (z_cal -3.05)
+    VAL  abl_lnorm_batch_s23 0.39187 vs abl_base_s23 0.39348: -0.00162
+    VAL  abl_lnorm_batch_s24 0.39221 vs abl_base_s24 0.39348: -0.00127
+    HOLD abl_lnorm_batch_s23 0.31704 vs abl_base_s23 0.31756: -0.00052
+    HOLD abl_lnorm_batch_s24 0.31611 vs abl_base_s24 0.31753: -0.00141
+  [selected (info)] VAL  pooled: all -0.00144+-0.00052 (z -2.78)  M<50 -0.00216+-0.00097 (z -2.24)  M>=50 -0.00094+-0.00057 (z -1.67)  Tue -0.00076+-0.00072 (z -1.05)  Thu -0.00219+-0.00074 (z -2.96)  coldpos +0.00146+-0.00107 (z +1.36)  warmpos -0.00281+-0.00068 (z -4.12)
+  [selected (info)] HOLD pooled: all -0.00097+-0.00030 (z -3.25)  late20% -0.00109+-0.00065 (z -1.67)
+  MINUTES base [37.1, 37.5] arm [43.3, 43.0] -> ratio 1.16
+  PMIX private-mix pooled delta -0.00217 +- 0.00076 (z -2.88); < -1 SE: YES
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00040+-0.00039 (pos 0.460)  warm|mid -0.00030+-0.00017 (pos 0.110)  warm|novel -0.00042+-0.00015 (pos 0.127)  cold|recent -0.00030+-0.00026 (pos 0.219)  cold|mid -0.00006+-0.00008 (pos 0.038)  cold|novel -0.00010+-0.00007 (pos 0.046)  cat#1|w3+ +0.00033+-0.00019 (pos 0.347)  total -0.00158+-0.00050 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_lnorm_batch_s23: warmup clipped 0.262 (median 0.695); plateau clipped 0.013 (median 0.549); cooldown clipped 0.007 (median 0.543); pool clipped 0.014 (median 0.661) | aux/main grad norm by Mpad 16:0.03 64:0.11 112:0.13 160:0.15 208:0.18 256:0.16 304:0.33
+  CLIPLOG abl_lnorm_batch_s24: warmup clipped 0.250 (median 0.677); plateau clipped 0.011 (median 0.546); cooldown clipped 0.012 (median 0.549); pool clipped 0.047 (median 0.672) | aux/main grad norm by Mpad 16:0.02 64:0.12 112:0.12 160:0.16 208:0.19 256:0.18 304:0.21
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.013 -> clipping CLOSED as an issue (< 20%)
+  ==> lnorm_batch: val -0.00152 (SE_cal 0.00056, z_cal -2.72; seeds -0.00178 -0.00127), holdout -0.00096 (z_cal -3.05; seeds -0.00050 -0.00141) -> LOAD-BEARING (worth val +0.00152, holdout +0.00096)
+
+== blocks3 (SCALE-UP: 3 cross + set blocks (--blocks 3)) vs base (B = arm, delta = arm - base)
+    VAL  abl_blocks3_s23@last 0.39349 vs abl_base_s23@last 0.39364: -0.00015
+    VAL  abl_blocks3_s24@last 0.39385 vs abl_base_s24@last 0.39348: +0.00037
+    HOLD abl_blocks3_s23@last 0.31806 vs abl_base_s23@last 0.31754: +0.00052
+    HOLD abl_blocks3_s24@last 0.31784 vs abl_base_s24@last 0.31753: +0.00031
+  [last] VAL  pooled: all +0.00011+-0.00048 (z +0.23)  M<50 +0.00088+-0.00090 (z +0.97)  M>=50 -0.00042+-0.00052 (z -0.81)  Tue +0.00146+-0.00066 (z +2.19)  Thu -0.00137+-0.00069 (z -1.98)  coldpos -0.00217+-0.00097 (z -2.24)  warmpos +0.00075+-0.00064 (z +1.18)
+  [last] HOLD pooled: all +0.00042+-0.00028 (z +1.49)  late20% +0.00070+-0.00061 (z +1.15)
+  [last] val SE_cal 0.00054 (z_cal +0.20)
+  [last] hold SE_cal 0.00030 (z_cal +1.39)
+    VAL  abl_blocks3_s23 0.39349 vs abl_base_s23 0.39348: +0.00001
+    VAL  abl_blocks3_s24 0.39385 vs abl_base_s24 0.39348: +0.00037
+    HOLD abl_blocks3_s23 0.31806 vs abl_base_s23 0.31756: +0.00050
+    HOLD abl_blocks3_s24 0.31784 vs abl_base_s24 0.31753: +0.00031
+  [selected (info)] VAL  pooled: all +0.00019+-0.00049 (z +0.39)  M<50 +0.00082+-0.00091 (z +0.90)  M>=50 -0.00025+-0.00054 (z -0.46)  Tue +0.00146+-0.00068 (z +2.14)  Thu -0.00120+-0.00071 (z -1.70)  coldpos -0.00018+-0.00100 (z -0.18)  warmpos +0.00003+-0.00065 (z +0.05)
+  [selected (info)] HOLD pooled: all +0.00041+-0.00029 (z +1.43)  late20% +0.00071+-0.00062 (z +1.15)
+  MINUTES base [37.1, 37.5] arm [45.3, 45.1] -> ratio 1.21
+  PMIX private-mix pooled delta +0.00014 +- 0.00072 (z +0.19); < -1 SE: no
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent +0.00058+-0.00038 (pos 0.460)  warm|mid +0.00012+-0.00015 (pos 0.110)  warm|novel -0.00015+-0.00015 (pos 0.127)  cold|recent -0.00052+-0.00024 (pos 0.219)  cold|mid +0.00003+-0.00007 (pos 0.038)  cold|novel +0.00003+-0.00007 (pos 0.046)  cat#1|w3+ -0.00022+-0.00017 (pos 0.347)  total +0.00008+-0.00048 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_blocks3_s23: warmup clipped 0.046 (median 0.434); plateau clipped 0.000 (median 0.316); cooldown clipped 0.000 (median 0.304); pool clipped 0.000 (median 0.248) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.22 160:0.37 208:0.53 256:0.62 304:1.31
+  CLIPLOG abl_blocks3_s24: warmup clipped 0.102 (median 0.426); plateau clipped 0.000 (median 0.316); cooldown clipped 0.000 (median 0.298); pool clipped 0.000 (median 0.239) | aux/main grad norm by Mpad 16:0.02 64:0.11 112:0.21 160:0.39 208:0.56 256:0.75 304:1.25
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> blocks3: val +0.00011 (SE_cal 0.00054, z_cal +0.20; seeds -0.00015 +0.00037), holdout +0.00042 (z_cal +1.39; seeds +0.00052 +0.00031) -> FAIL [COLD/WARM TRADE: stale-val + pmix required]
+
+== no_set (ABLATION: candidate-set self-attention (--no_set)) vs base (B = arm, delta = arm - base)
+    VAL  abl_no_set_s23@last 0.39182 vs abl_base_s23@last 0.39364: -0.00183
+    VAL  abl_no_set_s24@last 0.39135 vs abl_base_s24@last 0.39348: -0.00213
+    HOLD abl_no_set_s23@last 0.31619 vs abl_base_s23@last 0.31754: -0.00135
+    HOLD abl_no_set_s24@last 0.31605 vs abl_base_s24@last 0.31753: -0.00148
+  [last] VAL  pooled: all -0.00198+-0.00057 (z -3.46)  M<50 -0.00124+-0.00106 (z -1.18)  M>=50 -0.00248+-0.00063 (z -3.92)  Tue -0.00136+-0.00078 (z -1.74)  Thu -0.00265+-0.00084 (z -3.17)  coldpos -0.00310+-0.00115 (z -2.70)  warmpos -0.00139+-0.00076 (z -1.83)
+  [last] HOLD pooled: all -0.00142+-0.00034 (z -4.12)  late20% -0.00209+-0.00075 (z -2.79)
+  [last] val SE_cal 0.00062 (z_cal -3.18)
+  [last] hold SE_cal 0.00036 (z_cal -3.94)
+    VAL  abl_no_set_s23 0.39182 vs abl_base_s23 0.39348: -0.00166
+    VAL  abl_no_set_s24 0.39135 vs abl_base_s24 0.39348: -0.00213
+    HOLD abl_no_set_s23 0.31619 vs abl_base_s23 0.31756: -0.00137
+    HOLD abl_no_set_s24 0.31605 vs abl_base_s24 0.31753: -0.00148
+  [selected (info)] VAL  pooled: all -0.00190+-0.00058 (z -3.29)  M<50 -0.00130+-0.00106 (z -1.23)  M>=50 -0.00231+-0.00065 (z -3.57)  Tue -0.00136+-0.00079 (z -1.73)  Thu -0.00248+-0.00085 (z -2.92)  coldpos -0.00111+-0.00115 (z -0.97)  warmpos -0.00212+-0.00077 (z -2.75)
+  [selected (info)] HOLD pooled: all -0.00142+-0.00035 (z -4.09)  late20% -0.00208+-0.00076 (z -2.75)
+  MINUTES base [37.1, 37.5] arm [18.3, 10.8] -> ratio 0.39
+  PMIX private-mix pooled delta -0.00219 +- 0.00089 (z -2.46); < -1 SE: YES
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00070+-0.00045 (pos 0.460)  warm|mid -0.00020+-0.00019 (pos 0.110)  warm|novel -0.00020+-0.00017 (pos 0.127)  cold|recent -0.00075+-0.00028 (pos 0.219)  cold|mid -0.00008+-0.00009 (pos 0.038)  cold|novel -0.00015+-0.00008 (pos 0.046)  cat#1|w3+ -0.00011+-0.00021 (pos 0.347)  total -0.00206+-0.00057 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_no_set_s23: warmup clipped 0.174 (median 0.426); plateau clipped 0.000 (median 0.328); cooldown clipped 0.000 (median 0.316); pool clipped 0.000 (median 0.263) | aux/main grad norm by Mpad 16:0.03 64:0.11 112:0.23 160:0.42 208:0.59 256:0.65 304:1.92
+  CLIPLOG abl_no_set_s24: warmup clipped 0.116 (median 0.411); plateau clipped 0.000 (median 0.329); cooldown clipped 0.000 (median 0.311); pool clipped 0.000 (median 0.246) | aux/main grad norm by Mpad 16:0.03 64:0.11 112:0.25 160:0.45 208:0.65 256:0.79 304:1.48
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> no_set: val -0.00198 (SE_cal 0.00062, z_cal -3.18; seeds -0.00183 -0.00213), holdout -0.00142 (z_cal -3.94; seeds -0.00135 -0.00148) -> LOAD-BEARING (worth val +0.00198, holdout +0.00142)
+
+== SUMMARY (last checkpoints; delta = arm - base, pooled over seeds; ABLATION worth = -delta)
+  arm          type      val d (z_cal)        hold d (z_cal)      M<50     M>=50    Tue      Thu      coldpos  warmpos  late20%  pmix     stale    min  -> verdict
+  no_aux       ABLATION  -0.00219 (-3.43)  -0.00229 (-6.24)  -0.00313 -0.00155 -0.00131 -0.00317 -0.00732 -0.00024 -0.00221 -0.00154 +nan 1.09 -> LOAD-BEARING (worth val +0.00219, holdout +0.00229)
+  no_retr      ABLATION  -0.00337 (-4.52)  -0.00294 (-6.64)  -0.00306 -0.00359 -0.00201 -0.00486 -0.00663 -0.00206 -0.00250 -0.00429 +nan 0.90 -> LOAD-BEARING (worth val +0.00337, holdout +0.00294)
+  retr32       SCALE-UP  -0.00050 (-0.90)  -0.00048 (-1.59)  +0.00076 -0.00136 -0.00008 -0.00095 +0.00075 -0.00120 -0.00149 -0.00084 +nan 1.36 -> FAIL
+  retr32u      SCALE-UP  -0.00011 (-0.18)  +0.00005 (+0.15)  +0.00090 -0.00080 +0.00045 -0.00072 -0.00014 -0.00005 -0.00070 -0.00051 +nan 1.48 -> FAIL
+  xdrop_pop    ABLATION  -0.00234 (-2.49)  -0.00743 (-12.10)  -0.00180 -0.00271 -0.00137 -0.00340 +0.02273 -0.01283 -0.00389 -0.00115 +nan 1.19 -> LOAD-BEARING (worth val +0.00234, holdout +0.00743)
+  xdrop_ctxnd  ABLATION  -0.00135 (-2.20)  -0.00030 (-0.86)  -0.00091 -0.00165 -0.00071 -0.00205 -0.00240 -0.00132 -0.00123 -0.00201 +nan 1.16 -> LOAD-BEARING (worth val +0.00135, holdout +0.00030)
+  no_sim       ABLATION  -0.00044 (-0.85)  -0.00045 (-1.57)  -0.00055 -0.00037 +0.00021 -0.00116 +0.00028 -0.00086 -0.00044 -0.00133 +nan 1.10 -> INCONCLUSIVE (worth val +0.00044, holdout +0.00045)
+  no_domain    ABLATION  -0.00044 (-0.79)  -0.00001 (-0.03)  -0.00002 -0.00073 -0.00036 -0.00053 +0.00185 -0.00143 +0.00049 -0.00061 +nan 1.15 -> INCONCLUSIVE (worth val +0.00044, holdout +0.00001)
+  xrel_more    SCALE-UP  -0.00039 (-0.71)  +0.00015 (+0.50)  +0.00009 -0.00072 +0.00025 -0.00109 +0.00017 -0.00036 +0.00009 -0.00049 +nan 1.14 -> FAIL
+  lnorm_batch  ABLATION  -0.00152 (-2.72)  -0.00096 (-3.05)  -0.00211 -0.00112 -0.00076 -0.00236 -0.00053 -0.00208 -0.00110 -0.00217 +nan 1.16 -> LOAD-BEARING (worth val +0.00152, holdout +0.00096)
+  blocks3      SCALE-UP  +0.00011 (+0.20)  +0.00042 (+1.39)  +0.00088 -0.00042 +0.00146 -0.00137 -0.00217 +0.00075 +0.00070 +0.00014 +nan 1.21 -> FAIL [COLD/WARM TRADE: stale-val + pmix required]
+  no_set       ABLATION  -0.00198 (-3.18)  -0.00142 (-3.94)  -0.00124 -0.00248 -0.00136 -0.00265 -0.00310 -0.00139 -0.00209 -0.00219 +nan 0.39 -> LOAD-BEARING (worth val +0.00198, holdout +0.00142)
+
+== COMPONENT WORTH on the current recipe (ablation arms; -delta; val / holdout; +SE_cal)
+  no_aux       K9 production-order aux head (--aux_pos 0)                             worth val +0.00219 +- 0.00064  holdout +0.00229 +- 0.00037
+  no_retr      history retrieval retr_m 16 + attn_gate (dropped)                      worth val +0.00337 +- 0.00075  holdout +0.00294 +- 0.00044
+  xdrop_pop    8 popularity / co-visitation xt columns (--xt_exclude)                 worth val +0.00234 +- 0.00094  holdout +0.00743 +- 0.00061
+  xdrop_ctxnd  10 ctx_nd xt columns (--xt_exclude)                                    worth val +0.00135 +- 0.00061  holdout +0.00030 +- 0.00035
+  no_sim       sim_bias cosine attention prior (dropped)                              worth val +0.00044 +- 0.00052  holdout +0.00045 +- 0.00028
+  no_domain    traffic-domain token (--domain dropped)                                worth val +0.00044 +- 0.00056  holdout +0.00001 +- 0.00030
+  lnorm_batch  K1 per-feed loss normalisation (--loss_norm batch)                     worth val +0.00152 +- 0.00056  holdout +0.00096 +- 0.00031
+  no_set       candidate-set self-attention (--no_set)                                worth val +0.00198 +- 0.00062  holdout +0.00142 +- 0.00036

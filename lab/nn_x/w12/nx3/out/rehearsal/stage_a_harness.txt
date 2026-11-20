@@ -1,0 +1,24 @@
+=== nx3 STAGE A HARNESS CHECK (A3 ORDER: read and written to the ledger BEFORE any prediction of the arm is opened); computed 2026-11-16T05:25:43Z by nn_x/w12/nx3/nx3_read_a.py harness ===
+ FRESH controls (2): w5_e10_base_s955, w5_e10_base_s956    minus    STORED controls (4): w5_e10_base_s951 .. w5_e10_base_s954
+ Rule: member level, |z| <= 2 on val AND on the holdout (30,000 feeds), selected checkpoints; otherwise 6 more fresh controls (951-956) replace the stored ones.
+ Only the predictions of these control members were opened.
+ The pool columns compare pools of unequal size (2 against 4 members) and are no part of the check.
+== selected checkpoints (decision)
+  val                                    n  14423 | member -0.00018 +- 0.00062 (z -0.29; per-feed SE 0.00062, seed SE 0.00043; 0/2 arm members above the control mean) | pool -0.00016 +- 0.00076 (z -0.21)
+  val, private mix                       n  14423 | member +0.00116 +- 0.00090 (z +1.29; per-feed SE 0.00090, seed SE 0.00060; 2/2 arm members above the control mean) | pool +0.00073 +- 0.00111 (z +0.66)
+  holdout, all 30,000 feeds              n  30000 | member -0.00022 +- 0.00035 (z -0.62; per-feed SE 0.00035, seed SE 0.00032; 1/2 arm members above the control mean) | pool -0.00141 +- 0.00043 (z -3.30)
+  holdout, lag-view feeds (Sep 12-19)    n  15225 | member -0.00008 +- 0.00049 (z -0.17; per-feed SE 0.00049, seed SE 0.00022; 0/2 arm members above the control mean) | pool -0.00067 +- 0.00059 (z -1.14)
+  holdout, Sep 12-14 (val-like lag)      n   6946 | member -0.00071 +- 0.00072 (z -0.99; per-feed SE 0.00072, seed SE 0.00043; 0/2 arm members above the control mean) | pool -0.00065 +- 0.00090 (z -0.72)
+  holdout, Sep 17-19 (test-like lag)     n   8279 | member +0.00044 +- 0.00066 (z +0.67; per-feed SE 0.00066, seed SE 0.00037; 2/2 arm members above the control mean) | pool -0.00069 +- 0.00077 (z -0.89)
+  holdout, feeds WITHOUT the view (Sep 6-11) n  14775 | member -0.00035 +- 0.00058 (z -0.61; per-feed SE 0.00051, seed SE 0.00058; 1/2 arm members above the control mean) | pool -0.00218 +- 0.00062 (z -3.51)
+== last step (information)
+  val                                    n  14423 | member +0.00009 +- 0.00062 (z +0.15; per-feed SE 0.00062, seed SE 0.00023; 1/2 arm members above the control mean) | pool -0.00082 +- 0.00076 (z -1.08)
+  val, private mix                       n  14423 | member +0.00177 +- 0.00091 (z +1.94; per-feed SE 0.00091, seed SE 0.00067; 2/2 arm members above the control mean) | pool +0.00050 +- 0.00113 (z +0.45)
+  holdout, all 30,000 feeds              n  30000 | member +0.00002 +- 0.00044 (z +0.06; per-feed SE 0.00035, seed SE 0.00044; 1/2 arm members above the control mean) | pool -0.00105 +- 0.00042 (z -2.48)
+  holdout, lag-view feeds (Sep 12-19)    n  15225 | member +0.00020 +- 0.00048 (z +0.42; per-feed SE 0.00048, seed SE 0.00038; 1/2 arm members above the control mean) | pool -0.00001 +- 0.00059 (z -0.01)
+  holdout, Sep 12-14 (val-like lag)      n   6946 | member -0.00029 +- 0.00070 (z -0.41; per-feed SE 0.00070, seed SE 0.00037; 0/2 arm members above the control mean) | pool +0.00015 +- 0.00088 (z +0.18)
+  holdout, Sep 17-19 (test-like lag)     n   8279 | member +0.00061 +- 0.00065 (z +0.94; per-feed SE 0.00065, seed SE 0.00065; 2/2 arm members above the control mean) | pool -0.00014 +- 0.00079 (z -0.18)
+  holdout, feeds WITHOUT the view (Sep 6-11) n  14775 | member -0.00016 +- 0.00063 (z -0.25; per-feed SE 0.00050, seed SE 0.00063; 1/2 arm members above the control mean) | pool -0.00212 +- 0.00061 (z -3.50)
+== HARNESS DECISION (selected checkpoints, member level): z_val -0.29, z_holdout(30,000 feeds) -0.62; bar |z| <= 2 on both
+   -> HARNESS OK: the fresh controls sit with the stored ones; the control set of the read is the 6 stored w5_e10_base_s951-956 + the 2 fresh abl_e10_base_s957, s958.
+HARNESS_VERDICT=OK

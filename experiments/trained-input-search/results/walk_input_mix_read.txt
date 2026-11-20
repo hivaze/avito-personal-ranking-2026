@@ -1,0 +1,14 @@
+=== nx3 MIX READ (descriptive; stage-A hard-label members, selected checkpoints) ===
+-- val: mean pair correlation  nx3-nx3 0.9495 | base-base 0.9490 | nx3-base 0.9487
+   pure 8-pools: nx3 0.40009 | base 0.39966 | nx3 - base +0.00044 +- 0.00060
+   mixed 8-pool (4 + 4, mean of 200 draws) 0.39970 | MIX GAIN = mixed - mean of the two pure pools -0.00017 +- 0.00019 (z -0.91) | mixed - base +0.00005 +- 0.00034
+   all 16 (8 + 8) 0.39976 | minus base 8-pool +0.00011 +- 0.00038 | minus nx3 8-pool -0.00033 +- 0.00042   (16 against 8: includes the pool-size effect)
+-- lag-view holdout: mean pair correlation  nx3-nx3 0.9524 | base-base 0.9522 | nx3-base 0.9518
+   pure 8-pools: nx3 0.32242 | base 0.32185 | nx3 - base +0.00058 +- 0.00048
+   mixed 8-pool (4 + 4, mean of 200 draws) 0.32208 | MIX GAIN = mixed - mean of the two pure pools -0.00006 +- 0.00015 (z -0.40) | mixed - base +0.00023 +- 0.00028
+   all 16 (8 + 8) 0.32193 | minus base 8-pool +0.00008 +- 0.00032 | minus nx3 8-pool -0.00050 +- 0.00032   (16 against 8: includes the pool-size effect)
+-- holdout, all 30,000: mean pair correlation  nx3-nx3 0.9518 | base-base 0.9518 | nx3-base 0.9516
+   pure 8-pools: nx3 0.32334 | base 0.32342 | nx3 - base -0.00008 +- 0.00032
+   mixed 8-pool (4 + 4, mean of 200 draws) 0.32339 | MIX GAIN = mixed - mean of the two pure pools +0.00001 +- 0.00010 (z +0.09) | mixed - base -0.00003 +- 0.00019
+   all 16 (8 + 8) 0.32344 | minus base 8-pool +0.00002 +- 0.00021 | minus nx3 8-pool +0.00010 +- 0.00022   (16 against 8: includes the pool-size effect)
+NOTE: the SE of the mix gain is the paired per-feed SE of a mean over 200 draws; the draws share members, so it understates the seed part.

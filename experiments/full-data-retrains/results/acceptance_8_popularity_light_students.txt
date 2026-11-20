@@ -1,0 +1,55 @@
+# Cut from lab/nn_x/w12/stale/fulldata/logs/accept_P.txt (234 lines, several runs): the run on the complete set of stage-P members only. Kept: the run header, every check line of the first member, the in-sample holdout line (A2) of every member, any FAIL or WARN line, and the pool-level block. 8 members were checked; the dropped lines are the PASS lines of the structure checks of the other members.
+== accept_twins.py check P    [2026-11-15T13:38:04Z]
+   stage P: 8 of 8 twins finished
+   A2 bar in force: +0.00428 [R7 (G_s +0.01711, floor 0.00128; R4 bar 0.005)]
+  A1 abl_fd10_pop1kd05t25_s951 (reference abl_e10_pop1kd05t25_s951)
+    [PASS] abl_fd10_pop1kd05t25_s951: 'training feeds 3121208 -> 3151208' 
+    [PASS] abl_fd10_pop1kd05t25_s951: train feeds 3151208, steps/epoch 9984, total steps 99840 log: (3151208, 9984, 99840)
+    [PASS] abl_fd10_pop1kd05t25_s951: pool 164118 feeds, of which 30000 holdout feeds 
+    [PASS] abl_fd10_pop1kd05t25_s951: every eval line 'holdout_ndcg nan' (40 evals), one IN-SAMPLE line per eval 
+    [PASS] abl_fd10_pop1kd05t25_s951: BEST step == total BEST step 99840
+    [PASS] abl_fd10_pop1kd05t25_s951: logs/<v>.json and logs/<v>_fulldata.json exist 
+    [PASS] abl_fd10_pop1kd05t25_s951: json args holdout_in_train True, keep 'last', holdout 30000; best_step == total; history holdout_ndcg all NaN 
+    [PASS] abl_fd10_pop1kd05t25_s951: the run's own counts: 30000 holdout feeds in training, in every epoch's batches, 30000 in the pool; kept step == total (json: 30000, 30000, 30000, kept 99840)
+    [PASS] abl_fd10_pop1kd05t25_s951: arguments == the reference run's arguments except variant / holdout_in_train / keep differing keys: {}
+    [PASS] abl_fd10_pop1kd05t25_s951: NO out-of-sample-named holdout file 
+    [PASS] abl_fd10_pop1kd05t25_s951: in-sample holdout files present (2), 4630966 rows ['nn_abl_fd10_pop1kd05t25_s951_holdoutINSAMPLE.npy', 'nn_abl_fd10_pop1kd05t25_s951@last_holdoutINSAMPLE.npy']
+    [PASS] abl_fd10_pop1kd05t25_s951: val files finite, 1389971 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+    [PASS] abl_fd10_pop1kd05t25_s951: test files finite, 2904806 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+    [PASS] A2 abl_fd10_pop1kd05t25_s951: IN-SAMPLE holdout NDCG at the last eval 0.32651 - reference's out-of-sample @last 0.31583 = +0.01068 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 abl_fd10_pop1kd05t25_s952: IN-SAMPLE holdout NDCG at the last eval 0.32698 - reference's out-of-sample @last 0.31654 = +0.01044 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 abl_fd10_pop1kd05t25_s953: IN-SAMPLE holdout NDCG at the last eval 0.32700 - reference's out-of-sample @last 0.31608 = +0.01092 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 abl_fd10_pop1kd05t25_s954: IN-SAMPLE holdout NDCG at the last eval 0.32732 - reference's out-of-sample @last 0.31619 = +0.01113 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 abl_fd10_pop1kd05w192_s951: IN-SAMPLE holdout NDCG at the last eval 0.33371 - reference's out-of-sample @last 0.31585 = +0.01786 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 abl_fd10_pop1kd05w192_s952: IN-SAMPLE holdout NDCG at the last eval 0.33388 - reference's out-of-sample @last 0.31615 = +0.01773 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 abl_fd10_pop1kd05w192_s953: IN-SAMPLE holdout NDCG at the last eval 0.33300 - reference's out-of-sample @last 0.31657 = +0.01643 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 abl_fd10_pop1kd05w192_s954: IN-SAMPLE holdout NDCG at the last eval 0.33364 - reference's out-of-sample @last 0.31654 = +0.01710 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+  A3 pool level (arm abl_fd10_pop1kd05t25): val NDCG 4-pool twins 0.39969 vs 4-pool references @last 0.39967: D = +0.00002 +- 0.00053 (n 14423); band 0.00180 = 3 s16 sqrt(16 / 4)
+     information: against the references' SELECTED checkpoints D = +0.00026 +- 0.00053
+     A3 verdict: ACCEPT
+  A4 member level (information): twin - reference @last, val
+     abl_fd10_pop1kd05t25_s951 vs abl_e10_pop1kd05t25_s951: -0.00055 +- 0.00079
+     abl_fd10_pop1kd05t25_s952 vs abl_e10_pop1kd05t25_s952: +0.00070 +- 0.00080
+     abl_fd10_pop1kd05t25_s953 vs abl_e10_pop1kd05t25_s953: -0.00103 +- 0.00081
+     abl_fd10_pop1kd05t25_s954 vs abl_e10_pop1kd05t25_s954: +0.00073 +- 0.00078
+  A3 pool level (arm abl_fd10_pop1kd05w192): val NDCG 4-pool twins 0.40001 vs 4-pool references @last 0.39999: D = +0.00001 +- 0.00059 (n 14423); band 0.00180 = 3 s16 sqrt(16 / 4)
+     information: against the references' SELECTED checkpoints D = +0.00001 +- 0.00059
+     A3 verdict: ACCEPT
+  A4 member level (information): twin - reference @last, val
+     abl_fd10_pop1kd05w192_s951 vs abl_e10_pop1kd05w192_s951: -0.00161 +- 0.00084
+     abl_fd10_pop1kd05w192_s952 vs abl_e10_pop1kd05w192_s952: -0.00046 +- 0.00086
+     abl_fd10_pop1kd05w192_s953 vs abl_e10_pop1kd05w192_s953: +0.00090 +- 0.00087
+     abl_fd10_pop1kd05w192_s954 vs abl_e10_pop1kd05w192_s954: +0.00074 +- 0.00087
+  A3 pool level (all 8 twins of stage P): val NDCG 8-pool twins 0.40083 vs 8-pool references @last 0.39961: D = +0.00122 +- 0.00047 (n 14423); band 0.00127 = 3 s16 sqrt(16 / 8)
+     information: against the references' SELECTED checkpoints D = +0.00097 +- 0.00048
+     A3 verdict: ACCEPT
+  A4 member level (information): twin - reference @last, val
+     abl_fd10_pop1kd05t25_s951 vs abl_e10_pop1kd05t25_s951: -0.00055 +- 0.00079
+     abl_fd10_pop1kd05t25_s952 vs abl_e10_pop1kd05t25_s952: +0.00070 +- 0.00080
+     abl_fd10_pop1kd05t25_s953 vs abl_e10_pop1kd05t25_s953: -0.00103 +- 0.00081
+     abl_fd10_pop1kd05t25_s954 vs abl_e10_pop1kd05t25_s954: +0.00073 +- 0.00078
+     abl_fd10_pop1kd05w192_s951 vs abl_e10_pop1kd05w192_s951: -0.00161 +- 0.00084
+     abl_fd10_pop1kd05w192_s952 vs abl_e10_pop1kd05w192_s952: -0.00046 +- 0.00086
+     abl_fd10_pop1kd05w192_s953 vs abl_e10_pop1kd05w192_s953: +0.00090 +- 0.00087
+     abl_fd10_pop1kd05w192_s954 vs abl_e10_pop1kd05w192_s954: +0.00074 +- 0.00087
+   -> NO DEFECT FOUND

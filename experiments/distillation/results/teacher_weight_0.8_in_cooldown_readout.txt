@@ -1,0 +1,21 @@
+# Copy of lab/nn_x/w12/kd/out/read_kw08_m05_20261116.txt (written by code/arm_read8.py after lab/nn_x/w12/kd/fill.sh; the first four lines are the launcher's log): 16 re-cools of the wide students with teacher weight 0.8 in the cooldown only (kw08) and with 5% random-order feeds (m05), each against 16 plain re-cools.
+=== 2026-11-16T15:11:13Z missing members: 0 ===
+2026-11-16T14:47:45Z GPU N (2 processes, [n] MiB free): launch L:m05:958
+2026-11-16T14:48:48Z job list exhausted
+2026-11-16T14:48:48Z fill.sh ends
+##### arm_read8.py rc:kw08 #####
+== re-cool kw08 (16 members: ['08_s951', '08_s952', '08_s953', '08_s954', '08_s955', '08_s956', '08_s957', '08_s958', '08_s951', '08_s952', '08_s953', '08_s954', '08_s955', '08_s956', '08_s957', '08_s958']) vs re-cool ref (16 members)  (train-only pools, paired per feed)
+  val           : member 0.39964 (+0.00061+-0.00023) | 16-pool 0.40080 (-0.00047+-0.00039; z -1.21) | asymptote 0.40088 (-0.00054+-0.00041) | M>=50 -0.00039+-0.00041 M<50 -0.00058+-0.00075
+  holdout       : member 0.32300 (+0.00061+-0.00013) | 16-pool 0.32378 (-0.00059+-0.00021; z -2.86) | asymptote 0.32384 (-0.00067+-0.00022)
+  holdout @last : member 0.32288 (+0.00055+-0.00013) | 16-pool 0.32379 (-0.00052+-0.00021; z -2.54) | asymptote 0.32386 (-0.00059+-0.00022)
+  HOLD-SHORT    : 16-pool delta -0.00056+-0.00020 (z -2.87; 4 replicates; secondary)
+  RULE: val -0.00047 (z -1.21), holdout -0.00059 (z -2.86), pooled z -2.88 (bar 2.5) -> no pass  [REPLICATE band: both >= 0 and 1.6 <= pooled z < 2 -> 4 fresh seeds; bundle entry: both >= 0 and pooled z >= 1.0]
+##### arm_read8.py rc:m05 #####
+== re-cool m05 (16 members: ['05_s951', '05_s952', '05_s953', '05_s954', '05_s955', '05_s956', '05_s957', '05_s958', '05_s951', '05_s952', '05_s953', '05_s954', '05_s955', '05_s956', '05_s957', '05_s958']) vs re-cool ref (16 members)  (train-only pools, paired per feed)
+  val           : member 0.39855 (-0.00048+-0.00017) | 16-pool 0.40112 (-0.00015+-0.00032; z -0.46) | asymptote 0.40130 (-0.00013+-0.00034) | M>=50 -0.00029+-0.00038 M<50 +0.00006+-0.00057
+  holdout       : member 0.32201 (-0.00038+-0.00010) | 16-pool 0.32443 (+0.00006+-0.00019; z +0.34) | asymptote 0.32459 (+0.00009+-0.00020)
+  holdout @last : member 0.32179 (-0.00053+-0.00009) | 16-pool 0.32417 (-0.00014+-0.00018; z -0.83) | asymptote 0.32433 (-0.00012+-0.00018)
+  HOLD-SHORT    : 16-pool delta -0.00003+-0.00016 (z -0.21; 4 replicates; secondary)
+  RULE: val -0.00015 (z -0.46), holdout +0.00006 (z +0.34), pooled z -0.08 (bar 2.5) -> no pass  [REPLICATE band: both >= 0 and 1.6 <= pooled z < 2 -> 4 fresh seeds; bundle entry: both >= 0 and pooled z >= 1.0]
+
+[exited with code 0]

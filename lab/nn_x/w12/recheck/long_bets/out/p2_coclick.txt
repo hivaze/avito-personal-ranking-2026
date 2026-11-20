@@ -1,0 +1,10 @@
+(A) holdout feeds with >=2 positives: 10720 of 30000; LOO tasks 34244
+    hidden-positive NDCG: teacher only 0.26919 -> + revealed co-clicks 0.27911  delta +0.00992+-0.00067 | MRR 0.11248 -> 0.12278
+    fitted coefficients [teacher_z, simz_to_revealed, samecat] per half: [[0.928, 0.34, 0.131], [0.92, 0.312, 0.169]]
+(B) 30K exploration train feeds: D = in-sample - OOF teacher logit (centred per feed); teacher logit sd in-sample 1.182 OOF 1.152
+    within-feed OLS of D on [y, z(maxcos to OTHER clicked), samecat with OTHER clicked]: [0.068, 0.016, 0.0196]  (n rows 4634407)
+    mean D on clicked items +0.1410 | on non-clicked nearest decile to a click +0.0420 | farthest decile -0.0266
+
+real	0m48.960s
+user	0m52.211s
+sys	0m2.006s

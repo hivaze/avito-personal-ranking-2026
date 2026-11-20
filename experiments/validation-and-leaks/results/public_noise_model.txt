@@ -1,0 +1,129 @@
+# Read-out copied from lab/nn_x/pubdiag/noise/noise_out.txt, unchanged below this line.
+n_val 14423  n_public 8562  n_private 20033
+cluster size m (sum n^2/sum n, uid0 singletons): val 1.003  public 1.004  users val 14398 public 8545
+
+== pool val NDCG (check vs CURRENT_STATUS: Cd .39901 PF7x .39974 G3 .40032 M2 .40094 Pall .39896)
+  Cd    0.39901
+  PF7x  0.39974
+  G3    0.40032
+  M2    0.40094
+  Pall  0.39896
+  G3c   0.39906
+  M2c   0.39848
+n_eff of val under public weights: M-only 14297, MxCold 9321
+
+== part 1: paired deltas and SEs (A-B).  val SE iid / user-cluster;  expected PUBLIC SE under models:
+   iid = sd_val(d)/sqrt(n_pub); Mw = M-reweighted var; MCw = M x cold reweighted var; DIS = E[d^2 | M bin x
+   disagreement decile] fitted on val, averaged over the public feeds' own label-free disagreement; +cl = x user deff
+  pair            val d    SEiid     SEcl  pubmix d |      iid       Mw      MCw      DIS   MCw+cl | dis val/pub
+  PF7x-Cd     +0.00073  0.00036  0.00036 +0.00050  |  0.00047  0.00046  0.00047  0.00047  0.00047 | 0.0014/0.0014  deff_val 1.00 deff_pub 1.00 d==0 0.46
+  G3-Cd       +0.00131  0.00049  0.00049 +0.00098  |  0.00063  0.00062  0.00063  0.00062  0.00063 | 0.0043/0.0042  deff_val 1.00 deff_pub 1.00 d==0 0.36
+  M2-Cd       +0.00192  0.00053  0.00053 +0.00174  |  0.00068  0.00067  0.00069  0.00068  0.00069 | 0.0055/0.0055  deff_val 1.00 deff_pub 1.00 d==0 0.34
+  M2-PF7x     +0.00120  0.00047  0.00047 +0.00125  |  0.00061  0.00060  0.00061  0.00060  0.00060 | 0.0039/0.0039  deff_val 1.00 deff_pub 1.00 d==0 0.36
+  G3-PF7x     +0.00058  0.00039  0.00039 +0.00048  |  0.00051  0.00050  0.00051  0.00050  0.00051 | 0.0022/0.0022  deff_val 1.00 deff_pub 1.00 d==0 0.42
+  M2-G3       +0.00062  0.00034  0.00034 +0.00076  |  0.00044  0.00043  0.00044  0.00043  0.00044 | 0.0010/0.0010  deff_val 1.00 deff_pub 1.00 d==0 0.48
+  PF7x-Pall   +0.00078  0.00023  0.00023 +0.00052  |  0.00029  0.00029  0.00028  0.00029  0.00028 | 0.0003/0.0002  deff_val 1.00 deff_pub 1.00 d==0 0.62
+  G3-G3c      +0.00126  0.00042  0.00042 +0.00099  |  0.00054  0.00053  0.00055  0.00053  0.00055 | 0.0028/0.0028  deff_val 1.00 deff_pub 1.00 d==0 0.40
+  M2-M2c      +0.00246  0.00054  0.00054 +0.00248  |  0.00070  0.00069  0.00071  0.00068  0.00071 | 0.0057/0.0056  deff_val 1.00 deff_pub 1.00 d==0 0.34
+
+== val delta by half (score = z(ft) only / z(to) only):
+  ft PF7x-Cd +0.00032 +- 0.00033
+  ft G3-Cd +0.00095 +- 0.00046
+  ft M2-Cd +0.00121 +- 0.00050
+  to PF7x-Cd +0.00107 +- 0.00037
+  to G3-Cd +0.00158 +- 0.00051
+  to M2-Cd +0.00208 +- 0.00055
+
+== part 2 joint test  noise=MCw_cl expected=(val) : chi2(3) 4.77  p 0.189
+   PF7x-Cd: pub +0.00064  expected +0.00073  resid -0.00009  SE 0.00059 (val 0.00036, pub 0.00047)  z -0.15
+   G3-Cd: pub +0.00074  expected +0.00131  resid -0.00057  SE 0.00080 (val 0.00049, pub 0.00063)  z -0.71
+   M2-Cd: pub +0.00035  expected +0.00192  resid -0.00157  SE 0.00087 (val 0.00053, pub 0.00069)  z -1.81
+   M2-PF7x: resid -0.00148  SE 0.00077  z -1.94
+   G3-PF7x: resid -0.00048  SE 0.00064  z -0.75
+   M2-G3: resid -0.00100  SE 0.00055  z -1.81
+
+== part 2 joint test  noise=MCw_cl expected=(pubmix) : chi2(3) 4.62  p 0.202
+   PF7x-Cd: pub +0.00064  expected +0.00050  resid +0.00014  SE 0.00064 (val 0.00044, pub 0.00047)  z +0.22
+   G3-Cd: pub +0.00074  expected +0.00098  resid -0.00024  SE 0.00087 (val 0.00060, pub 0.00063)  z -0.28
+   M2-Cd: pub +0.00035  expected +0.00174  resid -0.00139  SE 0.00095 (val 0.00066, pub 0.00069)  z -1.46
+   M2-PF7x: resid -0.00153  SE 0.00082  z -1.86
+   G3-PF7x: resid -0.00039  SE 0.00069  z -0.56
+   M2-G3: resid -0.00115  SE 0.00059  z -1.93
+
+== part 2 joint test  noise=MCw    expected=(val) : chi2(3) 4.77  p 0.189
+   PF7x-Cd: pub +0.00064  expected +0.00073  resid -0.00009  SE 0.00059 (val 0.00036, pub 0.00047)  z -0.15
+   G3-Cd: pub +0.00074  expected +0.00131  resid -0.00057  SE 0.00080 (val 0.00049, pub 0.00063)  z -0.71
+   M2-Cd: pub +0.00035  expected +0.00192  resid -0.00157  SE 0.00087 (val 0.00053, pub 0.00069)  z -1.81
+   M2-PF7x: resid -0.00148  SE 0.00077  z -1.94
+   G3-PF7x: resid -0.00048  SE 0.00064  z -0.75
+   M2-G3: resid -0.00100  SE 0.00055  z -1.81
+
+== part 2 joint test  noise=MCw    expected=(pubmix) : chi2(3) 4.61  p 0.202
+   PF7x-Cd: pub +0.00064  expected +0.00050  resid +0.00014  SE 0.00064 (val 0.00044, pub 0.00047)  z +0.22
+   G3-Cd: pub +0.00074  expected +0.00098  resid -0.00024  SE 0.00087 (val 0.00060, pub 0.00063)  z -0.28
+   M2-Cd: pub +0.00035  expected +0.00174  resid -0.00139  SE 0.00095 (val 0.00066, pub 0.00069)  z -1.46
+   M2-PF7x: resid -0.00153  SE 0.00082  z -1.86
+   G3-PF7x: resid -0.00039  SE 0.00069  z -0.56
+   M2-G3: resid -0.00115  SE 0.00059  z -1.93
+
+== part 2 joint test  noise=iid    expected=(val) : chi2(3) 4.77  p 0.189
+   PF7x-Cd: pub +0.00064  expected +0.00073  resid -0.00009  SE 0.00059 (val 0.00036, pub 0.00047)  z -0.15
+   G3-Cd: pub +0.00074  expected +0.00131  resid -0.00057  SE 0.00080 (val 0.00049, pub 0.00063)  z -0.71
+   M2-Cd: pub +0.00035  expected +0.00192  resid -0.00157  SE 0.00086 (val 0.00053, pub 0.00068)  z -1.82
+   M2-PF7x: resid -0.00148  SE 0.00077  z -1.92
+   G3-PF7x: resid -0.00048  SE 0.00064  z -0.75
+   M2-G3: resid -0.00100  SE 0.00055  z -1.81
+
+== part 2 joint test  noise=iid    expected=(pubmix) : chi2(3) 4.59  p 0.204
+   PF7x-Cd: pub +0.00064  expected +0.00050  resid +0.00014  SE 0.00065 (val 0.00044, pub 0.00047)  z +0.22
+   G3-Cd: pub +0.00074  expected +0.00098  resid -0.00024  SE 0.00087 (val 0.00060, pub 0.00063)  z -0.28
+   M2-Cd: pub +0.00035  expected +0.00174  resid -0.00139  SE 0.00095 (val 0.00066, pub 0.00068)  z -1.47
+   M2-PF7x: resid -0.00153  SE 0.00083  z -1.85
+   G3-PF7x: resid -0.00039  SE 0.00070  z -0.56
+   M2-G3: resid -0.00115  SE 0.00059  z -1.93
+
+== transfer factor, total val delta vs Cd (pub = b*val):  b = 0.22  95% CI [-0.63, 1.29]  chi2 at b=1: 4.77 (min 2.23, 2 df gof p 0.33); LR test b=1 p 0.111
+
+== m02 decomposition of the val deltas vs Cd (n = counterpart-Cd, m = pool-counterpart), user-cluster SE
+   PF7x: total +0.00073 = n -0.00005 (+-0.00033) + m02 part +0.00078 (+-0.00023)   [pub-mix: n -0.00002, m +0.00052]
+   G3: total +0.00131 = n +0.00005 (+-0.00043) + m02 part +0.00126 (+-0.00042)   [pub-mix: n -0.00001, m +0.00099]
+   M2: total +0.00192 = n -0.00053 (+-0.00046) + m02 part +0.00246 (+-0.00054)   [pub-mix: n -0.00074, m +0.00248]
+== transfer factor of the m02 part only (non-m02 part transfers 1:1): b = 0.33  95% CI [-0.32, 0.98]  chi2 at b=1: 4.77  LR p(b=1) 0.044; at b=0: 1.85 LR p(b=0) 0.284
+== m02 factor with the non-m02 factor free too: b = 0.65  95% CI [-0.94, 2.53]
+
+== holdout (train-only pools; context): Cd 0.32319  PF7x 0.32360  G3 0.32379  M2 0.32361
+   PF7x-Cd: holdout +0.00040 +- 0.00020 (iid)
+   G3-Cd: holdout +0.00060 +- 0.00027 (iid)
+   M2-Cd: holdout +0.00042 +- 0.00030 (iid)
+   M2-PF7x: holdout +0.00002 +- 0.00027 (iid)
+   G3-PF7x: holdout +0.00020 +- 0.00022 (iid)
+
+== part 3 calibration public = a + c*val: a +0.0022  c 0.976 +- 0.036  resid sd 0.00077
+   v3    x 0.38160 pub 0.37390 fit 0.37473 resid -0.00083 LOO -0.00146 t_ext -1.62 (p 0.18)
+   v4    x 0.38390 pub 0.37720 fit 0.37698 resid +0.00022 LOO +0.00033 t_ext +0.33 (p 0.76)
+   v5    x 0.38690 pub 0.38020 fit 0.37990 resid +0.00030 LOO +0.00038 t_ext +0.41 (p 0.71)
+   v10   x 0.39399 pub 0.38786 fit 0.38682 resid +0.00104 LOO +0.00118 t_ext +1.64 (p 0.18)
+   Cd    x 0.39901 pub 0.39208 fit 0.39173 resid +0.00035 LOO +0.00044 t_ext +0.48 (p 0.66)
+   PF7x  x 0.39974 pub 0.39272 fit 0.39244 resid +0.00028 LOO +0.00036 t_ext +0.39 (p 0.72)
+   G3    x 0.40032 pub 0.39282 fit 0.39301 resid -0.00019 LOO -0.00024 t_ext -0.26 (p 0.81)
+   M2    x 0.40094 pub 0.39243 fit 0.39361 resid -0.00117 LOO -0.00157 t_ext -2.35 (p 0.08)
+   slope-1 model: offset -0.00715; residuals v3:-0.00055 v4:+0.00045 v5:+0.00045 v10:+0.00102 Cd:+0.00022 PF7x:+0.00013 G3:-0.00035 M2:-0.00136
+   fit on v3..Cd only: a -0.0216 c 1.038, resid sd 0.00057;  out-of-sample:
+     PF7x  pred 0.39331 +- 0.00076  actual 0.39272  miss -0.00059  t -0.78
+     G3    pred 0.39391 +- 0.00077  actual 0.39282  miss -0.00110  t -1.42
+     M2    pred 0.39455 +- 0.00079  actual 0.39243  miss -0.00212  t -2.70
+
+== part 3 calibration public = a + c*calib_pred: a +0.0096  c 0.978 +- 0.038  resid sd 0.00079
+   v3    x 0.37360 pub 0.37390 fit 0.37476 resid -0.00086 LOO -0.00151 t_ext -1.63 (p 0.18)
+   v4    x 0.37590 pub 0.37720 fit 0.37701 resid +0.00019 LOO +0.00028 t_ext +0.26 (p 0.80)
+   v5    x 0.37880 pub 0.38020 fit 0.37985 resid +0.00035 LOO +0.00045 t_ext +0.47 (p 0.66)
+   v10   x 0.38590 pub 0.38786 fit 0.38679 resid +0.00107 LOO +0.00123 t_ext +1.64 (p 0.18)
+   Cd    x 0.39090 pub 0.39208 fit 0.39167 resid +0.00041 LOO +0.00050 t_ext +0.53 (p 0.62)
+   PF7x  x 0.39170 pub 0.39272 fit 0.39246 resid +0.00027 LOO +0.00034 t_ext +0.35 (p 0.74)
+   G3    x 0.39230 pub 0.39282 fit 0.39304 resid -0.00022 LOO -0.00029 t_ext -0.30 (p 0.78)
+   M2    x 0.39290 pub 0.39243 fit 0.39363 resid -0.00120 LOO -0.00161 t_ext -2.28 (p 0.08)
+   slope-1 model: offset +0.00090; residuals v3:-0.00060 v4:+0.00040 v5:+0.00050 v10:+0.00106 Cd:+0.00028 PF7x:+0.00012 G3:-0.00038 M2:-0.00137
+   fit on v3..Cd only: a -0.0157 c 1.044, resid sd 0.00058;  out-of-sample:
+     PF7x  pred 0.39340 +- 0.00077  actual 0.39272  miss -0.00068  t -0.88
+     G3    pred 0.39403 +- 0.00079  actual 0.39282  miss -0.00121  t -1.54
+     M2    pred 0.39466 +- 0.00080  actual 0.39243  miss -0.00222  t -2.78

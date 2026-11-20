@@ -1,0 +1,105 @@
+WAVE 10 arm R3 (objective-diverse member family: listwise CE + a pointwise BCE term, --bce_w) PRE-DECLARATION — frozen 2026-11-13T16:58:38Z (`date -u`), BEFORE
+any run of this arm (checked at 2026-11-13T16:58:38Z: 0 matching files — no nn_x/w10/r3/logs/w10_*, no nn_x/w10/r3/ckpt/*, no nn_x/w5/{logs,preds,ckpt}/*_r3_* or *w10_*;
+no GPU process of this agent had been started; only the CPU test suite nn_x/w10/r3/tests/test_r3.py cpu (40/40, trains nothing) and the CPU read-out
+script validation on EXISTING base predictions (below) had run). Item: reports/EXTERNAL_SCAN_1113.md section 2.2 R3 (P 0.025; finding 8: the existing
+--loss both|bce path drops fw / --loss_norm feed / denom, hence the new flag). Lead decision: CURRENT_STATUS 11-13 16:39 (wave 10, GPUs N).
+
+CODE: nn_x/w10/r3 = the nn_x/w5 code (train.py, model.py, data.py, common.py, cd_arms*.py, finetune.py, holdout_eval.py, stale_pred.py, blend.py,
+  tests/, lane.sh; NOT preds/ckpt/logs) + cd_arms10.py + ONE flag --bce_w W (OFF by default, W = 0; nn_x/w5/*.py and nn_x/w5/lane.sh untouched):
+    loss = listwise_loss(lg, y, m, fw, norm=a.loss_norm, denom=a.max_feeds)  [unchanged]  +  W * bce_feed_loss(lg, y, m, fw, norm=a.loss_norm, denom=a.max_feeds)
+  bce_feed_loss = the MEAN-per-feed binary cross-entropy of the feed's candidates (sum_i m_i BCE(lg_i, y_i) / sum_i m_i) under exactly the per-feed
+  weighting / normalisation of model.listwise_loss (w = fw (or 1) x [ys > 0]; norm feed = sum / denom (max_feeds 512); batch / idcg as the listwise).
+  The --loss both path is NOT used. Tests (nn_x/w10/r3/logs/test_r3_cpu.log, 40/40): AST proof (train.py minus the 5 R3 statements == the frozen
+  nn_x/w5/train.py; module copies md5-identical; lane.sh diff = documented lines only); unit test on real mini batches (bce_feed_loss == brute force for
+  fw None / (0.3 + p) and norms feed / batch / idcg; the exact train.py loop statements give loss bitwise == the frozen statements at W = 0 and
+  == listwise + W x bce at W = 5 with BOTH calls receiving the same fw object, norm == --loss_norm, denom == max_feeds; gradient additivity); CPU
+  end-to-end on the mini split (flag OFF bit-identical to the frozen nn_x/w5 code: batches, logits, logged lines, selected + @last checkpoints, val and
+  holdout preds; flag ON: same batches, step-0 logits identical, bce called once per step with the same w / norm / denom, backward scalar == listwise
+  + 5 x bce without the aux). A GPU PLUMBING SMOKE (W5_SMOKE=1 lane.sh, variant w10_smoke_r3_s23: 20K train feeds, 1 epoch; outputs deleted except a
+  log copy) runs AFTER this declaration and before stage S; it yields no number that enters any rule.
+
+DOSE (from the item + the CPU scale measurement, nn_x/w10/r3/logs/test_r3_scale.json, real train batches of the trained nn_x/w5 base checkpoint
+  w5_e10_base_s951 and of a fresh init): PRIMARY --bce_w 5 = the item's dose ("5 x mean-per-feed BCE"). At init the BCE logit gradient is 0.24x the
+  listwise gradient at W = 5 (0.05x at W = 1, 0.95x at W = 20; cos 0.18 between the two gradients); the trained base's logits sit at a mean of +120
+  (sigmoid 1.0000 on every candidate; the softmax is shift-invariant), so the pointwise term imposes a genuinely new constraint (the absolute
+  log-odds level and per-item calibration across feeds), not a re-weighting. ONE INFORMATION DOSE --bce_w 20 (stage S only; the gradient-equal-weight
+  point): W = 1 would be a near copy by construction (0.05x). No other dose; no sweep.
+
+REFERENCE PAIR FOR STAGE S (disclosed deviation from the task's default 'abl_base_s23/24 if its args equal A_BASE + HYG, else own w10_base pair'):
+  the nn_x/w9/dw3 pair w9_base_s23 / s24 = A_BASE + HYG run from a code copy proven bit-identical to nn_x/w5 at flag off (E_dw3_predeclared.txt),
+  stored args == the w5 parser's A_BASE + HYG key for key (verified from nn_x/w9/dw3/logs/w9_base_s2{3,4}.json; abl_base_s23/24 carry abl-only keys
+  and come from the nn_x/abl lineage). The nn_x/w9/catgrad pair w9_base_s23 / s24 (an independent run of the same recipe) is the REPLICATE reference,
+  abl_base_s23/24 the secondary information reference. This saves 2 GPU runs and supplies the run-to-run null. Script validation run BEFORE this
+  declaration with the catgrad pair in the arm's place (nn_x/w10/r3/logs/s_readout_repbase.txt; null numbers, no arm number): val -0.00011 +- 0.00026,
+  holdout -0.00000 +- 0.00015, late -0.00018 / early -0.00006, member margin -0.00000 (rho_bb 0.97981 = rho_x), same-seed replicate corr 0.99789,
+  2-member pool val +0.00032 / holdout -0.00001 -> the +0.008 margin bar is ~100x the run-to-run noise of the margin.
+
+RUNS AND RULES (read on SAVED predictions; nothing is fine-tuned, pooled or submitted by this agent):
+STAGE S (2-epoch futility screen, first): w10_r3_s23 / s24 = lane.sh A_BASE + HYG + --bce_w 5 (lane case A:r3) and w10_r3w20_s23 / s24 = + --bce_w 20
+  (A:r3w20, information), two runs per GPU on GPUs N (s23 on 0, s24 on 1), paired per feed vs w9_base_s23 / s24 (above). Primary read = LAST checkpoint
+  (step 19,670; the 2-epoch convention); selected checkpoint reported. Read-out nn_x/w10/r3/s_readout.py <arm> 23,24 -> nn_x/w10/r3/logs/s_readout_<arm>.txt
+  (copied to nn_x/w5/logs/w10_r3_stageS_readout_<arm>.txt), computed ONCE per arm when all four @last + selected val and holdout pred files exist.
+  CONTINUE to stage E iff ALL of (pooled over seeds 23/24 = mean of the two per-feed delta vectors, LAST ckpt):
+    (s1) pooled member val >= -0.0015;  (s2) pooled member holdout >= -0.0010;  (s3) no val slice (M<50, M>=50, Tue, Thu) < -2 SE_feed;
+    (s4) member-level diversity margin rho_bb - rho_x >= +0.008 on val (rho_x = mean of corr(r3_s23, base_s24), corr(r3_s24, base_s23); rho_bb =
+         corr(base_s23, base_s24); within-feed rank-z Pearson) — the bar JOINT (+0.0011) / DW3 (+0.0013) failed and CATGRAD (+0.011) / HS1 (+0.016) cleared;
+    (s5) pmix >= -1 SE (veto only; audit amendment 11-13 16:10 (a)).
+  Otherwise STOP (the arm is closed at stage S; the margin is reported even when it fails). Information (never gates): late (Sep 17-19, 8,279 feeds) and
+  early (Sep 6-8, 7,823 feeds) holdout columns (holdout feeds' train day from the train feeds' timestamps, MSK day index; amendment (b)); per-seed
+  numbers; selected-ckpt view; the holdout margin; arm-arm and same-seed arm-base corr; the replicate-null margin; 2-member pool r3 vs base and the
+  mixed pools (r3_s + base_s') vs the base pair; the deltas vs the replicate and secondary references; train minutes; the plateau-end holdout.
+  INFORMATION DOSE r3w20: read by the same script and rule, reported alongside. Pre-declared second look: if r3 (W = 5) fails ONLY (s4) (a near copy at
+  the item's dose) and r3w20 passes all of (s1)-(s5), the stage-E pair runs at W = 20 instead (the lane case E:r3 is switched to --bce_w 20 by a dated
+  amendment written before the launch; variants keep the names w5_e10_r3_s951/952 and the json args record bce_w); at most ONE stage-E pair in any case.
+STAGE E (only if stage S CONTINUEs): w5_e10_r3_s951 (GPU N) / s952 (GPU N) = lane.sh E_BASE + HYG + the arm flag (E:r3; the flag appended last; parser
+  diff vs nn_x/w5 lane E:base = exactly bce_w 0 -> 5 (test C0c)), one run per GPU, paired per seed vs the EXISTING w5_e10_base_s951 / s952 (nn_x/w5/preds,
+  selected + @last, holdout). After the runs: logs/<v>.json/.log, preds/nn_<v>[@last]_trainonly_{val,test}.npy and preds/holdout/nn_<v>[@last]_holdout.npy
+  are copied into nn_x/w5 with cp --update=none (new files only). Read-outs: cd <repo> && CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12
+  .venv/bin/python nn_x/w5/w5_eval_e_ap1.py r3 951,952 -> nn_x/w5/logs/w5_eval_E_r3.txt (E rule) and scratchpad div_readout.py r3 951,952 ->
+  nn_x/w5/logs/div_readout_r3.txt (diversity clause); selected checkpoint primary, @last information; late / early holdout columns appended as information.
+  E RULE: PASS iff pooled per-seed paired member val > 0 AND holdout > +1 SE AND no val slice (M<50, M>=50, Tue, Thu) < -2 SE AND pmix >= -1 SE.
+  DIVERSITY CLAUSE (E_batch_predeclared.txt amendment 1): (d1) pooled member val >= -0.0005 AND holdout >= -0.0005 (selected ckpt); (d2) rho_bb - rho_x
+  >= +0.005 on val (rho_x = corr(r3 pool{951,952}, base pool{953,954}), rho_bb = corr(base pool{951,952}, base pool{953,954}) = 0.97364); (d3) the 2-member
+  pool r3 vs base{951,952}: val >= -0.0005 AND holdout >= -0.0005.
+  FAMILY CANDIDATE iff the E rule PASSES OR the diversity clause PASSES (d1 AND d2 AND d3); then reported to the lead (seeds 953/954, n2cpv3 FT, decide7
+  are the lead's; NOTE for the lead: nn_x/w5/finetune.py has no --bce_w, so the FT of this family would use the pure listwise loss unless ported).
+  Otherwise CLOSED. A crashed run (process gone without its json) -> INCOMPLETE (no verdict); a re-run needs a new dated amendment; a run that fails
+  twice -> stop and report.
+KILL GATE at step 60,000 (10-epoch runs; mid-plateau, before the cooldown from step 78,680; evaluated once, when BOTH arm logs contain their step-60000
+  eval line): h_base(60000) = w5_e10_base_s951.json 0.31659185, s952.json 0.31739697 (verified now); SE_gate = 0.00076575 (the LD addendum's constant,
+  reused unchanged). KILL iff for BOTH seeds h_r3,s(60000) - h_base,s(60000) < -2 SE_gate = -0.00153150, i.e. iff h_951(60000) < 0.31506035 AND
+  h_952(60000) < 0.31586547 -> stop both train.py processes by exact PID (cmdline re-verified), record in the RUNNING files, arm CLOSED (information);
+  otherwise the runs continue untouched and the gate numbers are information only.
+
+GPU / PROCESS RULES: GPUs N and 1 only (CUDA_VISIBLE_DEVICES = exactly one id per process); before every launch nvidia-smi shows <= 3 compute processes
+  and >= 60 GB free on that GPU (lane.sh check_gpu under the per-GPU flock; NOTE at 2026-11-13T16:58:38Z: another job holds ~68 GB and compute on every GPU,
+  untouched; wall times will be inflated); OMP/MKL/OPENBLAS/POLARS threads 12; setsid nohup launches; REAL python PIDs resolved via /proc/<pid>/cmdline and
+  recorded in nn_x/w10/r3/RUNNING.txt and nn_x/w5/logs/RUNNING_w5.txt; stops only by exact PID after checking /proc/<pid>/cmdline; no pkill -f / pgrep kills;
+  other processes untouched. Time cap 5 h from the task start (~16:40 UTC). COST / ETA: stage S 4 x ~25-40 min (2 per GPU), stage E 2 x ~100-180 min.
+
+RESULT ADDENDUM — 2026-11-13T17:35:37Z (written after the stage-S read-outs; the rules above are unchanged)
+Tests before any stage run: nn_x/w10/r3/tests/test_r3.py cpu 40/40 (AST proof, md5 module identity, lane DRY diff, unit test of bce_feed_loss and of the
+  exact train.py loop statements on real mini batches, CPU end-to-end on the mini split: flag OFF bit-identical to the frozen nn_x/w5 code), gpu N
+  (W5_SMOKE=1 lane plumbing smoke with --bce_w 5 on GPU N, log copy nn_x/w10/r3/logs/smoke_r3.log). Scale (nn_x/w10/r3/logs/test_r3_scale.json):
+  trained base logits mean +120 (sigmoid 1.0); BCE/listwise logit-gradient ratio at init 0.24 (W 5) / 0.95 (W 20).
+STAGE S (2-epoch, 17:01-17:32 UTC, 29.1-29.7 min per run, two runs per GPU on 0 / 1, another job co-resident; read-outs
+  nn_x/w10/r3/logs/s_readout_r3.txt and s_readout_r3w20.txt, copies nn_x/w5/logs/w10_r3_stageS_readout_{r3,r3w20}.txt), LAST ckpt (= selected on all 4
+  runs, step 19670), vs w9_base_s23/24 (nn_x/w9/dw3):
+  r3 (--bce_w 5, PRIMARY): pooled member val -0.00114 +- 0.00051 (z -2.2), holdout -0.00047 +- 0.00028 (z -1.7), late (Sep 17-19) -0.00116 +- 0.00053,
+    early (Sep 6-8) -0.00032 +- 0.00057, pmix -0.00074 +- 0.00079 (z -0.9), slices M<50 -0.00124 (z -1.3) M>=50 -0.00107 (z -1.9) Tue -0.00101 (z -1.4)
+    Thu -0.00128 (z -1.7); per seed d val -0.00140 / -0.00088, d hold -0.00034 / -0.00060; member diversity margin rho_bb - rho_x = 0.97981 - 0.97921 =
+    +0.00060 (holdout +0.00082; arm-arm 0.9805, same-seed arm-base 0.9842 vs 0.9979 for a replicate run); 2-member pool val -0.00145 / holdout -0.00036;
+    mixed pools -0.00074 / -0.00008; vs the replicate base pair -0.00103 / -0.00046, vs abl_base -0.00109 / -0.00053.
+    Gates: (s1) OK (s2) OK (s3) OK (s4) NO (+0.0006 << +0.008) (s5) OK. VERDICT: STOP (futility).
+  r3w20 (--bce_w 20, INFORMATION): val -0.00132 +- 0.00053 (z -2.5), holdout -0.00024 +- 0.00031, late -0.00016, early -0.00010, pmix -0.00216 +- 0.00082
+    (z -2.6), slices M<50 -0.00088 (z -0.9) M>=50 -0.00162 (z -2.8) Tue -0.00067 (z -0.9) Thu -0.00203 (z -2.6); per seed d val -0.00188 / -0.00075;
+    margin +0.00166 (holdout +0.00175; same-seed arm-base 0.9827); 2-member pool val -0.00185 / holdout -0.00012; mixed pools -0.00056 / -0.00014.
+    Gates: (s1) OK (s2) OK (s3) NO (M>=50 z -2.8, Thu z -2.6) (s4) NO (s5) NO. VERDICT: STOP.
+  The pre-declared second look (r3 fails only s4 AND r3w20 passes all) does not apply (r3w20 fails s3 / s4 / s5). Stage E NOT launched; nothing copied
+  into nn_x/w5/preds; nothing fine-tuned, pooled or submitted. ARM CLOSED AT STAGE S.
+  Reading: the pointwise term changes the member measurably (same-seed corr to the base 0.984 vs the 0.998 of a replicate run; the logged training loss
+  carries the extra BCE term) but the within-feed ORDER it induces is a near copy of the listwise member (decorrelation margin +0.0006 at W 5 and
+  +0.0017 at W 20 vs the +0.008 bar; the wave-9 near copies DW3 / JOINT had +0.0011 / +0.0013), at a strength cost of ~-0.001 val that grows with the
+  dose on long feeds (M>=50 -0.0011 -> -0.0016) and on the late holdout at W 5. A pointwise calibration objective is not a different VIEW of the data:
+  the diversity-strength frontier (~1 val point per 4 points of margin) is not reachable from the objective axis either. Trajectory (information):
+  the arm's val deficit is ~0 through step ~7000 and opens during the second epoch / cooldown (-0.001..-0.002 from step 16000 on both seeds).

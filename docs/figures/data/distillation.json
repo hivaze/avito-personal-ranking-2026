@@ -1,0 +1,68 @@
+{
+ "description": "Numbers shown in the distillation figure.",
+ "teacher_rankers": [
+  {
+   "group": "rankers whose cooldown was re-run from a stored checkpoint with 2% exploration feeds",
+   "count": 7,
+   "in_teacher_of_11": true
+  },
+  {
+   "group": "rankers trained in one run with the same cooldown",
+   "count": 4,
+   "in_teacher_of_11": true
+  },
+  {
+   "group": "rankers with a GRU history encoder",
+   "count": 6,
+   "in_teacher_of_11": false
+  },
+  {
+   "group": "popularity-light rankers",
+   "count": 8,
+   "in_teacher_of_11": false
+  }
+ ],
+ "train_candidates": 246745836,
+ "teacher_file_gb": 0.99,
+ "teacher_weight": 0.5,
+ "student_width": 192,
+ "students_in_final_files": {
+  "FD16P20": {
+   "wide_taught_by_11": 8,
+   "wide_taught_by_25": 8,
+   "popularity_light": 4,
+   "popularity_light_teacher": 11,
+   "popularity_light_width": 192
+  },
+  "W8P20": {
+   "wide_taught_by_11": 4,
+   "wide_taught_by_25": 4,
+   "popularity_light": 4,
+   "popularity_light_teacher": 25,
+   "popularity_light_width": 128
+  }
+ },
+ "gains": [
+  {
+   "what": "one student against the same ranker trained on clicks only",
+   "split": "validation",
+   "delta": 0.00257,
+   "se": 0.00047,
+   "conditions": "width 128, 4 seeds, paired per feed"
+  },
+  {
+   "what": "one student against the same ranker trained on clicks only",
+   "split": "holdout",
+   "delta": 0.002,
+   "se": 0.00028,
+   "conditions": "width 128, 4 seeds, paired per feed"
+  },
+  {
+   "what": "8 wide students against the best hard-label file",
+   "split": "public",
+   "delta": 0.001032,
+   "conditions": "0.394486 against 0.393454"
+  }
+ ],
+ "source": "decision ledger (read-out 2026-11-14T05:18:17Z, block of 2026-11-14 17:32Z; not published); teacher dump logs (not published); solution notes of the lab (not published)"
+}

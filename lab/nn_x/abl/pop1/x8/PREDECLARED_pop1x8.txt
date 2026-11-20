@@ -1,0 +1,60 @@
+PRE-DECLARATION: pop1 family to 8 seeds (Task A of the POPULARITY-VIEW FAMILIES follow-up, CURRENT_STATUS Log 14:17 UTC)
+Written 2026-11-13T14:21:17Z (`date -u`), BEFORE any run of this task. Agent: implementation agent; nothing is submitted.
+
+STATE AT WRITING (verified with ls at 2026-11-13T14:21:17Z): NO file of abl_e10_pop1_s955 / s956 / s957 / s958 exists in
+nn_x/abl/{logs,ckpt,preds,preds/holdout}, preds/, preds/holdout/ or nn/logs/ (0 matches for 'pop1_s95[5-8]'); no subs/*Q2a8*
+and no preds/ens_Q2a8pop1_* exist. GPUs N idle (0 compute processes, [n] GB free); GPUs N = the JOINT agent (never used).
+
+RUNS: abl_e10_pop1_s955, s956, s957, s958 = EXACTLY the recipe of abl_e10_pop1_s951-954: the train.py command of
+nn_x/abl/pop1/launch_e10.sh (E_BASE + HYG + --xt_exclude <the 8 popularity columns> --xt_add xp_imp_c50; args as logged in
+nn_x/abl/logs/abl_e10_pop1_s951.json 'args'), ONLY --seed (955..958) and --variant differ. Launcher: nn_x/abl/pop1/x8/launch_e10_x8.sh
+(a copy of launch_e10.sh; same command line byte for byte except the RUNNING.txt note). One run per GPU on GPUs N
+(nvidia-smi before each launch: <= 3 compute processes and >= 60 GB free; CUDA_VISIBLE_DEVICES = one id; 12 CPU threads).
+After each run starts, its logged args are compared with s951's args (all keys equal except variant / seed); a mismatch voids the run.
+
+FINE-TUNE: the standard n2cpv3 FT only (the pop1 chain's std variant; the nopop n2cpv3np variant is NOT run):
+  nn_x/abl/popfree/finetune.py --variant <v> --out <v>_n2cpv3 --extra n2c_pre_v3 --lr 5e-5 --epochs 6 --decay cos --ema 0.99 --ema_start 0.5 --epochs 4 --u0_singleton
+  (= nn_x/abl/pop1/chain/ft_list.sh with FTV="n2c_pre_v3:n2cpv3" and FTARGS='--decay cos --ema 0.99 --ema_start 0.5 --epochs 4 --u0_singleton';
+  x8 copy nn_x/abl/pop1/x8/ft_list_x8.sh, gpu_ok.sh with ALLOWED_GPUS="<ids>"), one member per GPU on 0/1/4/5.
+COPIES (new files only, cp --update=none): nn_<v>_{trainonly_val,trainonly_test,n2cpv3_val_oof,n2cpv3_test,n2cpv3_test_folds}.npy -> preds/,
+  holdout/nn_<v>_holdout.npy -> preds/holdout/, logs/<v>.log + <v>_n2cpv3_ft.log -> nn/logs/ (for the presub_gate audit). No alias members.
+
+CANDIDATES (member-equal pools exactly as nn_x/abl/pop1/chain/decide9.py computes them: per member per-feed rank-z
+(src/stack_val.feed_rank_z) of the n2cpv3 val OOF (ft branch) and of the train-only val preds (to branch); branch = rank-z of the
+member mean; final val score = 0.5 z(ft) + 0.5 z(to); holdout = rank-z of the mean of the members' train-only holdout rank-z;
+NDCG per feed = src/metrics.ndcg_per_feed; every delta is paired per feed; SE = sd / sqrt(n_feeds)):
+  G3   = F10 (v23_gru_pre2s_s501-506) + F7x (r6_cd_m02_r101-107) + F7x70 (r6_cd_m02_p70k_r101-107)   [20; reference, pick 1]
+  Q2a  = G3 + abl_e10_pop1_s951-954                      [24; existing hedge subs/cand_Q2a_G3pop1_memeq.parquet; reference]
+  Q2a' = G3 + abl_e10_pop1_s955-958                      [24; REPLICATION CHECK, information only]
+  Q2a8 = G3 + abl_e10_pop1_s951-958                      [28; THE CANDIDATE]
+Script: nn_x/abl/pop1/x8/decide_x8.py (one read-out, after all four FT files exist) -> nn_x/abl/pop1/x8/decide_x8.json.
+
+RULE (frozen now): Q2a8 QUALIFIES iff ALL of
+  (a) V(Q2a8) - V(G3) > +1 SE            [SE of the paired per-feed val delta Q2a8 - G3]
+  (b) V(Q2a8) - V(Q2a) >= -1 SE          [SE of the paired per-feed val delta Q2a8 - Q2a]
+  (c) pmix(Q2a8 - G3) >= pmix(Q2a - G3) - 1 SE   [src/pmix.py private-mix weighted means (pmix.wmean_se with W['private']);
+      the SE is the pmix SE of the paired per-feed delta Q2a8 - Q2a, which equals the difference of the two pmix deltas]
+  (d) no val slice of Q2a8 - G3 (M<50, M>=50, Tue, Thu; each with its own paired SE) < -2 SE
+  (e) in-period holdout (train-only pools, 30,000 feeds) Q2a8 - G3 >= -1 SE   [a VETO at -1 SE, not the +1 SE gate of decide9:
+      the holdout lies INSIDE the train period (fresh popularity inputs; it contains only M>=50 feeds, M mean 154) and is known to
+      under-value popularity-light members (CURRENT_STATUS 14:17: Q2a - G3 on it is -0.00002 while its val long-feed gain is
+      +0.00088, z 2.5); it therefore vetoes a loss but is not asked to confirm a gain]
+  (f) src/presub_gate.py PASS, run exactly as the pop1 chain documents:
+      presub_gate.py --sub subs/cand_Q2a8_G3pop1x8_memeq.parquet --val '0.5*ens_Q2a8pop1_ft_val+0.5*ens_Q2a8pop1_to_val'
+        --test '0.5*ens_Q2a8pop1_ft_test+0.5*ens_Q2a8pop1_to_test' --ref_val '0.5*ens_G3_ft_val+0.5*ens_G3_to_val'
+        --ref_test '0.5*ens_G3_ft_test+0.5*ens_G3_to_test' --members <28 members> --ft_suffix n2cpv3
+If (a)-(e) hold: build with nn_x/abl/popfree/build_pool.py Q2a8pop1 cand_Q2a8_G3pop1x8_memeq.parquet <28 members> (REFUSED if
+subs/cand_Q2a8_G3pop1x8_memeq.parquet or preds/ens_Q2a8pop1_* exist), then (f). If any of (a)-(e) fails: nothing is built.
+Nothing is submitted in either case. The pick-1 rule of CURRENT_STATUS section 1 is untouched: a qualifying Q2a8 is a
+recorded candidate (pick-1 ALTERNATE status like Q2a), not a pick-1 replacement.
+
+REPLICATION CHECK (information, no gate): V(Q2a') - V(G3) +- SE, H(Q2a') - H(G3) +- SE, pmix(Q2a' - G3), V(Q2a') - V(Q2a) +- SE;
+within-feed rank-z correlation (Pearson over all val candidates, as decide9's 'family pool z-corr') of the 4-member TRAIN-ONLY
+pool pop1(955-958) vs pop1(951-954), and of each vs the G3 train-only pool (val; holdout too). Also reported: per-member
+train-only val / holdout, FT OOF (best epoch and final EMA, from the FT logs), and the z-corr of Q2a8 / Q2a' to G3.
+
+LOOKS: exactly one read-out of the rule, after the four FT OOF files exist. If fewer than 4 of s955-958 are complete 4 h after
+launch, the read-out uses the complete ones (minimum 2) and says so (Q2a8 then has fewer than 28 members; disclosed).
+HONEST PRIOR: pool gains from 'more seeds of the same family' have been 0 +- 0.0002 at the pool level all day (CURRENT_STATUS
+12:21); Q2a - G3 is +0.00029 +- 0.00031. P(Q2a8 passes (a)) ~ 0.3; P(qualifies on all clauses) ~ 0.2. Expected private effect of
+Q2a8 vs Q2a ~ 0 +- 0.0002. Value: a replication read of the pop1 view (Q2a') and a cleaner 8-seed hedge.

@@ -1,0 +1,83 @@
+=== BLOCK 0  2026-11-15T17:57:37Z  (written BEFORE any labelled number; label-free step 1 is done: out_s1.txt, out_s1b.txt) ===
+RULE (not mine, unchanged): nn_x/w5/logs/E_kd_predeclared.txt block 2026-11-15T17:41:25Z. OPEN iff rho >= 0.5 with the numerator at z >= 2 on the holdout AND the same sign on val;
+ CLOSE iff the upper 95% bound of the numerator is below 25% of the denominator; otherwise UNDECIDED (the rule: one more replay design at most, then closed).
+
+LABEL-FREE FACTS THAT FORCE CHOICES (all [M], no label read)
+ F1 stored order: index 0 = newest (organisers' readme; data.py; data: stored-only events sit before the first anchor, 36.9 vs 12.4 after the last; earlier-only events sit after the earlier snapshot's last anchor, 25.9 vs 0.4).
+ F2 a history is NOT a shifted log: per-type caps (review_integrity INTEGRITY-1) and unstable order of simultaneous events. Exact-shift alignment works on 5% of pairs. I align by LCS on (item, type, source) with tie-swap repair (align_lib.py).
+ F3 `--no_pos` removes the display-position tower only. History tokens carry a learned recency embedding rec = Embedding(256, d) (row norm 2.4-3.0, all four members) and the retrieval values a log2 recency bucket.
+    So: pass (c) shows old events with the position code of slots 129-256 (as the rule intends); pass (d) cannot run as is (position 256 does not exist).
+ F4 qualifying feeds (H = 256, user_id != 0, >= 1 strictly earlier snapshot): holdout 3,235 of 30,000 (the review's power estimate assumed many more), val 2,160, test 4,102 = 14.35%.
+ F5 events OLDER than the stored 256th are few: median 29, >= 128 for 197 holdout / 155 val feeds. Events the earlier snapshots hold and the stored history lacks at any depth (old-only) are more: median 74 / 142, >= 128 for 791 / 1,051.
+ F6 positive check (cap pretended at 192): 0.4-0.5% of recovered events are placement errors; 72% (holdout) / 60% (val) are true stored events 193-256; 27% / 39% are real earlier events the later snapshot does not store at all (per-type caps).
+
+DEFINITIONS
+ qualifying   : H = 256, user_id != 0, >= 1 snapshot of the same user with a STRICTLY smaller timestamp (train / val / test; never a later or equal one). user_id 0 excluded.
+ criterion A  : >= 1 earlier snapshot merged = LCS with the union timeline has >= 16 anchors and an exact contiguous run >= 8. Feeds failing A are dropped from everything.
+ criterion B  : the deepest stored event that is an LCS anchor has index >= 248. Needed for T only.
+ T events     : events of the union timeline after the stored 256th event, newest first (the literal "events immediately older than the stored 256th").
+ U events     : all old-only events of the union timeline, newest first (T is its tail; the rest are events newer than the stored 256th that the stored history lacks).
+ DESIGN 1 (the rule's passes, literal): recovery T, read set R_T = feeds with A, B and n_T >= 1.
+ DESIGN 2 (declared now, because F5 shows design 1 cannot fill the slots; it is what an extended-history arm would feed): recovery U, read set R_U = feeds with A and n_U >= 1.
+
+MEMBERS (held-out: args.holdout = 30000 in each checkpoint): distilled w5_e10_kd05w192_s951, w5_e10_kd05t25w192_s951 (d192); hard-label w5_e10_base_s951, w5_e10_base_s952 (d128).
+ Pool = member-equal mean of per-feed z-scores (nn_x/w5/blend.py feed_z; the project pools score z, not rank z). Families = the two 2-member pools.
+ Inference: fp32 (no autocast), eval mode, nn_x/w5/model.py imported read-only, own subset loader that mirrors SplitData.gather. Holdout feeds get the domain mixture [1 - p_random, p_random, 0] as holdout_eval.py; val feeds none.
+ Fidelity gate (label-free): pass (a) must correlate >= 0.9999 with the stored predictions of each member (stored ones are bf16) on both sets; otherwise stop.
+
+PASSES (history shown to the model; every in-model history input follows the history shown, exactly as the loader's max_hist does; the 34 precomputed xt inputs are NEVER changed)
+ a     stored 256 events.
+ b     newest 128 (H = 128).
+ c     newest 128 + the first n = min(n_rec, 128) recovered events in slots 129..128+n (H = 128 + n). cT with T, cU with U.
+ am    stored newest 128 + n (length-matched stored reference; = a when n = 128).
+ e     placebo: newest 128 + n events of a DONOR: another user's read-set feed of the same set with >= n recovered events, drawn with rng seed 20261115; the donor's first n recovered events of the same design.
+ b192, c192 (second line): newest 192; newest 192 + min(n_rec, 64) recovered events. am192 likewise.
+ g     calibration on stored data: newest 128 + stored events 193-256 shown in slots 129-192 (H = 192), read against b192: the rho this design returns for events that ARE stored but shown 64 slots too shallow.
+ d1    information: stored 256 + n recovered events as one history of 256 + n tokens; rec index clamped at 255 for positions >= 256; retrieval recency bucket as coded (bucket 8 from position 255 on);
+       all in-model dense inputs held at their pass-(a) values (so the extension acts through the history encoder, the cross-attention with its cosine bias and the top-16 retrieval only).
+ d2    as d1 with the dense inputs recomputed over all 256 + n events, H held at 256.
+ dP    placebo of d1 with the donor's events.
+ a, b, b192, g run on ALL capped feeds of the holdout and of val; the others on the read sets.
+
+STATISTICS
+ Per-feed NDCG = src/metrics.py. Differences paired per feed; SE cluster-robust by user; z = mean / SE. Bootstrap of ratios: 2,000 resamples of users, seed 11, percentile 95% interval.
+ rho      = [N(c) - N(b)] / [N(a) - N(b)]                 the rule's statistic.
+ ceiling  = [N(am) - N(b)] / [N(a) - N(b)]                what rho would be if the n recovered events were worth exactly what the stored events in the same slots are (mechanical bound from partial fill).
+ rho_m    = [N(c) - N(b)] / [N(am) - N(b)]                length-matched share (per-slot worth of recovered events relative to stored ones).
+ rho_e    = the same with e in place of c; c - e paired    worth of the user's OWN old events over foreign ones.
+ "upper 95% bound of the numerator" = mean + 1.96 SE (the 1.645 form is printed too). Denominator at its point estimate.
+VERDICT MAPPING (thresholds of the rule untouched)
+ First line of my verdict = design 1, rho on R_T of the HOLDOUT with the literal denominator N(a) - N(b); sign = numerator on R_T of val.
+ Because of F5 the ceiling of design 1 may be below 0.5 (then the literal rule cannot return OPEN whatever the events are worth). I therefore also print, with the same thresholds and without calling any of them the verdict:
+   design 1 on the full-fill subset n_T >= 128 (pass c exactly as the rule words it), design 1 length-matched (rho_m), design 2 literal / full-fill / length-matched.
+ If design 1 is UNDECIDED, design 2 is reported as "the rule's one more replay design, already run"; whether it uses up that allowance is the lead's call.
+ Secondary, descriptive: by number filled (1-31, 32-63, 64-127, 128), by family, pooled holdout + val, 192 + 64 line, calibration g, d1 / d2 / dP minus a.
+SIZE (step 4): effect per feed of a bucket of n (1-31, 32-63, 64-127, 128) x share of the segment's feeds in that bucket (label-free alignment on val / public-like / private-like test days, boundary 1790497920), summed;
+ two effects: N(c) - N(b) (worth when shown in trained slots; an upper-side proxy for a retrained model, assumes no decay beyond the cap) and N(d1) - N(a) (direct, untrained). Effects estimated on holdout and val read sets pooled; holdout-only and val-only printed.
+ Also the plain form: mean effect over ALL qualifying feeds (zeros for feeds outside the read set) x share of qualifying feeds.
+EXPECTATIONS [I], written before any number: ceiling of design 1 about 0.3-0.4; rho_m in 0.3-0.8; placebo <= 0; d1 - a within +-0.001; verdict line UNDECIDED for lack of feeds (denominator about 3-4 SE on 2,358 feeds).
+LEAK / HYGIENE: no later or same-time snapshot; user_id 0 excluded; labels read only in s3_read.py (NDCG of finished score files); members never trained on the holdout feeds; val labels used only to evaluate (no fitting).
+
+=== BLOCK 1  2026-11-15T18:01:24Z  (still before any labelled number; s2_replay.py reads no label) ===
+Implementation choices fixed after the CPU smoke test (60 feeds per set, pass a only compared with stored predictions; no label):
+ - A recovered event carries the item embedding, category, type and source stored with ITS OWN snapshot (the earlier snapshot's split table). Label-free check: the same item has an identical vector in the train and val tables
+   for 80-87% of events and a near-identical one otherwise (cosine of the non-identical pairs: median 1.000, 5% quantile 0.985; 0.19% below 0.9).
+ - Fidelity gate on the smoke sample: flat correlation of pass (a) with the stored predictions 0.999996-1.000000 for all four members on both sets (stored = bf16, mine = fp32). PASS.
+ - Padded history slots point at the feed's first event and are masked, as the loader does; candidate padding likewise. Batches: feeds sorted by M, 16,384 candidates per batch (the model has no batch-dependent layer).
+ - Donor draw: one rng (seed 20261115), design T first, then U, feeds in read-set order; donor = uniform among read-set feeds of another user_id with at least as many (capped at 128) recovered events.
+ - Compute: one process on GPU N under the lane lock (blocking flock with a 30-minute limit, <= 3 compute processes and >= 60 GB free at launch, lock held until the process is visible), inference only.
+   If no slot within 30 minutes: the same script on CPU (12 threads; the smoke test shows the full job fits in about an hour on CPU, so no subset is needed).
+ - s3_read.py is written after the scores exist but reads them only through the statistics declared in block 0; any statistic added later is marked POST-HOC in the report.
+
+=== BLOCK 2  2026-11-15T18:14:57Z  (record after the read; nothing in blocks 0-1 was changed) ===
+ - First and only labelled read of the rule: s3_read.py at 2026-11-15T18:11Z -> out_s3.txt (run once; no statistic of block 0 was altered, none re-run with other settings).
+ - Added after that read, both marked in the report: s3b (integrity: my pass b / b192 / a against the review's CPU files on the capped val feeds; am = a on full-fill feeds) and
+   s3c_pooled.py (the declared "pooled holdout + val" form for the contrasts s3_read.py printed per set only: c - e, c - am, e - b, d, g; and the count of members with a positive numerator),
+   s3d_table.py (NDCG levels of every pass on the read sets, for the report's table). These add no new decision statistic.
+ - Disclosure: the bucket and family lines of out_s3.txt carry the label "by the rule's thresholds: OPEN / UNDECIDED" for every row because the same print function is used; only the row declared in block 0
+   (design 1, pool4, literal, holdout) is the verdict. Rows that print OPEN (design 1 hard-label family; design 1 bucket 1-31; design 2 distilled family) are 3 of 30 sub-rows and are reported as such, not as verdicts.
+
+=== BLOCK 3  2026-11-15T18:15:24Z  CORRECTION of a count in block 2 (text of block 2 left as written) ===
+ - out_s3.txt prints a threshold label on 36 rows: 30 UNDECIDED, 6 OPEN, 0 CLOSE. The 6 OPEN rows are sub-rows, not verdicts: design 1 hard-label family (literal and length-matched: the same numerator),
+   design 1 pool4 bucket "filled 1-31", design 2 distilled family (literal and length-matched), design 2 hard-label bucket "filled 64-127". With 36 rows at these thresholds a few OPEN labels are expected by chance.
+   The verdict row declared in block 0 (design 1, pool4, literal, holdout) reads UNDECIDED; the same row of design 2 reads UNDECIDED.

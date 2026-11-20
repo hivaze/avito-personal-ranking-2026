@@ -1,0 +1,92 @@
+[
+ {
+  "name": "public-progress",
+  "svg": "public-progress.svg",
+  "png": "public-progress.png",
+  "title": "Public NDCG went from 0.3739 to 0.3953 in nine days; 0.018 of the 0.021 came on the first day",
+  "caption": "All 40 scored files in the order their public score was logged, 11 to 19 November 2026 (UTC). The blue step line is the team best; the ringed points are the two final picks, FD16P20@m0.4_0.2 and FDX16P20:ps. The two horizontal lines are places 1 and 2 on the last fetched board snapshot (19 November, 03:34 UTC), with the team at rank 9 of 541.",
+  "alt": "Two stacked scatter plots of public NDCG against submission order. Top: all 40 files; the team best climbs from 0.3739 to 0.3921 over the six files of 11 November and then flattens. Bottom: detail of 12 to 19 November between 0.392 and 0.3987; the team best steps up eight more times, to 0.39282 and then 0.39345 with pools of rankers trained on clicks, 0.39449 with distilled students, 0.39501 with the popularity-light blend W8P20, 0.39521 with FD16P20@m0.4_0.2 (pick 1) on 17 November and 0.39526 with FDX16P20:ps (pick 2) on 19 November. On the board of 19 November, place 2 is at 0.398058, the leader at 0.398256, and the team is at rank 9 of 541.",
+  "source_note": "Data: docs/figures/data/public_scores.csv, leaderboard.csv. Board last fetched 19 Nov 2026, 03:34 UTC."
+ },
+ {
+  "name": "val-vs-public",
+  "svg": "val-vs-public.svg",
+  "png": "val-vs-public.png",
+  "title": "Validation predicts the public score of a file to about 0.0006; files built on all-data members land 0.0003 below the line on average",
+  "caption": "Validation NDCG against public NDCG for the 38 scored files that have a clean validation score. The line public = 0.0074 + 0.963 × validation was fitted on the 18 files scored by 14 November (residual sd 0.0006). On the right, 12 of the 16 files whose members were trained on all train feeds (the 68-member union included) sit below the line, by 0.0003 on average; the 20 files whose members hold out 30,000 train feeds average +0.00003.",
+  "alt": "Two scatter plots of public NDCG against validation NDCG. Left: 38 files from validation 0.382 to 0.403 lie along a straight line from public 0.374 to 0.395. Right: enlargement of validation 0.3985 to 0.4037; files whose members hold out 30,000 train feeds scatter on both sides of the line within about 0.001, and 12 of the 16 files built on all-data members are below it. Pick 1, FD16P20@m0.4_0.2, is below the line at validation 0.40293 and public 0.39521; pick 2, FDX16P20:ps, is below it at 0.40286 and 0.39526.",
+  "source_note": "Data: docs/figures/data/public_scores.csv, level_line.json. Scores: validation 14,423 feeds, public 8,562."
+ },
+ {
+  "name": "data-timeline",
+  "svg": "data-timeline.svg",
+  "png": "data-timeline.png",
+  "title": "Test feeds are served 7 to 10 days after the last train day: popularity inputs are 9 to 11 days old there, 1.75 days on the holdout",
+  "caption": "Calendar of the data in Moscow time, September 2026, and the mean age of the popularity inputs in each evaluation set: days since a candidate item was last seen in train, over items seen in train. Each line ends at the mean time of the set's feeds and is as long as that age.",
+  "alt": "Top: a calendar strip from 6 to 29 September 2026. Train covers 6 to 14 and 17 to 19 September, validation Tuesday 22 and Thursday 24, test 26 to 29; the public part of test ends on Sunday 27 at 11:32 and the rest is private. Bottom: four horizontal lines on the same day scale, 1.75 days for the holdout, 5.69 for validation, 9.34 for public and 11.23 for private; the last three all start around 17 September, inside the last train days.",
+  "source_note": "Data: docs/figures/data/calendar.csv, staleness.csv. Feed counts and times from the flattened splits."
+ },
+ {
+  "name": "pipeline",
+  "svg": "pipeline.svg",
+  "png": "pipeline.png",
+  "title": "Nine stages from raw parquet to a checked submission file; the GPU stages add up to about 150 hours, the students alone to 82",
+  "caption": "The stages of the final pipeline in the order they run, with the hardware and the run time of each in the original run. GPU-hours are wall-clock sums over runs on GPUs shared by several processes, so they are upper bounds.",
+  "alt": "A vertical chain of nine boxes between the competition data (17.9 GiB zipped) at the top and the submission file at the bottom: flatten, exploration probability, candidate inputs, teacher rankers, teacher files, students, fine-tune, ensemble and file, pre-submission gate. A column on the right gives hardware and run time in the original run: the CPU stages take seconds to about half an hour, encoder pre-training 5.2 GPU-hours, the 25 teacher rankers 58.0, the 20 students 81.8 and their fine-tunes 6.6.",
+  "source_note": "Data: docs/figures/data/pipeline_stages.csv, from the run logs of the final members."
+ },
+ {
+  "name": "architecture",
+  "svg": "architecture.svg",
+  "png": "architecture.png",
+  "title": "The ranker: five attention blocks of width 192 over the user's history and the candidates of the feed, 2.1 million parameters",
+  "caption": "The ranker used by every final member. Each candidate token is built from the item vector and 104 dense columns, picks up values from its 16 nearest history items, and then passes twice through a cross-attention block over the encoded user and history and a self-attention block over the other candidates of the feed, which the lab calls set attention.",
+  "alt": "Box-and-arrow diagram in two columns. Left: the user vector and up to 256 history events become a user token and history tokens of width 192, encoded by one self-attention block. Right: up to 300 candidates per feed become a dense block of 104 columns and a candidate token of width 192; a retrieval step adds values from the 16 nearest history items; two pairs of blocks follow, each a cross-attention block and a self-attention block over the candidates; a score head gives one score per candidate and an auxiliary head, used in training only, predicts the display order.",
+  "source_note": "Data: docs/figures/data/model.json, read from the model code and the checkpoints of the final members."
+ },
+ {
+  "name": "distillation",
+  "svg": "distillation.svg",
+  "png": "distillation.png",
+  "title": "Half clicks, half teacher: one student gained 0.0026 on validation, the first file of students 0.0010 on the public board",
+  "caption": "How a student's training target is made. The logits of 11 or 25 rankers trained on clicks are centred per feed and averaged; the target of a feed is half the normalised clicks and half the softmax of that teacher. Gains: one student against the same ranker trained on clicks (width 128, 4 seeds), and the first file of 8 full-view students against the best earlier file.",
+  "alt": "Box-and-arrow diagram. Top row: 25 rankers trained on clicks produce logits on 246.7 million train candidates, which are centred per feed and averaged into a teacher file. Middle row: the clicks of a feed and the softmax of the teacher scores of that feed enter the training target with weight 0.5 each. Below: the student, the same ranker at width 192, is trained on that target. Three figures at the bottom: plus 0.00257 validation NDCG and plus 0.00200 holdout NDCG for one student, plus 0.00103 public NDCG for the first file of students.",
+  "source_note": "Data: docs/figures/data/distillation.json, from the decision log entries of 14 Nov 2026."
+ },
+ {
+  "name": "ensemble",
+  "svg": "ensemble.svg",
+  "png": "ensemble.png",
+  "title": "Each final file is a fixed-weight mix of two student pools and two branches; pick 1 gives the popularity-light pool 0.4 on short feeds and 0.2 on long ones",
+  "caption": "How a final file is assembled from member predictions. Scores are z-scored within each feed before every average. In each branch the popularity-light pool enters at weight w and the full-view pool at 1 − w, with w = 0.4 on feeds of fewer than 50 candidates and 0.2 on the others in pick 1, FD16P20@m0.4_0.2 (w = 0.2 on every feed in FDX16P20:ps, FD16P20 and W8P20). The fine-tuned and train-only branches are mixed 0.5 / 0.5, and the file holds the rank within the feed. Validation NDCG is given for FD16P20@m0.4_0.2.",
+  "alt": "Box-and-arrow diagram. On the left, two groups, fine-tuned predictions and train-only predictions, each with a pool of 16 full-view students and a pool of 4 popularity-light students. In each group the two pools are mixed with weights 1 − w and w into a branch, w = 0.4 on feeds of fewer than 50 candidates and 0.2 on the others: validation NDCG 0.40139 for the fine-tuned branch and 0.40208 for the train-only branch. The branches are mixed 0.5 and 0.5 into the final score, validation NDCG 0.40293, which is ranked within each feed and written to the submission file of 2,904,806 rows.",
+  "source_note": "Data: docs/figures/data/ensemble.json. Validation: 14,423 feeds; fine-tuned predictions are out-of-fold."
+ },
+ {
+  "name": "near-copies-noise",
+  "svg": "near-copies-noise.svg",
+  "png": "near-copies-noise.png",
+  "title": "The public board cannot separate the 17 files of the final family: every difference to FD16P20 is within 1.1 paired standard errors",
+  "caption": "Public NDCG (8,562 feeds) of the 17 scored files built as full-view distilled students plus popularity-light students, scored 15 to 19 November 2026. Bars show one and two paired standard errors of each file's difference to FD16P20, pick 1 until 18 November; every two-standard-error bar reaches the score of FD16P20. Short feeds have fewer than 50 candidates, long feeds 50 or more.",
+  "alt": "Dot plot of 17 files against public NDCG from 0.39436 to 0.39526. Pick 1, FD16P20@m0.4_0.2, is number 3 at 0.39521; pick 2, FDX16P20:ps, is highest at 0.39526; FD16P20 at 0.39489 is number 8 and carries the vertical reference line. Every other file has error bars of one and two paired standard errors, 0.00026 to 0.00056 per standard error, and every two-standard-error bar crosses the line at FD16P20. The largest differences are +0.00037 (+0.8 standard errors) and −0.00054 (−1.1).",
+  "source_note": "Data: docs/figures/data/near_copies.csv. Paired SE as logged; for files of 17-19 Nov recomputed the same way."
+ },
+ {
+  "name": "experiments-outcomes",
+  "svg": "experiments-outcomes.svg",
+  "png": "experiments-outcomes.png",
+  "title": "Of 312 catalogued ideas, 58 were adopted; 155 had no measurable effect",
+  "caption": "The 312 entries of the experiment catalogue by theme and outcome. Several entries bundle many arms (13 block designs, 63 tricks, 95 rule families), so the number of distinct things tried is larger.",
+  "alt": "Horizontal stacked bars for 17 themes, longest first: Neural architecture and capacity 38 ideas; Optimiser, schedule and regularisation 33; Popularity, staleness, display order 30; Inputs and features 27; Validation protocol and decision rules 24; down to External data and outside research 6. Each bar is split into adopted, helped then superseded, no effect, hurt, inconclusive and not run. No effect is the largest part of 13 of the 17 bars; Validation protocol and decision rules has the most adopted ideas, 13; Optimiser, schedule and regularisation has the most that hurt, 14.",
+  "source_note": "Data: docs/figures/data/experiments_outcomes.csv, counted from docs/07-what-failed.md by count_catalogue.py."
+ },
+ {
+  "name": "work-loop",
+  "svg": "work-loop.svg",
+  "png": "work-loop.png",
+  "title": "The lead session stopped after each request and waited for the person; an automated harness would close the loop and add its own checks",
+  "caption": "Top: how the nine days were run. The person sent about 110 short requests and questions. After each request the lead session wrote down results and options and stopped until the next message. Bottom: the design of a stronger setup, a loop that proposes, runs, evaluates, keeps or drops and archives without a message, with a second model as critic and a scheduled look back over the decision ledger. The lower panel is a proposal; none of it ran.",
+  "alt": "Two box-and-arrow diagrams, one above the other. Top, how this entry was run: a loop from the person, who sends a short request (about 110 in nine days), to the lead session (one session, its context summarised 21 times, a status log and a decision ledger as memory), to about 50 multi-agent workflows, to experiments on GPUs, to results and options written down, and back to the person, who uploads up to 5 files a day and passes the public score back. A marker in the person's box says that the loop waits there for the next message. Bottom, what an automated harness would add: a closed loop of five steps inside a frame, propose (checked against the catalogue of closed ideas), run (with a noise probe), evaluate (on validation and the holdout, under a rule written first), keep or drop, and archive, from which the next round starts without a message. Outside the frame stand the person, who sets the goal and the budget and uploads the files, a second model as critic, and a scheduled look back over the ledger.",
+  "source_note": "Data: docs/figures/data/work_loop.json."
+ }
+]

@@ -1,0 +1,183 @@
+{
+ "md5_6b": "4ff0b0bf4d3b26038cc103513ba88a77",
+ "md5_6c_builder": "dbe5a1387569ecbcb832de6e4cc97297",
+ "md5_6c_w5": "dbe5a1387569ecbcb832de6e4cc97297",
+ "md5_equal_copy": true,
+ "changed_lines_by_region": {
+  "minus": {
+   "docstring": [
+    1
+   ],
+   "def:setup_hzcd": [
+    170
+   ]
+  },
+  "plus": {
+   "docstring": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+   ],
+   "between(comment/blank)": [
+    66,
+    67,
+    68,
+    71
+   ],
+   "assign:ENC_TO_HZ": [
+    69,
+    70
+   ],
+   "assign:ENC_GROUPS": [
+    72
+   ],
+   "def:luo_cols": [
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92
+   ],
+   "def:setup_hzcd": [
+    192,
+    193,
+    194,
+    199
+   ]
+  }
+ },
+ "R1a_regions_touched": [
+  "assign:ENC_GROUPS",
+  "assign:ENC_TO_HZ",
+  "between(comment/blank)",
+  "def:luo_cols",
+  "def:setup_hzcd",
+  "docstring"
+ ],
+ "R1a_pass": true,
+ "between_lines_text": [
+  "# 6c: encoder-score inputs, swapped only when <HZ_DIR>/train/<file>.npy exists (hz2n view). xt_transform(hz name) == xt_transform(stored name) by branch:",
+  "# *_z -> clip +-5; pre2_hz_fe / pre2_hz_fe_s / pre2_hz_new / pre2_hz_new_s -> clip +-10 (as the stored names); pre2_hz_fe_has is a stored 0/1 float file",
+  "# (clip +-10 is the identity on it), value-identical to attach_xt's \"has:\" branch of the overridden score.",
+  "# 6c: each head is all-or-nothing among the inputs the model reads (a partial head is refused); the has: flag is optional"
+ ],
+ "top_only_in_6c": [
+  "assign:ENC_GROUPS",
+  "assign:ENC_TO_HZ"
+ ],
+ "top_only_in_6b": [],
+ "top_order_6b": [
+  "docstring",
+  "import:os",
+  "import:time",
+  "import:numpy",
+  "import:torch",
+  "assign:ROOT",
+  "assign:HZ_DIR",
+  "assign:LUO_TO_HZ",
+  "assign:EXTRA_TO_HZ",
+  "assign:KEEP_PATH",
+  "def:hz_path",
+  "def:luo_cols",
+  "def:xt_transform",
+  "def:load_hz",
+  "def:apply_keep",
+  "def:HzTrainView",
+  "def:hz_stats",
+  "def:setup_hzcd",
+  "def:save_holdout_hz"
+ ],
+ "top_order_6c_minus_new": [
+  "docstring",
+  "import:os",
+  "import:time",
+  "import:numpy",
+  "import:torch",
+  "assign:ROOT",
+  "assign:HZ_DIR",
+  "assign:LUO_TO_HZ",
+  "assign:EXTRA_TO_HZ",
+  "assign:KEEP_PATH",
+  "def:hz_path",
+  "def:luo_cols",
+  "def:xt_transform",
+  "def:load_hz",
+  "def:apply_keep",
+  "def:HzTrainView",
+  "def:hz_stats",
+  "def:setup_hzcd",
+  "def:save_holdout_hz"
+ ],
+ "top_order_same": true,
+ "top_differing": [
+  "docstring",
+  "def:luo_cols",
+  "def:setup_hzcd"
+ ],
+ "strip": {
+  "luo_cols": {
+   "removed_6c_statements": [
+    [
+     85,
+     86,
+     "enc = [(i, n, ENC_TO_HZ[n]) for i, n in enumerate(xt_names or [])  # 6c"
+    ],
+    [
+     87,
+     91,
+     "if enc:  # 6c: refuse a partial head (every score-derived input of a swapped head that the model reads must ha"
+    ],
+    [
+     92,
+     92,
+     "cols += enc  # 6c"
+    ]
+   ],
+   "identical_after_strip": true,
+   "residual": null
+  },
+  "setup_hzcd": {
+   "removed_6c_statements": [
+    [
+     192,
+     192,
+     "enc = [c for c in cols if c[1] in ENC_TO_HZ]  # 6c"
+    ],
+    [
+     193,
+     194,
+     "enc_msg = (f\"; ENCODER-SCORE VIEW ON: {len(enc)} of them are encoder-score columns {[c[1] for c in enc]} <- {["
+    ]
+   ],
+   "identical_after_strip": false,
+   "residual": [
+    [
+     "'/train/it_hist_hz_*.npy in place of the LUO xt columns, same attach_xt scaling (log1p, fp16); [6b: '",
+     "'/train/it_hist_hz_*.npy in place of the LUO xt columns, same attach_xt scaling (log1p, fp16); [6c: '"
+    ],
+    [
+     "Constant",
+     "FormattedValue"
+    ],
+    [
+     "n_nodes",
+     313,
+     316
+    ]
+   ]
+  }
+ },
+ "R1b_pass": true
+}

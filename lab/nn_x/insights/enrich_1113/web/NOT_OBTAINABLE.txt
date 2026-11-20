@@ -1,0 +1,22 @@
+External / additional data that WOULD help the within-feed ranking but is NOT obtainable (why):
+1. Listing price and price tier (the strongest item attribute in every classifieds ranker; trivago/Expedia/Avito'24 winners use price-rank-in-list).
+   Not in the dataset; item_id is anonymised (no mapping to a public listing), item embeddings are opaque int8.
+2. Seller identity / seller type (B2C dealer vs private), seller rating, number of listings per seller.
+   Not in the dataset; cannot be recovered: posting-time 128-s slots hold 130-200 unrelated listings (feat_life_ §1), so batches cannot be attributed.
+3. Listing text, title, photos, microcategory and attributes (brand, model, size, condition).
+   Not present; the only content signal is the 128-d embedding, already fully used by the ranker (cosine, retrieval, pre2).
+4. Timestamps of history events (time-since-last-event, session boundaries, dwell time, Hawkes / Time2Vec features).
+   Only the rank hpos is given; retention is type-dependent (CODES §1.1), so hpos is not a clock.
+5. The item's region / city (population, distance to the user, local supply).
+   Only the user x item-region affinity f2 is given; the K2 region key covers ~60K frequent train items (38% of val feeds get a
+   home component) and carries no name, population or coordinates; time-zone shifts are inferable for 31 components only.
+6. Real-time production counters (impressions / clicks in the last minutes, the production ranker's score, exposure counts
+   behind f5), the item's generator / retrieval source, its production position in val/test.
+   Not published; f5 is an unsmoothed rate without its denominator.
+7. Public category-level demand series for Sep 2026 at daily resolution (Yandex Wordstat, Avito internal analytics).
+   Wordstat needs a login and gives search-query, not category, series; Avito press releases are monthly/quarterly and category-coarse;
+   even the in-sample oracle of a category x day x hour series is <= +0.0006 on val (nn_x/audit/external/findings.txt), so no
+   external series can exceed that.
+8. The private-test period's own events (Sep 26-29): later snapshots are banned (leak rule) and neutralised on test by the organisers.
+9. Device / platform / app version, push or deep-link context (source s0 = unknown surface): not encoded (CODES §2 platform check).
+10. Weather / local events at the USER's location: the user's region is unknown beyond the K2 component (no name).

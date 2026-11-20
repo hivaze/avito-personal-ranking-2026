@@ -1,0 +1,237 @@
+{
+ "checks": [
+  {
+   "name": "ref_pre_valcd copies intact (md5.txt: train.py, lane.sh, test_w5.py, test_trunc_lifts.py, test_hzcd.py, strip_hzcd.py)",
+   "ok": true,
+   "info": "{'lane.sh.txt': True, 'strip_hzcd.py.txt': True, 'test_hzcd.py.txt': True, 'test_trunc_lifts.py.txt': True, 'test_w5.py.txt': True, 'train.py.txt': True}"
+  },
+  {
+   "name": "train.py minus the wave-7 statements (exact set) minus the valcd statements (exact set) == previous train.py (AST, docstrings stripped)",
+   "ok": true,
+   "info": "removed {'import cd_arms7': 1, 'add_argument --val_mix': 1, 'add_argument --val_fold': 1, 'valcd = None': 1, 'if a.val_mix > 0': 1, 'if valcd is not None and step >= t_cool and valcd.draw(is_pool)': 1, 'if valcd is not None and valcd.is_val': 1, 'if valcd is not None': 2}; w7 {'import cd_arms8': 1, 'add_argument --rdrop_cd': 1, 'add_argument --sam_cd': 1, 'rdrop, sam = None, None': 1, 'if a.rdrop_cd > 0': 1, 'if a.sam_cd > 0': 1, 'if rdrop is not None and step >= t_cool': 1, 'if sam is not None and step >= t_cool': 1, 'if rdrop is not None': 1, 'if sam is not None': 1}"
+  },
+  {
+   "name": "parse(): val_mix default 0.0, val_fold -1 (rdrop_cd 0 / sam_cd 0: later flags); every other default == the previous parser",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "lane.sh DRY: all 61 previous jobs print byte-identical commands to the previous lane.sh",
+   "ok": true,
+   "info": "61 commands"
+  },
+  {
+   "name": "B:valcd:<r>:<k> (101-104 x 0-4) == B:m02ref:<r> + {val_mix 0.01, val_fold k}; variant w5_cd_valcd_r<r>_f<k>; CDSEED 900+r; init v17_pre2s_s<r>@77500; m02 0.02, 2 epochs, cooldown_frac 1.0, select_on holdout",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "malformed valcd jobs refused (missing / bad fold, 4th field on another arm, stage A / E, root out of range)",
+   "ok": true,
+   "info": "{'B:valcd:101': 1, 'B:valcd:101:5': 1, 'B:valcd:101:x': 1, 'B:m02ref:101:3': 1, 'A:valcd:23': 1, 'E:valcd:951': 1, 'B:valcd:108:0': 1}"
+  },
+  {
+   "name": "bash -n lane.sh",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "setup_valcd: one call, behind `if a.val_mix > 0`, in main()",
+   "ok": true,
+   "info": "[['if a.val_mix > 0', 'def main']]"
+  },
+  {
+   "name": "the setup block's body is exactly `valcd, prand = setup_valcd(a, tr, va, prand, hold, t_cool, total, log, eval_ndcg)` (the only statement that rebinds prand)",
+   "ok": true,
+   "info": "body ['valcd, prand = setup_valcd(a, tr, va, prand, hold, t_cool, total, log, eval_ndcg)']; prand assignments ['prand = None', 'prand = torch.from_numpy(prand_np).to(dev)', 'valcd, prand = setup_valcd(a, tr, va, prand, hold, t_cool, total, log, eval_ndcg)']"
+  },
+  {
+   "name": "order: setup_valcd after setup_wave5 and setup_hzcd (prand captured by them is the original) and before the training loop",
+   "ok": true,
+   "info": "{'a.val_mix > 0': 419, 'valcd is not None': 522, 'valcd is not None and step >= t_cool and valcd.draw(is_pool)': 451, 'valcd is not None and valcd.is_val': 500}"
+  },
+  {
+   "name": "the loop block: inside the training loop, body `b, is_pool = valcd.gather(valcd.next()), True`, placed after the gather statement and before the aug / dense statements",
+   "ok": true,
+   "info": "['b, is_pool = (valcd.gather(valcd.next()), True)']"
+  },
+  {
+   "name": "the loss block: inside the training loop after the optimiser steps, body `valcd.add_loss(loss.item())`",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "valcd method calls: draw 1, next 1, gather 1, add_loss 1, summary 2 (eval + selected checkpoint)",
+   "ok": true,
+   "info": "{'draw': 1, 'add_loss': 1, 'summary': 2, 'gather': 1, 'next': 1}"
+  },
+  {
+   "name": "`valcd`: 13 Name nodes (init, setup target, loop test 2 + body 2, loss test 2 + body 1, 2 log tests + 2 bodies)",
+   "ok": true,
+   "info": "['(valcd, prand)', 'valcd = None', 'valcd is not None', 'valcd.add_loss', 'valcd.draw', 'valcd.gather', 'valcd.is_val', 'valcd.next', 'valcd.summary']"
+  },
+  {
+   "name": "train.py: eval_subset / predict / feature_stats / save_* never take valcd",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "no other nn_x/w5 module imports cd_arms7 (w5_eval_valcd.py reads val_folds read-only; predict / eval / holdout_eval / stale_pred / finetune untouched)",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "common.py / model.py / data.py contain no valcd code",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms7.py imports only time / numpy / torch / sklearn (no GPU guard; unit tests call the real functions)",
+   "ok": true,
+   "info": "['numpy', 'sklearn', 'time', 'torch']"
+  },
+  {
+   "name": "guards: val_mix 0 at the defaults; the loop test is False at any step when valcd is None (no attribute access)",
+   "ok": true,
+   "info": "{0: False, 1: False, 12: False, 19669: False}"
+  },
+  {
+   "name": "val_mix 0.0 / val_fold -1 in every existing DRY command (61)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "val_folds == finetune.py's construction (inline GroupKFold(5), user-0 singletons); fold id k == finetune's ho_f of iteration k",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "fold sizes (2885, 2885, 2885, 2884, 2884) == (2885, 2885, 2885, 2884, 2884)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "every non-0 user is in exactly one fold (user-grouped); user-0 feeds spread over the folds",
+   "ok": true,
+   "info": "users 13740, user-0 feeds 658 by fold [132, 132, 132, 131, 131]"
+  },
+  {
+   "name": "deterministic: a second call gives the same folds",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "read-out reference files exist (28: m02ref @last val / test / holdout; r6 m02 n2cpv3 oof / test, train-only val / test)",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "the FT reference OOF file has one score per val candidate",
+   "ok": true,
+   "info": "(1389971,)"
+  },
+  {
+   "name": "ValPool feeds = fold != k, oof = fold == k (disjoint, complete)",
+   "ok": true,
+   "info": "185 cooldown / 44 OOF of 229"
+  },
+  {
+   "name": "draw(): ~p on non-pool steps (0.3 +- 0.02 over 20000), never on pool steps; is_val mirrors the last draw",
+   "ok": true,
+   "info": "rate 0.3018"
+  },
+  {
+   "name": "next(): only fold != k feeds; every completed pass is a permutation of exactly the cooldown feeds; passes counted",
+   "ok": true,
+   "info": "3 complete passes, 62 batches"
+  },
+  {
+   "name": "gather(): every key of SplitData.gather unchanged except fidx (+ n_train); added dom rows (0, 1, 0) float32 [B, 3] and pos = arange(Mx) int64 [B, Mx]; no other keys",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "y == val cand_target rows of the batch (labels of the val feeds)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "leak guard: gather() of an OOF (fold k) feed raises",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "exact train.py K9 aux statements: aux term == 0 exactly on a val batch (fw_aux = 1 - p_random = 0 via the extended vector, batch norm); non-zero on a train-like batch",
+   "ok": true,
+   "info": "val 0.0 train-like 3.0941"
+  },
+  {
+   "name": "... and with --aux_norm feed (AUXF) the val-batch aux term is 0 too",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "summary(): val batches / passes / mean loss and OOF (fold k) vs in-sample NDCG in one line",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "loop test: valcd None -> False at every step (no draw call); valcd set, t_cool 12 -> draw() called exactly once per step >= 12 with that step's is_pool, result = draw()",
+   "ok": true,
+   "info": "calls 12"
+  },
+  {
+   "name": "loop body replaces the gathered batch and marks the step as a pool step",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "setup_valcd refuses 17 bad configurations before building anything (no log line written)",
+   "ok": true,
+   "info": "{}"
+  },
+  {
+   "name": "positive call: extended p_random = train p_random ++ ones(n_val) (same dtype / device); pool feeds = fold != 2, OOF = fold == 2; pool RNG seed = seed + 2; dom (0, 1, 0)",
+   "ok": true,
+   "info": "pool 11538 / oof 2885"
+  },
+  {
+   "name": "log line: fold / sizes / batches per pass / expected val batches (p * (1 - mix) * steps) / token / fidx offset",
+   "ok": true,
+   "info": ""
+  }
+ ],
+ "dry_new": [
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r101_f0 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1001 --val_mix 0.01 --val_fold 0",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r101_f1 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1001 --val_mix 0.01 --val_fold 1",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r101_f2 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1001 --val_mix 0.01 --val_fold 2",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r101_f3 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1001 --val_mix 0.01 --val_fold 3",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r101_f4 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1001 --val_mix 0.01 --val_fold 4",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r102_f0 --init <repo>/nn/ckpt/v17_pre2s_s102@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1002 --val_mix 0.01 --val_fold 0",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r102_f1 --init <repo>/nn/ckpt/v17_pre2s_s102@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1002 --val_mix 0.01 --val_fold 1",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r102_f2 --init <repo>/nn/ckpt/v17_pre2s_s102@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1002 --val_mix 0.01 --val_fold 2",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r102_f3 --init <repo>/nn/ckpt/v17_pre2s_s102@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1002 --val_mix 0.01 --val_fold 3",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r102_f4 --init <repo>/nn/ckpt/v17_pre2s_s102@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1002 --val_mix 0.01 --val_fold 4",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r103_f0 --init <repo>/nn/ckpt/v17_pre2s_s103@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1003 --val_mix 0.01 --val_fold 0",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r103_f1 --init <repo>/nn/ckpt/v17_pre2s_s103@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1003 --val_mix 0.01 --val_fold 1",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r103_f2 --init <repo>/nn/ckpt/v17_pre2s_s103@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1003 --val_mix 0.01 --val_fold 2",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r103_f3 --init <repo>/nn/ckpt/v17_pre2s_s103@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1003 --val_mix 0.01 --val_fold 3",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r103_f4 --init <repo>/nn/ckpt/v17_pre2s_s103@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1003 --val_mix 0.01 --val_fold 4",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r104_f0 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1004 --val_mix 0.01 --val_fold 0",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r104_f1 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1004 --val_mix 0.01 --val_fold 1",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r104_f2 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1004 --val_mix 0.01 --val_fold 2",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r104_f3 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1004 --val_mix 0.01 --val_fold 3",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_valcd_r104_f4 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1004 --val_mix 0.01 --val_fold 4"
+ ],
+ "folds": {
+  "sizes": [
+   2885,
+   2885,
+   2885,
+   2884,
+   2884
+  ]
+ },
+ "setup_line": "wave-5 valcd: from step 0 (of 19670) each NON-pool cooldown step trains on a batch of LABELLED VAL feeds w.p. 0.01 (own RNG seed 1004; the m02 draws / batches are unchanged): fold 2 of 5 held out (OOF 2885 feeds), cooldown val feeds 11538 (folds (2885, 2885, 2885, 2884, 2884)), 48 batches per pass, expected val batches 193 (~4.0 passes); val batches carry the random-like domain token (0.0, 1.0, 0.0), p_random 1 (aux weight 0), fidx offset 3151208; selection on the holdout; 0.0s",
+ "failed": []
+}

@@ -1,0 +1,18 @@
+seeds with both files: [101, 102, 103, 104, 105, 106, 107]
+s101: avg3 val 0.39601 hold 0.32011 | cooled(cpu) val 0.39365 hold 0.31847 | cooled(gpu-bf16) val 0.39361 | delta val +0.00235 hold +0.00164
+s102: avg3 val 0.39532 hold 0.32019 | cooled(cpu) val 0.39526 hold 0.31957 | cooled(gpu-bf16) val 0.39532 | delta val +0.00006 hold +0.00062
+s103: avg3 val 0.39452 hold 0.32006 | cooled(cpu) val 0.39446 hold 0.31844 | cooled(gpu-bf16) val 0.39439 | delta val +0.00006 hold +0.00162
+s104: avg3 val 0.39446 hold 0.31935 | cooled(cpu) val 0.39578 hold 0.31979 | cooled(gpu-bf16) val 0.39568 | delta val -0.00132 hold -0.00044
+s105: avg3 val 0.39492 hold 0.31897 | cooled(cpu) val 0.39418 hold 0.31856 | cooled(gpu-bf16) val 0.39416 | delta val +0.00074 hold +0.00041
+s106: avg3 val 0.39522 hold 0.32003 | cooled(cpu) val 0.39494 hold 0.31928 | cooled(gpu-bf16) val 0.39512 | delta val +0.00028 hold +0.00075
+s107: avg3 val 0.39454 hold 0.31942 | cooled(cpu) val 0.39382 hold 0.31898 | cooled(gpu-bf16) val 0.39392 | delta val +0.00071 hold +0.00044
+
+POOLED single member avg3 - cooled (7 seeds): val +0.00041 +- 0.00040 (z 1.03) | M<50 -0.00048 M>=50 +0.00103 Tue +0.00043 Thu +0.00039
+  holdout +0.00072 +- 0.00024 feed-SE; calibrated SE 0.00040
+  seeds positive on val: 6/7; on holdout: 6/7
+
+ENSEMBLE (7 members each): val avg3 0.39618 | cooled 0.39866 | pool 0.39768; avg3-cooled -0.00247 +- 0.00055; pool-cooled -0.00098 +- 0.00037
+  holdout avg3 0.32115 | cooled 0.32279 | pool 0.32231; avg3-cooled -0.00164 +- 0.00032; pool-cooled -0.00048
+  slices avg3-cooled ens val: M<50 -0.00358 M>=50 -0.00170 Tue -0.00174 Thu -0.00328
+
+within-feed seed corr: avg3 0.9752 (sd 0.0014); cooled 0.9406 (sd 0.0043); avg3 vs own cooled: 0.9660

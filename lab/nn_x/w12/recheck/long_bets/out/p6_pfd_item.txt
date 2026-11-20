@@ -1,0 +1,11 @@
+rows 246745836 item id max 111319563
+holdout rows 4630966; LOO coverage n>=1 0.873 n>=5 0.632 n>=20 0.337
+alone: teacher 0.32370 | LOO ctr 0.23293 | LOO coec 0.24027 | log n 0.23565
+teacher + LOO ctr                      holdout NDCG 0.32375  delta +0.00005+-0.00018  coef [[1.043, 0.029], [1.049, 0.026]]
+teacher + LOO coec                     holdout NDCG 0.32389  delta +0.00019+-0.00021  coef [[1.042, 0.038], [1.048, 0.037]]
+teacher + ctr + coec + log n           holdout NDCG 0.32430  delta +0.00060+-0.00026  coef [[1.038, -0.006, 0.042, 0.036], [1.042, -0.014, 0.048, 0.045]]
+teacher + log n (popularity control)   holdout NDCG 0.32405  delta +0.00035+-0.00021  coef [[1.042, 0.037], [1.046, 0.046]]
+
+real	2m27.472s
+user	3m33.725s
+sys	0m15.994s

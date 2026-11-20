@@ -1,0 +1,66 @@
+W25 PRE-DECLARATION (build step). Written: Thu Nov 12 23:58:40 UTC 2026, BEFORE any W25 pipeline number was computed.
+Study + acceptance rules: study/study.md section 4 (timestamp Thu Nov 12 23:45:59 UTC 2026). This file restates them as executed.
+
+ROW SETS
+- XM: train feeds with p_random > 0.5 (eda/labels_position/out/train_prandom.npz, NaN -> 0), ALL M, minus the 30K trH holdout feeds
+  (nn_x/cb26/cbdata.hold_index): 485,023 feeds / 25,103,552 rows (counted label-free). Group weight 1 (the p_random-weight arm is dropped for time).
+- cb26 subset (A0 only): p_random > 0.5 and M >= 50 minus trH = 134,118 feeds (cb_member.py rule).
+- Evaluation: val (14,423 feeds), the 30K trH holdout (preds/holdout/holdout_{meta,y}.npy, cbdata.meta("trH")), val user-halves A/B (GroupKFold(2)
+  by user_id, user-0 singletons, as cb26); early stopping on half A only.
+
+FEATURE GROUPS (new columns, nn_x/w25/data/<split>/w25_*.npy; train rows = all p_random>0.5 feeds' rows, index in data/train/rows.npy)
+- G1 LAE scores: EASE-DAN (reg 10, drop_p 0.04977, alpha=beta=0.95209), RDLAE (reg 500, drop_p 0.7, xi 0.1), EASE (lambda 500) over item groups
+  cl4096 (primary), cl1024, category; W fitted on the binary user x group matrix from ONE train snapshot per user (latest train feed; user-0 feeds as
+  own rows), label-free; feed scored from ITS OWN history only (binary / count input); W and truncate(W^T, 300) ("score_20"); feed rank/z of the two main ones.
+  Parity check: W from train snapshots only is the primary (val/test histories never enter W); the all-snapshot W is only compared (corr of val scores).
+- G2 ratio weighting: group (cl4096) positive ratio, Bayesian with C = mean impressions per group, from exploration-like train labels (S2), time-respecting
+  for train rows (days < d; day 0 NaN); score x log1p(ratio) for RDLAE and DAN; label-free analogue = type-1 (strong intent) share per group.
+- G3 target statistics (time-respecting: train rows use train days < d only, day 0 NaN; val/test use all train; never the feed's own label; never a
+  same-user later feed): keys item, category, cl4096, user (>0), user x category, user x cl1024; sources S1 = all train, S2 = exploration-like train;
+  stats = impressions, positives, Bayesian CTR (C = mean impressions per key), COEC (expected clicks = data/clu_work/train_ex.npy position cells),
+  ONCE-PER-USER impressions/positives/CTR, days since last/first impression, distinct positive days; user: category of most recent earlier train
+  positive (last_contact_category), days since it, share of user positives / impressions in the candidate category.
+  S3 (val-label OOF statistics) is SKIPPED in this step for time (itemprior measured <= +0.0004 before); stated as skipped.
+- G4 crosses: category == last_contact_category, category == category at hpos 0 (last_seen, label-free), item_ratio*user_ratio, category_ratio*user_ratio,
+  cluster_ratio*user_cluster_ratio.
+- G5 recency/type-weighted LAE neighbourhoods: input vectors intent3 (= binary + 2*[type-1 event in group]), type-1 count only, 0.5^(hpos/5), exp(-0.05 hpos),
+  through W_DAN and W_RDLAE; plus W_DAN fitted on the type-1-only matrix.
+
+RANKER (nn_x/w25/train_w25.py): CatBoostRanker YetiRank GPU (CUDA_VISIBLE_DEVICES=<5|7>, devices "0", gpu_ram_part 0.25, thread_count 12), depth 8, l2 5,
+border 254, Bernoulli 0.8, random_strength 1, od_wait 200 on val half A, use_best_model, seed 0. Base = cb26 e3's 177 features (cb_member.member_features()).
+ARMS: A0 = cb26 reproduction (same rows, lr 0.08, <= 2500 iters) -> must be within +-0.0010 of 0.38201, else fix the harness.
+      A1 = base on full XM; A2 = A1 + G1..G5 (same lr/iters; lr 0.10, <= 2500 iters, od_wait 200 for both so that the comparison is feature-only).
+      Ablations (add-one-group to A1, and full-A2 minus one group if time): faster config (lr 0.15, <= 1200 iters) on the SAME row set, judged pairwise
+      within the ablation config only.
+      A3 (PR production feeds with training-only pos/rkend), A4 (VF val folds), A5 (literal 2025-winner protocol on val folds), Optuna and seed averaging are
+      run only if time remains after A2 and the ablations; otherwise reported as skipped.
+
+ACCEPTANCE (unchanged from study.md section 4)
+(a) A0 within +-0.0010 of 0.38201. "GBDT progress": A2 - A1 >= +0.0030 val, z >= 2, holdout >= 0, no slice < -2 SE.
+(b) Ensemble: candidate member only if val >= 0.40032 - 0.049(1-rho) (0.3932 at rho 0.856). ACCEPT only if at the nested-selected w in {0.05,0.1,0.2,0.3}:
+    val delta > 2 SE AND delta at w=0.05 > 0 AND holdout >= 0 AND no slice < -2 SE AND pmix >= -1 SE; same on PF7x. Else: GBDT closed with a faithful
+    pipeline; no subs/ candidate.
+(c) Teaching: a group is TEACHING if its paired ablation is >= +0.0050 val, z >= 3, holdout >= 0, positive on both M<50 and M>=50 -> queue for the NN
+    2-epoch screen. +0.002..+0.005 (z >= 2) is worth an NN screen only if its warm-beater-cell AUC >= 0.53.
+(d) Kill: stop the ladder if A2 - A1 < +0.0010; skip Optuna if A2 < 0.385; skip the ensemble test if the best arm < 0.390.
+LEAK RULES: no same-user later-feed information; no test labels; val labels only inside user-grouped OOF (none used here, S3 skipped); train target
+statistics strictly from earlier days; presub_gate must PASS on any subs/ file (none expected).
+GPU RULES: one process per GPU among 5/7, nvidia-smi check (< 4 compute procs, >= 60 GB free) before each launch, PIDs in logs/PIDS.txt, stop only own PIDs.
+
+AMENDMENT (Fri Nov 13 00:13:33 UTC 2026, before any PSI / NDCG number of a W25 column was read): per the FR-5 parity lesson, a W25 column is excluded from
+A2 and the ablations (moved to a non-used group "G_excl") if PSI(train XM rows, val) > 0.5 or PSI(val, test) > 0.5 (10 val-quantile bins,
+NaNs dropped) or if its NaN share differs by > 0.5 between train and val. Expected casualties: w25_it_dsl / w25_it_dsf (days since the
+item's last/first train impression: val/test sit 2-9 days after the train window, so the column encodes the split gap). Reported either way.
+
+AMENDMENT 2 (Fri Nov 13 00:17:06 UTC 2026): (i) A0 reproduced cb26 e3 exactly (val 0.38201327, best iter 1935, trH 0.30424) in 10 min, so the GPU budget
+allows the full plan: ablations are run as LEAVE-ONE-GROUP-OUT from A2 and ADD-ONE-GROUP to the base, both with the A1/A2 config on the
+full XM (not the fast 40% subsample). (ii) RDLAE: the winner's code returns W = -P diag(gamma+lambda) (no identity term) because its seen
+nodes are masked at inference; with unmasked candidates that gives a -0.9 self-term for any candidate whose group is in the history
+(single-feature val NDCG 0.275 < random 0.289 in the first build). Rebuilt in the paper's form B = I - P diag(gamma+lambda) (diagonal xi = 0.1,
+off-diagonals unchanged); all rdlae_* columns are recomputed before any arm uses them. The first-build PSI/NDCG table is kept in logs/psi_w25.log.
+
+AMENDMENT 3 (Fri Nov 13 01:58:16 UTC 2026): A2 - A1 = +0.00025 +- 0.00044 val (trH +0.00069 +- 0.00025) -> kill rule (d) fires (< +0.0010): the arm ladder stops
+(A3 / A4 / A5 / Optuna / seed averaging are NOT run). Remaining GPU runs, already in flight or chained: loo_G3 (GPU N), A2c_cb26 = all W25 groups on
+the cb26 row set with the A0 config (GPU N), add_G1 after loo_G3 (GPU N). Everything else in the ablation queues is cancelled.
+FINAL FILE RULE (declared before A2c / add_G1 are read): nn_x/w25/out/w25_{val,test}.npy = the full-feature arm (A2_all_xm or A2c_cb26) with the
+higher trH holdout NDCG (train labels, not val-selected); its val/test row order = data/flat.

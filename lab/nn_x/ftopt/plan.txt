@@ -1,0 +1,70 @@
+FTOPT plan (Optuna study of the val FINE-TUNE stage for m02 trunks)
+Written: Thu Nov 12 17:07:06 UTC 2026  (before any trial)
+Owner: workflow wpatyoqh2 sub-agent; dir nn_x/ftopt; GPUs N and 7 only, <= 2 own FT processes per GPU,
+launch only if the GPU has < 4 compute processes in total and >= 30 GB free (checked with nvidia-smi before each launch).
+
+MEMBERS
+  TUNE set A (4): r6_cd_m02_r101, r6_cd_m02_r103 (F7x, nn_x/r6/finetune.py code, ckpt nn_x/r6/ckpt),
+                  v27_gru_m02_s511 (GRU m02), v28_lr1_m02_s411 (lr1 m02) (nn/finetune.py code, ckpt nn/ckpt).
+  CONFIRM-2 set B (4, different members): v23_gru_pre2s_s501, v23_gru_pre2s_s502 (F10), v29_d192_m02_s711,
+                  r6_cd_m02_p70k_r102 (F7x70).
+
+EXECUTION
+  nn_x/ftopt/ftrun.py runs the UNCHANGED finetune.py of the member's code dir (imported as a module) with only the
+  output dirs re-pointed (PREDS/LOGS -> nn_x/ftopt/out/<trial>/, never preds/ or nn*/logs) and test-set predictions
+  skipped during the study (val OOF only; test inference is not needed to score val). Folds = the standard
+  user-grouped GroupKFold(5) over ALL val with --u0_singleton (identical to production n2cpv3).
+
+SPLIT (fixed, written before any trial)
+  TUNE / CONFIRM halves of val by a fixed hash of user_id: h = splitmix64(user_id) & 1 (0 = TUNE, 1 = CONFIRM);
+  user-0 feeds by splitmix64(fidx + 2^40) & 1. Saved to nn_x/ftopt/split.npy before the first trial.
+  CONFIRM labels never enter the objective (CONFIRM numbers are computed only after the study is frozen).
+
+POOL / OBJECTIVE
+  pool(ft) = 0.5 * z(mean_m z(ft_m)) + 0.5 * z(mean_m z(to_m)), z = per-feed z-score, over the 4 set-A members;
+  to_m = preds/nn_<m>_trainonly_val.npy (fixed). Baseline = the same pool with the EXISTING production
+  preds/nn_<m>_n2cpv3_val_oof.npy (computed once).
+  Objective (maximize) = mean over TUNE feeds of [NDCG(pool(trial ft)) - NDCG(pool(n2cpv3 ft))], full-list NDCG with
+  pessimistic ties (src/metrics.ndcg_per_feed).
+  Post-hoc (report only, NOT adopted on its own): w_ft in {0.3, 0.5, 0.7}.
+  Noise reference: trial 0 = an exact re-run of n2cpv3 through ftrun.py (measures GPU run-to-run noise).
+
+SEARCH SPACE (finetune.py flags)
+  lr log-uniform [1e-5, 3e-4]; epochs 2..6; decay {const, cos}; ema {0, 0.99, 0.995} (+ ema_start {0.25, 0.5, 1.0}
+  epochs when ema > 0; ema = 0 -> snapshot mean of epochs 1..E, the finetune.py default); wd {0, 0.005, 0.02, 0.05,
+  0.1}; drop {0.0, 0.1 (= ckpt default), 0.2}; loss_norm {batch, feed}; extra_lr_mult {3, 10, 30};
+  extra preset {v3 = n2c_pre_v3 (42), v3_noctx = v3 minus ctx_nd_* and centrality (31), v3_nopre = v3 minus pre_*
+  (31), none = no extra branch}; seeds {1, 2}. No larger vetted leak-safe preset exists (ALS / ctx_hn / ctx_hs /
+  it_tr_* were removed by the W3 hygiene or have leak-audit excess), so none is searched.
+  Not searched: select=best (picks the epoch on OOF over ALL val, would leak CONFIRM labels into the selection).
+  Sampler: Optuna TPESampler(seed=20261112, n_startup_trials=10, multivariate=True, constant_liar=True), up to 2
+  trials in flight; target 30-60 trials as time allows; storage sqlite nn_x/ftopt/study.db.
+
+PRE-DECLARED ACCEPTANCE
+  1. Freeze: the best TUNE trial (highest objective) at freeze time (~20:45 UTC or after the last trial).
+  2. CONFIRM (set A, CONFIRM feeds): pool delta vs n2cpv3 > 2 SE (paired per-feed SE = sd/sqrt(n)); and no CONFIRM
+     slice (M<50, M>=50, Tue, Thu; Tue = (ts + 10800) // 86400 < 20720) below -2 SE. User-clustered SE also reported.
+  3. Only if 2 passes: second confirmation on set B (4 different members), all val OOF, pool(best) - pool(n2cpv3)
+     > +1 SE.
+  4. Only if 3 passes: recommend re-running FT with the best config for all pool members (with test predictions).
+  Anything else -> keep n2cpv3; report the study as a negative/neutral result. Single-member numbers are descriptive.
+
+ADDENDUM 1 (Thu Nov 12 17:56:06 UTC 2026, after 6 trials, before the trial below exists): the 5 random startup trials all drew
+loss_norm=feed (the trunks train with feed norm; production FT uses batch) and all sit at +0.0003..+0.0006 on TUNE.
+To isolate that one flag, one controlled point is enqueued into the same study: n2cpv3 with loss_norm=feed only
+(all other params = n2cpv3). It is an ordinary trial: same TUNE objective, same freeze/selection rule (best TUNE
+trial), CONFIRM still untouched. Its CONFIRM result is reported descriptively after the freeze in any case.
+
+ADDENDUM 2 (Thu Nov 12 18:57:27 UTC 2026, 17 trials done, CONFIRM still untouched): trials are slower than planned (TPE moved to
+6-epoch x 2-seed configs, ~30 min per trial pair), so the freeze moves to 21:00 UTC: the frozen config = the best
+TUNE objective among trials COMPLETE at 21:00 (driver PAUSEd then; in-flight trials finish and are reported but are
+not eligible). Set B is run for the frozen config in any case if GPU time allows; it counts as acceptance step 3 only
+if step 2 passed, otherwise it is descriptive. Diagnostic note: the n2cpv3 baseline's pool FT gain over the TO-only
+pool is -0.00016 on TUNE vs +0.00054 on CONFIRM (computed at setup from production files), so any different FT
+realization is expected to look better on TUNE and worse on CONFIRM by regression to the mean; this is exactly what
+the CONFIRM half guards against. Rules unchanged.
+
+ADDENDUM 3 (Thu Nov 12 21:02:20 UTC 2026, AFTER the freeze and the CONFIRM read): frozen trial 21 failed step 2 (CONFIRM +0.00055 +- 0.00041,
+z 1.34 < 2). Acceptance = FAIL; n2cpv3 stays. Driver stopped (no TUNE improvement after trial 21). Descriptive only,
+no acceptance meaning: set B with trial-21 params (runB.py, tag B21), and two set-A decomposition runs (runset.py):
+D_n2cpv3_s2 = n2cpv3 with seeds=2 (how much is FT-seed bagging) and D_t21_s1 = trial-21 params with seeds=1.

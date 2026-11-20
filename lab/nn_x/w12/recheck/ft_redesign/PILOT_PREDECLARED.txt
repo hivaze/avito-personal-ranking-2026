@@ -1,0 +1,13 @@
+CPU PILOT of fine-tune variants -- reading rule written 2026-11-14T19:36:11Z, before any fold of any arm was read.
+Runs (ft_cpu.py, float32 CPU port of the n2cpv3 recipe, 1 FT seed, folds in GroupKFold order, 2 threads each):
+  members w5_e10_kd05w192_s951, w5_e10_kd05t25w192_s951 (first seed of each W8 arm; chosen by rule, not by their FT result)
+  A_base   = n2cpv3 (lr 5e-5, 4 epochs, cos, EMA 0.99)
+  B_kd05   = A + soft targets: y <- 0.5 y/sum(y) + 0.5 softmax(teacher), teacher = mean raw logit of the 8 W8 TRAIN-ONLY members on val (label-free)
+  C_lrhalf = A at lr 2.5e-5 (control for B: the hard-label gradient of B is halved)   [first member only: thread cap]
+Feeds = held-out folds finished by all arms of a member at read time (>= 2 folds needed).
+Sanity (must hold or the pilot is void): CPU A_base final-EMA vs the saved GPU n2cpv3s3 OOF on the same feeds: per-feed-z corr >= 0.995 and |NDCG delta| <= 0.0010.
+Reading (final-EMA predictions = what the recipe saves; paired per feed):
+  KD-in-FT is worth an 8-member GPU run iff (i) B - A member delta, mean of the two members, >= +0.0005 and >= 2 SE, AND
+  (ii) the file proxy [0.5 z(z(TO pool W8) + member shift) + 0.5 z(TO pool W8)] of B minus that of A >= +0.0003 on the mean of the two members.
+  If (i) holds but B - C (first member) < +0.0003: the gain is the smaller step, not the soft target -> "shrinkage", no separate arm.
+  Per-epoch raw-weight rows and pool proxies are information only.

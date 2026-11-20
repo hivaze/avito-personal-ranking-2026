@@ -1,0 +1,30 @@
+(a) E1' = Vp - D*(V/Vto)  [post-hoc sensitivity]
+  C0   PF7x   E0 +0.00000 E1 +0.00000 E1' +nan  min(E0,E1') +0.00000
+  C1   G3     E0 +0.00056 E1 +0.00025 E1' +0.00021  min(E0,E1') +0.00021
+  C2   M2     E0 +0.00126 E1 +0.00027 E1' +0.00009  min(E0,E1') +0.00009
+  C3   PX70   E0 +0.00025 E1 +0.00018 E1' +0.00038  min(E0,E1') +0.00025
+  C4   PX70r  E0 -0.00003 E1 +0.00008 E1' -0.00002  min(E0,E1') -0.00003
+  C5   HG     E0 +0.00016 E1 -0.00019 E1' +0.00012  min(E0,E1') +0.00012
+  Cd   Cd     E0 -0.00065 E1 +0.00002 E1' -0.00019  min(E0,E1') -0.00065
+  Pall Pall   E0 -0.00069 E1 -0.00027 E1' -0.00020  min(E0,E1') -0.00069
+
+(b) F13l complete members: ['v28_lr1_m02_s411', 'v28_lr1_m02_s413', 'v28_lr1_m02_s415']
+  per-member means val / holdout: F13l [0.3951  0.39526 0.39497] [0.31899 0.31925 0.31831] | F9 [0.3928  0.39455 0.39495 0.39255 0.39303 0.39504] [0.31792 0.3185  0.31906 0.31844 0.31824 0.31848]
+  F13l (scratch m02) - F9      single-member TO: val +0.00129 (feed SE 0.00056, seed SE 0.00048) | holdout +0.00041 (feed SE 0.00033, seed SE 0.00032) | val-holdout gap +0.00088
+  F7x (re-cool m02) - F7       single-member TO: val +0.00207 (feed SE 0.00042, seed SE 0.00037) | holdout +0.00088 (feed SE 0.00025, seed SE 0.00022) | val-holdout gap +0.00120
+  F7b (re-cool c0) - F7        single-member TO: val +0.00090 (feed SE 0.00039, seed SE 0.00052) | holdout -0.00046 (feed SE 0.00022, seed SE 0.00022) | val-holdout gap +0.00137
+  F7x - F7b (m02 increment)    single-member TO: val +0.00117 (feed SE 0.00039, seed SE 0.00049) | holdout +0.00134 (feed SE 0.00022, seed SE 0.00020) | val-holdout gap -0.00017
+
+(c) CatBoost vs the G3 pool (val)
+  cb_tr300k_none   val 0.36997 (pool 0.40032, gap 0.0304) within-feed rho with pool 0.772
+     pool + 0.02*z: val -0.00002 ± 0.00016
+     pool + 0.05*z: val -0.00027 ± 0.00026
+     pool + 0.10*z: val -0.00056 ± 0.00037
+  cb_tr500k_pw     val 0.36855 (pool 0.40032, gap 0.0318) within-feed rho with pool 0.777
+     pool + 0.02*z: val +0.00013 ± 0.00017
+     pool + 0.05*z: val -0.00009 ± 0.00027
+     pool + 0.10*z: val -0.00044 ± 0.00038
+  cb_tr300k_luo    val 0.36577 (pool 0.40032, gap 0.0345) within-feed rho with pool 0.740
+     pool + 0.02*z: val -0.00008 ± 0.00018
+     pool + 0.05*z: val +0.00002 ± 0.00026
+     pool + 0.10*z: val -0.00026 ± 0.00037

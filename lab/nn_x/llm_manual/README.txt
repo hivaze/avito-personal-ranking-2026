@@ -1,0 +1,1 @@
+LLM manual-ranking pilot (2026-11-13). feeds/feed_<i>.txt = val feed i rendered as text (NO labels). hidden/labels.json = labels, for the scorer only. feeds_meta.json = M, history length, n positives. Rankers must not read hidden/.

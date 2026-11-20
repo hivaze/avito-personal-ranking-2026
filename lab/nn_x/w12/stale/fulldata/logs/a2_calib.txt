@@ -1,0 +1,10 @@
+== R7 A2 calibration   [2026-11-15T04:19:29Z]
+   null noise of the A2 statistic: SD of the 16 W16 originals' @last holdout NDCG 0.00030 (range 0.32199-0.32303); s_null = sqrt(2) x SD = 0.00043; floor 3 s_null = 0.00128
+   w5_e10_kd05w192_s951@last: in sample 0.34631 +- 0.00150 (n 20000) | out of sample (holdout, saved file) 0.32219 +- 0.00115 (n 30000) | G_s = +0.02412 +- 0.00189
+      path check on 2000 holdout feeds: CPU 0.32279 vs saved GPU file 0.32265 (diff +0.00014 +- 0.00022), centred corr 0.999945 -> ok
+      its teacher teacher_mean11.npy: in sample 0.34317, holdout 0.32370, G_t = +0.01947; student - teacher: in sample +0.00314 +- 0.00061, holdout -0.00151 +- 0.00044
+   abl_e10_pop1kd05t25_s951@last: in sample 0.33294 +- 0.00145 (n 20000) | out of sample (holdout, saved file) 0.31583 +- 0.00111 (n 30000) | G_s = +0.01711 +- 0.00183
+      path check on 2000 holdout feeds: CPU 0.31279 vs saved GPU file 0.31296 (diff -0.00017 +- 0.00042), centred corr 0.999942 -> ok
+      its teacher teacher_mean25.npy: in sample 0.34332, holdout 0.32286, G_t = +0.02045; student - teacher: in sample -0.01038 +- 0.00074, holdout -0.00703 +- 0.00053
+   G_s (smaller of the two) = +0.01711; expected lift of a full-retrain twin on the holdout [I] about 0.5 G_s = +0.00855
+   A2 bars in force: full retrain 0.00428 (R4: 0.005), re-cool 0.00171 (R4: 0.002)

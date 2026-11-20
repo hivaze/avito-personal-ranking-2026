@@ -1,0 +1,51 @@
+--- A: 20 within-feed shuffles per check (LR of the shuffled column) ---
+V2b_uc_ctr           val   placebo LR over 20 shuffles: mean 1.18 median 0.84 max 8.13 share >= 3.84: 0.05
+V3_it_coec           val   placebo LR over 20 shuffles: mean 0.68 median 0.37 max 3.34 share >= 3.84: 0.00
+V5a_it_s1share       val   placebo LR over 20 shuffles: mean 0.58 median 0.22 max 3.03 share >= 3.84: 0.00
+V8a_f2_home          hold  placebo LR over 20 shuffles: mean 1.39 median 1.21 max 6.22 share >= 3.84: 0.05
+V8a_f2_home          val   placebo LR over 20 shuffles: mean 0.56 median 0.34 max 1.81 share >= 3.84: 0.00
+V2a_ui_reshown       val   placebo LR over 20 shuffles: mean 0.70 median 0.25 max 3.09 share >= 3.84: 0.00
+V7_fresh_cnt         val   placebo LR over 20 shuffles: mean 1.01 median 0.37 max 3.87 share >= 3.84: 0.05
+V8b_f1_tie           hold  placebo LR over 20 shuffles: mean 0.65 median 0.37 max 3.53 share >= 3.84: 0.00
+train MSK day numbers 20702..20716; stale cut = day <= 20710 keeps 0.7592 of train feeds
+--- B: hits rebuilt from train feeds of MSK date <= Sep 14 (post hoc) ---
+V3 stale: val rows whose item has impressions in the cut window 0.5023
+V2b stale: val rows with user x category train impressions in the cut window 0.2094
+V2b full rebuild (check of the builder): coverage 0.2636, corr with the file-based column 1.0000
+V5a stale: val rows with n_e1 > 0 in the cut window 0.4667
+V3s_it_coec_stale                  val   ctrl TO  LR     9.01 beta +0.0805 effect(beta*sd_w) +0.0198 placebo  1.59 (max of 3:  1.59) | cross-fit dNDCG -0.00018+-0.00026 | null
+V3s_it_coec_stale                  val   ctrl FIN LR     8.35 beta +0.0776 effect(beta*sd_w) +0.0191 placebo  1.55 (max of 3:  1.55) | cross-fit dNDCG -0.00019+-0.00027 | null
+V2bs_uc_ctr_stale                  val   ctrl TO  LR    14.51 beta +0.0976 effect(beta*sd_w) +0.0237 placebo  1.12 (max of 3:  2.65) | cross-fit dNDCG +0.00008+-0.00015 | INTERESTING
+V2bs_uc_ctr_stale                  val   ctrl FIN LR    14.57 beta +0.0978 effect(beta*sd_w) +0.0238 placebo  1.14 (max of 3:  2.67) | cross-fit dNDCG +0.00022+-0.00014 | INTERESTING
+V5as_it_s1share_stale              val   ctrl TO  LR     2.95 beta +0.0153 effect(beta*sd_w) +0.0111 placebo  0.17 (max of 3:  1.11) | cross-fit dNDCG +0.00003+-0.00021 | null
+V5as_it_s1share_stale              val   ctrl FIN LR     3.10 beta +0.0157 effect(beta*sd_w) +0.0114 placebo  0.17 (max of 3:  1.15) | cross-fit dNDCG +0.00002+-0.00020 | null
+--- C: earlier-feed impression history of the same user (post hoc) ---
+C val: target feeds with >= 1 earlier feed 0.3041 | source feeds 7200 rows 595366 clicks 15202 | rows with skip_sim > 0 0.3099 click_sim > 0 0.3099 uc pair known 0.2636
+C hold (earlier-day feeds): target feeds with >= 1 earlier feed 0.1624 | source feeds 6846 rows 647489 clicks 14403 | rows with skip_sim > 0 0.1651 click_sim > 0 0.1651 uc pair known 0.1441
+C1_skip_sim                        val   ctrl TO  LR     7.21 beta +0.3072 effect(beta*sd_w) +0.0202 placebo  0.35 (max of 3:  0.54) | cross-fit dNDCG -0.00005+-0.00016 | null
+C1_skip_sim                        val   ctrl FIN LR     4.11 beta +0.2316 effect(beta*sd_w) +0.0152 placebo  0.34 (max of 3:  0.53) | cross-fit dNDCG -0.00008+-0.00014 | null
+C1_skip_sim                        hold  ctrl H   LR     2.62 beta -0.1643 effect(beta*sd_w) -0.0078 placebo  2.88 (max of 3:  2.88) | cross-fit dNDCG -0.00001+-0.00005 | null
+C2_click_sim                       val   ctrl TO  LR     9.05 beta +0.2526 effect(beta*sd_w) +0.0209 placebo  3.02 (max of 3:  3.02) | cross-fit dNDCG -0.00023+-0.00019 | null
+C2_click_sim                       val   ctrl FIN LR     8.27 beta +0.2410 effect(beta*sd_w) +0.0199 placebo  2.99 (max of 3:  2.99) | cross-fit dNDCG -0.00014+-0.00018 | null
+C2_click_sim                       hold  ctrl H   LR     3.41 beta +0.1305 effect(beta*sd_w) +0.0080 placebo  0.11 (max of 3:  0.18) | cross-fit dNDCG -0.00002+-0.00004 | null
+C3_uc_coec                         val   ctrl TO  LR    23.33 beta +0.3838 effect(beta*sd_w) +0.0249 placebo  0.05 (max of 3:  1.38) | cross-fit dNDCG -0.00006+-0.00015 | INTERESTING
+C3_uc_coec                         val   ctrl FIN LR    23.82 beta +0.3879 effect(beta*sd_w) +0.0252 placebo  0.05 (max of 3:  1.34) | cross-fit dNDCG +0.00018+-0.00014 | INTERESTING
+C3_uc_coec                         hold  ctrl H   LR     6.05 beta +0.1927 effect(beta*sd_w) +0.0085 placebo  0.18 (max of 3:  0.18) | cross-fit dNDCG +0.00000+-0.00003 | null
+--- D: equality forms of f2 / f5 / f1 (post hoc) ---
+D1_f2_zero: mean val 0.1544 hold 0.1433
+D1_f2_zero                         val   ctrl TO  LR     4.29 beta +0.0401 effect(beta*sd_w) +0.0139 placebo  0.23 (max of 3:  1.94) | cross-fit dNDCG +0.00016+-0.00018 | null
+D1_f2_zero                         val   ctrl FIN LR     4.81 beta +0.0425 effect(beta*sd_w) +0.0147 placebo  0.23 (max of 3:  1.99) | cross-fit dNDCG -0.00001+-0.00019 | null
+D1_f2_zero                         hold  ctrl H   LR     1.79 beta +0.0173 effect(beta*sd_w) +0.0056 placebo  0.27 (max of 3:  3.58) | cross-fit dNDCG +0.00002+-0.00006 | null
+D2_f2_grp: mean val 3.0569 hold 3.2336
+D2_f2_grp                          val   ctrl TO  LR     1.96 beta -0.0078 effect(beta*sd_w) -0.0105 placebo  1.19 (max of 3:  1.19) | cross-fit dNDCG -0.00026+-0.00015 | null
+D2_f2_grp                          val   ctrl FIN LR     2.56 beta -0.0089 effect(beta*sd_w) -0.0120 placebo  1.18 (max of 3:  1.18) | cross-fit dNDCG -0.00027+-0.00017 | null
+D2_f2_grp                          hold  ctrl H   LR     4.01 beta -0.0064 effect(beta*sd_w) -0.0089 placebo  0.04 (max of 3:  1.87) | cross-fit dNDCG +0.00003+-0.00007 | null
+D3_f5_tie: mean val 0.3573 hold 0.4181
+D3_f5_tie                          val   ctrl TO  LR     4.14 beta -0.0219 effect(beta*sd_w) -0.0203 placebo  0.28 (max of 3:  1.80) | cross-fit dNDCG +0.00025+-0.00009 | null
+D3_f5_tie                          val   ctrl FIN LR     1.11 beta -0.0114 effect(beta*sd_w) -0.0105 placebo  0.26 (max of 3:  1.85) | cross-fit dNDCG +0.00005+-0.00007 | null
+D3_f5_tie                          hold  ctrl H   LR     4.68 beta +0.0124 effect(beta*sd_w) +0.0126 placebo  0.06 (max of 3:  4.66) | cross-fit dNDCG -0.00001+-0.00007 | null
+D4_f1_floor: mean val 0.1758 hold 0.1856
+D4_f1_floor                        val   ctrl TO  LR    14.15 beta -0.1103 effect(beta*sd_w) -0.0374 placebo  0.00 (max of 3:  3.92) | cross-fit dNDCG -0.00007+-0.00012 | INTERESTING
+D4_f1_floor                        val   ctrl FIN LR    12.97 beta -0.1056 effect(beta*sd_w) -0.0358 placebo  0.00 (max of 3:  3.90) | cross-fit dNDCG -0.00003+-0.00011 | INTERESTING
+D4_f1_floor                        hold  ctrl H   LR    19.18 beta -0.0842 effect(beta*sd_w) -0.0278 placebo  1.45 (max of 3:  1.45) | cross-fit dNDCG +0.00001+-0.00006 | INTERESTING
+done 77s

@@ -1,0 +1,270 @@
+DECLARATION  nn_x/w12/seg/review  (adversarial reviewer of nn_x/w12/seg/diag; CPU only; no GPU, no network, no submission)
+Every block is stamped with 'date -u' BEFORE the numbers it judges are computed by MY code. Blocks are appended, never edited.
+Default position: "the H = 256 gap is intrinsic and no arm is worth GPU" unless my numbers force otherwise; a real cheap
+lever is not to be dismissed by argument.
+
+=== BLOCK 0  2026-11-15T17:05:14Z  (written after reading the study's report, DECLARATION, lib.py, s0-s2b scripts and
+    out_s0.txt, CURRENT_STATUS sections 1-4, COVERAGE_MAP greps, build_r4.py, lane.sh arm lines, HDROP-ALL replay script;
+    NO number of mine computed yet; the study's numbers are known to me and are the thing judged) ===
+Conventions (mine, re-implemented in rv_lib.py; the study's lib.py is NOT imported):
+ - FINAL rebuilt from the 20 member files (16 w5_fd10_{kd05w192,kd05t25w192}_s951-958 + 4 abl_fd10_pop1kd05w192_s951-954),
+   per branch 0.8 z(base pool) + 0.2 z(pop pool), final 0.5 z(FT OOF) + 0.5 z(train-only); z = per-feed (x-mean)/sd, own
+   numpy code. NDCG: own implementation (binary gain, log2 discount, pessimistic ties), cross-checked against
+   src/metrics.ndcg_per_feed. SE: cluster-robust by user (user_id 0: every feed its own cluster), own code.
+ - Buckets as the study: H 0 | 1-4 | 5-9 | 10-19 | 20-49 | 50-99 | 100-255 (NEAR) | 256 (CAP); REST = H < 256.
+ - Marks [M] measured by my code, [D] arithmetic, [I] judgement.
+
+R0 reproduction. PASS if FINAL val = 0.40271 +- 0.00002, every bucket NDCG within 0.0005 and every SE within 10% (relative)
+   of the study's table, feed counts exact, test shares within 0.05 pp. Any miss is listed.
+
+R1 the three decision numbers of part A, own code:
+ (a) skill ratio cap / NEAR (skill = (NDCG - E_rand)/(1 - E_rand); E_rand from my own closed form, checked by simulation on
+     300 feeds): FINAL (study 0.872), pre2_fe (0.872), max cosine to the whole stored history (own cosine code; study 0.859).
+     CONFIRMED if each is within 0.010 of the study and my cluster bootstrap (2,000 draws by user) of R_FINAL - R_comparator
+     has |z| < 2 for pre2_fe and max cosine. REFUTED if FINAL is below either by z <= -2.
+ (b) A1 residual by an INDEPENDENT estimator: odds-weighting of the reference feeds (NEAR, and REST) to the covariate
+     distribution of the cap feeds; propensity = LightGBM classifier cap vs reference, cross-fitted 5 folds by user;
+     covariates built by my code (M, log M, day, hour, uid0, cold share of candidates, n candidate categories, top
+     candidate-category share, share of candidates whose category is in the history, event-type shares / distinct-item share /
+     distinct-category count / top-category share of the NEWEST 64 events, seen-in-train flag, log1p(number of train feeds)).
+     H itself and anything computed on more than the newest 64 events are excluded (no common support). Two sets:
+     XA = without the two activity markers (the study's X1), XB = with them. Weights clipped at the 99th percentile; the
+     effective sample size is reported. Study: X1 -0.0089 +- 0.0039 (REST) / -0.0093 +- 0.0042 (NEAR); X1 + activity
+     -0.0063 +- 0.0039 / -0.0063 +- 0.0042.
+     CONFIRMED if my XB estimate vs NEAR lies in [-0.0105, -0.0020] (study point +- 1 SE of 0.0042);
+     "more composition than stated" if > -0.0020; "more deficit than stated" if < -0.0105. SE by cluster bootstrap of the
+     weighted contrast with the propensity held fixed (stated limitation: under-states the SE).
+ (c) history starvation: (c1) own cosine ranker, newest 64 minus all 256, NDCG at the cap (study +0.0008 +- 0.0021): CONFIRMED
+     if mine is > -0.0030 (i.e. not a loss of the size the study's rule asked, -0.005, within noise); (c2) mean of the top-32
+     cosines minus mean of the top-16, per-feed AUC at the cap (study -0.0045 +- 0.0012): CONFIRMED if mine <= +0.0010;
+     (c3) stored HDROP predictions, cost of a 20% drop, cap minus NEAR (study -0.00001 +- 0.0009): CONFIRMED if mine is
+     within 0.0005 of it.
+ R1 verdict: "numbers reproduce" if (a), (b), (c) are all CONFIRMED.
+
+R2 would the same reads give the same answer on (i) the held-out twin W16P20w (16 wide held-out students
+   w5_e10_{kd05w192,kd05t25w192}_s951-958 + 4 wide popularity-light students abl_e10_pop1kd05w192_s951-954, weight 0.2,
+   as build_r4.py key W16P20w) and (ii) a hard-label pool (the 11 teacher members, train-only; and the stored G3 file)?
+   For each: D(cap - NEAR), D(cap - REST), skill ratio with bootstrap SE, and the PAIRED contrast
+   [NDCG_X - NDCG_FINAL](cap) - [NDCG_X - NDCG_FINAL](NEAR) with cluster SE (the sharp test: does the gap differ by model).
+   SAME ANSWER if for both (i) and (ii): the paired contrast has |z| < 2 AND the skill ratio is within 0.03 of FINAL's AND
+   the odds-weighted residual of R1(b) (XB, vs NEAR) computed on that file is inside FINAL's +- 2 SE.
+   Reported as information: paired contrast of FINAL against a single hard-label member and against a single student
+   (does pooling / distillation move the cap gap at all?).
+
+R3 audit of by-bucket reads (multiplicity and nesting):
+ (i) recompute with my code: a4u 10 ep x 6 seeds vs F7 same seeds at H = 256; a4u m02 re-cools vs F7 m02 re-cools; GRU under
+     distillation vs kd05w192 same seeds; retr32 10 ep vs w5_e10_base; kwh30; kw_hl2. AGREE if each delta is within 0.0003
+     and each SE within 15% of the study's.
+ (ii) independence of F1: are the m02 a4u re-cools descendants of the SAME plateau snapshots as the 10-epoch a4u runs
+     (file names, registry)? If yes, F1 is not an independent replication and is to be read as "the same runs under another
+     cooldown".
+ (iii) meta-read across the audited arms at H = 256 using the study's own printed per-arm cells (out_s6.txt): mean
+     interaction z (H = 256 delta minus complement delta) over the arms that touch the history path. Under no effect and
+     independent arms the mean of n z-values has sd 1/sqrt(n). FLAG "systematic sign at the cap" only if |mean z| x sqrt(n)
+     >= 2.5 after dropping arms that share one control pool down to one representative per control (shared controls
+     correlate the cells). Otherwise "inside noise" stands.
+ (iv) is any bucket a post-hoc pick? The H = 256 bucket itself came from the lead's first table on FINAL on the same val
+     feeds; a read of FINAL-family arms on that bucket is therefore conditioned on a look. Stated, with the consequence.
+
+R4 arms (kwa4u proposed as optional; kwr32, kwh6, kw256d2 declared-never-run): code path exists (grep train.py / model.py /
+   lane.sh, flag reaches the model under --kd_file and under --init), cost from the wall time of stored kd05w192 logs,
+   and DECIDABILITY: A/A paired per-feed SE of 4-pool vs 4-pool and 8-pool vs 8-pool contrasts of same-recipe students
+   (kd05w192 / kd05t25w192 seeds 951-954 vs 955-958), overall and on the cap bucket, computed here. A kill rule is
+   DECIDABLE if the PASS threshold (z >= 2) has power >= 0.5 at the effect the arm's own prior names (+0.0005 pool level,
+   or the bucket effect it cites) under the measured A/A sd (which includes training noise, unlike the per-feed SE).
+   My prior per arm stated as [I].
+
+T  model-based TRUNCATION dose-response (my addition; the study only has random 20% dropout, the data cap removes the
+   OLDEST events). CPU inference, fp32, of held-out wide distilled students w5_e10_kd05w192_s951 and s952 (FINAL's recipe)
+   through nn_x/abl model.py / data.py imported read-only (common.py with its GPU guard is not imported; own predict loop).
+   History truncated to the newest K events in the batch (masks, H and every in-model history-derived tensor recomputed as
+   HDROP-ALL compact_hist does); the precomputed xt inputs stay as stored (computed from the full history), so the cost
+   is a LOWER bound in magnitude: stated. Passes: K = 256 (ref; must correlate >= 0.999 with the stored train-only val
+   predictions), 192, 128, 64 on all feeds (truncation is a no-op where H <= K).
+   Read: c(K) = mean per-feed NDCG(K) - NDCG(ref), mean of the two members per feed, cluster SE, on the cap feeds; the
+   same for NEAR feeds with H >= 193 at K = 192 / 128 as the contrast "what does the oldest stretch buy below the cap".
+   Rule, written now: "THE CAP BINDS FOR THE MODEL" if c(192) at the cap <= -0.0010 with z <= -2 (the oldest quarter of
+   the stored history is worth >= 0.001 NDCG, so the events just beyond the cap plausibly are too);
+   "DOES NOT BIND" if c(192) >= -0.0005 AND c(128) >= -0.0015; otherwise UNDECIDED.
+   Consequence declared now: BINDS would be a new mechanism for re-opening the earlier-snapshot history extension
+   (COVERAGE l.227, closed on a CPU proxy) as an NN arm for users seen in train; DOES NOT BIND closes that door for this
+   review. Expectation: does not bind.
+
+S  segments the study may have missed (descriptive, no decision, no choice from labels):
+ (i) "functionally cold" feeds: label-free feed-level relevance of the history to THIS feed = share of candidates with a
+     history event at cosine >= 0.8, in fixed bins {0, (0, 0.1], (0.1, 0.25], (0.25, 0.5], > 0.5} among feeds with H >= 10:
+     share of val feeds, FINAL NDCG / AUC / skill, popularity-only AUC. Reported as the size of "low information about the
+     user for this feed" that H does not capture.
+ (ii) parity of the training distribution: share of train feeds at H = 256 / H = 0 / H <= 9 / user_id 0 against val and
+     test. FLAG if the cap share in train differs from test by more than 5 pp (models are then under-trained on the cap).
+ (iii) NDCG by fine H bins inside NEAR (100-149, 150-199, 200-255) against the cap: "continuation of a trend" if 200-255
+     is within 1 SE (of the contrast) of the cap, "step at the cap" if the cap is below 200-255 by >= 2 SE while 200-255 is
+     within 1 SE of 100-149.
+
+FINAL JUDGEMENT RULE: confirmed = true iff R0 PASS, R1 "numbers reproduce", R2 SAME ANSWER, R3 no systematic flag, and T
+is not "THE CAP BINDS". Otherwise confirmed = false and the corrected verdict states which part changes.
+
+=== BLOCK 1  2026-11-15T17:11:20Z  (written AFTER out_r0.txt and out_r1.txt were read and BEFORE any holdout number, any truncation
+    number (T is still running, none of its NDCG read) and any audit re-computation of mine) ===
+Outcomes so far by the block-0 rules:
+ R0 PASS: FINAL 0.40271 from the 20 member files with own z / NDCG / SE; every cell of the segment table identical to 4 decimals.
+ R1(a) CONFIRMED: skill ratio FINAL 0.872 (boot SE 0.035), pre2_fe 0.872, max cosine 0.859; R_FINAL - R_X z 0.00 / +0.21.
+ R1(b) CONFIRMED: odds-weighted residual XB vs NEAR -0.0074 +- 0.0058 (48% left; study -0.0063 +- 0.0042, 41%); XA -0.0108 +- 0.0055
+       (69%; study 60%). Regression cross-check with my newest-64-only covariates: XB -0.0077 +- 0.0042, XA -0.0100 +- 0.0042.
+ R1(c) CONFIRMED: c1 +0.0008 +- 0.0021; c2 -0.0045 +- 0.0012; c3 -0.00001 +- 0.00091 (all identical to the study).
+ R2 SAME ANSWER: paired contrast vs FINAL z +0.83 (W16P20w), +1.37 (teacher), +1.05 (G3); ratios 0.877 / 0.885 / 0.881;
+       XB residual -0.0069 / -0.0061 / -0.0060 (FINAL -0.0074 +- 0.0058).
+ R3(iii) meta-read on the study's printed interaction z (cap minus rest), history-path arms that ADD reach or capacity
+       (restrictions / drops excluded), grouped by control pool: abl_base {retr32 +1.6, retr32u +0.8, retr_cat +1.3, kv64 +2.0},
+       w5_e10_base {retr32 -0.2, retr32u +0.6}, kd05w192 {kw_hl2 +0.2, GRU +2.3}, r7_base {hl2 +0.3}, r6_base s23 {typed +0.3,
+       a4u +1.9, a4w +0.8}, v17 {a4u 10 ep +2.2, GRU family +1.1}. Per-control means +1.43, +0.20, +1.25, +0.30, +1.00, +1.65:
+       mean +0.97, x sqrt(6) = 2.38 (each per-control mean taken as one unit-variance z: conservative). Below my 2.5 -> by the
+       declared rule NO FLAG; but 6 of 6 control groups are positive and the statistic is close to the bar. My block-0 rule left
+       "one representative per control" ambiguous; the per-control mean is the reading I use and I state the ambiguity.
+ Because R3(iii) is borderline, one INDEPENDENT test is added (declared now, nothing of it computed):
+
+HR  holdout replication of the cap cells. Sample: the 30,000 in-period holdout feeds (train period, random-like, M >= 50;
+    other feeds and mostly other users than val), bucket fixed a priori = H >= 256, labels preds/holdout/holdout_y.npy. These
+    are history-architecture contrasts, not popularity contrasts, so the holdout is an admissible witness (evidence policy,
+    CURRENT_STATUS section 1). Checkpoints are selected on the overall holdout NDCG for arm and control alike (symmetric);
+    where '@last' files exist for both sides the unselected read is printed as a robustness line.
+    Cells: (1) GRU under distillation kd05w192gru s951-954 vs kd05w192 s951-954; (2) a4u 10 ep s101-106 vs F7 v17 s101-106
+    (if F7 holdout files exist); (3) a4u m02 re-cools r101-106 vs r6_cd_m02 r101-106; (4) kv64 2 ep vs abl_base s23/24;
+    (5) retr32 2 ep vs abl_base; (6) retr32 10 ep and retr32u 10 ep vs w5_e10_base s951/952; (7) kw_hl2 vs kd05w192
+    s951/952; (8) cset 10 ep vs F7; (9) kwh30 vs kd05w192 (a history DROP arm: expected sign negative, information).
+    Read: member-equal per-feed z-mean pools; per-feed NDCG delta at the cap, on the rest, interaction; cluster SE by user.
+    Cell rule: REPLICATED if the holdout cap delta > 0 with z >= 1.64 AND the interaction > 0; REFUTED if the holdout cap
+    delta <= 0 or (delta + 1.64 SE) < half of the val cap delta; else UNDECIDED.
+    Family rule: "history-capacity arms gain at the cap relative to the rest" SUPPORTED if the mean of the holdout
+    interaction z over one unit per control group (per-control mean of cells 1+7, 2+8-excluded (cset is candidate-side) i.e.
+    cell 2 alone, 4+5, 6) times sqrt(number of groups) is >= 2; otherwise NOT SUPPORTED.
+    Consequence written now: SUPPORTED -> the verdict gains a correction: a real H-specific TRADE of history capacity exists
+    (cap up, rest down), and the cheap follow-up is a CPU nested read of a fixed H-gated admixture of the stored GRU / a4u
+    students, before any GPU arm. NOT SUPPORTED -> "0 of 90 inside noise" stands and has an independent sample behind it.
+
+=== BLOCK 2  2026-11-15T17:19:38Z  (written AFTER out_r3_holdout.txt, out_r4_aa.txt and out_t.txt were read and BEFORE the two controls
+    TN and PC below are computed) ===
+Outcomes by the block-0 / block-1 rules:
+ R3(i) AGREE: my val re-computation of the six cells is identical to the study's (GRU +0.00216 +- 0.00109; a4u 10 ep +0.00274 +-
+       0.00119; a4u re-cools +0.00115 +- 0.00121; retr32 10 ep +0.00052 +- 0.00157; kwh30 -0.00178 +- 0.00110; kw_hl2 -0.00013 +- 0.00127).
+ R3(ii): the a4u m02 re-cools are initialised from r6_a4u_e10_s10x@77500 (log json "init"), i.e. the SAME runs as the 10-epoch
+       cell under another cooldown: the study's F1 is not an independent replication.
+ HR: GRU under KD REFUTED (holdout cap +0.00000 +- 0.00050; val +0.00216); a4u 10 ep REFUTED (holdout cap -0.00060 +- 0.00057; val
+       +0.00274); a4u re-cools UNDECIDED (+0.00014 +- 0.00056); kv64 REPLICATED as a cell (+0.00084 +- 0.00047, z 1.79) but its
+       holdout interaction is +0.00017 (z 0.27): an overall effect, not a cap effect; retr32 2 ep UNDECIDED (+0.00049 +- 0.00051);
+       retr32 / retr32u 10 ep REFUTED (-0.00049 / -0.00001); kw_hl2 REFUTED (-0.00135 +- 0.00059). Family rule: +0.21 (< 2):
+       NOT SUPPORTED. "0 of 90, inside noise" stands and now has an independent sample behind it.
+ R4: A/A paired cluster SE 4 vs 4: 0.00056 overall / 0.00106 cap (the lead's 0.0006 / 0.0011 confirmed); 8 vs 8: 0.00047 / 0.00087.
+       Power of "8-pool z >= 2" at a true pool effect +0.0005: 0.13-0.24 -> the kwa4u kill rule is NOT DECIDABLE at the effect its
+       own prior names; at a cap effect +0.0022 the secondary has power 0.66-0.76.
+ T: BY THE DECLARED RULE "THE CAP BINDS FOR THE MODEL". Wide distilled students (2 members): c(192) at the cap -0.00234 +- 0.00092
+       (z -2.5), c(128) -0.00437 +- 0.00126, c(64) -0.00930 +- 0.00166; hard-label members: -0.00246 +- 0.00093 (z -2.7), -0.00475,
+       -0.00769; 4 of 4 members negative at every K; ref passes correlate 1.000000 / 0.999999 with the stored files. Marginal worth
+       of 64-event stretches at the cap: events 193-256 -0.0023, 129-192 -0.0020 (-0.0025 / -0.0023 hard labels): NOT declining
+       between 128 and 256. My expectation ("does not bind") was wrong.
+ Two confounds of T that I did not handle in block 0, and the controls for them, declared now before they are computed:
+ TN (information or distortion?). Truncation also changes the length signals the model was trained on (log(1 + H), count
+    features), so c(K) = information lost + distortion. Control: keep the history at its stored length (masks, H, event
+    type / source / category of every event unchanged) and remove only the EMBEDDINGS of the events at index >= K
+    (hemb_ok False, he_raw 0, hidx -1: exactly how the loader represents an event without an embedding). Same four members,
+    K = 192 and 128. cN(K) is a LOWER bound of the information in those events (their type / category stay visible).
+    Rule: "INFORMATION" if cN(192) at the cap <= -0.0010 with z <= -2 for the distilled students; "DISTORTION" if
+    cN(192) >= -0.0005; otherwise UNDECIDED. The verdict on T is kept as BINDS only if TN reads INFORMATION; with DISTORTION
+    T is withdrawn; with UNDECIDED it is reported as "not excluded".
+ PC (is the probe that closed the earlier-snapshot extension able to see a KNOWN effect?). COVERAGE l.227 / err_segments
+    section 6 closed "longer history from earlier snapshots" with a probe of the form NN score + w z(scalar similarity to the
+    old-only items), w nested. Calibration on a case where the truth is known: on the cap feeds take S_192 = member-mean z of
+    the K = 192 passes (model deprived of events 193-256); truth G_true = NDCG(S_256) - NDCG(S_192); probe = S_192 + w z(q),
+    q in {max cosine to events 193-256, mean cosine to them, share of them in the candidate's category}, w in
+    {0, 0.05, 0.1, 0.2, 0.3} chosen on 4 user-folds and read on the 5th (5 folds by user), each q separately and the best q
+    nested as well. Rule: the probe is "BLIND" if its nested gain is below 25% of G_true for every q, "SIGHTED" if >= 50% for
+    some q, else "PARTLY". BLIND means the l.227 closure is not evidence against an NN arm that reads the old events itself.
+ Consequence written now: if TN = INFORMATION and PC = BLIND, the corrected verdict states that statement 7 of the study ("no
+    sign of history starvation at the cap") does not hold for the model, that the closure of the earlier-snapshot extension
+    rests on a blind probe, and names the zero-training CPU test that would decide it (refill replay: K = 192 plus the
+    user's old-only events from strictly earlier train snapshots in the freed slots). No GPU arm is recommended before that
+    test. If TN = DISTORTION, the study's statement 7 stands.
+
+=== BLOCK 3  2026-11-15T17:25:26Z  (written AFTER out_tn.txt, out_pc.txt and out_s.txt were read and BEFORE the sizing reads Z1 / Z2) ===
+Outcomes by the block-2 / block-0 rules:
+ TN = INFORMATION: embeddings of the events at index >= 192 removed, length signals kept: cap -0.00219 +- 0.00094 (z -2.3) for
+    the distilled students, -0.00334 +- 0.00094 (z -3.6) for the hard-label members (K = 128: -0.00374 / -0.00509). The
+    length-signal part of T (T minus TN) is -0.00015 +- 0.00062 / +0.00088 +- 0.00066. T stays "THE CAP BINDS FOR THE MODEL".
+ PC = PARTLY for the distilled students (best nested probe, mean cosine: +0.00091 +- 0.00068 = 36% of the known +0.00250;
+    max cosine -14%, category share 0%, gain in max cosine -23%) and BLIND for the hard-label members (-28% .. +20% of
+    +0.00147). No probe read is 2 SE from 0. A probe of the l.227 type therefore returns "about 0" for an effect that the
+    model demonstrably has.
+ S(i): feeds with H >= 10 and at most 10% of candidates matched at cosine 0.8 are 0.16% of val: "functionally cold" feeds are
+    not a hidden segment. S(ii): train has 42.3% of feeds at the cap (test 28.8%): FLAG by the 5 pp rule, direction = the cap
+    is OVER-represented in training, the middle (H 100-255: 37.8% vs 50.5%) under-represented. S(iii): neither declared
+    reading is met (cap minus H 200-255: -0.0083 +- 0.0060, 1.4 SE; H 200-255 minus H 100-149: -0.0151 +- 0.0072): NDCG falls
+    steadily with H inside the uncapped range (0.4139 / 0.4067 / 0.3989 / cap 0.3906).
+ Descriptive sizing reads declared now (no decision rule; used only for [D] arithmetic in the report):
+ Z1 size of the earlier-snapshot extension, label-free: for val and for test feeds at the cap, the share whose user (not
+    user_id 0) has at least one train feed with a strictly earlier timestamp; for the val ones the number of old-only
+    events (events of the user's strictly earlier train snapshots whose item id is absent from the stored history;
+    distinct items) : median, share with >= 64 and >= 128. Public / private split of the test share.
+ Z2 does the val fine-tune gain sit where the training mix under-represents? FT branch minus train-only branch of the FD16
+    base pool by H bucket; "sign of a mix-shift cost" only if the gain on H < 256 exceeds the gain at the cap by >= 2 SE of
+    the contrast; otherwise "no sign". (Known caveat: val OOF under-reads the fine-tune half.)
+
+=== BLOCK 4  2026-11-15T17:27:02Z  (written AFTER out_z.txt and out_z2.txt were read and BEFORE Z2b is computed) ===
+Z1: capped AND seen = 14.96% of val feeds, 14.31% of test (public 15.03%, private 14.00%); for the val ones the median number
+    of old-only distinct items in strictly earlier train snapshots is 106 (71% have >= 64, 40% have >= 128).
+Z2: FD16 base pool, FT minus train-only: cap -0.00271 +- 0.00108, H < 256 +0.00050 +- 0.00070, contrast +0.00320 +- 0.00129
+    (z +2.49) -> by the block-3 rule "sign of a mix-shift cost". The same read on other member sets (out_z2.txt, computed
+    as a replication after the fact): W16 +0.00306 (z +2.41), G3 hard labels +0.00202 (z +1.66), popularity-light pools
+    +0.00165 / +0.00078. All member sets share the val feeds and the fine-tune folds, so this is ONE observation of about
+    z 2.4, not several. It touches a family that reports/MIX_1115 closed ("w_ft by history length": nested +0.00076 on FD16 + 4,
+    -0.00019 / -0.00034 on the twins; gateB: "FD16 + 4 wants less fine-tune for H >= 222; W16 + 4 shows nothing there").
+Z2b (declared now): does the single-branch contrast carry into the BLEND? Final-composition contrasts on the cap bucket, fixed
+    weights, nothing fitted: final(w_ft 0.3) minus final(w_ft 0.5) and final(w_ft 0.0) minus final(w_ft 0.5), w_pop 0.2, for
+    FD16P20 and for the held-out twin W16P20w; cluster SE; the same on H < 256.
+    Reading: "the blend agrees" only if (0.3 minus 0.5) at the cap is > 0 with z >= 2 in BOTH compositions; then the report
+    says that the MIX_1115 closure of w_ft-by-H deserves one declared re-read by its authors (not adoption: an in-sample
+    bucket contrast of a mixing weight is exactly the kind of read that did not predict public today). Otherwise Z2 is a
+    single-branch fact with no consequence for the file and the MIX_1115 closure stands.
+
+=== BLOCK 5  2026-11-15T17:28:02Z  (written AFTER out_z2b.txt was read and BEFORE the sizing read Z3) ===
+Z2b outcome: (w_ft 0.3 minus 0.5) at the cap +0.00057 +- 0.00047 (z 1.2) on FD16P20 and +0.00025 +- 0.00043 (z 0.6) on W16P20w:
+    not z >= 2 in both -> Z2 is a single-branch fact (the fine-tuned branch alone is 0.002-0.003 below the train-only branch at
+    the cap in every base member set) with no consequence for the blend; the MIX_1115 closure of w_ft-by-H stands.
+Z3 (label-free sizing; a possible lever for SPARSE users that neither the study nor the coverage map names): the stored
+    history looks like a time window capped at 256 (uncapped seen users also have old-only items, Z1). A user who returns
+    after a pause can therefore show H = 0 or a handful of events now while a strictly EARLIER snapshot of the same user
+    (allowed by the leak rules) holds a real history. The model can consume such events without retraining (H <= 256), and
+    the marginal value of an event is largest where H is small. Read: among val feeds and among test feeds with a known
+    user id and H <= 0 / 9 / 19 / 49, the share whose user has a strictly earlier snapshot (train for val; train or val
+    for test), and the number of old-only distinct items those snapshots add (>= 10, >= 50), as a share of ALL feeds.
+    Gate written now: a zero-training CPU replay ("borrowed history") is worth running only if the feeds with H <= 19, a
+    known user id and >= 10 old-only items are >= 0.5% of TEST feeds (then +0.04 NDCG on them would be +0.0002); below that
+    the idea is recorded as sized and not worth a run.
+
+=== BLOCK 6  2026-11-15T17:29:47Z  (written AFTER out_z3.txt and out_b.txt were read and BEFORE the T replication on FINAL's own members) ===
+Z3 outcome: sparse known users (H <= 19) with >= 10 old-only items in a strictly earlier snapshot are 0.173% of val and 0.049%
+    of test feeds: far below the 0.5% gate -> "borrowed history" is sized and NOT worth a run.
+Part-B spot check (own code): paired deltas identical to the study's; nested family choice -0.0073 +- 0.0034 (H = 0),
+    -0.0027 +- 0.0014 (H 1-9), -0.0030 +- 0.0017 (user_id 0) with my candidate set: the study's "no stored family beats FINAL
+    on a small segment when chosen nested" is confirmed.
+T-FD (declared now): the truncation read T (K = 192 / 128 / 64) and the control TN (K = 192 / 128) on two members of the
+    analysed file itself, w5_fd10_kd05w192_s951 / s952 (full-data distilled students; selected checkpoint, must correlate
+    >= 0.999 with the stored train-only val file). REPLICATES if c(192) at the cap is negative for both members and the
+    2-member mean is <= -0.0010; DOES NOT REPLICATE if the 2-member mean is >= -0.0005. No new consequence is attached: this
+    only says whether the T verdict is about FINAL's members too.
+
+=== BLOCK 7  2026-11-15T17:37:25Z  (outcomes only; written AFTER out_t_fd.txt was read; no further number is computed after this block) ===
+T-FD REPLICATES: FINAL's own members w5_fd10_kd05w192_s951 / s952: c(192) at the cap -0.00202 +- 0.00098 (z -2.1), both members
+    negative (-0.00097 / -0.00307), c(128) -0.00532 +- 0.00131, c(64) -0.00985 +- 0.00163; TN(192) -0.00278 +- 0.00097 (z -2.9).
+    All six members pooled: c(192) -0.00227 +- 0.00077 (z -2.9), TN(192) -0.00277 +- 0.00079 (z -3.5), 6 of 6 members negative;
+    marginal worth of the 64-event stretches at the cap: 193-256 -0.0023 +- 0.0008, 129-192 -0.0025 +- 0.0008, 65-128 -0.0041 +- 0.0010.
+FINAL JUDGEMENT by the block-0 rule: R0 PASS; R1 numbers reproduce; R2 SAME ANSWER; R3 no systematic flag (and HR: family NOT
+    SUPPORTED on the independent holdout); T = "THE CAP BINDS FOR THE MODEL" (kept after TN = INFORMATION, replicated on FINAL's
+    members). -> confirmed = FALSE. What changes: statement 7 of the study and its use of the l.227 closure. What does not
+    change: the segment table, the size and strength of the cold / anonymous / sparse segments, "no stored family beats FINAL
+    on a small segment", "0 of 90 audit cells", and "no GPU arm follows from A-C".
+Deviations of mine from "criterion before number", disclosed: (1) block-0 rule R3(iii) left "one representative per control"
+    ambiguous; I read it as the per-control mean (statistic 2.38 < 2.5) and added HR because it was close. (2) The replication
+    of Z2 across member sets (out_z2.txt) was computed without its own declared rule; it is reported as a replication of one
+    observation, and the decision-bearing read Z2b was declared before it was computed. (3) The splits of T / TN by "seen in
+    train" in out_t.txt / out_tn.txt are descriptive, not declared. (4) T's two confounds (length signals; probe validity) were
+    not anticipated in block 0; their controls TN and PC were declared in block 2 after T was read.

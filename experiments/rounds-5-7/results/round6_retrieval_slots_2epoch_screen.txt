@@ -1,0 +1,89 @@
+== runs (log readouts: selected / final step)
+  sx:sx_base_s23           best  19670/19670 val 0.39375 hold 0.31783 | final val 0.39375 hold 0.31783 | 49 min
+  sx:sx_base_s24           best  19670/19670 val 0.39288 hold 0.31755 | final val 0.39288 hold 0.31755 | 49 min
+  r6:r6_a4u_s23            best  19670/19670 val 0.39456 hold 0.31793 | final val 0.39456 hold 0.31793 | 25 min
+  r6:r6_a4u_s24            best  19000/19670 val 0.39442 hold 0.31739 | final val 0.39438 hold 0.31736 | 34 min
+  r6:r6_wd01_s23           (missing)
+  r6:r6_wd01_s24           (missing)
+  r6:r6_cset_s23           best  19670/19670 val 0.39358 hold 0.31896 | final val 0.39358 hold 0.31896 | 38 min
+  r6:r6_cset_s24           best  19670/19670 val 0.39361 hold 0.31826 | final val 0.39361 hold 0.31826 | 40 min
+  r6:r6_typed_s23          best  19670/19670 val 0.39404 hold 0.31821 | final val 0.39404 hold 0.31821 | 36 min
+  r6:r6_typed_s24          best  19670/19670 val 0.39345 hold 0.31756 | final val 0.39345 hold 0.31756 | 35 min
+  r6:r6_adrop0_s23         best  19670/19670 val 0.39345 hold 0.31793 | final val 0.39345 hold 0.31793 | 35 min
+  r6:r6_adrop0_s24         best  19000/19670 val 0.39272 hold 0.31754 | final val 0.39274 hold 0.31753 | 28 min
+  r6:r6_a4w_s23            best  19670/19670 val 0.39357 hold 0.31782 | final val 0.39357 hold 0.31782 | 31 min
+  r6:r6_a4w_s24            best  19670/19670 val 0.39289 hold 0.31752 | final val 0.39289 hold 0.31752 | 16 min
+
+== a4u vs sx_base (B = treatment)
+  VAL  r6:r6_a4u_s23 0.39456 vs sx:sx_base_s23 0.39375: all +0.00080+-0.00062 (z +1.30)  M<50 +0.00056+-0.00115 (z +0.49)  M>=50 +0.00097+-0.00068 (z +1.43)  Tue +0.00103+-0.00085 (z +1.20)  Thu +0.00055+-0.00089 (z +0.62)  coldpos +0.00243+-0.00121 (z +2.02)  warmpos +0.00018+-0.00083 (z +0.21)
+  VAL  r6:r6_a4u_s24 0.39442 vs sx:sx_base_s24 0.39288: all +0.00154+-0.00065 (z +2.37)  M<50 +0.00294+-0.00119 (z +2.46)  M>=50 +0.00057+-0.00072 (z +0.79)  Tue +0.00321+-0.00090 (z +3.58)  Thu -0.00030+-0.00093 (z -0.32)  coldpos +0.00071+-0.00129 (z +0.55)  warmpos +0.00195+-0.00087 (z +2.25)
+  VAL  pooled: all +0.00117+-0.00047 (z +2.48)  M<50 +0.00175+-0.00086 (z +2.05)  M>=50 +0.00077+-0.00053 (z +1.44)  Tue +0.00212+-0.00066 (z +3.23)  Thu +0.00013+-0.00068 (z +0.19)  coldpos +0.00157+-0.00094 (z +1.68)  warmpos +0.00106+-0.00063 (z +1.69)
+  HOLD r6:r6_a4u_s23 0.31795 vs sx:sx_base_s23 0.31785: all +0.00011+-0.00036 (z +0.30)  late20% +0.00044+-0.00077 (z +0.57)
+  HOLD r6:r6_a4u_s24 0.31736 vs sx:sx_base_s24 0.31754: all -0.00018+-0.00037 (z -0.49)  late20% -0.00067+-0.00080 (z -0.83)
+  HOLD pooled: all -0.00004+-0.00027 (z -0.14)  late20% -0.00011+-0.00058 (z -0.20)
+  CORR val: base-base 0.9784 | arm-base cross-seed 0.9763 | arm-arm 0.9785 | arm-base same-seed 0.9885;  holdout: base-base 0.9793 | arm-base cross 0.9772
+  ENS VAL  2-member mixed vs 2x base: all +0.00041+-0.00035 (z +1.18)  M<50 +0.00091+-0.00064 (z +1.43)  M>=50 +0.00007+-0.00039 (z +0.17)  Tue +0.00019+-0.00049 (z +0.40)  Thu +0.00064+-0.00050 (z +1.30)  coldpos +0.00122+-0.00067 (z +1.82)  warmpos +0.00021+-0.00047 (z +0.44)  (base pair 0.39433)
+  ENS HOLD 2-member mixed vs 2x base: all -0.00000+-0.00020 (z -0.00)  late20% -0.00017+-0.00040 (z -0.44)
+  ENS 4-member (2 base + 2 arm) vs 2x base (info, unequal count): VAL all +0.00004+-0.00036 (z +0.12)  HOLD all +0.00011+-0.00021 (z +0.52)
+  ==> PASS (recipe change / stronger member) -> 10-epoch pair
+
+== wd01: incomplete, skipped
+
+== cset vs sx_base (B = treatment)
+  VAL  r6:r6_cset_s23 0.39358 vs sx:sx_base_s23 0.39375: all -0.00017+-0.00076 (z -0.23)  M<50 +0.00105+-0.00140 (z +0.75)  M>=50 -0.00101+-0.00084 (z -1.20)  Tue +0.00053+-0.00104 (z +0.51)  Thu -0.00094+-0.00111 (z -0.84)  coldpos +0.00140+-0.00155 (z +0.91)  warmpos -0.00090+-0.00101 (z -0.88)
+  VAL  r6:r6_cset_s24 0.39361 vs sx:sx_base_s24 0.39288: all +0.00073+-0.00074 (z +0.98)  M<50 +0.00236+-0.00140 (z +1.69)  M>=50 -0.00039+-0.00080 (z -0.49)  Tue +0.00183+-0.00102 (z +1.79)  Thu -0.00048+-0.00108 (z -0.44)  coldpos +0.00226+-0.00153 (z +1.48)  warmpos +0.00044+-0.00098 (z +0.44)
+  VAL  pooled: all +0.00028+-0.00057 (z +0.49)  M<50 +0.00171+-0.00105 (z +1.62)  M>=50 -0.00070+-0.00063 (z -1.11)  Tue +0.00118+-0.00079 (z +1.49)  Thu -0.00071+-0.00082 (z -0.86)  coldpos +0.00183+-0.00118 (z +1.55)  warmpos -0.00023+-0.00076 (z -0.30)
+  HOLD r6:r6_cset_s23 0.31897 vs sx:sx_base_s23 0.31785: all +0.00113+-0.00044 (z +2.58)  late20% +0.00052+-0.00089 (z +0.58)
+  HOLD r6:r6_cset_s24 0.31821 vs sx:sx_base_s24 0.31754: all +0.00067+-0.00044 (z +1.52)  late20% -0.00021+-0.00096 (z -0.21)
+  HOLD pooled: all +0.00090+-0.00033 (z +2.69)  late20% +0.00015+-0.00070 (z +0.22)
+  CORR val: base-base 0.9784 | arm-base cross-seed 0.9729 | arm-arm 0.9778 | arm-base same-seed 0.9787;  holdout: base-base 0.9793 | arm-base cross 0.9734
+  ENS VAL  2-member mixed vs 2x base: all +0.00002+-0.00041 (z +0.05)  M<50 +0.00024+-0.00077 (z +0.31)  M>=50 -0.00013+-0.00045 (z -0.29)  Tue +0.00067+-0.00056 (z +1.20)  Thu -0.00069+-0.00061 (z -1.13)  coldpos +0.00115+-0.00084 (z +1.37)  warmpos -0.00033+-0.00055 (z -0.59)  (base pair 0.39433)
+  ENS HOLD 2-member mixed vs 2x base: all +0.00074+-0.00024 (z +3.12)  late20% +0.00060+-0.00049 (z +1.21)
+  ENS 4-member (2 base + 2 arm) vs 2x base (info, unequal count): VAL all +0.00038+-0.00043 (z +0.88)  HOLD all +0.00106+-0.00025 (z +4.28)
+  ==> FAMILY-CANDIDATE (non-inferior, lower correlation, useful in a mix) -> 10-epoch pair
+
+== typed vs sx_base (B = treatment)
+  VAL  r6:r6_typed_s23 0.39404 vs sx:sx_base_s23 0.39375: all +0.00029+-0.00058 (z +0.50)  M<50 +0.00026+-0.00107 (z +0.24)  M>=50 +0.00031+-0.00064 (z +0.49)  Tue -0.00007+-0.00080 (z -0.09)  Thu +0.00068+-0.00083 (z +0.82)  coldpos +0.00140+-0.00121 (z +1.16)  warmpos -0.00021+-0.00076 (z -0.27)
+  VAL  r6:r6_typed_s24 0.39345 vs sx:sx_base_s24 0.39288: all +0.00057+-0.00059 (z +0.98)  M<50 +0.00231+-0.00111 (z +2.08)  M>=50 -0.00063+-0.00062 (z -1.01)  Tue +0.00076+-0.00082 (z +0.93)  Thu +0.00037+-0.00084 (z +0.44)  coldpos +0.00004+-0.00118 (z +0.04)  warmpos +0.00074+-0.00079 (z +0.94)
+  VAL  pooled: all +0.00043+-0.00042 (z +1.02)  M<50 +0.00129+-0.00079 (z +1.64)  M>=50 -0.00016+-0.00046 (z -0.35)  Tue +0.00034+-0.00059 (z +0.59)  Thu +0.00053+-0.00060 (z +0.87)  coldpos +0.00072+-0.00087 (z +0.83)  warmpos +0.00027+-0.00056 (z +0.48)
+  HOLD r6:r6_typed_s23 0.31823 vs sx:sx_base_s23 0.31785: all +0.00038+-0.00033 (z +1.17)  late20% -0.00011+-0.00067 (z -0.16)
+  HOLD r6:r6_typed_s24 0.31757 vs sx:sx_base_s24 0.31754: all +0.00003+-0.00034 (z +0.08)  late20% -0.00048+-0.00073 (z -0.66)
+  HOLD pooled: all +0.00020+-0.00024 (z +0.86)  late20% -0.00029+-0.00050 (z -0.59)
+  CORR val: base-base 0.9784 | arm-base cross-seed 0.9783 | arm-arm 0.9786 | arm-base same-seed 0.9908;  holdout: base-base 0.9793 | arm-base cross 0.9792
+  ENS VAL  2-member mixed vs 2x base: all -0.00026+-0.00032 (z -0.82)  M<50 -0.00012+-0.00061 (z -0.20)  M>=50 -0.00036+-0.00033 (z -1.08)  Tue -0.00050+-0.00045 (z -1.11)  Thu -0.00000+-0.00045 (z -0.01)  coldpos -0.00070+-0.00062 (z -1.12)  warmpos -0.00027+-0.00043 (z -0.64)  (base pair 0.39433)
+  ENS HOLD 2-member mixed vs 2x base: all +0.00017+-0.00018 (z +0.97)  late20% +0.00025+-0.00035 (z +0.72)
+  ENS 4-member (2 base + 2 arm) vs 2x base (info, unequal count): VAL all -0.00008+-0.00034 (z -0.24)  HOLD all +0.00015+-0.00019 (z +0.79)
+  ==> FAIL
+
+== adrop0 vs sx_base (B = treatment)
+  VAL  r6:r6_adrop0_s23 0.39345 vs sx:sx_base_s23 0.39375: all -0.00031+-0.00070 (z -0.44)  M<50 +0.00057+-0.00132 (z +0.43)  M>=50 -0.00091+-0.00074 (z -1.22)  Tue +0.00013+-0.00095 (z +0.13)  Thu -0.00078+-0.00102 (z -0.76)  coldpos -0.00058+-0.00134 (z -0.43)  warmpos -0.00003+-0.00094 (z -0.03)
+  VAL  r6:r6_adrop0_s24 0.39272 vs sx:sx_base_s24 0.39288: all -0.00016+-0.00068 (z -0.23)  M<50 +0.00191+-0.00130 (z +1.47)  M>=50 -0.00159+-0.00072 (z -2.21)  Tue +0.00038+-0.00093 (z +0.40)  Thu -0.00074+-0.00099 (z -0.75)  coldpos -0.00120+-0.00133 (z -0.91)  warmpos +0.00040+-0.00092 (z +0.44)
+  VAL  pooled: all -0.00023+-0.00049 (z -0.48)  M<50 +0.00124+-0.00092 (z +1.34)  M>=50 -0.00125+-0.00052 (z -2.40)  Tue +0.00025+-0.00067 (z +0.38)  Thu -0.00076+-0.00071 (z -1.07)  coldpos -0.00089+-0.00095 (z -0.94)  warmpos +0.00018+-0.00066 (z +0.28)
+  HOLD r6:r6_adrop0_s23 0.31794 vs sx:sx_base_s23 0.31785: all +0.00009+-0.00040 (z +0.23)  late20% -0.00001+-0.00088 (z -0.02)
+  HOLD r6:r6_adrop0_s24 0.31754 vs sx:sx_base_s24 0.31754: all -0.00000+-0.00040 (z -0.00)  late20% -0.00013+-0.00086 (z -0.15)
+  HOLD pooled: all +0.00005+-0.00028 (z +0.16)  late20% -0.00007+-0.00059 (z -0.12)
+  CORR val: base-base 0.9784 | arm-base cross-seed 0.9771 | arm-arm 0.9765 | arm-base same-seed 0.9845;  holdout: base-base 0.9793 | arm-base cross 0.9780
+  ENS VAL  2-member mixed vs 2x base: all +0.00003+-0.00037 (z +0.09)  M<50 +0.00057+-0.00070 (z +0.82)  M>=50 -0.00034+-0.00039 (z -0.88)  Tue +0.00011+-0.00050 (z +0.22)  Thu -0.00005+-0.00054 (z -0.09)  coldpos -0.00021+-0.00072 (z -0.29)  warmpos +0.00035+-0.00050 (z +0.70)  (base pair 0.39433)
+  ENS HOLD 2-member mixed vs 2x base: all -0.00002+-0.00021 (z -0.10)  late20% -0.00008+-0.00041 (z -0.20)
+  ENS 4-member (2 base + 2 arm) vs 2x base (info, unequal count): VAL all +0.00038+-0.00039 (z +0.98)  HOLD all +0.00038+-0.00022 (z +1.77)
+  ==> FAIL   WARN slices < -2 SE: ['val M>=50']
+
+== a4w vs sx_base (B = treatment)
+  VAL  r6:r6_a4w_s23 0.39357 vs sx:sx_base_s23 0.39375: all -0.00019+-0.00073 (z -0.25)  M<50 -0.00040+-0.00138 (z -0.29)  M>=50 -0.00004+-0.00080 (z -0.05)  Tue -0.00063+-0.00101 (z -0.62)  Thu +0.00030+-0.00107 (z +0.28)  coldpos +0.00060+-0.00146 (z +0.41)  warmpos -0.00047+-0.00099 (z -0.48)
+  VAL  r6:r6_a4w_s24 0.39289 vs sx:sx_base_s24 0.39288: all +0.00001+-0.00074 (z +0.01)  M<50 +0.00227+-0.00138 (z +1.64)  M>=50 -0.00155+-0.00080 (z -1.94)  Tue +0.00006+-0.00102 (z +0.06)  Thu -0.00005+-0.00107 (z -0.05)  coldpos +0.00196+-0.00151 (z +1.30)  warmpos -0.00105+-0.00098 (z -1.07)
+  VAL  pooled: all -0.00009+-0.00055 (z -0.16)  M<50 +0.00093+-0.00101 (z +0.92)  M>=50 -0.00080+-0.00060 (z -1.32)  Tue -0.00028+-0.00076 (z -0.37)  Thu +0.00012+-0.00078 (z +0.16)  coldpos +0.00128+-0.00110 (z +1.16)  warmpos -0.00076+-0.00073 (z -1.04)
+  HOLD r6:r6_a4w_s23 0.31782 vs sx:sx_base_s23 0.31785: all -0.00003+-0.00041 (z -0.06)  late20% -0.00130+-0.00091 (z -1.42)
+  HOLD r6:r6_a4w_s24 0.31752 vs sx:sx_base_s24 0.31754: all -0.00002+-0.00042 (z -0.05)  late20% -0.00034+-0.00092 (z -0.37)
+  HOLD pooled: all -0.00002+-0.00031 (z -0.08)  late20% -0.00082+-0.00069 (z -1.18)
+  CORR val: base-base 0.9784 | arm-base cross-seed 0.9759 | arm-arm 0.9777 | arm-base same-seed 0.9824;  holdout: base-base 0.9793 | arm-base cross 0.9770
+  ENS VAL  2-member mixed vs 2x base: all +0.00010+-0.00041 (z +0.24)  M<50 +0.00058+-0.00076 (z +0.77)  M>=50 -0.00023+-0.00045 (z -0.52)  Tue -0.00006+-0.00057 (z -0.10)  Thu +0.00027+-0.00059 (z +0.46)  coldpos +0.00143+-0.00079 (z +1.82)  warmpos -0.00025+-0.00056 (z -0.45)  (base pair 0.39433)
+  ENS HOLD 2-member mixed vs 2x base: all -0.00015+-0.00022 (z -0.66)  late20% -0.00017+-0.00045 (z -0.38)
+  ENS 4-member (2 base + 2 arm) vs 2x base (info, unequal count): VAL all +0.00009+-0.00043 (z +0.22)  HOLD all +0.00017+-0.00023 (z +0.71)
+  ==> FAIL
+
+== summary
+  a4u     val +0.00117 (z +2.48)  hold -0.00004 (z -0.14)  rho_x 0.9763 vs rho_bb 0.9784  -> PASS (recipe change / stronger member) -> 10-epoch pair
+  cset    val +0.00028 (z +0.49)  hold +0.00090 (z +2.69)  rho_x 0.9729 vs rho_bb 0.9784  -> FAMILY-CANDIDATE (non-inferior, lower correlation, useful in a mix) -> 10-epoch pair
+  typed   val +0.00043 (z +1.02)  hold +0.00020 (z +0.86)  rho_x 0.9783 vs rho_bb 0.9784  -> FAIL
+  adrop0  val -0.00023 (z -0.48)  hold +0.00005 (z +0.16)  rho_x 0.9771 vs rho_bb 0.9784  -> FAIL
+  a4w     val -0.00009 (z -0.16)  hold -0.00002 (z -0.08)  rho_x 0.9759 vs rho_bb 0.9784  -> FAIL

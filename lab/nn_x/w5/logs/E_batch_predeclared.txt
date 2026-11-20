@@ -1,0 +1,37 @@
+E-BATCH (batch-size scale-up at fixed epochs) PRE-DECLARATION — frozen 2026-11-13T10:51:22Z, before any run of these arms existed
+(checked: no logs/w5_e10_bs4*, no ckpt).
+Motivation: the E-EPOCHS wave shows the constant-lr plateau is SATURATED (e15 / e20 / e30 plateau val 0.3925-0.3934 and holdout
+0.3169-0.3181 at 100k-150k steps = the 10-epoch plateau at 77.5k: val 0.3933, holdout 0.3167); e15 (BEST val 0.39611 / 0.39602)
+is not above the 10-epoch base (0.39632 / 0.39691). A plateau that does not move with more steps at constant lr is the signature
+of a gradient-NOISE floor, and the GNS measurement (COVERAGE_MAP row 'batch size': B_simple 4,900 ± 800 / 9,400 ± 3,100 feeds
+vs ~317 feeds per step) says the batch is 15-30x below the critical batch. Batch size was NEVER tested. Larger batches at the
+same epochs lower the noise floor at the cost of 4x fewer steps.
+Arms (stage E = E_BASE + HYG + the arm flags, nn_x/w5/lane.sh; 10 epochs; step-based settings scaled by 1/4):
+  bs4   = --cand_budget 131072 --max_feeds 2048 --eval_every 625 --select_min_step 3000 --save_steps 17500,19375 (lr 2e-3 unchanged)
+  bs4lr4 = bs4 + --lr 4e-3 (sqrt-scaling of the Muon lr with the 4x batch)
+  seeds 951 / 952 per arm; bs4 on GPUs N now (free), bs4lr4 on two GPUs freed by e20 (not 0/1, reserved for the e20 chain FT).
+Paired references: w5_e10_base_s<seed> (selected checkpoint primary; @last information).
+RULE (per arm, = the stage-E rule): PASS iff pooled per-seed paired member val > 0 AND holdout > +1 SE AND no val slice
+  (M<50, M>=50, Tue, Thu) < -2 SE AND pmix >= -1 SE (w5_eval_e_ap1.py <arm> 951,952 mechanics). Two arms: each is judged by the
+  rule on its own; a PASS arm gets 2 more seeds (953/954) under the same flags and then chain_e.sh ARM=<arm> (n2cpv3 FT, decide7
+  T1 = G3 + arm(4), T2 = F10 + F7x + arm(4); pick-1 replacement only at H >= 2 SE and V >= 0). FAIL -> closed, nothing adopted.
+Information: steps/epoch (expected ~2,460), feeds per step, GPU memory, plateau val/holdout at the plateau end, cooldown end.
+Kill gate: a run that OOMs or whose plateau holdout at 50% of training is below the base's step-40000 holdout by > 0.003 (3x SE_gate)
+  on BOTH seeds is stopped by exact PID and the arm closed (information).
+ETA: ~4x fewer steps, ~4x larger steps -> similar wall time to the base alone (~90 min) if the GPU is not saturated; longer otherwise.
+
+AMENDMENT 1 — 2026-11-13T11:14:34Z (bs4 at step 13125 of 24620, plateau only; no cooldown eval and no read-out existed; bs4lr4 not started):
+Half-way read (information): bs4 plateau holdout 0.3170-0.3182 at 5 epochs = the small-batch plateau (base 0.3171 @40k, 0.3173 @75k);
+val 0.3932-0.3944 = base 0.3930-0.3935. No kill (gate not reached). The plateau level does not move with the batch either, so the
+E rule (member level) will most likely FAIL. A second, pre-declared use of the pair: bs4 is a DIFFERENT TRAJECTORY (4x fewer, 4x
+larger steps) and may be a same-strength, lower-correlation family for the pool (the only ensemble lever that has worked:
+'same-strength, different-recipe families').
+DIVERSITY CLAUSE (per arm, applies when the E rule FAILS): the arm becomes a FAMILY CANDIDATE iff
+  (d1) pooled member val >= -0.0005 AND pooled member holdout >= -0.0005 (same strength; selected ckpt), AND
+  (d2) rho_bb - rho_x >= +0.005 on val, where rho_x = corr(arm pool{951,952}, base pool{953,954}) and
+       rho_bb = corr(base pool{951,952}, base pool{953,954}) (within-feed rank-z, Pearson; = the LATE-DROPOUT clause 5), AND
+  (d3) the 2-member pool arm vs base{951,952}: val >= -0.0005 and holdout >= -0.0005.
+  Family candidate -> seeds 953/954 under the same flags, n2cpv3 FT of the 4, decide7 (T1 = G3 + arm(4), T2 = F10 + F7x + arm(4);
+  qualify iff H > +1 SE, V >= 0, slices, pmix, presub PASS; pick-1 replacement only at H >= 2 SE and V >= 0). Otherwise CLOSED.
+Read-out: w5_eval_e_ap1.py <arm> 951,952 (E rule) + the diversity numbers from nn_x/tricks/late_dropout/readout_late_dropout.py
+  mechanics on the w5 preds (script scratchpad div_readout.py <arm>, written before the bs4 cooldown ends).

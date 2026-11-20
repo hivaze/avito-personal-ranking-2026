@@ -1,0 +1,64 @@
+sub: 61107 feeds, 6537001 rows; rows.npy == my reconstruction of the train flat rows of src_fidx: True
+subxh: 8000 feeds, 1234917 rows; rows.npy == my reconstruction of the train flat rows of src_fidx: True
+labels of the study caches == train cand_target at those rows: True
+
+=== (1) my independent CPU path vs the study cache, sample feeds (W0S 2000, W0L 1500, H0 600, XH 600) ===
+  w5_e10_u20a_s951: rows compared 469307 of 469307 | max |logit diff| 1.53e-05 mean 7.64e-09 (logit sd 16.26) | NDCG mine - cache on compared feeds +0.00e+00
+  w5_e10_u20a_s952: rows compared 469307 of 469307 | max |logit diff| 1.53e-05 mean 7.38e-09 (logit sd 16.24) | NDCG mine - cache on compared feeds +0.00e+00
+  w5_e10_u20b_s951: rows compared 469307 of 469307 | max |logit diff| 1.53e-05 mean 8.91e-09 (logit sd 14.44) | NDCG mine - cache on compared feeds +0.00e+00
+  w5_e10_u20b_s952: rows compared 469307 of 469307 | max |logit diff| 1.53e-05 mean 7.45e-09 (logit sd 14.39) | NDCG mine - cache on compared feeds +0.00e+00
+  w5_e10_u20c_s951: rows compared 469307 of 469307 | max |logit diff| 1.53e-05 mean 7.54e-09 (logit sd 14.19) | NDCG mine - cache on compared feeds +0.00e+00
+  w5_e10_u20c_s952: rows compared 469307 of 469307 | max |logit diff| 1.53e-05 mean 8.03e-09 (logit sd 14.21) | NDCG mine - cache on compared feeds +0.00e+00
+  w5_e10_xf0_s951: rows compared 374992 of 469307 | max |logit diff| 1.53e-05 mean 1.31e-08 (logit sd 11.26) | NDCG mine - cache on compared feeds +0.00e+00
+  sample W0S (n 2000): B-A member from MY logits +0.00047 +- 0.00191 | from the cache, same feeds +0.00047 +- 0.00191
+  sample W0L (n 1500): B-A member from MY logits +0.00351 +- 0.00154 | from the cache, same feeds +0.00351 +- 0.00154
+  sample H0 (n 600): B-A member from MY logits -0.00412 +- 0.00246 | from the cache, same feeds -0.00412 +- 0.00246
+  sample XH (n 600): B-A member from MY logits +0.00240 +- 0.00240 | from the cache, same feeds +0.00240 +- 0.00240
+
+=== (2) transductive read re-derived (study cache logits, my NDCG / z; CPU fp32 vs CPU fp32) ===
+set | n | B-A member | per seed | B-A 2-pool | B-A member @last | C-A member (IN-SAMPLE on W0*) | A level | B level
+W0S | 11022 | +0.00060 +- 0.00082 | (+0.00126, -0.00006) | -0.00038 +- 0.00097 | +0.00037 +- 0.00083 | +0.02286 +- 0.00089 | 0.49482 | 0.49542
+W0L | 26883 | +0.00095 +- 0.00037 | (+0.00131, +0.00059) | +0.00026 +- 0.00042 | +0.00086 +- 0.00037 | +0.01780 +- 0.00042 | 0.32044 | 0.32139
+H0 | 5974 | -0.00086 +- 0.00076 | (-0.00059, -0.00114) | -0.00100 +- 0.00085 | -0.00036 +- 0.00076 | +0.00038 +- 0.00082 | 0.31941 | 0.31855
+W0S+W0L | 37905 | +0.00085 +- 0.00035 | (+0.00130, +0.00040) | +0.00008 +- 0.00041 | +0.00072 +- 0.00035 | +0.01927 +- 0.00039 | 0.37115 | 0.37200
+XH | 8000 | +0.00082 +- 0.00067 | (+0.00061, +0.00103) | +0.00018 +- 0.00075 | n/a | +0.00100 +- 0.00069 (out-of-sample)
+excess of B-A: W0L - XH +0.00013 +- 0.00076 | W0S - XH -0.00022 +- 0.00106 | W0L - H0 +0.00182 +- 0.00084 | H0 - XH -0.00168 +- 0.00101
+   @last: W0L - H0 +0.00122 +- 0.00084
+   W0S M 5-9: n 1266 B-A member -0.00339 +- 0.00264 | positives per feed 1.066
+   W0S M 10-19: n 1872 B-A member -0.00130 +- 0.00217 | positives per feed 1.123
+   W0S M 20-34: n 3930 B-A member +0.00298 +- 0.00141 | positives per feed 1.237
+   W0S M 35-49: n 3954 B-A member +0.00041 +- 0.00121 | positives per feed 1.322
+   witness feeds without a positive: W0S 0 W0L 0 H0 0
+   W0S by time: early half +0.00121 +- 0.00115 | late half -0.00001 +- 0.00117
+   W0L by time: early half +0.00088 +- 0.00054 | late half +0.00102 +- 0.00050
+   W0S without the user-0 bucket: n 10654 B-A member +0.00066 +- 0.00083
+   W0L without the user-0 bucket: n 25806 B-A member +0.00103 +- 0.00038
+
+=== (3) teacher: cached CPU xf0 3-mean vs teacher_xf0.npy / 3 (file is the SUM of n members), within-feed corr; B and A match to the teacher ===
+teacher_xf0.n = 3
+  W0S: n 11022 mean within-feed corr 0.999938 median 0.999972 share >= 0.999 0.9965 min 0.9886
+  W0L: n 26883 mean within-feed corr 0.999942 median 0.999965 share >= 0.999 0.9984 min 0.9951
+  H0: n 5974 mean within-feed corr 0.999946 median 0.999970 share >= 0.999 0.9985 min 0.9970
+  W1S: n 11228 mean within-feed corr 0.999936 median 0.999972 share >= 0.999 0.9963 min 0.9835
+  W1L: n 6000 mean within-feed corr 0.999943 median 0.999965 share >= 0.999 0.9987 min 0.9975
+  single member xf0_s951 vs teacher: W0L mean corr 0.9823
+  teacher NDCG on W0S / W0L / H0: 0.49489 / 0.32085 / 0.31869
+  u20a within-feed corr to the teacher: W0S 0.97206 W0L 0.97461 H0 0.97438
+  u20b within-feed corr to the teacher: W0S 0.97975 W0L 0.98099 H0 0.98088
+  u20c within-feed corr to the teacher: W0S 0.97501 W0L 0.97725 H0 0.97750
+  B minus A corr to the teacher: W0S +0.00769 +- 0.00014 | W0L +0.00638 +- 0.00004 | H0 +0.00650 +- 0.00009
+  seen (W0L) minus unseen (H0): -0.00012 +- 0.00009
+
+=== (4) known answer: base - xf0 member (3 seeds), cached CPU logits ===
+  W0S: n 11022 base - xf0 +0.02369 +- 0.00090
+  W0L: n 26883 base - xf0 +0.01707 +- 0.00042
+  H0: n 5974 base - xf0 +0.00152 +- 0.00081
+  W1S: n 11228 base - xf0 +0.00253 +- 0.00086
+  W1L: n 6000 base - xf0 +0.00120 +- 0.00087
+
+=== (5) A/A null of "mean of 2 members minus mean of 2 other members" on the cross-user holdout (stored GPU files) ===
+  kd05w192 selected: 8 members, member cross-user holdout NDCG sd 0.00029 (range 0.32276..0.32367); statistic sd 0.00029 over 420 arrangements; share >= +0.00061: 0.0071; share >= +0.00040: 0.0810; share |x| >= 0.00061: 0.0143
+  kd05w192 @last: 8 members, member cross-user holdout NDCG sd 0.00030 (range 0.32287..0.32377); statistic sd 0.00030 over 420 arrangements; share >= +0.00061: 0.0143; share >= +0.00040: 0.0952; share |x| >= 0.00061: 0.0286
+  kd05t25w192 selected: 8 members, member cross-user holdout NDCG sd 0.00025 (range 0.32304..0.32393); statistic sd 0.00025 over 420 arrangements; share >= +0.00061: 0.0000; share >= +0.00040: 0.0595; share |x| >= 0.00061: 0.0000
+  kd05t25w192 @last: 8 members, member cross-user holdout NDCG sd 0.00038 (range 0.32265..0.32393); statistic sd 0.00038 over 420 arrangements; share >= +0.00061: 0.0452; share >= +0.00040: 0.1571; share |x| >= 0.00061: 0.0905
+DONE

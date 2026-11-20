@@ -1,0 +1,118 @@
+=== premortem PREDECLARED, block 1, written 2026-11-15T04:59:49Z BEFORE any number of mine is computed ===
+(What I have already READ in project files before this block: the six scored pairs and their val / pmix / holdout columns (E_kd_predeclared.txt 02:15Z),
+ the witness agent's train-only dose table of the popularity-light admixture (witness.md 3.4), the lagged-holdout weight profile (poplag_verify 1.3),
+ ft_redesign's w_ft scan on val (optimum 0.25-0.35, w 0.7 -0.00068 +- 0.00025). Hypotheses below are therefore NOT blind to those numbers; the nested / out-of-sample
+ procedures are the guard, and the multiplicity is reported.)
+
+DEFINITIONS
+ member score = per-feed z (src/stack_val.feed_rank_z[:, 1]); pool = member mean of z; branch mix = (1 - w) z(base pool) + w z(pop pool);
+ FINAL = 0.5 z(FT branch) + 0.5 z(TO branch) (nn_x/w12/kd/build_r3.py); FT branch on val = out-of-fold predictions (n2cpv3s3_val_oof).
+ NDCG = per-feed full list, binary gain, pessimistic ties (numba copy pc_common.ndcg_fast, checked against src/metrics.ndcg_per_feed first).
+ SE = sd of the paired per-feed difference / sqrt(n feeds); pmix = src/pmix.weights() (public / private mix of M bin x cold-share bin), SE with n_eff.
+ stale-val = CPU fp32 re-predictions of the TRAIN-ONLY members with private-like inputs (witness cache/staleval, veto preds/cpu_*; CPU against CPU only).
+ SVF ("half-stale final", information, defined here) = 0.5 z(FT out-of-fold branch, fresh inputs) + 0.5 z(TO branch from the stale-val files). No fine-tuned
+   prediction exists under stale inputs, so SVF understates the staleness of a real private row for the FT half.
+ Wide pop1 students: all four fine-tunes are used when the fourth (s951) has landed; until then tables are marked "3 of 4 FT" and are re-run.
+
+R1. PRIVATE FORECAST of a pair A - B (FINAL level).
+ Three views of the same 14,423 val feeds: V1 plain val, V2 pmix-private, V3 SVF. Centre c_val = mean(V1, V2, V3). Sampling SE s_val = max of the three SEs (same feeds: no
+ averaging gain claimed). Model spread m = (max - min) / 2 of the three. Where a PUBLIC delta exists (independent feeds), public is shifted to private conditions by
+ (pmix-private - pmix-public) of the same pair, with SE_pub = sd(val per-feed delta) / sqrt(8,562) and an extra transfer sd = |pmix-private - pmix-public|;
+ forecast = inverse-variance mean of (c_val, sqrt(s_val^2 + m^2)) and (public shifted, sqrt(SE_pub^2 + transfer^2)). Without a public delta: forecast = c_val, sd = sqrt(s_val^2 + m^2).
+ EXPECTED private delta ~ N(forecast, sd_f^2). REALISED private delta adds the private sampling SE = sd(val per-feed delta under pmix-private weights) / sqrt(20,033).
+ P(A beats B on private) = Phi(forecast / sqrt(sd_f^2 + SE_priv^2)). The staleness gradient (c) and the label-free day behaviour (d) are reported next to it and
+ change the forecast only through the statement of the interval (I widen, never narrow, if (c) or (d) disagree in sign with the forecast).
+ SELECTION GUARD: "best file on private" is named only from this short list, fixed now: W8P20, W16, W8, W16P20d(0.2), W16P20x8(0.2). Any other composition (other weights,
+ feed-dependent weights, w_ft variants) can be named only if it passes R2 / R3 / R4 below. The winner's-curse of the short list is measured by a nested pick:
+ 200 random user-half splits (user-0 feeds as singletons), pick the list member with the largest c_val on half A, score it against W8P20 on half B (and the reverse).
+
+R2. CONSTANT popularity-light weight w in {0.1, 0.2, 0.3, 0.4} (bases W8 and W16; pop pools d128 x4 and x8).
+ A weight other than the scored 0.2 is "defensible for private" iff, against w = 0.2 on the same base, paired per feed at FINAL level:
+   V2 (pmix-private) >= +1.5 SE AND V1 (val) >= 0 AND stale-val of the train-only branch >= 0 AND the lagged holdout on record does not contradict it
+   (W8 base, poplag_verify 1.3 / witness 3.4: S_lag(w) - S_lag(0.2) >= 0 on the subset where the gate holds).
+ Reported with and without the lagged clause. 3 alternatives x 4 base/pop combinations = 12 looks.
+
+R3. FEED-DEPENDENT weight. Rule class fixed now: two feed groups by ONE label-free property, a weight from {0, 0.1, 0.2, 0.3, 0.4} per group.
+   Properties (3): P_M = M >= 50; P_c30 = feed cold share >= 0.30; P_c45 = feed cold share >= 0.45 (cold = it_hist_all_luo == 0, as src/pmix.py).
+   3 x 25 = 75 rules (15 of them constant; 5 distinct constants). Bases: W8 + d128 pop pool (the scored form) and W16 + x8 pop pool.
+ Judged OUT OF SAMPLE: 200 random user-half splits; on half A the rule with the largest FINAL val mean is picked, on half B it is scored against constant 0.2; both directions;
+   per split the out-of-sample delta is the mean over all 14,423 feeds of the cross-fitted per-feed deltas.
+ "Defensible" iff the mean over splits of the out-of-sample val delta >= 2 x (median per-split paired SE) AND the same cross-fitted picks read >= 0 on stale-val (train-only
+   branch) and >= 0 under pmix-private weights. Otherwise: constant weight. The in-sample best rule and its in-sample delta are reported as the selection-biased number.
+
+R4. FINE-TUNE WEIGHT w_ft in {0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0} (FINAL = w_ft z(FT) + (1 - w_ft) z(TO)), pools W8, W16new (seeds 955-958), W16, W8P20.
+ The standing claim "w_ft = 0.5" is WEAKENED iff some w_ft > 0.5 reads >= +1.5 SE on pmix-private against 0.5 AND >= 0 on plain val, in BOTH W8 and W16new (disjoint seeds).
+ It is "val-optimal lower" iff some w_ft < 0.5 reads >= +1.5 SE on val in both. Public knows only w_ft 0 vs 0.5 (+0.00048 +- 0.00055 for W8). Nothing is recommended from
+ this scan alone unless WEAKENED holds; then the recommendation is one public slot, not a change of the finals.
+
+R5. "VAL OUT-OF-FOLD UNDER-READS THE FT HALF BECAUSE 3 MODELS SCORE A VAL ROW AND 15 A TEST ROW" (argument on record; test from the per-fold test predictions).
+ Label-free measurement on TEST rows (n2cpv3s3_test_folds.npy = per-fold z, mean of 3 seeds): for the FT pool of W8 and of W16, P_k = member mean of fold k.
+   q1 = feed-mean Pearson r(P_k, P_j), k != j (10 pairs); fold-noise variance of one fold pool (z units) v1 = 1 - q1 (per-feed, share of variance not common to two folds);
+   the 5-fold mean keeps v1 / 5. q_member = the same for single members; ratio pool / member tells whether the fold noise is common to all members (same GroupKFold split).
+ Translation to NDCG on VAL (declared model, [I]): noise is added to the val out-of-fold FT pool z as lambda x v1 of independent per-row Gaussian noise for
+   lambda in {0.5, 1, 2} (20 draws each), FINAL NDCG read at each lambda, linear-quadratic fit in lambda, extrapolated to lambda = -0.8 (SIMEX; the test file has
+   1/5 of the fold variance). The extrapolated gain is the part of the public-minus-val gap of the FT half (+0.00048 public vs +0.00009 val) that the "3 vs 15" argument
+   can carry. The alternative on record in the same table is the mix shift (pmix-public of W8TO - W8 = -0.00066). I report both shares; the claim is
+   "SUPPORTED" iff the SIMEX gain is >= 0.0002 at FINAL level, "NOT SUPPORTED AS THE MAIN CAUSE" iff it is < 0.0001. Limit stated in advance: real fold noise is not
+   independent per row; SIMEX with white noise is a lower-quality stand-in and I say so in the report.
+
+R6. POOL SIZE. Train-only and FINAL pools of n = 1, 2, 4, 8, 16 wide students (60 random subsets each, seeds 951-958 x 2 arms): fit a - b / n on val, pmix-private,
+ stale-val (TO), holdout (TO). "Saturated at 16" is CONFIRMED iff b / 32 (the expected gain of 16 more members) is < 0.0002 on every column.
+
+R7. Sanity comparison with public (no fit): for the scored pairs W16 - W8, W8P20 - W8, W8TO - W8, S16 - W8, C3 - G3, W8 - C3 (and G3 - W8 as the 7th, dependent),
+ each witness column is scored by sign agreement on pairs with |public| >= 1 public SE and by X2 = mean squared standardised distance. Reported only.
+
+Nothing in this file promotes a file to a submission. Recommendations are for the lead.
+
+=== block 2, written 2026-11-15T05:04:33Z, after the first witness table (out/t1_table.md, wide pop1 pool with 3 of 4 fine-tunes) and BEFORE any R2-R6 number ===
+(Seen so far: levels and deltas of the compositions on val / pmix / stale-val / holdout. Not seen: any nested read, any w_ft scan, any fold statistic, any pool-size fit, any test-day statistic.)
+R5b (addition to R5, same decision bars): besides white noise, a STRUCTURED-noise SIMEX: for a random split of the 16 wide students into two disjoint 8-halves A, B (30 splits),
+  D = (P_A - P_B) / 2 on the val out-of-fold FT pools is noise of the 16-pool mean with real model structure and is uncorrelated with the 16-pool by exchangeability;
+  the W16 FT pool gets + c D with c^2 var(D) = lambda v1 var(P), lambda in {0.5, 1, 2}; same extrapolation to lambda = -0.8. If white and structured disagree, the structured
+  number is the one quoted and both are shown.
+R3 addition (information, no decision): the level gap between the popularity-light pool and the base pool by feed group (M, cold share), which is the mechanism a
+  feed-dependent weight would have to rest on. R3's decision stays the nested out-of-sample read as written.
+R1 addition (information): the same forecast is printed for W8b-based twins (base seeds 955-958) to show how much of a composition's delta is the base-seed draw.
+
+=== block 3, written 2026-11-15T05:09:25Z, BEFORE any lagged prediction of mine exists ===
+(Seen: out/t1_table.md with 4 of 4 fine-tunes, out/t3_weight.md (R2 / R3 on val), out/t4_size.md. R2 without the lagged clause passes w = 0.3 and 0.4 on W16 + Px8 only;
+ R3 passes on W16 + Px8 (nested z +2.31) and fails on W8 + Pd (z -0.56). The lagged holdout ON RECORD covers W8 + Pd only and contradicts w > 0.2 there.)
+LAGGED READ OF MINE (tool = the witness agent's lagged_score.py imported read-only, outputs redirected to nn_x/w12/stale/premortem/cache/lag; subset = holdout days >= Sep 13,
+ 13,424 feeds, where the label-free gate holds; views lag0 and private-like; CPU fp32 against CPU fp32; train-only level; M >= 50 feeds only by construction of the holdout):
+ members scored by me: abl_e10_pop1kd05w192_s951-954 (Pw); w5_e10_kd05w192_s955-958 + w5_e10_kd05t25w192_s955-958 (W16 newer) unless the witness agent's queue produces them first
+ (its files are then used; same tool, same views).
+ CONTROL: abl_e10_pop1kd05t25_s951, view priv, re-scored by my driver must equal the witness cache file within 1e-4 max |logit| difference; else no read.
+ READ: S_lag(w) = NDCG((1 - w) z(base) + w z(pop)) - NDCG(z(base)), w in {0.1, 0.2, 0.3, 0.4}, pop in {Pd, Pw, Px8}, base W8 (and W16 when its 8 newer members are scored);
+   S_0(w) the same at lag 0; paired S_lag(w) - S_lag(0.2).
+ USE: the lagged clause of R2 for a composition = its OWN S_lag(w) - S_lag(0.2) >= 0 (as written in block 1; where a composition is not measured the W8 + Pd record stands).
+   For R3's group "M >= 50" the lagged read is the only non-val witness of the weight on long feeds: the feed-dependent rule keeps "DEFENSIBLE" only if
+   S_lag(w_long) - S_lag(0.2) >= -1 SE for its modal w_long on the composition's own pools; otherwise it is reported as "val-only, contradicted on the lagged holdout".
+ Reported, no decision: pool levels under lag (Pw, Pd, Px8, W8, W16), level gap pop pool - base pool at lag 0 / lagged, the same statistics at lag 0.
+ Caveat written in advance: the lagged holdout keeps in-period labels (popularity counted inside the train window is still predictive of them), so it is expected to
+ favour the full-popularity base more than private rows do; a contradiction there is a caution, a confirmation there is strong.
+
+=== block 4, written 2026-11-15T05:17:31Z, before the read it covers ===
+(Seen: everything in out/t1-t5, t7; R3 results for the four compositions W8+Pd -0.00015, W16+Px8 +0.00065 (z 2.31), W8+Px8 +0.00007, W16+Pd +0.00047; no lagged number of mine yet.)
+EXTRA LOOK (5th composition, information for the lead's full-data plan, which builds 0.8 z(16 wide) + 0.2 z(4 WIDE popularity-light students)): the R3 nested read on W16 + Pw
+ with the unchanged procedure. It counts as a 5th look in the multiplicity statement; it cannot make R3 "DEFENSIBLE" by itself.
+SUMMARY STATISTIC for the feed-dependent weight over all five compositions (declared now): the plain mean of the five nested out-of-sample val deltas and the count of
+ compositions with all three nested columns (val, pmix-private, stale-val) >= 0. Reading: "replicated" iff the mean is >= +0.0003 and at least 4 of 5 compositions have all
+ three columns >= 0; otherwise "one composition only".
+
+=== block 5, written 2026-11-15T05:19:24Z ===
+(Seen: t8_sameview (same-view admixture = 0 on both 8-bases), the per-group columns of T3a: w 0.4 against 0.2 on M >= 50 is positive in 5 of 5 compositions (+0.00035..+0.00119),
+ w 0.1 against 0.2 on M < 50 is mixed (+0.00086, +0.00070, +0.00006, -0.00002, -0.00036), w 0.4 against 0.2 on M < 50 is negative in 5 of 5.)
+INFORMATION ROW added after seeing those columns (post hoc, NOT a candidate for "best file", no nested claim of its own): RULEM2040 = weight 0.2 (the scored weight) on M < 50 and 0.4 on M >= 50,
+ pools W16 + Px8. It is the conservative form of the nested modal rule RULEM1040 (0.1 / 0.4): it changes the scored recipe only where 5 of 5 compositions agree.
+ Both are printed in the forecast and robustness tables; any recommendation of a public slot names ONE of them and says why.
+
+=== block 6, written 2026-11-15T05:24:52Z, before the read it covers ===
+RE-READ OF THE SOFT-TARGET FINE-TUNE PILOT (audit row 9) from the stored arrays nn_x/w12/recheck/ft_redesign/out/ftcpu_*_oof.npy (2 W8 members, arms A_base / B_kd05, 3 of 5 folds,
+ 8,655 feeds), with the pilot's own statistic (file proxy = 0.5 z(z(TO pool W8) + z(arm) - z(member TO)) + 0.5 z(TO pool W8); B - A, mean of the two members, final EMA, paired per feed).
+ CONTROL: my code must reproduce the pilot's plain-val number -0.00036 +- 0.00031 within 0.00003.
+ READ: the same statistic (1) under pmix-private weights restricted to the pilot's feeds, (2) on feeds with cold share >= 0.30, (3) M >= 50 / M < 50 (information).
+ RULE: audit row 9 becomes "RE-OPEN CANDIDATE" iff (1) or (2) reads >= +1 SE; otherwise "the closure also holds at the private mix (same low power)".
+
+=== block 7, written 2026-11-15T05:31:06Z ===
+INFORMATION ONLY (no rule, no candidate): the popularity-light weight per branch, (w in the FT branch, w in the TO branch) in {0, 0.2, 0.4}^2, for W8 + Pd and W16 + Px8,
+ FINAL val / pmix-private / half-stale against the base. Purpose: audit of "new members do not need their own fine-tune" (ft_redesign) and of where the admixture acts. 2 x 9 cells.

@@ -1,0 +1,108 @@
+POPULARITY / EXPOSURE / FRESHNESS / COLD LENS: ERROR ANALYSIS OF FD16P20 ON THE DISCOVERY HALF (2026-11-17)
+Agent: popularity_fresh. CPU only, 12 threads. Scripts in work/ (a01..a26), helpers work/lib.py (fast numba NDCG,
+identical to kit.evaluate incl. pessimistic ties), work/lam.py (LambdaRank gradients), work/clogit.py (within-feed
+softmax logit with offset = score).
+Discovery base NDCG 0.39939 on 7,214 feeds (697k rows).
+
+VERDICT: ZERO RULES SUBMITTED. On these columns the model is saturated: its ordering is near-optimal, and every
+correction I could learn or hand-write fails out of sample. The best single candidate is kept in
+work/rejected_cold_heavycat.py with the reasons it was not submitted.
+
+-------------------------------------------------------------------------------------------------------------
+1. CALIBRATION ALONG THE LENS (expected = npos * softmax(score) within the feed; temperature 1.0 is the ML fit)
+- One-dimensional residuals are flat. A/E for xp_imp_c50 bins ranges 0.94-1.02, f4 0.89-1.07, f5 0.97-1.08,
+  it_hist_* 0.93-1.07, seq_cv 0.94-1.04, pre2_fe/new 0.94-1.14. No |z| > 2.7 in 100+ cells.
+- The only clear miscalibration is a temperature effect: the head is over-confident (A/E 0.934 at rank 1, 0.946 at
+  ranks 2-3, 1.064 at ranks 11-20). That does not change the order, so it cannot be exploited.
+- f4 < 0.2 implies cold: young listings have no train impressions (xp = 0) in 99.9% of rows. So "fresh" and "cold"
+  are the same set for young items. On test, with popularity 11 days stale, the cold set will also include older
+  items. That is one more reason not to lean on cold status.
+- f5 reliability: high f5 at low exposure is NOT over-trusted. For f5 >= .8 and xp < 1.5, A/E is 1.01 at rank 1,
+  0.97 at ranks 2-3, 1.04 at ranks 4-10 and 1.12 at ranks 11-30. At saturated exposure (50 impressions), f5 looks
+  slightly under-used (head A/E 1.25-1.50 for f5 >= .8, 0.77-0.92 for f5 < .4), but no tilt survives a
+  cross-fit (section 3).
+- Encoder scores on cold items: pre2 is not mis-trusted on cold items. Corr(score, pre2) is 0.70 on cold items
+  and 0.64 on warm ones; A/E is flat by pre2 bin within cold and within warm items.
+
+2. UPPER-BOUND PROBES (if a flexible learner cannot gain on these columns, simple rules cannot either)
+- LightGBM lambdarank with init_score = score (lens + rank/score/context): OOF -0.0004 to -0.0067 (worse with
+  more rounds).
+- LightGBM without score features. Binary objective with init = calibrated logit: best +0.00049 (z 0.94), the
+  rest -0.0013 to +0.0003. Lambdarank: best +0.00032 (z 0.79), mostly negative.
+- Regularised conditional logit with offset = score, cross-fitted over L2 strength:
+  lens main effects (19 features): best +0.00017 (z 0.8)
+  + category interactions (159): best -0.00007
+  + segment interactions (100): best +0.00004
+  all (240): best -0.00005
+  Even IN-SAMPLE the lens-only fit changes NDCG by -0.0004. Likelihood gains are calibration, not ordering.
+- Head-only conditional logit (softmax over the top-5/10/20, re-rank only inside the head): OOF -0.0002 to -0.0024.
+- Branch mix a*s_ft + (1-a)*s_to: a = 0.5 is optimal (a = 0.4: -0.00014; 0.6: +0.00001; 0.7: -0.00050). No
+  feed segment (cold share, fresh share, M, H, guest) prefers another mix in a stable way. Item-level
+  (s_to - s_ft) * g for g in {cold, young, sat, low-exposure, old, f5 < .1, all}: best CF +0.00020 (z 1.74).
+
+3. HYPOTHESES TURNED INTO RULES (cross-fitted: parameters chosen on 4 user folds, evaluated on the 5th)
+   name                                              CF delta   se       z      in-sample best
+   R1 fresh (f4<t) x weak-signal feed (guest/uvm/H<30) -0.00012  0.00013  -0.89  +0.00004
+   R1a fresh<.1 in guest feeds (A/E .52, lambda z -4)  -0.00001  0.00003  -0.37  +0.00001
+   R2a fresh<.1 in vacancies/services (cat 48|50)      +0.00011  0.00006   2.02  +0.00012
+   R3a low f5 (<.2) at high exposure (xp>3)            +0.00026  0.00025   1.02  +0.00041
+   R3b same, real estate (cat 10|11) only              +0.00016  0.00011   1.49  +0.00022
+   R4a cold in the user's top category (cur==1)        +0.00030  0.00037   0.82  +0.00030
+   R5 fresh in cold-heavy feeds                        -0.00007  0.00019  -0.38  +0.00028
+   novelty: cold & cat_views>=50 (boost)               +0.00054  0.00025   2.14  +0.00054  (fine grid: +0.00068, z 2.52)
+   novelty: cold * cat_hist_share                      +0.00044  0.00029   1.50
+   novelty: cold & cat_views>=20 / cold*(log1p(cv)-2)  -0.00017 / +0.00002
+   demote cold or young items in absent categories     +0.00003 / -0.00003
+   demote low-exposure (1-9 impressions) items in top-1/3/10   -0.00042 to +0.00003 (all 9 variants <= 0.05 z)
+   f5 tilt weighted by exposure, 7 forms               -0.00034 to +0.00033 (best z 2.13, weight at grid edge)
+   pre2 x cold / pre2 x warm                           -0.00130 to -0.00020
+   fresher copy of a near-duplicate pair (equal cand_maxcos >= .95/.97/.99), 6 forms   -0.00066 to -0.00007
+   demote head items the encoder dislikes (pre2 < 0 in top-1/3/5), 9 forms             -0.00026 to +0.00012
+
+   PROCEDURE-LEVEL CHECK (nested): choosing the family and the weight together on 4 folds out of the 25 families
+   above (128 candidates) gives -0.00011 (z -0.36) on fold seed 0, and -0.00087, -0.00024, -0.00063 on seeds 1-3.
+   The search as a whole has no out-of-sample value: the in-sample winners are selection noise.
+
+   SIMULATION (work/a25_simgain.py): draw labels from softmax(score + beta*g), using the conditional-logit beta
+   fitted in-sample (an optimistic value), and measure the expected NDCG gain of a correct rule:
+     cold & cat_views>=50   beta +0.139 (se .041) -> expected gain +0.00027 (sim sd 0.00033)
+     cold & top category    beta +0.103 (se .029) -> +0.00009
+     fresh<.1 & cat 48|50   beta -0.596 (se .180) -> +0.00005
+     f5<.2 & xp>3           beta -0.125 (se .056) -> +0.00008
+   These effects are real at the likelihood level (z 2-3.5), but they are too small, or sit too far down the
+   list, to clear +0.0003 NDCG even if fully true. To pay, a lens effect needs |beta| >~ 0.3 on items that compete
+   for the top 5. None exists: every head cell has A/E within 0.8-1.25 of the model, and the marginal deviations
+   are the head temperature.
+
+4. THE NEAR-MISS (work/rejected_cold_heavycat.py; NOT submitted)
+   score + 0.09 * [xp_imp_c50 == 0 and cat_views >= 50]. Reads xp_imp_c50 (cold status), cat_views, score.
+   kit.check_rule in-sample +0.00068 (se 0.00027, z 2.52), 28% of feeds reordered. Reasons for rejection:
+   the nested check is negative; 10 feeds carry all of the net gain (386 feeds better, 533 worse); the response
+   is jagged in the threshold (cv>=20 +0.00011, >=50 +0.00054, >=100 +0.00006) and in the weight (.06 +.00037,
+   .09 +.00068, .12 +.00024, .15 +.00004); the young-cold part is negative (-0.00018), only old-cold is positive;
+   the expected gain is below the bar even if the effect is real; and the cold set shifts on test.
+   Behavioural reading: heavy browsers of a category have already been shown its established listings, so
+   never-shown ones are novel. Pairwise, flipped near-ties favour the boosted item 55% overall and 57% in the head
+   (n = 255). The direction is plausibly right; the size is not worth a rule.
+
+5. INDIVIDUAL FEEDS (work/a05_feeds.py)
+   Good feeds (positive at ranks 1-3): the head is the user's top category, often near-copies (hmax >= .95) of
+   recent views. The clicked item and the top negatives have the same age, exposure and f5 profile.
+   Bad feeds (best positive at 30+): mostly large feeds (mean M 174 vs 57), 15.7 feed categories vs 9.5. Typical
+   miss: the positive is in a lower-ranked or long-unvisited category (exploration), with ordinary lens values
+   (median xp 1.39, f4 .51, f5 .44, near the all-row medians). No lens column separates these positives from the
+   negatives above them: medians of positives at 30+ vs negatives at 1-3 are xp 1.39 vs 1.79, f4 .51 vs .56,
+   f5 .46 vs .57, and the model already uses these differences.
+   Guest feeds (4.3% of feeds): fresh items are over-predicted (A/E .52), but they sit far from the top, so the
+   NDCG effect is +0.00001.
+
+6. FAILED / NOISE IDEAS (lambda-gradient screen: 588 feature x segment tests; z sd 1.34, 21 with |z| > 3, close
+   to the null): fresh x guest/uvec_missing/H<30, f5_zero x new category, f5-low & xp-high in real estate
+   (lambda z -5.5, CF +0.00016), hist0 in cat 48|50, pre2 in the head, loghist when the newest event came from
+   search. The large lambda z values come mostly from tail items or tiny subsets and do not become NDCG gains.
+
+VARIANT COUNT: about 730 rule variants (family x weight/threshold grid points) evaluated by NDCG on discovery,
+plus 94 learned-model probe configurations and 588 score tests in the screen.
+
+NOTE FOR THE LEAD: private test popularity is staler (about 11 days vs 6), so any rule on xp/it_hist would face
+a shifted input on test that discovery cannot validate. I found nothing that would justify that risk.

@@ -1,0 +1,81 @@
+PRIMER: reviewing a recommender's ranking feed by feed
+
+THE TASK
+Avito is a classifieds marketplace. A "feed" is one request to its main-page recommendation feed: one user, one
+moment, 5 to 300 candidate listings. The data never shows titles, prices or images; a listing is a category plus
+numbers. We must order the candidates so the ones the user engaged with come first. "Engaged" (the label, "positive")
+means: after this feed was shown, the user started an engagement with that listing from this feed, in 83-87% of cases
+by opening its item card. 74% of feeds have exactly one positive; the mean is 1.53 positives per feed.
+
+The metric is NDCG over the full list, averaged over feeds. A positive at position p earns 1/log2(p+1):
+p=1: 1.000, p=2: 0.631, p=3: 0.500, p=5: 0.387, p=10: 0.289, p=20: 0.228, p=50: 0.176, p=100: 0.150.
+Divided by the ideal (all positives on top). Example: a single positive at rank 20 scores 0.228; moving it to rank 1
+gives 1.000 (+0.77). But moving a NEGATIVE to rank 1 pushes every item above its old place down by one, and if the
+true positive was at rank 1 the feed falls from 1.000 to 0.631 (-0.37).
+
+These validation and test feeds were shown to users in RANDOM order, so position on screen did not influence clicks.
+
+THE MODEL WHOSE RANKING YOU SEE ("FD16P20")
+An ensemble of 20 neural rankers trained on 3.1 million earlier feeds (246 million candidates), then fine-tuned on
+the validation days. Each ranker reads every column on the card and much more: the full 128-dimensional vectors of
+the user, of every candidate and of all up to 256 history events, attention from each candidate to every history
+event, the 16 most similar history items, popularity counts, and a self-supervised model of history sequences.
+It scores 0.4027 NDCG on validation (random order: 0.289; best single feature: about 0.35).
+So the model already "knows" every simple relation between the columns you see. A change helps only when you
+can reason about something the model plausibly gets wrong.
+
+HOW GOOD THE MODEL'S ORDER IS (measured on 13,701 labelled validation feeds)
+Positive rate of the item at a given model rank:
+  rank 1: 13.1% | rank 2: 9.2% | rank 3: 7.7% | ranks 4-5: 6.2% | 6-10: 4.4% | 11-20: 2.9% | 21-50: 1.6% |
+  51-100: 0.85% | 101-300: 0.35%      (average candidate: 1.6%)
+Where the feed's best-ranked positive sits: rank 1 in 13% of feeds, ranks 2-3 in 15%, 4-10 in 26%, 11-30 in 25%,
+31 or lower in 20%.
+Consequence: moving an item to rank 1 pays off on average only if you believe it is more than about 13% likely to
+be positive, i.e. 8 times the rate of a typical item at ranks 21-50. Moving one item from rank 40 to rank 5 pays
+only if it beats about 6%. Most apparent "mistakes" are not mistakes: clicks are noisy and often exploratory.
+
+THE CARD
+Header: number of candidates, history length (max 256), logged-in or guest (user 0), whether the user vector is
+missing, weekday and Moscow hour.
+HISTORY newest first: the user's last 40 events as Category/event-type@source, consecutive repeats as "x n".
+  Event types: view = item card viewed; contact1 = first contact with the seller about the item; contact =
+  repeatable contact (phone reveal, call, message); fav = add/remove favourite; order / orderstep = delivery or
+  purchase flow (goods categories only); lead = lead-type action; done = completion of a lead or contact;
+  guestview = view marker of a guest. Sources (only for view, fav, lead): feed = this main-page feed,
+  search = search or catalogue, similar = "similar listings" block, favlist = favourites list, goods, rec2 = a
+  second recommendation surface, realty = real-estate surface, ? = unknown.
+  The history has no timestamps, only order. Its old end is thinned (views are dropped first), so long histories
+  over-represent contacts. Items the user already viewed are REMOVED from the candidates, so a candidate is
+  never an item from the history; a near-duplicate (cosine 0.99+) is usually a similar listing or a re-post.
+HISTORY by category: per category, views (v) and other actions (a) over the whole history, and @k = index of the
+  newest event in that category (0 = the newest event of the history).
+CANDIDATES, one line each, in the model's order (best first):
+  rank | z = model score (within-feed z-score; gaps between neighbours show how sure the model is)
+  | category
+  | f3 = affinity of the user to the candidate's leaf category (0..1; one value per category within a feed)
+  | f1 = finer affinity inside the category (0..1; at its floor .02 when there is no affinity)
+  | f2 = affinity of the user to the listing's region (0 = no activity there; "H" marks the feed's most common
+  value, i.e. the user's home region)
+  | f4 = age of the listing (0..1, HIGH = OLD). On this random-order traffic the freshest tenth (lowest f4) is
+  clicked 0.46 times the average; the rest are within 0.9-1.13 times.
+  | f5 = engagement rate of the listing, unsmoothed (noisy when the listing has few impressions; 0 = no data)
+  | ucos = cosine between the user vector and the item vector (Avito's own two-tower embeddings; "-" = missing)
+  | hmax = largest cosine between this candidate and any history item, "@k:type" = index (0 = newest) and event
+  type of that history event. A candidate that nearly duplicates a RECENT history item (0.99+) is positive about
+  2.8 times the base rate; the model knows this.
+  | h10 = largest cosine to the newest 10 history events
+  | cathist = the user's history in this candidate's category: views v, other actions a, @k newest index; "-" = none
+  | pop = how often the listing appears in other users' histories (popularity, leave-user-out)
+  | exp = how often it was shown as a candidate in the training period (0 = new or cold listing)
+
+WHAT WE KNOW FROM ERROR ANALYSIS
+- Recency of interest matters most: similarity to the newest few events predicts clicks better than similarity
+  to the whole history.
+- About 40% of positives ranked in the lower half are in a category absent from the user's recent 32 events
+  (exploration). The model ranks these low, and on average that is correct: such categories are clicked half
+  as often. Nobody has found a way to tell which feeds are exploratory (best detector AUC 0.71-0.75 did not help).
+- Inside the top category, the clicked item often loses to other items on every column (cosine, f1, f3,
+  popularity, age). Among near-duplicate candidates, f1, f4 and f5 are at chance for telling the clicked one.
+- Train click-through rates are worthless here; popularity in histories (pop) carries some signal.
+- Guests (user 0) click at about the same rate as logged-in users (1.47% vs 1.59% per candidate).
+- Large feeds (100+ candidates) carry two thirds of the lost NDCG.

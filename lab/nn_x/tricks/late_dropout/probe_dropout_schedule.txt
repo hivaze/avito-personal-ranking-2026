@@ -1,0 +1,185 @@
+== 1. parser (train.py parse via AST)
+LD command: train.py --variant abl_e10_latedrop_s951 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 951 --drop 0 --attn_drop 0.1 --drop_cd 0.1
+namespace diff LD vs E_BASE+HYG (base value, LD value): {'variant': ('abl_e10_base_s951', 'abl_e10_latedrop_s951'), 'drop': (0.1, 0.0), 'attn_drop': (-1.0, 0.1), 'drop_cd': (-1.0, 0.1)}
+CHECK exact diff = {drop 0.1->0, attn_drop -1->0.1, drop_cd -1->0.1}: PASS
+E_BASE+HYG namespace vs the reference run w5_e10_base_s951 args (log line 1): diffs other than variant and the abl-only flags at their OFF default: {} | ref keys missing in abl parser: []
+CHECK E_BASE+HYG (seed 951) == w5_e10_base_s951 recipe: PASS
+
+== 2. code under test (verbatim from train.py)
+Ranker call: Ranker(d=a.d, heads=a.heads, hist_layers=a.hist_layers, blocks=a.blocks, drop=a.drop, use_hist=not a.no_hist, use_set=not a.no_set, use_pos_tower=not a.no_pos, aux_pos=a.aux_pos > 0, ff=a.ff, sim_bias=a.sim_bias, pos_mode=a.pos_mode, n_dense=(N_DENSE + 2 if a.user0 else N_DENSE) + len(xt_names or []) + 2 * len(xt_rel or []) - len(xt_relonly or []), domain=a.domain, intent=a.intent > 0, xt_names=xt_names, id_buckets=id_buckets, id_drop=a.id_drop, arch=a.arch, id_hist_only=a.id_hist_only, xt_rel=xt_rel, xt_drop=a.xt_drop, xt_idcols=xt_idcols, xt_relonly=xt_relonly, attn_gate=a.attn_gate, split_kv=a.muon, retr_m=a.retr_m, attn_drop=a.attn_drop if a.attn_drop >= 0 else None, retr_prod=a.retr_prod, retr_uniq=a.retr_uniq, cretr_m=a.cretr_m, set_sim_bias=a.set_sim_bias, typed_cross=a.typed_cross, retr_tcnt=a.retr_tcnt)
+t_cool: t_cool = int(round((1 - a.cooldown_frac) * total))
+first statement of the training loop:
+if a.drop_cd >= 0 and step == t_cool:
+    nd_, na_ = set_dropout(model, a.drop_cd)
+    log(f'drop_cd: dropout p={a.drop_cd} from step {step} on {nd_} nn.Dropout modules and {na_} attention-probability sites (model cfg unchanged: drop {model.cfg['drop']})')
+cd_arms.set_dropout / dropout_sites: from <repo>/nn_x/abl/cd_arms.py
+
+== 3. CPU smoke run [LD = E_BASE + HYG + --drop 0 --attn_drop 0.1 --drop_cd 0.1]: 10 train steps on real MiniSplit train batches (forward + backward + AdamW step), train.py's own t_cool formula and drop_cd block
+total 10 -> t_cool 8 (train.py formula; the 10-epoch run: total 98350 -> t_cool 78680)
+model.cfg drop 0.0, cfg attn_drop 0.1; 1.009M params
+-- step 0 (warmup/plateau) loss 0.0197
+   Dropout retr.dp                    p=0.0   measured: identity
+   Dropout hist_enc.0.ff.2            p=0.0   measured: identity
+   Dropout hist_enc.0.dr              p=0.0   measured: identity
+   Dropout cross.0.ff.2               p=0.0   measured: identity
+   Dropout cross.0.dr                 p=0.0   measured: identity
+   Dropout cross.1.ff.2               p=0.0   measured: identity
+   Dropout cross.1.dr                 p=0.0   measured: identity
+   Dropout sets.0.ff.2                p=0.0   measured: identity
+   Dropout sets.0.dr                  p=0.0   measured: identity
+   Dropout sets.1.ff.2                p=0.0   measured: identity
+   Dropout sets.1.dr                  p=0.0   measured: identity
+   Attn-prob hist_enc.0.attn          p=0.1
+   Attn-prob cross.0.attn             p=0.1
+   Attn-prob cross.1.attn             p=0.1
+   Attn-prob sets.0.attn              p=0.1
+   Attn-prob sets.1.attn              p=0.1
+   F.scaled_dot_product_attention dropout_p actually passed: [0.1] over 5 calls
+-- step 7 (warmup/plateau) loss 0.0127
+   Dropout retr.dp                    p=0.0   measured: identity
+   Dropout hist_enc.0.ff.2            p=0.0   measured: identity
+   Dropout hist_enc.0.dr              p=0.0   measured: identity
+   Dropout cross.0.ff.2               p=0.0   measured: identity
+   Dropout cross.0.dr                 p=0.0   measured: identity
+   Dropout cross.1.ff.2               p=0.0   measured: identity
+   Dropout cross.1.dr                 p=0.0   measured: identity
+   Dropout sets.0.ff.2                p=0.0   measured: identity
+   Dropout sets.0.dr                  p=0.0   measured: identity
+   Dropout sets.1.ff.2                p=0.0   measured: identity
+   Dropout sets.1.dr                  p=0.0   measured: identity
+   Attn-prob hist_enc.0.attn          p=0.1
+   Attn-prob cross.0.attn             p=0.1
+   Attn-prob cross.1.attn             p=0.1
+   Attn-prob sets.0.attn              p=0.1
+   Attn-prob sets.1.attn              p=0.1
+   F.scaled_dot_product_attention dropout_p actually passed: [0.1] over 5 calls
+drop_cd: dropout p=0.1 from step 8 on 11 nn.Dropout modules and 5 attention-probability sites (model cfg unchanged: drop 0.0)
+-- step 8 (cooldown, FIRST COOLDOWN STEP) loss 0.0436
+   Dropout retr.dp                    p=0.1   measured: dropped, zeroed share 0.100
+   Dropout hist_enc.0.ff.2            p=0.1   measured: dropped, zeroed share 0.100
+   Dropout hist_enc.0.dr              p=0.1   measured: dropped, zeroed share 0.101
+   Dropout cross.0.ff.2               p=0.1   measured: dropped, zeroed share 0.101
+   Dropout cross.0.dr                 p=0.1   measured: dropped, zeroed share 0.097
+   Dropout cross.1.ff.2               p=0.1   measured: dropped, zeroed share 0.099
+   Dropout cross.1.dr                 p=0.1   measured: dropped, zeroed share 0.101
+   Dropout sets.0.ff.2                p=0.1   measured: dropped, zeroed share 0.100
+   Dropout sets.0.dr                  p=0.1   measured: dropped, zeroed share 0.100
+   Dropout sets.1.ff.2                p=0.1   measured: dropped, zeroed share 0.100
+   Dropout sets.1.dr                  p=0.1   measured: dropped, zeroed share 0.101
+   Attn-prob hist_enc.0.attn          p=0.1
+   Attn-prob cross.0.attn             p=0.1
+   Attn-prob cross.1.attn             p=0.1
+   Attn-prob sets.0.attn              p=0.1
+   Attn-prob sets.1.attn              p=0.1
+   F.scaled_dot_product_attention dropout_p actually passed: [0.1] over 5 calls
+-- step 9 (cooldown) loss 0.0232
+   Dropout retr.dp                    p=0.1   measured: dropped, zeroed share 0.100
+   Dropout hist_enc.0.ff.2            p=0.1   measured: dropped, zeroed share 0.098
+   Dropout hist_enc.0.dr              p=0.1   measured: dropped, zeroed share 0.102
+   Dropout cross.0.ff.2               p=0.1   measured: dropped, zeroed share 0.100
+   Dropout cross.0.dr                 p=0.1   measured: dropped, zeroed share 0.098
+   Dropout cross.1.ff.2               p=0.1   measured: dropped, zeroed share 0.101
+   Dropout cross.1.dr                 p=0.1   measured: dropped, zeroed share 0.099
+   Dropout sets.0.ff.2                p=0.1   measured: dropped, zeroed share 0.099
+   Dropout sets.0.dr                  p=0.1   measured: dropped, zeroed share 0.099
+   Dropout sets.1.ff.2                p=0.1   measured: dropped, zeroed share 0.101
+   Dropout sets.1.dr                  p=0.1   measured: dropped, zeroed share 0.100
+   Attn-prob hist_enc.0.attn          p=0.1
+   Attn-prob cross.0.attn             p=0.1
+   Attn-prob cross.1.attn             p=0.1
+   Attn-prob sets.0.attn              p=0.1
+   Attn-prob sets.1.attn              p=0.1
+   F.scaled_dot_product_attention dropout_p actually passed: [0.1] over 5 calls
+-- eval mode after training: SDPA dropout_p [0.0], nn.Dropout outputs ['identity'] (inference has no dropout)
+
+== 3. CPU smoke run [reference: E_BASE + HYG (base, flags off)]: 10 train steps on real MiniSplit train batches (forward + backward + AdamW step), train.py's own t_cool formula and drop_cd block
+total 10 -> t_cool 8 (train.py formula; the 10-epoch run: total 98350 -> t_cool 78680)
+model.cfg drop 0.1, cfg attn_drop <absent = None>; 1.009M params
+-- step 0 (warmup/plateau) loss 0.0197
+   Dropout retr.dp                    p=0.1   measured: dropped, zeroed share 0.100
+   Dropout hist_enc.0.ff.2            p=0.1   measured: dropped, zeroed share 0.098
+   Dropout hist_enc.0.dr              p=0.1   measured: dropped, zeroed share 0.100
+   Dropout cross.0.ff.2               p=0.1   measured: dropped, zeroed share 0.100
+   Dropout cross.0.dr                 p=0.1   measured: dropped, zeroed share 0.100
+   Dropout cross.1.ff.2               p=0.1   measured: dropped, zeroed share 0.097
+   Dropout cross.1.dr                 p=0.1   measured: dropped, zeroed share 0.099
+   Dropout sets.0.ff.2                p=0.1   measured: dropped, zeroed share 0.099
+   Dropout sets.0.dr                  p=0.1   measured: dropped, zeroed share 0.099
+   Dropout sets.1.ff.2                p=0.1   measured: dropped, zeroed share 0.099
+   Dropout sets.1.dr                  p=0.1   measured: dropped, zeroed share 0.102
+   Attn-prob hist_enc.0.attn          p=0.1
+   Attn-prob cross.0.attn             p=0.1
+   Attn-prob cross.1.attn             p=0.1
+   Attn-prob sets.0.attn              p=0.1
+   Attn-prob sets.1.attn              p=0.1
+   F.scaled_dot_product_attention dropout_p actually passed: [0.1] over 5 calls
+-- step 7 (warmup/plateau) loss 0.0127
+   Dropout retr.dp                    p=0.1   measured: dropped, zeroed share 0.100
+   Dropout hist_enc.0.ff.2            p=0.1   measured: dropped, zeroed share 0.097
+   Dropout hist_enc.0.dr              p=0.1   measured: dropped, zeroed share 0.104
+   Dropout cross.0.ff.2               p=0.1   measured: dropped, zeroed share 0.099
+   Dropout cross.0.dr                 p=0.1   measured: dropped, zeroed share 0.100
+   Dropout cross.1.ff.2               p=0.1   measured: dropped, zeroed share 0.101
+   Dropout cross.1.dr                 p=0.1   measured: dropped, zeroed share 0.100
+   Dropout sets.0.ff.2                p=0.1   measured: dropped, zeroed share 0.103
+   Dropout sets.0.dr                  p=0.1   measured: dropped, zeroed share 0.102
+   Dropout sets.1.ff.2                p=0.1   measured: dropped, zeroed share 0.100
+   Dropout sets.1.dr                  p=0.1   measured: dropped, zeroed share 0.098
+   Attn-prob hist_enc.0.attn          p=0.1
+   Attn-prob cross.0.attn             p=0.1
+   Attn-prob cross.1.attn             p=0.1
+   Attn-prob sets.0.attn              p=0.1
+   Attn-prob sets.1.attn              p=0.1
+   F.scaled_dot_product_attention dropout_p actually passed: [0.1] over 5 calls
+-- step 8 (cooldown, FIRST COOLDOWN STEP) loss 0.0438
+   Dropout retr.dp                    p=0.1   measured: dropped, zeroed share 0.100
+   Dropout hist_enc.0.ff.2            p=0.1   measured: dropped, zeroed share 0.101
+   Dropout hist_enc.0.dr              p=0.1   measured: dropped, zeroed share 0.099
+   Dropout cross.0.ff.2               p=0.1   measured: dropped, zeroed share 0.101
+   Dropout cross.0.dr                 p=0.1   measured: dropped, zeroed share 0.101
+   Dropout cross.1.ff.2               p=0.1   measured: dropped, zeroed share 0.100
+   Dropout cross.1.dr                 p=0.1   measured: dropped, zeroed share 0.100
+   Dropout sets.0.ff.2                p=0.1   measured: dropped, zeroed share 0.100
+   Dropout sets.0.dr                  p=0.1   measured: dropped, zeroed share 0.100
+   Dropout sets.1.ff.2                p=0.1   measured: dropped, zeroed share 0.100
+   Dropout sets.1.dr                  p=0.1   measured: dropped, zeroed share 0.100
+   Attn-prob hist_enc.0.attn          p=0.1
+   Attn-prob cross.0.attn             p=0.1
+   Attn-prob cross.1.attn             p=0.1
+   Attn-prob sets.0.attn              p=0.1
+   Attn-prob sets.1.attn              p=0.1
+   F.scaled_dot_product_attention dropout_p actually passed: [0.1] over 5 calls
+-- step 9 (cooldown) loss 0.0234
+   Dropout retr.dp                    p=0.1   measured: dropped, zeroed share 0.100
+   Dropout hist_enc.0.ff.2            p=0.1   measured: dropped, zeroed share 0.101
+   Dropout hist_enc.0.dr              p=0.1   measured: dropped, zeroed share 0.099
+   Dropout cross.0.ff.2               p=0.1   measured: dropped, zeroed share 0.101
+   Dropout cross.0.dr                 p=0.1   measured: dropped, zeroed share 0.097
+   Dropout cross.1.ff.2               p=0.1   measured: dropped, zeroed share 0.100
+   Dropout cross.1.dr                 p=0.1   measured: dropped, zeroed share 0.100
+   Dropout sets.0.ff.2                p=0.1   measured: dropped, zeroed share 0.101
+   Dropout sets.0.dr                  p=0.1   measured: dropped, zeroed share 0.102
+   Dropout sets.1.ff.2                p=0.1   measured: dropped, zeroed share 0.101
+   Dropout sets.1.dr                  p=0.1   measured: dropped, zeroed share 0.100
+   Attn-prob hist_enc.0.attn          p=0.1
+   Attn-prob cross.0.attn             p=0.1
+   Attn-prob cross.1.attn             p=0.1
+   Attn-prob sets.0.attn              p=0.1
+   Attn-prob sets.1.attn              p=0.1
+   F.scaled_dot_product_attention dropout_p actually passed: [0.1] over 5 calls
+-- eval mode after training: SDPA dropout_p [0.0], nn.Dropout outputs ['identity'] (inference has no dropout)
+
+== 4. schedule checks
+dropout sites: 11 nn.Dropout modules (retr.dp, hist_enc.0.ff.2, hist_enc.0.dr, cross.0.ff.2, cross.0.dr, cross.1.ff.2, cross.1.dr, sets.0.ff.2, sets.0.dr, sets.1.ff.2, sets.1.dr); 5 attention-probability sites (hist_enc.0.attn, cross.0.attn, cross.1.attn, sets.0.attn, sets.1.attn)
+CHECK LD stable phase: every nn.Dropout (Block FFN-hidden ff.2, Block residual dr, HistRetrieval value dp) p = 0 (set) and identity (measured) at every step < t_cool: PASS
+CHECK LD stable phase: every attention-probability site p = 0.1 (set) and SDPA receives dropout_p == [0.1] (measured): PASS
+CHECK LD cooldown (step >= t_cool, from the FIRST cooldown step): every nn.Dropout p = 0.1 (set) and drops ~10% (measured), every attention site p = 0.1 and SDPA receives [0.1]: PASS
+CHECK base reference: every site 0.1 at every step (so the LD cooldown == the base's dropout everywhere): PASS
+CHECK LD and base have the same dropout sites (names) and the same parameters at init (dropout has no parameters): PASS
+CHECK eval mode: no dropout anywhere (SDPA dropout_p 0, nn.Dropout identity) for LD and base: PASS
+CHECK train.py t_cool formula at the 10-epoch length (98350 steps) = 78680 (= the base run's logged cooldown start): PASS
+CHECK parser: LD differs from E_BASE+HYG only by drop / attn_drop / drop_cd: PASS
+CHECK parser: E_BASE+HYG == the w5_e10_base_s951 reference recipe: PASS
+NOTE (not a check): the LD checkpoint cfg stores drop 0.0 and attn_drop 0.1 (the drop_cd switch leaves cfg unchanged), so any later fine-tune that rebuilds the model from this cfg trains with drop 0 / attn_drop 0.1, not the base FT's 0.1 everywhere. cfg here: drop 0.0, attn_drop 0.1. Not used by the pre-declared readout (train-only and holdout preds only).
+
+PROBE VERDICT: PASS: the flags produce exactly the LATE-DROPOUT schedule (9/9 checks)

@@ -1,0 +1,63 @@
+## Matched single-member comparisons (train-only, holdout-selected checkpoints)
+
+### lr 2e-3 vs 1e-3 (pre2s, mix 0.1, 10 ep)
+  val  single: F7 0.39460 (n=7, sd 0.00078) vs F9 0.39382 (n=6, sd 0.00115): +0.00078  run-SE 0.00055  feed-SE 0.00045  z_run 1.41  | M<50 +0.00095 M>=50 +0.00066 Tue +0.00049 Thu +0.00110
+  hold single: F7 0.31911 (n=7, sd 0.00046) vs F9 0.31844 (n=6, sd 0.00037): +0.00067  run-SE 0.00023  feed-SE 0.00026  z_run 2.89
+
+### 10 vs 2 epochs (pre2s, lr 1e-3, mix 0.1)
+  val  single: F9 0.39382 (n=6, sd 0.00115) vs F8 0.39322 (n=12, sd 0.00073): +0.00060  run-SE 0.00051  feed-SE 0.00052  z_run 1.17  | M<50 +0.00188 M>=50 -0.00028 Tue +0.00078 Thu +0.00041
+  hold single: F9 0.31844 (n=6, sd 0.00037) vs F8 0.31775 (n=12, sd 0.00028): +0.00069  run-SE 0.00017  feed-SE 0.00030  z_run 4.02
+
+### pre2s vs cvnd (lr 1e-3, mix 0.1, 10 ep)
+  val  single: F9 0.39382 (n=6, sd 0.00115) vs F6 0.39294 (n=6, sd 0.00112): +0.00088  run-SE 0.00065  feed-SE 0.00048  z_run 1.35  | M<50 +0.00200 M>=50 +0.00011 Tue +0.00104 Thu +0.00071
+  hold single: F9 0.31844 (n=6, sd 0.00037) vs F6 0.31795 (n=6, sd 0.00028): +0.00049  run-SE 0.00019  feed-SE 0.00028  z_run 2.59
+
+### lr 2e-3 vs 1e-3, seed 23, cvnd, mix 0.1
+  val  single: v13_lr2_mix1 0.39403 (n=1, sd 0.00000) vs v13_lr1_mix1 0.39389 (n=1, sd 0.00000): +0.00014  run-SE 0.00000  feed-SE 0.00100  z_run nan  | M<50 -0.00256 M>=50 +0.00200 Tue -0.00023 Thu +0.00054
+  hold single: v13_lr2_mix1 0.31897 (n=1, sd 0.00000) vs v13_lr1_mix1 0.31828 (n=1, sd 0.00000): +0.00069  run-SE 0.00000  feed-SE 0.00056  z_run nan
+
+### mix 0 vs mix 0.1, seed 23, cvnd, lr 1e-3
+  val  single: v13_lr1_mix0 0.39433 (n=1, sd 0.00000) vs v13_lr1_mix1 0.39389 (n=1, sd 0.00000): +0.00045  run-SE 0.00000  feed-SE 0.00100  z_run nan  | M<50 +0.00081 M>=50 +0.00020 Tue +0.00127 Thu -0.00046
+  hold single: v13_lr1_mix0 0.31844 (n=1, sd 0.00000) vs v13_lr1_mix1 0.31828 (n=1, sd 0.00000): +0.00016  run-SE 0.00000  feed-SE 0.00058  z_run nan
+
+### mix 0.1 vs mix 0.3, seed 23, cvnd, lr 2e-3
+  val  single: v13_lr2_mix1 0.39403 (n=1, sd 0.00000) vs v12_all_e10 0.39132 (n=1, sd 0.00000): +0.00270  run-SE 0.00000  feed-SE 0.00101  z_run nan  | M<50 +0.00171 M>=50 +0.00339 Tue +0.00060 Thu +0.00500
+  hold single: v13_lr2_mix1 0.31897 (n=1, sd 0.00000) vs v12_all_e10 0.31723 (n=1, sd 0.00000): +0.00174  run-SE 0.00000  feed-SE 0.00060  z_run nan
+
+### 1-ep cooldown continuation vs plateau ckpt (F5)
+  val  single: F5cd 0.39426 (n=6, sd 0.00086) vs F5 0.39247 (n=6, sd 0.00094): +0.00180  run-SE 0.00052  feed-SE 0.00049  z_run 3.45  | M<50 +0.00175 M>=50 +0.00183 Tue +0.00199 Thu +0.00159
+  hold single: F5cd 0.31940 (n=6, sd 0.00056) vs F5 0.31790 (n=6, sd 0.00046): +0.00151  run-SE 0.00030  feed-SE 0.00029  z_run 5.05
+
+### 1-ep cooldown continuation vs plateau ckpt (F6 s92/94/96)
+  val  single: F6cd 0.39371 (n=3, sd 0.00054) vs F6cd_base 0.39242 (n=3, sd 0.00127): +0.00129  run-SE 0.00080  feed-SE 0.00053  z_run 1.61  | M<50 +0.00203 M>=50 +0.00077 Tue +0.00180 Thu +0.00072
+  hold single: F6cd 0.31797 (n=3, sd 0.00064) vs F6cd_base 0.31773 (n=3, sd 0.00017): +0.00025  run-SE 0.00038  feed-SE 0.00031  z_run 0.64
+
+### F7 (lr2 mix0.1 pre2s) vs F5 (lr2 mix0.3 cvnd/prew)
+  val  single: F7 0.39460 (n=7, sd 0.00078) vs F5 0.39247 (n=6, sd 0.00094): +0.00213  run-SE 0.00048  feed-SE 0.00046  z_run 4.42  | M<50 +0.00296 M>=50 +0.00157 Tue +0.00231 Thu +0.00194
+  hold single: F7 0.31911 (n=7, sd 0.00046) vs F5 0.31790 (n=6, sd 0.00046): +0.00121  run-SE 0.00026  feed-SE 0.00026  z_run 4.70
+
+### Muon+WSD 10ep cvnd seed23 (lr1 mix0) vs AdamW cos 10ep (v9_e10, no retr/gate)
+  val  single: v13_lr1_mix0 0.39433 (n=1, sd 0.00000) vs v9_e10 0.39141 (n=1, sd 0.00000): +0.00293  run-SE 0.00000  feed-SE 0.00111  z_run nan  | M<50 +0.00347 M>=50 +0.00255 Tue +0.00448 Thu +0.00122
+  hold single: v13_lr1_mix0 0.31844 (n=1, sd 0.00000) vs v9_e10 0.31664 (n=1, sd 0.00000): +0.00180  run-SE 0.00000  feed-SE 0.00065  z_run nan
+
+## Ensemble value (per-feed z-mean of the first k seeds, train-only)
+family  k=1(mean single)  k=2  k=3  k=6  gain1->6 | holdout k=1 k=6 | within-feed seed corr (val z)
+F5    0.39247 0.39411 0.39522 0.39712 +0.00466 | 0.31790 0.32162 +0.00373 | 0.9383
+F6    0.39294 0.39565 0.39611 0.39697 +0.00403 | 0.31795 0.32183 +0.00388 | 0.9302
+F7    0.39471 0.39695 0.39814 0.39871 +0.00399 | 0.31913 0.32263 +0.00350 | 0.9395
+F8    0.39318 0.39411 0.39448 0.39418 +0.00100 | 0.31767 0.31903 +0.00136 | 0.9778
+F9    0.39382 0.39622 0.39691 0.39820 +0.00438 | 0.31844 0.32213 +0.00369 | 0.9379
+F5cd  0.39426 0.39505 0.39632 0.39702 +0.00276 | 0.31940 0.32279 +0.00338 | 0.9470
+
+## Cross-family correlation of 6-seed TO ensembles (val z)
+F5 1.0000 0.9849 0.9843 0.9802 0.9842
+F6 0.9849 1.0000 0.9821 0.9785 0.9849
+F7 0.9843 0.9821 1.0000 0.9777 0.9856
+F8 0.9802 0.9785 0.9777 1.0000 0.9828
+F9 0.9842 0.9849 0.9856 0.9828 1.0000
+
+## Cross-family pairs: member-equal 12-member pools vs 6-seed families (val / holdout)
+F7+F9: val 0.39906 (vs F7 0.39871, F9 0.39820); hold 0.32288 (vs 0.32263, 0.32213)
+F6+F9: val 0.39873 (vs F6 0.39697, F9 0.39820); hold 0.32243 (vs 0.32183, 0.32213)
+F7+F6: val 0.39873 (vs F7 0.39871, F6 0.39697); hold 0.32278 (vs 0.32263, 0.32183)
+F8+F9: val 0.39743 (vs F8 0.39418, F9 0.39820); hold 0.32135 (vs 0.31903, 0.32213)

@@ -1,0 +1,30 @@
+group,segs,complete,epochs,lr,muon,sched,mix,retr,gate,arch,d,heads,blocks,hist,xt,val,hold,sel_frac
+v8: AdamW cos cvnd 2/3/5ep (+GRU/DIN/deep),10,10,2.0/3.0/5.0,0.001,False,cos,,0,False,din/gru/tf,128,4,2/3,1/2,cvnd,0.38693+-0.00144,0.31245,0.97 [0.89-1.00]
+v9: AdamW cos cvnd 5/8/10ep (+GRU/DIN/deep 5ep),12,12,10.0/5.0/8.0,0.001,False,cos,,0,False,din/gru/tf,128,4,2/3,1/2,cvnd,0.38960+-0.00191,0.31526,1.00 [0.77-1.00]
+"v3-v7: AdamW cos 2ep, cv/cvix/cvhn/cvraw inputs, GRU/DIN",21,16,2.0,0.001,False,cos,,0,False,din/gru/tf,128,4,2,1,cv/cvhn/cvix/cvixhn/cvraw,0.38446+-0.00165,0.30885,1.00 [0.51-1.00]
+nnx attn 2ep arms (FoX/QK/MoE/retr/gate),17,17,2.0,0.001,False,cos,,0/16,elem/none,tf,128,4,2,1,,0.38281+-0.00131,0.30207,0.97 [0.92-1.00]
+"F10: GRU, F7 recipe (running)",4,0,10.0,0.002,True,wsd,0.1,16,True,gru,128,4,2,1,cvnd_pre2s,-,-,-
+v2: AdamW cos 2ep loss-norm/K9/intent/idcg,6,6,2.0,0.001,False,cos,,0,False,tf,128,4,2,1,,0.37982+-0.00132,0.29788,1.00 [0.92-1.00]
+"F11: DIN, F7 recipe (running)",4,0,10.0,0.002,True,wsd,0.1,16,True,din,128,4,2,1,cvnd_pre2s,-,-,-
+F9: Muon lr1e-3 mix0.1 pre2s 10ep,6,6,10.0,0.001,True,wsd,0.1,16,True,tf,128,4,2,1,cvnd_pre2s,0.39382+-0.00115,0.31845,0.78 [0.51-0.86]
+stage-2 continuations (old recipe),54,53,2.0/3.0,0.0002,False,cos,0.0,0,False/none,tf,128,4,2,1,,0.38382+-0.00281,0.30630,1.00 [0.42-1.00]
+nnx optim 2ep arms (Muon/WSD/KD/lr2),20,18,2.0,0.001/0.002,False/True,cos/wsd,0.0/0.3,0,False,tf,128,4,2,1,,0.38383+-0.00145,0.30289,1.00 [0.92-1.00]
+F7: Muon lr2e-3 mix0.1 pre2s 10ep,13,7,10.0,0.002,True,wsd,0.1,16,True,tf,128,4,2,1,cvnd_pre2s,0.39460+-0.00078,0.31911,0.86 [0.81-0.89]
+solvers 2ep harness (F8 recipe) arms,12,10,2.0,0.001,True,wsd,0.1,16,True,tf,128,4,2,1,cvnd_pre2s,0.39337+-0.00089,0.31719,1.00 [0.97-1.00]
+round-1 2ep AdamW (base/nopos/aux/sim/heads/blocks/d256),21,18,2.0/4.0,0.001,False,cos,,0,False,tf,128/256,4/8,2/3,1,,0.37439+-0.00357,-,0.98 [0.10-1.00]
+smoke tests,2,2,0.05,0.002,True,wsd,0.1,16,True,din/gru,128,4,2,1,cvnd_pre2s,0.37711+-0.00063,0.30014,1.00 [1.00-1.00]
+nnx feat 2ep arms (PLE/prop/sid/TabM/ts),11,11,2.0,0.001,False,cos,,0,False,tf,128,4,2,1,,0.38171+-0.00061,0.30061,0.97 [0.81-1.00]
+"v10: train-row pre_* (leaky, rejected)",2,0,3.0,0.001,False,cos,,0,False,tf,128,4,2,1,cvnd_pre/cvnd_prez,-,-,-
+v16: cvnd_pre2 (clip bug) 3ep AdamW cos,2,2,3.0,0.001,False,cos,0.0,0,False,tf,128,4,2,1,cvnd_pre2,0.38841+-0.00051,0.31312,0.95 [0.95-0.95]
+v19: pre2s lr1e-3 mix0 10ep (stopped at 5k),6,0,10.0,0.001,True,wsd,0.0,16,True,tf,128,4,2,1,cvnd_pre2s,-,-,-
+v18: cvnd_pre2s 3ep AdamW cos,2,2,3.0,0.001,False,cos,0.0,0,False,tf,128,4,2,1,cvnd_pre2s,0.38907+-0.00023,0.31313,0.96 [0.92-1.00]
+"F5cd: 1-ep cooldown continuation (lr2e-3, mix0.1)",6,6,1.0,0.002,True,wsd,0.1,0,False,tf,128,4,2,1,,0.39427+-0.00087,0.31940,0.71 [0.71-1.00]
+F8: Muon lr1e-3 mix0.1 pre2s 2ep,12,12,2.0,0.001,True,wsd,0.1,16,True,tf,128,4,2,1,cvnd_pre2s,0.39322+-0.00073,0.31775,1.00 [1.00-1.00]
+F6cd: 1-ep cooldown continuation (lr1e-3),3,3,1.0,0.001,True,wsd,0.1,0,False,tf,128,4,2,1,,0.39371+-0.00053,0.31797,0.51 [0.20-0.61]
+v11: AdamW cos 10-20ep probes (gate/d256/deep/GRU; mostly killed),11,0,10.0/15.0/20.0,0.001,False,cos,,0,False/True,gru/tf,128/256,4/8,2/3,1/2,cvnd,-,-,-
+F6: Muon lr1e-3 mix0.1 cvnd 10ep,5,5,10.0,0.001,True,wsd,0.1,16,True,tf,128,4,2,1,cvnd,0.39275+-0.00114,0.31788,0.76 [0.48-0.86]
+F5: Muon lr2e-3 WSD mix0.3 cvnd/prew 10ep,6,6,10.0,0.002,True,wsd,0.3,16,True,tf,128,4,2,1,cvnd/cvnd_prew,0.39247+-0.00094,0.31790,0.81 [0.61-0.81]
+round-4 component probes (killed early / 3ep),3,1,10.0/3.0,0.001/0.002,False/True,cos/wsd,0.0/0.3,0/16,False/True,tf,128,4,2,1,cvnd/cvnd_prew,0.38839,0.31366,0.92 [0.92-0.92]
+v14_mix1_s91: lr2e-3 mix0.1 prew 10ep,1,1,10.0,0.002,True,wsd,0.1,16,True,tf,128,4,2,1,cvnd_prew,0.39428,0.31873,0.86 [0.86-0.86]
+v13 hedges seed23 cvnd 10ep (lr x mix),4,4,10.0,0.001/0.002,True,wsd,0.0/0.1/0.3,16,True,tf,128,4,2,1,cvnd,0.39344+-0.00131,0.31849,0.84 [0.46-0.86]
+"F12: d192/6h, F7 recipe (queued)",1,1,0.02,0.002,True,wsd,0.1,16,True,tf,192,6,2,1,cvnd_pre2s,0.36888,0.29018,1.00 [1.00-1.00]

@@ -1,0 +1,49 @@
+test-day groups: Sat (pub) 6050, Sun am (pub) 2512, Sun pm (priv) 4855, Mon (priv) 7578, Tue (priv) 7600 | public 8562 private 20033 | feeds outside the 5 groups: 0
+val: val Tue 7542, val Thu 6878
+W8 file order reproduced by preds/ens_W8kd_*: 99.999931%
+
+== A. cold-minus-warm offset, candidate minus W8, z of the model scores (mean ± SE over feeds)
+  cand   |          val Tue |          val Thu |        Sat (pub) |     Sun am (pub) |    Sun pm (priv) |       Mon (priv) |       Tue (priv) |           PUBLIC |          PRIVATE | PRIVATE-PUBLIC (z) | last-val Tue (z) | last-first (z) | chi2(4)
+  W16    | -0.0002 ± 0.0003 | -0.0001 ± 0.0003 | +0.0004 ± 0.0003 | +0.0009 ± 0.0004 | -0.0001 ± 0.0003 | +0.0002 ± 0.0002 | +0.0006 ± 0.0002 | +0.0005 ± 0.0002 | +0.0003 ± 0.0001 | -0.0002 ± 0.0003 (-0.9) | +0.0007 ± 0.0004 (+2.0) | +0.0002 (+0.5) | 4.8
+  W8P20  | +0.0055 ± 0.0002 | +0.0057 ± 0.0002 | +0.0063 ± 0.0002 | +0.0065 ± 0.0003 | +0.0054 ± 0.0002 | +0.0056 ± 0.0002 | +0.0054 ± 0.0002 | +0.0064 ± 0.0002 | +0.0055 ± 0.0001 | -0.0009 ± 0.0002 (-4.2) | -0.0001 ± 0.0003 (-0.2) | -0.0009 (-3.2) | 18.5
+  W8TO   | -0.0094 ± 0.0004 | -0.0136 ± 0.0004 | -0.0162 ± 0.0004 | -0.0184 ± 0.0006 | -0.0174 ± 0.0004 | -0.0193 ± 0.0003 | -0.0210 ± 0.0003 | -0.0169 ± 0.0003 | -0.0195 ± 0.0002 | -0.0026 ± 0.0004 (-7.1) | -0.0116 ± 0.0005 (-22.0) | -0.0048 (-9.6) | 105.6
+  S16    | -0.0007 ± 0.0003 | -0.0014 ± 0.0003 | -0.0016 ± 0.0003 | -0.0011 ± 0.0004 | -0.0023 ± 0.0003 | -0.0016 ± 0.0003 | -0.0011 ± 0.0003 | -0.0015 ± 0.0002 | -0.0016 ± 0.0002 | -0.0001 ± 0.0003 (-0.4) | -0.0005 ± 0.0004 (-1.3) | +0.0005 (+1.3) | 9.7
+  C3     | -0.0012 ± 0.0007 | -0.0020 ± 0.0007 | -0.0013 ± 0.0007 | +0.0018 ± 0.0010 | -0.0032 ± 0.0008 | -0.0020 ± 0.0006 | -0.0015 ± 0.0006 | -0.0004 ± 0.0006 | -0.0021 ± 0.0004 | -0.0017 ± 0.0007 (-2.5) | -0.0003 ± 0.0009 (-0.3) | -0.0002 (-0.3) | 15.6
+
+== B. agreement of the two FILES (per-feed Spearman, same top-1 item), mean over feeds
+  W16    Spearman PUBLIC 0.9967 PRIVATE 0.9966 | by day 0.9967 / 0.9968 / 0.9965 / 0.9965 / 0.9966 | same top-1 all 93.2% PUBLIC 93.3% PRIVATE 93.2% | file order reproduced by preds/ens_*: 99.99966%
+  W8P20  Spearman PUBLIC 0.9976 PRIVATE 0.9975 | by day 0.9975 / 0.9976 / 0.9975 / 0.9974 / 0.9975 | same top-1 all 93.4% PUBLIC 93.4% PRIVATE 93.4% | file order reproduced by preds/ens_*: 99.99979%
+  W8TO   Spearman PUBLIC 0.9953 PRIVATE 0.9950 | by day 0.9953 / 0.9953 / 0.9951 / 0.9949 / 0.9949 | same top-1 all 90.6% PUBLIC 90.7% PRIVATE 90.6% | file order reproduced by preds/ens_*: 99.99986%
+  S16    Spearman PUBLIC 0.9964 PRIVATE 0.9963 | by day 0.9963 / 0.9964 / 0.9962 / 0.9963 / 0.9964 | same top-1 all 92.8% PUBLIC 92.9% PRIVATE 92.8% | file order reproduced by preds/ens_*: 99.99986%
+  C3     Spearman PUBLIC 0.9874 PRIVATE 0.9873 | by day 0.9875 / 0.9870 / 0.9873 / 0.9869 / 0.9876 | same top-1 all 82.5% PUBLIC 82.4% PRIVATE 82.6% | file order reproduced by preds/ens_*: 100.00000%
+
+== C. A/A null of the cold-offset contrasts: 60 random 8-vs-8 splits of the 16 wide students (train-only test predictions), seed 4242
+  PRIVATE - PUBLIC: mean diff -0.00009, sd of diff 0.00070, sd of z 1.31, rms of z 1.32, max |z| 2.92
+  last - first day: mean diff -0.00003, sd of diff 0.00095, sd of z 1.33, rms of z 1.33, max |z| 2.86
+  chi2 over the 5 day groups: mean 5.22 (expected 4), max 12.7, share above 9.49 (p 0.05): 0.08; share above 14.9 / 15.6 / 18.5: 0.00 / 0.00 / 0.00
+  z of the overall level (all test feeds): sd 10.57, rms 10.58
+  note: the 60 splits share members (16 students), so they are not independent draws; the sd carries roughly ± 15-20%.
+
+== D. control 1: SE of PRIVATE - PUBLIC under resampling of 1-hour time blocks (1,000 resamples, blocks drawn inside public and inside private)
+  W16    PRIVATE - PUBLIC -0.00025: feed-level SE 0.00028 (z -0.9) | hour-block SE 0.00027 (z -0.9; ratio 0.95; blocks public / private [36, 60])
+  W8P20  PRIVATE - PUBLIC -0.00087: feed-level SE 0.00021 (z -4.2) | hour-block SE 0.00020 (z -4.3; ratio 0.97; blocks public / private [36, 60])
+  W8TO   PRIVATE - PUBLIC -0.00264: feed-level SE 0.00037 (z -7.1) | hour-block SE 0.00050 (z -5.2; ratio 1.35; blocks public / private [36, 60])
+  S16    PRIVATE - PUBLIC -0.00012: feed-level SE 0.00029 (z -0.4) | hour-block SE 0.00030 (z -0.4; ratio 1.03; blocks public / private [36, 60])
+  C3     PRIVATE - PUBLIC -0.00173: feed-level SE 0.00068 (z -2.5) | hour-block SE 0.00073 (z -2.4; ratio 1.07; blocks public / private [36, 60])
+  A/A (kd05w192 x8 vs kd05t25w192 x8): +0.00129, feed-level SE 0.00052, hour-block SE 0.00049 (ratio 0.94)
+
+== E. control 2: W8P20 minus W8 cold offset, PUBLIC vs PRIVATE inside strata (feed size x cold share of the feed); and the two halves of Sunday
+  stratified PRIVATE - PUBLIC (25 strata of M x cold share, weighted by stratum size): -0.00054 ± 0.00021 | unstratified -0.00087 ± 0.00021 | strata used 20, negative in 12
+  mean cold share of the feeds: public 0.429 private 0.459; share of feeds with M < 50: public 0.387 private 0.392
+  Sunday only: pm (private) - am (public) -0.00111 ± 0.00041 (z -2.7)
+  inside public: Sun am - Sat +0.00025 ± 0.00039 (z +0.6)
+  inside private: Tue - Sun pm +0.00000 ± 0.00030 (z +0.0)
+  time-of-day placebo, Sat: after 11:00 MSK - before -0.00020 ± 0.00042 (z -0.5); feeds 1874 / 4176
+  time-of-day placebo, Mon: after 11:00 MSK - before -0.00091 ± 0.00040 (z -2.3); feeds 2584 / 4994
+  time-of-day placebo, Tue: after 11:00 MSK - before -0.00020 ± 0.00038 (z -0.5); feeds 2514 / 5086
+
+== F. CatBoost (e3_xm_yeti) vs the W16 file
+  Spearman all 0.8153 ± 0.0006 PUBLIC 0.8151 PRIVATE 0.8153 | same top-1 37.3% | cold offset (rank-z) all -0.0944 ± 0.0016 PUBLIC -0.0967 PRIVATE -0.0935 last day -0.0939 chi2 1.9
+  CatBoost vs W8 law-rho (feed-mean Pearson of z) by group: Sat (pub) 0.8363 ± 0.0012 | Sun am (pub) 0.8372 ± 0.0019 | Sun pm (priv) 0.8398 ± 0.0013 | Mon (priv) 0.8362 ± 0.0011 | Tue (priv) 0.8382 ± 0.0011 | PUBLIC 0.8366 PRIVATE 0.8378 | M<50 0.8337 M>=50 0.8398
+
+done in 29 s

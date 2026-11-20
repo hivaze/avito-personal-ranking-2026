@@ -1,0 +1,49 @@
+=== 1. logged arguments
+smoke nx3 vs smoke base (same harness, same seed): {'variant': ('abl_smoke_nx3_s23', 'abl_smoke_base_s23'), 'xt_add': ('nx_rp3_z,nx_rp3_rk,has:nx_rp3_z', '')}
+stored control s952 vs s951: differing keys ['seed', 'variant']
+stored control s953 vs s951: differing keys ['seed', 'variant']
+stored control s954 vs s951: differing keys ['seed', 'variant']
+stored control s955 vs s951: differing keys ['seed', 'trunc_lifts', 'variant']
+stored control s956 vs s951: differing keys ['seed', 'trunc_lifts', 'variant']
+smoke base vs stored control w5_e10_base_s951: 88 / 75 keys; differing: {'cliplog': (10, 50), 'epochs': (1.0, 10.0), 'eval_every': (25, 2500), 'hzcd': (False, '<absent>'), 'kd_T': (1.0, '<absent>'), 'kd_file': ('', '<absent>'), 'kd_w': (0.5, '<absent>'), 'kv64': (0, '<absent>'), 'retr_cat': (0, '<absent>'), 'seed': (23, 951), 'select_min_step': (25, 12000), 'train_feeds': (20000, 0), 'trunc_lifts': ('', '<absent>'), 'val_fold': (-1, '<absent>'), 'val_mix': (0.0, '<absent>'), 'variant': ('abl_smoke_base_s23', 'w5_e10_base_s951'), 'xt_add': ('', '<absent>'), 'xt_add_relonly': ('', '<absent>'), 'xt_exclude': ('', '<absent>'), 'xt_rel_extra': ('', '<absent>')}
+  keys that differ beyond variant, seed and the five smoke keys: {'hzcd': (False, '<absent>'), 'kd_T': (1.0, '<absent>'), 'kd_file': ('', '<absent>'), 'kd_w': (0.5, '<absent>'), 'kv64': (0, '<absent>'), 'retr_cat': (0, '<absent>'), 'trunc_lifts': ('', '<absent>'), 'val_fold': (-1, '<absent>'), 'val_mix': (0.0, '<absent>'), 'xt_add': ('', '<absent>'), 'xt_add_relonly': ('', '<absent>'), 'xt_exclude': ('', '<absent>'), 'xt_rel_extra': ('', '<absent>')}
+  of them present only in the nn_x/abl harness (must all be the "off" value): {'hzcd': False, 'kd_T': 1.0, 'kd_file': '', 'kd_w': 0.5, 'kv64': 0, 'retr_cat': 0, 'trunc_lifts': '', 'val_fold': -1, 'val_mix': 0.0, 'xt_add': '', 'xt_add_relonly': '', 'xt_exclude': '', 'xt_rel_extra': ''}
+=== 2. stage-A launcher
+flag text of the train.py call identical to the designer's launch_nx_hl.sh: True
+flags: --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed $s
+  train_feeds: the launcher passes none without SMOKE; the stored control logged 0
+  launcher flags checked against w5_e10_base_s951 logged args: 27 keys ['no_pos', 'aux_pos', 'aux_mode', 'aux_tau', 'sim_bias', 'user0', 'domain', 'holdout', 'select_on', 'loss_norm', 'xt', 'xt_drop', 'epochs', 'eval_every', 'muon', 'sched', 'cooldown_frac', 'aux_anneal', 'retr_m', 'attn_gate', 'cooldown_mix', 'lr', 'save_steps', 'save_last', 'save_holdout', 'select_min_step', 'cliplog']; mismatches: []
+  expected stage-A base args (smoke base args with the 5 smoke keys set back) vs stored control s951, beyond variant / seed: {'hzcd': (False, '<absent>'), 'kd_T': (1.0, '<absent>'), 'kd_file': ('', '<absent>'), 'kd_w': (0.5, '<absent>'), 'kv64': (0, '<absent>'), 'retr_cat': (0, '<absent>'), 'trunc_lifts': ('', '<absent>'), 'val_fold': (-1, '<absent>'), 'val_mix': (0.0, '<absent>'), 'xt_add': ('', '<absent>'), 'xt_add_relonly': ('', '<absent>'), 'xt_exclude': ('', '<absent>'), 'xt_rel_extra': ('', '<absent>')}
+=== 3. logged input lists
+smoke base lists 34 inputs; equal (names and order) to the stored control w5_e10_base_s951 (34): True
+smoke nx3 lists 37 inputs; first 34 equal to base: True; added (indices 34..): ['nx_rp3_z', 'nx_rp3_rk', 'has:nx_rp3_z']
+  stored control s952: 34 inputs, equal to s951: True
+  stored control s953: 34 inputs, equal to s951: True
+  stored control s954: 34 inputs, equal to s951: True
+  stored control s955: 34 inputs, equal to s951: True
+  stored control s956: 34 inputs, equal to s951: True
+=== 4. checkpoints (cfg, statistics)
+checkpoint keys: ['args', 'cfg', 'state_dict']
+cfg smoke base vs stored control s951: {}
+cfg smoke nx3 vs smoke base: differing keys ['n_dense', 'xt_names']; n_dense (107, 104); xt_names lengths 37 / 34; nx3 tail ['nx_rp3_z', 'nx_rp3_rk', 'has:nx_rp3_z']
+cfg xt_rel / xt_idcols / xt_relonly nx3: [0, 3, 30, 31, 32] / [0, 1, 2, 3, 4, 5, 6, 7] / [30, 31, 32]; base: [0, 3, 30, 31, 32] / [0, 1, 2, 3, 4, 5, 6, 7] / [30, 31, 32]
+saved args of the nx3 checkpoint: xt 'cvnd_pre2s', xt_add 'nx_rp3_z,nx_rp3_rk,has:nx_rp3_z', xt_exclude '', xt_add_relonly ''
+statistics tensors: [('f_mean', (107,), (104,)), ('f_std', (107,), (104,))]
+tensors whose shape differs nx3 vs base: {'f_mean': ((107,), (104,)), 'f_std': ((107,), (104,)), 'c_mlp.0.weight': ((256, 107), (256, 104)), 'wide.weight': ((1, 107), (1, 104))}; tensors only in one: []
+parameter count nx3 - base: 777
+n_dense base 104, nx3 107
+statistics of nx3 equal to base bitwise on the first 94 of 104 inputs (mean), std equal on the same: True
+the entries after that prefix: nx3 mean [-0.003100000089034438, 0.0, 0.4571000039577484, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, -0.0], std [0.6366999745368958, 0.1412999927997589, 0.498199999332428, 0.1720000058412552, 0.9235000014305115, 0.29179999232292175, 0.9998999834060669, 0.24799999594688416, 0.8467000126838684, 0.24799999594688416, 0.8467000126838684, 0.24660000205039978, 0.8413000106811523]; base mean [0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, -0.0], std [0.1720000058412552, 0.9235000014305115, 0.29179999232292175, 0.9998999834060669, 0.24799999594688416, 0.8467000126838684, 0.24799999594688416, 0.8467000126838684, 0.24660000205039978, 0.8413000106811523]
+(for scale) the files as the loader reads them, ALL train rows: computed in v05; smoke statistics are over 40 batches of the 19,827 smoke training feeds
+stored control checkpoint f_mean / f_std equal to the smoke base on how many of 104 inputs (different feed sample expected, so not equal): 15
+precedent abl_smoke_kv64_s23: n_dense 104; f_mean bitwise equal to the smoke base on 104 of the first 104; f_std on 104
+precedent abl_smoke_pre2noid_s23: n_dense 104; f_mean bitwise equal to the smoke base on 99 of the first 104; f_std on 96
+=== 5. smoke predictions
+  nn_abl_smoke_base_s23_trainonly_val.npy: shape (1389971,), finite True, sd 0.5334
+  nn_abl_smoke_base_s23_trainonly_test.npy: shape (2904806,), finite True, sd 0.5267
+  holdout/nn_abl_smoke_base_s23_holdout.npy: shape (4630966,), finite True, sd 0.5253
+  nn_abl_smoke_nx3_s23_trainonly_val.npy: shape (1389971,), finite True, sd 0.7276
+  nn_abl_smoke_nx3_s23_trainonly_test.npy: shape (2904806,), finite True, sd 0.6891
+  holdout/nn_abl_smoke_nx3_s23_holdout.npy: shape (4630966,), finite True, sd 0.7720
+smoke json: base val_ndcg 0.34384 best_step 73; nx3 val_ndcg 0.34170 best_step 73 (73 steps: not evidence)
+DONE

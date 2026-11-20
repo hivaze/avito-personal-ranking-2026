@@ -1,0 +1,13 @@
+== STAGE S read-out hs1b (2026-11-13T14:09:06Z): w9_hs1b_s[23, 24] (nn_x/w9/hs1) vs abl_base_s[23, 24] (nn_x/abl), selected checkpoints primary (@last info). Rule (nn_x/w5/logs/E_hs1_predeclared.txt stage S): PROCEED iff dval >= -0.0015 AND rho_bb - rho_x >= +0.005 AND (dval >= 0 OR margin / |dval| >= 5)
+seed 23: base val 0.39348 hold 0.31756 | hs1b val 0.38874 hold 0.31272 | d val -0.00474 d hold -0.00484
+         last ckpt: d val -0.00451 d hold -0.00485
+seed 24: base val 0.39348 hold 0.31753 | hs1b val 0.38876 hold 0.31251 | d val -0.00472 d hold -0.00502
+         last ckpt: d val -0.00472 d hold -0.00502
+POOLED member (selected): val -0.00473+-0.00083 (z -5.72) | holdout -0.00493+-0.00050 (z -9.80) | pmix -0.00497+-0.00120 (z -4.13) | slices M<50 -0.00490 (z -3.2) M>=50 -0.00462 (z -5.1) Tue -0.00453 (z -3.9) Thu -0.00496 (z -4.2)
+POOLED member (@last, info): val -0.00462+-0.00083 | holdout -0.00493+-0.00050
+DIVERSITY (val, member level): rho_bb = corr(base_s23, base_s24) 0.97776 | rho_x = mean cross-seed corr(arm, base) 0.95266 | margin +0.02510 | margin / |dval| 5.3 | arm-arm 0.97739 | same-seed arm-base 0.95805
+     (info) holdout: rho_bb 0.97874 rho_x 0.95199 margin +0.02674
+2-member POOL (info): base val 0.39400 hold 0.31774 | hs1b val 0.38951 hold 0.31318 | d val -0.00449+-0.00093 d hold -0.00456+-0.00054
+gates: dval >= -0.0015 NO; margin >= +0.005 OK; dval >= 0 or margin/|dval| >= 5 OK
+VERDICT stage S hs1b: CLOSED (removal on the frontier) (dval -0.00473 +- 0.00083, margin +0.02510, ratio 5.3, holdout -0.00493 +- 0.00050)
+registry: w9_hs1b_s23/24 vs abl_base (2-epoch screen, A_BASE + HYG, selected ckpt, pre-declared stage-S rule): val -0.00473 +- 0.00083 (z -5.7), holdout -0.00493 +- 0.00050, pmix -0.00497, M<50 -0.00490 M>=50 -0.00462 Tue -0.00453 Thu -0.00496, rho_bb 0.9778 rho_x 0.9527 margin +0.0251 ratio 5.3, pool val -0.00449 / hold -0.00456, @last val -0.00462 / hold -0.00493 -> CLOSED (<repo>/nn_x/w9/hs1/logs/s_readout_hs1b.txt)

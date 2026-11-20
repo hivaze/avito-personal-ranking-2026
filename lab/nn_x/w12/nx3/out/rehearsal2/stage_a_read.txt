@@ -1,0 +1,59 @@
+=== nx3 STAGE A READ (one look; computed 2026-11-16T05:29:20Z by nn_x/w12/nx3/nx3_read_a.py read) ===
+ARM  (1): abl_smoke_nx3_s23 .. abl_smoke_nx3_s23
+CTL  (1): abl_smoke_base_s23 .. abl_smoke_base_s23   [abl_smoke_base:23-23]
+HARNESS CHECK on record (<repo>/nn_x/w12/nx3/out/rehearsal2/stage_a_harness.txt):
+  == HARNESS DECISION (selected checkpoints, member level): z_val -0.29, z_holdout(30,000 feeds) -0.62; bar |z| <= 2 on both
+     -> HARNESS OK: the fresh controls sit with the stored ones; the control set of the read is the 6 stored w5_e10_base_s951-956 + the 2 fresh abl_e10_base_s957, s958.
+  HARNESS_VERDICT=OK
+== selected checkpoints
+  val                                    n  14423 | member -0.00215 +- 0.00169 (z -1.27; per-feed SE 0.00169, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00215 +- 0.00169 (z -1.27)
+  val, private mix                       n  14423 | member -0.00492 +- 0.00257 (z -1.91; per-feed SE 0.00257, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00492 +- 0.00257 (z -1.91)
+  val, public mix                        n  14423 | member -0.00393 +- 0.00210 (z -1.87; per-feed SE 0.00210, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00393 +- 0.00210 (z -1.87)
+  val M>=50                              n   8530 | member +0.00266 +- 0.00177 (z +1.50; per-feed SE 0.00177, seed SE 0.00000; 1/1 arm members above the control mean) | pool +0.00266 +- 0.00177 (z +1.50)
+  val M<50                               n   5893 | member -0.00910 +- 0.00326 (z -2.79; per-feed SE 0.00326, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00910 +- 0.00326 (z -2.79)
+  holdout, all 30,000 feeds              n  30000 | member -0.00511 +- 0.00096 (z -5.33; per-feed SE 0.00096, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00511 +- 0.00096 (z -5.33)
+  holdout, lag-view feeds (Sep 12-19)    n  15225 | member -0.00402 +- 0.00130 (z -3.09; per-feed SE 0.00130, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00402 +- 0.00130 (z -3.09)
+  holdout, Sep 12-14 (val-like lag)      n   6946 | member -0.00400 +- 0.00191 (z -2.09; per-feed SE 0.00191, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00400 +- 0.00191 (z -2.09)
+  holdout, Sep 17-19 (test-like lag)     n   8279 | member -0.00404 +- 0.00178 (z -2.27; per-feed SE 0.00178, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00404 +- 0.00178 (z -2.27)
+  holdout, feeds WITHOUT the view (Sep 6-11) n  14775 | member -0.00623 +- 0.00141 (z -4.42; per-feed SE 0.00141, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00623 +- 0.00141 (z -4.42)
+== last step
+  val                                    n  14423 | member -0.00215 +- 0.00169 (z -1.27; per-feed SE 0.00169, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00215 +- 0.00169 (z -1.27)
+  val, private mix                       n  14423 | member -0.00492 +- 0.00257 (z -1.91; per-feed SE 0.00257, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00492 +- 0.00257 (z -1.91)
+  val, public mix                        n  14423 | member -0.00393 +- 0.00210 (z -1.87; per-feed SE 0.00210, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00393 +- 0.00210 (z -1.87)
+  val M>=50                              n   8530 | member +0.00266 +- 0.00177 (z +1.50; per-feed SE 0.00177, seed SE 0.00000; 1/1 arm members above the control mean) | pool +0.00266 +- 0.00177 (z +1.50)
+  val M<50                               n   5893 | member -0.00910 +- 0.00326 (z -2.79; per-feed SE 0.00326, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00910 +- 0.00326 (z -2.79)
+  holdout, all 30,000 feeds              n  30000 | member -0.00511 +- 0.00096 (z -5.33; per-feed SE 0.00096, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00511 +- 0.00096 (z -5.33)
+  holdout, lag-view feeds (Sep 12-19)    n  15225 | member -0.00402 +- 0.00130 (z -3.09; per-feed SE 0.00130, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00402 +- 0.00130 (z -3.09)
+  holdout, Sep 12-14 (val-like lag)      n   6946 | member -0.00400 +- 0.00191 (z -2.09; per-feed SE 0.00191, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00400 +- 0.00191 (z -2.09)
+  holdout, Sep 17-19 (test-like lag)     n   8279 | member -0.00404 +- 0.00178 (z -2.27; per-feed SE 0.00178, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00404 +- 0.00178 (z -2.27)
+  holdout, feeds WITHOUT the view (Sep 6-11) n  14775 | member -0.00623 +- 0.00141 (z -4.42; per-feed SE 0.00141, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00623 +- 0.00141 (z -4.42)
+== stale-val, scenario SVL (both_pre2lt3); arm members read nx_rp3_z / nx_rp3_rk from their stale-val twins (<repo>/nn_x/w12/nx3/out/dry/rescore_smoke_mem/svl)
+  stale-val, selected (the clause)       n  14423 | member -0.00275 +- 0.00168 (z -1.64; per-feed SE 0.00168, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00275 +- 0.00168 (z -1.64)
+     levels, member mean: arm natural 0.34170 -> stale 0.34022 (-0.00148); control natural 0.34384 -> stale 0.34296 (-0.00088)
+  stale-val, last step (information)     n  14423 | member -0.00275 +- 0.00168 (z -1.64; per-feed SE 0.00168, seed SE 0.00000; 0/1 arm members above the control mean) | pool -0.00275 +- 0.00168 (z -1.64)
+     levels, member mean: arm natural 0.34170 -> stale 0.34022 (-0.00148); control natural 0.34384 -> stale 0.34296 (-0.00088)
+== VALUE (A3): the arm's 1 members re-scored with nx_rp3_z and nx_rp3_rk permuted within the feed (one permutation per feed for both, has kept at 1); selected checkpoints (<repo>/nn_x/w12/nx3/out/dry/rescore_smoke_mem/perm)
+  check, val: re-scored natural vs the stored predictions of the trainer, member NDCG: max |difference| 0.00e+00 (per feed: max 0.00e+00)
+  check, hold: re-scored natural vs the stored predictions of the trainer, member NDCG: max |difference| 0.00e+00 (per feed: max 0.00e+00)
+  val                                    n  14423 | natural - permuted +0.01473 +- 0.00116 (paired per-feed SE; z +12.72; seed-level SE 0.00000; 1/1 members > 0)
+  holdout, lag-view feeds (Sep 12-19)    n  15225 | natural - permuted +0.01012 +- 0.00086 (paired per-feed SE; z +11.75; seed-level SE 0.00000; 1/1 members > 0)
+  holdout, Sep 12-14 (val-like lag)      n   6946 | natural - permuted +0.00961 +- 0.00129 (paired per-feed SE; z +7.43; seed-level SE 0.00000; 1/1 members > 0)
+  holdout, Sep 17-19 (test-like lag)     n   8279 | natural - permuted +0.01056 +- 0.00115 (paired per-feed SE; z +9.15; seed-level SE 0.00000; 1/1 members > 0)
+  check: on the 14,775 holdout feeds without the view the permutation is a no-op: max |natural - permuted| per feed = 0.00e+00
+
+=== nx3 STAGE A: FINAL BLOCK (rule block 2026-11-16T03:45:41Z as amended A1-A6; selected checkpoints, member level unless stated) ===
+ ARM abl_smoke_nx3_s23 .. abl_smoke_nx3_s23 (1)   CTL abl_smoke_base:23-23 (1)   harness: HARNESS_VERDICT=OK
+ C1 val                      z >= +1.0            : member -0.00215 +- 0.00169, z -1.27  -> FAIL
+ C2 lag-view holdout (15,225) z >= +1.0            : member -0.00402 +- 0.00130, z -3.09  -> FAIL
+ C3 pooled z = (z_val + z_holdout) / sqrt(2) >= 2.0 : -3.08  -> FAIL
+ C4 private mix (src/pmix.py) member z >= -1.0     : member -0.00492 +- 0.00257, z -1.91  -> FAIL
+ C5 pool minus pool >= 0 on val AND lag-view holdout: val -0.00215 +- 0.00169, holdout -0.00402 +- 0.00130  -> FAIL
+ C6 last step, lag-view holdout, member delta >= 0  : -0.00402 +- 0.00130  -> FAIL
+ C7 stale-val (SVL + NX twins) member delta >= -1 SE: -0.00275 +- 0.00168 (z -1.64)  -> FAIL   [last step, information: -0.00275 +- 0.00168]
+ C8 VALUE: natural - permuted >= 0.5 x (arm - control) on the lag-view holdout AND > 0 on val:
+      lag-view holdout +0.01012 +- 0.00086 against 0.5 x -0.00402 = -0.00201 -> ok;  val +0.01473 +- 0.00116 -> ok   -> ok
+ REPLICATE band: pooled z in [1.6, 2.0) with z_val >= 0 and z_holdout >= 0 : no
+ REPORT R1 (A3) arm - control on the 14,775 holdout feeds WITHOUT the view (expected 0): member -0.00623 +- 0.00141, z -4.42  -> |z| > 2: SIDE EFFECT OF THE ARM, written next to the verdict
+ REPORT R2 (A3) natural - permuted on val = the size the trained members take from the values: +0.01473 +- 0.00116 (paired SE)
+ VERDICT: NOT SHOWN at this power (0.71-0.80 for a member-level +0.001, 0.24-0.29 for +0.0005, 0.09-0.13 for +0.0003; critic/out/c04_rule_null.txt). natural - permuted on val + 2 SE = +0.01704 >= +0.0005 -> not closed at +0.0005. "New train-stage inputs" is not closed as a class: the arm holds ONE piece of information (one scalar in two forms). A7.3: stage B, if trained, is read once as a descriptive record.
+ NEXT TO THE VERDICT (A3 REPORT): side effect of the arm on the feeds without the view, z -4.42.

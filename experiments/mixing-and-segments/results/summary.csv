@@ -1,0 +1,27 @@
+study,item,witness,value,uncertainty,source
+mixing,"feed-size rule minus plain weight 0.2, in sample, all-data 16 + 4",val,+0.00026,0.00021,results/mix_check_nested.txt
+mixing,"feed-size rule minus plain, in sample, all-data 8 + 4 / held-out 16 + 4 / held-out 8 + 4",val,+0.00051 / +0.00071 / +0.00043,0.00021 / 0.00021 / 0.00019,results/mix_check_nested.txt
+mixing,"feed-size rule, nested headline, all-data 16 + 4",val,+0.00002,0.00027,lab/reports/MIX_1115/review.md
+mixing,"feed-size rule, nested headline, all-data 8 + 4 / held-out 16 + 4 / held-out 8 + 4",val,+0.00015 / +0.00030 / +0.00015,0.00028 / 0.00026 / 0.00028,lab/reports/MIX_1115/review.md
+mixing,feed-size rule file minus its plain twin,public,0.3947465 against 0.394892 (-0.00015),paired SE about 0.00027,decision ledger block 2026-11-15T14:34:22Z (not published)
+mixing,rule families passing the criteria set before the search,"val, 4 compositions","0 of 95 (131,547 rules)",,lab/reports/MIX_1115/rulesA.md
+mixing,"best family on the all-data members (weight of the fine-tuned half by history length), nested",val,+0.00076,0.00032,results/mix_rule_search_all_data_16.txt
+mixing,the same family on the two held-out compositions,val,-0.00019 / -0.00034,,lab/reports/MIX_1115/rulesA.md
+mixing,"greedy scan of the whole rule set on a placebo with nothing to find, in sample",val,+0.00057 (95th percentile +0.00082),,lab/reports/MIX_1115/rulesA.md
+mixing,"learned gate (choice among 7 families) minus the feed-size rule, nested, all-data / held-out",val,-0.00022 / -0.00038,0.00021 / 0.00016,results/mix_learned_gates_all_data_16.txt; lab/reports/MIX_1115/gateB.md
+segments,feeds without history (H = 0),val; share of test feeds,0.3784; 0.86%,0.0176,results/seg_segment_table.txt
+segments,feeds with 1 to 9 history events,val; share of test feeds,0.4431; 1.90%,0.0173,results/seg_segment_table.txt
+segments,feeds of the pooled anonymous user id 0,val; share of test feeds,0.4093; 4.12%,0.0101,results/seg_segment_table.txt
+segments,feeds at the 256-event cap against all other feeds,val; share of test feeds,0.3906 against 0.4077 (-0.01711); 28.81%,0.00443,results/seg_segment_table.txt
+segments,"oldest 64 stored events removed at inference, feeds at the cap, wide students",val,-0.00234,0.00092,results/seg_truncation_replay.txt
+segments,"the same, six members pooled",val,-0.0023,0.0008,lab/reports/SEG_1115/review.md
+segments,"refill replay, design 1: recovered older events in slots 129-256 minus empty slots","holdout (2,358 feeds) / val",+0.00117 / +0.00269,0.00082 / 0.00157,lab/reports/SEG_1115/refill.md
+segments,"refill replay, design 2: all events the earlier snapshots add","holdout (3,123 feeds) / val",+0.00151 / +0.00267,0.00093 / 0.00215,lab/reports/SEG_1115/refill.md
+segments,"refill replay, holdout and val pooled, design 1 / design 2",holdout + val,+0.00173 / +0.00194,0.00078 / 0.00099,results/seg_refill_pooled.txt
+segments,reachable gain at pool level if a retrained model used all of it,estimate for private-like test days,+0.00015 to +0.00035,0.00007 to 0.00015,lab/reports/SEG_1115/refill.md
+fresh exposure,within-feed AUC of the strictly-earlier count for the click,val,0.4970,0.0012,results/fresh_s2_auc.txt
+fresh exposure,within-feed AUC of the train exposure input,val,0.5335,0.0022,results/fresh_s2_auc.txt
+fresh exposure,"nested gain over the pool score, conditional-logit family",val,-0.00044,0.00015,lab/reports/FRESH_1115/pregate.md
+fresh exposure,"nested gain over the raw pool score, direct NDCG read (independent re-run)",val,-0.00004,0.00020,lab/reports/FRESH_1115/review.md
+fresh exposure,"in-sample ceiling, best single form and weight",val,+0.00017,0.00025,lab/reports/FRESH_1115/review.md
+fresh exposure,candidates with a strictly-earlier count of 1 or more,val / public-like / private-like,10.8% / 20.1% / 28.0%,,lab/reports/FRESH_1115/pregate.md

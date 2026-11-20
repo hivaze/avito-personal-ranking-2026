@@ -1,0 +1,58 @@
+=== 2026-11-15T03:14:53Z hz2 ARM: PRE-REGISTERED EXPECTATION (hz2 agent). Written before any model has been trained on an hz2 view and before the hz arm (w5_kcd_hz_s95x / w5_lcd_hz_s95x) has been read. ===
+Not a decision rule: the lead owns the rules in nn_x/w5/logs/E_kd_predeclared.txt. This file fixes what the mechanism predicts, so that the reading can count against it.
+
+ARM (proposed): K: / L: re-cool of the wide KD students with "--hzcd" and
+   HZCD_DIR=<repo>/nn_x/w12/stale/hz2/feats  HZ2_KEEP=<repo>/nn_x/w12/stale/hz2/feats/train/hz2_keep_rows.npy        ("hz2k": primary view, Sep 6-8 truncated rows left as stored)
+   second arm if GPU allows: HZCD_DIR=.../feats_L  HZ2_KEEP=.../feats_L/train/hz2_keep_rows.npy                                                      ("hz2Lk": lag-first view)
+   reference = the K: / L: ref re-cools of the same snapshots; comparison arm = hz (half dose), paired by snapshot.
+
+DOSE, label-free (logs/gate_summary_final.md; trPool private-like feeds; share of the as-built zero-share gap dZ to private rows that the view closes):
+                         it_hist_all_luo        seq_cv_pop             xp_imp_c50       columns swapped
+   hz  (half dose)       33% (0.259 -> 0.174)   0%                     0%               5
+   hz2  primary          75% (-> 0.064)         58% (0.144 -> 0.061)   78%              8 (+1)
+   hz2k primary + keep   88% (-> 0.032)         56%                    78%              8 (+1)
+   hz2L lag-first        68% (-> 0.083)         45%                    63%              8 (+1)
+   on feed days >= Sep 13: hz 32% / 0% / 0%; hz2 90% / 88% / 84%; hz2L 81% / 65% / 77%.
+   So hz2 carries 2.3-2.8 times the it_hist dose of hz and adds the three seq_cv inputs, which hz does not touch.
+
+MECHANISM M: part of the staleness cost of the W8 members (-0.0033 +- 0.0008 on the lagged holdout, reports/NEXT_1115/poplag_verify.md) is a train / test mismatch of the
+   popularity inputs that training on test-like inputs removes. Anchor: hz at 11-12 (hard labels, 4 roots): stale-val +0.00107 +- 0.00036, in-period holdout -0.00052 +- 0.00019, val +0.00026 +- 0.00033.
+
+EXPECTED READINGS of hz2k against its reference re-cool (16-pool, selected checkpoints, paired per feed), central value and 80% interval:
+   E-a stale-val                       +0.0018   [+0.0008, +0.0032]
+   E-b stale-val, hz2k minus hz        +0.0007   [-0.0002, +0.0018]     (same snapshots; a concave dose-response, 2.3-2.8 x the dose giving 1.3-2.5 x the gain)
+   E-c val                              0.0000   [-0.0006, +0.0006]     (cold positives up at least as much as under hz, warm positives down more than under hz)
+   E-d in-period holdout (as built)    -0.0010   [-0.0020, -0.0003]     (about twice the hz reading; reported, not a veto under the 02:15Z policy)
+   E-e causal lagged holdout, days >= Sep 13 (13,424 feeds): NDCG(hz2k model | hz2 inputs) - NDCG(reference model | hz2 inputs)   +0.0015   [+0.0005, +0.0030]
+       (files: preds/holdout/nn_<v>_holdout_hz.npy of the hz2 run; the reference checkpoint through the same view by nn_x/w12/stale/hz2/hold_infer.py; CPU vs GPU numerics differ by
+        about 0.0002, so score both sides with hold_infer.py if the reading is inside +-0.0005)
+   hz2Lk: the same signs; stale-val within +-0.0005 of hz2k (I have no basis to order the two; the lagged-holdout loss of the W8 pool under each view, report section 5, is the only evidence).
+
+WHAT WOULD FALSIFY M (any one):
+   F1 stale-val of hz2k is not above +1 SE (16-pool) although its label-free dose is more than twice that of hz.
+   F2 dose-response violated: stale-val(hz2k) - stale-val(hz) < -1 SE of the paired difference.
+   F3 E-e <= 0: a model cooled on exactly these inputs does not beat, on these inputs, a model that never saw them. Then the measured cost is information loss, not mismatch.
+   F4 in-period holdout >= 0 AND stale-val <= 0: the cooldown was a no-op.
+NOT a falsifier: val in [-0.0006, 0] together with stale-val >= +2 SE. Val rows have a lag of 2 and 4 days; no train feed of the view has a lag below 6 (by design: test lags).
+   If plain val must stay a hard condition ("val >= 0" in RULE hz), expect hz2 to be closer to failing it than hz was.
+COST: the view tensor on the GPU is 3.95 GB (8 columns x 246.7M rows x fp16) against 2.47 GB for hz; load time about 30 s more.
+
+=== 2026-11-15T03:40:09Z ADDENDUM (resumed run; still before any hz / hz2 K: / L: run exists and before the HZ11 read of DECLARATION.txt ADDENDUM 6; the text above is unchanged) ===
+The task asks for the expected move RELATIVE TO THE HALF-DOSE hz ARM on both witnesses. Stale-val is E-b above. For the lagged holdout the missing line is:
+   E-f causal lagged holdout, days >= Sep 13 (13,424 feeds), both models through the hz2 view (hold_infer.py, CPU both sides):
+       hz model - reference model     +0.0006   [ 0.0000, +0.0015]     (half dose: 33% of the it_hist gap, none of the seq_cv gap)
+       hz2k model - hz model          +0.0009   [-0.0002, +0.0020]     (the rest of E-e = +0.0015)
+   Falsifier F5 (dose order on the lagged holdout): hz2k model - hz model < -1 SE of the paired difference on those feeds.
+HOW TO READ E-e / E-f WITHOUT A NEW TOOL: python hold_infer.py feats <ref variant>,<hz variant>,<hz2 variant> late   then pool the per-feed z of the 16 snapshots per arm as in hz11_read.py.
+SELECTION CAVEAT (stated before any run): the harness selects the checkpoint on the IN-PERIOD holdout (fresh popularity). For a staleness arm that selection works against the arm;
+   the @last checkpoint is the reading free of it. Expect selected < @last on stale-val for hz2 by up to 0.0003; if the two disagree in sign, report both and say so.
+LANE CAVEAT: HZCD_DIR / HZ2_KEEP must be set per job. A lane that exports them and then runs a K:hz job would silently train hz with the hz2 files. The run log line "[6b: N swapped columns ...]"
+   shows what a run really read: 5 columns = hz, 8 columns = hz2 (1 column for a popularity-light member with the hz2 dir).
+
+=== 2026-11-15T04:58:52Z NOTE (tool pointer only; NO expectation or falsifier above is changed. Written AFTER the HZ11 read of the 11-12 hard-label hz models, which is not the K: / L: arm this file is about) ===
+Reader for E-e / E-f / F3 / F5: nn_x/w12/stale/hz2/lagged_pair_read.py (usage in its docstring; validated: it reproduces logs/hz11_read_feats.txt to the last digit).
+   python hold_infer2.py feats  <16 hz2 variants>,<16 hz variants>,<16 ref variants> late      (label-free scoring, about 5-8 min per d192 model at 12 CPU threads; two processes at a time)
+   python hold_infer2.py stored <the same> late                                                 (optional: in-period arm through the same CPU path)
+   python lagged_pair_read.py feats <16 hz2 variants> <16 ref variants> hz2_vs_ref    ;    ... <16 hz2 variants> <16 hz variants> hz2_vs_hz    ;    ... <16 hz variants> <16 ref variants> hz_vs_ref
+For the record, what HZ11 read on the OLD models (d128, hard labels, half dose; report section 5.2): hz - ref through the hz2 view +0.00067 +- 0.00041 (4-pool, selected checkpoints, 13,424 feeds).
+   E-f's first line (+0.0006 [0.0000, +0.0015]) was written at 03:40Z, before that read (04:51Z), for the K: / L: arm; the two numbers are about different models.

@@ -1,0 +1,70 @@
+# Read-out copied from the raw run log (not published), unchanged below this line.
+slices n: all 14423, M<50 5893, M>=50 8530, Tue 7543, Thu 6880, all-cold 2510, all-warm 10230  | MxH4 missing mass 0.0 0.0
+R val 0.39818 (F5 n2cpv3 members via combiner 0.39818); v11 val 0.39793
+R/v11 holdout TO-half 0.32162
+  F5    v12_all_e10            FT=n2cpv3 TO val 0.39132  FT val 0.39374  TO holdout 0.31723
+  F5    v12_all_s81            FT=n2cpv3 TO val 0.39322  FT val 0.39450  TO holdout 0.31812
+  F5    v12_all_s82            FT=n2cpv3 TO val 0.39125  FT val 0.39306  TO holdout 0.31778
+  F5    v12_allprew_s83        FT=n2cpv3 TO val 0.39266  FT val 0.39338  TO holdout 0.31771
+  F5    v12_allprew_s84        FT=n2cpv3 TO val 0.39322  FT val 0.39447  TO holdout 0.31793
+  F5    v12_allprew_s85        FT=n2cpv3 TO val 0.39312  FT val 0.39510  TO holdout 0.31863
+  F6    v13_lr1_mix1           FT=n2cpv3 TO val 0.39389  FT val 0.39457  TO holdout 0.31828
+  F6    v14_s92                FT=n2cpv3 TO val 0.39158  FT val 0.39283  TO holdout 0.31755
+  F6    v14_s93                FT=n2cpv3 TO val 0.39400  FT val 0.39570  TO holdout 0.31822
+  F6    v14_s94                FT=n2cpv3 TO val 0.39389  FT val 0.39349  TO holdout 0.31775
+  F6    v14_s95                FT=n2cpv3 TO val 0.39249  FT val 0.39518  TO holdout 0.31801
+  F6    v14_s96                FT=n2cpv3 TO val 0.39180  FT val 0.39328  TO holdout 0.31789
+  F5cd  v15_cd_all_e10         FT=n2cpf  TO val 0.39318  FT val 0.39520  TO holdout 0.31927
+  F5cd  v15_cd_all_s81         FT=n2cpf  TO val 0.39343  FT val 0.39541  TO holdout 0.31859
+  F5cd  v15_cd_all_s82         FT=n2cpf  TO val 0.39466  FT val 0.39620  TO holdout 0.31951
+  F5cd  v15_cd_allprew_s83     FT=n2cpf  TO val 0.39426  FT val 0.39584  TO holdout 0.32014
+  F5cd  v15_cd_allprew_s84     FT=n2cpf  TO val 0.39451  FT val 0.39658  TO holdout 0.31903
+  F5cd  v15_cd_allprew_s85     FT=n2cpf  TO val 0.39555  FT val 0.39613  TO holdout 0.31989
+  H     v13_lr1_mix0           FT=n2cpf  TO val 0.39433  FT val 0.39475  TO holdout 0.31844
+  H     v13_lr2_mix1           FT=n2cpf  TO val 0.39403  FT val 0.39598  TO holdout 0.31897
+  H     v14_mix1_s91           FT=n2cpf  TO val 0.39428  FT val 0.39527  TO holdout 0.31872
+gate F5    n 6  mean TO val 0.39247 (gap 0.00180)  holdout 0.31790 (gap 0.00151)  FT n2cpv3 True  -> PASS
+gate F6    n 6  mean TO val 0.39294 (gap 0.00132)  holdout 0.31795 (gap 0.00146)  FT n2cpv3 True  -> PASS
+gate F5cd  n 6  mean TO val 0.39426 (gap 0.00000)  holdout 0.31940 (gap 0.00000)  FT n2cpv3 False  -> PASS
+gate H     n 3  mean TO val 0.39421 (gap 0.00005)  holdout 0.31871 (gap 0.00069)  FT n2cpv3 False  -> PASS
+pool Q1   F5+F6              12 members  FT {'n2cpv3': 12}  holdout TO-half 0.32239  d +0.00077+-0.00026  late20 +0.00105+-0.00056
+pool Q2   F5+F6+F5cd         18 members  FT {'n2cpv3': 12, 'n2cpf': 6}  holdout TO-half 0.32292  d +0.00130+-0.00028  late20 +0.00151+-0.00060
+pool Q3   F5+F6+F5cd+H       21 members  FT {'n2cpv3': 12, 'n2cpf': 9}  holdout TO-half 0.32300  d +0.00138+-0.00028  late20 +0.00140+-0.00061
+CHOSEN on the holdout (phase A): Q3
+
+Q1    val 0.39846 [final-eligible (all FT n2cpv3)]
+   vs R   all +0.00028+-0.00043  M<50 -0.00019+-0.00083  M>=50 +0.00059+-0.00045  Tue +0.00045+-0.00061  Thu +0.00008+-0.00061  all-cold +0.00091+-0.00101  all-warm +0.00017+-0.00054  | privM +0.00031  privMxH4 +0.00028  adv_intr priv +0.00017+-0.00044 pub +0.00033  folds +0.0006 +0.0001 -0.0003 +0.0006 +0.0003
+   vs v11 all +0.00053+-0.00045  M<50 +0.00051+-0.00088  M>=50 +0.00053+-0.00047  Tue +0.00056+-0.00063  Thu +0.00049+-0.00065  all-cold -0.00029+-0.00106  all-warm +0.00069+-0.00057  | privM +0.00055  privMxH4 +0.00050  adv_intr priv +0.00047+-0.00046 pub +0.00065  folds +0.0011 +0.0002 +0.0008 +0.0001 +0.0004
+   calib pub/priv M 0.39035/0.39299  MxH4 0.39078/0.39237  test corr vs v11 0.9965/0.9922  vs R(v12) 0.9967/0.9925 (Pearson z / Spearman); val Spearman vs R 0.9921
+
+Q2    val 0.39878 [info, not final (FT uses n2cpf)]
+   vs R   all +0.00060+-0.00046  M<50 +0.00072+-0.00086  M>=50 +0.00051+-0.00049  Tue +0.00082+-0.00065  Thu +0.00035+-0.00064  all-cold +0.00286+-0.00116  all-warm +0.00020+-0.00056  | privM +0.00062  privMxH4 +0.00064  adv_intr priv +0.00051+-0.00046 pub +0.00061  folds +0.0013 +0.0002 +0.0001 +0.0006 +0.0008
+   vs v11 all +0.00085+-0.00047  M<50 +0.00142+-0.00090  M>=50 +0.00045+-0.00050  Tue +0.00092+-0.00065  Thu +0.00076+-0.00068  all-cold +0.00166+-0.00116  all-warm +0.00072+-0.00058  | privM +0.00086  privMxH4 +0.00086  adv_intr priv +0.00082+-0.00047 pub +0.00093  folds +0.0018 +0.0003 +0.0012 +0.0001 +0.0009
+   calib pub/priv M 0.39066/0.39330  MxH4 0.39095/0.39272  test corr vs v11 0.9963/0.9917  vs R(v12) 0.9964/0.9919 (Pearson z / Spearman); val Spearman vs R 0.9915
+
+Q3    val 0.39879 [info, not final (FT uses n2cpf)]
+   vs R   all +0.00061+-0.00046  M<50 +0.00075+-0.00087  M>=50 +0.00052+-0.00050  Tue +0.00076+-0.00066  Thu +0.00045+-0.00065  all-cold +0.00295+-0.00115  all-warm +0.00013+-0.00057  | privM +0.00064  privMxH4 +0.00057  adv_intr priv +0.00055+-0.00046 pub +0.00071  folds +0.0014 +0.0001 -0.0002 +0.0010 +0.0008
+   vs v11 all +0.00086+-0.00047  M<50 +0.00145+-0.00090  M>=50 +0.00046+-0.00051  Tue +0.00087+-0.00066  Thu +0.00086+-0.00068  all-cold +0.00175+-0.00115  all-warm +0.00065+-0.00059  | privM +0.00088  privMxH4 +0.00079  adv_intr priv +0.00086+-0.00047 pub +0.00103  folds +0.0019 +0.0002 +0.0009 +0.0006 +0.0008
+   calib pub/priv M 0.39069/0.39332  MxH4 0.39100/0.39266  test corr vs v11 0.9960/0.9913  vs R(v12) 0.9960/0.9914 (Pearson z / Spearman); val Spearman vs R 0.9909
+
+Q2h   val 0.39865 [info only, not pre-declared (FT branch = n2cpv3 members only, TO branch = full pool)]
+   vs R   all +0.00047+-0.00044  M<50 -0.00007+-0.00083  M>=50 +0.00084+-0.00047  Tue +0.00065+-0.00063  Thu +0.00026+-0.00060  all-cold +0.00202+-0.00106  all-warm +0.00021+-0.00054  | privM +0.00050  privMxH4 +0.00051  adv_intr priv +0.00036+-0.00044 pub +0.00058  folds +0.0013 -0.0003 +0.0004 +0.0008 +0.0002
+   vs v11 all +0.00072+-0.00046  M<50 +0.00063+-0.00088  M>=50 +0.00078+-0.00049  Tue +0.00076+-0.00065  Thu +0.00067+-0.00066  all-cold +0.00082+-0.00109  all-warm +0.00073+-0.00057  | privM +0.00074  privMxH4 +0.00073  adv_intr priv +0.00066+-0.00046 pub +0.00090  folds +0.0017 -0.0002 +0.0015 +0.0003 +0.0003
+   calib pub/priv M 0.39055/0.39318  MxH4 0.39088/0.39259  test corr vs v11 0.9965/0.9921  vs R(v12) 0.9967/0.9925 (Pearson z / Spearman); val Spearman vs R 0.9921
+
+Q3h   val 0.39880 [info only, not pre-declared (FT branch = n2cpv3 members only, TO branch = full pool)]
+   vs R   all +0.00062+-0.00044  M<50 +0.00043+-0.00083  M>=50 +0.00075+-0.00047  Tue +0.00080+-0.00063  Thu +0.00041+-0.00061  all-cold +0.00219+-0.00107  all-warm +0.00037+-0.00054  | privM +0.00064  privMxH4 +0.00065  adv_intr priv +0.00054+-0.00044 pub +0.00073  folds +0.0017 -0.0005 +0.0004 +0.0011 +0.0003
+   vs v11 all +0.00087+-0.00047  M<50 +0.00113+-0.00089  M>=50 +0.00069+-0.00049  Tue +0.00091+-0.00065  Thu +0.00082+-0.00067  all-cold +0.00099+-0.00110  all-warm +0.00089+-0.00058  | privM +0.00088  privMxH4 +0.00087  adv_intr priv +0.00085+-0.00047 pub +0.00105  folds +0.0022 -0.0004 +0.0015 +0.0006 +0.0004
+   calib pub/priv M 0.39068/0.39332  MxH4 0.39106/0.39274  test corr vs v11 0.9964/0.9919  vs R(v12) 0.9966/0.9923 (Pearson z / Spearman); val Spearman vs R 0.9918
+presub_gate Q1 vs R: PASS with WARN (FAIL 0, WARN 9) -> <repo>/solvers/out/CPU1_xrecipe_member_equal_pool_v3/gate_A_Q1_vs_R.log
+ACCEPT Q1 vs R: val_gt_2SE=False  no_slice_below_-2SE=True  holdout_ge_floor=True  presub_gate_pass=True  file_checks=True  ft_all_n2cpv3=True  => no
+ACCEPT Q1 vs v11: val_gt_2SE=False  no_slice_below_-2SE=True  holdout_ge_floor=True  presub_gate_pass=not run  file_checks=True  ft_all_n2cpv3=True  => no
+presub_gate Q2 vs R: PASS with WARN (FAIL 0, WARN 18) -> <repo>/solvers/out/CPU1_xrecipe_member_equal_pool_v3/gate_A_Q2_vs_R.log
+ACCEPT Q2 vs R: val_gt_2SE=False  no_slice_below_-2SE=True  holdout_ge_floor=True  presub_gate_pass=True  file_checks=True  ft_all_n2cpv3=False  => no
+ACCEPT Q2 vs v11: val_gt_2SE=False  no_slice_below_-2SE=True  holdout_ge_floor=True  presub_gate_pass=not run  file_checks=True  ft_all_n2cpv3=False  => no
+presub_gate Q3 vs R: PASS with WARN (FAIL 0, WARN 21) -> <repo>/solvers/out/CPU1_xrecipe_member_equal_pool_v3/gate_A_Q3_vs_R.log
+presub_gate Q3 vs v11: PASS with WARN (FAIL 0, WARN 21) -> <repo>/solvers/out/CPU1_xrecipe_member_equal_pool_v3/gate_A_Q3_vs_v11.log
+ACCEPT Q3 vs R: val_gt_2SE=False  no_slice_below_-2SE=True  holdout_ge_floor=True  presub_gate_pass=True  file_checks=True  ft_all_n2cpv3=False  => no
+ACCEPT Q3 vs v11: val_gt_2SE=False  no_slice_below_-2SE=True  holdout_ge_floor=True  presub_gate_pass=True  file_checks=True  ft_all_n2cpv3=False  => no
+
+wrote <repo>/solvers/out/CPU1_xrecipe_member_equal_pool_v3/phaseA.json  (100 s)

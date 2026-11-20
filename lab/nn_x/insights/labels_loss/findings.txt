@@ -1,0 +1,343 @@
+LABELS, METRIC AND LOSS ALIGNMENT - findings (labels_loss analyst, 2026-11-12, CPU only)
+=========================================================================================
+Dir: <repo>/nn_x/insights/labels_loss (scripts 01-13 + proxy_lib_ll.py; outputs in out/). No GPU, no file
+outside this directory written, nothing running touched. All NDCG = src/metrics.ndcg_per_feed (pessimistic ties).
+"Members" = the 20 train-only members r6_cd_m02_r101..107 (F7x), v28_lr1_m02_s411..417, v23_gru_pre2s_s501..506
+(F10); per-feed quantities are averaged over them. Raw logits are used for anything loss-related (the saved
+train-only preds are the raw head logits, the same scale the training softmax sees). Label-defined slices (cold/warm
+positive, rank of the positive, shown position, later event type) are descriptive, not causal.
+Sibling analysis read (not repeated): nn_x/insights/data_usage/findings.txt (position bias on production rows, RHO,
+truncation offsets in a GBDT; its NN readout says rho70 / rec33 are -0.004..-0.005 val).
+
+0. TL;DR
+--------
+1. What a positive is. The target action is later logged as an ordinary history event: 92% of train positives
+   reappear in the same user's next history. 79.5% of those show only event type 1; ~20% show deeper types (2/3/4/5/6).
+   Half of val's positives sit in multi-positive feeds. Production train feeds carry 6-34% more positives per feed
+   than val at equal M (more for long feeds); random-like train feeds match val.
+   In exploration feeds 1 in 6 positives is the TERMINAL click: the last shown item, log-lift +3.5, because the feed
+   ends at the last click. Terminal clicks and deep-slot clicks are the BEST-ranked positives (examination
+   selection). The examination lift is +1.15 at slot 0 and -0.41 at slot 200.
+2. The metric weights feeds equally, but its sensitivity does not. The CE pull per feed is ~uniform
+   (1 - P_pos = 0.93).
+   - By M the CE over-weights long feeds by up to 1.9x relative to their NDCG sensitivity. Test composition offsets
+     this (test has 2x the train share of M >= 250), so the ideal weights stay within 0.81-1.45. A K1-calibrated
+     second-order estimate puts the gain of fixing it at <= +0.0003.
+   - By K the mismatch is exactly K/IDCG(K), already run (neutral).
+   - The biggest mismatch is difficulty: 31% of the CE pull goes to feeds holding 10% of the sensitivity. Every
+     correction of it (ce_rw, LambdaLoss, ApproxNDCG, NeuralNDCG; here Optuna gamma) is null or negative.
+3. Within a feed the CE already allocates gradient like LambdaRank:
+   - top-5 negatives 32% vs 35%;
+   - same-category negatives 39.0% vs 40.2%;
+   - the multi-positive anti-gradient is 0.007% of the mass.
+   So top-k focal, within-category hard-negative and PL / positive-count ideas have no mismatch to fix.
+4. The training loss is a faithful proxy where our members differ: across 152 members Spearman(NDCG, -CE) is 0.95,
+   and the per-feed correlation within seed pairs is 0.42. All families are equally over-confident (T* ~1.15), which
+   does not affect ranking. Ties are a non-issue: <= 2.6e-5 for single members, 0 for pools.
+5. Optuna was run on a CPU GBDT with the NN's softmax CE: 30 TPE trials over M / K / exploration / difficulty
+   weighting, nested over val halves. The selected weighting scores -0.0010 +- 0.0011 on the held-out half. Main-loss
+   feed re-weighting is closed in every direction.
+6. Exploration-only position offsets in the GBDT proxy, 6 seeds:
+   - the pure examination term is null (+0.00003 +- 0.00024);
+   - anything that explains terminal clicks away HURTS (A3 -0.0010 val, holdout -0.0011, z -3.7).
+   So no end-of-feed term may ever touch exploration feeds. This constrains data_usage's truncation offset, which
+   reads +0.002 on mostly production rows, to production feeds only.
+7. The one untested loss-side asymmetry with a mechanism: the K9 aux is batch-mean normalised, so its per-feed weight
+   rises 4.3x with M and pool batches carry it x5-7 (REVIEW P8, never run). The +0.0020 K1 gain is confounded with
+   this. -> E1 AUXF (2-epoch from-scratch pair, then 2 members).
+   Further: E2 TRUNC-PROD (with data_usage), E3 CLIPLOG (free diagnostic), E4 XOFF (optional rider).
+8. Bottom line: the loss is not the bottleneck. Realistic upside of all loss-side work is <= +0.001 per member. Do not
+   spend GPU on surrogate swaps or feed re-weighting.
+
+---------------------------------------------------------------------------------------------------------------------
+1. WHAT A POSITIVE IS (01_labels.py, 05_holdout_labels.py -> out/01_labels.txt, out/05_holdout_labels.txt)
+---------------------------------------------------------------------------------------------------------------------
+1.1 Counts. Every train and val feed has >= 1 positive (0 feeds with K = 0).
+                         feeds      mean K   P(K>=2)   share of POSITIVES in K>=2 feeds   pos rate
+  train production       2,987,090  1.723    0.333     0.613                              2.21% (all train)
+  train random-like      164,118    1.822    0.366     0.652                              (M>=50 only)
+  val                    14,423     1.524    0.255     0.511                              1.58%
+  Within every M bin train has more positives than val (e.g. [100,150): K 2.07 production / 1.74 random-like / 1.64
+  val; [250,300]: 3.02 / 2.29 / 2.26): random-like train feeds have the val label density, production feeds 6-34%
+  more (the ranker's top slots convert). Half of val's positives sit in multi-positive feeds; K/IDCG(K) (the
+  NDCG-consistent per-feed weight) averages 1.03 (M<10) .. 1.20 (M>=250) on val.
+1.2 Event type of the target action (descriptive label enrichment: a train positive looked up in the SAME user's
+  NEXT train feed history; 18.1% of train feeds have such a later feed, median gap 69 h; 400K sampled feeds,
+  773,811 positives; never usable as an input):
+  - 92.1% of positives reappear in the later history (negatives: 0.40%); 97% if the gap is < 6 h, 88% at > 3 days
+    (the 256-event cap pushes them out). So the target action is logged as an ordinary history event.
+  - event types of the reappearing positives: type 1 only 79.5%; any type 1 86.6%; {2,3} 3.9%, {4} 2.5%, {2} 2.3%,
+    {1,2,3} 1.9%, {1,4} 1.4%, {3} 1.4%, {5,6} 1.2% ... -> ~20% of positives come with a type 2..9 event (types 2/3/4
+    are the "deeper" actions; history shares: type 1 52% train / 44% val+test). Source of the newest matching event:
+    source 1 84%, source 0 15% (history overall: 0 39%, 1 38%, 2 16%) -> the feed surface is event_source 1.
+  - Label heterogeneity is small for ranking: on the 30K holdout, positives with a type 2..9 event are ranked a little
+    better by the members (mean rank percentile 0.264 vs 0.274 for type-1-only, P(top 10%) 0.327 vs 0.299; n 1,685 vs
+    8,150, ~1.4 SE) and are more often terminal clicks (19.6% vs 15.0%). Graded relevance from later history is a weak,
+    sparse signal (18% of feeds) -> event-type multi-task heads are NOT recommended (section 5, do-not list).
+1.3 Exploration-feed label structure (holdout = 30K random-order train feeds, positions known; members are
+  position-blind: within-feed corr(member z, shown rank) +0.005):
+  - examination: click rate vs shown rank (pool feeds, non-end slots) log-lift g = +1.15 (rank 0), +0.95 (1), +0.67
+    (2), +0.48 (5), +0.43 (10), +0.31 (20), +0.08 (50), -0.21 (100), -0.41 (200)  (out/pool_pos_offset.npz g_noend;
+    agrees with data_usage's theta_rand to +-0.05).
+  - truncation: the last shown item has log-lift +3.54 (28.8% positive vs 1.15% base); 17.2% of exploration positives
+    are in the last 3 slots (16.1% the last item), only 3.7% in the first 3. The feed ends right after the last click,
+    so ~1 in 6 exploration positives is a "terminal" click - in val/test too, where it is unidentifiable.
+  - a fixed g+h offset alone explains MORE of the holdout labels than a member does (CE/feed: uniform 4.896, offset
+    only 4.402, member 4.496, member + offset 4.089 -> the two are additive, as expected under random order).
+  - members rank deep-shown and terminal positives HIGHER: mean rank percentile 0.274 (shown ranks 0-2) -> 0.266
+    (30-99) -> 0.255 (100+) and 0.255 for the last item (P(top 10%) 0.30 -> 0.33 -> 0.345). A click at a
+    low-examination slot needs more relevance (position-based-model signature; same finding as data_usage section 2).
+    The CE gives every positive the same pull, i.e. it treats a casual top-slot click and a deep/terminal click as
+    equal evidence, and treats an unexamined deep negative like an examined top-slot negative.
+1.4 Ties (04_ties.py): single members have 140-330 exactly tied adjacent pairs on val (raw logits carry a feed-level
+  offset of 50-120, float32 ULP 4-8e-6), 3-11 of them pos-neg; pessimistic - optimistic NDCG <= 2.6e-5 (v28 s411).
+  Pools and 0.5/0.5 mixes (z-scored): 0-8 ties, 0 pos-neg, difference 0.000000 on val; 1-8 tied pairs on test.
+  Ties are a non-issue; nothing to do (keep z-scoring before blending; never rank-average).
+
+---------------------------------------------------------------------------------------------------------------------
+2. HOW THE METRIC WEIGHTS FEEDS vs HOW THE LOSS WEIGHTS THEM (02_weights.py, 03_trainweights.py, 10, 11)
+---------------------------------------------------------------------------------------------------------------------
+Definitions per feed (raw member logits, softmax at T=1 like nn/model.py listwise_loss; member-averaged):
+  Sl = -dCE/d(delta) for a uniform +delta logit shift of all positives (= 1 - P_pos; how hard the loss pulls),
+  Sm = dNDCG/d(delta) for the same shift (central difference, delta 0.5 nat; how much the metric gains),
+  Sm/Sl (rel) = share of total Sm / share of total Sl in a slice: > 1 = the loss UNDER-weights that slice relative to
+  its metric value per unit of loss improvement; < 1 = over-weights. The scale-free version (delta = 0.25 x the feed's
+  logit sd) gives the same numbers to +-0.05. LambdaRank gradient (sum |dNDCG_ij| sigma(s_j - s_i)) for reference.
+  Full tables: out/02_weights.txt, out/alignment_slices_val.csv, out/alignment_slices_hold.csv.
+
+2.1 The metric weights every feed equally; its sensitivity is NOT equal. The CE pull is nearly uniform per feed
+  (1 - P_pos = 0.93 on average; P_pos 0.26 at M<10, 0.02 at M>=250):
+  slice (val)          feeds%  ndcg    CEgrad%  Sm%    Sm/Sl  | holdout (M>=50) Sm/Sl
+  M [5,10)              7.2    0.683    5.8     7.6    1.33   |
+  M [10,20)            10.4    0.549    9.6    12.0    1.25   |
+  M [20,30)             9.3    0.468    9.0    10.7    1.19   |
+  M [30,50)            13.9    0.423   14.0    15.8    1.13   |
+  M [50,75)            12.6    0.370   12.9    13.2    1.02   |  1.22
+  M [75,100)            9.5    0.342    9.8     9.6    0.98   |  1.12
+  M [100,150)          12.9    0.311   13.5    11.9    0.88   |  1.02
+  M [150,200)           8.0    0.292    8.4     7.0    0.83   |  0.94
+  M [200,250)           6.4    0.274    6.8     4.9    0.73   |  0.85
+  M [250,300]           9.7    0.270   10.2     7.3    0.71   |  0.81
+  K=1 / 2 / 3 / >=4    74.5/15.4/5.0/5.1                     0.97 / 1.03 / 1.08 / 1.21  | 0.92/1.07/1.18/1.32
+  all-pos cold / mixed / warm (descriptive)                  0.87 / 1.07 / 1.04
+  H=0 / [1,32) / [32,128) / [128,256) / 256                  1.18 / 0.92 / 0.93 / 1.01 / 1.05 (flat)
+  user 0 / user>0                                            0.96 / 1.00
+  best positive's rank pct: top10% / 10-30% / 30-60% / bottom 40% (descriptive)
+                       37.0/33.1/22.0/7.9 feeds%; CEgrad% 35.1/33.6/22.9/8.4; Sm% 57.0/33.0/9.1/0.9
+                                                             1.62 / 0.98 / 0.40 / 0.10
+  Readings:
+  (a) M: the CE over-weights long feeds relative to their metric sensitivity by up to 1.9x (M<10 vs M>=250); same
+      slope on the holdout. (b) K: the CE under-weights multi-positive feeds by up to 1.2-1.3x (this is exactly the
+      K/IDCG correction, already run: v2_idcg 0.38004 vs v2_feed 0.38003, v4_cv_s33 idcg = v4_cv; neutral).
+  (c) The dominant mismatch is "difficulty": 31% of the CE pull goes to feeds whose best positive is below the 30th
+      percentile, which hold 10% of the metric sensitivity; feeds with a near-correct positive get 35% of the pull and
+      57% of the sensitivity (16x spread). This is the textbook softmax-vs-NDCG gap. Its fixes (ce_rw = weight by
+      dNDCG/dlog r; LambdaLoss/NDCG-Loss2++; ApproxNDCG; NeuralNDCG) are all null or worse (sol_solvers 2.1:
+      ce_rw +0.00016 +- 0.00052 val, -0.00119 +- 0.00036 holdout over 6 seeds). Section 3.1 re-tests it with Optuna.
+  (d) H, user 0 and coldness show no material mismatch (coldness < 1.15x, and it is label-defined).
+
+2.2 How training actually weights feeds (live recipe, nn/train.py + nn/data.py; 03_trainweights.py, 10_aux_norm_const):
+  - Batches are M-bucketed: B = min(512, 32768 // Mpad) feeds (512 for M<=64, 256 at M~128, 107 at M~300).
+  - Main CE (--loss_norm feed): sum/512 -> every feed weighs the same (batch total B/512).
+  - K9 aux: per-batch MEAN over feeds weighted by (1-p) -> per-feed aux weight ~ aux_w/B. Relative to the main loss
+    the aux per feed is 0.62 (M<75) -> 0.90 (75-100) -> 1.26 (100-150) -> 1.76 -> 2.26 -> 2.69 (M>=250) (rel. units):
+    52% of the aux weight lands on M>=100 feeds that carry 28% of the main weight.
+  - m02 pool batches (p>0.5): the aux still sums to aux_w over the ~17% production mass (mean 1-p 0.166): x5-7 aux
+    weight per unit of production-ness (REVIEW_SYNTHESIS P8; never fixed or run).
+  - Composition vs test (test/train feed share): M [5,10) 0.61, [10,20) 0.67, [20,30) 0.73, [30,250) 1.0-1.28,
+    [250,300] 2.04 (train 5.4% vs test 11.0%). H=256: train 42.3% vs test 28.8%.
+  - Label regime: 95.7% of the plateau's main-loss feed weight is production feeds; m02 adds ~1.7% exploration weight
+    in the cooldown (pool batch 272 feeds vs 320 regular); test is 100% exploration.
+  - The K1 result (+0.0020 val for batch-mean -> sum/512, nn_report v2) is CONFOUNDED: the same switch lowered the
+    epoch-mean main weight per batch to 0.62 while the aux stayed at aux_w, i.e. the aux:main ratio went 0.50 -> 0.81
+    on average and to 2.39 on M~300 batches. Nobody has separated "equal feed weight" from "aux re-weighted to long
+    feeds"; the aux normalisation was never varied (aux_pos / tau / PL were).
+  - Gradient clipping (1.0) would equalise batches and undo part of the feed normalisation if it were active; the r6
+    GNS numbers (trSigma 93 per feed, |G|^2 0.019; recap_gns2.log) put typical batch gradient norms at ~0.3-0.6, so it
+    is probably inactive at the plateau (not measured: no run logs the pre-clip norm).
+
+2.3 Is the per-feed M weighting worth changing? Metric-ideal weight w*(M) = (Sm/Sl) x (test/train share):
+  M <30: 0.81-0.87, 30-250: 0.88-1.12, >=250: 1.45 (current: 1.0 everywhere; pre-K1 batch-mean: 0.63 .. 2.67).
+  Second-order calibration on K1 (gain ~ c x test-weighted sum (log w - log w*)^2; batch-mean deviation 0.234 vs
+  current 0.028 -> c = 0.0097): moving to w* would gain +0.0003 val (+0.0002 without the composition term). An upper
+  bound (K1 is confounded with the aux change) and below a member MDE (~0.001). -> CLOSE M-reweighting of the main loss.
+
+2.4 Within-feed allocation (where the gradient on NEGATIVES goes, CE p_j vs LambdaRank lambda_j, val):
+  negative rank [0,5) 32.2% vs 35.2% | [5,20) 32.3 vs 24.2 | [20,50) 20.0 vs 18.4 | [50,100) 10.2 vs 12.7 |
+  [100,300) 5.2 vs 9.5; above the best positive 47.6 vs 49.2; below all positives 42.1 vs 38.2;
+  negatives sharing a category with a positive 39.0% vs 40.2% (their count share is ~26%).
+  -> The CE already allocates its negative gradient like the metric: equally top-heavy, and already concentrated on
+  same-category negatives 1.5x their count share. A top-k focal term would move it the WRONG way (full-list NDCG wants
+  slightly more on the deep tail, not less); a within-category hard-negative term has no mismatch to fix (CE category
+  part 1.43 nats + within-category part 2.31 nats per positive; both are already in the softmax).
+2.5 Multi-positive "distribution" pathology (CE target y/K pushes a positive DOWN once p_i > 1/K): 0.26% of positives
+  (0.50% in K>=2 feeds), 0.007% of the CE gradient mass. Harmless at the current model strength (P_pos 0.07).
+2.6 Is the training loss a faithful proxy at the margin where members differ? (09_member_alignment.py, 152 train-only
+  members with val + holdout preds; 12_temperature.py)
+  - Across members, Spearman(NDCG, -CE) = +0.87 val / +0.90 holdout with CE at T=1, +0.95 / +0.96 with the best global
+    temperature; slope -0.25 NDCG per nat (val), -0.20 (holdout). Within 93 same-family seed pairs the per-feed
+    corr(dNDCG, -dCE) is +0.42 (val) / +0.41 (holdout).
+  - Every family is mildly over-confident at T=1 (T* 1.11-1.17, CE gap 0.004-0.008 nats; c0 (mix 0.1) 0.0077 vs m02
+    0.0056) - irrelevant for ranking.
+  -> Lower CE reliably means higher NDCG across our members; there is no sign that a different surrogate would rank
+  our models differently. Loss-side upside is bounded by what a better-aligned surrogate can add, which the old zoo
+  and section 3 put at ~0.
+
+---------------------------------------------------------------------------------------------------------------------
+3. OFFLINE PROXIES ON CPU (LightGBM with the NN's listwise softmax CE as a custom objective; proxy_lib_ll.py)
+---------------------------------------------------------------------------------------------------------------------
+Features: the 48 loss-zoo inputs (solvers/proxy_lib CONTENT + COLLAB), cached by 06_prep_proxy.py. Train-only
+offsets enter as init_score and are never seen at prediction; val NDCG is the exact metric; paired per-feed deltas.
+Proxy noise: baseline seed-to-seed |delta| 0.0007 on val (08). Calibration caveat (sol_solvers 2.1): proxies
+exaggerate loss-family effects ~4x and cannot see representation effects (K9).
+
+3.1 Optuna over per-feed loss-weight families (08_optuna_weights.py; out/08_optuna_weights.txt, 08_optuna_trials.csv).
+  Train 60K uniformly drawn train feeds (production + 4.4% random-like), 300 rounds, same data/seed for all trials.
+  w_f = (M/50)^alpha x (K/IDCG(K))^beta x (1 + eta p_random) x S_f^gamma, S_f = detached NDCG rank-elasticity of the
+  positives (the ce_rw idea), refreshed every 20 rounds. TPE, 30 trials (4 enqueued: baseline, alpha -0.17 = the
+  section-2 metric-ideal slope, beta 1 = K/IDCG, gamma 0.5), objective = val half A (users hashed), nested readout on
+  half B.
+  - pre-declared single settings (full val, vs baseline): alpha -0.17: +0.00004 (0.00072); beta 1 (K/IDCG): +0.00032
+    (0.00070); gamma 0.5: -0.00024 (0.00073).
+  - every gamma < 0 (up-weight hard / hopeless feeds, i.e. focal-like) is clearly worse: -0.0024 .. -0.0092;
+    eta >= 2.5 (exploration up-weighting in the main loss) -0.001 .. -0.002 unless offset by other terms; alpha
+    +0.56 (long feeds up) -0.0021. The best full-val trial is +0.0006 (0.00075).
+  - NESTED: best on half A (alpha -0.21, beta 1.12, eta 3.14, gamma 0.07) scores -0.00097 (0.00113) on half B; the
+    reverse (best on B = beta 1, scored on A) -0.00096 (0.00098). -> No weighting family beats equal per-feed
+    weights; consistent with the K1 calibration (+0.0003 ceiling, 2.3), K/IDCG neutral in the NN and ce_rw null.
+    Feed re-weighting of the main loss is closed in every direction (M, K, exploration, difficulty).
+
+3.2 Exploration-only examination offsets (07_gbdt_offset.py, 07b replication, 07c terminal arms).
+  Train 64K random-order pool feeds per seed (p > 0.5, M >= 50, holdout excluded), 500 rounds; arms add a fixed
+  train-only offset to the logits of these feeds:
+  arm (3 seeds, seeds 1-3)                    val @300 (SE)        M<50 @300          val @500 (SE)      holdout @500
+  A1  g(shown rank) + h(end) joint fit        -0.00017 (0.00045)   -0.00053           -0.00043 (0.00050)  -0.00098 (0.00028)
+  A2  g only (fit on non-end slots)           +0.00052 (0.00034)   +0.00146 (0.00065) +0.00001 (0.00039)  +0.00003 (0.00022)
+      per seed @300: +0.00035 / +0.00090 / +0.00032
+  A3  h only (end-of-feed / truncation term)  -0.00063 (0.00049)   -0.00220 (0.00094) -0.00104 (0.00053)  -0.00110 (0.00030)
+  A4  shown rank + rank-from-end as train-only
+      features fixed at inference (EDA g2)    -0.00036 (0.00042)   -0.00095           +0.00037 (0.00046)  -0.00040 (0.00027)
+  replication seeds 4-6 (07b) and terminal arms seeds 1-3 (07c):
+  A2  g only, seeds 4-6                       -0.00046 (0.00035)   -0.00074           -0.00040 (0.00039)  -0.00027 (0.00022)
+      per seed @300: +0.00029 / -0.00155 / -0.00011  -> 6-seed A2: +0.00003 (0.00024) @300, -0.00020 (0.00026) @500,
+      holdout -0.00012 (0.00016): NULL
+  A2h 0.5 x g, seeds 4-6                      +0.00044 (0.00033)   +0.00084           +0.00018 (0.00037)  -0.00008 (0.00021)
+  A2s g on non-end slots, end slots 0         -0.00088 (0.00033)   -0.00124           -0.00086 (0.00038)  -0.00025 (0.00022)
+  A5  g + (-0.5) on the last slot             +0.00026 (0.00035)   +0.00072           -0.00026 (0.00040)  -0.00044 (0.00023)
+  A6  -0.5 on the last slot only              -0.00020 (0.00032)   -0.00001           -0.00007 (0.00036)  -0.00030 (0.00021)
+  Readings:
+  - Anything that makes the terminal (last shown) slot look MORE likely a priori - i.e. explains the truncation click
+    away - HURTS: A3 (h > 0) -0.0010 val / -0.0011 holdout (z -3.7), A1 holdout -0.0010 (z -3.5), A2s (end slot left at
+    0 while its deep neighbours get g < 0) -0.0009 val (z -2.7). Terminal clicks are the most informative positives in
+    exploration feeds (members rank them best, 1.3); the loss must keep their full pull. Pulling them HARDER does not
+    help either (A6 -0.0002, A5 +0.0003 @300 / -0.0003 @500, holdouts -0.0003/-0.0004). Consistent with the round-1 NN
+    end-of-feed tower (rev_aux -0.001 vs nopos_aux, nn_report). data_usage's GBDT "trunc1" arm (lambdarank, offset
+    on ALL rows, 95% production) reads +0.0013..+0.0029 at 200 rounds over 3 seeds: the sign differs between
+    production and exploration rows, so a truncation offset may only ever touch production feeds (p <= 0.5).
+  - The pure examination term on exploration feeds is NULL over 6 seeds (A2 +0.00003 (0.00024) @300; half strength
+    A2h +0.0004 (z 1.3) on 3 seeds; holdouts 0 to -0.0003). The EDA's learned-position design (A4, its g2 arm +0.006
+    on 50K feeds with rank:ndcg) does not reproduce under the softmax objective (-0.0004 / +0.0004). The examination
+    noise in exploration labels is real (1.3) but removing it buys ~nothing in a fixed-feature learner.
+
+---------------------------------------------------------------------------------------------------------------------
+4. MISMATCH -> VERDICT MAP (every loss idea named in the task, plus the ones the data suggested)
+---------------------------------------------------------------------------------------------------------------------
+idea                                   measured mismatch (this report)                      verdict
+metric-weighted feed normalisation     Sm/Sl 1.33 (M<10) -> 0.71 (M>=250), offset by        CLOSED: <= +0.0003 (K1-calibrated),
+  (by M, test-composition weights)     test/train 0.61 -> 2.04; w* 0.81..1.45 vs 1.0        Optuna alpha null, nested -0.001
+positive-count normalisation (K/IDCG)  Sm/Sl 0.97 / 1.03 / 1.08 / 1.21 for K=1/2/3/>=4      CLOSED: = K/IDCG, neutral in the NN
+                                       (= K/IDCG(K) exactly)                                (v2_idcg, v4_cv_s33); Optuna beta 1 +0.0003 n.s.
+NDCG-sensitivity ("difficulty")        largest mismatch: Sm/Sl 1.62 (near-correct) .. 0.10  CLOSED: ce_rw null/holdout -0.0012 (zoo);
+  weighting, LambdaLoss-style          (hopeless); 31% of CE pull on 10% of sensitivity     gamma > 0 null, gamma < 0 -0.002..-0.009
+top-k focal weighting                  none: CE negative mass already as top-heavy as       CLOSED (would move the wrong way;
+                                       LambdaRank (top-5 32% vs 35%), tail 5% vs 9.5%       focal null in the zoo)
+within-category hard-negative term     none: same-category negatives get 39.0% of CE vs     CLOSED (no mismatch to fix)
+                                       40.2% of LambdaRank mass (count share ~26%)
+multi-positive "distribution" fix      anti-gradient 0.007% of CE mass                      CLOSED (PL/per-positive null)
+label smoothing to exploration prior   calibration only (T* 1.11-1.17 everywhere), no       CLOSED (LS null; T is rank-invariant)
+                                       ranking mismatch
+event-type multi-task heads            ~20% of positives "deeper" (types 2-9), 18% of       NOT RECOMMENDED (weak, sparse,
+                                       train feeds labelled, +1.4 SE rank difference        later-snapshot-derived)
+exploration up-weighting (main loss)   label regime: 95.7% production weight vs 100% test   CLOSED: NN -0.001 (pw_aux_sim);
+                                                                                            Optuna eta >= 2.5 -0.001..-0.002
+end-of-feed / truncation offset on     terminal clicks = 16% of exploration positives,      DO NOT: A3 -0.0010 val, -0.0011
+  exploration feeds                    best-ranked by members                               holdout (z -3.7)
+examination offset on exploration      g = +1.15 (rank 0) .. -0.41 (rank 200), unconfounded LOW: null over 6 GBDT seeds
+  feeds (no end term)                  in random order; members position-blind              (+0.00003); optional rider E4
+K9 aux normalisation                   aux per feed 0.62 -> 2.69 (rel.) with M; pool       OPEN, never run (P8): E1
+                                       batches x5-7; K1 gain confounded with it
+truncation offset on PRODUCTION feeds  production M<50: 38.8% of positives in the last 3    OPEN (data_usage GBDT +0.002, 3
+                                       slots (data_usage); never tried production-only      seeds); must exclude p > 0.5: E2
+
+---------------------------------------------------------------------------------------------------------------------
+5. PROPOSED EXPERIMENTS (ranked; each = live m02 recipe + one change; GPU rules: CUDA_VISIBLE_DEVICES = one id,
+   <= 4 compute processes per GPU counted with nvidia-smi before launch, >= 30 GB free; code in a NEW nn_x/<dir>
+   copy of nn_x/r6/train.py, never editing nn/ or nn_x/r6/; costs: a 2-epoch run ~24 GPU-min alone, a 10-epoch
+   member ~114 min, from r6_cd_m02_r101.log / v30_f7_m02_s901.log)
+---------------------------------------------------------------------------------------------------------------------
+E1. AUXF - feed-normalised K9 aux (subsumes the never-run P8 fix). The idea is not new (REVIEW_SYNTHESIS P8; r6_recap
+    P2 arm A4, never implemented). The evidence is new: the aux weight per feed rises 4.3x with M (0.62 -> 2.69 rel.
+    to the main CE), and 52% of it sits on M>=100 feeds, which carry 28% of the main weight. Pool batches carry it at
+    x5-7 per unit of production mass. The +0.0020 K1 gain is confounded with exactly this re-weighting (aux:main went
+    0.50 -> 0.81 on average and to 2.39 on M~300). aux_pos 1.0 (null) changed the strength; nobody changed the profile.
+    Change (nn/train.py:307 analogue): aux = aux_w(step) * 1.695 * sum_f (1-p_f) CE_aux_f / max_feeds. The 1.695 keeps
+    the epoch-mean aux weight of the live recipe (out/10_aux_norm_const.txt). Pool batches then get aux ~ their
+    production mass automatically (P8).
+    Stage 1 (plateau-sensitive, since K9 acts through the trunk): 2-epoch from-scratch pair, seeds 23/24, sol_gpu
+    K9-tuning harness recipe with --cooldown_mix 0.02, base vs auxf: 4 runs, ~1.6 GPU-h.
+    Stage 2: 2 from-scratch 10-epoch members of the v30_f7_m02 recipe + auxf (~4 GPU-h), judged at family level
+    against the v30 seeds (unified rule + ensemble-level check, r6_recap §7).
+    Expected: member -0.0005 .. +0.0008 (sign unknown a priori: long-feed aux may be the useful part); P(pass) ~0.2.
+    Kill: stage 1 pooled val < 0 or holdout < 0 -> close (record "aux profile irrelevant"); stage 2 fails the
+    unified rule -> close.
+E2. TRUNC-PROD - end-of-feed (truncation) offset on PRODUCTION feeds only (joint with data_usage; their arm, my
+    constraint). Production M<50 feeds hold 38.8% of their positives in the last 3 slots (data_usage section 1). Their
+    GBDT trunc1 offset (all rows) reads +0.0013/+0.0013/+0.0029 at 200 rounds. On exploration feeds the same offset
+    is harmful (A3 holdout -0.0011, z -3.7; A1, A2s), and the round-1 NN end-of-feed tower on ALL feeds was -0.001.
+    The NN has never tried it production-only.
+    Change: lg_loss = lg + (1 - p_f) * h[rank_from_end] in the main CE (h fit on production feeds per M group, e.g.
+    data_usage end_lifts; ranks-from-end 0-2 only); never in the aux or at inference.
+    Stage 1: CD arm `truncp` on roots 101-104 vs m02 (~1.6 GPU-h); stage 2 on 105-107.
+    Expected 0 .. +0.0006 member, P ~0.15. Kill: stage 1 val < 0 or holdout < 0, or M<50 slice < -1 SE.
+E3. CLIPLOG - zero-GPU-cost diagnostic, attached to the next from-scratch run of any arm. Log per step: the pre-clip
+    gradient norm (clip_grad_norm_ returns it), the share of clipped steps, and the main vs aux gradient-norm ratio
+    per M bucket.
+    Why: clip 1.0 was never varied (COVERAGE_MAP). If it were active, it would equalise batches and silently undo part
+    of the feed normalisation that won +0.0020 (K1). The r6 GNS numbers (trSigma 93/feed, |G|^2 0.019) suggest batch
+    norms of ~0.3-0.6, i.e. inactive at the plateau, but early training and pool batches are unmeasured.
+    Decision: clipped share > 20% of plateau steps -> one CD arm with clip 5.0; otherwise close.
+E4. XOFF - exploration-only examination offset (NEW, LOW priority; run only as a free-slot rider). In random-order
+    feeds the shown position is independent of the item, so a fixed train-only offset g(shown rank) is an
+    unconfounded correction; the closed PAL tower acted on production feeds. Change: for feeds with p_random > 0.5,
+    lg_loss = lg + 0.5 * p_f * g_noend[pos.clamp(0, 299)] in the main CE only. g_noend is in out/pool_pos_offset.npz;
+    half strength = the A2h arm. No end-of-feed term (A1/A3/A2s harmful).
+    Evidence is weak: the 6-seed GBDT proxy is null (A2 +0.00003 (0.00024)); A2h is +0.0004 (z 1.3, 3 seeds).
+    Stage 1: CD arm `xoff` on roots 101-104 vs m02 (~1.6 GPU-h). Expected 0 .. +0.0003, P ~0.1.
+    Kill: stage 1 val < 0 or holdout < 0.
+
+Do-not list (evidence in sections 2-4):
+- M / K / exploration / difficulty re-weighting of the main loss (Optuna nested -0.001; K1-calibrated ceiling +0.0003).
+- top-k focal weighting.
+- within-category hard-negative term.
+- multi-positive PL / per-positive variants.
+- label smoothing toward any prior.
+- event-type multi-task heads.
+- any end-of-feed / truncation offset or tower on exploration feeds (A3 holdout -0.0011, z -3.7). If data_usage's
+  trunc offset goes to the NN, restrict it to production feeds (p <= 0.5) = E2.
+- temperature / calibration losses: T* is 1.11-1.17 for every family, and T does not change ranks.
+
+---------------------------------------------------------------------------------------------------------------------
+6. FILES (all under <repo>/nn_x/insights/labels_loss)
+---------------------------------------------------------------------------------------------------------------------
+01_labels.py -> out/01_labels.txt/.json (K by M, event types, next-history lookup)
+02_weights.py -> out/02_weights.txt, out/02_perfeed_{val,hold}.npz (Sm, Sl, LambdaRank, gradient allocation)
+03_trainweights.py -> out/03_trainweights.txt (composition, effective main/aux weights, w*(M), K1 calibration)
+04_ties.py -> out/04_ties.txt;  05_holdout_labels.py, 05b -> out/05_*.txt, out/pool_pos_offset.npz
+06_prep_proxy.py -> out/proxy/* (GBDT feature cache, ~5.4 GB; delete when done)
+07_gbdt_offset.py, 07b_gbdt_offset_rep.py, 07c_gbdt_terminal.py -> out/07*_*.txt, out/07_gbdt_offset_full.log
+08_optuna_weights.py -> out/08_optuna_weights.txt, out/08_optuna_trials.csv
+09_member_alignment.py -> out/09_member_alignment.txt (152 members);  10_aux_norm_const.py -> out/10_aux_norm_const.txt
+11_export_csv.py -> out/alignment_slices_{val,hold}.csv;  12_temperature.py -> out/12_temperature.txt
+13_save_offsets.py -> g_noend in out/pool_pos_offset.npz (GPU-ready offsets for E4; h_rkend for reference only)
+proxy_lib_ll.py: LightGBM + listwise softmax CE custom objective (per-feed weights, train-only init_score offsets)
+

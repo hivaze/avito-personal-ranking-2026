@@ -1,0 +1,295 @@
+TOP-1 FORENSICS: EXPLAINING THE 0.3983 LEADER (1 entry)
+Audit agent, 2026-11-12 22:05-22:40 UTC. CPU only (12 threads/process, CUDA_VISIBLE_DEVICES=""), no existing file edited,
+no process touched. Directory: <repo>/nn_x/audit/top1/ (this file, h3_val_value_gbdt.py, h5_probing_capacity.py,
+h6_ties_check.py, out/*.log, out/h3_results.json, out_lb_snapshot_2026-11-12T2200Z.txt).
+Conventions: "+-" = paired per-feed SE; G3 = cand_G_F10F7xF7x70_memeq (val 0.40032, public 0.392820); val-equivalent of a public
+score uses the critique's 9-point calibration public = 0.0078 + 0.962*val (residual sd 0.0008; nn_x/audit/critique/c02_numbers.log).
+Sources read: AUDIT_1112, INSIGHTS_1112, RESEARCH_SWEEP_1112, eda_shift_overlap, deep_ru_competitions, COVERAGE_MAP,
+EXPERIMENT_REGISTRY, CURRENT_STATUS (to 22:03), nn_x/audit/{testinfo,altapproach,features,avito,weakspots,critique,ftforward,
+ageprod}/findings or results; web pages cited inline.
+
+=====================================================================================================================
+0. VERDICT (probabilities over the hypotheses; they sum to ~1)
+=====================================================================================================================
+The 0.3983 entry is best read as a GENUINE model advantage of about +0.005 public over G3 whose mechanism we cannot identify
+from the data we have. Everything cheap and observable has been checked:
+  - the only test-time channel of the right size (same-user later-feed history) is NEUTRALISED on public (G3+overlay scored
+    0.392819 = G3 to 6 decimals at 21:52; CURRENT_STATUS), so it explains nothing;
+  - a merge of the #2/#3 teams is excluded by the platform mechanics and the board (section 2, H1);
+  - ties/format tricks cannot raise NDCG (ties put negatives first; our 31 files have 0 ties; h6);
+  - probing is feasible in principle with 10-digit scores but would not stop at +0.0036 over #2 and gives nothing on private (h5);
+  - external data can only enter through the timestamp, and every calendar interaction we measured is null (H4).
+Probabilities (judgement, evidence in section 2):
+  H2  a structurally different / better model (incl. several small levers that we closed at screen power adding up)  0.52
+  H8  an information channel in the files that our audits did not find (unknown unknown)                                 0.12
+  H7  an organiser- or Avito-affiliated reference entry (e.g. the production stack on de-anonymised data)                 0.10
+  H3  heavy use of val labels under a protocol we did not try                                                            0.08
+  H1  merged team (combined submissions)                                                                                  0.05
+  H5  leaderboard probing / several accounts                                                                              0.05
+  H4  external data (calendar, events, market stats)                                                                      0.03
+  H6  scoring / format trick                                                                                              0.01
+  residual (our calibration misreads a public-only property of their model, etc.)                                         0.04
+What cannot be known from outside: the team's composition, whether it will submit again, whether 0.3983 transfers to
+private, and the model class. What CAN be watched: the full board (team count, entries per team, new 1-entry rows) once a
+day until the Dec-8 merge deadline (section 5).
+Size with honest error bars: #1 - G3 on public is +0.0054 with a cross-team paired SE of 0.0012-0.0018 (per-feed corr
+0.90-0.77; critique N2), i.e. +0.0025..+0.0085 at 2 SE; val-equivalent 0.4060 (+0.0057 over G3). A 1-entry team is not
+subject to the winner's curse, so the number is an unbiased single draw; #2's 0.3947 over 35 entries carries some
+optimism (our own decide4 optimism estimate for a best-of-6 was +0.0001..+0.0004, p4_winners.txt).
+
+=====================================================================================================================
+1. FACTS (what is established)
+=====================================================================================================================
+1.1 Leaderboard (fetched live 22:00 UTC; out_lb_snapshot_2026-11-12T2200Z.txt): 1214 participants, 5417 submissions, 440 teams.
+    #1 (the leader) 0.3982555809 (1 entry, last 2h) | #2 0.3946950126 (35, 3h) | #3
+    0.3937667627 (59, 11h) | #4 0.3928313612 (42, 40 min; NEW above us by +0.00001) | #5 us
+    0.3928199333 (12) | #6 0.3925572043 (60) | #7 0.39165 (53) | #8 0.39128 (54) | #9 0.39103 (33) | #10 0.39066 (47).
+    Low-entry strong rows exist besides #1: #14 0.38916 (7), #20 0.38731 (10), #21 0.38693 (5),
+    #28 0.38517 (5). The 20:20 snapshot (CURRENT_STATUS) had #1 at the same score "26 min old", 439 teams,
+    1212 participants, 5355 submissions: #1 made exactly one submission at ~19:54 UTC (22:54 MSK, Thursday) and none since.
+    The top cluster (#2-#6) spans 0.3926-0.3947 (val-equivalent 0.400-0.402); #1 sits +0.0036 above #2 and +0.0054 above us.
+1.2 Platform mechanics (https://ods.ai/pages/join-team, FAQ https://ods.ai/competitions/avitotechrecsys2026/faq, fetched):
+    - "Все предыдущие одиночные результаты участников команды объединяются и отображаются в лидерборде как командные" (all
+      previous individual results of team members are combined and shown as the team's); "Объединение в команду необратимо";
+      "Доступное число отправки решений общее для всех участников команды"; teams up to 4; FAQ: "При участии в команде 5
+      сабмитов на всю команду"; "Дедлайн по объединению в команды - 8 декабря"; unused daily attempts expire.
+    - FAQ on additional data: "Ограничений нет" (no restrictions on the solution or on additional public/non-public data).
+    - Final-solution selection window Dec 9 00:00-12:00 (MSK); top-10 must send their solution for a check.
+    - Metric text (competition page): ties -> "отрицательные примеры располагаются перед положительными"; feeds without
+      positives score 1; IDCG@30; public = first ~30% of test feeds chronologically.
+1.3 Our yardsticks: public = 0.0078 + 0.962*val over 9 scored files (residual sd 0.0008); over the last five modern pools the
+    slope is only 0.14 (Cd->M2 +0.0019 val moved public +0.0004), so val gains above ~0.400 have not been transferring 1:1.
+    Public paired SE between near-copies of our pools 0.0005-0.0007; between different teams' models 0.0012-0.0018; single-score
+    unpaired SE 0.0027 (critique c02). TO-only public 0.392346 (-0.00047 vs the 0.5/0.5 blend).
+1.4 The leak question is closed: G3 + same-user later-feed overlay = 0.392819 = G3 (59 public feeds re-ranked, 108 items pushed
+    to rank 1 from a median base rank of 21, and the score did not move). Those feeds contribute nothing to the public score
+    (either excluded from scoring or their positives removed). The day-1 v5_lh "no gain" was real. No other label-free channel
+    moves G3 by more than +-0.0005 on val (testinfo 01-08, altapproach, avito a01-a07, features s04: 372 single probes, 0% at z>2).
+1.5 Our files: all 31 subs/*.parquet have 2,904,806 rows, 0 within-feed ties, finite float32 rank-valued scores (h6_ties.log).
+
+=====================================================================================================================
+2. HYPOTHESES, EVIDENCE FOR / AGAINST, PROBABILITY
+=====================================================================================================================
+H1 Merged team of two or more top pipelines.  P 0.05
+  For: a merge of #2 (0.3947) and #3 (0.3938) blended would plausibly land near 0.398 (two strong, partly decorrelated pools;
+       our own cross-family pooling gives +0.001..+0.003 over the best member).
+  Against (decisive): ods.ai combines members' previous results into the team row and shares the submission allowance, so a
+       merged team's "entries" would be the sum of its members' submissions, not 1; the #2 (35) and #3 (59) rows are still on
+       the board 2 hours after #1 appeared; the team count ROSE 439 -> 440 (a merge lowers it). The only merge-compatible story
+       is a team formed by people who had never submitted individually, i.e. a new team, which is H2 in disguise.
+  Test: daily full-board snapshot; a merge shows as vanished rows + a summed entry count. Merge deadline Dec 8.
+H2 A structurally different, genuinely better model.  P 0.52
+  For: the leak is excluded and every cheap alternative is excluded or tiny; a 1-entry 0.3983 is exactly what a team that
+       develops offline on val and uploads once looks like (we did the same with 0.3928); the error anatomy leaves 90% of the
+       loss in two "information-limited" blocks (INSIGHTS A1 53% category choice, A2 37% buried in the right category), and our
+       "information-limited" verdicts rest on probes with MDE ~0.0008-0.0016 (weakspots 3.3): fifteen closed levers of
+       +0.0003 each would be +0.005 if they were real and additive.
+  Against: nothing in the registry has member-level evidence >= +0.002 except TRUNC (running; proxy +0.0022..+0.0031, NN
+       cooldown form null at 22:03); architecture 0/13, capacity flat, losses closed, GBDT in every role closed (cb26), LLM
+       backbones closed, pretrained-encoder channel closed today (R3 stage 0, 22:00), ensemble saturated (+0.0002 headroom),
+       feature space saturated (372 probes). If a +0.005 model exists, it is not a recombination of our parts.
+  Candidate structures (what the 2025-26 winners and Avito's own stack suggest; section 3) and what we measured:
+    (a) GBDT-heavy multi-stage with target statistics, EASE/RDLAE/SASRec scores (Avito 2025 1st): our best GBDT is
+        0.382 val (exploration-subset YetiRank) vs NN 0.397 single / 0.400 pool; as a member it adds +0.00015 (cb26); item-ID
+        collaborative scores (ALS, item2vec, co-visitation on all histories, EASE infeasible at 40M items) are 0 or negative as
+        residuals on G3 and side with the "beaters" (cell AUC 0.39-0.46; altapproach 2.1). Verdict: not a +0.005 route here.
+    (b) Large ID-aware sequence model pretrained on all histories (Yandex VK'24 2nd, ARGUS): our pre2s encoder (8M dense, 2 ep)
+        zero-shot 0.359, as 9 scalars +0.0009 at 10 ep; today's R3 stage-0 gate: ensembles 0.361-0.363, nested residual <= 0,
+        ID-only parts exactly 0, beater-cell AUC 0.31-0.33 -> CLOSED. Verdict: the ID channel carries nothing on G3's residual.
+    (c) Transductive test-period model: closed (testinfo 02-03, features xs_: all within +-0.0003; the only denser-on-private
+        direction, "earlier", has residual exactly 0).
+    (d) A better use of the 3.1M production feeds (debiasing): this is where our evidence says the remaining structure is.
+        TRUNC (true rank-from-end, production-only) is the one proxy-positive lever; AGE-PROD failed (-0.0046); cooldown-form
+        truncp/auxf null (22:03). The E 10-epoch pairs (~23:00) decide. A team with a different debiasing (e.g. a learned
+        context/position tower detached at inference, arXiv 2310.03481; three-model CatBoost position scheme, habr 1069352)
+        could sit +0.001..+0.003 above us; +0.005 would need more.
+    (e) "Train on exploration-like data only at scale": the pool-only NN reference (r6_rhoref_pool_s1: 134K random-like
+        M>=50 train feeds, 4 epochs) scores val 0.38199 (data_usage findings, header), i.e. 0.015 below a single trained
+        member; the GBDT analogue is 0.382 (cb26 exploration-subset YetiRank) vs 0.371 train-fed (h3 arm A). Verdict:
+        exploration-only is weaker in both model classes; the NN's edge comes from learning from the production rows.
+    (f) NN-as-feature inside a train-side GBDT (ARGUS: +2.32% as a feature vs -5.33% standalone): NEVER tried on the train
+        side (our stackers used val only, 14K feeds, and over-fit: -0.0136 / -0.0050; avito a07). It needs out-of-fold NN
+        scores on train (k-fold NN training). This is the one untested structural recipe with a published large effect;
+        design D2 in section 4.
+H3 Heavy use of val labels under a different protocol.  P 0.08
+  For: val is the only in-distribution labelled data; FAQ allows anything; our use of it is mild (4-epoch OOF fine-tune
+       blended at 0.5). In-sample, a fine-tuned member gains +0.0095..+0.0106 on the feeds it was fitted on (ftforward):
+       the models CAN absorb val.
+  Against (measured): the OOF value of val labels is small and stable across protocols: member FT +0.0011 OOF, pool-level
+       blend - TO = -0.00003 +- 0.00039 (val), +0.0005 public (TO-only probe), forward-in-time (fit Tue, read Thu) +0.00055 +-
+       0.00042 vs same-day OOF (ftforward 22:03); full-val refit -0.00025 (ROUND5 2b); Optuna FT retune CONFIRM +0.00055 z 1.3
+       (ftopt); FT-seed bagging +0.0002; w_ft flat. New GBDT datum (h3, this audit; LightGBM lambdarank, 53 leak-free features):
+         A train-only 150K feeds -> val 0.37064 | B val-only 5-fold user-grouped OOF (11.5K feeds/fold) 0.36442 (-0.0062 +-
+         0.0014 vs A) | D boosting from A on val folds (tree "fine-tune") 0.36599 (-0.0047 +- 0.0007) | C10 JOINT U2 + 4/5 val
+         with val row weight 10 (OOF): 0.37067 (+0.00002 +- 0.00127 vs A; M<50 +0.0017 +- 0.0024, M>=50 -0.0011 +- 0.0014,
+         Tue -0.0007, Thu +0.0008) | C1 (weight 1): running at write-up time (fold 1/5 at 22:16 UTC; the detached job
+         writes it to out/h3_results.json and out/h3_run.log by ~22:21); it sits between A and C10 by construction.
+       So 11.5K in-distribution feeds are worth about 13x a production feed each but still LESS than 150K production feeds,
+       and adding them to the production feeds, even at 10x weight, changes the GBDT by +0.00002: at tree level val labels
+       are NOT a resource beyond what train already teaches, and the tree fine-tune over-fits. This matches the NN side
+       (FT +0.0011 member, ~0 pool, +0.0005 forward). A +0.005 from val labels would require a protocol that extracts ~5x more
+       generalisable signal than every protocol we measured; no mechanism for that is visible.
+  Cheap test left (design D1): val feeds inside the cooldown replay pool, OOF.
+H4 External data.  P 0.03
+  For: FAQ "Ограничений нет"; the user asked for calendar / event / market-stat features to be considered.
+  Against: every id is anonymised and the embeddings are int8 tower outputs; the only join key is the feed timestamp (128-s
+       grid, MSK). A feed-level covariate cannot change a within-feed ranking unless it interacts with item features, and every
+       such interaction we measured is null: category x hour-of-day prior -0.00003 +- 0.00009, category x weekend -0.00001 +-
+       0.00006 (on the weekend-bearing holdout), category rate prior -0.00010 +- 0.00018 (avito a01); no weekend effect in
+       the feature-label relation (f1 lift +0.037..+0.042 on all 4 weekend train days vs +0.035..+0.041 weekdays; eda_shift
+       s08); per-day input means flat Sep 6-19; hour profile identical across splits except logging outages (val Sep 22 20h,
+       Sep 24 04h, 20-21h; test Sep 26 10h/18h/20h, Sep 27 12h, Sep 28 18h, Sep 29 14h), which are artefacts, not demand.
+       Calendar context: Sep 26-29 2026 = Sat-Tue, no Russian public holiday, month-end; train Sep 6-19 holds two weekends and
+       a mid-month payday window; val Sep 22-24 = Tue/Thu. Nothing of this can produce +0.005 within feeds. The sibling step of
+       this workflow (external/connected data) owns the feature design; this audit's reading is that it is a null for the
+       #1 question.
+H5 Leaderboard probing or several accounts.  P 0.05
+  Feasibility (h5_probing_capacity.py, val labels as the public stand-in): a single adjacent swap at ranks (1,2) changes a
+       feed's NDCG by 0.040..0.369 (25 distinct magnitudes over npos 1..30), the public precision 1e-10 x 8,562 feeds gives a
+       resolution of 8.6e-7 on the per-feed sum, i.e. ~18.7 bits of superincreasing capacity per submission: group testing can
+       read 20-30 "is one of these two a positive" bits per submission; by bisection ~6 submissions locate one positive in a
+       median feed. Budget 5/day x 41 days = 205 submissions per team (820 with 4 accounts). Moving ONE known positive to the
+       top is worth +0.528 per feed on G3 (median +0.613): 50 feeds = +0.0031 public, 300 = +0.0185, 1,000 = +0.0616.
+  Against: a probing team would not stop at +0.0036 over #2 (one week of probing with coded group testing reaches +0.1);
+       the board shows no implausible score; probing cannot help private (70%, decided Dec 9) and the top-10 code check
+       would expose it; #1 has 1 entry (probing under other accounts would have to be hidden). Two public rows look like
+       probe-ready setups only superficially (hash-named teams with 11-47 entries at 0.382-0.386, normal scores).
+H6 Scoring / format trick.  P 0.01
+  Ties put negatives first (metric text), so deliberate ties can only lower NDCG; feeds without positives score 1 for
+       everyone; scores are compared within feed only; float32 precision is enough for 300 ranks. Our files: 0 ties in all 31
+       (h6_ties.log). Nothing to exploit.
+H7 Organiser-affiliated / reference entry.  P 0.10
+  For: Avito holds the de-anonymised data and the production stack (CatBoost L2 with ~200
+       features + neural L3; habr 1090584, +7.2% NDCG over the CatBoost on target actions). A one-shot reference run
+       late on a Thursday evening fits a "let us see where production lands" check; the team name is of
+       the kind organisers use. ODS has no visible organiser flag on rows.
+  Against: organisers normally label reference rows; an employee row would be ineligible for prizes but could remain on the
+       public board; nothing observable distinguishes it from H2. Watch: a reference never submits again.
+H8 An information channel we did not find.  P 0.12
+  The five audits enumerated the channels a modeller would think of (cross-user test-window counts, co-candidacy, candidate
+       frequency, duplicate sets, stored order, id/index orders, feed_id/timestamp/user_id, embedding drift, emb_idx -1,
+       val-label TE, same-user earlier feeds, later user embedding). What was NOT testable: the organisers' neutralisation rule
+       itself (which feeds/positives were removed from scoring; a team that knew the rule could not gain from it either, since
+       those feeds are constants), and anything that needs test labels. This bucket is the honest "unknown unknown".
+
+=====================================================================================================================
+3. WHAT THE AVITO 2025 / 2026 WINNERS DID (web), AND WHETHER IT TRANSFERS
+=====================================================================================================================
+3.1 Avito ML Cup 2025 "Персональные рекомендации" (Recall@40 over item groups; 1,707 participants, 3,234 submissions):
+    public board https://ods.ai/competitions/avitotechmlchallenge2025/leaderboard: #1 0.23147 (99 entries), #2
+    0.22603 (75), #3 0.22549 (54), #4 0.22361 (30), #5 0.22336 (105),
+    #6 0.21350 (5). Only the #1 code is public: <public repository, link removed> (
+    read in deep_ru_competitions 3): scorers EASE-DAN (R@40 0.1735) + RDLAE (0.1994, scores x
+    log1p of a Bayesian-smoothed node contact ratio, extra per-pair count/recency matrices) + SASRec over nodes (0.1629) and over
+    categories; ranker = CatBoost YetiRank (GPU) on RDLAE top-300 with user / user x category / item / category contact counts
+    and ratios, crosses, scorer scores and ranks; only users with >= 1 positive, <= 100 positives and <= 30 random negatives per
+    user; 5-fold averaged; "the best submission was pure CatBoost". #2 and
+    #3 gave Data Fest 2025 talks (https://ods.ai/events/fest2025-avito-msc; recording
+    https://www.youtube.com/watch?v=-lUszYJT5BA) whose content is not indexed; no write-up found (searched RU/EN, GitHub, Habr).
+    Transfer to our task: the edge there was (i) ID-based collaborative scorers on a 2-month clickstream, (ii) target-encoded
+    contact ratios, (iii) GBDT with ranks of several generators. Here (i) is measured at 0 or negative on G3's residual
+    (altapproach), (ii) exists as it_tr_* / user train stats and val-label TE adds +0.0003 at most (testinfo 05, itemprior),
+    (iii) GBDT members add +0.00015 (cb26). The 2025 recipe does not explain +0.005 on this task.
+3.2 Avito ML Cup 2026 spring (retrieval, Recall@160): Data Fest 2026 track https://ods.ai/tracks/df26_avitotech_mlcup2026 lists
+    the names of places 1 to 3, a task-author
+    lifehacks talk and a panel with two of the winners; no slides, videos or code found. A 30th-place
+    repo (<public repository, link removed>) shows the usual ladder: popularity -> time-decayed co-visitation with
+    contact boost -> LightGBM lambdarank -> CV ensemble. Transfer: candidates are given here, so the retrieval machinery is
+    moot; the ranking-stage lessons (co-visitation, GBDT) are the closed items above.
+3.3 Avito's production stack (habr 1090584, 1004694, 974682, 1069352; read in the avito audit): CatBoost L2 (~200 features,
+    composite target, ranking loss) selects the top 300; neural L3 = one transformer over [history filtered to target actions,
+    <= 50 events, no clicks; candidates], candidates attend to each other (+0.6%), DCN head, ListMLE, ~2.5M params, +7.2%
+    offline NDCG over CatBoost. Position bias in CTR models: three-CatBoost scheme or IPW. This is structurally what we run
+    (history encoder + candidate-set attention + listwise CE + distillation of the production order), so a "model-5 clone" is a
+    diversity member at best (design D3), not a generational step.
+3.4 Names on this board: web searches for the names of #1, #2, #3 and #6 with ods.ai /
+    kaggle / recsys return nothing relevant (profiles are not indexed). Cannot be
+    known from outside: who they are, whether they are the 2025/2026 winners under a new team name (possible: the 2025 and
+    spring-2026 winners are active in the same community and sat on one DF26 panel), or whether they are affiliated.
+
+=====================================================================================================================
+4. CONCRETE, TESTABLE DESIGNS FOR H2 / H3 WITHIN ~2 DAYS ON 8 GPUS (ranked by expected private gain x P)
+=====================================================================================================================
+Common rules: new harness copies only (nn_x/w5 flags default off, bit-identity test); CUDA_VISIBLE_DEVICES = one id; <= 4
+compute processes and >= 30 GB free per GPU; judge at ensemble level (k-seed TO pool + seed corr) with val, holdout, pmix and
+stale-val vetoes; nothing trained on val labels leaves the user-grouped OOF protocol; no same-user later-feed information.
+
+D2  TRAIN-SIDE NN-AS-FEATURE STACK (ARGUS recipe; the one untested structural item with a published large effect).  H2
+    Mechanism: a GBDT over 3.1M train feeds with an OUT-OF-FOLD NN score as its main feature learns the residual the NN leaves
+      on production rows without the 11.5K-feed over-fit of val stackers; with training-only position / true-rkend / p_soft
+      columns (set to constants at inference) it absorbs the production confound the way the TRUNC proxy did (+0.0031 val).
+    Protocol: (1) 5-fold NN training of the F7 m02 recipe with 20% of train feeds held out per fold (fold by feed, holdout and
+      pool feeds excluded from every fold's training), 10 epochs each: 5 x 4.5 GPU-h = 22 GPU-h (~3-4 h wall on 6-the GPUs);
+      the 5 fold models also give a 5-member TO pool for free. (2) Score every train feed with its fold model (OOF), val/test
+      with the 5-fold mean. (3) LightGBM / CatBoost YetiRank on a 500K-1M-feed train subsample + val folds (user-grouped, OOF)
+      with: NN OOF score (raw, within-feed z, pct rank), the 53 proxy features, the 42 n2cpv3 extras, training-only
+      pos / rkend / p_soft, 400-1000 rounds; readouts: val OOF, holdout, pmix, stale-val; as a member in G3 (member-equal,
+      and at fixed weights 0.1/0.2) and as a replacement for the FT branch.
+    Expected gain: member 0..+0.002 val (P ~0.15 for >= +0.001); pool +0.0003..+0.0015 if the GBDT reaches >= 0.398 val at
+      rho <= 0.9 to G3 (break-even measured at ~0.393 val for rho 0.856, cb26).
+    Cost: ~22 GPU-h NN + ~2 h GBDT (GPU CatBoost or 12-thread LightGBM) + ~0.5 day plumbing.
+    Kill: GBDT val OOF < best single TO member + 0.0005 (0.3967 + 0.0005), or holdout < 0 vs that member, or pool delta on G3
+      < +0.0005 with pmix / stale-val < -1 SE. Prior: ARGUS +2.32% as a feature vs -5.33% standalone (deep_ru 8.1); our val-only
+      stackers over-fit (avito a07); the GBDT proxy reproduces NN artefacts (ageprod 1). Note the FT-branch evidence (val labels
+      worth ~0 at pool level) says the GBDT's val folds matter little; the train rows are the point.
+D1  VAL-IN-COOLDOWN (the H3 test; cheap).  H3
+    Mechanism: our only val use is a 4-epoch low-lr fine-tune after training; replaying val feeds inside the m02 cooldown (with
+      the exploration domain token, at the same ~1 extra pass the m02 pool gets) lets the trunk absorb in-distribution labels
+      while the lr is still high, which is what the m02 mechanism rewards (+0.0012 member for 2% of 134K train exploration-like
+      feeds; INSIGHTS 9).
+    Protocol: w5-style harness flag --val_pool K (fold id), 5 user-grouped folds; roots 101-104 re-cooled from @77500 with the
+      standard m02 stream plus the 4/5 val feeds mixed at 0.02 (arm V2) and 0.05 (arm V5); OOF = each fold's held-out val
+      feeds; compare per root with the n2cpv3 FT OOF and with TO on the same roots; pool the 4 roots. 4 roots x 5 folds x 2 arms
+      x ~0.5 GPU-h = 20 GPU-h (~3 h wall on the GPUs). Readouts: OOF val (all / M<50 / M>=50 / Tue / Thu), holdout (as built),
+      pmix, stale-val; forward read (folds by day: fit Tue -> read Thu) as in ftforward.
+    Expected gain: member +0.0005..+0.0015 over TO (FT gives +0.0011); pool 0..+0.0005; P ~0.15 that it beats the FT branch by
+      > +0.0005 at pool level.
+    Kill: 4-root OOF pool delta vs the FT pool < +0.0005, or holdout < -1 SE, or pmix < -1 SE, or forward (Tue->Thu) delta < 0.
+    Prior: refit on full val -0.00025, FT retune null, forward FT +0.0005 (ftforward), h3 GBDT: val-only 0.364 < train-only
+      0.371 and tree fine-tune -0.0047 (trees over-fit 11.5K feeds; the NN FT does not, +0.0011).
+D3  MODEL-5 CLONE AS A DECORRELATED MEMBER.  H2 (ensemble diversity, not a generational step)
+    Mechanism: the pool is correlation-limited (rho 0.93, n_eff 1.07); a member with a different mean function (history filtered
+      to target-action events, <= 50 events, no clicks; candidates = item embedding only, no cvnd features; DCN head; ListMLE;
+      trained with the same debiasing aux) at >= 0.393 val and rho <= 0.9 is worth +0.0003..+0.0008 at pool level (frontier law).
+    Protocol: nn/model.py variant flags (--hist_filter target --hist_cap 50 --no_dense --head dcn --loss listmle), 2 seeds x
+      10 epochs (9 GPU-h) then 6 seeds if the pair passes; judged as a family (gates a+b) and as an addition to G3.
+    Expected: pool +0.0003..+0.0008 (P ~0.15). Kill: single val < 0.393 or rho to G3 > 0.92 or G3+family <= 0 on val and holdout.
+D4  TRUNC chain (running): E 10-epoch pairs read ~23:00, trunc2 ~00:10, replication seeds 955/956 ~01:00; pre-declared rules
+    stand. Pool +0.0002..+0.0005 (P ~0.3). Nothing to add from this audit except: an E FAIL driven by M<50 does not close TRUNC
+    (per-M lifts in trunc2).
+D5  BOARD WATCH + SELECTION DISCIPLINE (0 GPU). Snapshot the full board daily (teams, entries, last) to resolve H1/H7 (a merge
+    = vanished rows + summed entries; a reference = never submits again); never compare against another team's entry at better
+    than +-0.0015; freeze the Dec-9 protocol (S = min(V, V-D), pmix / stale vetoes, pick 2 = least test-correlated eligible pool).
+Not proposed (closed with numbers): ID collaborative channels (altapproach), pretrained-encoder init (R3 stage 0 FAIL 22:00),
+age offsets (AGE-PROD FAIL, post-hoc +0.0003), w_ft / M-split / H-split routing, calendar priors (H4), LLM backbones,
+architecture blocks (r7 0/13), more same-recipe seeds (asymptote +0.0002), exploration-only training (0.384 / 0.382).
+Honest bottom line: no design above has an expected gain near +0.005; D2 is the only one whose published precedent is of that
+order, and its prior here is ~0.15. If #1 is H2, the most likely reason we cannot see the lever is screen power, not a missing
+idea; the 2-day budget is best spent on D2 + D1 + the TRUNC chain, with D3 only on idle lanes.
+
+=====================================================================================================================
+5. WHAT CANNOT BE KNOWN, AND WHAT TO WATCH
+=====================================================================================================================
+- Cannot be known: #1's composition and affiliation; its private score (public-only properties of a model are invisible to us:
+  our calibration maps OUR models' val to public; a model that is better on weekend/morning feeds would show a larger public
+  gap than private); whether 0.3983 is one model or a pool; whether they used val labels or external data.
+- Observable over time: (i) entries count and "last" of #1 (a reference stays at 1); (ii) the team count and vanished rows (a
+  merge); (iii) whether the gap to #2 closes as #2/#3 keep submitting (35-59 entries: they are iterating; #1 is not); (iv) at
+  Dec 9, the private board (if #1 drops below the cluster, a public-specific property or a one-shot lucky draw; the unpaired
+  single-score SE is 0.0027, the cross-team paired SE 0.0012-0.0018, so +0.0054 is a 3-4 SE effect, real but of uncertain size).
+- Not actionable: chasing the public gap with model changes (RESEARCH_SWEEP P1, critique R10); public cannot resolve < 0.003.
+
+=====================================================================================================================
+6. FILES
+=====================================================================================================================
+nn_x/audit/top1/findings.txt                      this file
+nn_x/audit/top1/out_lb_snapshot_2026-11-12T2200Z.txt   public board top 30 with entries and "last" (live fetch)
+nn_x/audit/top1/h3_val_value_gbdt.py + out/h3_run.log, out/h3_results.json, out/h3_perfeed_*.npy, out/h3_pred_A.npy
+                                                   GBDT value of val labels: train-only vs val-only OOF vs joint vs tree fine-tune
+nn_x/audit/top1/h5_probing_capacity.py + out/h5_probing.log   probing feasibility at 1e-10 precision; gain per learned positive
+nn_x/audit/top1/h6_ties_check.py + out/h6_ties.log            0 ties in all 31 submission / candidate files
+Web (fetched): https://ods.ai/competitions/avitotechrecsys2026 (rules, metric, split), .../faq (merge deadline, 5/day per team,
+"Ограничений нет"), .../leaderboard (live top 50), https://ods.ai/pages/join-team (merge mechanics),
+https://ods.ai/competitions/avitotechmlchallenge2025/leaderboard (2025 top 10), https://ods.ai/tracks/df26_avitotech_mlcup2026
+(2026 winners' names), <public repository, link removed> (2025 #1 code, via deep_ru_competitions),
+https://ods.ai/events/fest2025-avito-msc and https://www.youtube.com/watch?v=-lUszYJT5BA (DF25 track, not transcribed).

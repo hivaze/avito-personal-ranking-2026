@@ -1,0 +1,19 @@
+XPOOL (stage-B re-cool with the v2 exploration posterior) -- PRE-DECLARED 2026-11-14T02:21:03Z, before the first run.
+Mechanism: the day-1 detector (eda/labels_position/out/train_prandom.npz) is 0 for M<50 (51% of train feeds; 39-41% of val/test
+feeds) and NaN->0 for the 400K proxy-fit feeds, and its p>0.9 set is ~10% production-ordered (nn_x/w12/xdet/check2.py). The v2
+posterior (nn_x/w12/xdet: set-composition classifier val+test vs train, cross-fitted, x exact-null order LR from the K9 aux head;
+no labels, no position features in the classifier) finds 291.8K feeds with p>0.5 (105K with M<50) vs 164K; validated by the
+exact shuffled null (z mean +0.03..+0.12, sd ~1 for p_set>0.9 at every M), day-stable shares, flat position-click curves.
+Arms (m02ref + flags; roots 101-104; CDSEED 900+root; holdout identity UNCHANGED = old file):
+  xp2     = --prand2 train_prandom_v2.npz                       (pool p>0.5 all M, aux weight 1-p, domain token from v2)
+  xp2m05  = xp2 + --cooldown_mix 0.05                           (same replay dose per pool feed as m02 on the old pool)
+  xp2m10  = xp2 + --cooldown_mix 0.10                           (dose arm)
+Read-out (w5_eval_wave8-style, paired vs w5_cd_m02ref_r<root>, selected ckpt and @last; val TO all / M<50 / M>=50; holdout):
+  PROMOTE an arm iff pooled 4-root member dval >= +0.0008 AND dval > 2 SE AND holdout >= -1 SE AND 4-member pool dval > 0.
+  If several promote: highest pooled 4-member pool val. Holdout is M>=50 only and ~10% contaminated, so it is a veto at -1 SE only.
+  Expected signature if the mechanism is real: the gain sits in val M<50.
+On PROMOTE: rebuild the F7x-type family (roots 101-107 + p70k) with the arm, FT n2cpv3, pool into G3/C3-type candidates, presub gate.
+On no PROMOTE: XPOOL closed at re-cool level; one from-scratch pair (E-stage) is NOT run unless member dval >= +0.0004.
+ADDENDUM 2026-11-14T02:22:50Z (before any XPOOL readout): speculative from-scratch arm E:xp2m05 seeds 951-954 (E_BASE + --prand2 + --cooldown_mix 0.05)
+launched on idle GPU slots, paired vs w5_e10_base_s951-954. Read by the E RULE (w5_eval_e_ap1.py) + M<50/M>=50 slices. If the stage-B
+readout shows xp2m05 is harmful (pooled member dval < -0.0005), these runs are stopped by exact PID.

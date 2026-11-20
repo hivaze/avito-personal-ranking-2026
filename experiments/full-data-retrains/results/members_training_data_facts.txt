@@ -1,0 +1,25 @@
+== 1. Training data of every final member (from each member's own log)
+   24 members (16 W16 + 8 popularity-light): --holdout [30000], --select_on ['holdout'], --keep ['best'], --train_feeds [0], --val_mix [0.0], log line 'holdout: 30000 ... excluded' in all: True
+   training feeds [3121208] of 3,151,208; steps/epoch [9835]; total steps [98350]; cooldown from step [78680]; cooldown pool [134118] feeds; teacher files ['teacher_mean11.npy', 'teacher_mean25.npy']; kd_w [0.5]; d [128, 192]; epochs [10.0]
+   kept (holdout-selected) step: [92500, 92500, 97500, 97500, 97500, 97500, 97500, 97500, 97500, 97500, 97500, 97500, 97500, 97500, 97500, 97500, 98350, 98350, 98350, 98350, 98350, 98350, 98350, 98350]
+   W16 (16): selected - @last per member (log values): holdout mean +0.00011 (min +0.00000, max +0.00062); val mean +0.00012 (min -0.00011, max +0.00065); members whose selected step is the last step: 7
+   pop-light (8): selected - @last per member (log values): holdout mean +0.00012 (min -0.00001, max +0.00034); val mean -0.00009 (min -0.00115, max +0.00060); members whose selected step is the last step: 1
+== 2. Pool level (train-only, per-feed z-mean): selected vs @last
+   W16 train-only 16-pool: val selected 0.40144 / @last 0.40157 (selected - @last -0.00013 +- 0.00016, n 14423); holdout selected 0.32460 / @last 0.32449 (+0.00011 +- 0.00009, n 30000)
+   member val NDCG @last: mean 0.39921, SD across the 16 members 0.00048 (kd05w192 0.39891, kd05t25w192 0.39950)
+== 3. Null band s16 (PREDECLARED R4): random splits of the 16 members (@last) into two disjoint 8-pools, 4 + 4 per arm
+   60 splits: RMS of the 8-pool vs 8-pool val difference s8 = 0.00042 (max |d| 0.00100; mean paired per-feed SE of one split 0.00046); s16 = s8 / sqrt(2) = 0.00030; acceptance band 3 s16 = 0.00090
+   (the splits share members pairwise, so s8 is a slight under-estimate of the fully independent case; the per-feed SE of a split is the larger, safer number)
+== 4. Value of training data: hard-label base (all 3,121,208 feeds) vs the cross-fit members (--xfold k: one user fold of 5 dropped, 80% of feeds and steps)
+   member val NDCG @last: base (3 seeds) 0.39638 vs xf (15 members) 0.39395: 20% of the feeds (and steps) = +0.00243 per member; 3-pool base vs 3-pool xf_k (mean over k): +0.00121 +- 0.00060
+   scaled to the holdout's 0.952% of feeds: log law +0.000104, linear +0.000116 (val; caveat: xfold drops whole users and 20% of the steps, the holdout feeds are exploration-like and 1.88% of candidates)
+== 5. Fine-tune half (n2cpv3s3) of a W16 member, from its own log
+   args: folds 5, seeds 3, lr 5e-05, epochs 4, decay cos, ema 0.99 (start 0.5 epochs), wd 0.02, warmup 30, extra n2c_pre_v3, u0_singleton True, add_random 0, pseudo '', select snapshot
+   extra features (42): ['centrality', 'it_hist_all_luo', 'it_hist_all_luo_rk', 'it_hist_all_luo_zsl', 'it_hist_all_luo_gap', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo', 'it_hist_et5_luo', 'it_hist_et6
+   user-0 feeds as singleton groups: 658
+   OOF ndcg by epoch: [0.39858, 0.3999, 0.39982, 0.39911, 0.39888]
+   best epoch 1: OOF ndcg 0.39990 (epoch0 = train-only 0.39858)
+   snapshot mean of epochs 1..4: OOF ndcg 0.39981
+   final EMA weights: OOF ndcg 0.39897
+   GroupKFold(5) by user (user-0 feeds singletons): fit sizes [11538, 11538, 11538, 11539, 11539] of 14423 val feeds (80.0% each); every val feed is in the fit set of 4 of the 5 folds -> its label enters 12 of the 15 models whose mean is the test prediction; no model sees all of val
+done

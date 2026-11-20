@@ -1,0 +1,17 @@
+== single runs (log readouts: selected step / final step)
+  sx_base_s23            best_step  19670/19670  val 0.39375 hold 0.31783 | final val 0.39375 hold 0.31783 | max val 0.39375 | 49 min
+  sx_base_s24            best_step  19670/19670  val 0.39288 hold 0.31755 | final val 0.39288 hold 0.31755 | max val 0.39356 | 49 min
+  sx_agedrop_s23         best_step  19000/19670  val 0.39328 hold 0.31618 | final val 0.39330 hold 0.31618 | max val 0.39330 | 61 min
+  sx_agedrop_s24         best_step  19000/19670  val 0.39345 hold 0.31543 | final val 0.39350 hold 0.31541 | max val 0.39350 | 61 min
+
+== agedrop vs base (B = treatment)
+  VAL  sx_agedrop_s23 0.39328 vs sx_base_s23 0.39375: all -0.00048+-0.00077 (z -0.62)  M<50 -0.00050+-0.00145 (z -0.35)  M>=50 -0.00046+-0.00085 (z -0.55)  Tue +0.00045+-0.00108 (z +0.41)  Thu -0.00149+-0.00111 (z -1.35)
+  VAL  sx_agedrop_s24 0.39345 vs sx_base_s24 0.39288: all +0.00057+-0.00079 (z +0.73)  M<50 +0.00167+-0.00148 (z +1.13)  M>=50 -0.00018+-0.00086 (z -0.21)  Tue +0.00198+-0.00110 (z +1.81)  Thu -0.00097+-0.00113 (z -0.86)
+  VAL  pooled: all +0.00005+-0.00061 (z +0.08)  M<50 +0.00058+-0.00113 (z +0.52)  M>=50 -0.00032+-0.00068 (z -0.48)  Tue +0.00121+-0.00086 (z +1.42)  Thu -0.00123+-0.00087 (z -1.41)
+  HOLD sx_agedrop_s23 0.31619 vs sx_base_s23 0.31785: all -0.00166+-0.00045 (z -3.68)  late20% +0.00065+-0.00098 (z +0.67)
+  HOLD sx_agedrop_s24 0.31543 vs sx_base_s24 0.31754: all -0.00212+-0.00043 (z -4.89)  late20% -0.00003+-0.00097 (z -0.03)
+  HOLD pooled: all -0.00189+-0.00034 (z -5.58)  late20% +0.00031+-0.00075 (z +0.42)
+  final-step (log, info): val deltas [-0.00045, 0.00062], hold deltas [-0.00165, -0.00214]
+  ENS VAL  2-member mixed vs 2x base: all +0.00031+-0.00043 (z +0.70)  M<50 +0.00093+-0.00081 (z +1.15)  M>=50 -0.00012+-0.00048 (z -0.26)  Tue +0.00056+-0.00060 (z +0.94)  Thu +0.00003+-0.00064 (z +0.05)  (base pair 0.39433)
+  ENS HOLD 2-member mixed vs 2x base: all -0.00050+-0.00024 (z -2.10)  late20% +0.00107+-0.00054 (z +1.99)
+  ENS VAL  4-member (2 base + 2 arm) vs 2x base: all +0.00016+-0.00045 (z +0.36)  M<50 +0.00051+-0.00086 (z +0.59)  M>=50 -0.00008+-0.00048 (z -0.16)  Tue +0.00045+-0.00061 (z +0.73)  Thu -0.00015+-0.00067 (z -0.22)  (info; unequal member count)

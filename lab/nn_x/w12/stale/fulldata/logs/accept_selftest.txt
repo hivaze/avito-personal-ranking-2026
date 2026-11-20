@@ -1,0 +1,116 @@
+== accept_twins.py selftest   [2026-11-15T04:19:46Z]
+ S1 the A1 parser on the CPU smoke runs (flag ON): must PASS with the smoke expectations (eval-capped predictions: row-count test off)
+  C_copy_E_on (w5_smoke_e10_kd05w192_s951)
+    [PASS] w5_smoke_e10_kd05w192_s951: 'training feeds 19806 -> 20000' 
+    [PASS] w5_smoke_e10_kd05w192_s951: train feeds 20000, steps/epoch 73, total steps 73 log: (20000, 73, 73)
+    [PASS] w5_smoke_e10_kd05w192_s951: pool 1004 feeds, of which 194 holdout feeds 
+    [PASS] w5_smoke_e10_kd05w192_s951: every eval line 'holdout_ndcg nan' (3 evals), one IN-SAMPLE line per eval 
+    [PASS] w5_smoke_e10_kd05w192_s951: BEST step == total BEST step 73
+    [PASS] w5_smoke_e10_kd05w192_s951: logs/<v>.json and logs/<v>_fulldata.json exist 
+    [PASS] w5_smoke_e10_kd05w192_s951: json args holdout_in_train True, keep 'last', holdout 30000; best_step == total; history holdout_ndcg all NaN 
+    [PASS] w5_smoke_e10_kd05w192_s951: the run's own counts: 194 holdout feeds in training, in every epoch's batches, 194 in the pool; kept step == total (json: 194, 194, 194, kept 73)
+    [PASS] w5_smoke_e10_kd05w192_s951: arguments == the reference run's arguments except variant / holdout_in_train / keep differing keys: {}; flags newer than the reference's log, at their defaults: ['aug_all', 'xfold', 'xfold_unlab']
+    [PASS] w5_smoke_e10_kd05w192_s951: NO out-of-sample-named holdout file 
+    [PASS] w5_smoke_e10_kd05w192_s951: in-sample holdout files present (2), 4630966 rows ['nn_w5_smoke_e10_kd05w192_s951_holdoutINSAMPLE.npy', 'nn_w5_smoke_e10_kd05w192_s951@last_holdoutINSAMPLE.npy']
+    [PASS] w5_smoke_e10_kd05w192_s951: val files finite, 1389971 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+    [PASS] w5_smoke_e10_kd05w192_s951: test files finite, 2904806 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+  I_copy_P_on (abl_smoke_e10_pop1kd05w192_s951)
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: 'training feeds 19806 -> 20000' 
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: train feeds 20000, steps/epoch 73, total steps 73 log: (20000, 73, 73)
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: pool 1004 feeds, of which 194 holdout feeds 
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: every eval line 'holdout_ndcg nan' (3 evals), one IN-SAMPLE line per eval 
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: BEST step == total BEST step 73
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: logs/<v>.json and logs/<v>_fulldata.json exist 
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: json args holdout_in_train True, keep 'last', holdout 30000; best_step == total; history holdout_ndcg all NaN 
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: the run's own counts: 194 holdout feeds in training, in every epoch's batches, 194 in the pool; kept step == total (json: 194, 194, 194, kept 73)
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: arguments == the reference run's arguments except variant / holdout_in_train / keep differing keys: {}
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: NO out-of-sample-named holdout file 
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: in-sample holdout files present (2), 4630966 rows ['nn_abl_smoke_e10_pop1kd05w192_s951_holdoutINSAMPLE.npy', 'nn_abl_smoke_e10_pop1kd05w192_s951@last_holdoutINSAMPLE.npy']
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: val files finite, 1389971 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+    [PASS] abl_smoke_e10_pop1kd05w192_s951: test files finite, 2904806 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+  D_copy_K_on_mix03 (w5_smoke_kcd_ref_s951)
+    [PASS] w5_smoke_kcd_ref_s951: 'training feeds 19814 -> 20000' 
+    [PASS] w5_smoke_kcd_ref_s951: train feeds 20000, steps/epoch 74, total steps 74 log: (20000, 74, 74)
+    [PASS] w5_smoke_kcd_ref_s951: pool 998 feeds, of which 186 holdout feeds 
+    [PASS] w5_smoke_kcd_ref_s951: every eval line 'holdout_ndcg nan' (3 evals), one IN-SAMPLE line per eval 
+    [PASS] w5_smoke_kcd_ref_s951: BEST step == total BEST step 74
+    [PASS] w5_smoke_kcd_ref_s951: logs/<v>.json and logs/<v>_fulldata.json exist 
+    [PASS] w5_smoke_kcd_ref_s951: json args holdout_in_train True, keep 'last', holdout 30000; best_step == total; history holdout_ndcg all NaN 
+    [PASS] w5_smoke_kcd_ref_s951: the run's own counts: 186 holdout feeds in training, in every epoch's batches, 186 in the pool; kept step == total (json: 186, 186, 186, kept 74)
+    [PASS] w5_smoke_kcd_ref_s951: arguments == the reference run's arguments except variant / holdout_in_train / keep differing keys: {}
+    [PASS] w5_smoke_kcd_ref_s951: NO out-of-sample-named holdout file 
+    [PASS] w5_smoke_kcd_ref_s951: in-sample holdout files present (2), 4630966 rows ['nn_w5_smoke_kcd_ref_s951_holdoutINSAMPLE.npy', 'nn_w5_smoke_kcd_ref_s951@last_holdoutINSAMPLE.npy']
+    [PASS] w5_smoke_kcd_ref_s951: val files finite, 1389971 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+    [PASS] w5_smoke_kcd_ref_s951: test files finite, 2904806 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+  J_copy_K_hz_on (w5_smoke_kcd_ref_s951)
+    [PASS] w5_smoke_kcd_ref_s951: 'training feeds 19814 -> 20000' 
+    [PASS] w5_smoke_kcd_ref_s951: train feeds 20000, steps/epoch 74, total steps 74 log: (20000, 74, 74)
+    [PASS] w5_smoke_kcd_ref_s951: pool 998 feeds, of which 186 holdout feeds 
+    [PASS] w5_smoke_kcd_ref_s951: every eval line 'holdout_ndcg nan' (3 evals), one IN-SAMPLE line per eval 
+    [PASS] w5_smoke_kcd_ref_s951: BEST step == total BEST step 74
+    [PASS] w5_smoke_kcd_ref_s951: logs/<v>.json and logs/<v>_fulldata.json exist 
+    [PASS] w5_smoke_kcd_ref_s951: json args holdout_in_train True, keep 'last', holdout 30000; best_step == total; history holdout_ndcg all NaN 
+    [PASS] w5_smoke_kcd_ref_s951: the run's own counts: 186 holdout feeds in training, in every epoch's batches, 186 in the pool; kept step == total (json: 186, 186, 186, kept 74)
+    [PASS] w5_smoke_kcd_ref_s951: arguments == the reference run's arguments except variant / holdout_in_train / keep differing keys: {}
+    [PASS] w5_smoke_kcd_ref_s951: NO out-of-sample-named holdout file 
+    [PASS] w5_smoke_kcd_ref_s951: in-sample holdout files present (3), 4630966 rows ['nn_w5_smoke_kcd_ref_s951_holdoutINSAMPLE.npy', 'nn_w5_smoke_kcd_ref_s951@last_holdoutINSAMPLE.npy', 'nn_w5_smoke_kcd_ref_s951_holdoutINSAMPLE_hz.npy']
+    [PASS] w5_smoke_kcd_ref_s951: val files finite, 1389971 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+    [PASS] w5_smoke_kcd_ref_s951: test files finite, 2904806 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+ S1 result: ALL PASS
+ S2 the A1 parser on flag-OFF smoke runs: every one must be REJECTED (a twin trained without the flag must not pass)
+    [DEFECT] w5_smoke_e10_kd05w192_s951: 'training feeds 19806 -> 20000' 
+    [DEFECT] w5_smoke_e10_kd05w192_s951: train feeds 20000, steps/epoch 73, total steps 73 log: (19806, 72, 72)
+    [DEFECT] w5_smoke_e10_kd05w192_s951: pool 1004 feeds, of which 194 holdout feeds 
+    [DEFECT] w5_smoke_e10_kd05w192_s951: every eval line 'holdout_ndcg nan' (3 evals), one IN-SAMPLE line per eval 
+    [DEFECT] w5_smoke_e10_kd05w192_s951: BEST step == total BEST step 72
+    [DEFECT] w5_smoke_e10_kd05w192_s951: logs/<v>.json and logs/<v>_fulldata.json exist 
+    [DEFECT] w5_smoke_e10_kd05w192_s951: NO out-of-sample-named holdout file found ['nn_w5_smoke_e10_kd05w192_s951_holdout.npy', 'nn_w5_smoke_e10_kd05w192_s951@last_holdout.npy']
+    [DEFECT] w5_smoke_e10_kd05w192_s951: in-sample holdout files present (2), 4630966 rows []
+    [PASS] w5_smoke_e10_kd05w192_s951: val files finite, 1389971 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+    [PASS] w5_smoke_e10_kd05w192_s951: test files finite, 2904806 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+  B_copy_E_off: REJECTED as it must be
+    [DEFECT] w5_smoke_kcd_ref_s951: 'training feeds 19814 -> 20000' 
+    [DEFECT] w5_smoke_kcd_ref_s951: train feeds 20000, steps/epoch 74, total steps 74 log: (19814, 74, 74)
+    [DEFECT] w5_smoke_kcd_ref_s951: pool 998 feeds, of which 186 holdout feeds 
+    [DEFECT] w5_smoke_kcd_ref_s951: every eval line 'holdout_ndcg nan' (3 evals), one IN-SAMPLE line per eval 
+    [DEFECT] w5_smoke_kcd_ref_s951: BEST step == total BEST step 50
+    [DEFECT] w5_smoke_kcd_ref_s951: logs/<v>.json and logs/<v>_fulldata.json exist 
+    [DEFECT] w5_smoke_kcd_ref_s951: NO out-of-sample-named holdout file found ['nn_w5_smoke_kcd_ref_s951_holdout.npy', 'nn_w5_smoke_kcd_ref_s951@last_holdout.npy']
+    [DEFECT] w5_smoke_kcd_ref_s951: in-sample holdout files present (2), 4630966 rows []
+    [PASS] w5_smoke_kcd_ref_s951: val files finite, 1389971 rows, not constant; kept vs @last max abs diff 2.81e-01 (same weights) 
+    [PASS] w5_smoke_kcd_ref_s951: test files finite, 2904806 rows, not constant; kept vs @last max abs diff 4.21e-01 (same weights) 
+  F_copy_K_off_mix03: REJECTED as it must be
+ S3 A3 / A4 numerics: the 16 originals' SELECTED checkpoints stand in for twins of the @last checkpoints (facts.py: -0.00013 +- 0.00016)
+  A3 pool level (self-test, 16 W16 members): val NDCG 16-pool twins 0.40144 vs 16-pool references @last 0.40157: D = -0.00013 +- 0.00016 (n 14423); band 0.00090 = 3 s16 sqrt(16 / 16)
+     A3 verdict: ACCEPT
+  A4 member level (information): twin - reference @last, val
+     w5_e10_kd05w192_s951 selected vs @last: -0.00009 +- 0.00034
+     w5_e10_kd05w192_s952 selected vs @last: +0.00000 +- 0.00000
+     w5_e10_kd05w192_s953 selected vs @last: +0.00031 +- 0.00034
+     w5_e10_kd05w192_s954 selected vs @last: +0.00000 +- 0.00000
+     w5_e10_kd05w192_s955 selected vs @last: +0.00065 +- 0.00035
+     w5_e10_kd05w192_s956 selected vs @last: +0.00012 +- 0.00031
+     w5_e10_kd05w192_s957 selected vs @last: +0.00000 +- 0.00000
+     w5_e10_kd05w192_s958 selected vs @last: -0.00011 +- 0.00032
+     w5_e10_kd05t25w192_s951 selected vs @last: +0.00030 +- 0.00035
+     w5_e10_kd05t25w192_s952 selected vs @last: +0.00000 +- 0.00000
+     w5_e10_kd05t25w192_s953 selected vs @last: +0.00013 +- 0.00033
+     w5_e10_kd05t25w192_s954 selected vs @last: +0.00029 +- 0.00034
+     w5_e10_kd05t25w192_s955 selected vs @last: +0.00025 +- 0.00032
+     w5_e10_kd05t25w192_s956 selected vs @last: +0.00000 +- 0.00000
+     w5_e10_kd05t25w192_s957 selected vs @last: +0.00000 +- 0.00000
+     w5_e10_kd05t25w192_s958 selected vs @last: +0.00000 +- 0.00000
+    [PASS] S3 pool difference == facts.py's number -0.000134 vs -0.000134
+    [PASS] S3 verdict ACCEPT (|D| <= 0.00090) 
+ S4 the band logic on a deliberately broken 'twin' pool: the 16 @last members with 8 of them replaced by a 2-epoch screen model is not available, so the break is synthetic: per-feed z of each member + N(0, 1) noise (seed 0) -> must be DEFECT SUSPECTED
+    [PASS] S4 noisy pool D = -0.00774 +- 0.00104 is below -band (0.00090) 
+ S5 names: every twin variant this script looks for == a '--variant' of the lane_full.sh DRY output of that stage, and nothing else
+    [PASS] S5 stage F: 16 variants == lane_full.sh DRY (reference logs present now: 16 of 16)
+    [PASS] S5 stage FH: 16 variants == lane_full.sh DRY (reference logs present now: 12 of 16)
+    [PASS] S5 stage R: 16 variants == lane_full.sh DRY (reference logs present now: 16 of 16)
+    [PASS] S5 stage RH: 16 variants == lane_full.sh DRY (reference logs present now: 12 of 16)
+    [PASS] S5 stage P: 8 variants == lane_full.sh DRY (reference logs present now: 8 of 8)
+    [PASS] S5 stage PR: 8 variants == lane_full.sh DRY (reference logs present now: 8 of 8)
+ S6 the check mode end to end on a MOCK harness tree (runs/_mock_accept: 8 'twins' of arm kd05w192 = symlinks to the flag-on smoke run C, references = the real originals): expected A1 PASS x 8, A2 DEFECT x 8 (a 73-step smoke model is no twin), A3 verdict below the band
+    [PASS] S6 mock: exit code 1; the only failures are 8 x A2 and the A3 verdict of the arm (A1 passed for all 8, so A3 / A4 ran) failures: 9 = 8 A2 + 1 A3 + 0 other; log logs/accept_selftest_mock.txt
+   -> SELFTEST ALL PASS

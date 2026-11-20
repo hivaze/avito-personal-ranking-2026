@@ -1,0 +1,43 @@
+{
+  "declared_utc": "2026-11-12T14:42:30Z",
+  "status": "PRE-DECLARED before any number of the new candidates C3/C4/C5 was computed. C0/C1/C2 (PF7x, G3, M2) numbers were already known from the diagnosis; disclosed. Public LB scores are context only and enter nothing below.",
+  "reference": "C0",
+  "candidates": {
+    "C0": {"name": "PF7x", "families": ["F5cd", "F6", "F7x", "F9", "F10", "F12"], "weighting": "member-equal", "note": "current pick 1 (reference)"},
+    "C1": {"name": "G3", "families": ["F10", "F7x", "F7x70"], "weighting": "member-equal"},
+    "C2": {"name": "M2", "families": ["F7x", "F7x70"], "weighting": "member-equal"},
+    "C3": {"name": "PX70", "families": ["F5cd", "F6", "F7x", "F7x70", "F9", "F10", "F12"], "weighting": "member-equal (45)"},
+    "C4": {"name": "PX70r", "families": ["F5cd", "F6", "F7x", "F7x70", "F9", "F10", "F12"], "weighting": "root-dedup: F7x and F7x70 members of the same F7 root get weight 0.5 each (one member slot per F7 trunk, 38 slots; re-cooled weight share = PF7x's 7/38)"},
+    "C5": {"name": "HG", "families": "every family except F7 (superseded by its own re-cools) and F7b (c0 control) whose single-member train-only HOLDOUT mean AND 6-member HOLDOUT mix are both within 0.002 of the best family on the holdout (gates a+b on the holdout only, because val is where the re-cool excess lives)", "weighting": "member-equal", "note": "dropped if identical to C3 or C0"}
+  },
+  "info_only_not_selectable": {
+    "X_cb": "best robust pool + 0.05 * z(best existing CatBoost val model), to answer whether a CatBoost solver adds anything to the pool (fixed weight, no fitting); never eligible as a pick",
+    "context": "Cd, Pall: printed for context"
+  },
+  "spec": "per-feed rank-z of each member; branch = mean over members (weighted for C4); final = 0.5*z(FT branch) + 0.5*z(TO branch); holdout = z-mean of train-only members (same weights)",
+  "proxies_vs_C0": {
+    "V": "val NDCG delta of the final pool, paired per feed, user-cluster SE (user_id 0 = singletons)",
+    "Vp": "val delta weighted by nn_x/pubdiag/shift/p2_adv_weights.npz['private_intrinsic+hour'] (chosen a priori by the shift agent; SE via n_eff)",
+    "Vto": "val delta of the train-only branch alone",
+    "H": "holdout delta (train-only pools), paired per feed",
+    "D": "Vto - H, the val excess the in-period holdout does not confirm (SE = hypot)",
+    "E0": "Vp            (lambda=0: val gains transfer to private 1:1)",
+    "E1": "Vp - D        (lambda=1: only the holdout-confirmed part transfers)",
+    "Ehalf": "Vp - 0.5*D (central private estimate, reported)",
+    "S": "min(E0, E1) = worst case over lambda in [0,1]  (robust score)"
+  },
+  "eligibility_vs_C0": [
+    "e1: H >= -1 SE",
+    "e2: Vp >= -1 SE",
+    "e3: no val slice (M<50, M>=50, Tue, Thu, coldpos, warmpos) below -2 SE and no holdout slice (weekday, weekend) below -2 SE",
+    "e4: D <= +2 SE (val-vs-holdout consistency flag)",
+    "e5: src/pmix private-mix delta >= -1 SE (project veto rule, CURRENT_STATUS 12:42)",
+    "e6: src/presub_gate.py PASS (run on the top 1-3 by S)"
+  ],
+  "selection": {
+    "safest_pick": "eligible argmax S. If the top two S differ by < 0.00010, prefer the lower re-cooled weight share, then more families.",
+    "hedge": "if the pick is not the eligible argmax of E0, the hedge is the eligible argmax of E0 (covers 'val transfers 1:1'); otherwise the eligible argmax of E1 (covers 'only holdout-confirmed gains transfer')",
+    "replace_current_pick1": "the safest pick replaces PF7x (C0) only if its S > 0 AND it is eligible; otherwise PF7x stays"
+  },
+  "not_revisited": "FT/train-only weight stays 0.5 (diagnosis: no FT optimism). F13l (3/6 members), F13g, d192-m02 are not eligible (decide4: >= 6 complete members). F7b never enters (control; val-only re-cool excess)."
+}

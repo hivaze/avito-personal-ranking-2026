@@ -1,0 +1,322 @@
+FEATURE ENGINEERING + ADVERSARIAL VALIDATION REVISION  (nn_x/audit/features, 2026-11-12 20:30-22:00 UTC, CPU only)
+=====================================================================================================================
+Scope: every input of the live NN (34 cvnd_pre2s train-stage inputs, the in-model dense features via their on-disk
+proxies, the 42 n2cpv3 fine-tune extras) plus all ~260 unused on-disk features, plus 52 NEW candidate features built
+here. Nothing under nn/, nn_x/r6, src/, preds/, subs/, reports/ was modified; GPUs untouched (CPU replays only).
+Conventions: cAUC = candidate-level univariate adversarial AUC (label-free, NaN below min, 250K rows per side);
+wAUC = mean within-feed label AUC; slope = 1-D conditional-logit coefficient on the within-feed z; trRL = the exact
+30K random-like train holdout (p_random>0.9, M>=50); trProd = 12K production train feeds (p_random<0.05, M>=50);
+val50 = val M>=50; pub/priv = test split at ts 1790497920. "+-" = paired per-feed SE over 14,423 val feeds.
+
+Scripts / outputs (all absolute under <repo>/nn_x/audit/features/):
+  s01_feature_table.py   -> out/feature_table.csv (308 features x 90 metrics), out/s01.log
+  s01b_summary.py        -> out/s01b_summary.txt, out/feature_table_classed.csv (usage class per feature)
+  s02_replay_ablation.py -> out/replay/<member>_{base,g<group>_{z,p},z<j>,p<j>}.npy + <member>.log  (CPU replay of
+                            r6_cd_m02_r101 [F7x, tf] and v23_gru_pre2s_s501 [F10, gru]; corr with stored preds 0.999999)
+  s02b_replay_summary.py -> out/replay_summary.json (paired deltas + slices)
+  s02c_stale_replay.py   -> out/replay/<member>_st_{pop,pre2,both}.npy (private-like coverage, per input family)
+  s03_newfeats.py        -> out/feats/{val,test,trRL,trProd}/<name>.npy (52 new features; see families below)
+  s04_resid_probe.py     -> out/resid_{0,1}.jsonl, out/s04_{0,1}.log (nested residual-on-G3 LIN + GBM probes)
+  s04b_pmix_probe.py     -> out/pmix_probe.jsonl, out/pmix_probe/*.npy (same, with private-mix weighting)
+  s05_new_av.py          -> out/new_feature_table.csv (adversarial / label / support metrics of the new features)
+  s06_joint_age_cov.py   -> out/joint_age_cov.csv, out/s06_joint_age_cov.txt (age x coverage joint support)
+  lib_av.py              shared numba kernels.
+NOTE: two CPU replay processes started by this audit (s02_replay_ablation.py, PIDs 2736201 [r6_cd_m02_r101] and
+2737088 [v23_gru_pre2s_s501], 12 threads each, no GPU) were still appending per-column passes to out/replay/ at
+write-up time (~70-90 s per pass, ~50 passes left each); they only write inside this directory and may be stopped
+by PID at any time. Re-run s02b_replay_summary.py to refresh out/replay_summary.{txt,json}.
+
+---------------------------------------------------------------------------------------------------------------------
+0. BOTTOM LINE
+---------------------------------------------------------------------------------------------------------------------
+1. No label leak and no extrapolation problem in the live inputs. No used feature has more than 0.3% of private rows
+   outside val's [q0.1%, q99.9%] range (max: pre_hmax32_c 0.34%, pre_idmax32 0.32%); cold rows are not worse.
+   The marginal val->private shift of every used feature is coverage (it_hist_*_luo cAUC 0.461, seq_cv_pop 0.470,
+   pre_idmax32 0.473, pre_id_contrib_v2 0.481); everything else is within 0.49-0.51.
+2. The shift that matters is JOINT (listing age x coverage), and the marginal AV cannot see it. LUO zero rate of
+   3-7-day-old listings: trRL 0.23 / trProd 0.12 / val 0.62 / public 0.83 / private 0.86; 7-24 d: 0.18 / 0.09 /
+   0.30 / 0.41 / 0.50. JS divergence of the 12-cell (age x cold) distribution: val->public 0.0045, val->private
+   0.0090, trRL->val 0.034, trProd->val 0.074. And the label relation in those cells differs: P(y|cold)/P(y) for 1-7 d
+   listings is 0.6-0.7 on train (both production and random-like) vs 0.90-0.93 on val.
+3. What this costs the model, measured directly (CPU replay of G3 members under the project's private-like 'both'
+   coverage scenario): the 4-member F7x train-only pool loses -0.00175 +- 0.00053 on val (private-mix weighted
+   -0.00227 +- 0.00081), and the loss is concentrated where the positives are 7-24 days old (-0.0092 +- 0.0014,
+   2,579 feeds) and 3-7 d; feeds whose positives are < 3 days old GAIN (+0.021 / +0.015) because everything there is
+   cold anyway. This is the FR-3 / hzcd mechanism with a private-specific price tag: the train-stage popularity
+   inputs are the only live inputs plausibly HURTING private, and they hurt through warm->cold flips of 1-4-week-old
+   listings, not through young listings.
+4. Reliance of a G3 member on each input family (CPU replay, column(s) set to the NaN->0 'missing' state / permuted
+   within feed; r6_cd_m02_r101 | v23_gru_s501): popularity (8 cols) -0.0057/-0.0151 | -0.0061/-0.0162;
+   ctx_nd (10) -0.0110/-0.0070 | -0.0108/-0.0067; ctx_hs (4) -0.0032/-0.0050 | -0.0024/-0.0031; ctx_hn (6)
+   -0.0015/-0.0014 | -0.0023/-0.0017; pre2 (6) -0.0019/-0.0046 | -0.0021/-0.0048. Zeroing popularity trades
+   coldpos +0.037 against warmpos -0.024: the model's cold/warm calibration is entirely carried by these 8 columns.
+5. Production-ranker confounding of the label relation (train production feeds vs val): popularity slopes are
+   compressed 5x (it_hist_all_luo 0.020 vs 0.097; seq_cv_pop flips sign -0.017 vs +0.095), f4 (listing age) flips
+   sign (-0.025 vs +0.142), ctx_nd_ucent 0.011 vs 0.200; while f1 / f3 / f5 / feed_cat_share / category counts are
+   STRONGER on production feeds (ratio 1.14 / 1.18 / 1.23 / 1.32 / 1.09). On random-like train feeds every ratio is
+   0.85-1.15 except it_hist_all_luo_rk 1.33 and ctx_nd_knn_{u,h,f1} 1.11-1.14 (two-sided popularity, LEAKAGE-1).
+   Train-row exposure counts (tte_it_imp, ixh_*, src_expo_h; unused) flip sign outright (-0.07 vs +0.07).
+6. New features: 52 built (6 families), all label-free; every one is null over G3 in the nested residual probe
+   (best single: rc_ctx_nd_knn_h_rk GBM +0.00052 +- 0.00037; 4 noise columns span -0.00047..+0.00022, so nothing
+   clears the multiplicity bar). Including the test-window-only exposure counts (xs_*, transductive): all within
+   +-0.0003. The age-adjusted popularity family only re-trades cold vs warm (coldpos +0.003..+0.009, warmpos
+   -0.001..-0.004, net 0; private-mix net +0.0002..-0.0004). The feature space is saturated at the probe level; the
+   remaining lever for the private shift is on the TRAIN side (parity of the popularity inputs), not a new column.
+7. Unused on-disk features re-probed over G3 (124 features x LIN/GBM; trd_, clu_, tte_, als_, seq_*, ctx_hs_*,
+   prew_*, ixh_, hzcv_, ud_, it_tr_*, hour, it_cand_cnt_*): of 372 single-feature probes (new + unused) 0.0% reach
+   z > +2 and 2.4% reach z < -2 (fitting a useless column costs ~0.0003, as the noise controls show). Best singles:
+   it_tr_coec LIN +0.00060 +- 0.00033, prew_new_z LIN +0.00039 +- 0.00021, ixh_df1 LIN +0.00038 +- 0.00027. Best
+   family GBM: ud_ +0.00056 +- 0.00031 (z 1.8, previously rejected), then h_ +0.00017, ixh_ +0.00022, a_ +0.00018;
+   seq_unused -0.00138 (z -3.4), ctx_hs_unused -0.00059, clu_ -0.00042. The on-disk space is saturated over G3.
+8. The private-like coverage loss is ENTIRELY the popularity family: CPU replay with the family-separated stale
+   scenarios gives st_pop -0.00124 / -0.00145 vs st_pre2 +0.00006 / -0.00010 and st_both -0.00117 / -0.00144
+   (r101 / s501; the CPU st_both reproduces the stored GPU stale-val -0.00123). pre2 is therefore NOT a private risk
+   despite being the most train-shifted non-popularity family. Per column, the model reads popularity through
+   it_hist_all_luo (zeroed alone: -0.0114 / -0.0123) and seq_cv_pop (-0.0055 / -0.0037); seq_cv_invd20 -0.0007 /
+   -0.0013, seq_cv_norm 0.0000 (redundant), it_hist_et1_luo -0.0039 / -0.0038.
+
+---------------------------------------------------------------------------------------------------------------------
+1. PER-FEATURE TABLE: USED INPUTS  (full table: out/feature_table.csv; classed: out/feature_table_classed.csv)
+---------------------------------------------------------------------------------------------------------------------
+Usage classes: XT = cvnd_pre2s train-stage input, IM = in-model dense feature proxy, FT = n2cpv3 fine-tune extra.
+
+1a. train(random-like) -> val50 candidate shift (cAUC; 0.5 = none), the only used inputs beyond |0.05|:
+    pre2_fe_z / pre2_new_z / has:pre2_fe 0.632 / 0.632 / 0.631  <- 26.2% NaN on train (Sep 6-8 rows), 0% on val/test;
+      with trProd 0.644. Inside present rows the shift is smaller: pre2_fe_s 0.607 (trProd 0.535), pre2_new_s 0.613.
+      => `has:pre2_fe` is a pure date flag on train and constant on val/test (FR-1 note confirmed); the model can use
+      it as "early-September" marker. Harmless at inference (always 1) but it lets the train fit separate regimes.
+    it_hist_all_luo 0.400 (trProd 0.310), it_hist_et1_luo 0.403, et2 0.441, et3 0.445, et4 0.461, seq_cv_pop 0.545,
+      seq_cv_invd20_rk 0.416 (FT), it_hist_all_luo_gap 0.559 (FT; trProd 0.687).
+    H 0.469, M 0.472 (population composition, known).
+    Everything else (ctx_nd_*, ctx_hn_*, ctx_hs_*, pre2_hmax32 excluded above, f1..f5, cos/sim proxies, category
+    counts) is within 0.48-0.52.
+1b. val -> private candidate shift: it_hist_all_luo 0.461, it_hist_et1_luo 0.463, seq_cv_pop 0.470, pre_idmax32
+    0.473, pre_idmax32_has 0.475, it_hist_et2/3_luo 0.481, pre_id_contrib_v2 0.481, seq_cv_invd20_rk 0.532 (FT; the
+    tied-rank-of-cold-rows mechanism of ADV-3), it_hist_all_luo_gap 0.515; all others 0.49-0.51. Feed-level
+    zero-share AUC val->private: it_hist_all_luo 0.688, seq_cv_pop 0.645, pre_idmax32_has 0.616, pre_id_contrib_v2
+    0.620. public->private is at most 0.485 (it_hist_all_luo).
+1c. label relation production vs exploration (slope on within-feed z; wAUC in brackets):
+    feature            trProd   trRL    valAll   ratio prod/val   ratio RL/val
+    seq_cv_pop         -0.017   0.088   0.095    -0.18            0.93      sign flip
+    f4 (age)           -0.025   0.149   0.142    -0.17            1.05      sign flip
+    it_hist_et4_luo    -0.002   0.073   0.066    -0.04            1.10      sign flip
+    ctx_nd_ucent        0.011   0.169   0.200     0.05            0.84
+    it_hist_all_luo     0.020   0.105   0.097     0.21            1.08
+    it_hist_et1_luo     0.024   0.109   0.100     0.24            1.08
+    it_hist_all_luo_rk  0.102   0.233   0.175     0.58            1.33      (FT)
+    seq_cv_invd20       0.110   0.131   0.146     0.76            0.90
+    cos_u               0.429   0.537   0.533     0.81            1.01
+    maxsim32            0.475   0.562   0.565     0.84            0.99
+    pre2_fe_s           0.544   0.663   0.646     0.84            1.03
+    ctx_nd_knn_h        0.443   0.508   0.454     0.98            1.12
+    f1                  0.512   0.470   0.448     1.14            1.05
+    f3                  0.475   0.429   0.404     1.18            1.06
+    f5                  0.243   0.220   0.197     1.23            1.12
+    feed_cat_share      0.422   0.343   0.319     1.32            1.08
+    cat_min_hpos       -0.538  -0.466  -0.423     1.27            1.10
+    Reading: the production ranker already consumed popularity, so on production feeds popularity carries almost no
+    residual signal (and seq_cv_pop / f4 invert); organiser scores f1/f3/f5 and category affinity look STRONGER on
+    production feeds than on exploration feeds (position bias concentrates clicks where f1 is high). A model fitted
+    on 95% production rows (even with the domain token) is pulled toward f1/f3/category and away from popularity
+    relative to what exploration feeds reward. The random-like train rows show ratios ~1, so trRL is a fair proxy
+    for val on the label side (its remaining excess is the two-sided popularity inflation, LEAKAGE-1).
+1d. Private rows outside val support (q0.1%-99.9%) among used inputs: all <= 0.34% (pre_hmax32_c), cold rows
+    <= 0.5%. Unused features that DO extrapolate: it_cand_cnt_split 70% (transductive per-split count; banned),
+    hzcv_stale_d 100% (by construction), ud_gap_l 27%, src_expo_h / hzcv_expo_slog 20% (42% on cold rows).
+1e. Within-feed position of cold rows (mean within-feed z on LUO-cold rows): e.g. it_hist_all_luo trRL/val/priv
+    stay at the feed minimum by construction; pre2_fe_s cold rows sit at z -0.15 on val and -0.14 on private (same
+    as the FR gate check), so pre2 does not drift on cold rows.
+
+---------------------------------------------------------------------------------------------------------------------
+2. JOINT AGE x COVERAGE SUPPORT (s06; out/joint_age_cov.csv)
+---------------------------------------------------------------------------------------------------------------------
+age bucket  pop      rows  LUO0   covis0  | P(y)/base  P(y|cold)/P(y)  pos share  pos share & cold
+<1d         trRL     0.119 0.532  0.999   | 0.50       0.56            0.060      0.018
+            trProd   0.129 0.315  0.997   | 1.07       0.43            0.138      0.019
+            val      0.114 0.923  1.000   | 0.51       0.90            0.058      0.048
+            public   0.103 0.944  1.000
+            private  0.110 0.975  1.000
+1-3d        trRL     0.080 0.320  0.986   | 0.86       0.59            0.068      0.013
+            val      0.075 0.842  0.999   | 0.91       0.93            0.069      0.054
+            private  0.073 0.916  0.999
+3-7d        trRL     0.102 0.229  0.956   | 0.99       0.71            0.101      0.017
+            trProd   0.089 0.116  0.889   | 0.98       0.70            0.087      0.007
+            val      0.096 0.617  0.978   | 0.94       0.91            0.090      0.051
+            public   0.104 0.832  0.997
+            private  0.101 0.860  0.996
+7-24d       trRL     0.174 0.180  0.909   | 1.10       0.76            0.192      0.026
+            val      0.179 0.303  0.899   | 1.07       0.90            0.192      0.052
+            public   0.177 0.405  0.927
+            private  0.176 0.499  0.944
+24-76d      trRL     0.168 0.149  0.877   | 1.13       0.82            0.190      0.023
+            val      0.175 0.175  0.825   | 1.12       0.92            0.195      0.031
+            private  0.176 0.192  0.842
+>76d        trRL     0.357 0.144  0.879   | 1.09       0.87            0.389      0.049
+            val      0.361 0.184  0.826   | 1.10       0.91            0.395      0.066
+            private  0.363 0.200  0.836
+=> On train a cold young listing is 30-45% less clickable than a warm one; on val only 7-10%. On private the
+   (young, cold) cells hold more of the rows than on val (3-7 d: 0.086 vs 0.059 of all rows; 7-24 d cold: 0.088 vs
+   0.054). The 7-24 d bucket is where the private shift is largest in absolute positive mass (19% of positives) and
+   where the stale-val replay loses most (-0.0092 per feed with such positives).
+
+---------------------------------------------------------------------------------------------------------------------
+3. RELIANCE OF G3 MEMBERS ON EACH INPUT (CPU replay; s02 / s02b; out/replay_summary.json)
+---------------------------------------------------------------------------------------------------------------------
+Paired delta vs the member's own CPU base pass (r6_cd_m02_r101 base 0.39733, stored 0.39730; v23_gru_pre2s_s501 base
+0.39500, stored 0.39487). z = column(s) -> 0 (the NaN->0 'absent' state); p = permuted within feed.
+group (cols)        r101 z            r101 p            s501 z            s501 p          r101 z slices coldpos/warmpos
+popularity (0-7)   -0.00566 (0.00108) -0.01514 (0.00127) -0.00611 (0.00107) -0.01616 (0.00129)  +0.0374 / -0.0245
+ctx_nd (8-17)      -0.01101 (0.00116) -0.00703 (0.00092) -0.01077 (0.00119) -0.00665 (0.00095)  -0.0201 / -0.0078
+ctx_hn (18-23)     -0.00153 (0.00064) -0.00138 (0.00063) -0.00227 (0.00061) -0.00167 (0.00058)  -0.0016 / -0.0017
+ctx_hs (24-27)     -0.00323 (0.00080) -0.00504 (0.00079) -0.00244 (0.00072) -0.00306 (0.00071)  -0.0078 / -0.0013
+pre2 (28-33)       -0.00191 (0.00056) -0.00463 (0.00074) -0.00205 (0.00051) -0.00473 (0.00072)  -0.0055 / -0.0006
+STALE-VAL ('both_pre2both', stored GPU replay, r101): -0.00123 (0.00057); M<50 -0.0014, M>=50 -0.0011, Tue -0.0004,
+Thu -0.0022, coldpos +0.0133, warmpos -0.0073.
+pre2 permuted within feed: -0.00663 (0.00081) r101 / -0.00473 (0.00074) s501 (a wrong ordering hurts far more than
+the 'absent' state, which the model knows from LUO-cold rows).
+Per-column (z = zeroed alone, p = permuted alone), r101 | s501:
+  it_hist_all_luo   z -0.01142 (0.00121) | -0.01232     p -0.01107 | -0.00955     coldpos +0.036 / warmpos -0.032 (z)
+  seq_cv_pop        z -0.00545 (0.00086) | -0.00365     p -0.01289 | -0.01307     coldpos -0.036 / warmpos +0.007 (z)
+  it_hist_et1_luo   z -0.00387 (0.00089) | -0.00380                               coldpos +0.027 / warmpos -0.017
+  seq_cv_invd20     z -0.00068 (0.00063) | -0.00130     p -0.00214 | -0.00193
+  seq_cv_norm       z -0.00014 (0.00032) | +0.00002     p -0.00038 | -0.00007     (redundant with invd20, rho 0.9998)
+  (zeroing one popularity column alone exceeds zeroing all eight, because the model reads the all/et1/cv-pop columns
+   jointly and an inconsistent state is worse than a consistent 'cold' state.)
+The remaining per-column passes (ctx_nd, ctx_hn, ctx_hs, pre2 columns) keep appending to out/replay/<member>.log and
+out/replay_summary.json (s02 is resumable: re-run s02b_replay_summary.py to refresh).
+Reading: ctx_nd (feed-internal neighbourhood density) is the input the model leans on most and it has NO shift
+(cAUC 0.50 everywhere), so it is safe. Popularity is second and is the only shifted family. pre2 reliance is small
+(-0.002 zeroed) for a family that is the most train-shifted non-popularity input; its risk is bounded by that.
+
+---------------------------------------------------------------------------------------------------------------------
+4. PRIVATE-LIKE COVERAGE COST, SEPARATED BY FAMILY (s02c; stale scenarios of nn_x/r6/stale_pred.py replayed on CPU)
+---------------------------------------------------------------------------------------------------------------------
+scenario (val inputs replaced)    r6_cd_m02_r101 (tf)          v23_gru_pre2s_s501 (gru)     r101 slices coldpos / warmpos / M<50 / Thu
+st_pop  (8 popularity cols)       -0.00124 (0.00056) z -2.2    -0.00145 (0.00056) z -2.6    +0.0126 / -0.0069 / -0.0010 / -0.0022
+st_pre2 (pre2_fe_z/_s, has)       +0.00006 (0.00009)           -0.00010 (0.00007)           +0.0001 / +0.0000 / +0.0001 / -0.0001
+st_both (= project stale-val)     -0.00117 (0.00056) z -2.1    -0.00144 (0.00056) z -2.6    +0.0129 / -0.0069 / -0.0010 / -0.0021
+stored GPU stale-val (r101)       -0.00123 (0.00057)           n/a                          +0.0133 / -0.0073 / -0.0014 / -0.0022
+=> the whole private-like loss is the popularity family; pre2's contribution is +-0.0001. Thu (the staler val day)
+   loses 5x more than Tue, as expected for a staleness effect.
+F7x train-only 4-member pool under 'both_pre2both' (stored GPU stale preds): -0.00175 +- 0.00053 (private-mix
+-0.00227 +- 0.00081); M<50 -0.0036, M>=50 -0.0005; coldpos +0.0112, warmpos -0.0071; by mean age of the feed's
+positives: <1d +0.0211 (0.0040), 1-3d +0.0146 (0.0025), 3-7d -0.0015 (0.0022), 7-24d -0.0092 (0.0014),
+24-76d -0.0028 (0.0010), >76d -0.0026 (0.0007). Per member: -0.0012 / -0.0022 / -0.0012 / -0.0005.
+
+---------------------------------------------------------------------------------------------------------------------
+5. NEW FEATURES (s03) AND THE RESIDUAL-ON-G3 PROBE (s04 / s04b)
+---------------------------------------------------------------------------------------------------------------------
+Probe: base = G3 submission score on val (0.40032); GroupKFold(5) by user; LIN control 0.40032, GBM control 0.40050
+(the GBM control re-calibrates by +0.0002). Null: noise0..3 LIN -0.00047..+0.00009, GBM -0.00042..+0.00022.
+Families built (all splits unless noted; definitions in s03 docstring):
+  h_  history structure: recency-weighted same-category mass tau 5/20 and share, same-category counts by event
+      source (1 = feed clicks, 2, >=3), source-1 share, first same-category type-1 recency, repeat-engaged
+      same-category items, rank of the category in the user's profile, history category entropy, #source-1 events.
+      wAUC on val 0.55-0.60 (h_cat_rw5 0.598), parity clean (cAUC trRL~val50 0.50, val~priv 0.50), slopes ~equal on
+      production and exploration. Probe: all within +-0.0003 (best h_cat_src2 LIN +0.00008; worst h_cat_s1_share GBM
+      -0.00067 +- 0.00030). The in-model category-affinity block already covers this.
+  rc_ candidate-set-relative within (feed, category): z / pct-rank of maxsim32, f1, pre2_fe_s, log LUO, cos_u,
+      ctx_nd_knn_h, log co-vis; group size; group max f1. Aimed at the "right category, buried" block. Probe: best
+      rc_ctx_nd_knn_h_rk GBM +0.00052 +- 0.00037 (M<50 +0.0013, M>=50 0.0000), rc_f1_z GBM +0.00038 +- 0.00033,
+      rc_f1_rk LIN +0.00026 +- 0.00020; rc_cos_u_z GBM -0.00075. None > 2 SE; the within-category ordering is
+      already learned by the set attention.
+  a_  age-adjusted popularity (label-free): log age (f4 knots), LUO per day of life, LUO residual vs the split's own
+      f4-bin mean (transductive), co-vis residual, the split's f4-bin LUO zero rate. These are the CPU analogue of
+      "staleness-corrected popularity": by construction they match per split (val from val, test from test).
+      Probe: a_luo_resid_split LIN +0.00000, GBM -0.00004; a_luo_rate GBM -0.00031; a_zero_rate_split LIN +0.00019 /
+      GBM -0.00026; a_age_days LIN +0.00001 / GBM -0.00017 (private-mix +0.00026 / -0.00036). Every one trades
+      coldpos (+0.002..+0.005) against warmpos (-0.001..-0.003). The G3 pool (TO + FT halves) is already close to
+      age-calibrated on val; what the probe cannot see is the private regime, where these features' zero rates are
+      outside val support (a_zero_rate_split: 8.9% of private rows outside val q-range). A transductive per-split
+      age-conditional popularity residual is therefore the one new input whose private value val cannot price.
+  u_  user x item variants (val/test): cos_u - cos_hall, cos_u - cos_h10, cos_u * maxsim32, cosine with the user
+      vector's residual after projecting out the last-32 history centroid (u_res_cos), cosine with that centroid,
+      user-zero flag. u_x_maxsim wAUC 0.654 (= the two strongest in-model signals multiplied), u_res_cos wAUC 0.511
+      only: the user model carries almost nothing beyond the recent history direction (mean projection 0.68).
+      Probe: all within +-0.00035 (u_minus_h10 LIN +0.00034 +- 0.00022, GBM -0.00035).
+  xs_ within-split exposure counts (val from val, test from test; label-free but TRANSDUCTIVE test information):
+      other-user candidate count all / before / after own ts; other users' histories holding the item all / before /
+      after. Coverage: cand other>0 val 0.19 vs test 0.30 (the test split has 2x the feeds), so these are NOT
+      parity-matched val->test (cAUC val~priv 0.557-0.559 for the candidate counts); the 'after' counts are future
+      information inside the test window. wAUC on val 0.497-0.514 (nil). Probe: all within +-0.0003 (xs_cand_after
+      LIN +0.00018, xs_hist_before GBM -0.00026). => test-window-only counts carry no usable signal over G3, and they
+      would need density normalisation to be used at all. Not recommended.
+  k_  cold-item content-kNN prior (val/test): faiss IVF over the split's own item table restricted to train-exposed
+      items (1.58M val / 2.60M test references), 20 neighbours per candidate (self excluded), top-1 cosine 0.951 on
+      average: similarity-weighted train popularity (log LUO), train CTR, clicks-over-expected of the neighbours,
+      near-duplicate count (cos > 0.95), mean popularity of the 5 nearest. wAUC 0.52-0.53 (weak), parity clean
+      (val~priv 0.49-0.55). Probe: k_ctr LIN +0.00029 +- 0.00025 / GBM -0.00007; k_coec LIN +0.00033 / GBM -0.00074;
+      k_pop GBM -0.00041. Null, consistent with eda_embeddings (item CTR is not predictable from content, kNN R2<0).
+      (The per-split tables share 72-83% bit-identical vectors with train, so a union-table version would be the same.)
+  Group GBMs (all columns of a family in one 60-round lambdarank over G3; out/s04_summary.txt):
+    ud_ +0.00056 (0.00031) | h_ +0.00017 (0.00027) | NEW_all (52) +0.00024 (0.00045) | ixh_ +0.00022 (0.00042) |
+    a_ +0.00018 (0.00042) | xs_ +0.00007 (0.00032) | rc_ +0.00001 (0.00044) | k_ -0.00005 | u_ -0.00005 |
+    tte_ -0.00009 | xs_causal -0.00010 | prew_ -0.00022 | als_ -0.00030 | trd_ -0.00035 | clu_ -0.00042 |
+    ctx_hs_unused -0.00059 (0.00035) | seq_unused (19) -0.00138 (0.00040).
+    Every family with popularity-type content shows the same signature: coldpos +0.003..+0.007, warmpos -0.002..
+    -0.003, net 0 (NEW_all coldpos +0.0062 / warmpos -0.0024).
+  Private-mix weighted (s04b; out/pmix_probe.jsonl): a_group GBM +0.00056 val / +0.00138 (0.00071) private-mix /
+    +0.00099 public-mix; k_ctr LIN +0.00029 / +0.00098 (0.00039) / +0.00076; a_luo_resid_split LIN +0.00000 /
+    +0.00035 (0.00029); a_luo_rate GBM -0.00031 / -0.00108 (0.00051); everything else within +-0.0005. With ~30
+    weighted comparisons, z 2.5 (k_ctr) is the chance maximum; a_group's +0.0014 under the private mix is the only
+    candidate worth a confirmation (P2 below), not evidence.
+
+---------------------------------------------------------------------------------------------------------------------
+6. PROPOSALS (mechanism -> protocol -> expected gain -> kill rule)
+---------------------------------------------------------------------------------------------------------------------
+P1. hzcd-type parity for the popularity inputs, re-targeted at 7-24-day listings (the only private-specific lever
+    found). Mechanism: section 2/4 - the private loss of the TO half sits in feeds whose positives are 1-4 weeks old
+    and warm on val but cold on private (zero rate 0.30 -> 0.50); the existing it_hist_hz files restore the
+    train-row zero-lift parity (0.71 -> 0.99) and were null on val (a cold/warm trade) - but the trade's private-mix
+    value was never read on this axis. Protocol (CPU first, GPU only on pass): (a) re-score the 20 G3 TO members
+    under the 'both' scenario (CPU replay as s02c, ~80 s/pass) and report the delta per age bucket and private-mix;
+    (b) cooldown arm 'hzcd' (train rows read it_hist_hz_* in the cooldown, as INSIGHTS item 6) on roots 101-104 vs
+    m02ref; readout = val, holdout, stale-val, pmix, and the 7-24 d age-bucket delta. Expected: TO member +0.0003..
+    +0.0008 under private-like coverage, ~0 on val. Kill: val < -1 SE or stale-val delta <= m02ref's.
+P2. Per-split transductive age-conditional popularity residual as a fine-tune extra (a_luo_resid_split,
+    a_zero_rate_split; built here for val/test): val-fit standardisation keeps parity, the semantic "popularity
+    relative to listings of the same age in this split" is identical on val and test, and it is the only new input
+    whose private value differs from its val value by construction. Protocol: n2cpv3 + these 2 (or 4) files on >= 8
+    members, 2 FT seeds; readout OOF delta (bar >= -0.0003, W3 rule) and the stale-val replay of the FT folds (ADV
+    proposal 2). Expected val ~0 (probe: +0.0000/-0.0003), private 0..+0.0005. Kill: OOF < -0.0003 or no gain on
+    the emulated-stale OOF.
+P3. Domain-balanced train loss for the production confound (section 1c): f1/f3/f5/feed_cat_share are rewarded more
+    on production feeds than on exploration feeds (ratios 1.14-1.32) while popularity is rewarded 5x less. The
+    domain token handles the intercept, not the slope. Protocol: a 2-epoch paired screen with the production rows'
+    loss weight annealed to 1-p_soft at the end of the cooldown (= exploration-only cooldown), read the per-family
+    slope of the model's score on val (regress z(score) on z(f1), z(luo) ...) against the val label slopes above.
+    Note wave-4's rho70 / rec33 already showed that removing production feeds from the cooldown hurts (-0.0035 /
+    -0.0021), so this is low prior (P ~0.1); a cheaper diagnostic is the slope comparison alone (CPU, 10 min).
+P4. Drop `has:pre2_fe` from the next from-scratch preset and give the Sep 6-8 train rows the LUO-cold pre2 value
+    instead of NaN (a 0-cost hygiene change): it is a pure early-September date flag on train (26% of rows) and a
+    constant on val/test; cAUC trRL~val50 0.631 is the single largest train/val separator among the 34 inputs.
+    Expected +-0.0002; it removes a regime switch the model cannot use at inference.
+P5. Fine-tune hygiene already queued (W3b/n2cpv3) stays right: the shifted FT extras are the coverage ones
+    (it_hist_*_luo, seq_cv_pop, pre_idmax32(_has), pre_id_contrib_v2) and seq_cv_invd20_rk (tied-rank drift 0.532).
+    A warm-only rank (NaN for cold) for seq_cv_invd20_rk and it_hist_all_luo_rk is the one remaining parity fix
+    (ADV proposal 3). Expected <= +0.0003.
+Not recommended (measured null here): history-structure features (h_), within-category relative features (rc_),
+user x item variants (u_), content-kNN priors (k_), test-window exposure counts (xs_; also not parity-matched),
+and every unused on-disk family (section 7).
+
+---------------------------------------------------------------------------------------------------------------------
+7. ABLATION PROTOCOL FOR "FEATURES PLAUSIBLY HURTING PRIVATE"
+---------------------------------------------------------------------------------------------------------------------
+Unused on-disk singles over G3 (top / bottom by z; full list in out/s04_summary.txt and out/resid_*.jsonl):
+  it_tr_coec LIN +0.00060 (0.00033) | prew_new_z LIN +0.00039 (0.00021) | ixh_df1 LIN +0.00038 (0.00027) |
+  ixh_mf1 LIN +0.00034 | trd_skde_s6h LIN +0.00022 | it_tr_coec GBM +0.00046 (0.00040) | ud_drift_fz GBM +0.00032 |
+  ... | seq_max_new8 GBM -0.00085 | seq_dmax_hl10 GBM -0.00082 | trd_n95_s6h GBM -0.00059 | ctx_hs_e1k64 GBM -0.00072.
+  Note it_tr_coec / ixh_* / tte_it_imp are the train-period exposure statistics whose label slope flips sign between
+  production and exploration rows (section 1c) and which drift val->private (cAUC 0.43-0.57); their +0.0004..0.0006
+  on val is the usual "val-fit on val-period coverage" number that ADV-3 warned cannot price the private cost.
+Candidates (reliance x shift): (i) it_hist_{all,et1..et4}_luo + seq_cv_{invd20,norm,pop} [reliance -0.006 zeroed,
+shift val->priv 0.46, joint age x cold shift]; (ii) pre2_{fe,new}_{z,s}, pre2_hmax32, has:pre2_fe [reliance -0.002,
+train-only NaN regime + density skew; val->priv clean]; (iii) FT extras seq_cv_invd20_rk, it_hist_all_luo_rk,
+pre_idmax32_has [tied-rank / availability drift]. Everything else: reliance without shift (safe).
+Protocol A (CPU, 1 day): for all 20 G3 TO members, replay val under st_pop, st_pre2, st_both (s02c) -> pool deltas
+with SE, private-mix, age buckets; this prices (i) vs (ii) separately. Protocol B (GPU, paired, 2 seeds each, the
+2-epoch r7 screen then a 10-epoch pair): cvnd_pre2s minus seq_cv_* (3 cols), minus it_hist_et2..4 (3 cols), minus
+has:pre2_fe, and the hzcd arm; readout = val (> -1 SE), holdout, stale-val (must improve by > 2 SE for an
+ablation to be adopted), pmix, the 7-24 d age-bucket delta. Protocol C (FT, GPU-min): n2cpv3 minus
+{seq_cv_invd20_rk, it_hist_all_luo_rk} vs with warm-only ranks, 8 members x 2 FT seeds, OOF + stale-emulated OOF.
+Decision rule: adopt an ablation only if stale-val and pmix improve by > 2 SE and val is not worse than -1 SE.

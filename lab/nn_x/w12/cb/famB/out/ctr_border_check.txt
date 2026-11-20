@@ -1,0 +1,6 @@
+Synthetic check of native CTR resolution (CatBoost 1.2.10 CPU, Logloss, 600,000 train rows, one categorical key with 200 values whose click rates run from 0.4% to 3.0%; 200,000 eval rows) [M, 2026-11-15 01:31Z]
+constant-rate Logloss 0.08673   oracle Logloss 0.08488
+default CTR (Borders CtrBorderCount=15)      eval Logloss 0.08673   distinct predicted levels over the 200 keys 2    corr(pred, true rate) 0.057
+CtrBorderCount=255                            eval Logloss 0.08504   distinct predicted levels 23                     corr 0.947
+CtrBorderCount=255, has_time                  eval Logloss 0.08503   distinct predicted levels 25                     corr 0.948
+(CatBoost prints "Change of simpleCtr will not affect combinations ctrs": combinations_ctr must be set too.)

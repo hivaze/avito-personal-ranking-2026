@@ -1,0 +1,15 @@
+replicate 0: sub-feed mean M 23.4, positives per sub-feed 1.06 (val M<50: mean M 23.4, positives 1.22); W8 NDCG 0.52431
+replicate 1: sub-feed mean M 23.5, positives per sub-feed 1.06 (val M<50: mean M 23.4, positives 1.22); W8 NDCG 0.52482
+replicate 2: sub-feed mean M 23.4, positives per sub-feed 1.06 (val M<50: mean M 23.4, positives 1.22); W8 NDCG 0.52500
+replicate 3: sub-feed mean M 23.4, positives per sub-feed 1.06 (val M<50: mean M 23.4, positives 1.22); W8 NDCG 0.52606
+
+levels: W8 full holdout 0.32456 | W8 HOLD-SHORT(free) 0.52505 | W8 val M<50 0.51828 | val M>=50 0.32093
+
+contrast                     | holdout full (30K, M>=50)  | HOLD-SHORT free (30K x 4 reps) | val M<50 (5.9K)        | val M>=50 (8.5K)       | corr(full, short) per feed
+KD (d128, 4 vs 4)            | +0.00021 +- 0.00036        | +0.00072 +- 0.00034            | +0.00309 +- 0.00117    | +0.00121 +- 0.00063    | 0.511
+width under KD (8 vs 8)      | +0.00083 +- 0.00028        | +0.00073 +- 0.00027            | -0.00011 +- 0.00089    | +0.00071 +- 0.00055    | 0.471
+W8 vs hard-label 4-pool      | +0.00128 +- 0.00037        | +0.00164 +- 0.00035            | +0.00292 +- 0.00122    | +0.00254 +- 0.00067    | 0.520
+S16 vs W8                    | -0.00028 +- 0.00019        | +0.00002 +- 0.00018            | +0.00056 +- 0.00057    | -0.00013 +- 0.00039    | 0.420
+
+Reading: if HOLD-SHORT(free) deltas equal the full-holdout deltas times a constant and the per-feed correlation is high, the instrument
+re-weights the same information; it cannot confirm or refute a val M<50 effect that the full holdout does not already show.

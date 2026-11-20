@@ -1,0 +1,16 @@
+== r7 eval_screen screen; sigma_run val 0.00035 holdout 0.00015; seeds (23,)
+== runs (selected step / final step; train minutes; GPU; peak reserved GB)
+  r7:r7_smoke-base_s23         best     73/73 val 0.31824 hold 0.24729 | final val 0.31824 hold 0.24729 (end-sel +0.00000 / +0.00000) | 1 min | GPU N | 55 GB
+  r7:r7_smoke-muon_in-batch2s-resdrop0-pbld-hc4-diff2-swiglu-derf-hl2-periln-ftok-a4u-cset-typed-adrop0-a4w-wd01_s23 best     43/43 val 0.34185 hold 0.26664 | final val 0.34185 hold 0.26664 (end-sel +0.00000 / +0.00000) | 1 min | GPU N | 62 GB
+
+== smoke-muon_in+batch2s+resdrop0+pbld+hc4+diff2+swiglu+derf+hl2+periln+ftok+a4u+cset+typed+adrop0+a4w+wd01 vs smoke-base (B = treatment)
+  VAL  r7:r7_smoke-muon_in-batch2s-resdrop0-pbld-hc4-diff2-swiglu-derf-hl2-periln-ftok-a4u-cset-typed-adrop0-a4w-wd01_s23 0.34185 vs r7:r7_smoke-base_s23 0.31824: all +0.02360+-0.00098 (z +24.12)  M<50 +0.02800+-0.00177 (z +15.84)  M>=50 +0.02057+-0.00095 (z +21.75)  Tue +0.02358+-0.00127 (z +18.61)  Thu +0.02363+-0.00132 (z +17.91)  coldpos +0.02811+-0.00134 (z +20.93)  warmpos +0.02148+-0.00131 (z +16.42)
+  VAL  pooled: all +0.02360+-0.00098 (z +24.12)  M<50 +0.02800+-0.00177 (z +15.84)  M>=50 +0.02057+-0.00095 (z +21.75)  Tue +0.02358+-0.00127 (z +18.61)  Thu +0.02363+-0.00132 (z +17.91)  coldpos +0.02811+-0.00134 (z +20.93)  warmpos +0.02148+-0.00131 (z +16.42)
+  HOLD r7:r7_smoke-muon_in-batch2s-resdrop0-pbld-hc4-diff2-swiglu-derf-hl2-periln-ftok-a4u-cset-typed-adrop0-a4w-wd01_s23 0.26664 vs r7:r7_smoke-base_s23 0.24729: all +0.01936+-0.00052 (z +37.14)  late20% +0.01798+-0.00103 (z +17.53)
+  HOLD pooled: all +0.01936+-0.00052 (z +37.14)  late20% +0.01798+-0.00103 (z +17.53)
+  SCALE growth |final-init| arm vs base (seed means): {'top_sim_bias': (0.003, 0.003, False), 'c_ln_gain': (0.0002, 0.0003, False), 'retr_a': (0.0052, 0.0045, False), 'cross0_WO_rms': (0.0001, 0.0, True)}  -> SCALE-SUSPECT False
+  COST: train-minute ratios on comparable (same GPU, same wave) pairs: none comparable
+  ==> PROMOTE -> stage 2 (10-epoch pair)
+
+== summary
+  smoke-muon_in+batch2s+resdrop0+pbld+hc4+diff2+swiglu+derf+hl2+periln+ftok+a4u+cset+typed+adrop0+a4w+wd01 val +0.02360 (z +24.12)  hold +0.01936 (z +37.14)  -> PROMOTE -> stage 2 (10-epoch pair)

@@ -1,0 +1,251 @@
+READY.txt of arm hz2n (builder), written 2026-11-15T07:47:39Z. Builder start 2026-11-15T07:12:44Z. CPU only; no GPU process started; no val / test / holdout label opened.
+Marks: [M] measured here, [D] read in a project file, [I] inferred. Declarations with their time stamps: DECLARATION.txt (+ ADDENDUM 1-3), PREREG_hz2n_arm.txt.
+
+0. WHAT TO DO (one screen)
+ a. copy the module next to the trainer (I may not write there):   cp <repo>/nn_x/w12/stale/hz2n/cd_arms6c.py <repo>/nn_x/w5/cd_arms6c.py   (md5 dbe5a1387569ecbcb832de6e4cc97297)
+ b. ONE-LINE import change, nn_x/w5/train.py line 56 (the same line is nn_x/w12/kd/fd/train_full2.py line 69):
+      - from cd_arms6b import save_holdout_hz, setup_hzcd  # ...
+      + from cd_arms6c import save_holdout_hz, setup_hzcd  # wave-5 hzcd; 6c = cd_arms6b + optional encoder-score columns pre2_hz_* in HZCD_DIR (hz2n); identical to 6b when HZCD_DIR holds none
+    (nn_x/abl/train.py imports cd_arms6, not 6b: untouched. AST of train.py with the new line: 35 top-level statements, exactly 1 differs = this import [M].)
+ c. per arm export HZCD_DIR (+ HZ2_KEEP), as lane.sh lines 233-236 do for hz2 / hz2L; run with --hzcd exactly like hz / hz2. Nothing else changes.
+ d. check in the run log: the setup_hzcd line must contain "[6c: <n> swapped columns [...]; HZ2_KEEP rows on stored values: <k>; ENCODER-SCORE VIEW ON: <m> of them are
+    encoder-score columns [...] <- [...]". Expected <n> / <m> / <k> per directory in section 1. No "ENCODER-SCORE VIEW ON" in the line = the run trained on a plain 6b view.
+
+1. DIRECTORIES (HZCD_DIR -> HZ2_KEEP). Every directory holds symlinks to all files of its base view that cd_arms6b reads, plus the new files.
+ THE THREE VIEWS AS ASKED (fe head only = the stale-val witness construction build_pre2both, bit for bit):
+  (a) <repo>/nn_x/w12/stale/hz2n/feats_n     HZ2_KEEP=<repo>/nn_x/w12/stale/hz2/feats/train/hz2_keep_rows.npy     log: 10 swapped / 2 encoder / keep 46918534   hz tensor 4.60 GB (hz2: 3.68)
+  (b) <repo>/nn_x/w12/stale/hz2n/feats_Ln    HZ2_KEEP=<repo>/nn_x/w12/stale/hz2/feats_L/train/hz2_keep_rows.npy   log: 10 / 2 / 46918534   4.60 GB
+  (c) <repo>/nn_x/w12/stale/hz2n/feats_hn    HZ2_KEEP unset                                                                     log: 7 / 2 / 0          3.22 GB (hz: 2.30)
+ DECLARED EXTENSION F (ADDENDUM 2; as-asked fe-head files + the NEW head rebuilt the same way = witness construction build_pre2full, bit for bit):
+  (aF) <repo>/nn_x/w12/stale/hz2n/feats_nF   HZ2_KEEP as (a)   log: 12 / 4 / 46918534   5.52 GB
+  (bF) <repo>/nn_x/w12/stale/hz2n/feats_LnF  HZ2_KEEP as (b)   log: 12 / 4 / 46918534   5.52 GB
+  (cF) <repo>/nn_x/w12/stale/hz2n/feats_hnF  HZ2_KEEP unset    log: 9 / 4 / 0           4.14 GB
+  (cFS) <repo>/nn_x/w12/stale/hz2n/feats_hnFS HZ2_KEEP unset   log: 12 / 4 / 0          5.52 GB   (ADDENDUM 3: cF + seq_cv_hz_* = 0 on view-cold rows, as on every cold val / test row)
+ DECLARED SENSITIVITY P (ADDENDUM 1; fe head with the no-ID score on the fe calibration; NOT recommended for GPU, see 5):  feats_nP, feats_LnP, feats_hnP (same keep, 10 / 2, 10 / 2, 7 / 2).
+ GPU memory: resident = the hz tensor above (0.46 GB per swapped column); setup peak = 2x that for a moment (torch.stack in load_hz, unchanged from 6b).
+ The two keep masks are byte-identical files [M]. Keep rows carry no encoder score at all (0 of 46,918,534 keep rows have a finite pre2_fe [M]: feeds of Sep 6-8 lie before
+ the first encoder window), so the keep mask does not interact with the new columns.
+
+2. DEFINITION (all 246,745,836 train rows)
+ view it_hist_all = the RAW counter file <base>/train/it_hist_hz_all.npy (float32; a: hz2/feats, b: hz2/feats_L, c: data/feats_new); stored counter = nn/feat_cache/train/it_hist_all_luo.npy.
+ newly cold row nc = (view == 0) & (stored > 0) & ~keep. Raw vs model scale: 0 rows with view > 0 whose fp16(log1p) is 0, 0 rows with view > 0 and stored == 0, no NaN [M].
+ on nc rows: pre2_fe := data/feats/train/pre2_fe_noid.npy; pre2_fe_s := float32((pre2_fe_noid + 20) / 6); pre2_fe_z := mean over the 2 configs of the within-feed z of the mixed
+ per-config scores, recomputed over the WHOLE feed (as the witness does); has:pre2_fe follows the mixed score. Every non-nc row keeps the stored bits of pre2_fe / pre2_fe_s / has;
+ pre2_fe_z keeps the stored bits in every feed without an nc row, and changes on all rows of a feed with one (re-standardisation; mean |dz| on the other rows 0.059 a, 0.062 b, 0.015 c [M]).
+ has:pre2_fe: 0 of 246,745,836 rows change in every directory [M] -> nothing to swap; the file sits in <dir>/aux/pre2_hz_fe_has.npy (cd_arms6c would swap it if it were in train/).
+ Files a model under --xt cvnd_pre2s reads from the new set: pre2_hz_fe_z.npy, pre2_hz_fe_s.npy (+ pre2_hz_new_z.npy, pre2_hz_new_s.npy in F). pre2_hz_fe.npy / pre2_hz_new.npy are the
+ raw mixed scores (not inputs of that preset). hz2n_newly_cold.npy = the nc mask.
+
+3. PROOFS (one line each)
+ P0 [M] PASS: the per-config arithmetic without override reproduces stored pre2_fe, pre2_fe_noid, pre2_fe_z BITWISE on all 177,782,868 window rows (0 differing rows per window; stored pre2_fe_s == float32((pre2_fe + 20) / 6) bitwise); outside the windows no row has a score (0 finite). New head (P0n): same, 0 differing rows.
+ P1 [M] PASS: cd_arms6c vs nn_x/w5/cd_arms6b.py with HZCD_DIR unset / hz2/feats (+keep) / hz2/feats_L (+keep) / hz2/feats (no keep): AST: changed defs exactly {luo_cols, setup_hzcd}, no new def,
+    only constants ENC_TO_HZ / ENC_GROUPS added; identical column lists (W8 preset and pop-light list), bit-identical load_hz tensors, 40 batches x 22 keys bit-identical on 2,000 random
+    non-holdout train feeds (158,751 cells), identical hz_stats, log line identical apart from the tag "6c". Diff: cd_arms6c_vs_cd_arms6b.diff (made by make_6c.py).
+ P2 [M] PASS: my row-wise function on the VAL rows with the witness counters reproduces solvers/out/stale/cf/pre2both_pre2_fe / pre2_fe_z / pre2_fe_s.npy with max|d| = 0.0e+00 / 0.0e+00 / 0.0e+00 (0 of 1,389,971 rows differ bitwise in each; nc == newly_cold.npy; has identical).
+    New head (P2n) vs pre2full_pre2_new / _z / _s.npy: max|d| = 0.0e+00 / 0.0e+00 / 0.0e+00 (0 rows differ bitwise). P family vs the witness: 9.0e-03 / 2.0e-02 / 1.5e-03 (NOT witness-exact, as declared).
+ P3 [M] PASS (all 246,745,836 rows, each directory): rows outside nc with changed bits in pre2_hz_fe / pre2_hz_fe_s / has: 0 / 0 / 0; pre2_hz_fe_z rows changed in feeds without an nc row: 0;
+    keep rows: never nc and without any score. New-head files (P3n): 0 / 0. Rows changed (fe_s; fe_z): feats_n 51,276,139; 177,601,669; feats_Ln 55,041,224; 177,653,467; feats_hn 16,914,895; 162,951,541.
+ P4a [M] PASS: the REAL setup_hzcd of cd_arms6c (unwrapped load_hz, the real HZ2_KEEP file) over the FULL row space on a CPU stand-in split: every cell of every swapped column == keep ? stored : fp16(attach_xt transform(view file)) (0 differing cells of 246,745,836 per column); encoder columns: 0 rows changed outside nc, 0 nc rows that are not the no-ID value; gather of 500 random feeds == those cells. Directories passed: ['feats_Ln', 'feats_LnF', 'feats_LnP', 'feats_hn', 'feats_hnF', 'feats_hnFS', 'feats_hnP', 'feats_n', 'feats_nF', 'feats_nP']; failed: none; pending: none.
+ P4b [M] PASS (10 directories, MiniSplit of 2,000 real train feeds, setup_hzcd with the sample keep file): log clause present; view tensor == keep ? stored : fp16(transform(file)); popularity columns
+    bit-identical to the 6b view of the base directory; pre2_fe_s == no-ID value on nc cells and stored bits elsewhere; every other key / column == plain gather; pop-light xt list swaps
+    [pre2_fe_z, pre2_fe_s(, xp_imp_c50)]; a partial head is refused; preset cvnd_pre2 (pre2_id_contrib input) is refused; has: hook works when the file is in train/.
+ P4c [M] PASS: real Ranker (w5_e10_kd05w192_s951@77500), 30 AdamW steps on batches gathered through HzTrainView(cd_arms6c) for feats_n / feats_nP / feats_nF: finite losses, weights move.
+    Label-free sensitivity before any step: mean |d within-feed z of the logit| vs the 6b hz2 view: 0.012 all cells, 0.022 nc cells (the hz2 view itself vs stored inputs: 0.160).
+ P4 LIMIT, stated plainly: nn_x/w5/train.py itself was NOT run on CPU. The fulldata harness cpu_run.py loads the whole train split (about 45 GB resident, 60+ GB peak by my
+    count [I]), above my 40 GB limit. Flag-off identity therefore rests on: (1) the one-line import is the only AST difference of train.py; (2) cd_arms6c at import only reads the two
+    environment variables and defines names (same top-level statements as 6b + 2 constants); (3) with --hzcd absent no function of the module is called. The first GPU run is the
+    end-to-end test of train.py + cd_arms6c: read its setup_hzcd log line (0.d) before trusting the lane.
+
+4. GATE (label-free; all 246,745,836 train rows; "pool" = trPool private-like feeds of days >= Sep 13, the population of the review's +0.21 and the one exchangeable with test feeds)
+ TARGETS (as built) [M]: P(pre2 ID contribution != 0 | it_hist_all == 0): val 0 of 527423, public 0 of 379250, private 0 of 919809 cold rows; P(new-head ID | cold) 0.0000 / 0.0000 / 0.0000; P(seq_cv_pop > 0 | cold) 0.0000 / 0.0000 / 0.0000; pre2_fe_s cold mean (all-row SD): val 5.6331 (0.7515), public 5.6543 (0.7333), private 5.6802 (0.7353)
+ 
+ G1 / G3 (fe head). cold = effective view counter == 0. before -> after = P(fe-head ID contribution != 0 | cold), count after in (). rows chg = share of rows whose pre2_fe_s / pre2_fe_z bits change; feeds = share of feeds with a changed row.
+ dir        days  cold share G1 before       G1 after (count)  chg fe_s  chg fe_z   feeds
+ feats_n    all       0.4079    0.2357     0.000000 (     0)    0.2078    0.7198  0.7185
+ feats_n    >=13      0.4248    0.3020     0.000000 (     0)    0.2583    0.9986  0.9872
+ feats_n    pool      0.4572    0.2228     0.000000 (     0)    0.2207    1.0000  1.0000
+ feats_Ln   all       0.4232    0.2452     0.000000 (     0)    0.2231    0.7200  0.7202
+ feats_Ln   >=13      0.4605    0.3172     0.000000 (     0)    0.2941    0.9991  0.9912
+ feats_Ln   pool      0.4972    0.2414     0.000000 (     0)    0.2607    1.0000  1.0000
+ feats_hn   all       0.2276    0.1104     0.000000 (     0)    0.0686    0.6604  0.6067
+ feats_hn   >=13      0.2529    0.1348     0.000000 (     0)    0.0864    0.9031  0.8189
+ feats_hn   pool      0.3077    0.0875     0.000000 (     0)    0.0711    0.8937  0.8780
+ feats_nP   all       0.4079    0.2357     0.000129 ( 13001)    0.0962    0.7137  0.6823
+ feats_nP   >=13      0.4248    0.3020     0.000080 (  3388)    0.1283    0.9898  0.9359
+ feats_nP   pool      0.4572    0.2228     0.000165 (   478)    0.1019    0.9990  0.9977
+ feats_LnP  all       0.4232    0.2452     0.000129 ( 13502)    0.1038    0.7149  0.6874
+ feats_LnP  >=13      0.4605    0.3172     0.000084 (  3840)    0.1461    0.9926  0.9481
+ feats_LnP  pool      0.4972    0.2414     0.000177 (   559)    0.1200    0.9995  0.9989
+ feats_hnP  all       0.2276    0.1104     0.000064 (  3607)    0.0251    0.5430  0.4520
+ feats_hnP  >=13      0.2529    0.1348     0.000037 (   934)    0.0341    0.7460  0.6172
+ feats_hnP  pool      0.3077    0.0875     0.000060 (   118)    0.0269    0.7463  0.7192
+ 
+ G2 (fe head): standardised mean difference of pre2_fe_s vs PRIVATE cold rows (public in []), before -> after. A = all view-cold rows with a score, B = made cold AND ID-carrying, C = made cold, no ID, D = as-built cold (never touched).
+ dir        days  B                                  A                                  C                                  D               
+ feats_n    all   +0.641 -> +0.366 [+0.678 -> +0.403] +0.433 -> +0.334 [+0.470 -> +0.370] +0.411 -> +0.370 [+0.447 -> +0.407] +0.265 [+0.301]
+ feats_n    >=13  +0.585 -> +0.351 [+0.622 -> +0.387] +0.389 -> +0.311 [+0.425 -> +0.347] +0.376 -> +0.352 [+0.412 -> +0.389] +0.248 [+0.284]
+ feats_n    pool  +0.207 -> -0.003 [+0.243 -> +0.032] +0.029 -> -0.023 [+0.065 -> +0.012] +0.011 -> -0.011 [+0.046 -> +0.025] -0.038 [-0.002]
+ feats_Ln   all   +0.633 -> +0.369 [+0.670 -> +0.406] +0.438 -> +0.339 [+0.474 -> +0.376] +0.416 -> +0.377 [+0.453 -> +0.414] +0.265 [+0.301]
+ feats_Ln   >=13  +0.578 -> +0.357 [+0.615 -> +0.394] +0.398 -> +0.321 [+0.435 -> +0.357] +0.390 -> +0.368 [+0.427 -> +0.405] +0.248 [+0.284]
+ feats_Ln   pool  +0.203 -> +0.010 [+0.239 -> +0.045] +0.043 -> -0.010 [+0.079 -> +0.026] +0.042 -> +0.021 [+0.077 -> +0.057] -0.038 [-0.002]
+ feats_hn   all   +0.571 -> +0.367 [+0.608 -> +0.404] +0.322 -> +0.282 [+0.358 -> +0.318] +0.312 -> +0.271 [+0.348 -> +0.307] +0.265 [+0.301]
+ feats_hn   >=13  +0.528 -> +0.358 [+0.565 -> +0.394] +0.298 -> +0.270 [+0.334 -> +0.306] +0.309 -> +0.284 [+0.345 -> +0.320] +0.248 [+0.284]
+ feats_hn   pool  +0.117 -> -0.043 [+0.153 -> -0.007] -0.035 -> -0.052 [+0.000 -> -0.017] -0.115 -> -0.138 [-0.079 -> -0.103] -0.038 [-0.002]
+ feats_nP   all   +0.641 -> +0.400 [+0.678 -> +0.437] +0.433 -> +0.359 [+0.470 -> +0.396] +0.411 -> +0.411 [+0.447 -> +0.447] +0.265 [+0.301]
+ feats_nP   >=13  +0.585 -> +0.367 [+0.622 -> +0.404] +0.389 -> +0.323 [+0.425 -> +0.359] +0.376 -> +0.376 [+0.412 -> +0.412] +0.248 [+0.284]
+ feats_nP   pool  +0.207 -> +0.013 [+0.243 -> +0.048] +0.029 -> -0.014 [+0.065 -> +0.022] +0.011 -> +0.011 [+0.046 -> +0.046] -0.038 [-0.002]
+ feats_LnP  all   +0.633 -> +0.402 [+0.670 -> +0.438] +0.438 -> +0.364 [+0.474 -> +0.400] +0.416 -> +0.416 [+0.453 -> +0.453] +0.265 [+0.301]
+ feats_LnP  >=13  +0.578 -> +0.373 [+0.615 -> +0.410] +0.398 -> +0.333 [+0.435 -> +0.370] +0.390 -> +0.390 [+0.427 -> +0.427] +0.248 [+0.284]
+ feats_LnP  pool  +0.203 -> +0.025 [+0.239 -> +0.060] +0.043 -> -0.000 [+0.079 -> +0.035] +0.042 -> +0.042 [+0.077 -> +0.077] -0.038 [-0.002]
+ feats_hnP  all   +0.571 -> +0.400 [+0.608 -> +0.437] +0.322 -> +0.297 [+0.358 -> +0.333] +0.312 -> +0.312 [+0.348 -> +0.348] +0.265 [+0.301]
+ feats_hnP  >=13  +0.528 -> +0.374 [+0.565 -> +0.410] +0.298 -> +0.277 [+0.334 -> +0.314] +0.309 -> +0.309 [+0.345 -> +0.345] +0.248 [+0.284]
+ feats_hnP  pool  +0.117 -> -0.027 [+0.153 -> +0.008] -0.035 -> -0.048 [+0.000 -> -0.013] -0.115 -> -0.115 [-0.079 -> -0.079] -0.038 [-0.002]
+ 
+ G2 for pre2_fe_z (clipped +-5) vs PRIVATE cold rows, before -> after:
+ feats_n    all   B +0.184 -> -0.134 | A -0.038 -> -0.117 | C -0.102 -> -0.094 | D -0.177 -> -0.126
+ feats_n    >=13  B +0.165 -> -0.122 | A -0.054 -> -0.119 | C -0.108 -> -0.090 | D -0.181 -> -0.139
+ feats_n    pool  B +0.160 -> -0.082 | A -0.039 -> -0.077 | C -0.086 -> -0.083 | D -0.101 -> -0.073
+ feats_Ln   all   B +0.178 -> -0.124 | A -0.032 -> -0.107 | C -0.089 -> -0.079 | D -0.177 -> -0.123
+ feats_Ln   >=13  B +0.158 -> -0.108 | A -0.042 -> -0.103 | C -0.084 -> -0.062 | D -0.181 -> -0.135
+ feats_Ln   pool  B +0.149 -> -0.069 | A -0.028 -> -0.064 | C -0.055 -> -0.048 | D -0.101 -> -0.070
+ feats_hn   all   B +0.089 -> -0.183 | A -0.149 -> -0.191 | C -0.220 -> -0.258 | D -0.177 -> -0.164
+ feats_hn   >=13  B +0.075 -> -0.163 | A -0.150 -> -0.179 | C -0.198 -> -0.217 | D -0.181 -> -0.171
+ feats_hn   pool  B +0.065 -> -0.134 | A -0.101 -> -0.117 | C -0.202 -> -0.223 | D -0.101 -> -0.095
+ feats_nP   all   B +0.184 -> -0.103 | A -0.038 -> -0.098 | C -0.102 -> -0.056 | D -0.177 -> -0.140
+ feats_nP   >=13  B +0.165 -> -0.106 | A -0.054 -> -0.109 | C -0.108 -> -0.066 | D -0.181 -> -0.146
+ feats_nP   pool  B +0.160 -> -0.066 | A -0.039 -> -0.071 | C -0.086 -> -0.060 | D -0.101 -> -0.079
+ feats_LnP  all   B +0.178 -> -0.095 | A -0.032 -> -0.089 | C -0.089 -> -0.043 | D -0.177 -> -0.138
+ feats_LnP  >=13  B +0.158 -> -0.092 | A -0.042 -> -0.094 | C -0.084 -> -0.040 | D -0.181 -> -0.143
+ feats_LnP  pool  B +0.149 -> -0.055 | A -0.028 -> -0.057 | C -0.055 -> -0.027 | D -0.101 -> -0.076
+ feats_hnP  all   B +0.089 -> -0.143 | A -0.149 -> -0.175 | C -0.220 -> -0.208 | D -0.177 -> -0.169
+ feats_hnP  >=13  B +0.075 -> -0.143 | A -0.150 -> -0.172 | C -0.198 -> -0.186 | D -0.181 -> -0.173
+ feats_hnP  pool  B +0.065 -> -0.115 | A -0.101 -> -0.112 | C -0.202 -> -0.195 | D -0.101 -> -0.097
+ 
+ G4 (not repaired by the as-asked / P files): P(NEW-head ID contribution | cold), P(seq_cv_pop > 0 | cold), P(xp_imp_c50 > 0 | cold); targets 0 / 0 / 0.18-0.31
+ feats_n    all   new-head ID 0.2357 | seq_cv_pop > 0 0.0000 | xp_imp_c50 > 0 0.1179 | hmax32 ID-dependent 0.7505 (targets 0.98-0.99)
+ feats_n    >=13  new-head ID 0.3020 | seq_cv_pop > 0 0.0000 | xp_imp_c50 > 0 0.1467 | hmax32 ID-dependent 0.9851 (targets 0.98-0.99)
+ feats_n    pool  new-head ID 0.2228 | seq_cv_pop > 0 0.0000 | xp_imp_c50 > 0 0.1643 | hmax32 ID-dependent 0.9699 (targets 0.98-0.99)
+ feats_Ln   all   new-head ID 0.2452 | seq_cv_pop > 0 0.0000 | xp_imp_c50 > 0 0.1148 | hmax32 ID-dependent 0.7592 (targets 0.98-0.99)
+ feats_Ln   >=13  new-head ID 0.3172 | seq_cv_pop > 0 0.0000 | xp_imp_c50 > 0 0.1378 | hmax32 ID-dependent 0.9856 (targets 0.98-0.99)
+ feats_Ln   pool  new-head ID 0.2414 | seq_cv_pop > 0 0.0000 | xp_imp_c50 > 0 0.1570 | hmax32 ID-dependent 0.9709 (targets 0.98-0.99)
+ feats_hn   all   new-head ID 0.1104 | seq_cv_pop > 0 0.0971 | xp_imp_c50 > 0 0.3993 | hmax32 ID-dependent 0.7405 (targets 0.98-0.99)
+ feats_hn   >=13  new-head ID 0.1348 | seq_cv_pop > 0 0.0967 | xp_imp_c50 > 0 0.4435 | hmax32 ID-dependent 0.9823 (targets 0.98-0.99)
+ feats_hn   pool  new-head ID 0.0875 | seq_cv_pop > 0 0.0821 | xp_imp_c50 > 0 0.4579 | hmax32 ID-dependent 0.9663 (targets 0.98-0.99)
+ 
+ F family, NEW head: G1n = P(new-head ID contribution | cold) before -> after (count); rows chg; SMD of pre2_new_s vs private [public] before -> after for B and A
+ feats_nF   all   G1n 0.2357 -> 0.000000 (18) | chg new_s 0.0962 new_z 0.7137 | B +0.582 -> +0.377 [+0.622 -> +0.416] | A +0.403 -> +0.340 [+0.442 -> +0.379] | C +0.388 | D +0.253
+ feats_nF   >=13  G1n 0.3020 -> 0.000000 (7) | chg new_s 0.1283 new_z 0.9898 | B +0.533 -> +0.345 [+0.573 -> +0.384] | A +0.361 -> +0.304 [+0.400 -> +0.343] | C +0.352 | D +0.235
+ feats_nF   pool  G1n 0.2228 -> 0.000000 (0) | chg new_s 0.1019 new_z 0.9990 | B +0.150 -> -0.017 [+0.189 -> +0.021] | A +0.005 -> -0.032 [+0.043 -> +0.006] | C -0.011 | D -0.049
+ feats_LnF  all   G1n 0.2452 -> 0.000000 (20) | chg new_s 0.1038 new_z 0.7149 | B +0.577 -> +0.379 [+0.617 -> +0.419] | A +0.408 -> +0.345 [+0.447 -> +0.384] | C +0.394 | D +0.253
+ feats_LnF  >=13  G1n 0.3172 -> 0.000000 (9) | chg new_s 0.1461 new_z 0.9926 | B +0.530 -> +0.353 [+0.570 -> +0.392] | A +0.372 -> +0.315 [+0.411 -> +0.354] | C +0.369 | D +0.235
+ feats_LnF  pool  G1n 0.2414 -> 0.000000 (0) | chg new_s 0.1200 new_z 0.9995 | B +0.152 -> -0.003 [+0.190 -> +0.035] | A +0.019 -> -0.018 [+0.057 -> +0.020] | C +0.021 | D -0.049
+ feats_hnF  all   G1n 0.1104 -> 0.000000 (5) | chg new_s 0.0251 new_z 0.5430 | B +0.515 -> +0.371 [+0.555 -> +0.410] | A +0.298 -> +0.277 [+0.338 -> +0.316] | C +0.282 | D +0.253
+ feats_hnF  >=13  G1n 0.1348 -> 0.000000 (1) | chg new_s 0.0341 new_z 0.7460 | B +0.479 -> +0.347 [+0.518 -> +0.386] | A +0.277 -> +0.260 [+0.316 -> +0.298] | C +0.281 | D +0.235
+ feats_hnF  pool  G1n 0.0875 -> 0.000000 (0) | chg new_s 0.0269 new_z 0.7463 | B +0.065 -> -0.058 [+0.103 -> -0.020] | A -0.052 -> -0.062 [-0.014 -> -0.025] | C -0.138 | D -0.049
+ 
+ View c co-visitation (gate_g4_extra.json): P(x > 0 | view cold) / P(x > 0 | made cold): seq_cv_invd20 0.0097 / 0.0227; seq_cv_pop 0.0971 / 0.2269; seq_cv_norm 0.0097 / 0.0227; xp_imp_c50 0.3993 / 0.4949; it_hist_et1_luo 0.0000 / 0.0000; it_hist_et4_luo 0.0000 / 0.0000 | targets: seq_cv_* 0.0000 exactly; xp_imp_c50 val 0.305 public 0.218 private 0.185
+
+ GATE VERDICTS against the declared rules:
+ G1 (target 0): PASS for (a) (b) (c): 0 view-cold rows keep an fe-head ID contribution (before: 23,725,776 / 25,607,841 / 6,199,225 rows = 23.6% / 24.5% / 11.0% of view-cold rows;
+    30.2% / 31.7% / 13.5% on days >= Sep 13). val / public / private: 0 as built. P family: 13,001 / 13,502 / 3,607 rows left by a 1e-3 tolerance reading (0.013% of cold rows;
+    8,791 / 9,082 / 2,107 of them are rows where the assembler's guard "raw score > -2" differs between the score and its no-ID twin [M]; the rest not examined).
+ G2(i) rows made cold AND ID-carrying, pre2_fe_s vs private cold rows: on the pool population +0.207 -> -0.003 (a), +0.203 -> +0.010 (b), +0.117 -> -0.043 (c): PASS (the review's +0.210 is
+    reproduced: +0.2101 against private feeds with M >= 50). On ALL train feeds (the population my declaration named first) +0.641 -> +0.366 (a), +0.633 -> +0.369 (b), +0.571 -> +0.367 (c):
+    FAIL BY THE LETTER (needed < half of before). Diagnosis [M]: rows the view never touches (D, as-built cold) read +0.265 on the same population and -0.038 on the pool, i.e. production-
+    ordered train feeds carry a level offset of about +0.3 SD against test feeds that has nothing to do with the view. My criterion ignored it. After the change, B sits at the level
+    of the other cold rows of its own population (C +0.370, A +0.334). I report the FAIL as declared and do not count it as a defect of the view; the lead decides.
+ G2(ii) all view-cold rows: PASS on all feeds for every directory (|after| < |before|); on the pool PASS for a, b and FAIL for c (-0.035 -> -0.052 vs private; +0.000 -> -0.017 vs public).
+ G3: rows whose pre2_fe_s changes 20.8% (a) / 22.3% (b) / 6.9% (c) of all train rows (25.8% / 29.4% / 8.6% on days >= Sep 13); pre2_fe_z changes on 72% / 72% / 66% (99.9% / 99.9% / 90%
+    on days >= Sep 13) because the feed is re-standardised; feeds with a changed row 71.9% / 72.0% / 60.7% (98.7% / 99.1% / 81.9%). Sep 6-8 feeds: 0 rows change (no encoder score there).
+ G4, NOT repaired by the three views as asked (say-so):
+  (1) NEW encoder head. pre2_new_z / pre2_new_s carry the item-ID contribution on exactly the same rows: P(new-head ID | view cold) 0.236 (a) / 0.245 (b) / 0.110 (c), 0.0000 on cold val /
+      public / private rows. The witness both_pre2both does not replace this head either. After the as-asked change these rows read "fe head without ID + new head with ID", a pattern
+      that exists on no test row and on no as-built train row, only in the stale-val witness inputs. Repaired in F (after: 18 / 20 / 5 coincidental rows; pre2_new_s on B rows, pool:
+      +0.150 -> -0.017 (a), +0.152 -> -0.003 (b), +0.065 -> -0.058 (c)).
+  (2) View c only: it_hist_all == 0 with seq_cv_pop > 0 on 9.7% of view-cold rows (22.7% of the rows it makes cold; seq_cv_invd20 / norm 1.0%), impossible on val / test (0.0000 exactly).
+      This is in arm hz as trained. Repaired in feats_hnFS only.
+  (3) Train calibration: on rows WITHOUT any ID contribution the stored pre2_fe_noid sits below pre2_fe by 0.257 / 0.184 / 0.008 (windows Sep 9-11 / Sep 12-15 / Sep 17-20; pre2_fe scale,
+      SD 4.3; val +0.003, test 0 exactly). So "as asked" also lowers pre2_fe_s of nc rows that never carried an ID, by 0.04 / 0.03 / 0.001 (0.06 / 0.04 / 0.002 private-row SD).
+      The review's "within 0.028" holds for the last window only. The P family removes this shift; level evidence does not separate the two (difference <= 0.03 SD, sign depends on the
+      population), so P is a sensitivity variant, not a recommendation.
+  (4) Unchanged by design and still unlike test: warm rows are 1-2 d stale instead of 7-10 d, non-integer counts (review MAJOR 1); Sep 6-8 keep hybrid (review MEDIUM 3); pre2_hmax32
+      (ID-dependent on 98% of cold rows on val / test and on train alike, so no tell by this reading; a candidate-ID part cannot be separated here); xp_imp_c50 > 0 on 40% of view-cold
+      rows under view c against 18-31% on targets (a level difference, not an impossible combination).
+
+5. REASONS NOT TO TRAIN / RECOMMENDATION (the choice is the lead's)
+ (a) feats_n: none from the proofs; G2(i) fired by the letter on the all-feeds reading (see above). Limit: half of the encoder tell (new head) stays. Trains on the stale-val witness pattern.
+ (b) feats_Ln: no base arm exists (no hz2L run on record [D hz2_review.md]) and the base view fails the hz2 study's own gate by G1 [D]; an hz2Ln arm can only be read against hz2, which
+     mixes "lag-first" with the encoder change. Do not train (b) unless an hz2L base arm is run next to it.
+ (c) feats_hn: none from the proofs; keeps tells (1) and (2) of G4. If one view-c arm is run, feats_hnFS is the one in which no cold-row combination is train-only by my checks.
+ F directories: the only ones in which no encoder-score input carries an item-ID contribution on a view-cold row. Read their stale-val with BOTH scenarios: both_pre2both (stale_pred.py)
+     feeds "fe without ID + new with ID" on newly cold val rows, which F models never saw; the like-for-like scenario is both_pre2full: stale_pred_full.py in this directory (a 10-line
+     wrapper that imports nn_x/w5/stale_pred.py unchanged and adds the three pre2full files; GPU script, NOT run by me).
+ My order if GPUs are short [I]: feats_hnFS (the chosen recipe X = hz with every cold-row tell removed) and feats_nF first; feats_n and feats_hn (as asked) next; (b) and P last / not at all.
+ Lagged-holdout read through a new view for ANY member (ref / hz / hz2 / hz2n): hold_infer_n.py in this directory (wrapper around the validated hz2/hold_infer.py; its attach()
+     self-test PASSED on the 30,000 holdout feeds for feats_n / feats_nF / feats_hnFS; scoring itself not run by me). Each hz2n run also writes its own nn_<v>_holdout_hz.npy through its view.
+ Pre-registration of what I expect: PREREG_hz2n_arm.txt (short: no arm of this family separates from its base arm by more than 1.5 SE on val or stale-val).
+
+5b. EXPECTED VALUES IN THE setup_hzcd LOG LINE of a GPU run [M, P4a: the same function over all rows on CPU]: "rows changed" per column (fp16 scale), W8 preset
+  feats_n    10 columns, hz tensor 4.60 GB: seq_cv_invd20 0.1272, seq_cv_pop 0.4843, seq_cv_norm 0.1297, it_hist_all_luo 0.6809, it_hist_et1_luo 0.6570, it_hist_et2_luo 0.3911, it_hist_et3_luo 0.3834, it_hist_et4_luo 0.3183, pre2_fe_z 0.7172, pre2_fe_s 0.1914
+  feats_Ln   10 columns, hz tensor 4.60 GB: seq_cv_invd20 0.1295, seq_cv_pop 0.4876, seq_cv_norm 0.1316, it_hist_all_luo 0.6861, it_hist_et1_luo 0.6638, it_hist_et2_luo 0.3972, it_hist_et3_luo 0.3878, it_hist_et4_luo 0.3219, pre2_fe_z 0.7178, pre2_fe_s 0.2034
+  feats_hn    7 columns, hz tensor 3.22 GB: it_hist_all_luo 0.1669, it_hist_et1_luo 0.1606, it_hist_et2_luo 0.0827, it_hist_et3_luo 0.0821, it_hist_et4_luo 0.0603, pre2_fe_z 0.6199, pre2_fe_s 0.0626
+  feats_nF   12 columns, hz tensor 5.52 GB: seq_cv_invd20 0.1272, seq_cv_pop 0.4843, seq_cv_norm 0.1297, it_hist_all_luo 0.6809, it_hist_et1_luo 0.6570, it_hist_et2_luo 0.3911, it_hist_et3_luo 0.3834, it_hist_et4_luo 0.3183, pre2_fe_z 0.7172, pre2_new_z 0.7095, pre2_fe_s 0.1914, pre2_new_s 0.0952
+  feats_LnF  12 columns, hz tensor 5.52 GB: seq_cv_invd20 0.1295, seq_cv_pop 0.4876, seq_cv_norm 0.1316, it_hist_all_luo 0.6861, it_hist_et1_luo 0.6638, it_hist_et2_luo 0.3972, it_hist_et3_luo 0.3878, it_hist_et4_luo 0.3219, pre2_fe_z 0.7178, pre2_new_z 0.7111, pre2_fe_s 0.2034, pre2_new_s 0.1027
+  feats_hnF   9 columns, hz tensor 4.14 GB: it_hist_all_luo 0.1669, it_hist_et1_luo 0.1606, it_hist_et2_luo 0.0827, it_hist_et3_luo 0.0821, it_hist_et4_luo 0.0603, pre2_fe_z 0.6199, pre2_new_z 0.5141, pre2_fe_s 0.0626, pre2_new_s 0.0248
+  feats_hnFS 12 columns, hz tensor 5.52 GB: seq_cv_invd20 0.0022, seq_cv_pop 0.0221, seq_cv_norm 0.0022, it_hist_all_luo 0.1669, it_hist_et1_luo 0.1606, it_hist_et2_luo 0.0827, it_hist_et3_luo 0.0821, it_hist_et4_luo 0.0603, pre2_fe_z 0.6199, pre2_new_z 0.5141, pre2_fe_s 0.0626, pre2_new_s 0.0248
+  (zero rate of the pre2 columns is unchanged, 0.279 -> 0.279: rows without an encoder score stay 0.)
+
+5c. STATE SEEN AT 07:43Z (read-only look, not my action): nn_x/w5/cd_arms6c.py exists with md5 == mine; nn_x/w5/train.py.6c differs from train.py by the import line only; lane.sh has the arms
+  hzn / hznF / hznFS / hz2n / hz2nF / hz2Ln / hz2LnF with the directories and keep files of section 1 (checked by reading lines 157 and 238-244).
+  Verified for the witness correction of 07:42Z [M, head_mismatch.json]: on val / public / private the set of rows with an fe-head ID contribution and the set with a new-head ID
+  contribution are IDENTICAL (0 rows with one and not the other; 628,350 / 373,332 / 810,938 rows), and cold rows have neither. The witness both_pre2both feeds 43,419 val rows
+  (3.1% of val rows, 6.4% of its cold rows) with "fe head replaced, new head still with ID"; both_pre2full replaces the new head on exactly those 43,419 rows.
+
+6. MD5
+ dbe5a1387569ecbcb832de6e4cc97297  cd_arms6c.py
+ 197dca34f998d926f89fa4bd339d8f38  feats_Ln/aux/pre2_hz_fe_has.npy
+ 21c206159b0b90b7c2864aea0c6e263d  feats_Ln/train/hz2n_newly_cold.npy
+ 472e59a860797a722f9cbfee0cb190be  feats_Ln/train/pre2_hz_fe.npy
+ c8392e4821d1d98ef5ff60286e878530  feats_Ln/train/pre2_hz_fe_s.npy
+ c196a917f9a76d7d24ef9568b2200f23  feats_Ln/train/pre2_hz_fe_z.npy
+ 30a7561d6b146d3990b383812e88f822  feats_LnF/train/pre2_hz_new.npy
+ db3b8e04781cb3cc924621dc54dc0cb7  feats_LnF/train/pre2_hz_new_s.npy
+ 533d0e5d3f55c5ba097637a93d7ecda0  feats_LnF/train/pre2_hz_new_z.npy
+ 197dca34f998d926f89fa4bd339d8f38  feats_LnP/aux/pre2_hz_fe_has.npy
+ 21c206159b0b90b7c2864aea0c6e263d  feats_LnP/train/hz2n_newly_cold.npy
+ 46a474cd4a6a0dc6d2c203bb41cc0033  feats_LnP/train/pre2_hz_fe.npy
+ 6d20c1d53b064632845258cea8fbf323  feats_LnP/train/pre2_hz_fe_s.npy
+ 335c2503932ae227630b4a2db883d3d1  feats_LnP/train/pre2_hz_fe_z.npy
+ 197dca34f998d926f89fa4bd339d8f38  feats_hn/aux/pre2_hz_fe_has.npy
+ 25351e5a059baeea915de114716882c6  feats_hn/train/hz2n_newly_cold.npy
+ ff08cfc2df6d0c29baa124264aa7ea89  feats_hn/train/pre2_hz_fe.npy
+ 5f40af92effb49290ae3a32e7f29f0af  feats_hn/train/pre2_hz_fe_s.npy
+ 1f65e26bad018531dccb0956b94dc9ac  feats_hn/train/pre2_hz_fe_z.npy
+ d32cd0bb0f446e32d776c7abc8641fc3  feats_hnF/train/pre2_hz_new.npy
+ 8251daf57139af42aeeb6ffc951043d0  feats_hnF/train/pre2_hz_new_s.npy
+ c7b72af2ebb57e242eebe0494d5b8a95  feats_hnF/train/pre2_hz_new_z.npy
+ ddafdb7768f8cc31b2c9aa0c0ae4b3c4  feats_hnFS/train/seq_cv_hz_invd20.npy
+ a7e6f68b2dbc3eb56edf53267c4c19d1  feats_hnFS/train/seq_cv_hz_norm.npy
+ 1a540902417e01899be3e5faa5f364f3  feats_hnFS/train/seq_cv_hz_pop.npy
+ 197dca34f998d926f89fa4bd339d8f38  feats_hnP/aux/pre2_hz_fe_has.npy
+ 25351e5a059baeea915de114716882c6  feats_hnP/train/hz2n_newly_cold.npy
+ ed8d7151d5e01acb48eb714fc5d6e4b4  feats_hnP/train/pre2_hz_fe.npy
+ 459bc5db58ae6b8569600562c218f49b  feats_hnP/train/pre2_hz_fe_s.npy
+ 5bdb11393b53f74b9d924b4690889d7a  feats_hnP/train/pre2_hz_fe_z.npy
+ 197dca34f998d926f89fa4bd339d8f38  feats_n/aux/pre2_hz_fe_has.npy
+ 02bd20526245c22ed2e07326025ce224  feats_n/train/hz2n_newly_cold.npy
+ 6672d13bc1f31ac22acfc85495cce6e4  feats_n/train/pre2_hz_fe.npy
+ 6c9d760b2a4e3ac76535ca3524172ec4  feats_n/train/pre2_hz_fe_s.npy
+ df8b4e8b8d44e748286416fe50887942  feats_n/train/pre2_hz_fe_z.npy
+ e1fa0fe5b24dd33c979ca64f54d27ed8  feats_nF/train/pre2_hz_new.npy
+ 43b06bcbd45baad82e46fb50537add17  feats_nF/train/pre2_hz_new_s.npy
+ 41d5bf74e5055e2b35d1fe59a12b7d0e  feats_nF/train/pre2_hz_new_z.npy
+ 197dca34f998d926f89fa4bd339d8f38  feats_nP/aux/pre2_hz_fe_has.npy
+ 02bd20526245c22ed2e07326025ce224  feats_nP/train/hz2n_newly_cold.npy
+ 3c25126a46223da3de9c207fc81e5742  feats_nP/train/pre2_hz_fe.npy
+ 2ce7f2511d851074b1a1d33a8f6abf9c  feats_nP/train/pre2_hz_fe_s.npy
+ f964cc1fa18ba8783eb64cd6b3dbdb75  feats_nP/train/pre2_hz_fe_z.npy
+ (symlinked base-view files keep the checksums of nn_x/w12/stale/hz2/MD5SUMS_feats.txt and data/feats_new; full list incl. scripts: MD5SUMS.txt)
+
+7. FILES: DECLARATION.txt, PREREG_hz2n_arm.txt, PROGRESS.md, cd_arms6c.py, make_6c.py, cd_arms6c_vs_cd_arms6b.diff, train_py_import_6c.txt, enc_common.py, build_enc.py, build_new.py,
+   build_seq0.py, gate.py, gate_new.py, gate_table.py, test_cd_arms6c.py, p4a_full.py, stale_pred_full.py, hold_infer_n.py, make_ready.py, *.json, gate_table.txt, logs/. Report: reports/STALE_1115/hz2n.md.

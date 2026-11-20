@@ -1,0 +1,23 @@
+item,witness,value,uncertainty,source
+"XGBoost binary:logistic, 5-fold on val, 122 features, seeds 0/1/2",val out-of-fold,0.3677 / 0.3686 / 0.3683,paired SE about 0.0010,lab/reports/deep_gbdt_ranking.md
+XGBoost rank:ndcg with library defaults (top-32 pairs),val out-of-fold,0.3626 (-0.0052),0.0013,lab/reports/deep_gbdt_ranking.md
+"12 tree models, per-feed z-score mean",val out-of-fold,0.3705 (+0.0018 over the best single),0.0008,lab/reports/deep_gbdt_ranking.md
+"2 CatBoost models, rank mean without a tie-break",val out-of-fold,0.3619,,lab/reports/deep_gbdt_ranking.md
+"LightGBM fitted on 100,000 train feeds, with a position term",val,0.3666 against 0.3644 (+0.0022),0.0011,lab/reports/deep_gbdt_ranking.md
+"trees fitted on train feeds, single models",val,0.3658 to 0.3700,,results/early_trees.csv
+gain of trees fitted with leaky history counts on feeds whose user has a later feed,val,+0.025 to +0.052,,status log of 2026-11-11 (not published)
+best blend of the first neural ensemble with a tree model (weight 0.8 on the network),val,0.3820 against 0.38186,,lab/reports/nn_report.md
+first submission: neural ensemble + stacker + trees,val / public,0.3816 / 0.3739,,experiment registry (not published)
+second submission: residual stacker + fine-tuned network,val / public,0.3839 / 0.3772,,experiment registry (not published)
+third submission: network + residual stacker,val / public,0.3869 / 0.3802,val carried about 0.002 of leak,experiment registry (not published); status log of 2026-11-11 (not published)
+residual stacker on leak-free inputs (res4_clean),val out-of-fold,0.38491,,results/residual_stacker_runs.csv
+residual stacker on the next neural generation,val,-0.0001,0.0006,status log of 2026-11-11 (not published)
+"residual CatBoost trained on the holdout, added to the 20-member pool",val / holdout,-0.00031 / -0.00042,0.00029 / 0.00018,results/cb26_eval_e1e2.txt
+residual CatBoost nested on val,val,-0.00009,0.00034,results/cb26_eval_e1e2.txt
+"CatBoost member on random-order feeds, alone",val / holdout,0.38201 / 0.30424,,results/cb26_eval_e3.txt
+same member added to the pool at weight 0.05,val / holdout,+0.00015 / -0.00016,0.00024 / 0.00014,results/cb26_eval_e3.txt
+same member added to the pool at weight 0.10,val / holdout,-0.00013 / -0.00041,0.00033 / 0.00020,results/cb26_eval_e3.txt
+"neural gate stacker on the 20-member pool, mean of 3 replicates",val (nested) / holdout,+0.00056 / -0.00006,0.00028 / 0.00012,results/stack_gate_combine.txt
+the same stacker as a file (S2) against the plain pool (G3),public,0.392473 against 0.392820 (-0.00035),,experiment registry (not published)
+"family weights fitted on the holdout, applied to the train-only half",val / holdout 2-fold,+0.00054 / +0.00016,0.00021 / 0.00017,lab/nn_x/stack/hfit/plan.txt
+the same weighting against the 20-member pool,val / holdout,+0.00013 / -0.00022,0.00034 / 0.00019,results/stack_holdout_fit_compare.txt

@@ -1,0 +1,44 @@
+MEMBERSHIP (recomputed from train.py rules; label-free)
+  u20a: training feeds 2496456 (fold 0 dropped: 624752), cooldown pool 107273 | u20b: training feeds 3121208, unlabelled 624752, cooldown pool 107273 | u20c: training feeds 3121208, cooldown pool 134118
+  W0S: 11022 feeds | in u20a training 0 | in u20b training 11022, of them unlabelled (teacher-only target, aux weight 0) 11022, in u20b cooldown pool 0 | in u20c training (labelled) 11022, in u20c cooldown pool 0
+  W0L: 26883 feeds | in u20a training 0 | in u20b training 26883, of them unlabelled (teacher-only target, aux weight 0) 26883, in u20b cooldown pool 0 | in u20c training (labelled) 26883, in u20c cooldown pool 17462
+  H0: 5974 feeds | in u20a training 0 | in u20b training 0, of them unlabelled (teacher-only target, aux weight 0) 0, in u20b cooldown pool 0 | in u20c training (labelled) 0, in u20c cooldown pool 0
+  log w5_e10_u20a_s951: w12 xfold 0: 624752 feeds of the fold dropped, 2496456 training feeds || train feeds 2496456, steps/epoch 7871, total steps 78710 || cooldown mix: p=0.02 from step 62968, exploration pool 107273 feeds
+  log w5_e10_u20a_s952: w12 xfold 0: 624752 feeds of the fold dropped, 2496456 training feeds || train feeds 2496456, steps/epoch 7871, total steps 78710 || cooldown mix: p=0.02 from step 62968, exploration pool 107273 feeds
+  log w5_e10_u20b_s951: U20 xfold 0 UNLABELLED: 624752 of 3121208 training feeds get teacher-only targets || train feeds 3121208, steps/epoch 9835, total steps 98350 || cooldown mix: p=0.02 from step 78680, exploration pool 107273 feeds
+  log w5_e10_u20b_s952: U20 xfold 0 UNLABELLED: 624752 of 3121208 training feeds get teacher-only targets || train feeds 3121208, steps/epoch 9835, total steps 98350 || cooldown mix: p=0.02 from step 78680, exploration pool 107273 feeds
+  log w5_e10_u20c_s951: train feeds 3121208, steps/epoch 9835, total steps 98350 || cooldown mix: p=0.02 from step 78680, exploration pool 134118 feeds
+  log w5_e10_u20c_s952: train feeds 3121208, steps/epoch 9835, total steps 98350 || cooldown mix: p=0.02 from step 78680, exploration pool 134118 feeds
+  witness feeds without a positive (the only label-dependent factor of the unlabelled target, train.py l.502): 0
+
+=== SELECTED checkpoints, domain token tr === scored: u20a [951, 952], u20b [951], u20c []
+  feeds                            n |  u20a member  pool |  u20b member  pool | B-A member (per seed) ; B-A pool | C-A member ; C-A pool [IN-SAMPLE for C on W0*] | B-C member
+  W0S short, all               11022 | 0.49482 0.49650 | 0.49602 0.49602 | +0.00126+-0.00113 (+0.00126)
+    M 5-9                       1266 | 0.69954 0.70198 | 0.69754 0.69754 | -0.00023+-0.00373 (-0.00023)
+    M 10-19                     1872 | 0.56212 0.56400 | 0.55752 0.55752 | -0.00627+-0.00291 (-0.00627)
+    M 20-34                     3930 | 0.47476 0.47511 | 0.47984 0.47984 | +0.00450+-0.00189 (+0.00450)
+    M 35-49                     3954 | 0.41735 0.42002 | 0.41845 0.41845 | +0.00209+-0.00172 (+0.00209)
+    excl. user-0 bucket        10654 | 0.49358 0.49501 | 0.49477 0.49477 | +0.00123+-0.00114 (+0.00123)
+  W0L long, all                26883 | 0.32044 0.32173 | 0.32151 0.32151 | +0.00131+-0.00052 (+0.00131)
+    in C cooldown pool         17462 | 0.32004 0.32173 | 0.32105 0.32105 | +0.00149+-0.00064 (+0.00149)
+    not in C pool               9421 | 0.32118 0.32172 | 0.32236 0.32236 | +0.00098+-0.00087 (+0.00098)
+    old p>0.9 (holdout-like)    9392 | 0.32252 0.32417 | 0.32356 0.32356 | +0.00188+-0.00090 (+0.00188)
+    M 50-99                     9143 | 0.36302 0.36440 | 0.36532 0.36532 | +0.00253+-0.00103 (+0.00253)
+    M 100-300                  17740 | 0.29849 0.29973 | 0.29893 0.29893 | +0.00068+-0.00057 (+0.00068)
+    excl. user-0 bucket        25806 | 0.31894 0.32023 | 0.32010 0.32010 | +0.00137+-0.00053 (+0.00137)
+  W0S + W0L                    37905 | 0.37115 0.37255 | 0.37225 0.37225 | +0.00130+-0.00049 (+0.00130)
+  H0 fold-0 holdout             5974 | 0.31941 0.31986 | 0.31867 0.31867 | -0.00059+-0.00111 (-0.00059)
+  SHORT witness re-weighted to the val M<50 size mix (exact M; effective n 9366): B - A +0.00022+-0.00129
+  TRANSDUCTIVE READ (SELECTED checkpoints): B - A on natural SHORT witness feeds +0.00126+-0.00113 (n 11022); on LONG witness feeds +0.00131+-0.00052 (n 26883); both +0.00130+-0.00049
+    contrast "this feed's inputs seen" minus "only the user's other feeds seen" (long: W0L minus H0, independent feed sets): +0.00190+-0.00122
+    same contrast on the population-matched subset (W0L feeds with old p_random > 0.9, the holdout's own selection rule; n 9392): +0.00247+-0.00143
+  teacher_xf0 (GPU bf16 file, 3 hard-label members that never saw fold 0) NDCG: W0S 0.49489, W0L 0.32085, H0 0.31869
+  mean within-feed corr to the teacher (member mean over seeds): W0S: u20a 0.9721 u20b 0.9796 ; B-A +0.00755+-0.00016 | W0L: u20a 0.9746 u20b 0.9807 ; B-A +0.00607+-0.00004 | H0: u20a 0.9744 u20b 0.9805 ; B-A +0.00613+-0.00010
+  anchor on H0, CPU fp32 minus stored GPU bf16 file, per member: u20a_s951 -0.00022+-0.00023; u20a_s952 +0.00026+-0.00022; u20b_s951 +0.00002+-0.00020; 
+
+=== @last checkpoints, domain token tr === scored: u20a [951, 952], u20b [951], u20c []
+Traceback (most recent call last):
+  File "<repo>/nn_x/w12/next/u20wit/u20_wit_read.py", line 54, in <module>
+    assert not np.isnan(x[np.isin(sid, (0, 1, 2))[fid]]).any(), f'{name(arm, s)}{suf}: W0S / W0L / H0 not fully scored'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: w5_e10_u20b_s951@last: W0S / W0L / H0 not fully scored

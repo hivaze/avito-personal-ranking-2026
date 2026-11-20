@@ -1,0 +1,42 @@
+holdout reproduced: 30000 feeds, 4630966 rows
+classifier feeds: exploration 80000 (mean M 115.8), production M-matched 80000 (mean M 115.8)
+rows 5797300 (test fold 578249); loading features
+bases: W8 val 0.40165 | W8 TO val 0.40157 | W8 TO holdout 0.32456
+
+=== variant A content+affinity (23 columns): held-out candidate AUC production-vs-exploration 0.7490 (n 578249)
+    production position [0,5) vs exploration candidates: AUC 0.8358; mean score 0.689 (exploration 0.408)
+    production position [5,20) vs exploration candidates: AUC 0.7931; mean score 0.633 (exploration 0.408)
+    production position [20,50) vs exploration candidates: AUC 0.7535; mean score 0.593 (exploration 0.408)
+    production position [50,100) vs exploration candidates: AUC 0.7319; mean score 0.572 (exploration 0.408)
+    production position [100,200) vs exploration candidates: AUC 0.7128; mean score 0.556 (exploration 0.408)
+    production position [200,400) vs exploration candidates: AUC 0.6955; mean score 0.542 (exploration 0.408)
+    top gain: cos_u 0.26, cand_f5 0.13, cand_category_id 0.13, cand_f4 0.12, maxsim32 0.12, cand_f3 0.06, cand_f1 0.03, cand_f2 0.02
+    score alone: val NDCG 0.34267 (random 0.2890; f1 alone 0.3279) | holdout NDCG 0.26463
+    within-feed Spearman to the pool: val 0.506 | holdout 0.483
+    nested on W8 (0.5 FT + 0.5 TO), val: +0.00035 +- 0.00032 (z +1.1); w chosen [0.05, 0.05]; in-sample best w 0.05 +0.00035 +- 0.00032 | M<50 +0.00016 M>=50 +0.00049
+       curve -0.30:-0.01180 -0.20:-0.00565 -0.10:-0.00168 -0.05:-0.00025 -0.02:+0.00005 +0.00:+0.00000 +0.02:+0.00014 +0.05:+0.00035 +0.10:+0.00001 +0.20:-0.00077 +0.30:-0.00285 +0.50:-0.00701
+    nested on W8 TO pool, val: +0.00003 +- 0.00037 (z +0.1); w chosen [0.1, 0.02]; in-sample best w 0.1 +0.00024 +- 0.00049 | M<50 -0.00074 M>=50 +0.00056
+       curve -0.30:-0.01206 -0.20:-0.00599 -0.10:-0.00161 -0.05:-0.00040 -0.02:-0.00030 +0.00:+0.00000 +0.02:+0.00007 +0.05:-0.00001 +0.10:+0.00024 +0.20:-0.00062 +0.30:-0.00240 +0.50:-0.00638
+    nested on W8 TO pool, holdout: -0.00024 +- 0.00016 (z -1.5); w chosen [-0.02, 0.05]; in-sample best w -0.02 +0.00004 +- 0.00012 | M<50 +nan M>=50 -0.00024
+       curve -0.30:-0.01042 -0.20:-0.00504 -0.10:-0.00143 -0.05:-0.00050 -0.02:+0.00004 +0.00:+0.00000 +0.02:-0.00012 +0.05:-0.00018 +0.10:-0.00090 +0.20:-0.00227 +0.30:-0.00410 +0.50:-0.00872
+
+=== variant B A+popularity/co-vis (28 columns): held-out candidate AUC production-vs-exploration 0.7849 (n 578249)
+    production position [0,5) vs exploration candidates: AUC 0.8621; mean score 0.719 (exploration 0.380)
+    production position [5,20) vs exploration candidates: AUC 0.8273; mean score 0.666 (exploration 0.380)
+    production position [20,50) vs exploration candidates: AUC 0.7926; mean score 0.624 (exploration 0.380)
+    production position [50,100) vs exploration candidates: AUC 0.7703; mean score 0.598 (exploration 0.380)
+    production position [100,200) vs exploration candidates: AUC 0.7480; mean score 0.576 (exploration 0.380)
+    production position [200,400) vs exploration candidates: AUC 0.7239; mean score 0.554 (exploration 0.380)
+    top gain: cos_u 0.21, cand_category_id 0.14, it_hist_et1_luo 0.13, maxsim32 0.11, cand_f4 0.11, cand_f5 0.07, cand_f3 0.05, it_hist_all_luo 0.04
+    score alone: val NDCG 0.34804 (random 0.2890; f1 alone 0.3279) | holdout NDCG 0.27271
+    within-feed Spearman to the pool: val 0.523 | holdout 0.527
+    nested on W8 (0.5 FT + 0.5 TO), val: +0.00028 +- 0.00023 (z +1.2); w chosen [-0.02, -0.02]; in-sample best w -0.02 +0.00028 +- 0.00023 | M<50 +0.00012 M>=50 +0.00038
+       curve -0.30:-0.01110 -0.20:-0.00497 -0.10:-0.00085 -0.05:-0.00023 -0.02:+0.00028 +0.00:+0.00000 +0.02:-0.00009 +0.05:-0.00027 +0.10:-0.00032 +0.20:-0.00148 +0.30:-0.00323 +0.50:-0.00730
+<repo>/nn_x/w12/recheck/winner_model/c06_select.py:77: RuntimeWarning: invalid value encountered in scalar divide
+  f_ = lambda d: f"{d.mean():+.5f} +- {se(d):.5f} (z {d.mean() / se(d):+.1f})"
+    nested on W8 TO pool, val: +0.00000 +- 0.00000 (z +nan); w chosen [0, 0]; in-sample best w 0 +0.00000 +- 0.00000 | M<50 +0.00000 M>=50 +0.00000
+       curve -0.30:-0.01118 -0.20:-0.00580 -0.10:-0.00118 -0.05:-0.00043 -0.02:-0.00027 +0.00:+0.00000 +0.02:-0.00018 +0.05:-0.00042 +0.10:-0.00079 +0.20:-0.00167 +0.30:-0.00301 +0.50:-0.00750
+    nested on W8 TO pool, holdout: -0.00038 +- 0.00020 (z -1.9); w chosen [0, 0.1]; in-sample best w 0 +0.00000 +- 0.00000 | M<50 +nan M>=50 -0.00038
+       curve -0.30:-0.01206 -0.20:-0.00553 -0.10:-0.00149 -0.05:-0.00065 -0.02:-0.00021 +0.00:+0.00000 +0.02:-0.00008 +0.05:-0.00014 +0.10:-0.00021 +0.20:-0.00113 +0.30:-0.00288 +0.50:-0.00648
+C06DONE
+EXIT 0

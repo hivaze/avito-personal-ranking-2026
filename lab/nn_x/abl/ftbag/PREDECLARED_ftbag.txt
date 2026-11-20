@@ -1,0 +1,91 @@
+PRE-DECLARATION: FINE-TUNE SEED BAGGING (3 FT seeds per fold) for all 28 members of G3 + pop1(8); two PUBLIC-PROBE candidates.
+Written 2026-11-13T19:08:07Z (`date -u`), BEFORE any run of this task. Agent: implementation agent (ftbag); nothing is submitted.
+
+STATE AT WRITING (verified 2026-11-13T19:08:07Z): 0 files matching '*n2cpv3s3*' in preds/, nn_x/abl/preds/, nn/logs/, nn_x/abl/logs/;
+subs/cand_G3_ftbag3_memeq.parquet, subs/cand_Q2a8_ftbag3_memeq.parquet, preds/ens_G3s3_*, preds/ens_Q2a8s3_* do not exist.
+the GPUs idle (0 compute processes, 0 MiB used each); no sft.py / finetune.py / train.py process running; load 7.8 on many threads.
+
+EXISTING n2cpv3 RECIPE (from nn/logs/<m>_n2cpv3_ft.{log,json} for the 20 G3 members and nn_x/abl/logs/<m>_n2cpv3_ft.{log,json}
+for abl_e10_pop1_s951-958; launched by nn/run_ftv3.sh -> nn/ft_list.sh (G3) and nn_x/abl/pop1/chain/ft_list.sh /
+nn_x/abl/pop1/x8/ft_list_x8.sh (pop1); identical logged args for all 28): epochs 4 (the later --epochs 4 overrides the list
+script's --epochs 6), lr 5e-05, wd 0.02, warmup 30, cand_budget 8192, max_feeds 128, loss softmax, loss_norm batch, folds 5,
+seeds 1, drop None, from_scratch False, extra n2c_pre_v3 (42 names), extra_lr_mult 10.0, add_random 0, pseudo '', w_test 0.3,
+pseudo_n 12000, pseudo_T 1.0, decay cos, ema 0.99, ema_start 0.5, u0_singleton True, select snapshot (saved = final EMA weights
+because ema > 0; the saved OOF/test = EMA predictions averaged over the seeds of each fold). pop1 members additionally
+xt_check on (popfree/finetune.py honours the checkpoint's --xt_exclude 8 columns and --xt_add xp_imp_c50).
+
+SEEDS SUPPORT (verified by reading the scripts): nn/finetune.py line 42 and nn_x/abl/popfree/finetune.py (same training loop,
+diff limited to sys.path / xt honouring / nopop preset) both take '--seeds N' = "fine-tune seeds per fold (averaged)":
+for fold k and seed index s: torch.manual_seed(1000*k + s) and np.random.default_rng(1000*k + s); the held-out-fold OOF and the
+test predictions of the final EMA weights are averaged over the seeds (oof_fin += predict(ema)/seeds; test_fin += pt/(folds*seeds);
+test_folds likewise). Seed index 0 is the seed of the existing n2cpv3 run. With --seeds 3 the seeds used are
+fold 0: 0,1,2 | fold 1: 1000,1001,1002 | fold 2: 2000,2001,2002 | fold 3: 3000,3001,3002 | fold 4: 4000,4001,4002.
+Output naming: '--out <v>_n2cpv3s3' -> preds/nn_<v>_n2cpv3s3_{val_oof,test,test_folds}.npy + nn/logs/<v>_n2cpv3s3_ft.{log,json}
+(G3; nn/common.py PREDS/LOGS) and nn_x/abl/preds + nn_x/abl/logs (pop1; nn_x/abl/common.py). NEW files only; the existing
+n2cpv3 files are never touched (different --out name; the lane script refuses to start if the s3 OOF file already exists).
+
+EXACT COMMANDS (identical to the recorded n2cpv3 commands except '--seeds 3' and the output suffix n2cpv3s3; nothing else changes):
+  G3 members (cwd <repo>/nn, as nn/ft_list.sh runs them):
+    CUDA_VISIBLE_DEVICES=<one id> ../.venv/bin/python finetune.py --variant <v> --out <v>_n2cpv3s3 --extra n2c_pre_v3 --lr 5e-5 --epochs 6 --decay cos --ema 0.99 --ema_start 0.5 --epochs 4 --u0_singleton --seeds 3
+  pop1 members (cwd <repo>/nn_x/abl/popfree, as pop1/chain/ft_list.sh and x8/ft_list_x8.sh run them):
+    CUDA_VISIBLE_DEVICES=<one id> <repo>/.venv/bin/python finetune.py --variant <v> --out <v>_n2cpv3s3 --extra n2c_pre_v3 --lr 5e-5 --epochs 6 --decay cos --ema 0.99 --ema_start 0.5 --epochs 4 --u0_singleton --seeds 3
+  Env for every process: OMP_NUM_THREADS=12 MKL_NUM_THREADS=12 OPENBLAS_NUM_THREADS=12 NUMBA_NUM_THREADS=12 POLARS_MAX_THREADS=12
+  (the original G3 FT ran with OMP_NUM_THREADS=16 via run_ftv3.sh; thread caps do not enter the recipe). Launcher: nn_x/abl/ftbag/ft_one_s3.sh
+  (one member per lane; nn_x/abl/ftbag/gpu_ok.sh = pop1/chain/gpu_ok.sh with ALLOWED_GPUS "<ids>": < 4 compute processes and
+  >= 60 GB free on the GPU, checked with nvidia-smi before EACH launch, polled every 60 s up to 3 h), setsid nohup, real PIDs verified
+  through /proc/<pid>/cmdline and recorded in nn_x/abl/ftbag/RUNNING.txt and nn_x/abl/RUNNING.txt. After each run the logged args are
+  compared with the member's n2cpv3 args: all keys equal except out (suffix) and seeds (3); a mismatch voids that member.
+  Lane -> GPU map (lane i -> GPU i mod 8; 4 lanes on some GPUs, 3 on some GPUs):
+    lane: v23_gru_pre2s_s501, r6_cd_m02_r103, r6_cd_m02_p70k_r104, abl_e10_pop1_s955
+    lane: v23_gru_pre2s_s502, r6_cd_m02_r104, r6_cd_m02_p70k_r105, abl_e10_pop1_s956
+    lane: v23_gru_pre2s_s503, r6_cd_m02_r105, r6_cd_m02_p70k_r106, abl_e10_pop1_s957
+    lane: v23_gru_pre2s_s504, r6_cd_m02_r106, r6_cd_m02_p70k_r107, abl_e10_pop1_s958
+    lane: v23_gru_pre2s_s505, r6_cd_m02_r107, abl_e10_pop1_s951
+    lane: v23_gru_pre2s_s506, r6_cd_m02_p70k_r101, abl_e10_pop1_s952
+    lane: r6_cd_m02_r101, r6_cd_m02_p70k_r102, abl_e10_pop1_s953
+    lane: r6_cd_m02_r102, r6_cd_m02_p70k_r103, abl_e10_pop1_s954
+  COPIES for the 8 pop1 members (new files only, cp --update=none): nn_x/abl/preds/nn_<v>_n2cpv3s3_{val_oof,test,test_folds}.npy -> preds/,
+  nn_x/abl/logs/<v>_n2cpv3s3_ft.log -> nn/logs/ (for the presub_gate audit, as the pop1 chain did for n2cpv3).
+
+CANDIDATES (member-equal pools exactly as nn_x/abl/popfree/build_pool.py builds them; copy nn_x/abl/ftbag/build_pool_s3.py with the
+FT file names n2cpv3s3_val_oof / n2cpv3s3_test instead of n2cpv3_*; the train-only branch is unchanged):
+  G3   = F10 (v23_gru_pre2s_s501-506) + F7x (r6_cd_m02_r101-107) + F7x70 (r6_cd_m02_p70k_r101-107)   [20; FT n2cpv3; reference, pick 1]
+  Q2a8 = G3 + abl_e10_pop1_s951-958                                                                  [28; FT n2cpv3; reference for C3]
+  C2   = G3 members, FT = n2cpv3s3, 0.5 z(FT) + 0.5 z(TO)      TAG G3s3    OUT subs/cand_G3_ftbag3_memeq.parquet
+  C3   = G3 + pop1(8) members, FT = n2cpv3s3, same spec        TAG Q2a8s3  OUT subs/cand_Q2a8_ftbag3_memeq.parquet
+  (both refused if the subs/ file or preds/ens_<TAG>_* already exist). Read-out script nn_x/abl/ftbag/readout_s3.py (CPU; decide9 /
+  decide_x8 machinery: per member per-feed rank-z (src/stack_val.feed_rank_z) of the FT val OOF and of the train-only val preds, branch =
+  rank-z of the member mean, score = 0.5 z(ft) + 0.5 z(to); NDCG per feed = src/metrics.ndcg_per_feed; every delta paired per feed;
+  SE = sd/sqrt(n)). Reported for each of C2, C3: val; V vs the same pool with n2cpv3 (C2 - G3, C3 - Q2a8; paired per feed +- SE);
+  V vs G3 (n2cpv3) +- SE; pmix (src/pmix.py private-mix weighted mean +- SE) for both contrasts; slices M<50, M>=50, Tue, Thu (paired
+  delta +- SE, both contrasts); z-corr to G3; presub_gate result (src/presub_gate.py exactly as the pop1 chain runs it:
+  --sub subs/<OUT> --val '0.5*ens_<TAG>_ft_val+0.5*ens_<TAG>_to_val' --test '0.5*ens_<TAG>_ft_test+0.5*ens_<TAG>_to_test'
+  --ref_val '0.5*ens_G3_ft_val+0.5*ens_G3_to_val' --ref_test '0.5*ens_G3_ft_test+0.5*ens_G3_to_test' --members <members>
+  --ft_suffix n2cpv3s3 > nn_x/abl/ftbag/gate_<TAG>.txt), sha256 of the parquet, the gate's predicted public / private.
+  Direct bagging measurement (CPU): per member, FT OOF val NDCG of n2cpv3s3 vs n2cpv3 (paired per feed), mean delta +- SE across the
+  28 members (and the within-member paired SE), split by family.
+
+RULE (frozen now): C2 and C3 are PUBLIC PROBES at the user's request, NOT picks: each is built regardless of the sign of its val delta,
+UNLESS (i) its val is below the same pool with n2cpv3 (C2 vs G3; C3 vs Q2a8) by more than 1 SE of the paired per-feed delta -> not built,
+reported; or (ii) src/presub_gate.py FAILS -> the file is reported as BLOCKED and is not a probe (nothing is deleted or overwritten).
+A member whose s3 run fails or whose logged args mismatch is reported; a candidate is only built when all of its members have the
+n2cpv3s3 files (C2 needs 20/20, C3 needs 28/28; no partial pools). The pick-1 rule of CURRENT_STATUS section 1 is untouched.
+
+EXPECTATION (stated in advance): the registry records 'FT-seed bagging gives +0.0002' (val). If bagging works, V(C2) - V(G3) is in
++0.0001..+0.0004 (pool level; paired SE expected ~0.0001-0.0002 since C2 is a near copy of G3, z-corr > 0.999), and the member-level FT
+OOF gain (n2cpv3s3 - n2cpv3) is larger, ~+0.0003..+0.0010 per member (averaging 3 FT seeds removes part of the single-seed FT noise
+whose spread is ~0.0005-0.001 per member). V(C3) - V(Q2a8) should be of the same size as V(C2) - V(G3). A real +0.0002 val level gain
+transfers ~1:1 to public (public = 0.0078 + 0.962 val); it is below the public MDE (0.0011), so the probes verify level only.
+TIME CAP: 4 h from 2026-11-13T19:08:07Z. LOOKS: one read-out after all 28 s3 OOF files exist (or at the cap, with the complete members disclosed).
+
+AMENDMENT 1 (2026-11-13T19:12:53Z, before any r6_cd_* s3 run; the 6 F10 and 8 pop1 lanes are running as declared): the 14 r6_cd_m02_r101-107 and
+r6_cd_m02_p70k_r101-107 members of G3 were fine-tuned (n2cpv3) through the nn_x/r6 harness, not nn/: nn_x/r6/run_ftv3.sh ->
+nn_x/r6/ft_list.sh, cwd <repo>/nn_x/r6, <repo>/.venv/bin/python finetune.py (nn_x/r6/finetune.py is
+byte-identical to nn/finetune.py; nn_x/r6/common.py redirects CKPT/LOGS/PREDS to nn_x/r6/{ckpt,logs,preds}); their n2cpv3 outputs
+were copied to preds/ and nn/logs/ (md5 identical). My first launch (launch_all.sh, MODE nn, cwd nn/) found no checkpoint and
+every r6 lane exited at once with rc 4 (nothing ran, nothing written). Correction, recipe unchanged: the 14 r6 lanes run
+  cd <repo>/nn_x/r6 && CUDA_VISIBLE_DEVICES=<one id> <repo>/.venv/bin/python finetune.py --variant <v> --out <v>_n2cpv3s3 --extra n2c_pre_v3 --lr 5e-5 --epochs 6 --decay cos --ema 0.99 --ema_start 0.5 --epochs 4 --u0_singleton --seeds 3
+via nn_x/abl/ftbag/ft_one_s3_r6.sh (MODE r6; v2 of ft_one_s3.sh, which is left untouched because its lanes are executing) and
+launch_r6.sh with the SAME lane -> GPU map as declared (lanes 6-19). Outputs land in nn_x/r6/preds + nn_x/r6/logs and are copied
+(cp --update=none) to preds/nn_<v>_n2cpv3s3_{val_oof,test,test_folds}.npy and nn/logs/<v>_n2cpv3s3_ft.log, exactly as the n2cpv3
+versions were; the 8 pop1 members' files are copied the same way after their lanes finish (copy_s3.sh, cp --update=none).

@@ -1,0 +1,59 @@
+== A3.1 Within-run eval-to-eval jitter (rms successive difference / sqrt 2), val | hold, by lr bin
+   NB on the 2500 grid the plateau value includes the slow trend; the re-cool grid is 1000 steps.
+re-cool m02 (F7x,F7x70,cs813)    [8e-04-2e-03] 0.00068|0.00043  [4e-04-8e-04] 0.00046|0.00032  [2e-04-4e-04] 0.00054|0.00034  [1e-04-2e-04] 0.00039|0.00017  [0e+00-1e-04] 0.00023|0.00016
+re-cool c0 (mix.1)               [8e-04-2e-03] 0.00065|0.00043  [4e-04-8e-04] 0.00063|0.00042  [2e-04-4e-04] 0.00054|0.00043  [1e-04-2e-04] 0.00067|0.00047  [0e+00-1e-04] 0.00049|0.00037
+re-cool m0                       [8e-04-2e-03] 0.00076|0.00045  [4e-04-8e-04] 0.00055|0.00024  [2e-04-4e-04] 0.00046|0.00041  [1e-04-2e-04] 0.00037|0.00024  [0e+00-1e-04] 0.00017|0.00028
+F5 cvnd lr2 mix.3                [plateau 40-77.5k] 0.00083|0.00055  [cooldown] 0.00340|0.00343
+F6 cvnd lr1 mix.1                [plateau 40-77.5k] 0.00081|0.00043  [cooldown] 0.00088|0.00062
+cvnd lr2 mix.1                   [plateau 40-77.5k] 0.00094|0.00051  [cooldown] 0.00086|0.00068
+cvnd lr1 mix0 (s23)              [plateau 40-77.5k] 0.00071|0.00054  [cooldown] 0.00054|0.00057
+cvnd lr1 mix.3 (s23)             [plateau 40-77.5k] 0.00057|0.00067  [cooldown] 0.00304|0.00290
+F7 pre2s lr2 mix.1               [plateau 40-77.5k] 0.00076|0.00055  [cooldown] 0.00071|0.00054
+F9 pre2s lr1 mix.1               [plateau 40-77.5k] 0.00073|0.00045  [cooldown] 0.00080|0.00068
+F10 GRU lr2 mix.1                [plateau 40-77.5k] 0.00090|0.00048  [cooldown] 0.00077|0.00050
+F11 DIN lr2 mix.1                [plateau 40-77.5k] 0.00072|0.00050  [cooldown] 0.00162|0.00148
+F12 d192 lr2 mix.1               [plateau 40-77.5k] 0.00092|0.00049  [cooldown] 0.00146|0.00124
+a4u e10 lr2 mix.1                [plateau 40-77.5k] 0.00096|0.00054  [cooldown] 0.00074|0.00058
+cset e10 lr2 mix.1               [plateau 40-77.5k] 0.00107|0.00049  [cooldown] 0.00083|0.00062
+F13g GRU lr2 m02                 [plateau 40-77.5k] 0.00071|0.00049  [cooldown] 0.00072|0.00060
+F13l pre2s lr1 m02               [plateau 40-77.5k] 0.00081|0.00051  [cooldown] 0.00056|0.00047
+d192 lr2 m02 (v29)               [plateau 40-77.5k] 0.00092|0.00050  [cooldown] 0.00078|0.00063
+F7 lr2 m02 scratch (v30)         [plateau 40-77.5k] 0.00113|0.00065  [cooldown] 0.00065|0.00040
+
+== A3.2 Between-seed spread (sd over seeds) of val at fixed steps, and persistence across phases
+F5 cvnd lr2 mix.3          n6 sd: v20k 0.00062 v40k 0.00036 P 0.00059 sel 0.00094 last 0.00109 | P_hold 0.00040 sel_hold 0.00047
+F6 cvnd lr1 mix.1          n6 sd: v20k 0.00044 v40k 0.00036 P 0.00057 sel 0.00112 last 0.00118 | P_hold 0.00017 sel_hold 0.00028
+F7 pre2s lr2 mix.1         n7 sd: v20k 0.00050 v40k 0.00044 P 0.00035 sel 0.00078 last 0.00098 | P_hold 0.00020 sel_hold 0.00046
+F9 pre2s lr1 mix.1         n6 sd: v20k 0.00046 v40k 0.00065 P 0.00049 sel 0.00110 last 0.00095 | P_hold 0.00026 sel_hold 0.00037
+F10 GRU lr2 mix.1          n6 sd: v20k 0.00031 v40k 0.00115 P 0.00035 sel 0.00054 last 0.00053 | P_hold 0.00020 sel_hold 0.00030
+F11 DIN lr2 mix.1          n4 sd: v20k 0.00029 v40k 0.00037 P 0.00044 sel 0.00124 last 0.00223 | P_hold 0.00031 sel_hold 0.00028
+F12 d192 lr2 mix.1         n7 sd: v20k 0.00017 v40k 0.00059 P 0.00044 sel 0.00114 last 0.00100 | P_hold 0.00026 sel_hold 0.00027
+a4u e10 lr2 mix.1          n6 sd: v20k 0.00048 v40k 0.00050 P 0.00034 sel 0.00050 last 0.00077 | P_hold 0.00015 sel_hold 0.00034
+cset e10 lr2 mix.1         n5 sd: v20k 0.00070 v40k 0.00050 P 0.00026 sel 0.00061 last 0.00081 | P_hold 0.00039 sel_hold 0.00029
+F13g GRU lr2 m02           n3 sd: v20k 0.00021 v40k 0.00026 P 0.00026 sel 0.00130 last 0.00110 | P_hold 0.00020 sel_hold 0.00019
+F13l pre2s lr1 m02         n7 sd: v20k 0.00035 v40k 0.00051 P 0.00073 sel 0.00061 last 0.00084 | P_hold 0.00029 sel_hold 0.00041
+d192 lr2 m02 (v29)         n3 sd: v20k 0.00021 v40k 0.00044 P 0.00040 sel 0.00084 last 0.00110 | P_hold 0.00002 sel_hold 0.00030
+   pooled within-family correlations (standardized per family, n runs = 66):
+   corr(e20, P) = -0.09
+   corr(e40, P) = +0.09
+   corr(P, sel) = +0.39
+   corr(e40, sel) = +0.09
+   corr(P, last) = +0.17
+   corr(Ph, hsel) = +0.09
+   corr(P, hsel) = +0.11
+   corr(sel, hsel) = +0.24
+
+== A3.3 Selection luck: value at the holdout-selected eval minus a smooth cooldown trend (cubic in sqrt(k)); re-cool minus its F7 original, root-paired
+arm                        n            sel gap =    trend gap @sel +          luck gap | luck_v arm/orig, luck_h arm/orig
+c0 (mix.1, cs811)          7  +0.00137+-0.00038 = +0.00083+-0.00035 + +0.00053+-0.00029 | +0.00077/+0.00009, +0.00062/+0.00047
+c0 (mix.1, cs813)          4  +0.00116+-0.00025 = +0.00058+-0.00027 + +0.00058+-0.00044 | +0.00085/+0.00008, +0.00070/+0.00051
+m02 (cs811) =F7x           7  +0.00118+-0.00037 = +0.00107+-0.00033 + +0.00011+-0.00008 | -0.00008/+0.00009, +0.00019/+0.00047
+m02 (cs813)                4  +0.00090+-0.00051 = +0.00042+-0.00058 + +0.00048+-0.00017 | +0.00028/+0.00008, +0.00022/+0.00051
+m02 p70k (cs812) =F7x70    7  +0.00072+-0.00038 = +0.00065+-0.00030 + +0.00007+-0.00021 | +0.00005/+0.00009, +0.00036/+0.00047
+m0 (no pool)               7  +0.00064+-0.00032 = +0.00057+-0.00040 + +0.00007+-0.00017 | -0.00004/+0.00009, +0.00027/+0.00047
+   F7 originals (7 roots): holdout luck at selection +0.00047+-0.00014, val residual at the same eval +0.00009+-0.00018; selected k 5606
+
+== A3.4 The @77500 / @70000 snapshot evals vs the run's plateau mean P (re-cools start from the snapshot)
+   @70000: val-P -0.00027+-0.00030  hold-P -0.00028+-0.00013  gap +0.00001+-0.00023
+   @77500: val-P -0.00035+-0.00011  hold-P +0.00044+-0.00021  gap -0.00080+-0.00021
+   between-seed sd of the plateau val-minus-hold gap P_val - P_hold (what an unpaired comparison must beat): F7 0.00044, F9 0.00054, F10 0.00049, F12 0.00057, a4u 0.00037, cset 0.00038, F13l 0.00077, F13g 0.00009, d192 0.00039

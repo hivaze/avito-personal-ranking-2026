@@ -1,0 +1,126 @@
+DECLARATION of searcher B (LEARNED GATE), directory nn_x/w12/mix/gateB, report reports/MIX_1115/gateB.md
+Every block is written with its 'date -u' stamp BEFORE the number it judges is computed. Marks: [M] measured here, [D] read in a file, [I] inferred.
+
+=== 2026-11-15T13:14Z BLOCK 0: scope, compute, leak rules (before any label is touched) ===
+CPU only (CUDA_VISIBLE_DEVICES=""), <= 2 heavy processes, 12 threads each, < 30 GB. Writes only in this directory and the report file. No submission file.
+Val labels enter only through (a) fixed, fully pre-specified score files (step 1 reproduction; fixed comparators PLAIN and M-RULE), (b) the ORACLE MAP, which is in-sample and labelled DIAGNOSTIC everywhere,
+(c) nested procedures grouped by user (user_id 0 feeds = singleton groups). Test rows: label-free only.
+
+=== 2026-11-15T13:14Z BLOCK 1: reproduction bar (step 1) ===
+Own loader (gateB/lib.py, re-implemented, not importing build_r4.py) must give final val of FD16P20 and FD16P20@m0.2_0.4 within 1e-5 of the logged 0.40271 / 0.40298 [D E_kd_predeclared.txt 12:51Z]
+(|mine - logged| <= 1.5e-5 allows for the 5-decimal rounding of the log), AND, where the built pool files preds/ens_FD16P20kd_{ft,to}_val.npy exist, max |branch array difference| <= 1e-5.
+FAIL -> stop and report; nothing else is computed until it passes.
+
+=== 2026-11-15T13:16:46Z BLOCK 1a: step-1 first run and correction of the CHECK (not of the bar) ===
+First run [M]: final val FD16P20 0.402714, FD16P20@m0.2_0.4 0.402975 (logged 0.40271 / 0.40298: match), final recomputed from the stored arrays 0.402714 / 0.402975 (identical to 6 decimals),
+but my array check printed max|d| 0.158 / 0.126: it compared MY re-standardised branch z(mix) with the STORED un-standardised mix (1 - w) z(base) + w z(pop) (build_r4 stores B[sp] before fin()'s z). Object mismatch in my check.
+Corrected check (same bar 1e-5): my un-standardised mix vs the stored array, both branches, both files. The bar and the logged targets are unchanged. Re-run follows; step 1 PASSES only if the corrected check passes.
+
+=== 2026-11-15T13:17:40Z BLOCK 1b: step 1 RESULT ===
+PASS [M]: FD16P20 0.402714 (logged 0.40271), FD16P20@m0.2_0.4 0.402975 (logged 0.40298); stored pool arrays reproduced with max|d| = 0.0 in both branches of both files.
+Held-out twins W16 + 4 wide [M]: plain 0.402141, M-rule 0.402847 (rule minus plain +0.00071 = the logged value).
+
+=== 2026-11-15T13:17:40Z BLOCK 2: steps 2-6, written BEFORE any labelled number other than step 1 ===
+Label-free work done before this block (no labels loaded): feat_explore.py (distribution of candidate gate features on val / public-like / private-like test feeds).
+
+OBJECTS. Four pool arrays per split (zB_ft, zB_to, zP_ft, zP_to = per-feed z of the member-equal mean of member z). Mixing form = build_r4's:
+  final(w_pop, w_ft) = w_ft z((1 - w_pop) zB_ft + w_pop zP_ft) + (1 - w_ft) z((1 - w_pop) zB_to + w_pop zP_to).
+Compositions: PRIMARY FD16P4 = 16 full-data wide students + 4 full-data wide popularity-light students; REPLICATION W16P4 = the held-out twins (same val feeds and labels: replication across trained models, not across feeds).
+GRID. w_pop in {0, 0.05, .., 0.80} (17), w_ft in {0.20, 0.25, .., 0.80} (13): 221 points; tensor E[feed, i, j] = exact per-feed NDCG (own numba NDCG, verified equal to src/metrics.ndcg_per_feed before use).
+Fixed comparators (nothing fitted here): PLAIN = (0.2, 0.5); MRULE = (0.2 if M < 50 else 0.4, 0.5).
+
+GATE FEATURES (8, label-free, built identically for val and test):
+  lM = log M | lH = log1p H | u0 = (user_id == 0) | cold = share of candidates with it_hist_all_luo == 0 | f4m = feed mean of cand_f4 (listing-age covariate) |
+  mcs = share of the largest category among the candidates | cih = share of candidates whose category occurs in the user's history | rho = per-feed Pearson correlation of zB_to and zP_to (pool disagreement, TRAIN-ONLY branch only:
+  the fine-tuned branch is out-of-fold on val and a fold-mean on test, so it is not used for a gate feature).
+  Use in fitted gates: winsorised to the TRAINING folds' [1%, 99%] quantiles, then standardised with training-fold mean / sd. 'day' is val-only (Tue / Thu; test has other days): oracle map only, never a gate feature.
+
+STEP 2 ORACLE MAP (IN-SAMPLE, DIAGNOSTIC, never quoted as a result). Cells: M deciles, cold quintiles (and the pmix bins < 15 / 15-30 / 30-45 / >= 45% of its own cold share), H quintiles, day, u0, quintiles of f4m, mcs, cih, rho; plus the 2 x 2 table (M < 50 | >= 50) x (cold below | above its median).
+  Per cell: (a) un-optimised contrasts with SE (user-clustered): E(0.4, 0.5) - E(0.2, 0.5) ["more popularity-light"], E(0.0, 0.5) - E(0.2, 0.5), E(0.2, 0.7) - E(0.2, 0.5) and E(0.2, 0.3) - E(0.2, 0.5) ["more / less fine-tune"];
+  (b) in-sample argmax (w_pop at w_ft = 0.5; w_ft at w_pop = 0.2; joint) with its in-sample gain over PLAIN and a user-bootstrap (200 draws) 10-90% interval of the argmax. Also the global surface (best constant, in-sample).
+
+STEP 3 LEARNED GATE, nested by user. Outer: 5 fold seeds x 5 folds, groups = user_id with every user-0 feed its own group. Everything below is fitted on the 4 training folds only and applied to the held-out fold; per fold seed the
+  out-of-fold weights of all 14,423 feeds are scored EXACTLY (continuous weights, own NDCG); per-feed nested value = mean over the 5 fold seeds; SE = user-clustered SE of the per-feed paired difference.
+  Families (argmax = exact training mean on the grid tensor):
+   CONSTp  : w_pop constant (w_ft = 0.5).                                   CONST2 : (w_pop, w_ft) constant.
+   MSTEP   : the M-rule family: w_ft = 0.5; cut on M in {25, 50, 100}; w_pop below / above the cut from the grid.
+   STUMP1  : one feature (of 8), one cut at a training quantile in {0.2, 0.35, 0.5, 0.65, 0.8} (u0: its single cut); own (w_pop, w_ft) on each side.
+   PSTUMP  : product stump: w_pop by a stump on feature A, w_ft by a stump on feature B (A, B, cuts as in STUMP1), coordinate ascent from CONST2, at most 4 alternations.
+   LINM(l) : w_pop = 0.8 sigmoid(a0 + a1 lM), w_ft = 0.5.                   LINp(l) : w_pop = 0.8 sigmoid(a0 + a.x) on all 8 features, w_ft = fitted constant.
+   LIN2(l) : w_pop = 0.8 sigmoid(a0 + a.x), w_ft = 0.2 + 0.6 sigmoid(b0 + b.x), all 8 features.
+     LIN fits maximise  mean over training feeds of E~(w_pop, w_ft) - l (|a|^2 + |b|^2)  where E~ = bilinear interpolation of the grid tensor smoothed along each grid axis with the kernel [1, 2, 3, 2, 1] / 9 (edges replicated);
+     full-batch Adam, 300 steps, lr 0.05, start = CONST2 (slopes 0). Ridge l chosen from {3e-5, 1e-4, 3e-4, 1e-3, 3e-3} by an INNER 4-fold user-grouped CV inside the training folds (exact NDCG of the inner out-of-fold weights).
+   AUTO    : PRIMARY learned gate = the family among {CONST2, MSTEP, STUMP1, PSTUMP, LINM, LINp, LIN2} (LIN at its inner-CV l) with the highest inner-CV mean (same inner folds), refitted on the 4 training folds.
+  Reported for every family: in-sample (fitted on all feeds, scored on the same feeds) NEXT TO nested; deltas vs PLAIN, vs MRULE (fixed), vs nested CONST2; and the nested delta vs MRULE reweighted to the public / private mix (src/pmix.weights).
+  Multiplicity (all of it inside the nesting): 8 families, 5 ridge strengths, 8 x 5 stump cuts, 221 grid points; 2 compositions; 4 + 5 placebo runs. Nothing is re-tuned after the first nested read; any later variant is a new dated block marked POST HOC.
+
+CRITERIA (judged in this order):
+  C1 primary : nested (AUTO - MRULE) on FD16P4 >= +2 SE.
+  C2 replicate: nested (AUTO - MRULE) on W16P4 >= +1 SE (the procedure re-run from scratch on that composition).
+  C3 placebo : G = nested (AUTO - nested CONST2). G(FD16P4) > max over the 4 pool placebos and the 5 feature-permutation placebos of the same statistic, AND G(FD16P4) - mean(pool placebos) >= 2 SE of G(FD16P4).
+               If the mean of the 5 feature-permutation placebos exceeds +1 SE (their own SE), the nested procedure is judged leaky and NO claim is made from it.
+  VERDICT A (a learned gate has a nested, placebo-calibrated gain over the M-rule): C1 and C2 and C3. Then ONE candidate = the simplest family (order CONSTp < CONST2 < MSTEP < STUMP1 < PSTUMP < LINM < LINp < LIN2) whose own nested
+            (family - MRULE) is >= +1.5 SE on FD16P4 and >= 0 on W16P4 and that survives step 6; stated with its all-feed fit rounded to the grid. If only LINp / LIN2 qualify: reported as "real but not reducible", no candidate.
+  VERDICT B (no candidate; a rule family worth a declared test): not A, but some family other than CONSTp / CONST2 has nested (family - MRULE) >= 0 on BOTH compositions and nested (family - nested CONST2) above its placebo maximum.
+  VERDICT C: otherwise; the oracle map is given as hypotheses only.
+  Also read (no criterion): nested (MSTEP - PLAIN) = the honest size of the M-rule family's effect, and how often the nested fits pick cut 50 / weights (0.2, 0.4).
+
+STEP 4 PLACEBOS (identical code path, identical features and folds):
+  P1 pool placebo x 4: within FD16, "popularity-light" pool := 4 same-recipe wide students, base := the other 12; the four splits = {kd05w192 s951-954, kd05w192 s955-958, kd05t25w192 s951-954, kd05t25w192 s955-958}; rho recomputed from the placebo pools.
+     Its PLAIN is (0.25, 0.5) (member-equal). Read: nested (family - nested CONST2), nested (MSTEP - CONSTp), nested (AUTO - (0.25, 0.5)). Expectation under "noise only on the w_pop axis": <= 0. Note [I]: the w_ft axis (fine-tuned vs train-only) is the
+     SAME real contrast in the placebo, so a w_ft gate may gain there too; families that gate only w_pop (MSTEP, LINM, LINp) are the clean noise floor.
+  P2 feature-permutation placebo x 5 on FD16P4: one random permutation of the 8-feature rows across feeds (seeds 101..105), everything else identical. Expectation: every (family - nested CONST2) <= 0 within noise.
+
+STEP 5 CONTROL FAMILY (constant weights, different combiner over the same four pool arrays; pool weights a = (w_ft (1 - w), (1 - w_ft)(1 - w), w_ft w, (1 - w_ft) w) for (B_ft, B_to, P_ft, P_to)):
+  R4 = build_r4 form (reference) | ZM = sum a_k z_k (no branch re-standardisation) | RK = sum a_k r_k, r = per-feed rank scaled to [0, 1] | SM(T) = log sum a_k softmax_feed(z_k / T), T in {0.5, 1, 2} (T chosen nested).
+  Reads: (i) at the plain weights (0.2, 0.5): combiner - R4 (SM: T nested); (ii) (w, w_ft) [and T] chosen nested per combiner on the same 221-point grid: nested combiner - nested R4-CONST2; (iii) at the M-rule weights: combiner - R4-MRULE.
+  A combiner is "worth a declared test" iff (ii) >= +2 SE on FD16P4 and >= +1 SE on W16P4; otherwise the combiner family is closed. (The mean of log-softmax probabilities equals ZM in order and is therefore not a separate arm.)
+
+STEP 6 TRANSFER CHECK (label-free; public-like = test timestamp < 1790497920 as in src/pmix.py, private-like = the rest) for the all-feed fit of AUTO's modal family and for the candidate rule if any:
+  per used feature: val / public / private quantiles, share outside val's [1%, 99%] winsor range, PSI (report); gate outputs: mean, quantiles, share of feeds per output cell.
+  REJECT iff (i) > 5% of public-like or private-like feeds lie beyond one winsor bound of a feature the gate uses (val: 1% by construction), or (ii) > 1% of public-like or private-like feeds get an output outside the [min, max] of the outputs on val,
+  or (iii) an output cell (stump side) holding >= 20% of private-like feeds holds < 5% of val feeds (its weights would rest on < 720 val feeds).
+
+PROBABILITY STATEMENT: any "P(gains on public)" is [I], derived from the nested delta and its SE with the transfer record of val deltas (6 of 6 signs for plain val / pmix), and discounted for the val OOF under-reading of the fine-tuned half
+(any w_ft below 0.5 fitted on val is NOT proposed: val under-reads the fine-tune branch by about 0.0004 against public [D CURRENT_STATUS section 1]).
+
+=== 2026-11-15T13:21:16Z BLOCK 2a: implementation details of step 3 fixed BEFORE the first nested number (step 2 oracle map of FD16P4 has been computed and read; it changes nothing above) ===
+- Fold ids: outer = lib2.folds(groups, seed s in 0..4, k = 5); inner = lib2.folds(groups, 1000 + 10 s + fold, k = 4) restricted to the training feeds.
+- Stump convention: side "hi" = feature > cut; MSTEP reads M from the lM feature column (hi = lM >= log cut), so the feature-permutation placebo permutes it as well. The fixed MRULE comparator always uses the true M.
+- LIN optimiser returns the iterate with the best penalised training objective among the 300 Adam steps (and the start point); w_pop start clipped to [0.02, 0.78], w_ft start to [0.22, 0.78]. LINM starts from CONSTp.
+- AUTO ties (equal inner-CV mean to 1e-9) go to the simpler family (order CONST2 < MSTEP < STUMP1 < PSTUMP < LINM < LINp < LIN2). Inner-CV values of grid families are read from the tensor (exact); LIN families by an exact scoring pass.
+- In-sample column = the same procedure with "training folds" := all 14,423 feeds (ridge strength and AUTO's family by a 4-fold user-grouped CV over all feeds, fold seed 999), scored on the same feeds. This all-feed fit is also the deployable gate for step 6.
+- pmix-weighted deltas use pmix.wmean_se (weighted, not clustered); all unweighted SEs are user-clustered.
+- Oracle-map reading so far (IN-SAMPLE, for the record, no decision): PLAIN 0.402714; (0.4, 0.5) constant +0.00048 +- 0.00032; M-rule +0.00026 +- 0.00021; best constant (0.40, 0.70) +0.00054; no cell contrast beyond about 2 SE.
+
+=== 2026-11-15T13:33:22Z BLOCK 3: READ of steps 3-4 by the declared criteria [M] (tables: log_step3_<RUN>.txt) ===
+C1 FAIL: nested (AUTO - MRULE) on FD16P4 = -0.00022 +- 0.00021 (in-sample +0.00021).   C2 FAIL: on W16P4 = -0.00038 +- 0.00016 (in-sample +0.00012).
+C3 FAIL: G = nested (AUTO - nested CONST2): FD16P4 -0.00012 +- 0.00013; pool placebos -0.00012 / +0.00005 / -0.00007 / -0.00021; feature-permutation placebos -0.00014 / -0.00004 / -0.00015 / -0.00005 / -0.00026 (mean -0.00013: not leaky).
+VERDICT A: NO. VERDICT B: NO (no family other than CONSTp / CONST2 has nested (family - MRULE) >= 0 on both compositions: FD16P4 STUMP1 +0.00039, PSTUMP +0.00008, MSTEP -0.00002; W16P4 all negative, best MSTEP -0.00027). -> VERDICT C. No candidate.
+Unplanned observation (pool placebos, fixed contrasts, out_diag_placebo.txt): the M-rule SHAPE minus the member-equal constant reads +0.00038 / -0.00016 / +0.00039 / +0.00040 when the "popularity-light pool" is 4 same-recipe base students.
+
+=== 2026-11-15T13:33:22Z BLOCK 4: POST HOC diagnostics declared before they are computed (none of them can produce a candidate; verdict C stands) ===
+D1 NULL DISTRIBUTION OF THE M-RULE CONTRAST under same-recipe subsets. For base set S in {FD16, W16}: 40 random 4-subsets Q of S (numpy default_rng(2026), without the constraint of one recipe) + the 4 structured ones; "pop" := Q, base := S minus Q.
+   Statistic T = mean over all val feeds of E(M-rule 0.2 | 0.4, 0.5) - E(0.2, 0.5) (like-for-like with the lead's "rule minus plain"); also T25 = the same against (0.25, 0.5), and the long-feed part alone.
+   Real values to be placed in that null: FD16 + FDP, W16 + P1w, and the crossed / other popularity-light sets W16 + P1d, FD16 + P1w, W16 + FDP, FD16 + P1d. Reported: null mean, sd, quantiles, rank of each real T, and (T - null mean) / null sd.
+   Reading (no decision): the null sd is the member-subset noise that the paired per-feed SE does not contain; the M-rule's own reading rule (public pair, declared by the lead 09:27Z) is not touched.
+D2 CROSS-MEMBER-SET NESTED for the grid families (CONSTp, CONST2, MSTEP, STUMP1, PSTUMP): the 25 fold fits stored for composition A are applied to the held-out users of composition B (A, B in {FD16P4, W16P4}, A != B; feature rho taken from B).
+   Reported: cross-nested family - PLAIN and - MRULE on B with user-clustered SE. Reading: a rule family is "member-robust" only if its cross-nested delta vs PLAIN is >= 0 in both directions.
+D3 POOLED-TENSOR NESTED for CONSTp, MSTEP, STUMP1: fit on the mean of the two compositions' tensors (training users), scored on each composition's held-out users; and the all-feed pooled fit of MSTEP (the family's pooled optimum, IN-SAMPLE).
+
+=== 2026-11-15T13:39:46Z BLOCK 5: READ of steps 5, 6 and of the post hoc diagnostics [M] ===
+STEP 5 (declared rule: (ii) >= +2 SE on FD16P4 and >= +1 SE on W16P4): ZM +0.00000 / -0.00002, RK -0.00050 +- 0.00030 / -0.00005 +- 0.00033, SM +0.00005 +- 0.00009 / +0.00001 +- 0.00011 -> combiner family CLOSED.
+   At the plain weights: ZM -0.00001 / 0.00000 (identical in order to the build_r4 form), RK -0.00107 +- 0.00030 / -0.00145 +- 0.00031 (rank averaging loses), SM(T = 1) +0.00002 / +0.00005.
+STEP 6: no feature beyond a val winsor bound on more than 2.2% of public-like / private-like feeds (cold above q99: 1.5% / 2.2%); no gate output outside the val output range on more than 0.05% of test feeds; no thin cell. Nothing is rejected on transfer;
+   the gates are rejected by C1-C3. cold share shifts (PSI 0.18 / 0.46) inside the val range.
+D1: null of T = M-rule minus plain under same-recipe 4-of-16 subsets: FD16 base mean +0.00009, sd 0.00015, max +0.00043; W16 base mean +0.00004, sd 0.00008, max +0.00025.
+    Real: FD16 + FDP +0.00026 (above 38 of 44; null z +1.2), FD16 + P1w +0.00032 (43 of 44), FD16 + P1d -0.00028 (1 of 44); W16 + P1w +0.00071 (44 of 44; z +7.9), W16 + P1d +0.00043 (44 of 44), W16 + FDP +0.00061 (44 of 44).
+D2: no grid family has a cross-member-set nested delta vs PLAIN >= 0 in both directions (CONSTp +0.00020 / -0.00002; MSTEP -0.00009 / +0.00023; STUMP1 +0.00007 / -0.00019; PSTUMP +0.00003 / -0.00027; CONST2 -0.00003 / +0.00003).
+D3: pooled-tensor MSTEP picks cut 50 in 25 of 25 fits (lo 0.1-0.2, hi 0.45-0.65); nested minus PLAIN +0.00011 +- 0.00028 (FD16P4) / +0.00031 +- 0.00028 (W16P4); minus the fixed MRULE -0.00015 / -0.00039. Pooled in-sample: MRULE +0.00048 +- 0.00017, family optimum (0.10 | 0.55) +0.00058.
+
+=== 2026-11-15T13:40:54Z BLOCK 6: addendum to D1, declared before it is computed ===
+D1 printed, for the FD16 base, a null mean of T25 = "M-rule shape minus member-equal 0.25" of +0.00016 with 91% of the 44 subsets positive (W16 base: -0.00001, 48%). The 44 subsets share the val feeds, so the spread over subsets is not the SE of that mean.
+D1b: per-feed average over the 44 subsets of (M-rule - const 0.25) and of (M-rule - const 0.2), with its user-clustered SE, for both base sets, split into short / long feeds. Reading only: if the FD16 null mean is within 2 SE of zero it is feed noise common to all subsets;
+     if not, "member-equal weights are not optimal inside FD16" is reported as an unexplained observation (no rule follows from it).
+D1b READ [M] (2026-11-15T13:41:13Z): see out_d1b.txt; z values appended below by the command that wrote this line.
+   FD16 T +0.000089 +- 0.000049 (z +1.83) | FD16 T25 +0.000158 +- 0.000082 (z +1.92) | W16 T +0.000040 +- 0.000042 (z +0.95) | W16 T25 -0.000014 +- 0.000077 (z -0.19)

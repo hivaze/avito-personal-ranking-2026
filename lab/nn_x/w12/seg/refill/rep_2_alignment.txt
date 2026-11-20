@@ -1,0 +1,47 @@
+## 2. Alignment (step 1; label-free; `align_lib.py`, `s1_align.py`, `s1b_poscheck.py`, `out_s1.txt`, `out_s1b.txt`)
+
+**Stored order.** Index 0 = newest. Three sources agree: the organisers' readme ("ordered from new events to old"), the docstring of `data.py`, and the data [M]: against the most recent earlier snapshot, the events only the later history holds sit before the first common event (36.9 per feed, against 12.4 after the last common one), and the events only the earlier snapshot holds sit after its last common event (25.9, against 0.4 before the first). So events beyond the cap continue the stored array at its END, oldest last.
+
+**A history is not a shifted log** [M]. The exact-shift test (later[k : k + n] == earlier[0 : n]) succeeds on 5.2% of pairs. Two reasons: (i) per-type caps (recorded as INTEGRITY-1 in `reports/review_integrity.md`: a snapshot keeps the newest N events of each type, about 100-110 views in val / test and up to about 210 in half of the capped train feeds, then the newest 256 of the union), so a view can leave the history while older events of other types stay; (ii) simultaneous events (same item, several types) change order between snapshots. I therefore align by a longest common subsequence of (item, type, source), repair tie swaps, and merge all strictly earlier snapshots (most recent first) into one union timeline.
+
+Two sets of recovered events follow, and the difference matters for everything below:
+
+- **T** = events of the union timeline after the stored 256th event: the literal "events immediately older than the stored 256th".
+- **U** = every event the earlier snapshots hold and the stored history lacks (old-only), newest first. T is its tail; the rest are events NEWER than the stored 256th that the per-type caps removed (mostly views).
+
+**Criteria.** A (aligned): at least one earlier snapshot shares >= 16 LCS anchors and an exact contiguous run >= 8 with the timeline; feeds failing A are dropped. B (end-anchored, needed for T only): the deepest stored event that is an anchor has index >= 248.
+
+| [M] | holdout (30,000) | val (14,423) | test (28,595) |
+|---|---|---|---|
+| capped feeds (H = 256) | 11,601 (38.67%) | 4,176 (28.95%) | 8,239 (28.81%) |
+| qualifying: capped, user_id != 0, >= 1 strictly earlier snapshot | **3,235 (10.78%)** | **2,160 (14.98%)** | **4,102 (14.35%)**; public-like days 15.03%, private-like 14.05% |
+| earlier snapshots per feed (median / 95%); where they come from | 1 / 3; train only | 1 / 4; train 4,082, val 13 | 1 / 4; train 7,533, val 55, test 53 |
+| gap to the most recent earlier snapshot, median days | 2.9 | 9.6 | 14.2 |
+| criterion A pass / FAIL (dropped) | 3,140 (97.1%) / 2.9% | 1,879 (87.0%) / 13.0% | 3,222 (78.5%) / 21.5% |
+| criterion B pass (of qualifying) | 2,511 (77.6%) | 1,465 (67.8%) | 2,565 (62.5%) |
+| T events per feed (A and B), 5 / 25 / 50 / 75 / 95% | 0 / 8 / 29 / 74 / 160 | 0 / 11 / 29 / 64 / 177 | 0 / 14 / 34 / 72 / 192 |
+| T >= 1 / >= 32 / >= 64 / >= 128, feeds (share of qualifying) | 2,358 (72.9%) / 1,202 (37.2%) / 738 (22.8%) / **197 (6.1%)** | 1,383 (64.0%) / 691 (32.0%) / 367 (17.0%) / **155 (7.2%)** | 2,427 (59.2%) / 1,356 (33.1%) / 745 (18.2%) / 291 (7.1%) |
+| U events per feed (A), 5 / 25 / 50 / 75 / 95% | 5 / 32 / 74 / 128 / 253 | 32 / 85 / 142 / 208 / 394 | 50 / 106 / 158 / 217 / 396 |
+| U >= 1 / >= 32 / >= 64 / >= 128, feeds (share of qualifying) | 3,123 (96.5%) / 2,363 (73.0%) / 1,747 (54.0%) / 791 (24.5%) | 1,878 (86.9%) / 1,785 (82.6%) / 1,587 (73.5%) / 1,051 (48.7%) | 3,222 (78.5%) / 3,155 (76.9%) / 2,935 (71.6%) / 2,099 (51.2%) |
+| share of views (type 1): stored events 129-256 / T / U | 0.442 / 0.307 / 0.450 | 0.230 / 0.293 / 0.632 | 0.225 / 0.294 / 0.646 |
+
+The 14.3% on record is verified: 14.35% of test feeds (public-like days 15.03%, private-like 14.05%; the review's 14.00% counted train and val snapshots only, here earlier test snapshots are admitted too). Three facts the brief did not have:
+
+1. **Only 10.8% of the holdout qualifies** (3,235 feeds, not a large share of the 11,600 capped ones): a holdout feed's user rarely has an earlier train feed. The review's power estimate ("full recovery about 6 SE on the holdout") does not hold.
+2. **Few events are older than the stored 256th**: median 29; 128 of them exist for 6-7% of qualifying feeds (197 holdout, 155 val). The rule's pass (c), "128 events from beyond the cap", can be built as written for those feeds only.
+3. **Most of what earlier snapshots add is not "beyond the 256th event"** but views removed by the per-type cap (U is 63-65% views on val / test; stored events 129-256 are 23% views there). For val / test this comes largely from the train-format snapshots, which keep twice as many views.
+
+**Positive check of the method** (pretend the cap is 192: the stored history and every earlier snapshot cut to their newest 192; recover the events after the 192nd; truth = stored events 193-256) [M]:
+
+| | holdout | val |
+|---|---|---|
+| feeds with >= 1 recovered event (with all 64) | 2,544 (752) | 1,417 (606) |
+| recovered events compared | 91,870 | 61,462 |
+| exact match at the same position | 41.9% | 28.5% |
+| is one of the true events 193-256 (any position) | 72.3% | 60.4% |
+| is stored among the newest 192 (a placement error of the method) | **0.4%** | **0.5%** |
+| is not stored anywhere in the 256 (a real earlier event the later snapshot dropped) | 27.3% | 39.1% (74% of them views) |
+| feeds with 64 recovered: share of the 64 true events found | 69.1% | 52.9% |
+| same check with earlier snapshots at their stored length: exact position / true event | 48.5% / 75.8% | 33.4% / 66.4% |
+
+Reading: the alignment does not misplace events (0.4-0.5%). The low exact-match rate is a property of the data: an earlier snapshot is a different sample of the user's event stream, so 27-39% of what it supplies beyond a cut are events the later snapshot would not store at any depth, and it misses 31-47% of the events the later snapshot does store there. A "refilled" history is therefore never the history a deeper cap would have stored.

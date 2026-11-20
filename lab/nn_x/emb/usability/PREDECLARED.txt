@@ -1,0 +1,65 @@
+EMB-USABILITY: which pre/post-processing of the given int8 item embeddings could help the ranker (label-free or nested tests on G3).
+Pre-declared at: 2026-11-13 05:20:55 UTC (date -u), written before any number of this study was computed. CPU only, 12 threads.
+Directory: nn_x/emb/usability/ (scripts, logs, out/). Nothing else written.
+
+COMMON
+- Val = 14,423 feeds, 1,389,971 candidate rows. Report set = the 14,306 leak-free feeds (~eda/errors/synthesis/qt.leak_mask()).
+- Base = zG3 = within-feed z of preds/ens_G3_final_val.npy (src/stack_val.feed_rank_z).
+- Signal x -> within-feed z over the rows where x is finite (NaN -> 0 = feed mean; feeds with < 2 finite or sd 0 -> 0).
+- Pair AUC = P(x_pos > x_neg) + 0.5 P(tie) over all within-feed (pos, neg) pairs of leak-free feeds where both sides finite
+  (coverage reported). Same-category AUC = pairs with the same category_id.
+- NESTED RESIDUAL (the gate number): score = zG3 + w z(x), w in {0, +-0.02, +-0.05, +-0.1, +-0.15, +-0.2, +-0.3, +-0.5},
+  chosen by mean per-feed NDCG (src/metrics.ndcg_per_feed) on the leak-free feeds of 4/5 user groups (sklearn GroupKFold(5,
+  shuffle=True), seeds 0 and 1, user_id 0 feeds as singleton groups), applied to the held-out 1/5; per-feed delta vs w = 0
+  averaged over the 2 seeds; mean +- paired SE over the leak-free feeds. pmix (src/pmix private weights) reported, never gating.
+- CELL-WISE variant (interactions): the same, but w chosen separately per cell of (M tercile) x (H tercile) (terciles of the
+  per-feed M and H over the 14,423 val feeds, label-free; 9 cells), nested in the same folds.
+- GBM variant (item 5 primary, others reported): per fold, LightGBM lambdarank (lr 0.05, 150 rounds fixed, 15 leaves,
+  min_data_in_leaf 500, seed 0) on [zG3, logM, logH, user0] (control) vs [zG3, logM, logH, user0, x, z(x)] (with x), trained on
+  the 4/5 training users' leak-free feeds, scored OOF; delta = with-x minus control, paired over feeds, fold seed 0 only.
+
+BAR (all items): a signal is "worth a 2-epoch NN screen" only if its nested residual on G3 >= +0.0005 AND >= 2 SE (leak-free val)
+for the PRIMARY signal of the item. Secondary signals of an item need >= +0.0005 AND >= 2.64 SE (Bonferroni over <= 6 looks)
+to be flagged, and are then labelled exploratory. Otherwise the item is CLOSED. pmix < -1 SE vetoes a pass.
+
+ITEM 1 - EMBEDDING CHANGE between tables
+- item_id -> train-table row from ALL train flat rows (cand_item_id/cand_emb_idx and hist_item_id/hist_emb_idx, emb_idx >= 0);
+  item_id -> val-table row from the val flat rows (same). Consistency (one row per item_id per table) reported.
+- For each val candidate with a val vector: c_tv = cos(val vector, train vector) when the item has a train row, else NaN.
+- PRIMARY x = 1 - c_tv (NaN when absent). Secondary: changed flag = (c_tv < 0.99) (NaN when absent); in_train flag (0/1, all).
+- Click lift: click rate changed / unchanged (present items), SE by feed-clustered delta method; plus within-feed AUC.
+  Descriptive: category change rate between tables for changed vs unchanged items (from the flat category ids).
+- Test (descriptive, no labels): share of test candidates with a train-table vector / val-table vector, and the share of those
+  with cos < 0.99, public (ts < 1790497920) vs private.
+
+ITEM 2 - centred / whitened cosine (global variants; P3 owns within-category whitening, read only)
+- Fit sample: 1,000,000 uniformly random rows of the train table (seed 0), unit-normalised u = e/|e|. mu = mean(u),
+  C = cov(u). Variants: V0 raw cos(u_c, u_h); V1 centred cos(u_c - mu, u_h - mu); V2 ABTT3 = centred then remove the top-3
+  principal directions of C; V3 ZCA = W (u - mu), W = (C + lam I)^(-1/2), lam = 0.1 tr(C)/128.
+- Signals over the feed's valid history events (hist_emb_idx >= 0, all H <= 256, val table): maxcos = max over events;
+  new5 = mean over the 5 newest valid events. NaN when the feed has no valid history event / candidate has no vector.
+- PRIMARY = V3 ZCA maxcos. Secondary = V1/V2 maxcos, V1/V2/V3 new5 (V0 raw = reference only, already in G3 as seq_max_all
+  etc.). AUC per variant reported.
+
+ITEM 3 - anisotropy direction
+- PRIMARY x = <u_c, mu/|mu|> (projection of the candidate unit vector on the mean direction). Secondary: projection on PC1 of C.
+- AUC overall, same-category, and same-category + same popularity decile (deciles of log1p(it_hist_all_luo) over val rows).
+
+ITEM 4 - near-duplicates of history items
+- maxcos_act = max raw cos to history events with event_type in 2..10; maxcos_view = max raw cos to event_type 1 events.
+- PRIMARY x = nd_act = 1[maxcos_act > 0.98] (0 when no such events). Secondary: nd_view_only = 1[maxcos_view > 0.98 and not
+  nd_act]; continuous maxcos_act (NaN when no acted events).
+- Click rates (nd_act / nd_view_only / neither) with feed-clustered SE, lift vs neither.
+
+ITEM 5 - two-tower score cos(user_emb, item)
+- x = data/feats/val/cos_u.npy (already a G3 input). PRIMARY = GBM variant (interactions with M, H, user0). Secondary = linear
+  grid, cell-wise grid. Also AUC.
+
+ADDENDUM A (pre-declared 2026-11-13 05:27:46 UTC, AFTER the val screen in out/eval.log was seen; exploratory, cannot turn a FAIL into
+a PASS): holdout replica on the 30K random-like train holdout feeds (holdout_index() of nn_x/pretrain2/P3/whiten_gate.py, rng
+12345 over p_random > 0.9 and M >= 50), base = within-feed z-mean of the 20 G3 members' holdout preds (preds/holdout/
+nn_{v23_gru_pre2s_s501..506, r6_cd_m02_r101..107, r6_cd_m02_p70k_r101..107}_holdout.npy), vectors from the TRAIN table,
+mu / PC1 from out/fit.npz. Signals: proj_mu (item 3 primary; val +0.00045 +- 0.00022, just under the bar), proj_pc1,
+zca_maxcos, raw_maxcos, nd_act, cos_u (train user_emb). Same nested grid procedure (users = train user ids, user 0 singletons,
+2 fold seeds, no leak mask). Read: proj_mu is called REPLICATED only if holdout nested >= +0.0002 and > 0 at 1 SE; it remains
+below the declared bar either way (verdict CLOSED stands); a replication would only move it to 'cheap optional NN input'.

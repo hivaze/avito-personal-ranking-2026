@@ -1,0 +1,58 @@
+# Read-out copied from lab/nn_x/tricks/FUTWIN/RESULT.txt, unchanged below this line.
+FUTWIN Step A closure readout -- RESULT (written 2026-11-13 04:48:24 UTC; rule pre-declared 2026-11-13 04:45:44 UTC in PREDECLARED.txt)
+Code: nn_x/tricks/FUTWIN/futwin_stepA.py (CPU, 12 threads, 28 s). Full log: run_log.txt; numbers: result.json.
+ORACLE: u_fut uses the user's future (next >= 24 h train snapshot) and is NOT a feature. Closure test only; nothing adopted.
+
+SETS
+- Holdout H30K rebuilt by the rng-12345 rule (asserted equal to preds/holdout/holdout_meta.npy and holdout_y.npy):
+  30000 feeds, 4,630,966 candidates, 53,524 positives, every feed has >= 1 positive.
+- G3 train-only holdout pool (20 members, per-feed z-mean) reproduces 0.32379 on all 30K (asserted).
+- user_id 0 feeds: 1536. Kept set S (non-zero user with a later train feed >= 24 h; b = earliest such): 4476 feeds (14.9%).
+  Gap median 97.6 h (p10 33.2 h, p90 223.6 h). G3 pool NDCG on S 0.32204 (off S 0.32410).
+- Future window W = multiset diff of b's history minus a's history on (item_id, event_type): |W| median 68, mean 77.2,
+  |W| = 0 in 0.4% of S, |W| >= 10 in 91.8%. Validity: 77.3% of the window events sit in b's newest block (hpos < |W|);
+  65.2% of b histories are capped at 256. 74 S feeds have an empty current history.
+- Label echo inside the window: 93.1% of S feeds (4168/4476) have an event on one of this feed's own positive items in W.
+
+PAIRED PER-FEED NDCG DELTA vs G3 pool on S (n = 4476), s = zf(pool) + w * zf(u)
+  pre-declared w = 0.10:
+    u_fut   +0.00275 +- 0.00068 (z +4.02)   NDCG on S 0.32479; feeds up 44.2% / down 30.0%
+    u_past  -0.00123 +- 0.00055 (z -2.24)   NDCG on S 0.32081
+    u_echo  +0.02963 +- 0.00113 (z +26.11)  NDCG on S 0.35167; feeds up 78.4% / down 0.0%
+    paired delta(u_fut) - delta(u_past) = +0.00398 +- 0.00064 (z +6.18)
+    paired delta(u_fut) - delta(u_echo) = -0.02688 +- 0.00117 (z -22.99)
+    ratio delta(u_fut) / delta(u_echo) = 0.093
+  info only:
+    u_fut_nopos (window without events on this feed's own positive items) w 0.10: +0.00072 +- 0.00067 (z +1.07)
+    w 0.05: u_fut +0.00179 +- 0.00043 | u_past -0.00049 +- 0.00036 | u_echo +0.01425 +- 0.00069 | u_fut_nopos +0.00077 +- 0.00041
+    w 0.20: u_fut +0.00431 +- 0.00099 | u_past -0.00334 +- 0.00083 | u_echo +0.06133 +- 0.00189 | u_fut_nopos +0.00050 +- 0.00096
+    w 0.30: u_fut +0.00522 +- 0.00130 | u_past -0.00492 +- 0.00106 | u_echo +0.09036 +- 0.00248 | u_fut_nopos -0.00054 +- 0.00126
+    (u_fut / u_echo ratio stays 0.06-0.13 at every weight; u_fut_nopos never exceeds 2 SE.)
+
+WITHIN-FEED CORR (Pearson of per-feed z over candidates, feeds where both vary)
+  corr(u_fut, u_past)        pooled +0.7277, per-feed mean +0.7194, median +0.8876 (4381 feeds)
+  corr(u_fut, u_echo)        pooled +0.5206, per-feed mean +0.5087, median +0.7057 (4455)
+  corr(u_past, u_echo)       pooled +0.4415, per-feed mean +0.4280, median +0.5920 (4397)
+  corr(u_fut_nopos, u_past)  pooled +0.7251, per-feed median +0.8830 (4335)
+  corr with the G3 pool: u_fut +0.328, u_past +0.330, u_echo +0.261 (pooled)
+
+INFO SLICES @ w 0.10 (delta +- SE)
+  |W| 1-9    (n 349):  u_fut +0.01616+-0.00315 | u_past -0.00138+-0.00133 | u_echo +0.03755+-0.00522 | nopos +0.00526+-0.00255
+  |W| 10-49  (n 1412): u_fut +0.00405+-0.00105 | u_past +0.00003+-0.00104 | u_echo +0.02953+-0.00192 | nopos +0.00156+-0.00108
+  |W| >= 50  (n 2699): u_fut +0.00035+-0.00090 | u_past -0.00186+-0.00071 | u_echo +0.02862+-0.00144 | nopos -0.00030+-0.00091
+  gap 24-48h (n 966):  u_fut +0.00458+-0.00168 | u_past -0.00179+-0.00131 | u_echo +0.02978+-0.00246 | nopos +0.00088+-0.00159
+  gap 2-4d   (n 1207): u_fut +0.00395+-0.00125 | u_past -0.00079+-0.00088 | u_echo +0.02680+-0.00193 | nopos +0.00206+-0.00123
+  gap >= 4d  (n 2303): u_fut +0.00135+-0.00092 | u_past -0.00123+-0.00079 | u_echo +0.03104+-0.00167 | nopos -0.00004+-0.00093
+  no own-positive event in W (n 308): u_fut -0.00064+-0.00241 | u_past -0.00340+-0.00209 | u_echo +0.02464+-0.00452
+  Reading: the u_fut gain is concentrated where the window is small (so the click on this feed's positive dominates
+  the window) and is ~0 when the window is long or holds no event on this feed's positive item.
+
+DECISION (pre-declared, w = 0.1)
+  (1) delta(u_fut) = +0.00275 >= +0.005 AND z = +4.02 >= 3          -> FAIL (z passes, size is 55% of the bar)
+  (2) delta(u_fut) - delta(u_past) = +0.00398 >= +0.003             -> pass
+  (3) delta(u_fut) = +0.00275 >= 0.30 * delta(u_echo) = +0.00889    -> FAIL (ratio 0.093)
+  VERDICT: CLOSED for good. This covers the category-intent aux family: any future-window or dense category-intent aux,
+  FUTWIN Step B and PFD. Even with full knowledge of the next >= 24 h window, category intent adds +0.0028 on the 15% of
+  holdout feeds that have one. Most of that is the echo of this feed's own click: after removing events on own
+  positive items, +0.0007 (z 1.1) is left. Past-history category share already hurts the G3 pool (-0.0012). The sweep's
+  Step-B bar (margin >= +0.01 over both controls) fails by a wider margin still (u_fut - u_echo = -0.027).

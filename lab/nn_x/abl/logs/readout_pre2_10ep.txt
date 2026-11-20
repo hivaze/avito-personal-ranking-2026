@@ -1,0 +1,12 @@
+== ENCODER-DOSE (B) PRE2-10EP read-out (2026-11-14T01:30:53Z): abl_e10_xdrop_pre2_s[951, 952] (<repo>/nn_x/abl/preds) vs w5_e10_base_s[951, 952] (nn_x/w5/preds), selected checkpoints primary (@last info). WORTH W = base - arm. SEQUENTIAL GATE (ledger 10.B): (1) Wv >= +0.0015 -> (2) Wh > 0 -> (3) W_M50 > 0; PASS iff all three in sequence
+seed 951: base val 0.39632 hold 0.32084 | abl_e10_xdrop_pre2 val 0.39562 hold 0.31953 | W val +0.00070 W hold +0.00131
+         last ckpt: W val +0.00069 W hold +0.00118
+seed 952: base val 0.39691 hold 0.32000 | abl_e10_xdrop_pre2 val 0.39606 hold 0.31997 | W val +0.00085 W hold +0.00004
+         last ckpt: W val -0.00047 W hold +0.00012
+POOLED member WORTH (selected): val +0.00077+-0.00073 (z +1.06) | holdout +0.00067+-0.00043 (z +1.56) | pmix +0.00004+-0.00110 (z +0.04) | slices M<50 +0.00049 (z +0.4) M>=50 +0.00097 (z +1.2) Tue +0.00066 (z +0.6) Thu +0.00091 (z +0.9)
+holdout columns (information): late(Sep17-19) +0.00100+-0.00080 (n 8279); early(Sep6-8) +0.00075+-0.00083 (n 7823)
+POOLED member WORTH (@last, info): val +0.00011+-0.00073 (z +0.16) | holdout +0.00065+-0.00043 (z +1.53)
+2-member POOL (info): base val 0.39837 hold 0.32226 | abl_e10_xdrop_pre2 val 0.39776 hold 0.32168 | W val +0.00061+-0.00083 W hold +0.00059+-0.00049
+SEQUENTIAL GATE: (1) Wv +0.00077 >= +0.0015: NO -> STOP; (2) Wh +0.00067 > 0: OK (printed, not counted); (3) W_M50 +0.00097 > 0: OK (printed, not counted)
+VERDICT (B) PRE2-10EP abl_e10_xdrop_pre2: FAIL (stopped at clause 1) (worth val +0.00077 +- 0.00073, holdout +0.00067 +- 0.00043, M>=50 +0.00097; 2-epoch worth was +0.00128 val / +0.00054 holdout; F9 - F6 +0.0009 val)
+registry: abl_e10_xdrop_pre2_s951/952 vs w5_e10_base (10-epoch from-scratch pair, E_BASE + HYG, selected ckpt; WORTH of the pre2 channel = base - xdrop_pre2; ledger 10.B sequential gate): val +0.00077 +- 0.00073 (z +1.1), holdout +0.00067 +- 0.00043 (z +1.6), pmix +0.00004, M<50 +0.00049 M>=50 +0.00097 Tue +0.00066 Thu +0.00091, holdout late +0.00100 / early +0.00075, pool val +0.00061 / hold +0.00059, @last val +0.00011 / hold +0.00065 -> FAIL (<repo>/nn_x/abl/logs/readout_pre2_10ep.txt)

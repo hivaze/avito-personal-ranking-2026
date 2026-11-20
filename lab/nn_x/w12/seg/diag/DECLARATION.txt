@@ -1,0 +1,187 @@
+DECLARATION  nn_x/w12/seg/diag  (analyst of user-information segments; CPU only; no GPU, no network, no submission)
+Every block is stamped with 'date -u' BEFORE the numbers it judges are computed. Nothing in this file is edited after
+the fact; amendments are appended with their own stamp.
+
+=== BLOCK 0  2026-11-15T16:40:12Z  (written before ANY number of this study was computed; the only numbers seen so far are the
+    lead's first table in the task text and the status / coverage files) ===
+Conventions
+ - Score analysed: FINAL = 0.5 z(preds/ens_FD16P20kd_ft_val.npy) + 0.5 z(preds/ens_FD16P20kd_to_val.npy), per-feed z
+   (src/stack_val.py feed_rank_z[:,1]); metric src/metrics.py ndcg_per_feed (feeds without a positive count 1).
+ - SE: cluster-robust by user_id (sum of per-user residual sums; user_id 0 = pooled bucket, each of its feeds is its
+   own cluster). Paired deltas are per feed, then the same cluster SE.
+ - H buckets: 0 | 1-4 | 5-9 | 10-19 | 20-49 | 50-99 | 100-255 | 256 (H = stored history length, capped at 256 by the data).
+ - "REST" = all feeds with H < 256; "NEAR" = H in 100..255 (adjacent bucket).
+ - Marks: [M] measured here, [D] derived arithmetic from [M], [I] judgement.
+ - Val labels are used (a) descriptively with no choice made from them, or (b) inside 5-fold GroupKFold-by-user
+   procedures wherever something is FITTED or CHOSEN. No later snapshots of a user, no labels as features.
+
+D0 reproduction: rebuilt FINAL must read 0.40271 +- 0.00001; bucket shares and NDCG must match the lead's table to
+   +-0.001 NDCG / +-0.1 pp. If not, the mismatch is reported and my numbers are used.
+
+A1 (is the H = 256 deficit explained by label-free feed composition?)
+ D_raw(ref) = mean NDCG(H=256) - mean NDCG(ref), ref in {REST, NEAR}.
+ Covariates, label-free: M (and log M), day, hour, user_id 0 flag, cold share of the candidates (it_hist_all_luo == 0,
+   the project's 'cold' definition), share of candidates without an embedding, number of candidate categories, top
+   candidate-category share, share of candidates whose category occurs in the history; history composition computed
+   on the NEWEST min(H, 64) events so that it has common support across H (event-type shares, event-source top share,
+   number of distinct categories, top-category share, share of events without embedding, share of distinct items);
+   random-order posterior of the feed if a stored label-free one exists for val. NOT available in the data: event
+   timestamps (so "recency of the last event" in time cannot be computed; stated, not approximated) and a traffic
+   domain for val feeds (val is shuffled / one inference domain) -> reported as not identifiable.
+ Method: LightGBM regression of per-feed NDCG on the covariates, fitted on REST feeds only, 5-fold GroupKFold by user
+   over ALL feeds (a feed is always predicted by a model that saw no feed of its user); D_adj = mean over H=256 feeds
+   of (NDCG - prediction) minus the same mean over REST feeds (out-of-fold; should be about 0). Cross-check: OLS with
+   the same covariates + H=256 indicator; exact-cell matching on (M decile x cold-share tercile) as a third read.
+ The number of positives is NOT label-free. It is handled separately: (i) D_adj+ = the same procedure with n_pos added;
+   (ii) per-feed AUC (mean percentile rank of the positives; 0.5 for a random order whatever M and n_pos);
+   (iii) NDCG minus the exact expectation of NDCG under a random order given (M, n_pos) ("skill").
+ Reading rule: "composition" if D_adj+ >= -1/3 |D_raw(REST)| or D_adj+ >= -2 SE; "deficit candidate" if
+   D_adj+ <= -2/3 |D_raw(REST)| and <= -2 SE; otherwise "partly". A residual is NOT yet a model deficit: A2 decides.
+
+A2 (difficulty proxies; same bucket table for other rankers)
+ Rankers: FINAL; FD16 base pool alone; popularity-light pool alone (4 wide full-data pop1 students); the distillation
+   teacher's hard-label members on val (the 11 teacher members if their val predictions are stored, else the stored
+   hard-label pools G3 / w5_e10_base); one single hard-label member; trivial rankers: popularity only (it_hist_all_luo),
+   exposure only (xp_imp_c50), max cosine to the history (computed here), cosine to the user embedding, the
+   pre-trained encoder score (pre2_fe), f-columns if any is a known one-column heuristic.
+ For each: NDCG, per-feed AUC and skill by H bucket; D(H=256 - NEAR) and D(H=256 - REST).
+ Reading rule: the gap is TASK DIFFICULTY (intrinsic) if all three hold:
+   (a) history-free rankers (popularity, exposure) show D(H=256 - REST) in NDCG of the same sign and >= 50% of FINAL's;
+   (b) FINAL's per-feed AUC at H=256 is not below NEAR by more than 2 SE;
+   (c) FINAL's lift over the popularity-only ranker (paired per feed, in AUC and in skill) at H=256 is not smaller
+       than at NEAR by more than 2 SE.
+ MODEL-DEFICIT signature: (c) fails, i.e. the model's gain over history-free ranking shrinks at the cap while the
+   history-free rankers do not get worse.
+
+A3 (where the positives of heavy users sit; descriptive, no choice)
+ For positives (negatives as contrast) by H bucket: rank / percentile of the positive under FINAL (top-1, top-5,
+   top-10 shares; median percentile); share of cold positives; max cosine to the history, index (newest-first) of the
+   most similar event: share within the newest 16 / 64 / 256; within-feed AUC of smax restricted to the newest
+   8 / 16 / 32 / 64 / 128 / 256 events; within-feed AUC of mean-of-top-k cosines for k = 1 / 3 / 16 / 32 / 64 / all.
+ NOTE (code fact, nn_x/w5/model.py HistRetrieval): retrieval takes the top-16 events BY COSINE over the whole stored
+   history, not the newest 16, and the cross-attention with the cosine bias sees all stored events. So "position
+   beyond 16" is not out of reach; what depth 16 cannot reach is events ranked 17+ by cosine, and what nothing can
+   reach is history older than the 256-event data cap.
+ Reading rules: "relevant history is old" if at H=256 >= 40% of positives have their most similar event at index >= 64
+   AND the smax-only ranker restricted to the newest 64 events loses >= 0.005 NDCG at H=256 against smax over all.
+   "retrieval depth binds" if at H=256 the within-feed AUC of mean-top-32 exceeds mean-top-16 by >= +0.005 (cluster
+   2 SE clear of 0) while it does not at H 20-99.
+
+B (small segments: H = 0; H 1-9; user_id 0)
+ Table: FINAL vs FD16 alone, popularity-light pool alone, popularity only, exposure only, cos_u, pre2_fe; paired
+   deltas with cluster SE; within-feed AUC of each raw input on the segment vs all feeds (what is still informative).
+ "Largest gain any stored family shows": candidate set fixed NOW = {FD16 base, popularity-light pool, FT branch
+   only, TO branch only, W8 file, W16 file, S16 file (d128 students), G3 file (hard labels), Q1a popularity-free
+   file, Q2a pop1 file, P-weight w in {0, 0.1, 0.2, 0.3, 0.4, 0.6, 0.8, 1.0} between FD16 and the popularity-light
+   pool}. Per segment, the best candidate is chosen on 4 user-folds and read on the 5th (nested); in-sample best is
+   printed next to it and labelled as such.
+ Ceiling of a segment in val NDCG points [D] = segment share x max(0, nested gain + 2 SE); a second, generous
+   ceiling = share x (NDCG of NEAR-level performance gap) is printed only as an upper bound that assumes the gap is
+   not intrinsic.
+
+C (audit of long-history / sparse-user arms with stored predictions, read by H bucket)
+ Arms = every stored train-only val prediction family of an architecture / history arm with a same-seed control:
+   retr32, retr32u, retr_cat, no_retr, no_sim, blocks3, kv64 (abl 2-epoch, seeds 23/24, control abl_base);
+   e10 retr32, retr32u, blocks3 (seeds 951/952, control w5_e10_base same seeds); kw_hl2, kw_id, kw_ff4, kwh30,
+   kd05w192gru, kd05w224 (control kd05w192 same seeds); kd05t25w192b3, kd05t25w256 (control kd05t25w192 same seeds);
+   r7 hl2, hc4 (control r7_base); r6 typed, a4u, a4w, cset (control r6_base / the stated control of the report);
+   r6_cd hcap, rec33, aug (control r6_cd_m02 same roots); w9 hs1, hs1b (control abl_base same seeds if matched);
+   v23_gru vs v17 (families); xdrop_pre2 / xdrop_pop / pop1 as information rows.
+ Read: pool = member-equal per-feed z-mean of the arm's stored members; delta vs the control pool on ALL, H=256,
+   H<=9 (incl. 0), user_id 0; cluster SE; plus the interaction (segment delta - complement delta).
+ Multiplicity: about 30 arms x 3 segments = about 90 looks. An arm is FLAGGED for a segment only if segment z >= 3.3
+   (Bonferroni 0.05 one-sided over 90) AND the interaction z >= 2 AND the complement delta >= -1 SE. Anything below is
+   reported as "inside the multiplicity noise"; the count of |z| >= 2 cells is compared with the 4.6% expected by chance.
+
+D (proposals): at most two GPU arms, only if A says "deficit candidate / partly" with a mechanism located by A3 or a
+   FLAGGED cell of C; otherwise "no arm". Prior for pool-level >= +0.0005 stated as [I].
+
+=== BLOCK 1  2026-11-15T16:43:13Z  (AMENDMENT, written AFTER the s0 / s2 tables were seen and BEFORE s2b / s3 / s4 are run) ===
+What was seen: D0 reproduced (0.40271; H = 0 is 194 feeds, not 195). s2: FINAL D(256-NEAR) NDCG -0.0155, AUC -0.0138;
+ popularity-only NDCG -0.0042, AUC -0.0127; ratio of skill 256/NEAR 0.872 FINAL, 0.805 popularity, 0.872 pre2_fe.
+Reading of the A2 rule AS DECLARED (not changed): (a) FAILS in absolute NDCG (popularity 36%, exposure 27% of FINAL's
+ D(256-REST)); (b) FAILS (FINAL AUC at H=256 is 3.1 SE below NEAR); (c) passes in AUC, to be computed in skill.
+ So "intrinsic by rule A2" is NOT established as declared. The model-deficit signature (history-free rankers do not get
+ worse) is not met either: they get worse by the same AUC amount.
+POST-HOC DIAGNOSIS OF THE RULE (labelled post hoc): (a) compared absolute NDCG gaps of rankers whose NDCG range above
+ the random level differs by 8x, and (b) assumed AUC is free of difficulty; both are scale errors of mine. The task text
+ itself names the right criterion ("the same gap in the same RATIO"). The ratio form is therefore added as rule A2':
+ A2' (declared now, before its SE is computed): R_X = skill_X(H=256) / skill_X(NEAR) with a 2,000-draw cluster bootstrap
+   by user. The gap is "shared difficulty" if FINAL's R is not below the R of the history-free rankers (popularity,
+   exposure, f1) and of the label-free history rankers (max cosine, pre2_fe) by more than the bootstrap 2 SE of the
+   paired difference in EVERY one of these five comparisons; "model-specific deficit" if FINAL's R is below at least
+   three of the five by more than 2 SE. The same for AUC - 0.5 in place of skill is printed as a second read.
+   Because A2' was written after seeing the point ratios, its outcome is reported as POST HOC next to the declared rule.
+A1 extension (declared now, not yet computed): extra label-free covariates describing RANGE RESTRICTION of the
+   candidate set (hypothesis: the production system already personalises the candidate set of heavy users, so the
+   candidates are more alike): per-feed mean and sd over candidates of smax64 (max cosine to the newest 64 events), of
+   cos_u, of log1p popularity, of log1p exposure; share of candidates whose own item is in the history; mean pairwise
+   cosine between the candidates of the feed. Reported as model "X2" next to the declared covariate set "X1".
+
+=== BLOCK 2  2026-11-15T16:50:20Z  (written AFTER s3, s2b, s4, s5, s6 were read and BEFORE s7 is run) ===
+Outcomes by the block-0 / block-1 rules (numbers in out_s*.txt):
+ A1: D_adj (X1) -0.0089 +- 0.0039 (52% of raw), D_adj+ (X1 + n_pos) -0.0137 +- 0.0038 (80% of raw, z -3.6) -> by the
+     declared rule "DEFICIT CANDIDATE" (= not explained by feed composition); A2 decides whether it is the model.
+ A2 (declared): not established as written (block 1). A2' (post hoc): FINAL's skill ratio 256/NEAR 0.872 is not below
+     any valid comparator by > 2 SE (pre2_fe 0.872, max cosine 0.859, f1 0.793, popularity 0.805; exposure-only has
+     NEGATIVE skill in both buckets, so its ratio is meaningless and is excluded, in AUC - 0.5 it keeps 0.54 vs FINAL 0.94)
+     -> "shared difficulty".
+ A3: "relevant history is old": first half true (51.9% of positives at H=256 have the best match at index >= 64), second
+     half false (smax newest 64 minus all: +0.0008 +- 0.0021 NDCG) -> NOT met. "retrieval depth binds": top-32 minus
+     top-16 AUC -0.0045 +- 0.0012 -> NOT met (sign reversed).
+ B: no stored family beats FINAL on any small segment (nested gains all negative; 3 of 75 cells at |z| >= 2 vs 3.4 expected).
+ C: 0 of 90 cells flagged (z >= 3.3); |z| >= 2 in 6 cells vs 4.1 expected. Largest positive cells are all at H=256:
+     a4u (unique retrieval slots) 2 ep seed 23 z +2.66; a4u 10 ep, 6 seeds +0.00274 +- 0.00119 (z +2.30, interaction
+     z +2.2); cset 2 ep z +2.37 (10 ep: +0.0004, gone); GRU under KD +0.00216 +- 0.00109 (z +2.0); kv64 z +2.0.
+     By the declared rule all of this is INSIDE the multiplicity noise.
+FOLLOW-UP on a4u only (it is the one arm with a label-free mechanism from A1: the distinct-item share of the newest 64
+ events is 0.658 at H=256 vs 0.738 at NEAR, SMD -0.40, so duplicates can crowd the 16 retrieval slots; and it was
+ never run under distillation). Three reads declared NOW, before any is computed:
+ F1 independent replication: m02 re-cools of the a4u snapshots (nn_r6_cd_m02_a4u_r101..106, train-only) vs the m02
+    re-cools of the F7 snapshots with the same root numbers (cross-root, as the registry notes). One-sided at H=256.
+    REPLICATED if delta(H=256) > 0 with z >= 1.64 and interaction (H=256 minus rest) >= 0; REFUTED if delta(H=256) <= 0;
+    otherwise UNDECIDED. The fine-tuned form (n2cpv3 OOF, roots with both files) is printed as a second line.
+ F2 mechanism dose-response on the 10-epoch 6-seed pair (the z +2.30 cell), feeds with H >= 100: terciles of the
+    label-free distinct-item share of the whole stored history; SUPPORTED if delta(bottom tercile = most repeats) minus
+    delta(top tercile) > 0 at z >= 2; else NOT SUPPORTED.
+ F3 cold/warm trade (section 3 rule: "stale-val for any cold/warm trade, they net about 0"): the H=256 delta of the
+    10-epoch pair split by feeds whose positives are all cold / all warm / mixed. If the H=256 gain sits in the all-cold
+    feeds and the all-warm feeds lose, it is the known trade and NOT a history effect.
+ Proposal rule for D: an a4u arm under distillation is proposed only if F1 is not REFUTED and (F2 SUPPORTED or F3 shows
+    the gain is not the cold/warm trade). Otherwise "no arm".
+ Also declared now (information, no decision): the worth of the candidate-set / history levers by H for FINAL's own
+    family cannot be read (no ablation of FD students exists); stated as a gap.
+
+=== BLOCK 3  2026-11-15T16:51:57Z  (written AFTER s7 was read and BEFORE s8 is run) ===
+s7 outcomes by the block-2 rules: F1 UNDECIDED (H=256 +0.00115 +- 0.00121, z +0.95; fine-tuned form +0.00146 +- 0.00134);
+ F2 NOT SUPPORTED (bottom minus top tercile of distinct share +0.0011 +- 0.0017 on the 10-epoch pair, -0.0017 +- 0.0018
+ on the re-cool pair: the gain does not sit where the repeats are); F3: on the 10-epoch pair the H=256 gain is in cold
+ AND warm feeds (+0.0041 / +0.0023), on the re-cool pair the signs split (-0.0035 / +0.0035): no stable pattern.
+ By the block-2 proposal rule an a4u arm MAY be proposed (F1 not refuted, F3 not the trade on the pair that carried the
+ cell); it is carried as a LOW-PRIOR optional arm, not as a finding.
+Three descriptive reads declared now (no decision attached except where stated):
+ G1 model-based counterpart of A3 from stored predictions (nn_x/tricks/HDROP-ALL/preds/val: hard-label members
+    w5_e10_base_s951/952 scored with 10% / 20% of the history events dropped at random, single pass, 4 masks): cost of
+    one dropped-history pass by H bucket (mean over masks of per-feed NDCG minus the full-history NDCG, 2-member mean).
+    Reading: if the cost at H=256 is not larger than at NEAR (contrast >= -2 SE), the model's marginal use of history
+    is not higher at the cap, i.e. no sign that it is starved of history there; if the cost at H=256 is larger by
+    > 2 SE, the cap binds for the model.
+ G2 does the model "know" that heavy users are harder: softmax of the mean raw logit of the 11 teacher members per
+    feed; predicted probability mass on the top-1 candidate vs the realised y_top1 / n_pos, by H bucket (calibration
+    of the listwise target). If realised and predicted fall together at H=256, the lower score is predicted
+    difficulty; if realised falls and predicted does not, the model is over-confident there (a deficit signature).
+ G3 H = 0 split by whether the organisers' user embedding is non-zero (label-free split): NDCG / AUC of FINAL,
+    popularity-only and cos_u; and uid0 vs known users inside H = 0.
+
+=== BLOCK 4  2026-11-15T16:53:16Z  (written AFTER s8 was read and BEFORE s9 is run) ===
+s8 outcomes: G1 contrast (cost of a 20% history drop, H=256 minus NEAR) -0.00001 +- 0.00091 -> by the declared reading
+ the cap does NOT bind for the model. G2: predicted p(top-1) falls by 0.0098 +- 0.0020 at H=256 vs NEAR, realised by
+ 0.0143 +- 0.0055, realised minus predicted -0.0045 +- 0.0052 (n.s.) -> predicted difficulty, no over-confidence
+ signature. G3: the weak cold cell is H=0 with an all-zero user embedding (74 val feeds, NDCG 0.3515 +- 0.025).
+s9 (descriptive decomposition of the A1 result; same cross-fitted procedure, no new decision rule): which covariate
+ block carries the 40-48% that matching removed. Blocks: F = feed only (M, log M, day, hour, uid0, cold share, missing
+ embeddings, candidate categories); F + T = plus event-type shares of the newest 64 events; F + T + R = plus repeat /
+ category structure of the newest 64 (= X1); X1 + A = plus label-free user-activity markers (user seen in train,
+ log1p number of train feeds of the user). Expectation written now: feed-only explains < 10%; if X1 + A leaves < 1/3
+ of the raw gap the reading is "heavy users are a different KIND of user, and feeds of the same kind of user are as
+ hard below the cap".

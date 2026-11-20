@@ -1,0 +1,279 @@
+LLM manual-ranking pilot: scoring (2026-11-13)
+==============================================================================
+Inputs: rankings = LLM rankers' JSON (copied to /tmp/scratchpad/llm_orders.json); labels = nn_x/llm_manual/hidden/labels.json;
+G3 = preds/ens_G3_final_val.npy (offsets from src/common.feed_meta('val')); scorer = /tmp/scratchpad/score_pilot.py
+(per-feed CSV: /tmp/scratchpad/pilot_per_feed.csv). The heuristics use only the rendered CANDIDATES columns of nn_x/llm_manual/feeds/feed_<i>.txt.
+
+SUMMARY (100 val feeds; NDCG mean +- SE; paired delta vs G3 mean +- SE)
+  LLM (5 rankers x 20 feeds)  0.3957 +- 0.0256   delta -0.0476 +- 0.0232  (W/T/L vs G3 33/10/57; 95% CI of delta about [-0.093, -0.002])
+  G3 ensemble                 0.4433 +- 0.0256   (same feeds; G3 on the full val split = 0.4003, so this sample is easier than average for G3)
+  random (200 perms)          0.3336 +- 0.0116   delta -0.1097 +- 0.0214
+  H1 cos_max_to_history       0.3888 +- 0.0243   delta -0.0545 +- 0.0208  (random ties: 0.4002)
+  H2 cos_to_newest_5          0.3791 +- 0.0234   delta -0.0642 +- 0.0235  (random ties: 0.3857)
+  H3 popularity               0.3472 +- 0.0219   delta -0.0961 +- 0.0263
+  H4 n_same_cat > cos_max     0.3940 +- 0.0244   delta -0.0493 +- 0.0235  (random ties: 0.4011)
+  H5 best = f1 desc           0.3499 +- 0.0201   delta -0.0934 +- 0.0212  (picked on these feeds; random ties: 0.3887)
+  LLM - H1 +0.0069 +- 0.0163 | LLM - H2 +0.0167 +- 0.0126 | LLM - H4 +0.0017 +- 0.0196 | LLM - random +0.0621 +- 0.0205
+  Top-1 hit: LLM 0.150 +- 0.036, G3 0.140 +- 0.035 (paired +0.010 +- 0.039); first positive in top-5: LLM 0.32, G3 0.45
+  Extra (not requested): per-feed rank-average blend of LLM and G3: w_LLM 0.25 -> -0.0214 +- 0.0116, 0.5 -> -0.0297 +- 0.0177 vs G3 (no complementary signal).
+
+INTERPRETATION
+On this anonymised rendering, a zero-shot LLM (Opus, with tools, no external NN) does not compete with G3. It scores 0.396 against G3's 0.443
+on the same 100 feeds: a paired loss of 0.048 +- 0.023 (about 2 SE), losing 57 feeds and winning 33. It is clearly better than random (+0.062),
+but statistically tied with the trivial one-column heuristics: cos_max (+0.007 +- 0.016) and same-category count then cos_max (+0.002 +- 0.020).
+With random rather than pessimistic tie-breaking, those heuristics reach 0.400-0.401, slightly above the LLM. The gap to G3 is similar in
+every M bucket (-0.04 to -0.05) and smaller for feeds with more than one positive (-0.024 +- 0.033). The LLM matches G3 at putting a positive
+at rank 1 (15% vs 14%). These are the obvious "same intent, near-duplicate" cases. It loses further down the list: it gets the first
+positive into the top 5 in 32% of feeds against 45% for G3, and the mean first-positive rank is 21.7 against 14.6. All five rankers fell back
+on a hand-weighted linear rule over the rendered cues: cosine, f1/f3 affinity, category recency and popularity. That is a crude, untrained
+version of what G3 learns from labelled training feeds, which also has engineered item/user statistics that the text does not expose.
+Ranking within one category needs calibrated weights on many weak signals. Blending the LLM ranks into G3 hurts at every weight, so there is no complementary signal to
+harvest. Per-ranker differences (rankers 3 and 5 near parity, 1 and 2 about -0.09) are within noise at n=20. Conclusion: LLM manual ranking
+is not a viable lever for this task, either as a standalone ranker or as a blend component, and it would not scale to 14k feeds anyway.
+
+==============================================================================
+DETAILED TABLES
+Feeds: 100 val feeds (nn_x/llm_manual/feeds), 5 rankers x 20 feeds (ranker k = feeds 20(k-1)+1..20k in feeds_meta order).
+Metric: src/metrics.ndcg_per_feed (binary gain, full-list NDCG, pessimistic ties). SE = sd/sqrt(n). Paired delta = per-feed (method - G3).
+Validation: 100 rankings parsed; feeds needing repair (missing/duplicate/out-of-range idx): 0
+Sanity: labels == data/flat/val/cand_target and feed-file item_ids == cand_item_id for all 100 feeds (asserted).
+G3 reference on the full val split: mean NDCG 0.4003 over all 14423 feeds; 0.4003 over the 14423 feeds with >=1 positive.
+Sample composition: M median 30 (min 5, max 281); npos=1 in 80 feeds, >1 in 20; history length median 197.
+H5 best = H5_f1+ (chosen on these 100 feeds -> optimistic). All 10 H5 variants listed below.
+
+TABLE 1. All 100 feeds
+  method             n  mean NDCG      SE  delta vs G3      SE   wins/ties/losses vs G3
+  LLM              100     0.3957  0.0256      -0.0476  0.0232                 33/10/57
+  G3               100     0.4433  0.0256      +0.0000  0.0000                  0/100/0
+  RAND             100     0.3336  0.0116      -0.1097  0.0214                  40/0/60
+  H1_cosmax        100     0.3888  0.0243      -0.0545  0.0208                 33/12/55
+  H2_cos5          100     0.3791  0.0234      -0.0642  0.0235                  34/8/58
+  H3_pop           100     0.3472  0.0219      -0.0961  0.0263                  31/3/66
+  H4_nsame>cmax    100     0.3940  0.0244      -0.0493  0.0235                  35/9/56
+  H5_best          100     0.3499  0.0201      -0.0934  0.0212                 26/10/64
+
+TABLE 2a. M <= 30 (n=50)
+  method             n  mean NDCG      SE  delta vs G3      SE   wins/ties/losses vs G3
+  LLM               50     0.5135  0.0419      -0.0519  0.0372                 13/10/27
+  G3                50     0.5654  0.0372      +0.0000  0.0000                   0/50/0
+  RAND              50     0.4190  0.0135      -0.1463  0.0342                  19/0/31
+  H1_cosmax         50     0.5209  0.0389      -0.0445  0.0322                 15/12/23
+  H2_cos5           50     0.4931  0.0370      -0.0723  0.0379                  15/8/27
+  H3_pop            50     0.4650  0.0355      -0.1003  0.0449                  16/3/31
+  H4_nsame>cmax     50     0.5136  0.0399      -0.0518  0.0402                  16/8/26
+  H5_best           50     0.4413  0.0323      -0.1240  0.0338                  11/9/30
+
+TABLE 2b. 30 < M <= 80 (n=30)
+  method             n  mean NDCG      SE  delta vs G3      SE   wins/ties/losses vs G3
+  LLM               30     0.2999  0.0231      -0.0393  0.0340                  14/0/16
+  G3                30     0.3392  0.0324      +0.0000  0.0000                   0/30/0
+  RAND              30     0.2727  0.0091      -0.0666  0.0308                  13/0/17
+  H1_cosmax         30     0.2885  0.0183      -0.0507  0.0344                  12/0/18
+  H2_cos5           30     0.2850  0.0228      -0.0542  0.0329                  12/0/18
+  H3_pop            30     0.2415  0.0120      -0.0977  0.0341                   8/0/22
+  H4_nsame>cmax     30     0.2807  0.0189      -0.0586  0.0346                  11/0/19
+  H5_best           30     0.2902  0.0216      -0.0491  0.0296                  10/1/19
+
+TABLE 2c. M > 80 (n=20)
+  method             n  mean NDCG      SE  delta vs G3      SE   wins/ties/losses vs G3
+  LLM               20     0.2450  0.0277      -0.0493  0.0497                   6/0/14
+  G3                20     0.2943  0.0425      +0.0000  0.0000                   0/20/0
+  RAND              20     0.2115  0.0110      -0.0828  0.0430                   8/0/12
+  H1_cosmax         20     0.2093  0.0120      -0.0850  0.0423                   6/0/14
+  H2_cos5           20     0.2351  0.0280      -0.0592  0.0510                   7/0/13
+  H3_pop            20     0.2112  0.0202      -0.0831  0.0482                   7/0/13
+  H4_nsame>cmax     20     0.2653  0.0251      -0.0290  0.0345                   8/1/11
+  H5_best           20     0.2111  0.0179      -0.0832  0.0445                   5/0/15
+
+TABLE 3a. exactly 1 positive (n=80)
+  method             n  mean NDCG      SE  delta vs G3      SE   wins/ties/losses vs G3
+  LLM               80     0.3867  0.0299      -0.0536  0.0279                 25/10/45
+  G3                80     0.4403  0.0295      +0.0000  0.0000                   0/80/0
+  RAND              80     0.3292  0.0124      -0.1111  0.0257                  36/0/44
+  H1_cosmax         80     0.3886  0.0276      -0.0517  0.0248                 29/12/39
+  H2_cos5           80     0.3635  0.0269      -0.0768  0.0280                  25/8/47
+  H3_pop            80     0.3477  0.0259      -0.0927  0.0313                  25/3/52
+  H4_nsame>cmax     80     0.3852  0.0280      -0.0552  0.0286                  28/8/44
+  H5_best           80     0.3411  0.0234      -0.0992  0.0251                 19/10/51
+
+TABLE 3b. >1 positive (n=20)
+  method             n  mean NDCG      SE  delta vs G3      SE   wins/ties/losses vs G3
+  LLM               20     0.4318  0.0463      -0.0236  0.0327                   8/0/12
+  G3                20     0.4553  0.0512      +0.0000  0.0000                   0/20/0
+  RAND              20     0.3513  0.0305      -0.1040  0.0300                   4/0/16
+  H1_cosmax         20     0.3899  0.0531      -0.0654  0.0312                   4/0/16
+  H2_cos5           20     0.4415  0.0447      -0.0139  0.0341                   9/0/11
+  H3_pop            20     0.3454  0.0374      -0.1099  0.0411                   6/0/14
+  H4_nsame>cmax     20     0.4296  0.0489      -0.0257  0.0262                   7/1/12
+  H5_best           20     0.3853  0.0363      -0.0700  0.0345                   7/0/13
+
+TABLE 4. Positive at rank 1 (share of feeds), and rank of the first positive
+  LLM        top-1 hit 0.150 +- 0.036
+  G3         top-1 hit 0.140 +- 0.035
+  H2_cos5    top-1 hit 0.100 +- 0.030
+  paired LLM - G3 top-1: +0.010 +- 0.039  (LLM-only hits 8, G3-only hits 7, both 7, neither 78)
+  first-positive rank: LLM median 8 (mean 21.7), G3 median 7 (mean 14.6); first positive in top-5: LLM 0.32, G3 0.45
+  top-1 by M bucket (LLM / G3): M<=30: 0.28 / 0.24; 30<M<=80: 0.00 / 0.03; M>80: 0.05 / 0.05
+
+TABLE 5. Per ranker (20 feeds each; each ranker used its own hand-written rule, see strategies)
+  ranker        LLM       G3    LLM-G3      SE       H2    LLM-H2      SE   medM
+  1          0.3855   0.4757   -0.0901  0.0565   0.3820   +0.0035  0.0136     21
+  2          0.3648   0.4507   -0.0859  0.0629   0.3806   -0.0158  0.0248     27
+  3          0.3787   0.3927   -0.0140  0.0265   0.3124   +0.0664  0.0319     64
+  4          0.3540   0.4003   -0.0463  0.0417   0.3822   -0.0282  0.0232     31
+  5          0.4956   0.4972   -0.0016  0.0641   0.4381   +0.0575  0.0372     22
+
+TABLE 6. Paired LLM vs heuristics (LLM - heuristic, all 100 feeds)
+  LLM - RAND             +0.0621 +- 0.0205
+  LLM - H1_cosmax        +0.0069 +- 0.0163
+  LLM - H2_cos5          +0.0167 +- 0.0126
+  LLM - H3_pop           +0.0485 +- 0.0281
+  LLM - H4_nsame>cmax    +0.0017 +- 0.0196
+  LLM - H5_best          +0.0458 +- 0.0181
+
+TABLE 7. Heuristics with ties broken at random instead of pessimistically (the rendered columns are rounded to 2 decimals and
+         f3 is constant within a category, so pessimistic ties penalise them; mean over 50 random tie-breaks)
+  heuristic        pessimistic  random-tie   rt - G3      SE
+  H1_cosmax             0.3888      0.4002   -0.0431  0.0216
+  H2_cos5               0.3791      0.3857   -0.0576  0.0234
+  H3_pop                0.3472      0.3581   -0.0852  0.0261
+  H4_nsame>cmax         0.3940      0.4011   -0.0422  0.0236
+  H5_f1+                0.3499      0.3887   -0.0546  0.0222
+  H5_f1-                0.2711      0.2917   -0.1516  0.0259
+  H5_f2+                0.2700      0.3250   -0.1184  0.0241
+  H5_f2-                0.3118      0.3554   -0.0879  0.0252
+  H5_f3+                0.2929      0.3662   -0.0771  0.0223
+  H5_f3-                0.2727      0.2952   -0.1481  0.0269
+  H5_f4+                0.3186      0.3209   -0.1224  0.0254
+  H5_f4-                0.3071      0.3126   -0.1307  0.0237
+  H5_f5+                0.3356      0.3413   -0.1021  0.0248
+  H5_f5-                0.2932      0.2977   -0.1456  0.0264
+
+
+RANKERS' STRATEGIES (as reported by the 5 LLM rankers; each ranked 20 feeds from the text files only)
+------------------------------------------------------------------------------------------------------
+[Ranker 1 | feeds 1-20]
+I read all 20 feeds by hand and reasoned about the patterns. I then turned that judgement into one hand-weighted rule, so every feed is treated the same way. It uses only the feed files: no trained model and no labels. The rule adds up: 1.0*f1 + 0.6*f3 + 0.5*(f2 / the feed's max f2) + 1.6*cos_to_newest_5 + 0.8*cos_max + 0.5*exp(-newest_hist_idx_same_category/8) + 0.25*(log of same-category history count, scaled within the feed) - 0.25 if the category was never seen + 0.04*log1p(popularity). I read the features this way: f3 is the same for every item of a category within a feed, but differs between users, so it looks like a user x category affinity or past click-rate. In feed 4998, c13 has f3 0.98 while c39, the most-viewed category, has 0.08, which suggests it is not just view counts. f1 looks like a finer-grained version of f3. f2 takes a few repeated values per feed with a common maximum, so it looks like a user x location match. f4 and f5 look like item-only features, so I gave them no weight. Most top picks are items in the newest category with the highest f1/f3 and cosine to the newest events. Three manual adjustments: in feed 7094 I moved c10 near-duplicates (cos 1.00) of the earlier block of repeated e4 events into the top 14. In feed 4998 I put the c39 item with the best recency cosine first. In feed 9715 I moved up the c5 item that matches the 2nd-newest event.
+
+[Ranker 2 | feeds 21-40]
+I ranked from the feed text files alone, using a transparent hand-weighted score plus manual corrections for each feed. No model, labels or other project files were used.
+Score = 3.0*cos_to_newest_5 + 1.5*cos_max + 1.0*f1 + 0.6*(f2 / feed's max f2) + 0.3*f3 + 0.8*(recency-decayed share of the candidate's category in the shown history), plus a category-recency bonus (+0.25 if the category is the newest event's, +0.15 if within the last 5 events, -0.4 if the category never appears in the history), plus small terms 0.03*log1p(popularity) + 0.1*(f4+f5).
+How I read the f features, inferred from patterns only:
+- f3 is constant per (user, category), so it looks like user-category affinity.
+- f1 looks like a finer user-subcategory affinity.
+- f2 takes a few discrete levels per feed, with a dominant 'home' level; it looks like a user-location match, so f2~0 is treated as a negative.
+Manual corrections:
+- Lift near-duplicates (cos_max >= 0.95) of items the user acted on very recently, especially items with e2/e3/e4/e5/e6/e9 actions.
+- When the newest one or two events start a new category (c29 in 12930, c20 in 2148, c3 with e9 in 12154, c40 in 115), give that category's best candidates a moderate lift, without overriding a strongly dominant recent category.
+Caveat: these 20 feeds are almost all 'stay in the dominant recent category, pick the closest embedding match' cases. Within large same-category candidate sets, such as 5429 (148 candidates) and 12154 (259), the anonymised text gives few cues beyond cosine and f2, so gains over the trained ensemble are unlikely.
+
+[Ranker 3 | feeds 41-60]
+I ranked by a hand-written linear score (no trained model, no labels), computed with a small parser script over the feed files, then applied category boosts per feed by hand. Reading the data, f3 looks like a recency-weighted user-by-category affinity: it is constant per category within a feed, varies across users and follows recent engagement. f1 looks like a finer user-by-microcategory affinity (corr 0.91 with f3). f2 is a per-feed discrete value, plausibly user-by-location affinity. f4/f5 behave like item age or traffic: low values mean zero recent views, so they got no weight. Score = 0.8*f1 + 0.5*f3 + 0.3*f2 + 1.0*cos_to_newest_5 + 1.2*cos_max + 0.3*cos_max_same_cat + 0.15 if cos_max>=0.95 (near-duplicate of a viewed item) + a category recency bonus (newest event 0.25, within 3 events 0.18, within 10 events 0.10, within 30 events 0.04) + 0.25*share of the newest 20 events in the category - 0.3 for never-seen categories + 0.015*log1p(pop). Manual judgment: where a secondary category is clearly a fresh intent (newest event or recent strong e2/e3/e5 action) but is swamped by a dominant category, I added a category boost (+0.1 to +0.8) so its best items interleave near the top. This applied to feeds 12275 (c15, c13), 11190 (c22), 129 (c7), 844 (c6), 10278 (c3), 10384 (c3) and 2685 (c6). I sorted by expected relevance and did not hedge for diversity. Because history is long and candidate pools are dominated by one or two categories, most of the achievable gain is in ordering within the dominant category by similarity to recent items.
+
+[Ranker 4 | feeds 61-80]
+I made one hand-written scoring rule (no trained model), scored every candidate within its feed, and then adjusted orderings by judgement in 7 feeds. The rule gives the biggest weight to embedding similarity: cosine to the 5 newest events (1.2) and the max cosine to any history item (0.8). Next come f3, which looks like an organiser-provided user-category affinity (1.0), and f1, which looks like a finer-grained affinity because it varies within a category (1.0). I suspect this because f3 is constant per category within a feed but does not track history counts; for example, a category with no history events can have f3=0.5. Smaller weights go to f2 (0.4), recent category share with decay and extra weight for deeper event types (0.8), a newest-category bonus (+0.5 when the newest event is in that category, smaller when it is a few events back), log popularity (0.3) and f4/f5 (0.1 each, since they seem to track popularity). Candidates whose category is not in history are penalised, but less when their f3 is high. The judgement changes were: interleave two categories when the newest events show deep engagement in both, lift a strong second category above a weak tail of the main one, and demote items with f2 near 0 or very low cosine within the intent category. In practice f1/f3 plus similarity to the newest events drive most rankings; in feeds dominated by one category, ties are broken by cosine, f2 and popularity.
+
+[Ranker 5 | feeds 81-100]
+I scored every candidate with an approximate log-odds formula, using a small script that read only the feed files, then reviewed each feed by hand and overrode a few. Category prior: 0.4*ln(affinity+0.03), where affinity averages the category's share of all history events with its share of the visible history. In that share each event is weighted by exp(-idx/10), and non-e1 events count 1.5x. Then -0.3 if the category is unseen, +0.25 if it matches the newest event's category, and -0.2*ln(number of candidates in that category) as a dilution hedge. Similarity: +2.0*cos_max_to_history + 1.2*cos_to_newest_5. Features: f1, f3 and f2 look like user x category / user x context affinities (they are constant within a category in a feed, and 0.02 for unseen categories), so they get 0.55, 0.35 and 0.3; f4/f5 look item-level and get small weights (0.15, 0.1). Popularity: +0.05*ln1p(views). The prior is calibrated to the stated per-item lifts (about 1.7x for the newest event's category, about 3x penalty for unseen categories), so a strongly similar item from a secondary category can outrank a weak item from the main one. Manual overrides: lifted near-duplicates in the newest event's category when it differed from the dominant session category (3807 c32, 3336 c6, 3969 c36 already high), reordered small feeds (3680, 8446), and moved the best c33 item up in 8497.
+
+APPENDIX. Raw LLM orders (feed: order), kept for reproducibility
+7094: [58, 40, 33, 0, 53, 9, 26, 31, 62, 48, 42, 6, 25, 60, 54, 3, 56, 15, 2, 29, 23, 47, 52, 57, 28, 22, 34, 36, 63, 61, 51, 12, 38, 44, 27, 4, 32, 16, 21, 10, 14, 50, 7, 17, 46, 8, 49, 18, 59, 11, 41, 19, 45, 39, 13, 30, 5, 35, 20, 43, 55, 37, 1, 24]
+13276: [58, 60, 42, 40, 55, 45, 6, 5, 57, 25, 9, 20, 17, 2, 63, 56, 14, 33, 8, 38, 18, 59, 27, 10, 15, 35, 16, 34, 54, 28, 47, 44, 4, 52, 49, 37, 22, 24, 53, 51, 62, 0, 50, 3, 39, 21, 11, 61, 32, 46, 30, 13, 31, 7, 19, 48, 1, 23, 12, 29, 36, 43, 41, 26]
+2406: [8, 10, 4, 15, 11, 1, 14, 0, 17, 3, 20, 13, 18, 12, 21, 9, 16, 7, 2, 6, 5, 19]
+9715: [5, 17, 3, 13, 2, 6, 16, 4, 9, 10, 7, 12, 8, 14, 11, 0, 15, 1]
+7046: [3, 5, 2, 4, 1, 0]
+14256: [77, 85, 35, 80, 48, 63, 18, 19, 1, 4, 3, 71, 62, 5, 58, 14, 8, 86, 91, 107, 21, 56, 76, 100, 25, 37, 52, 53, 22, 87, 65, 20, 54, 99, 36, 105, 93, 74, 96, 44, 103, 106, 30, 97, 73, 41, 57, 27, 64, 0, 59, 10, 31, 13, 16, 7, 6, 98, 68, 95, 69, 24, 108, 17, 75, 90, 66, 55, 78, 51, 23, 88, 92, 72, 2, 84, 49, 61, 104, 40, 101, 60, 109, 33, 39, 67, 12, 82, 79, 43, 26, 89, 42, 50, 47, 94, 45, 83, 9, 28, 15, 46, 38, 29, 102, 11, 81, 34, 32, 70]
+6009: [11, 3, 5, 6, 12, 9, 8, 2, 4, 1, 0, 7, 10]
+4381: [6, 9, 4, 5, 8, 0, 2, 7, 1, 3]
+8415: [31, 30, 36, 20, 24, 43, 48, 35, 7, 38, 26, 45, 44, 8, 14, 16, 4, 46, 55, 13, 40, 51, 9, 27, 29, 37, 15, 42, 54, 11, 53, 2, 12, 5, 34, 0, 22, 39, 19, 33, 1, 18, 17, 32, 49, 28, 50, 21, 10, 6, 23, 52, 47, 3, 41, 25]
+6611: [5, 36, 33, 60, 87, 79, 48, 53, 44, 51, 20, 10, 42, 83, 39, 21, 26, 64, 7, 68, 46, 9, 81, 80, 84, 86, 27, 4, 22, 1, 73, 35, 47, 25, 63, 16, 74, 56, 31, 54, 14, 6, 18, 67, 2, 82, 65, 24, 32, 13, 50, 30, 37, 0, 23, 59, 3, 19, 77, 58, 72, 57, 61, 55, 85, 41, 45, 71, 78, 28, 70, 29, 11, 40, 8, 12, 62, 66, 69, 76, 34, 52, 43, 15, 17, 38, 75, 49]
+13680: [0, 4, 1, 5, 3, 2]
+5251: [12, 10, 3, 6, 9, 8, 5, 13, 15, 1, 18, 17, 16, 14, 4, 2, 7, 11, 0]
+268: [38, 35, 5, 32, 20, 23, 26, 8, 25, 2, 0, 33, 21, 9, 24, 4, 40, 13, 17, 15, 3, 7, 34, 36, 30, 27, 39, 37, 28, 10, 18, 22, 12, 1, 19, 6, 16, 31, 29, 11, 14]
+9750: [25, 62, 43, 73, 0, 65, 18, 85, 42, 17, 45, 13, 75, 24, 56, 5, 79, 27, 80, 34, 63, 69, 60, 32, 6, 58, 30, 21, 9, 15, 38, 3, 10, 61, 86, 29, 33, 8, 64, 76, 53, 83, 22, 16, 47, 1, 72, 78, 70, 23, 40, 46, 2, 11, 55, 4, 31, 26, 28, 81, 77, 54, 41, 7, 68, 19, 44, 59, 12, 66, 20, 89, 35, 14, 52, 87, 39, 57, 74, 82, 48, 50, 36, 37, 49, 67, 71, 51, 84, 88]
+1931: [9, 12, 4, 7, 15, 6, 5, 2, 17, 16, 1, 3, 10, 11, 18, 14, 0, 13, 8]
+6497: [2, 0, 5, 1, 3, 4]
+4998: [8, 12, 7, 14, 5, 18, 3, 20, 2, 15, 19, 11, 6, 17, 0, 4, 1, 13, 9, 16, 10]
+11444: [29, 35, 34, 4, 24, 3, 36, 19, 31, 16, 17, 10, 27, 14, 18, 26, 15, 12, 20, 32, 6, 2, 33, 23, 13, 30, 5, 7, 9, 25, 11, 1, 21, 8, 28, 0, 22]
+11608: [8, 11, 2, 4, 3, 1, 10, 13, 7, 12, 9, 6, 5, 0]
+6382: [53, 43, 47, 1, 0, 39, 26, 2, 11, 41, 4, 3, 9, 24, 12, 31, 17, 59, 7, 18, 57, 42, 28, 49, 52, 6, 27, 33, 44, 25, 10, 21, 32, 19, 58, 30, 40, 60, 48, 20, 15, 29, 50, 35, 36, 56, 23, 22, 5, 16, 55, 54, 38, 37, 46, 14, 34, 51, 8, 13, 45]
+2025: [30, 3, 9, 15, 26, 19, 21, 5, 4, 13, 17, 29, 0, 24, 25, 10, 28, 1, 12, 23, 20, 14, 18, 22, 7, 6, 8, 11, 2, 27, 16]
+444: [17, 18, 20, 11, 4, 16, 22, 10, 15, 19, 8, 0, 7, 2, 9, 5, 13, 21, 14, 1, 3, 24, 6, 23, 12]
+615: [12, 16, 13, 24, 21, 19, 6, 10, 11, 7, 5, 2, 8, 15, 4, 18, 3, 26, 25, 20, 14, 22, 17, 23, 0, 1, 9]
+7212: [3, 4, 14, 10, 11, 8, 12, 17, 9, 16, 5, 6, 13, 7, 1, 0, 2, 15]
+12461: [14, 5, 20, 4, 29, 41, 2, 19, 28, 24, 7, 44, 8, 3, 39, 6, 25, 12, 18, 10, 36, 27, 16, 43, 34, 40, 46, 38, 33, 31, 30, 35, 42, 17, 9, 0, 15, 45, 11, 1, 23, 21, 32, 13, 26, 22, 37]
+12930: [71, 60, 43, 15, 18, 49, 23, 10, 3, 27, 75, 41, 54, 47, 24, 25, 4, 67, 37, 21, 57, 19, 6, 59, 46, 9, 33, 26, 69, 66, 53, 38, 36, 14, 35, 70, 56, 28, 68, 76, 44, 2, 34, 40, 13, 78, 63, 77, 55, 5, 51, 31, 16, 61, 8, 22, 20, 45, 52, 7, 48, 17, 32, 62, 12, 58, 0, 39, 73, 1, 65, 50, 11, 42, 29, 72, 74, 64, 30]
+9135: [9, 0, 7, 8, 10, 1, 4, 5, 3, 6, 2, 11]
+10175: [7, 8, 0, 3, 5, 6, 2, 1, 10, 9, 4]
+6269: [9, 5, 16, 0, 12, 11, 8, 2, 13, 4, 15, 14, 7, 6, 1, 10, 3]
+7148: [13, 19, 10, 16, 9, 7, 12, 20, 14, 6, 3, 1, 5, 2, 18, 11, 8, 4, 15, 21, 0, 17]
+5429: [70, 122, 95, 59, 83, 68, 104, 121, 15, 22, 98, 120, 48, 38, 37, 29, 113, 129, 141, 140, 71, 134, 86, 14, 130, 34, 77, 3, 5, 112, 44, 58, 69, 138, 114, 102, 119, 101, 27, 139, 43, 7, 106, 35, 85, 66, 105, 0, 51, 47, 32, 72, 92, 115, 55, 52, 61, 23, 109, 18, 124, 74, 19, 75, 96, 123, 56, 137, 21, 118, 107, 144, 94, 16, 108, 33, 142, 17, 127, 25, 97, 90, 31, 46, 79, 133, 143, 125, 12, 39, 4, 67, 89, 147, 28, 40, 63, 36, 78, 30, 57, 93, 80, 50, 76, 88, 1, 53, 65, 60, 73, 8, 20, 87, 136, 132, 2, 116, 110, 41, 145, 128, 117, 91, 42, 45, 54, 9, 49, 81, 10, 6, 84, 24, 100, 126, 111, 26, 11, 146, 13, 99, 64, 82, 62, 131, 135, 103]
+12057: [6, 17, 19, 10, 27, 16, 25, 22, 18, 9, 8, 11, 13, 24, 3, 23, 26, 7, 15, 0, 21, 20, 5, 14, 1, 4, 12, 2]
+2148: [146, 30, 150, 23, 21, 140, 147, 36, 119, 161, 135, 123, 66, 59, 63, 165, 56, 117, 9, 60, 51, 24, 48, 8, 88, 94, 124, 139, 102, 69, 157, 110, 113, 50, 33, 11, 133, 76, 32, 81, 35, 45, 73, 116, 97, 25, 55, 41, 106, 31, 136, 132, 78, 98, 14, 142, 0, 141, 118, 46, 52, 53, 84, 96, 130, 103, 144, 5, 152, 148, 74, 65, 34, 153, 134, 3, 104, 115, 72, 163, 85, 91, 16, 112, 162, 6, 120, 7, 61, 129, 83, 40, 57, 86, 125, 12, 70, 155, 75, 95, 166, 164, 62, 109, 121, 2, 27, 108, 58, 68, 79, 122, 4, 101, 89, 22, 13, 126, 111, 49, 90, 42, 26, 137, 143, 160, 37, 18, 92, 80, 99, 158, 20, 145, 154, 17, 29, 105, 64, 100, 39, 15, 67, 38, 1, 54, 44, 82, 77, 47, 151, 107, 131, 149, 128, 159, 28, 114, 156, 10, 71, 93, 127, 43, 87, 19, 138]
+10969: [14, 19, 1, 20, 12, 18, 5, 4, 2, 6, 16, 7, 3, 13, 8, 11, 9, 17, 10, 0, 15]
+14120: [23, 34, 29, 14, 18, 15, 37, 10, 22, 13, 28, 0, 2, 3, 7, 27, 1, 32, 33, 26, 31, 35, 4, 30, 17, 20, 25, 21, 8, 36, 12, 9, 24, 6, 16, 19, 11, 5]
+658: [22, 20, 40, 14, 47, 25, 55, 38, 51, 45, 17, 39, 4, 52, 19, 49, 59, 35, 3, 34, 54, 61, 15, 32, 2, 36, 24, 29, 1, 57, 23, 13, 62, 37, 60, 12, 48, 11, 21, 41, 30, 8, 63, 27, 46, 0, 56, 50, 42, 16, 7, 5, 33, 10, 6, 28, 44, 43, 53, 31, 18, 9, 26, 58]
+3252: [0, 6, 2, 3, 1, 5, 4]
+12154: [14, 221, 250, 11, 251, 174, 28, 87, 171, 68, 179, 212, 223, 33, 149, 50, 9, 136, 113, 210, 46, 40, 173, 10, 53, 47, 254, 137, 169, 117, 43, 25, 127, 160, 187, 63, 122, 111, 139, 114, 102, 148, 229, 138, 0, 182, 39, 195, 3, 105, 154, 101, 189, 112, 176, 209, 197, 208, 106, 21, 253, 130, 241, 108, 65, 170, 244, 133, 70, 193, 240, 104, 199, 205, 198, 75, 107, 38, 83, 249, 190, 218, 134, 34, 56, 120, 145, 44, 141, 15, 233, 93, 45, 58, 243, 69, 30, 257, 150, 115, 172, 211, 71, 49, 156, 245, 146, 51, 90, 147, 94, 196, 121, 67, 85, 61, 98, 74, 155, 242, 27, 4, 237, 12, 194, 192, 89, 142, 216, 151, 41, 180, 161, 143, 22, 1, 201, 84, 95, 23, 239, 184, 60, 153, 32, 36, 159, 86, 126, 20, 119, 124, 116, 166, 72, 79, 19, 77, 97, 215, 57, 152, 81, 76, 131, 214, 248, 59, 99, 220, 191, 110, 213, 37, 163, 227, 128, 200, 35, 158, 123, 238, 42, 100, 54, 5, 8, 16, 219, 181, 31, 185, 24, 224, 255, 183, 18, 132, 29, 82, 226, 66, 78, 140, 13, 206, 202, 256, 177, 144, 118, 252, 186, 91, 225, 135, 80, 235, 236, 125, 129, 62, 103, 48, 203, 6, 178, 109, 228, 231, 88, 258, 167, 17, 232, 207, 55, 230, 222, 157, 247, 164, 217, 175, 64, 7, 2, 162, 165, 92, 234, 246, 204, 26, 96, 168, 73, 188, 52]
+115: [97, 100, 63, 18, 11, 128, 109, 112, 84, 113, 5, 53, 132, 78, 138, 91, 111, 147, 17, 93, 59, 30, 157, 99, 126, 23, 15, 77, 98, 49, 54, 110, 94, 159, 105, 123, 96, 33, 27, 44, 61, 143, 16, 155, 108, 86, 81, 52, 32, 41, 75, 7, 74, 37, 130, 76, 34, 133, 13, 40, 56, 90, 64, 125, 139, 115, 106, 79, 12, 149, 2, 135, 25, 65, 148, 150, 48, 42, 122, 134, 8, 120, 156, 89, 55, 38, 10, 28, 62, 67, 4, 117, 141, 104, 35, 101, 66, 116, 60, 51, 118, 6, 129, 72, 92, 145, 69, 24, 58, 124, 46, 87, 83, 88, 103, 131, 31, 39, 95, 43, 1, 68, 119, 114, 85, 57, 70, 45, 47, 127, 144, 71, 14, 137, 80, 136, 152, 121, 142, 36, 3, 20, 73, 107, 146, 22, 0, 151, 102, 26, 19, 82, 153, 160, 9, 50, 140, 21, 154, 158, 29]
+10165: [8, 0, 10, 2, 3, 6, 7, 9, 12, 1, 11, 4, 5]
+9309: [168, 64, 186, 3, 165, 237, 54, 5, 144, 199, 82, 85, 159, 126, 190, 164, 95, 80, 167, 2, 60, 84, 121, 49, 42, 140, 33, 119, 102, 89, 96, 235, 17, 181, 191, 153, 196, 245, 197, 100, 141, 142, 30, 44, 176, 135, 41, 94, 58, 147, 28, 174, 136, 4, 13, 16, 203, 155, 244, 115, 194, 205, 34, 21, 187, 231, 139, 52, 127, 143, 74, 160, 22, 189, 107, 26, 170, 222, 9, 195, 46, 210, 169, 43, 209, 24, 55, 239, 37, 158, 56, 220, 101, 77, 79, 185, 236, 157, 225, 156, 166, 118, 211, 148, 114, 39, 125, 45, 242, 86, 63, 65, 15, 151, 88, 67, 81, 108, 1, 48, 161, 131, 162, 230, 219, 19, 8, 221, 25, 201, 23, 36, 50, 177, 228, 214, 72, 226, 202, 32, 68, 123, 238, 243, 91, 122, 132, 212, 213, 14, 78, 183, 207, 90, 57, 111, 6, 192, 137, 179, 27, 29, 0, 31, 51, 69, 20, 18, 146, 241, 149, 129, 178, 38, 184, 99, 124, 182, 106, 53, 145, 193, 152, 163, 116, 180, 12, 171, 188, 133, 97, 217, 198, 227, 66, 206, 98, 208, 73, 75, 172, 200, 71, 87, 93, 120, 62, 240, 216, 47, 233, 218, 128, 35, 130, 10, 173, 40, 83, 224, 232, 104, 110, 138, 112, 134, 215, 11, 204, 175, 117, 92, 7, 109, 59, 103, 223, 234, 76, 113, 61, 154, 105, 70, 229, 150]
+14005: [66, 63, 33, 4, 48, 36, 17, 56, 35, 68, 62, 18, 70, 27, 39, 32, 15, 51, 69, 53, 64, 9, 54, 19, 58, 13, 12, 65, 44, 52, 11, 61, 31, 30, 45, 71, 34, 26, 20, 57, 40, 1, 6, 41, 67, 37, 59, 21, 49, 0, 42, 5, 2, 14, 8, 25, 16, 7, 3, 60, 46, 22, 28, 10, 29, 47, 24, 50, 43, 38, 23, 55]
+12275: [98, 4, 28, 125, 64, 127, 105, 70, 3, 85, 93, 75, 73, 136, 123, 140, 91, 40, 109, 27, 113, 1, 128, 56, 104, 65, 97, 38, 80, 122, 79, 6, 46, 106, 72, 0, 115, 32, 5, 39, 7, 58, 44, 68, 19, 130, 55, 84, 83, 132, 45, 82, 26, 103, 18, 10, 35, 20, 86, 43, 142, 110, 67, 108, 69, 37, 16, 13, 101, 74, 42, 112, 92, 94, 138, 14, 120, 81, 24, 124, 121, 141, 114, 57, 135, 17, 71, 118, 61, 48, 9, 49, 137, 54, 51, 21, 15, 8, 62, 25, 2, 126, 100, 107, 129, 59, 77, 60, 117, 22, 102, 23, 31, 131, 88, 78, 116, 87, 11, 50, 139, 36, 47, 30, 95, 89, 34, 12, 29, 52, 53, 96, 99, 90, 63, 33, 76, 41, 119, 111, 134, 66, 133]
+5342: [15, 11, 2, 16, 7, 18, 8, 21, 30, 28, 23, 17, 9, 22, 20, 10, 19, 12, 26, 6, 1, 29, 14, 3, 4, 13, 5, 0, 25, 24, 27]
+10278: [133, 104, 173, 79, 38, 135, 107, 26, 106, 180, 168, 28, 69, 115, 131, 163, 50, 92, 31, 151, 25, 184, 5, 153, 91, 178, 3, 130, 132, 78, 20, 27, 75, 62, 30, 87, 77, 70, 59, 124, 37, 185, 162, 94, 172, 175, 8, 117, 34, 57, 16, 93, 86, 155, 134, 67, 85, 21, 128, 161, 47, 109, 176, 11, 74, 88, 98, 101, 125, 144, 166, 22, 158, 32, 138, 46, 82, 137, 19, 42, 122, 53, 0, 58, 18, 63, 48, 9, 177, 51, 179, 76, 4, 66, 68, 54, 61, 29, 6, 14, 112, 103, 33, 56, 113, 65, 156, 64, 145, 35, 80, 95, 55, 127, 7, 154, 71, 181, 97, 157, 102, 24, 17, 99, 114, 165, 146, 110, 143, 23, 149, 36, 141, 118, 41, 167, 39, 150, 45, 140, 159, 123, 119, 13, 1, 96, 60, 171, 116, 44, 182, 83, 183, 164, 81, 126, 10, 129, 170, 121, 148, 160, 2, 108, 100, 120, 152, 111, 84, 15, 89, 52, 147, 174, 49, 105, 43, 142, 40, 90, 12, 73, 136, 169, 72, 139]
+844: [64, 32, 91, 159, 19, 211, 166, 141, 85, 155, 204, 132, 61, 188, 265, 231, 271, 162, 55, 12, 33, 62, 40, 106, 16, 232, 26, 114, 126, 58, 234, 268, 128, 100, 20, 13, 10, 143, 145, 230, 70, 205, 103, 254, 258, 37, 18, 84, 185, 65, 182, 130, 228, 2, 27, 174, 56, 192, 122, 108, 138, 1, 260, 41, 235, 161, 67, 173, 227, 263, 171, 22, 199, 35, 157, 257, 167, 51, 38, 170, 54, 195, 47, 3, 57, 187, 179, 220, 45, 203, 180, 95, 129, 76, 98, 178, 63, 164, 208, 261, 209, 243, 142, 111, 30, 160, 229, 11, 88, 101, 86, 148, 190, 75, 175, 210, 226, 223, 133, 206, 6, 80, 53, 219, 151, 255, 83, 158, 60, 248, 267, 144, 198, 77, 272, 99, 200, 93, 81, 154, 121, 214, 29, 181, 23, 217, 137, 102, 163, 131, 218, 43, 176, 79, 5, 168, 104, 14, 92, 28, 97, 241, 59, 153, 197, 253, 125, 201, 113, 74, 225, 25, 17, 269, 21, 149, 169, 89, 236, 107, 207, 115, 177, 124, 270, 110, 215, 44, 68, 239, 184, 202, 9, 146, 123, 117, 259, 156, 8, 34, 246, 183, 252, 256, 152, 105, 109, 266, 39, 118, 193, 119, 136, 262, 139, 36, 242, 66, 238, 71, 250, 46, 194, 15, 127, 90, 147, 264, 251, 165, 172, 52, 237, 135, 196, 82, 212, 224, 78, 222, 31, 49, 120, 134, 186, 72, 69, 189, 233, 0, 216, 116, 87, 247, 50, 249, 150, 213, 96, 24, 42, 191, 48, 140, 245, 112, 221, 94, 244, 73, 7, 4, 240]
+129: [51, 38, 34, 39, 31, 63, 5, 49, 29, 36, 15, 43, 20, 32, 58, 40, 57, 37, 54, 42, 14, 70, 0, 46, 59, 66, 3, 60, 12, 11, 4, 8, 16, 67, 13, 25, 65, 17, 18, 52, 50, 41, 21, 27, 1, 28, 9, 26, 33, 55, 44, 30, 45, 53, 47, 24, 22, 19, 61, 64, 6, 10, 48, 23, 56, 7, 69, 62, 71, 35, 2, 68]
+9326: [4, 0, 1, 2, 7, 3, 5, 6, 9, 8]
+2685: [6, 23, 65, 42, 63, 10, 38, 20, 30, 46, 40, 26, 50, 5, 47, 55, 28, 59, 9, 35, 19, 51, 41, 58, 22, 37, 64, 43, 52, 61, 11, 25, 67, 33, 53, 17, 15, 14, 44, 56, 13, 62, 60, 12, 48, 36, 45, 66, 1, 0, 31, 8, 27, 34, 68, 2, 39, 3, 21, 18, 29, 24, 54, 32, 49, 57, 4, 16, 7]
+104: [6, 0, 71, 65, 66, 48, 59, 57, 67, 69, 38, 44, 26, 27, 34, 28, 20, 52, 68, 74, 17, 32, 45, 11, 47, 40, 30, 39, 41, 7, 54, 29, 61, 14, 36, 58, 2, 16, 35, 23, 1, 63, 46, 33, 31, 18, 24, 5, 25, 4, 37, 53, 43, 56, 12, 22, 21, 64, 70, 13, 51, 72, 19, 8, 42, 55, 60, 62, 50, 3, 15, 73, 49, 9, 10]
+10816: [2, 4, 1, 0, 5, 3]
+10384: [5, 34, 8, 11, 1, 6, 0, 24, 19, 32, 18, 16, 22, 20, 2, 7, 30, 37, 28, 15, 35, 27, 21, 13, 25, 23, 10, 17, 9, 4, 31, 33, 26, 39, 36, 3, 29, 12, 14, 38]
+407: [3, 5, 2, 1, 4, 6, 0]
+7533: [3, 5, 10, 1, 11, 2, 12, 8, 6, 9, 13, 4, 0, 7]
+1303: [214, 42, 70, 194, 2, 246, 109, 106, 187, 199, 27, 98, 72, 130, 160, 84, 0, 41, 266, 39, 59, 107, 211, 269, 103, 99, 63, 117, 3, 97, 139, 65, 7, 196, 69, 115, 147, 71, 8, 67, 148, 259, 159, 197, 176, 226, 73, 167, 4, 198, 204, 92, 108, 192, 47, 168, 223, 15, 158, 203, 241, 265, 113, 151, 143, 61, 123, 54, 135, 171, 174, 48, 129, 141, 207, 179, 238, 150, 12, 247, 87, 165, 10, 230, 118, 77, 137, 254, 111, 177, 191, 32, 22, 262, 144, 270, 81, 132, 134, 9, 166, 74, 217, 105, 149, 156, 52, 1, 75, 57, 243, 253, 66, 18, 260, 85, 152, 91, 102, 46, 146, 220, 136, 215, 163, 114, 162, 121, 45, 221, 157, 268, 216, 30, 80, 209, 127, 172, 34, 120, 239, 50, 251, 245, 101, 142, 21, 56, 202, 93, 76, 252, 234, 255, 83, 51, 206, 128, 173, 90, 208, 49, 125, 16, 38, 100, 119, 205, 229, 55, 82, 195, 94, 33, 110, 272, 155, 232, 13, 19, 190, 26, 79, 224, 133, 29, 271, 244, 233, 170, 263, 131, 210, 169, 219, 186, 178, 31, 140, 28, 264, 161, 17, 181, 86, 11, 154, 122, 40, 231, 20, 124, 236, 6, 256, 250, 225, 88, 43, 36, 222, 200, 44, 14, 212, 249, 261, 126, 95, 183, 227, 213, 201, 242, 153, 37, 184, 112, 189, 258, 240, 185, 53, 5, 89, 23, 62, 237, 96, 58, 35, 267, 104, 188, 24, 182, 228, 68, 257, 64, 145, 164, 25, 175, 60, 218, 180, 235, 78, 248, 116, 138, 193]
+11190: [35, 31, 8, 28, 15, 18, 41, 46, 57, 32, 7, 54, 6, 29, 0, 16, 17, 9, 39, 23, 42, 26, 12, 24, 2, 44, 53, 56, 10, 45, 55, 59, 20, 3, 52, 30, 22, 47, 40, 13, 37, 51, 38, 19, 1, 25, 36, 58, 33, 27, 49, 21, 48, 50, 43, 14, 34, 5, 4, 11]
+13822: [4, 6, 11, 13, 7, 12, 9, 5, 0, 3, 8, 2, 1, 10]
+11633: [12, 3, 17, 8, 19, 10, 23, 1, 16, 14, 20, 21, 4, 5, 11, 25, 7, 0, 9, 18, 24, 2, 13, 15, 22, 6]
+6387: [13, 27, 3, 17, 19, 1, 21, 10, 22, 0, 15, 7, 9, 2, 4, 8, 11, 25, 20, 16, 24, 26, 18, 23, 6, 12, 5, 14]
+2875: [24, 14, 20, 66, 31, 52, 4, 30, 18, 49, 78, 74, 33, 19, 40, 58, 67, 46, 59, 53, 5, 64, 45, 43, 35, 56, 38, 16, 36, 13, 1, 2, 37, 48, 9, 8, 41, 15, 69, 25, 23, 60, 7, 21, 75, 73, 17, 28, 27, 10, 55, 29, 32, 11, 71, 12, 22, 77, 62, 6, 57, 68, 65, 3, 42, 34, 63, 61, 44, 76, 47, 70, 72, 54, 26, 51, 50, 0, 39]
+2905: [46, 37, 53, 30, 69, 63, 49, 2, 60, 31, 45, 38, 47, 65, 57, 36, 15, 26, 64, 35, 8, 43, 22, 10, 50, 41, 20, 28, 1, 44, 25, 56, 33, 48, 32, 11, 40, 68, 18, 19, 3, 4, 42, 16, 34, 70, 29, 17, 61, 24, 5, 55, 14, 7, 62, 9, 71, 58, 23, 52, 0, 21, 72, 6, 59, 66, 54, 27, 39, 51, 13, 67, 12]
+452: [1, 9, 28, 7, 6, 16, 8, 29, 14, 24, 27, 23, 11, 0, 12, 18, 5, 26, 21, 10, 19, 13, 17, 25, 22, 15, 3, 2, 20, 4]
+8046: [196, 84, 111, 183, 123, 87, 166, 238, 16, 220, 214, 218, 18, 77, 180, 179, 145, 134, 33, 141, 3, 98, 34, 240, 170, 103, 175, 231, 23, 88, 169, 122, 124, 11, 83, 8, 203, 17, 94, 63, 73, 96, 202, 155, 219, 109, 150, 9, 176, 149, 189, 211, 139, 144, 64, 57, 254, 194, 67, 162, 247, 193, 128, 6, 136, 116, 171, 66, 65, 46, 204, 114, 113, 191, 224, 50, 31, 132, 199, 174, 228, 156, 44, 154, 197, 241, 233, 92, 142, 256, 99, 58, 159, 235, 201, 234, 206, 250, 25, 125, 237, 187, 52, 225, 261, 93, 230, 60, 249, 259, 76, 188, 244, 253, 213, 38, 195, 14, 263, 167, 78, 72, 13, 140, 15, 29, 54, 40, 10, 148, 172, 258, 185, 186, 182, 151, 28, 36, 56, 20, 37, 2, 239, 80, 82, 147, 248, 138, 146, 246, 86, 223, 205, 61, 79, 101, 245, 100, 209, 0, 168, 91, 198, 190, 137, 112, 157, 163, 47, 260, 192, 262, 208, 216, 106, 152, 232, 217, 42, 119, 7, 27, 127, 227, 30, 164, 53, 95, 26, 181, 115, 117, 75, 129, 135, 90, 108, 251, 184, 55, 121, 161, 221, 160, 120, 89, 243, 35, 252, 81, 207, 118, 97, 24, 43, 153, 173, 32, 5, 62, 49, 143, 110, 69, 257, 102, 70, 74, 1, 85, 48, 222, 107, 4, 130, 71, 45, 19, 242, 212, 22, 178, 41, 105, 51, 200, 131, 226, 255, 39, 210, 12, 68, 177, 236, 165, 229, 126, 158, 133, 59, 21, 215, 104]
+230: [59, 19, 47, 29, 38, 23, 25, 16, 52, 30, 27, 14, 35, 34, 3, 22, 32, 51, 42, 46, 10, 11, 62, 13, 53, 21, 28, 31, 20, 40, 37, 8, 26, 4, 41, 33, 0, 56, 15, 24, 17, 43, 7, 39, 48, 44, 57, 18, 45, 54, 49, 58, 6, 1, 60, 12, 9, 36, 50, 61, 5, 2, 55]
+8993: [13, 0, 26, 22, 1, 14, 11, 5, 10, 28, 8, 12, 2, 23, 27, 3, 24, 7, 4, 21, 17, 25, 19, 18, 16, 9, 15, 6, 20]
+4512: [32, 30, 9, 16, 11, 5, 12, 17, 23, 13, 18, 19, 28, 10, 15, 21, 20, 14, 26, 22, 8, 3, 2, 24, 6, 27, 0, 31, 29, 1, 25, 4, 7]
+7524: [9, 10, 19, 2, 12, 22, 3, 5, 24, 7, 20, 23, 31, 14, 34, 1, 41, 26, 28, 38, 13, 32, 17, 18, 37, 35, 15, 6, 0, 11, 36, 40, 33, 8, 39, 30, 4, 25, 29, 27, 16, 21]
+4817: [28, 8, 31, 30, 24, 2, 10, 20, 5, 33, 7, 25, 13, 27, 26, 21, 6, 3, 17, 22, 11, 18, 4, 9, 32, 19, 15, 1, 23, 14, 12, 0, 29, 16]
+12233: [84, 79, 51, 11, 43, 40, 27, 6, 55, 35, 21, 66, 60, 94, 78, 58, 7, 20, 85, 59, 61, 49, 2, 23, 19, 87, 56, 73, 34, 75, 39, 70, 25, 54, 32, 74, 81, 62, 10, 0, 9, 12, 18, 86, 37, 13, 31, 72, 76, 52, 46, 17, 53, 44, 22, 69, 24, 89, 1, 48, 50, 47, 28, 33, 67, 14, 88, 42, 26, 80, 41, 29, 71, 82, 30, 38, 77, 63, 92, 45, 15, 65, 64, 3, 93, 68, 90, 4, 8, 5, 91, 83, 57, 36, 16]
+2737: [2, 3, 1, 0, 7, 4, 6, 5, 8, 10, 9]
+12959: [11, 0, 26, 19, 20, 10, 25, 1, 17, 24, 5, 13, 7, 16, 8, 15, 4, 14, 9, 23, 21, 6, 3, 18, 12, 2, 22]
+10042: [145, 102, 185, 5, 75, 15, 125, 57, 29, 154, 144, 118, 79, 110, 81, 136, 131, 77, 59, 105, 173, 111, 34, 0, 49, 167, 192, 70, 61, 84, 179, 56, 24, 11, 139, 78, 163, 159, 180, 46, 200, 68, 3, 165, 39, 183, 108, 152, 66, 182, 166, 18, 178, 37, 135, 107, 134, 43, 20, 52, 130, 158, 181, 169, 126, 148, 172, 162, 147, 117, 80, 153, 196, 195, 113, 21, 35, 76, 26, 36, 116, 67, 194, 28, 31, 176, 141, 6, 177, 23, 198, 71, 4, 16, 73, 137, 65, 160, 168, 97, 48, 201, 188, 133, 87, 93, 86, 83, 27, 143, 149, 58, 1, 8, 150, 2, 122, 72, 69, 132, 7, 142, 115, 64, 123, 129, 88, 38, 91, 202, 25, 100, 47, 106, 121, 155, 187, 45, 151, 190, 189, 186, 94, 170, 42, 138, 120, 124, 14, 103, 50, 171, 104, 146, 96, 193, 10, 90, 98, 197, 164, 54, 32, 12, 109, 140, 62, 53, 199, 40, 114, 17, 9, 175, 19, 55, 85, 95, 156, 74, 92, 101, 174, 89, 33, 44, 128, 157, 60, 41, 30, 82, 13, 112, 127, 63, 99, 22, 51, 119, 184, 191, 161]
+13169: [0, 21, 20, 5, 7, 11, 13, 15, 10, 9, 4, 14, 17, 16, 22, 3, 8, 2, 18, 12, 1, 19, 6]
+13246: [5, 2, 1, 3, 7, 0, 4, 6]
+2478: [9, 6, 2, 1, 7, 0, 4, 3, 5, 8]
+10630: [97, 101, 47, 4, 11, 65, 19, 85, 27, 90, 62, 49, 43, 60, 54, 100, 63, 29, 57, 16, 80, 95, 21, 33, 40, 74, 50, 41, 56, 46, 73, 35, 3, 99, 34, 6, 96, 32, 75, 77, 81, 93, 10, 52, 69, 87, 67, 37, 18, 82, 13, 31, 89, 72, 92, 9, 61, 44, 5, 22, 70, 71, 83, 36, 12, 20, 24, 68, 17, 84, 91, 15, 38, 14, 78, 39, 64, 66, 59, 23, 51, 26, 30, 58, 2, 55, 1, 45, 48, 88, 76, 53, 25, 79, 42, 0, 98, 86, 94, 28, 7, 8]
+5258: [5, 14, 9, 10, 8, 0, 2, 13, 11, 12, 4, 7, 6, 3, 1]
+6443: [4, 1, 2, 10, 0, 5, 9, 7, 3, 12, 6, 11, 16, 8, 15, 14, 13]
+4487: [59, 34, 21, 30, 63, 33, 3, 28, 16, 13, 54, 51, 55, 52, 27, 17, 25, 49, 8, 36, 31, 7, 2, 45, 42, 57, 15, 0, 20, 18, 48, 32, 47, 35, 64, 4, 14, 53, 61, 5, 1, 11, 26, 29, 58, 19, 50, 43, 56, 10, 39, 46, 62, 22, 44, 60, 65, 38, 12, 40, 37, 24, 66, 23, 41, 9, 6]
+4796: [6, 11, 7, 4, 19, 15, 14, 18, 0, 8, 1, 3, 13, 10, 12, 20, 16, 2, 17, 5, 9]
+1166: [1, 3, 0, 4, 2]
+6160: [15, 9, 0, 3, 11, 5, 4, 12, 14, 8, 16, 13, 17, 10, 2, 1, 7, 6]
+3680: [2, 9, 4, 8, 0, 10, 7, 1, 5, 3, 6]
+8253: [16, 10, 8, 15, 35, 6, 9, 14, 44, 13, 30, 24, 19, 31, 34, 20, 23, 37, 26, 27, 36, 4, 2, 21, 11, 45, 22, 18, 29, 25, 38, 33, 1, 41, 42, 3, 7, 5, 28, 12, 39, 43, 0, 17, 40, 32]
+12145: [65, 139, 80, 257, 53, 137, 22, 141, 275, 33, 120, 215, 87, 180, 220, 234, 206, 166, 0, 235, 169, 101, 77, 24, 188, 222, 54, 266, 105, 192, 76, 198, 242, 151, 19, 239, 118, 69, 172, 41, 66, 145, 142, 277, 270, 226, 125, 233, 212, 38, 263, 154, 189, 44, 107, 20, 264, 11, 178, 200, 84, 190, 201, 256, 1, 255, 209, 74, 50, 260, 253, 163, 57, 246, 12, 279, 72, 194, 8, 7, 207, 176, 35, 59, 103, 60, 131, 158, 90, 161, 113, 110, 93, 271, 138, 21, 274, 51, 254, 122, 26, 106, 195, 95, 155, 159, 9, 86, 70, 170, 228, 88, 119, 197, 3, 111, 115, 273, 124, 39, 204, 174, 265, 97, 181, 157, 71, 143, 268, 34, 62, 63, 243, 108, 219, 68, 175, 214, 31, 16, 213, 140, 247, 2, 132, 102, 171, 203, 193, 221, 67, 153, 251, 227, 4, 89, 128, 36, 182, 173, 223, 130, 211, 52, 10, 79, 259, 199, 144, 94, 249, 258, 40, 78, 183, 236, 37, 56, 27, 191, 179, 150, 61, 165, 205, 49, 168, 156, 152, 186, 147, 230, 225, 73, 30, 146, 177, 134, 85, 42, 121, 112, 269, 231, 229, 82, 18, 99, 280, 216, 133, 278, 248, 261, 14, 126, 135, 244, 238, 32, 149, 116, 6, 55, 184, 237, 187, 48, 17, 208, 224, 217, 129, 136, 91, 117, 5, 58, 29, 162, 202, 250, 98, 28, 47, 96, 252, 13, 245, 100, 123, 104, 83, 92, 167, 46, 218, 23, 241, 15, 164, 25, 45, 127, 64, 232, 81, 43, 75, 276, 272, 262, 210, 148, 196, 114, 160, 240, 185, 267, 109]
+2120: [2, 4, 3, 8, 0, 6, 5, 1, 7]
+3807: [156, 87, 147, 93, 185, 157, 45, 150, 191, 168, 56, 24, 80, 141, 184, 197, 114, 187, 38, 52, 69, 196, 96, 123, 130, 139, 50, 180, 6, 153, 129, 11, 124, 74, 163, 173, 33, 36, 37, 99, 27, 32, 73, 127, 161, 181, 35, 172, 83, 149, 62, 1, 10, 134, 179, 9, 193, 72, 20, 125, 97, 86, 135, 132, 89, 102, 28, 70, 175, 146, 40, 144, 121, 133, 113, 58, 108, 18, 111, 107, 21, 194, 79, 195, 152, 117, 122, 63, 160, 30, 19, 16, 137, 101, 94, 98, 148, 155, 106, 119, 15, 105, 192, 158, 53, 17, 171, 71, 140, 12, 59, 167, 90, 189, 145, 104, 49, 118, 47, 44, 68, 0, 178, 2, 8, 26, 151, 78, 143, 77, 7, 76, 198, 34, 95, 91, 31, 54, 112, 60, 67, 138, 39, 159, 22, 88, 186, 13, 126, 162, 170, 85, 190, 65, 4, 48, 66, 199, 25, 64, 154, 3, 57, 116, 51, 29, 164, 177, 42, 182, 100, 81, 84, 5, 23, 136, 176, 188, 142, 131, 166, 120, 55, 174, 109, 115, 92, 82, 103, 165, 110, 41, 46, 75, 169, 43, 183, 61, 14, 128]
+3969: [35, 32, 9, 0, 24, 15, 2, 48, 28, 26, 56, 4, 34, 54, 17, 38, 57, 33, 55, 22, 41, 21, 49, 3, 6, 8, 19, 23, 45, 5, 14, 46, 30, 18, 52, 25, 1, 27, 7, 20, 44, 16, 40, 39, 53, 13, 47, 43, 51, 42, 37, 29, 50, 11, 12, 31, 36, 10]
+6393: [2, 4, 3, 1, 0]
+8446: [16, 3, 13, 1, 5, 8, 15, 9, 6, 14, 4, 7, 0, 10, 11, 2, 12]
+652: [13, 15, 7, 8, 6, 17, 0, 19, 9, 16, 18, 5, 4, 11, 10, 12, 1, 3, 2, 14]
+14299: [17, 12, 4, 7, 22, 6, 9, 10, 8, 11, 21, 15, 5, 14, 18, 16, 19, 2, 0, 1, 13, 3, 20, 23]
+13242: [11, 2, 25, 5, 32, 20, 8, 16, 9, 31, 14, 13, 27, 26, 19, 30, 23, 3, 10, 6, 21, 4, 0, 15, 18, 29, 17, 33, 7, 35, 28, 34, 22, 12, 1, 24]
+14356: [7, 69, 86, 78, 94, 49, 107, 85, 19, 80, 104, 109, 24, 120, 116, 119, 122, 15, 105, 9, 42, 11, 33, 8, 82, 108, 48, 126, 3, 81, 5, 31, 2, 61, 12, 77, 71, 41, 59, 40, 45, 84, 22, 111, 101, 68, 66, 47, 65, 16, 73, 121, 34, 114, 4, 83, 56, 43, 74, 28, 95, 36, 26, 115, 113, 51, 53, 96, 32, 92, 117, 27, 70, 50, 60, 37, 20, 98, 110, 58, 124, 10, 1, 99, 90, 25, 62, 38, 97, 64, 87, 55, 17, 106, 76, 91, 21, 103, 54, 125, 79, 123, 44, 52, 13, 35, 39, 14, 23, 57, 46, 0, 112, 100, 30, 89, 18, 118, 127, 72, 6, 75, 93, 67, 29, 63, 102, 88]
+13450: [0, 8, 1, 10, 2, 6, 4, 11, 5, 12, 9, 7, 3, 13]
+8497: [8, 66, 30, 177, 167, 218, 199, 60, 219, 156, 189, 115, 196, 110, 228, 65, 122, 170, 46, 164, 222, 102, 128, 174, 70, 69, 4, 193, 63, 157, 161, 131, 183, 109, 135, 15, 206, 71, 192, 0, 23, 165, 89, 62, 75, 207, 111, 53, 20, 187, 86, 13, 194, 31, 88, 116, 56, 98, 38, 50, 33, 68, 215, 117, 145, 32, 79, 182, 146, 61, 166, 28, 82, 169, 213, 29, 81, 113, 185, 80, 21, 103, 57, 144, 163, 137, 168, 1, 19, 159, 140, 211, 126, 36, 147, 39, 55, 118, 41, 11, 223, 54, 34, 3, 43, 27, 90, 224, 136, 123, 158, 142, 220, 44, 64, 78, 99, 12, 190, 93, 143, 132, 114, 203, 226, 138, 96, 221, 94, 172, 105, 225, 160, 2, 125, 47, 45, 59, 200, 120, 26, 107, 130, 195, 133, 51, 148, 77, 176, 149, 92, 204, 16, 25, 5, 227, 83, 154, 179, 173, 175, 58, 197, 95, 73, 49, 141, 52, 72, 214, 9, 10, 100, 37, 18, 67, 134, 124, 129, 106, 85, 22, 97, 178, 35, 180, 162, 74, 202, 191, 112, 121, 119, 151, 14, 91, 127, 181, 150, 84, 24, 171, 42, 6, 208, 216, 104, 17, 155, 153, 210, 209, 76, 152, 139, 217, 7, 40, 184, 201, 186, 205, 188, 101, 108, 212, 87, 198, 48]
+10900: [14, 8, 0, 15, 13, 18, 3, 28, 12, 41, 38, 39, 37, 4, 24, 26, 16, 20, 7, 30, 35, 34, 46, 25, 6, 44, 45, 32, 23, 9, 2, 5, 36, 1, 33, 19, 17, 27, 31, 11, 21, 42, 43, 29, 10, 22, 40]
+2567: [3, 2, 4, 5, 0, 1]
+3336: [8, 5, 33, 31, 10, 34, 30, 4, 35, 18, 14, 1, 9, 22, 3, 12, 13, 0, 32, 11, 29, 17, 24, 25, 27, 6, 21, 26, 2, 20, 7, 15, 16, 28, 23, 19]
+4208: [5, 1, 4, 0, 3, 2, 6]

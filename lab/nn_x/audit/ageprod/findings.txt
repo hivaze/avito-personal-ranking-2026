@@ -1,0 +1,95 @@
+AGE-PROD CPU PROXY GATE (critique item 8): training-only listing-age margin on production rows - findings
+ageprod gate agent, 2026-11-12 21:40-22:05 UTC. CPU only (12 threads/process), no GPU, no existing file edited.
+Directory: nn_x/audit/ageprod/ (plan.txt pre-declared 21:40:29Z before any arm ran; ap01 lifts, ap02 arms, ap03 summary
++ gate, ap04 post-hoc shift diagnostic, ap05 placement diagnostic; out/results.txt = full paired tables, out/gb/ =
+per-feed NDCG per arm/seed, out/age_lifts.json + out/age_lifts_mbucket.json = the lift tables / NN-spec file).
+
+VERDICT: FAIL on all four pre-declared clauses (and both advisory clauses). The listing-age margin is NOT a sibling of
+TRUNC-PROD: it costs the proxy -0.0046 val / -0.0034 holdout per model and -0.0032 on top of the truncation offset,
+uniformly over 4 seeds, both val days, both M halves, live and stale val. No GPU arm is justified.
+
+1. Harness (= nn_x/insights/review/r2_trunc_replicate.py): fresh U2 150K-feed train sample (seed 2026, disjoint from
+   data_usage's U), the 53 leak-free GBDT features, LightGBM lambdarank (truncation 1000, lr 0.05, 63 leaves, l2 10,
+   bagging/feature 0.8, 400 rounds), seeds 11-14, readouts at 100/200/300/400 on val (14,423 feeds), the stale val
+   ('both' coverage replay: it_hist_{all,et1..et4}_luo + seq_cv_{invd20,pop,norm} from nn_x/r6/stale_cf, luo_z
+   recomputed; the pre2 half of the scenario has no counterpart in the GBDT features) and HO (10K train-period
+   random-like M>=50 holdout feeds). Reproduction: base 0.37117 (r2 0.37132), tprod1 0.37428 (r2 0.37441),
+   tprod1 - base +0.00311 +- 0.00060 val / +0.00137 +- 0.00055 holdout at 200 rounds (r2: +0.0031 / +0.0020).
+
+2. Age margin. age = age_hours(f4) via data/feats/life_f4_age_knots.npy exactly as a06-a08 (f4 >= 63/64-1e-6 -> last
+   bin); a08's 8 bins. L[M bucket, bin] = log((rate_prod[bin]/base_prod) / (rate_expl[bin]/base_expl)) on the FULL
+   train (holdout excluded): production = cls 0 (NN p_random <= 0.5, incl. every M<50 feed; 222.4M rows),
+   exploration-like = cls 1 (p_random > 0.5, M>=50; 19.7M rows, 134,118 feeds). Applied as init_score on every
+   production row (10.73M of 11.68M U2 rows; mean |offset| 0.17), never at inference.
+
+   Lift table (full train; rows / positives / positive-rate lift vs the group base; L with its SE):
+   bin      | expl cls1 rows      pos   lift | prod M>=50 rows      pos    lift | prod M<50 rows      pos   lift | L(M>=50)      L(M<50)
+   <3h      |    963,447        4,380  0.366 |   8,941,155      108,081  0.767 |   2,313,666     167,463  1.155 | +0.742+-.015  +1.151+-.015
+   3-12h    |    706,097        5,422  0.617 |   7,763,522      143,779  1.176 |   2,225,944     169,649  1.216 | +0.644+-.014  +0.678+-.014
+   12-24h   |    620,351        6,144  0.796 |   7,176,425      135,646  1.200 |   2,124,905     154,893  1.163 | +0.410+-.013  +0.379+-.013
+   1-3d     |  1,558,389       18,063  0.932 |  15,780,124      269,343  1.084 |   3,449,667     225,021  1.041 | +0.151+-.008  +0.111+-.008
+   3-14d    |  3,826,402       48,155  1.012 |  32,486,761      512,904  1.002 |   5,578,464     338,722  0.969 | -0.010+-.005  -0.043+-.005
+   2w-3m    |  5,395,966       73,862  1.101 |  47,752,920      749,547  0.996 |   7,634,017     455,160  0.952 | -0.099+-.004  -0.146+-.004
+   3m-1y    |  3,934,014       54,443  1.113 |  37,768,582      594,715  1.000 |   6,326,455     376,106  0.949 | -0.107+-.004  -0.159+-.005
+   >1y      |  2,736,941       35,044  1.030 |  29,633,702      436,346  0.935 |   5,416,954     310,460  0.915 | -0.097+-.006  -0.118+-.006
+   bases: expl 0.01244, prod M>=50 0.01575, prod M<50 0.06266 (exact counts, out/age_lifts.json). a08's definition (p<0.05 vs p>0.9, M>=50) gives +0.851 +0.793 +0.526 +0.198 -0.019
+   -0.122 -0.133 -0.112 (a08 on its 60K subsample: 0.891 0.763 0.545 0.199 -0.021 -0.134 -0.119 -0.116). Finer M
+   buckets: <3h lift +1.16 (M1-16), +1.07, +0.92, +0.83 (M50-99), +0.70, +0.53 (M>=200). Val reference lift by age
+   0.323 0.561 0.726 0.913 0.998 1.113 1.104 1.078 (= exploration). The proxy's base model shares the NN pool's
+   artefact, more strongly: val act/exp 0.62 / 0.82 / 0.87 at <3h / 3-12h / 12-24h (G3 pool 0.87 / 1.02 / 1.00).
+
+3. Paired per-feed deltas (seed-mean over 4 seeds, +- SE over feeds), val | stale val | holdout:
+   arm contrast           r100                              r200 (PRIMARY)                     r300
+   age1 - base            -0.00525+-.00087 | -.00476 | -.00328   -0.00461+-.00084 | -.00387+-.00083 | -0.00339+-.00096   -0.00455 | -.00380 | -.00307
+   tprod1 - base          +0.00219+-.00062 | +.00208 | +.00072   +0.00311+-.00060 | +.00326+-.00059 | +0.00137+-.00055   +0.00348 | +.00394 | +.00120
+   tprod1+age1 - tprod1   -0.00304+-.00068 | -.00297 | -.00084   -0.00322+-.00067 | -.00322+-.00066 | -0.00092+-.00082   -0.00324 | -.00320 | -.00120
+   tprod1+age1 - base     -0.00085+-.00082 | -.00089 | -.00012   -0.00010+-.00078 | +.00004          | +0.00045+-.00086   +0.00024 | +.00074 | -.00001
+   ageh1 - base (M>=50)   -0.00172+-.00070 | -.00153 | -.00214   -0.00168+-.00067 | -.00122          | -0.00166+-.00091   -0.00150 | -.00092 | -.00205
+   age0.5 - base          -0.00254+-.00073 | -.00243 | -.00078   -0.00118+-.00071 | -.00123          | -0.00117+-.00078   -0.00168 | -.00089 | -.00156
+   r400: age1-base -0.00407 / -0.00362 / -0.00277; tprod1+age1-tprod1 -0.00358 / -0.00312 / -0.00125.
+   Per-seed age1-base val200: -0.00489 -0.00467 -0.00425 -0.00463 (holdout -0.00416 -0.00280 -0.00364 -0.00297).
+   Slices of age1 - base at r200 (val): M<50 -0.00561+-.00155, M>=50 -0.00392+-.00092; Tue -0.00401+-.00115, Thu
+   -0.00527+-.00121; by mean age of the feed's positives: <1d -0.128 (4.4% of feeds), 1-3d -0.079, 3-7d -0.042,
+   7-24d -0.016, 24-76d +0.015, >76d +0.019 (44%); by youngest positive: <3h -0.098 (2.3%), 3-12h -0.097, 12-24h
+   -0.084, 1-3d -0.055, 3-14d -0.026, 2w-3m +0.021, 3m-1y +0.033, >1y +0.012; feeds with no positive < 3 h:
+   -0.00243+-.00081 (97.7% of feeds). Holdout slices have the same shape (<1d -0.147, >76d +0.018). The same
+   cold<->warm trade (young positives lose, old positives gain) for tprod1+age1 - tprod1 and ageh1.
+   TRUNC's gain is NOT confined to young positives (no-<3h feeds +0.00290+-.00061), so the two levers differ in kind.
+
+4. Gate (plan.txt, r200): (i) age1-base val -0.00461 +- 0.00084 > +1 SE: FALSE; (ii) holdout -0.00339 +- 0.00096 >= 0:
+   FALSE; (iii) gain on feeds without <3h positives -0.00243 (contribution -0.00237 of -0.00461) > 0: FALSE;
+   (iv) tprod1+age1 - tprod1 val -0.00322 +- 0.00067 > +1 SE: FALSE. Advisory: stale -0.00387 +- 0.00083 (FALSE),
+   holdout tprod1+age1-tprod1 -0.00092 +- 0.00082 (FALSE); r300 signs agree. => FAIL.
+
+5. Why (ap04, ap05; post-hoc, not gating):
+   a) Scale is not the issue. age1 over-corrects (val act/exp at <3h 0.62 -> 1.49), age0.5 lands near calibration
+      (0.94 / 1.13 / 1.07) and still loses -0.0012 +- 0.0007 val, -0.0012 holdout.
+   b) A plain post-hoc within-feed shift by age on the BASE proxy's val scores hurts in BOTH directions: s - w*L with
+      w = -0.25 / +0.25 / +0.5 / +1.0 = -0.0032 / -0.0015 / -0.0033 / -0.0064; the cross-fitted calibrating offset
+      (log act/exp, 5 user folds) -0.0016 +- 0.0005 (w 0.5), -0.0029 (w 1.0). The proxy is at its NDCG optimum with
+      respect to any per-age-bin shift although its softmax act/exp by age is 0.62 at <3h: for a lambdarank score
+      the softmax mass is scale-arbitrary and is not a calibration target (c04 found the same null, +0.0002 +- 0.0003,
+      for the NN pool's genuine listwise probabilities).
+   c) The training-time margin destroys information beyond the shift: undoing it at inference on the age1 arm
+      (s + 0.5 L, or the cross-fitted offset w = 1) recovers only +0.0028 / +0.0031 of its -0.0057, leaving
+      -0.0026..-0.0029 below base. The margin removes the gradient of the 14% of production positives that are
+      < 1 day old, i.e. the model stops learning what makes a fresh listing good, and val (where fresh positives
+      are rare but concentrated: 2.3% of feeds hold a < 3 h positive) pays -0.10 NDCG on exactly those feeds.
+   d) The production fresh-listing surplus is a PLACEMENT effect, not a label artefact (ap05, full train, M>=50):
+      production puts fresh listings at the top (15.8% of rank-0 candidates are < 3 h vs 5.5% in exploration; 44.9%
+      of production < 3 h positives sit at rank 0-4 vs 13.9% in exploration). Within shown-rank buckets the
+      production/exploration log-ratio at < 3 h is +0.18 (rank 0), +0.68 (1-4), +0.82 (5-19), +0.28 (20-59),
+      -0.09 (>= 60): at deep ranks production fresh listings convert exactly like exploration ones (0.30x vs 0.32x).
+      Examination-adjusted (y / theta_rand(rank)) the marginal L shrinks by half (+0.375 +0.361 +0.216 +0.095 ...),
+      and the deep-rank-only L is ~0 (-0.01 at < 3 h). The remaining within-rank surplus at ranks 1-19 is the
+      ranker's relevance selection, which the features explain. A marginal age offset therefore explains away
+      (half) examination that the EXAM offset already handles per row (data_usage: exam1 +0.0006..+0.0008 n.s., +0
+      on top of trunc) plus real relevance. TRUNC differs: the last-item click is a labelling artefact invisible to
+      the features (rkend not a feature), so its offset removes noise only. The examination-adjusted margin (L_adj)
+      is numerically the age0.5 arm for M>=50 (+0.37 +0.32 +0.21 +0.08) and that arm fails too.
+
+6. What this means for the project: AGE-PROD is CLOSED at the proxy stage (critique item 8 kill: "proxy fails").
+   Do not build the NN arm. Any training-side age correction would have to be conditional (position- and
+   feature-aware), i.e. the examination offset, which is already closed as null on top of TRUNC. The val
+   miscalibration of the final pool by age (act/exp 0.86 at < 3 h) remains a <= +0.0003 post-hoc item (a07, c04)
+   and no training lever. out/age_lifts_mbucket.json is written for the record (gate_verdict FAIL), not for use.

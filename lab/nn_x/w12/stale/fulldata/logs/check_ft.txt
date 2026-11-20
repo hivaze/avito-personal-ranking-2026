@@ -1,0 +1,58 @@
+
+== FT IDENTITY: FT_A_orig (original finetune.py) vs FT_B_copy_off (finetune_full.py, flag off)   [2026-11-15T03:39:56Z]
+   ods-comp/nn_x/w12/stale/fulldata/runs/FT_A_orig --variant w5_e10_kd05w192_s951 --out w5_e10_kd05w192_s951_n2cpv3s3 --extra n2c_pre_v3 --lr 5e-5 --epochs 6 --decay cos --ema 0.99 --ema_start 0.5 --epochs 4 --u0_singleton --seeds 3 --epochs 1 --folds 2 --seeds 1
+  [PASS] both runs finished 6.6 / 6.6 min; eval cap 1000,1500,1500
+  [PASS] logs identical line for line (copy's args line has the extra key full_val False) 9 lines
+  [PASS] record.ll_fidx identical (14423,)
+  [PASS] record.ll_off identical (225,)
+  [PASS] record.ll_split identical (224,)
+  [PASS] record.y identical (1496704,)
+  [PASS] record.yshapes identical (224, 2)
+  [PASS] record.loss identical (224,)
+  [PASS] record.lgsum identical (224,)
+  [PASS] record.calls identical (12,)
+       training steps 224; loss first / last 5.382063 / 4.884649
+  [PASS] same prediction files ['nn_w5_e10_kd05w192_s951_n2cpv3s3_test.npy', 'nn_w5_e10_kd05w192_s951_n2cpv3s3_test_folds.npy', 'nn_w5_e10_kd05w192_s951_n2cpv3s3_val_oof.npy']
+  [PASS] nn_w5_e10_kd05w192_s951_n2cpv3s3_test.npy identical (2904806,) nonzero 157655
+  [PASS] nn_w5_e10_kd05w192_s951_n2cpv3s3_test_folds.npy identical (2, 2904806) nonzero 315310
+  [PASS] nn_w5_e10_kd05w192_s951_n2cpv3s3_val_oof.npy identical (1389971,) nonzero 188083
+  [PASS] summary json identical (minutes removed) 
+   -> ALL PASS
+
+== FT FLAG ON (--full_val): FT_C_copy_fv   [2026-11-15T03:46:43Z]
+   C_copy_fv --variant w5_e10_kd05w192_s951 --out w5_e10_kd05w192_s951_n2cpv3s3 --extra n2c_pre_v3 --lr 5e-5 --epochs 6 --decay cos --ema 0.99 --ema_start 0.5 --epochs 4 --u0_singleton --seeds 3 --epochs 1 --full_val --seeds 1 --out w5_e10_kd05w192_s951_n2cpv3fv1
+  [PASS] run finished 6.4 min
+  [PASS] args: full_val True, folds forced to 1 seeds 1 epochs 1
+  [PASS] every training batch is a val batch 218 steps
+  [PASS] steps == seeds x epochs x batches(all 14423 val feeds) = 1 x 1 x 218 
+  [PASS] in every epoch of every seed each of the 14423 val feeds is trained on exactly once (no fold is held out) 
+  [PASS] outputs: valINSAMPLE + test + test_folds; NO ..._val_oof.npy ['nn_w5_e10_kd05w192_s951_n2cpv3fv1_test.npy', 'nn_w5_e10_kd05w192_s951_n2cpv3fv1_test_folds.npy', 'nn_w5_e10_kd05w192_s951_n2cpv3fv1_valINSAMPLE.npy']
+  [PASS] test predictions finite, 2,904,806 rows; test_folds has 1 row (2904806,) (1, 2904806)
+  [PASS] json: insample_* keys, no oof_* key, note present train-only val NDCG (epoch 0, capped eval) 0.21281; in-sample by epoch [0.21281, 0.21271]
+  [PASS] log: FULLVAL announcement at start, IN-SAMPLE warning right before the first 'OOF' figure, summary line at the end 
+   -> ALL PASS
+
+== FT IDENTITY: FT_D_orig_abl (original finetune.py) vs FT_F_copy_abl_off (finetune_full.py, flag off)   [2026-11-15T03:52:24Z]
+   x/w12/stale/fulldata/runs/FT_D_orig_abl --variant abl_e10_pop1kd05t25_s951 --out abl_e10_pop1kd05t25_s951_n2cpv3s3 --extra n2c_pre_v3 --lr 5e-5 --epochs 6 --decay cos --ema 0.99 --ema_start 0.5 --epochs 4 --u0_singleton --seeds 3 --epochs 1 --folds 2 --seeds 1
+  [PASS] both runs finished 5.5 / 5.4 min; eval cap 1000,1500,1500
+  [PASS] logs identical line for line (copy's args line has the extra key full_val False) 11 lines
+  [PASS] record.ll_fidx identical (14423,)
+  [PASS] record.ll_off identical (225,)
+  [PASS] record.ll_split identical (224,)
+  [PASS] record.y identical (1496704,)
+  [PASS] record.yshapes identical (224, 2)
+  [PASS] record.loss identical (224,)
+  [PASS] record.lgsum identical (224,)
+  [PASS] record.calls identical (12,)
+       training steps 224; loss first / last 5.363435 / 4.869611
+  [PASS] same prediction files ['nn_abl_e10_pop1kd05t25_s951_n2cpv3s3_test.npy', 'nn_abl_e10_pop1kd05t25_s951_n2cpv3s3_test_folds.npy', 'nn_abl_e10_pop1kd05t25_s951_n2cpv3s3_val_oof.npy']
+  [PASS] nn_abl_e10_pop1kd05t25_s951_n2cpv3s3_test.npy identical (2904806,) nonzero 157655
+  [PASS] nn_abl_e10_pop1kd05t25_s951_n2cpv3s3_test_folds.npy identical (2, 2904806) nonzero 315310
+  [PASS] nn_abl_e10_pop1kd05t25_s951_n2cpv3s3_val_oof.npy identical (1389971,) nonzero 188083
+  [PASS] summary json identical (minutes removed) 
+   -> ALL PASS
+
+== ORIGINAL fine-tune files on checkpoints written by --holdout_in_train runs   [2026-11-15T03:59:53Z]
+  [PASS] FT_E_orig_on_twin: nn_x/w5/finetune.py (unmodified) on w5_smoke_e10_kd05w192_s951.pt [args holdout_in_train True, keep 'last']: finished 6.3 min, 224 val training steps, 3 prediction files finite, OOF by epoch (capped eval, not a result) [0.21927, 0.22114]
+  [PASS] FT_G_orig_abl_on_twin: nn_x/abl/popfree/finetune.py (unmodified) on abl_smoke_e10_pop1kd05w192_s951.pt [args holdout_in_train True, keep 'last']: finished 6.4 min, 224 val training steps, 3 prediction files finite, OOF by epoch (capped eval, not a result) [0.21365, 0.22156]
+   -> ALL PASS

@@ -1,0 +1,119 @@
+{
+ "tag": "pilot15k_raw",
+ "n_val": 14423,
+ "n_hold": 30000,
+ "val": 0.3809277652292886,
+ "val_se": 0.0019617232130001738,
+ "hold": 0.30527256559076743,
+ "hold_se": 0.0010699802645238472,
+ "w16_val": 0.40143578947217784,
+ "w16_hold": 0.32459720573745354,
+ "gap_val": 0.02050802424288916,
+ "gap_val_se": 0.0013929260196061026,
+ "gap_hold": 0.019324640146686157,
+ "gap_hold_se": 0.0008570429505118907,
+ "rho_val": 0.8900716982732275,
+ "rho_hold": 0.8943208345515217,
+ "rho_global_val": 0.8956600187776624,
+ "rho_global_hold": 0.8953692787326166,
+ "law_record": -0.005707366751694134,
+ "law_refit": -0.005102177862052548,
+ "law_record_hold": -0.00533908149810567,
+ "member_rule": {
+  "val": {
+   "delta": -0.000503915118098165,
+   "se": 0.00038120428859859,
+   "z": -1.3219030665963731,
+   "n": 14423
+  },
+  "hold": {
+   "delta": 0.00013275656642866012,
+   "se": 0.00020822497038072555,
+   "z": 0.63756314233554,
+   "n": 30000
+  },
+  "pooled_z": -0.4839014010815234,
+  "pass": false
+ },
+ "mix_w005": {
+  "val": {
+   "delta": 3.879541357908522e-07,
+   "se": 0.00025779713221267753,
+   "z": 0.00150488150299049,
+   "n": 14423
+  },
+  "hold": {
+   "delta": 0.0001302132431264909,
+   "se": 0.00014455079091643325,
+   "z": 0.9008130796169004,
+   "n": 30000
+  },
+  "pooled_z": 0.6380351490942943,
+  "pass": false
+ },
+ "mix_w020": {
+  "val": {
+   "delta": -0.0013699487402397262,
+   "se": 0.000542165444344934,
+   "z": -2.5268093983653888,
+   "n": 14423
+  },
+  "hold": {
+   "delta": -0.0003928351172502878,
+   "se": 0.00031437964625313883,
+   "z": -1.2495564580347436,
+   "n": 30000
+  },
+  "pooled_z": -2.6702939053018775,
+  "pass": false
+ },
+ "stop_rule_val_ge_0.3900": false,
+ "stop_rule_law_ge_-0.002": false,
+ "extra": {
+  "n_fit_feeds": 13463,
+  "n_sel_feeds": 1473,
+  "best_iter": 296,
+  "trees_built": 300,
+  "budget_stop": false,
+  "fit_seconds": 836.0074052810669,
+  "s_per_iter": 2.7866913509368896,
+  "total_seconds": 934.4760863780975,
+  "peak_rss_gb": 29.522743225097656,
+  "params": {
+   "iterations": "300",
+   "learning_rate": "0.3",
+   "depth": "8",
+   "l2_leaf_reg": "5.0",
+   "loss_function": "RMSE",
+   "border_count": "254",
+   "od_wait": "300",
+   "od_type": "Iter",
+   "thread_count": "4",
+   "random_seed": "0",
+   "use_best_model": "False",
+   "eval_metric": "NDCG:type=Base",
+   "allow_writing_files": "False"
+  },
+  "set": "xm",
+  "selection": "trainside",
+  "loss": "rmse",
+  "block": "raw",
+  "args": {
+   "tag": "pilot15k_raw",
+   "loss": "rmse",
+   "lr": 0.3,
+   "iters": 300,
+   "depth": 8,
+   "l2": 5.0,
+   "seed": 0,
+   "block": "raw",
+   "grow": "SymmetricTree",
+   "mdl": 0,
+   "max_leaves": 0,
+   "budget_min": null,
+   "max_feeds": 15000,
+   "od_wait": 0,
+   "out": "nn_x/w12/cb/famS/pilot"
+  }
+ }
+}

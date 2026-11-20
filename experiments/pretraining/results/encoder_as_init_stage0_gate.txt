@@ -1,0 +1,63 @@
+# Read-out copied from the raw run log (not published), unchanged below this line.
+[   1.2s] ckpt v3A: d=384 nl=4 nh=6 d_id=64 min_cnt=3 epochs=2.0 exclude_test=1 vt_rep=4 id_bias=0 multi=4 dense params 8.00M; id table (39922092, 64); keys 70; size 9.5 GB
+[   1.2s] ckpt v4A: d=384 nl=4 nh=6 d_id=128 min_cnt=3 epochs=2.0 exclude_test=1 vt_rep=4 id_bias=1 multi=4 dense params 8.02M; id table (39922092, 128); keys 71; size 19.2 GB
+[   1.2s] ckpt v3: d=384 nl=4 nh=6 d_id=64 min_cnt=3 epochs=2.0 exclude_test=None vt_rep=4 id_bias=None multi=4 dense params 8.00M; id table (40251464, 64); keys 70; size 9.6 GB
+[   1.2s] ckpt v4: d=384 nl=4 nh=6 d_id=128 min_cnt=3 epochs=2.0 exclude_test=None vt_rep=4 id_bias=1 multi=4 dense params 8.02M; id table (40251464, 128); keys 71; size 19.4 GB
+[   1.2s] corpus: 2588072 sequences (split counts train/val/test = [2545717, 14204, 28151]), 463,552,406 events
+[   1.3s] val feeds 14423, leak-free 14306, rows 1,389,971
+[   2.0s] base NDCG all / leak-free: {'G3': (0.40032, 0.40046), 'G3_to': (0.40035, 0.40047)}
+[   2.0s] --- zero-shot val NDCG of single head scores (all feeds | leak-free) ---
+[   3.7s]   v1    fe 0.3537/0.3537  new 0.3547/0.3547  fe_noid 0.3496/0.3496  new_noid 0.3505/0.3507  hmax32 0.3459/0.3460  hmax8 0.3481/0.3482  idmax32 0.2974/0.2975
+[   5.4s]   v2    fe 0.3578/0.3578  new 0.3583/0.3583  fe_noid 0.3525/0.3526  new_noid 0.3538/0.3540  hmax32 0.3461/0.3463  hmax8 0.3483/0.3483  idmax32 0.2969/0.2969
+[   7.1s]   v3    fe 0.3573/0.3574  new 0.3572/0.3574  fe_noid 0.3536/0.3537  new_noid 0.3538/0.3540  hmax32 0.3448/0.3450  hmax8 0.3467/0.3467  idmax32 0.2970/0.2970
+[   8.8s]   v3A   fe 0.3567/0.3568  new 0.3584/0.3585  fe_noid 0.3540/0.3540  new_noid 0.3560/0.3562  hmax32 0.3454/0.3456  hmax8 0.3469/0.3470  idmax32 0.2947/0.2947
+[  10.4s]   v4    fe 0.3575/0.3577  new 0.3582/0.3584  fe_noid 0.3534/0.3536  new_noid 0.3549/0.3551  hmax32 0.3437/0.3437  hmax8 0.3461/0.3461  idmax32 0.2962/0.2962
+[  12.1s]   v4A   fe 0.3566/0.3567  new 0.3584/0.3585  fe_noid 0.3535/0.3536  new_noid 0.3552/0.3553  hmax32 0.3454/0.3455  hmax8 0.3469/0.3471  idmax32 0.2943/0.2942
+[  13.8s]   v4s1  fe 0.3585/0.3587  new 0.3588/0.3589  fe_noid 0.3543/0.3545  new_noid 0.3548/0.3550  hmax32 0.3454/0.3455  hmax8 0.3471/0.3472  idmax32 0.2959/0.2958
+[  13.8s] best single head: v4s1_new (0.35878030554355445, 0.358902096223957)
+[  14.9s] --- zero-shot val NDCG of encoder-only ensembles (all | leak-free | M<50 | M>=50 | Tue | Thu) ---
+[  15.1s]   pre_final        all 0.3590 leakfree 0.3591 M<50 0.4726 M>=50 0.2803 Tue 0.3610 Thu 0.3570
+[  15.4s]   pre2_final       all 0.3590 leakfree 0.3591 M<50 0.4726 M>=50 0.2803 Tue 0.3610 Thu 0.3570
+[  15.6s]   ENS_clean        all 0.3590 leakfree 0.3591 M<50 0.4726 M>=50 0.2803 Tue 0.3610 Thu 0.3570
+[  15.9s]   ENS_clean+h      all 0.3613 leakfree 0.3614 M<50 0.4748 M>=50 0.2828 Tue 0.3624 Thu 0.3604
+[  16.1s]   ENS_all          all 0.3613 leakfree 0.3615 M<50 0.4762 M>=50 0.2819 Tue 0.3631 Thu 0.3597
+[  16.4s]   ENS_all+h        all 0.3625 leakfree 0.3626 M<50 0.4751 M>=50 0.2845 Tue 0.3639 Thu 0.3612
+[  16.7s]   ENS_all+h+h8     all 0.3613 leakfree 0.3615 M<50 0.4724 M>=50 0.2846 Tue 0.3622 Thu 0.3607
+[  16.9s]   ENS_all_noid     all 0.3564 leakfree 0.3566 M<50 0.4712 M>=50 0.2770 Tue 0.3580 Thu 0.3550
+[  17.2s]   best_single      all 0.3588 leakfree 0.3589 M<50 0.4725 M>=50 0.2801 Tue 0.3619 Thu 0.3556
+[  17.3s]   pre2_id_contrib  all 0.2891 leakfree 0.2891 M<50 0.3789 M>=50 0.2268 Tue 0.2904 Thu 0.2877
+[  17.5s]   pre2_idmax32     all 0.2944 leakfree 0.2944 M<50 0.3886 M>=50 0.2291 Tue 0.2963 Thu 0.2924
+[  17.8s] cell positives (task): 7,624 of 21,983 positives in 5,383 feeds (leak-free 7,543); P8-cell positives 7,039
+[  17.9s] pairs: task cell 151,881 (feeds 5,334), P8 cell 62,016; loss share of task-cell positives: see 05_mass ('cat#1|w3-9' + 'cat#1|w10+')
+[  18.1s] === pre_final: pair AUC on task cell 0.3160 (cov 1.000), P8 cell 0.3077
+[  20.2s]   base G3   : equal z-mix -0.01093 ± 0.00113 | nested -0.00018 ± 0.00020 (z -0.92; w_full 0.05) pmix -0.00007 ± 0.00030 | M<50 -0.00010 M>=50 -0.00024 Tue -0.00026 Thu -0.00010 coldpos +0.00064 warmpos -0.00044 | cell feeds +0.00032 ± 0.00016 blend cell AUC 0.0168 | fixed-w: 0:+0.00000 0.05:+0.00003 0.1:-0.00069 0.15:-0.00118 0.2:-0.00158 0.3:-0.00305 0.5:-0.00477
+[  22.2s]   base G3_to: equal z-mix -0.01003 ± 0.00113 | nested -0.00011 ± 0.00024 (z -0.47; w_full 0.05) pmix +0.00005 ± 0.00037 | M<50 -0.00036 M>=50 +0.00006 Tue +0.00007 Thu -0.00031 coldpos +0.00027 warmpos -0.00033 | cell feeds +0.00021 ± 0.00019 blend cell AUC 0.0370 | fixed-w: 0:+0.00000 0.05:+0.00013 0.1:-0.00024 0.15:-0.00102 0.2:-0.00149 0.3:-0.00249 0.5:-0.00460
+[  22.2s] === ENS_clean+h: pair AUC on task cell 0.3081 (cov 1.000), P8 cell 0.2979
+[  24.2s]   base G3   : equal z-mix -0.00901 ± 0.00107 | nested -0.00011 ± 0.00005 (z -2.10; w_full 0) pmix -0.00010 ± 0.00007 | M<50 -0.00022 M>=50 -0.00003 Tue -0.00003 Thu -0.00019 coldpos -0.00004 warmpos -0.00013 | cell feeds +0.00006 ± 0.00005 blend cell AUC 0.0000 | fixed-w: 0:+0.00000 0.05:-0.00020 0.1:-0.00038 0.15:-0.00087 0.2:-0.00131 0.3:-0.00198 0.5:-0.00416
+[  26.3s]   base G3_to: equal z-mix -0.00846 ± 0.00107 | nested -0.00047 ± 0.00015 (z -3.10; w_full 0) pmix -0.00046 ± 0.00022 | M<50 -0.00063 M>=50 -0.00036 Tue -0.00034 Thu -0.00061 coldpos -0.00032 warmpos -0.00062 | cell feeds +0.00001 ± 0.00013 blend cell AUC 0.0353 | fixed-w: 0:+0.00000 0.05:-0.00013 0.1:-0.00024 0.15:-0.00088 0.2:-0.00105 0.3:-0.00173 0.5:-0.00356
+[  26.3s] === ENS_all: pair AUC on task cell 0.3168 (cov 1.000), P8 cell 0.3074
+[  28.3s]   base G3   : equal z-mix -0.00974 ± 0.00112 | nested -0.00017 ± 0.00009 (z -1.91; w_full 0) pmix -0.00028 ± 0.00015 | M<50 -0.00035 M>=50 -0.00004 Tue -0.00003 Thu -0.00033 coldpos +0.00014 warmpos -0.00027 | cell feeds +0.00007 ± 0.00008 blend cell AUC 0.0000 | fixed-w: 0:+0.00000 0.05:-0.00014 0.1:-0.00060 0.15:-0.00101 0.2:-0.00174 0.3:-0.00252 0.5:-0.00408
+[  30.3s]   base G3_to: equal z-mix -0.00965 ± 0.00112 | nested -0.00034 ± 0.00014 (z -2.32; w_full 0) pmix -0.00031 ± 0.00021 | M<50 -0.00062 M>=50 -0.00014 Tue -0.00013 Thu -0.00056 coldpos -0.00041 warmpos -0.00039 | cell feeds +0.00013 ± 0.00012 blend cell AUC 0.0353 | fixed-w: 0:+0.00000 0.05:-0.00003 0.1:-0.00029 0.15:-0.00056 0.2:-0.00113 0.3:-0.00227 0.5:-0.00412
+[  30.4s] === ENS_all+h: pair AUC on task cell 0.3083 (cov 1.000), P8 cell 0.2976
+[  32.4s]   base G3   : equal z-mix -0.00786 ± 0.00106 | nested -0.00026 ± 0.00012 (z -2.20; w_full 0) pmix -0.00026 ± 0.00019 | M<50 -0.00041 M>=50 -0.00015 Tue -0.00010 Thu -0.00042 coldpos +0.00038 warmpos -0.00049 | cell feeds +0.00011 ± 0.00008 blend cell AUC 0.0000 | fixed-w: 0:+0.00000 0.05:-0.00010 0.1:-0.00036 0.15:-0.00086 0.2:-0.00125 0.3:-0.00201 0.5:-0.00367
+[  34.4s]   base G3_to: equal z-mix -0.00773 ± 0.00106 | nested -0.00045 ± 0.00023 (z -1.98; w_full 0.1) pmix -0.00043 ± 0.00033 | M<50 -0.00056 M>=50 -0.00038 Tue -0.00018 Thu -0.00075 coldpos +0.00029 warmpos -0.00086 | cell feeds +0.00044 ± 0.00019 blend cell AUC 0.0406 | fixed-w: 0:+0.00000 0.05:-0.00017 0.1:+0.00000 0.15:-0.00050 0.2:-0.00078 0.3:-0.00173 0.5:-0.00375
+[  34.4s] === ENS_all+h+h8: pair AUC on task cell 0.3092 (cov 1.000), P8 cell 0.2990
+[  36.4s]   base G3   : equal z-mix -0.00979 ± 0.00106 | nested -0.00026 ± 0.00012 (z -2.17; w_full 0) pmix -0.00014 ± 0.00019 | M<50 -0.00031 M>=50 -0.00023 Tue -0.00017 Thu -0.00036 coldpos +0.00029 warmpos -0.00045 | cell feeds +0.00016 ± 0.00009 blend cell AUC 0.0000 | fixed-w: 0:+0.00000 0.05:-0.00012 0.1:-0.00026 0.15:-0.00100 0.2:-0.00185 0.3:-0.00245 0.5:-0.00389
+[  38.5s]   base G3_to: equal z-mix -0.00913 ± 0.00106 | nested -0.00039 ± 0.00017 (z -2.33; w_full 0) pmix -0.00030 ± 0.00024 | M<50 -0.00068 M>=50 -0.00019 Tue -0.00007 Thu -0.00074 coldpos -0.00006 warmpos -0.00053 | cell feeds +0.00012 ± 0.00014 blend cell AUC 0.0353 | fixed-w: 0:+0.00000 0.05:-0.00014 0.1:-0.00008 0.15:-0.00060 0.2:-0.00096 0.3:-0.00216 0.5:-0.00402
+[  38.5s] === best_single: pair AUC on task cell 0.3278 (cov 1.000), P8 cell 0.3243
+[  40.5s]   base G3   : equal z-mix -0.01106 ± 0.00117 | nested -0.00011 ± 0.00007 (z -1.62; w_full 0) pmix -0.00002 ± 0.00010 | M<50 -0.00007 M>=50 -0.00014 Tue -0.00012 Thu -0.00010 coldpos +0.00028 warmpos -0.00022 | cell feeds +0.00002 ± 0.00005 blend cell AUC 0.0000 | fixed-w: 0:+0.00000 0.05:-0.00016 0.1:-0.00081 0.15:-0.00119 0.2:-0.00158 0.3:-0.00277 0.5:-0.00474
+[  42.6s]   base G3_to: equal z-mix -0.01062 ± 0.00116 | nested -0.00012 ± 0.00024 (z -0.50; w_full 0.05) pmix +0.00010 ± 0.00035 | M<50 -0.00067 M>=50 +0.00026 Tue +0.00011 Thu -0.00037 coldpos -0.00025 warmpos -0.00007 | cell feeds +0.00017 ± 0.00021 blend cell AUC 0.0371 | fixed-w: 0:+0.00000 0.05:+0.00025 0.1:-0.00013 0.15:-0.00043 0.2:-0.00100 0.3:-0.00197 0.5:-0.00376
+[  42.6s] === ENS_all_noid: pair AUC on task cell 0.3294 (cov 1.000), P8 cell 0.3171
+[  44.6s]   base G3   : equal z-mix -0.01056 ± 0.00116 | nested +0.00000 ± 0.00000 (z +0.00; w_full 0) pmix +0.00000 ± 0.00000 | M<50 +0.00000 M>=50 +0.00000 Tue +0.00000 Thu +0.00000 coldpos +0.00000 warmpos +0.00000 | cell feeds +0.00000 ± 0.00000 blend cell AUC 0.0000 | fixed-w: 0:+0.00000 0.05:-0.00021 0.1:-0.00036 0.15:-0.00100 0.2:-0.00185 0.3:-0.00252 0.5:-0.00466
+[  46.7s]   base G3_to: equal z-mix -0.01052 ± 0.00114 | nested -0.00037 ± 0.00021 (z -1.77; w_full 0.05) pmix -0.00033 ± 0.00030 | M<50 -0.00095 M>=50 +0.00003 Tue -0.00018 Thu -0.00059 coldpos +0.00029 warmpos -0.00074 | cell feeds +0.00027 ± 0.00019 blend cell AUC 0.0370 | fixed-w: 0:+0.00000 0.05:+0.00010 0.1:-0.00033 0.15:-0.00106 0.2:-0.00161 0.3:-0.00274 0.5:-0.00459
+[  46.7s] === pre2_id_contrib: pair AUC on task cell 0.4707 (cov 1.000), P8 cell 0.4703
+[  48.7s]   base G3   : equal z-mix -0.05359 ± 0.00172 | nested +0.00000 ± 0.00000 (z +0.00; w_full 0) pmix +0.00000 ± 0.00000 | M<50 +0.00000 M>=50 +0.00000 Tue +0.00000 Thu +0.00000 coldpos +0.00000 warmpos +0.00000 | cell feeds +0.00000 ± 0.00000 blend cell AUC 0.0000 | fixed-w: 0:+0.00000 0.05:-0.00096 0.1:-0.00256 0.15:-0.00474 0.2:-0.00793 0.3:-0.01562 0.5:-0.03114
+[  50.8s]   base G3_to: equal z-mix -0.05312 ± 0.00172 | nested +0.00000 ± 0.00000 (z +0.00; w_full 0) pmix +0.00000 ± 0.00000 | M<50 +0.00000 M>=50 +0.00000 Tue +0.00000 Thu +0.00000 coldpos +0.00000 warmpos +0.00000 | cell feeds +0.00000 ± 0.00000 blend cell AUC 0.0353 | fixed-w: 0:+0.00000 0.05:-0.00083 0.1:-0.00271 0.15:-0.00480 0.2:-0.00774 0.3:-0.01491 0.5:-0.03056
+[  50.8s] === pre2_idmax32: pair AUC on task cell 0.4760 (cov 0.207), P8 cell 0.4765
+[  52.9s]   base G3   : equal z-mix -0.02875 ± 0.00144 | nested +0.00000 ± 0.00000 (z +0.00; w_full 0) pmix +0.00000 ± 0.00000 | M<50 +0.00000 M>=50 +0.00000 Tue +0.00000 Thu +0.00000 coldpos +0.00000 warmpos +0.00000 | cell feeds +0.00000 ± 0.00000 blend cell AUC 0.0000 | fixed-w: 0:+0.00000 0.05:-0.00039 0.1:-0.00167 0.15:-0.00247 0.2:-0.00391 0.3:-0.00677 0.5:-0.01329
+[  55.0s]   base G3_to: equal z-mix -0.02865 ± 0.00142 | nested +0.00000 ± 0.00000 (z +0.00; w_full 0) pmix +0.00000 ± 0.00000 | M<50 +0.00000 M>=50 +0.00000 Tue +0.00000 Thu +0.00000 coldpos +0.00000 warmpos +0.00000 | cell feeds +0.00000 ± 0.00000 blend cell AUC 0.0353 | fixed-w: 0:+0.00000 0.05:-0.00063 0.1:-0.00135 0.15:-0.00268 0.2:-0.00391 0.3:-0.00720 0.5:-0.01368
+[  55.0s] GATE: zero-shot clean (pre_final) 0.3590; best encoder-only ENS_all+h 0.3625 -> >= 0.36: True
+[  55.0s] GATE: nested residual on G3 (leak-free): pre_final -0.00018±0.00020; ENS_clean+h -0.00011±0.00005; ENS_all -0.00017±0.00009; ENS_all+h -0.00026±0.00012; ENS_all+h+h8 -0.00026±0.00012; best_single -0.00011±0.00007; ENS_all_noid +0.00000±0.00000; pre2_id_contrib +0.00000±0.00000; pre2_idmax32 +0.00000±0.00000 -> any > +0.0005 and > 2 SE: False
+[  55.0s] GATE: task-cell pair AUC: pre_final 0.3160; ENS_clean+h 0.3081; ENS_all 0.3168; ENS_all+h 0.3083; ENS_all+h+h8 0.3092; best_single 0.3278; ENS_all_noid 0.3294; pre2_id_contrib 0.4707; pre2_idmax32 0.4760 -> any > 0.52: False
+[  55.0s] GATE DECISION: STOP (gate failed)
+[  55.0s] done

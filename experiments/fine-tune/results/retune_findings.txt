@@ -1,0 +1,137 @@
+FTOPT: Optuna (TPE) study of the val FINE-TUNE stage for m02 trunks. Written 2026-11-12 ~21:20 UTC.
+Protocol: nn_x/ftopt/plan.txt. It was written at 17:07 UTC, before trial 0. Addenda 1-3 are timestamped; 1 and 2
+were written before the freeze and before any CONFIRM read.
+
+VERDICT: PRE-DECLARED ACCEPTANCE FAILS. KEEP n2cpv3. Do NOT re-run FT for the pool members.
+  Step 2 (CONFIRM > 2 SE) fails: the frozen best TUNE trial #21 gives +0.00055 +- 0.00041 (z +1.34).
+  Step 3 (set B > +1 SE): run anyway as a descriptive check. It gives -0.00009 +- 0.00027 on all val (z -0.32), so
+  the config does not transfer to a different member set.
+  Inverse-variance mean of the two unbiased readouts (CONFIRM_A, all-val B): about +0.0001 +- 0.00023.
+  The FT recipe is not a pool-level lever for these trunks.
+
+------------------------------------------------------------------------------------------------------------
+SETUP
+- Set A, used for tuning: r6_cd_m02_r101, r6_cd_m02_r103, v27_gru_m02_s511, v28_lr1_m02_s411.
+- Set B, the second confirmation: v23_gru_pre2s_s501, v23_gru_pre2s_s502, v29_d192_m02_s711, r6_cd_m02_p70k_r102.
+- Pool = 0.5 z(mean z(ft)) + 0.5 z(mean z(to)), with z taken per feed. The baseline uses the production
+  preds/nn_<m>_n2cpv3_val_oof.npy.
+- Metric: src/metrics.ndcg_per_feed, with paired per-feed SE. The user-clustered SE is the same to 1e-7, because
+  nearly every val user has one feed.
+- TUNE / CONFIRM split: splitmix64(user_id) & 1, and splitmix64(fidx + 2^40) for user-0 feeds. Sizes: 7218 TUNE /
+  7205 CONFIRM feeds. Saved to split.npy.
+- FT runs: ftrun.py imports the UNCHANGED nn/finetune.py or nn_x/r6/finetune.py. Only PREDS/LOGS are re-pointed
+  to nn_x/ftopt/out/<tag>, and test predict() returns zeros, so the study writes val OOF only.
+  - The folds are the standard GroupKFold(5) with --u0_singleton over all val.
+  - Nothing was written to preds/, nn*/logs or feat_cache (checked).
+- Noise reference: trial 0 re-runs n2cpv3 exactly. It gives TUNE -0.00007 +- 0.00006 and CONFIRM +0.00001 +-
+  0.00005, so GPU run-to-run noise is ~1e-4 at pool level.
+- Study: 37 trials asked; 35 COMPLETE. Trial 0 is the n2cpv3 re-run, trial 8 the enqueued n2cpv3 +
+  loss_norm=feed control (addendum 1), and 33 were sampled (10 random startup, then TPE). 0 failures; trials 35-36
+  were asked but never launched (the study was frozen).
+  - Sampler: TPE with seed 20261112, 10 random startup trials, multivariate + group + constant_liar, 2 trials in
+    flight, 4 FT processes (2 on GPU N on GPU N).
+  - Trials took 5-23 min. TPE moved to 5-6 epoch x 2-seed configs, which are slow.
+  - Freeze: the best COMPLETE trial at 21:00:05 UTC.
+
+SEARCH SPACE: lr 1e-5..3e-4 (log); epochs 2-6; decay const/cos; ema 0 / 0.99 / 0.995 (+ ema_start 0.25 / 0.5 /
+1.0); wd {0, .005, .02, .05, .1}; drop {0, .1, .2}; loss_norm batch/feed; extra preset {n2c_pre_v3,
+v3 minus ctx_nd/centrality, v3 minus pre_*, none}; extra_lr_mult {3, 10, 30}; seeds 1/2.
+- No larger vetted leak-safe preset exists: ALS, ctx_hn/hs and it_tr_* were removed by the W3 hygiene or have
+  leak-audit excess.
+- select=best was excluded because it picks the epoch on OOF over all val.
+
+FROZEN BEST (trial 21): lr 4.37e-5, 5 epochs, const, ema 0.995 from epoch 0.25, wd 0.05, drop 0.0,
+loss_norm feed, extra preset none (no extra-feature branch), 2 seeds.
+
+| readout | pool delta vs n2cpv3 | SE | z | note |
+|---|---|---|---|---|
+| TUNE (objective) | +0.00090 | 0.00041 | 2.19 | selection-biased |
+| CONFIRM | +0.00055 | 0.00041 | 1.34 | FAIL (> 2 SE needed) |
+| all val, set A | +0.00072 | 0.00029 | - | contains the TUNE selection |
+| set B, all val | -0.00009 | 0.00027 | -0.32 | descriptive (step 2 failed) |
+
+CONFIRM slices (none is below -2 SE):
+| slice | delta | SE |
+|---|---|---|
+| M<50 | +0.00042 | 0.00081 |
+| M>=50 | +0.00064 | 0.00041 |
+| Tue | +0.00066 | 0.00058 |
+| Thu | +0.00043 | 0.00058 |
+
+CONFIRM single-member mixes (0.5 z(ft) + 0.5 z(to) vs the same with n2cpv3):
+| member | delta | SE |
+|---|---|---|
+| r101 | +0.00012 | 0.00043 |
+| r103 | -0.00031 | 0.00044 |
+| GRU s511 | +0.00108 | 0.00042 |
+| lr1 s411 | +0.00034 | 0.00046 |
+Most of the set-A gain comes from one member (v27_gru_m02_s511).
+
+FT half over the TO-only pool, on CONFIRM: n2cpv3 +0.00054, trial 21 +0.00109.
+
+Set B (all val) for trial 21:
+- Slices: M<50 -0.00021, M>=50 -0.00000, Tue -0.00008, Thu -0.00009.
+- FT half over TO-only: +0.00074 for trial 21 vs +0.00082 for n2cpv3. On these trunks n2cpv3 already gets the FT
+  gain.
+- Single-member mixes: +0.00034 / +0.00020 / +0.00040 / -0.00011. The single-member gains do not survive pooling.
+
+w_ft post-hoc (report only; w_ft stays 0.5): for trial 21 on CONFIRM, w 0.3 +0.00021 and w 0.7 -0.00023, both
+worse than w 0.5 (+0.00055). Across all trials w 0.5 is about the best on CONFIRM. Set B gives the same: w 0.3
+-0.00003, w 0.7 -0.00015.
+
+DECOMPOSITION ON SET A (descriptive, post-freeze, runset.py):
+| run | ALL | CONFIRM |
+|---|---|---|
+| Dn2s2 = n2cpv3 with 2 FT seeds | +0.00005 +- 0.00013 | +0.00020 +- 0.00018 |
+| Dt21s1 = trial-21 params, 1 seed | +0.00072 +- 0.00029 | +0.00049 +- 0.00041 |
+- Bagging FT seeds is ~0 at pool level.
+- Dt21s1 matches trial 21. The set-A effect comes from the recipe (no extra branch, feed norm, const + EMA 0.995,
+  no dropout), not from the 2 seeds. It still does not reach 2 SE on CONFIRM and is null on set B.
+
+------------------------------------------------------------------------------------------------------------
+WHAT THE STUDY TELLS US (descriptive; TPE sampling is not random, so the group means are confounded)
+1. Regression to the mean in the baseline: the n2cpv3 pool's FT gain over TO-only is -0.00016 on TUNE and +0.00054
+   on CONFIRM (+0.00019 on all val).
+   - Any different FT realization therefore looks ~0.0005 better on TUNE than on CONFIRM.
+   - Across all 35 complete trials, mean d_TUNE is +0.00029 and mean d_CONFIRM -0.00024.
+   - Lesson: an FT objective on half of val, against a single fixed FT realization, carries a sizeable
+     baseline-luck term. The CONFIRM half was essential; every TUNE number above +0.0005 was inflated by it.
+2. TUNE and CONFIRM deltas correlate +0.81 across trials. Config effects are real, but the large ones are the
+   HARMFUL configs:
+   - 6 epochs at lr >= 1.2e-4 with EMA (trials 14, 20, 22, 30): CONFIRM -0.0015 to -0.0043.
+   - ema 0.99 configs average CONFIRM -0.0012.
+   The upside region is flat and small.
+3. The upside region is consistent: preset none (no extra-feature branch), loss_norm feed, const lr 4e-5 to 1e-4,
+   4-6 epochs, ema 0 or 0.995.
+   - Trials 21, 33, 15, 25, 28, 19, 34, 27 all give CONFIRM +0.0004 to +0.0005, each about 1.0-1.3 SE.
+   - These are near-duplicates, not independent evidence. Set B shows they do not generalize to other members.
+4. The extra-feature branch (n2c_pre_v3, 42 features) no longer helps on m02 trunks: preset none is >= v3 in this
+   study. If the FT ever has to be re-run for cost reasons, dropping the branch is a free simplification. This is
+   not a gain claim.
+5. loss_norm feed (the trunks' own normalisation) alone is null. The control (trial 8) gives TUNE +0.00010 +-
+   0.00031 and CONFIRM +0.00023 +- 0.00028.
+6. fANOVA importance on the TUNE objective: ema 0.23, seeds 0.18, epochs 0.18, lr 0.15, wd 0.09, preset 0.09,
+   decay 0.04, drop 0.02, loss_norm 0.02.
+7. This adds to the lead's L2 finding: the FT half adds ~0 at pool level on m02 trunks, and retuning the FT recipe
+   does not change that. The val labels are worth ~+0.0002-0.0008 over the TO-only pool whichever reasonable FT is
+   used. The members are the limit.
+
+Disclosed slips:
+- The running driver stored tune_mix_<m> single-member stats with members misaligned (job order vs SET_A order).
+  The pool objective is order-free and correct. driver.py was fixed on disk; per-member stats were recomputed by
+  name (analyze.py, confirm.py, post_freeze.py).
+- PAUSE was touched at 20:54:20 instead of 21:00 because a wait loop timed out early. The frozen choice was still
+  read at 21:00:05 as declared, and trial 21 was best at both times.
+
+FILES (nn_x/ftopt):
+- Protocol and state: plan.txt (protocol + addenda), RUNNING.txt (driver PID history; nothing running now),
+  freeze.txt.
+- Results: trials.jsonl / trials.csv / summ_final.txt (all trials, TUNE only), summ_at_freeze.txt,
+  post_freeze.csv / post_freeze.txt (TUNE / CONFIRM / ALL per trial), confirm_A_21.txt / .json,
+  confirm_B_B21.json, score_Dn2s2.json, score_Dt21s1.json, group_means.txt, analyze_tune.csv.
+- Study: study.db (Optuna sqlite, study ftopt_m02_v1). split.npy (True = CONFIRM).
+- Code: ftlib.py, ftrun.py, driver.py, confirm.py, post_freeze.py, runB.py, runset.py, score_tag.py, summ.py,
+  analyze.py.
+- logs/ holds the driver, runB and runset logs.
+- out/<t#|B21|Dn2s2|Dt21s1>/ holds val-OOF predictions (766 MB, own files only). There are no test predictions;
+  delete when no longer needed.

@@ -1,0 +1,89 @@
+SEGMENTS / SCORE-SHAPE LENS: NOTES (agent "segments", 2026-11-17)
+=========================================================================
+Outcome: I am submitting NO rules. Nothing cleared the bar (cross-fitted gain >= +0.0003 and z >= 2).
+The best near-miss is a within-category saturation penalty: cross-fitted +0.00023, z 2.5. It is not
+submitted. The file is work/candidate_cat_saturation.py, and it is not in rules/.
+
+Data: discovery sample, 7,214 feeds and 697,304 rows. Base NDCG 0.39939 (my vectorised NDCG matches kit.evaluate exactly).
+Every number below is a paired delta against the model score. "CF" means parameters were chosen on 4 user folds
+(kit.folds) and the delta was measured on the 5th, then the 5 out-of-fold deltas were averaged. Units are 1e-4 unless stated otherwise.
+Scripts are in work/ (a01..a20). Rough count of variants tried: about 1,870 (counting each weight), in about 60 families.
+
+1. SEGMENT DESCRIPTION (what the residual looks like)
+- NDCG is driven almost entirely by M: M<20 0.61, 20-50 0.44, 50-100 0.36, 100-150 0.31, 150-300 0.27-0.30.
+  H, hour, weekday, newest_type/src, n_hist_cats32, guest, uvec_missing and empty history move NDCG only
+  through M or through tiny groups: guest 312 feeds (0.406), uvm 92 (0.344), H=0 95 (0.372).
+- Score shape: g12 (top-1 minus top-2) and g110 (top-1 minus top-10) rise with NDCG, but mainly because they
+  track M. The fine-tuned and train-only branches agree almost completely: the within-feed corr of s_ft and s_to
+  has median 0.993.
+- Good feeds (best positive at ranks 1-3) against bad feeds (best positive at 30+), with M >= 60:
+  * The best positive is in the same category as the model's top-1 item in 83% of good feeds and 28% of bad ones.
+  * In bad feeds the best positive is deep inside its category: median cat_rank_in_feed 12 (good: 1),
+    and its category has a median of 28 candidates in the feed.
+  * Category absent from history: 11% in bad feeds, 3% in good. Same category as the newest event: 28% against 64%.
+  * By every affinity signal the positive in a bad feed is weak: f3 0.48 (good 0.66), f1 0.42 (0.63),
+    h1 0.53 (0.70), hmax 0.84 (0.92), ucos 0.50 (0.56), near-copy of a history item (hmax >= .95) 15% (51%).
+  * Bad feeds are larger (M 183 against 141) and have fewer positives (1.3 against 2.7). Score peakedness barely
+    differs (g110 0.76 against 0.84), so the model's confidence does not flag the bad feeds.
+  * Reading individual feeds (a05b_print.py bad/good/smallbad) shows the same thing. Bad feeds are either the k-th
+    listing of the user's main category (the model has no feature to pick one of 50 similar listings) or
+    exploration clicks into weak categories. I found no recurring situation in which a simple feature points to the positive.
+
+2. SEGMENT-SPECIFIC LINEAR BLENDS: none work
+- Global blends score + w*z_feed(x) for 27 signals (ucos, h1/h5/h10/h32/hmax/hmean5, f1-f5, popularity, seq_cv,
+  pre2, cand_maxcos, c_*, sft-sto, cat rank) at 8 weights each: the best is +4.5 in-sample (f3 at -0.03, z 1.5).
+  This is pure noise for 216 tries. (a02)
+- Per-segment weights, chosen per segment by CF:
+  * M3 / H3 schemes x 13 features (a11): CF from -15.5 to +2.9. Every one is negative except hmax by M3 (+2.9, z 0.97).
+  * Lens scan (a16): 9 schemes (hour4, weekday, n_feed_cats, g110, g12, newest_type, cold = guest|uvm|H<5,
+    n_hist_cats32, corr(ft,to)) x 16 features = 144 variants. Mean CF -4.0. One variant has z > 2:
+    newest_type x f2_home, +6.0, z 2.17. Its whole effect comes from the 181 guest feeds (newest_type 10), and the
+    per-fold deltas range from -21 to +238. This is noise.
+  * Contact-heavy against view-heavy histories (action share over the feed's categories, terciles), 13 features (a14):
+    CF from -12.8 to +1.8.
+  * Head-only blends, applied to ranks <= 5/10/20 only, 9 features (a09): every one is CF-negative.
+  * Category-specific slopes (onehot(cat) x z(feature)), fitted by L2-shrunk conditional logit, 11 features x 2 L2 (a15):
+    every one is CF-negative (-3.6 to -17.9).
+  * Segment x category offsets (hour4, M3, H3, guest, weekday, newest_type, newest_src) by clogit (a12): every one is CF-negative.
+- Branch re-weighting (a04): score = w*s_ft + (1-w)*s_to, with w in 0.2..0.8, by 19 segments. The curve is jagged and
+  non-monotone everywhere, and 0.5 is optimal overall. The other combinations do not help either: the disagreement
+  penalty -lam*|s_ft-s_to|, rank fusion, soft-min and soft-max (logsumexp). Where the two branches' top-1 items
+  differ (1,378 feeds), the blend's top-1 has 124 positives, against 118 for the ft top-1 and 103 for the to top-1.
+- Headroom diagnostics: residual LightGBM with the score as init is CF-negative in every setting I tried.
+  Lambdarank gives -22 to -65, and pointwise binary on clogit logits gives +0.4 / -5.2 / -6.1 at 50/100/200 rounds (a03, a13).
+  Small linear or nonlinear moves along these inputs do not improve the model's ordering on 7.2k feeds.
+- Feed-level storage position (row-row0) carries no signal (observed/expected 0.97-1.02 by position bin).
+  There are no exact score ties. Only 15 users have 2 feeds, so cross-feed repeats cannot be used.
+
+3. BIN RESIDUALS ACROSS FEEDS DO NOT TRANSLATE INTO RE-RANKING
+The obs/exp tables at ranks <= 3 and <= 10 (a08) show these:
+  - f3 >= .92 under-rated (1.15-1.18)
+  - same_cat_newest = 0 over-rated at the top 3 (0.89, z -3.5)
+  - (s_ft - s_to) in [.05, .13] over-rated (0.84, z -4.2)
+  - singleton-category items at rank 1 over-rated (0.84)
+Every within-feed re-ranking built on these is CF-negative. Pairwise adjacent-rank logits (a10) also look strong
+(for example log n_cand_dup95 z +5, and h1 in M30-100 z -6). Those z values are inflated by clustering, and the
+matching blends are CF-negative.
+
+4. NEAR-MISS (not submitted): within-category saturation
+new = score - 0.02 * (cat_rank_in_feed - 1)^0.3. Each follower in a category is demoted, and category leaders are untouched.
+- In-sample +2.31 (se 0.92, z 2.51), changing 79% of feeds. CF +2.31 (z 2.51): w=0.02 was chosen in all 5 folds.
+  Per fold: +2.7, +5.1, -0.2, +0.3, +3.7.
+- I tried about 160 variants of this family (a07, a17, a18, a19, plus flatness gating). Every form lands at CF +1.1..+2.4:
+  * sqrt(sum of the model probabilities of higher-scored same-category items), a=1, w=0.1: +2.42, z 2.25
+  * [cr >= 2] alone: +1.82
+  * (cr-1)/rank: +1.58
+  * gating to M >= 30: +1.1..+1.8
+  * scaling by score flatness: +0.8..+0.9
+  * near-duplicate versions ([cr>=2] x n_cand_dup95, cand_maxcos): +0.3 / -0.2 / +0.6 / -1.2
+- By segment, the effect sits in M 30-100 (about +5 in-segment). It is about +1 for M >= 100 and slightly negative for
+  M < 30. It is concentrated in flat-score feeds (g110 tercile 1: +4.6, se 1.8).
+- Caveats: the gain is below +0.0003, and it is the best of a family searched for its maximum. The conditional-logit
+  likelihood restricted to ranks <= 5/10/20 does NOT support the mechanism: the follower coefficient is about 0, and in
+  M<30 it is positive, meaning followers are UNDER-rated. A substitution effect (a user clicks one of several similar
+  listings) is a plausible story, but the data here cannot separate it from noise.
+  If the lead pools near-misses from several agents, this is the only one from this lens worth a sealed check.
+
+5. FAILED IDEAS (summary): see the list in the structured result. In short, the model is at a local optimum against
+every simple segment-specific correction I could build from these columns. The errors that remain are within-category
+picks and exploration clicks, and the features do not separate them from the model's choices.

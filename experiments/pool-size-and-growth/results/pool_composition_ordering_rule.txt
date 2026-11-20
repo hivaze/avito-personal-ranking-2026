@@ -1,0 +1,14 @@
+POOL-COMPOSITION RECHECK -- ordering rule, written 2026-11-14T19:05:48Z BEFORE any pool number of this recheck was computed
+(known at this time, from the decision ledger / status log (not published) only: W8 TO 0.40157 val / 0.32456 hold; S16 TO 0.40172 val; kd05 x4 0.40085 / 0.32349;
+ kd05w192 x4 0.40134 / 0.32408; public W8 0.394486 > S16 0.394078 > C3 0.393454).
+Reference = W8 train-only pool (kd05w192 + kd05t25w192, seeds 951-954, selected checkpoints, member-equal mean of per-feed z).
+R1 ORDER: recipes are ordered by the paired per-feed HOLDOUT delta of their train-only pool vs W8 (30,000 feeds). Val never orders.
+R2 "AHEAD OF W8" only if holdout delta >= +2 SE. Otherwise the recipe is a tie with W8 (a hedge / size extension, not an improvement).
+R3 VAL VETO: a recipe is dropped if its val TO-pool delta vs W8 is below -1 SE, or (where FT files exist) its final 0.5 z(FT)+0.5 z(TO) val delta vs the W8 final is below -1 SE.
+R4 SELECTION-BIAS CHECK: member checkpoints were selected on the holdout, so the holdout delta is also read on @last checkpoints (selection-free);
+   a recipe whose holdout advantage changes sign at @last is flagged and loses the "ahead" label.
+R5 TIES (holdout deltas within 1 SE of each other): more d192 members first (public: W8 > S16), then lower test correlation to W8.
+R6 Weights / selections fitted on one labelled set are judged ONLY on the other set (holdout-fitted -> val, val-fitted -> holdout); a fitted
+   weighting is "better than member-equal" only if it is >= +2 SE on the set it was NOT fitted on, in both directions.
+R7 Noise floor: val-only gain < +0.0005 or < 2 SE = noise; near copies of W8 (test corr >= 0.995) are not expected to move public by a resolvable amount.
+Snapshot of completed runs: out/snapshot_w5_e10_complete.txt (112 w5_e10 runs with logs/<variant>.json at 2026-11-14T19:04:24Z) + abl_e10_pop1kd05t25_s951-954.

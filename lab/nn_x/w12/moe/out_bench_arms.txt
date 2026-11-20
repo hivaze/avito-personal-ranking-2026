@@ -1,0 +1,30 @@
+== 1a. quantile balancer vs sign balancer (CPU, 20k fixed tokens, router skewed so expert 0 takes every token)
+  quantile eta 0.1   | it 0: ent 0.975 max/min 2.4 | it 10: ent 0.997 max/min 1.5 | it 30: ent 1.000 max/min 1.1 | it 100: ent 1.000 max/min 1.0 | it 300: ent 1.000 max/min 1.0
+  sign u 1e-3        | it 0: ent 0.974 max/min 2.5 | it 10: ent 0.976 max/min 2.4 | it 30: ent 0.978 max/min 2.3 | it 100: ent 0.985 max/min 2.1 | it 300: ent 0.998 max/min 1.3
+  sign u 1e-2        | it 0: ent 0.975 max/min 2.4 | it 10: ent 0.986 max/min 2.0 | it 30: ent 0.998 max/min 1.3 | it 100: ent 1.000 max/min 1.1 | it 300: ent 1.000 max/min 1.1
+== 1b. MuonBatched [1, A, B] against torch.optim.Muon [A, B] (CPU fp32 params, one and five steps)
+  shape (48, 192): max |diff| after 5 steps 0.00e+00 (param scale 0.040)
+  shape (192, 48): max |diff| after 5 steps 0.00e+00 (param scale 0.040)
+
+== 2. parameters (total | Muon 2-D | MuonBatched 3-D | AdamW | active per candidate token)
+  ref total 2,118,848 | Muon 2,022,400 (46 mats) | MuonBatched 0 (0 stacks) | AdamW 96,448 | active 2,118,848 | ratio 1.000
+  A   total 2,714,816 | Muon 2,022,400 (46 mats) | MuonBatched 589,824 (8 stacks) | AdamW 102,592 | active 2,272,448 | ratio 1.281
+  B   total 2,720,960 | Muon 2,022,400 (46 mats) | MuonBatched 589,824 (4 stacks) | AdamW 108,736 | active 2,426,048 | ratio 1.284
+  C   total 2,270,340 | Muon 2,169,856 (60 mats) | MuonBatched 0 (0 stacks) | AdamW 100,484 | active 2,270,340 | ratio 1.071
+  A: baseline tensors identical True (137 same-name tensors; renamed by wrapping: 16)
+  B: baseline tensors identical True (131 same-name tensors; renamed by wrapping: 22)
+  A: eval logits equal to the baseline bit for bit: True (max |diff| 0.00e+00)
+  B: eval logits equal to the baseline bit for bit: True (max |diff| 0.00e+00)
+
+== 3. training step (ms; fwd + bwd + clip + all optimisers + balancer) | batches per epoch 9984
+| batch (Mpad x B) | ref | A moe-ffn | B switch-vo | C 3 pairs ff1 |
+|---|---|---|---|---|
+| 32 x 512 | 32.4 | 36.3 | 44.3 | 36.9 |
+| 64 x 512 | 40.4 | 46.0 | 52.8 | 47.6 |
+| 128 x 256 | 37.2 | 42.7 | 45.4 | 43.6 |
+| 256 x 128 | 35.8 | 41.3 | 42.0 | 42.1 |
+| 304 x 107 | 35.8 | 41.4 | 41.6 | 42.1 |
+
+epoch-weighted step time relative to ref: ref 1.000, A 1.144, B 1.245, C 1.169 | pure GPU minutes per epoch: ref 5.5, A 6.3, B 6.9, C 6.5
+peak GPU memory of the model step (GB, excludes the ~21.6 GB resident train/val split): ref 4.6, A 5.1, B 5.5, C 5.0
+wall 45 s

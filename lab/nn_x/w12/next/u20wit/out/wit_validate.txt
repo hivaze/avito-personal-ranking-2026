@@ -1,0 +1,59 @@
+witness sub-split: 61107 feeds, 6537001 rows; feeds without a positive: 0
+
+(a) CPU fp32 path vs the stored teacher (GPU bf16 SUM of 3 members, dump_teacher.py)
+  teacher_xf0.npy: SUM of 3 members (file .n); compared as mean logit
+  set   feeds     rows | within-feed corr(mean of my 3 CPU members, teacher/3): mean / median / p1 / min | share >= 0.999 | centred row corr | NDCG mine / teacher (paired)
+  W0S   11022   310168 | 0.999938 / 0.999972 / 0.999462 / 0.988616 | 0.9965 | 0.999946 | 0.49511 / 0.49489 (+0.00023+-0.00024)
+  W0L   26883  4090296 | 0.999942 / 0.999965 / 0.999619 / 0.995051 | 0.9984 | 0.999947 | 0.32082 / 0.32085 (-0.00004+-0.00009)
+  H0     5974   914438 | 0.999946 / 0.999970 / 0.999600 / 0.996961 | 0.9985 | 0.999951 | 0.31856 / 0.31869 (-0.00013+-0.00025)
+  W1S   11228   314110 | 0.999936 / 0.999972 / 0.999431 / 0.983452 | 0.9963 | 0.999944 | 0.51730 / 0.51780 (-0.00050+-0.00023)
+  W1L    6000   907989 | 0.999943 / 0.999965 / 0.999656 / 0.997549 | 0.9987 | 0.999947 | 0.33790 / 0.33790 (-0.00000+-0.00021)
+  single member vs teacher mean (must be lower: the teacher is a 3-mean): s951 0.9814, s952 0.9785, s953 0.9799
+  wrong-alignment control (my scores shifted by one feed against the teacher inside W0S): corr -0.0007
+  H0 per member, CPU fp32 vs stored GPU bf16 holdout file (5,974 fold-0 holdout feeds):
+    w5_e10_xf0_s951: CPU 0.31631 GPU file 0.31607 paired +0.00024+-0.00019 | within-feed corr mean 0.999943 min 0.99526
+    w5_e10_xf0_s952: CPU 0.31458 GPU file 0.31455 paired +0.00003+-0.00022 | within-feed corr mean 0.999921 min 0.99650
+    w5_e10_xf0_s953: CPU 0.31619 GPU file 0.31636 paired -0.00016+-0.00020 | within-feed corr mean 0.999930 min 0.99623
+    w5_e10_base_s951: CPU 0.31680 GPU file 0.31660 paired +0.00019+-0.00019 | within-feed corr mean 0.999929 min 0.99789
+    w5_e10_base_s952: CPU 0.31683 GPU file 0.31655 paired +0.00028+-0.00022 | within-feed corr mean 0.999930 min 0.99539
+    w5_e10_base_s953: CPU 0.31803 GPU file 0.31777 paired +0.00025+-0.00018 | within-feed corr mean 0.999935 min 0.99766
+    w5_e10_xf1_s951: CPU 0.31480 GPU file 0.31473 paired +0.00007+-0.00023 | within-feed corr mean 0.999936 min 0.99482
+    w5_e10_xf1_s952: CPU 0.31600 GPU file 0.31609 paired -0.00009+-0.00019 | within-feed corr mean 0.999928 min 0.99796
+    w5_e10_xf1_s953: CPU 0.31539 GPU file 0.31505 paired +0.00034+-0.00024 | within-feed corr mean 0.999930 min 0.99648
+
+(b) known-answer contrasts (CPU vs CPU, member deltas pooled over 3 seeds, paired per feed; 3-pool = mean per-feed z)
+  set   feeds | xf0 member / 3-pool | base member / 3-pool | base - xf0: member, 3-pool | xf1 - xf0: member, 3-pool
+  W0S   11022 | 0.49208 / 0.49511 | 0.51577 / 0.52008 | +0.02369+-0.00090, +0.02497+-0.00112 | +0.02073+-0.00089, +0.02269+-0.00112
+  W0L   26883 | 0.31822 / 0.32086 | 0.33529 / 0.33819 | +0.01707+-0.00042, +0.01733+-0.00051 | +0.01551+-0.00042, +0.01618+-0.00052
+  H0     5974 | 0.31570 / 0.31858 | 0.31722 / 0.31907 | +0.00152+-0.00081, +0.00049+-0.00101 | -0.00030+-0.00079, +0.00037+-0.00097
+  W1S   11228 | 0.51306 / 0.51741 | 0.51559 / 0.51970 | +0.00253+-0.00086, +0.00228+-0.00108 | -0.02102+-0.00090, -0.02088+-0.00113
+  W1L    6000 | 0.33465 / 0.33741 | 0.33585 / 0.33819 | +0.00120+-0.00087, +0.00078+-0.00103 | -0.01587+-0.00093, -0.01675+-0.00110
+  expected: base - xf0 > 0 on W0S / W0L (fold 0 is in-sample for base only), ~0 on W1S / W1L (in-sample for both), small on H0 (out-of-sample for both; same-user channel);
+            xf1 - xf0 > 0 on W0*, < 0 on W1* (fold swap).
+  by old-posterior class inside W0L (old p > 0.5 = in the cooldown pool of every full-data model):
+    base - xf0 member: pool feeds (17462) +0.01847+-0.00053 | non-pool feeds (9421) +0.01449+-0.00069
+
+(c) positives per feed by M bin: natural short witness (W0S, W1S; train labels) vs val M < 50 (val labels; counts only)
+  M bin   |  W0S n pos/feed multi-pos |  W1S n pos/feed |  val n pos/feed multi-pos | skeptic NAT (all folds) / VAL
+   5-9    |   1266    1.066     0.057 |   1294    1.064 |   1043    1.078     0.064 | 1.063 / 1.078
+  10-19   |   1872    1.123     0.100 |   1988    1.132 |   1505    1.157     0.109 | 1.140 / 1.157
+  20-34   |   3930    1.237     0.166 |   3986    1.235 |   2030    1.250     0.169 | 1.232 / 1.250
+  35-49   |   3954    1.322     0.205 |   3960    1.326 |   1315    1.359     0.227 | 1.326 / 1.359
+   5-49   |  11022    1.228     0.156 |  11228    1.229 |   5893    1.220     0.148 | nan / nan
+  M mix: W0S mean M 28.1, val M<50 mean M 23.4; val M<5 feeds 0; W0L mean M 152.2, H0 153.1, val M>=50 mean M 146.8
+  positives per feed, long: W0L 1.714  H0 1.778  val M>=50 1.734
+
+(d) resolution: seed-to-seed (A/A) noise of a member delta on each set (xf0 seeds, out-of-sample on fold-0 sets)
+  set   feeds | per-feed sd of (member s_i - member s_j), mean of 3 pairs | implied SE of a 2-seed pooled member delta B - A (sd / sqrt(2) / sqrt(n)) | mean |A/A delta| of the 3 pairs
+  W0S   11022 | 0.1483 | 0.00100 | 0.00131
+  W0L   26883 | 0.1043 | 0.00045 | 0.00061
+  H0     5974 | 0.1029 | 0.00094 | 0.00116
+  W1S   11228 | 0.1514 | 0.00101 | 0.00668
+  W1L    6000 | 0.1119 | 0.00102 | 0.00699
+  W0S+W0L 37905 feeds: implied SE 0.00043
+  holdout cross-user  24026 feeds (stored GPU files): sd 0.1054 | implied SE 0.00048
+  holdout fold-0       5974 feeds (stored GPU files): sd 0.1027 | implied SE 0.00094
+  holdout all         30000 feeds (stored GPU files): sd 0.1049 | implied SE 0.00043
+  val all             14423 feeds (stored GPU files): sd 0.1255 | implied SE 0.00074
+  val M<50             5893 feeds (stored GPU files): sd 0.1506 | implied SE 0.00139
+DONE

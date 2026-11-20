@@ -1,0 +1,15 @@
+(a) W8 pooled FT shift, cold minus warm candidates (per-feed mean, z units) and feed cold share, by MSK day (day 0 = Tue Sep 22)
+  val  day 0: offset +0.0212+-0.0008 | cold share 0.361 | feeds 7496
+  val  day 2: offset +0.0294+-0.0008 | cold share 0.403 | feeds 6851
+  test day 4: offset +0.0344+-0.0007 | cold share 0.427 | feeds 6033
+  test day 5: offset +0.0374+-0.0007 | cold share 0.443 | feeds 7347
+  test day 6: offset +0.0404+-0.0006 | cold share 0.456 | feeds 7559
+  test day 7: offset +0.0438+-0.0007 | cold share 0.471 | feeds 7581
+  offset by feed cold-share bin: [0.00,0.15) val +0.0249 test +0.0334 | [0.15,0.30) val +0.0297 test +0.0418 | [0.30,0.45) val +0.0257 test +0.0428 | [0.45,0.60) val +0.0222 test +0.0379 | [0.60,1.01) val +0.0108 test +0.0280
+
+(b) test-side per-feed-z correlation with the W8 file (0.5 z(FT) + 0.5 z(TO))
+  TO only (w_ft 0)   corr 0.99790 (public rows 0.99789); mean per-feed Spearman 0.99505
+  w_ft 0.25          corr 0.99947 (public rows 0.99947); mean per-feed Spearman 0.99805
+  w_ft 0.75          corr 0.99947 (public rows 0.99947); mean per-feed Spearman 0.99799
+  FT only (w_ft 1)   corr 0.99790 (public rows 0.99789); mean per-feed Spearman 0.99496
+  reference: G3 TO-only vs G3 file corr 0.99799 (that pair read public -0.00047 at a paired SE 0.00050)

@@ -1,0 +1,21 @@
+WAVE 9 arm HS1 (feed-surface history view) — RESULT (2026-11-13, agent record; rule nn_x/w5/logs/E_hs1_predeclared.txt frozen 13:35:59Z)
+
+VERDICT: STAGE S (2-epoch futility screen) CLOSED for HS1 and for the information arm HS1b -> stage E (10-epoch pair) NOT run.
+  HS1  (--hist_src 1):       w9_hs1_s23/24 vs abl_base_s23/24, selected ckpt: member val -0.00311 +- 0.00074 (z -4.2; seeds -0.00323 /
+        -0.00299), holdout -0.00266 +- 0.00043 (z -6.2), pmix -0.00402, slices M<50 -0.00240 M>=50 -0.00360 Tue -0.00220 Thu -0.00411,
+        @last -0.00312 / -0.00273, 2-member pool -0.00217 / -0.00223; diversity rho_bb 0.97776 rho_x 0.96186 margin +0.01590 (S2 OK),
+        margin / |dval| 5.1 (S3 OK), S1 (dval >= -0.0015) FAILS. Member cross-corr 0.962 (not 'material'). 25-26 min per run (2 per GPU).
+  HS1b (--hist_et 2,3,4,7,9, the Avito model-5 target-action filter): val -0.00473 +- 0.00083, holdout -0.00493 +- 0.00050, pmix -0.00497,
+        margin +0.02510, ratio 5.3, S1 FAILS.
+  Reading: the s1 view is genuinely more diverse (margin 3x the 0.005 bar, slightly above the 4:1 removal frontier) but it removes
+  ~0.003 val / ~0.0027 holdout of member strength at 2 epochs (the GPU-side channel's search / contact / delivery events carry real
+  signal; the xt inputs do not fully replace it), so it cannot be a same-strength family. The model-5 filter (actions only) is weaker
+  still. Inference probe on the trained 10-epoch base members: s1 view zcorr 0.930 / 0.937 (val -0.0116 / -0.0095).
+Empty-slice handling: feeds whose s1 slice is empty (2.96% train exact / 2.97% val / 2.37% test; 1.11 / 1.35 / 0.86% already empty) take
+  the base's empty-history path (no history tokens, similarity features at the -1.5 floor, counts 0, retrieval on the sink) and are
+  ranked from the candidate side + xt + user_emb; the view holds types 1 / 4 / 7 only (types 2 3 5 6 8 9 10 carry no source).
+Read-outs: nn_x/w9/hs1/logs/s_readout_hs1.txt / s_readout_hs1b.txt (copies nn_x/w5/logs/w9_s_readout_hs1*.txt), probe
+  logs/probe_inference_view.txt. Tests: logs/test_hs1_cpu.log (69/69), logs/test_hs1_gpu.log (13 checks).
+Code: nn_x/w9/hs1 (private copy of nn_x/w5 + cd_arms9.py; flag off bit-identical to nn_x/w5; HS1 checkpoints carry hist_src in
+  args + cfg; nn_x/w5 scripts refuse them loudly; FT / replays must use nn_x/w9/hs1/{finetune,holdout_eval,stale_pred}.py).
+Nothing fine-tuned, pooled or submitted. GPUs N released at 14:08 UTC.

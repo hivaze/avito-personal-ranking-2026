@@ -1,0 +1,18 @@
+V5 pass train done 16s
+V5 pass val done 16s
+V5 pass test done 16s
+V5: val rows with same-user e1 events removed 733 | rows with n_e1 > 0: 0.5888 | mean s1 share where n_e1 > 0: 0.6551
+--- LR reads V5 ---
+V5a_it_s1share                     val   ctrl TO  LR    13.03 beta +0.0297 effect(beta*sd_w) +0.0236 placebo  0.01 (max of 3:  0.44) | cross-fit dNDCG +0.00017+-0.00031 | INTERESTING
+V5a_it_s1share                     val   ctrl FIN LR    11.68 beta +0.0282 effect(beta*sd_w) +0.0224 placebo  0.01 (max of 3:  0.46) | cross-fit dNDCG +0.00019+-0.00029 | INTERESTING
+V5b_it_s1cnt                       val   ctrl TO  LR     1.01 beta +0.0051 effect(beta*sd_w) +0.0066 placebo  0.26 (max of 3:  0.92) | cross-fit dNDCG +0.00004+-0.00016 | null
+V5b_it_s1cnt                       val   ctrl FIN LR     0.77 beta +0.0044 effect(beta*sd_w) +0.0058 placebo  0.28 (max of 3:  0.91) | cross-fit dNDCG -0.00024+-0.00015 | null
+lut train built 38s
+V6 val: history events 2499547 | without own embedding 0.1421 | recovered 76549 = 0.2156 of the missing | feeds with >= 1 recovered event 0.7216 | rows with gain > 0: 0.0305 | mean gain where > 0: 0.0441
+--- LR reads V6 val ---
+V6_missemb_gain                    val   ctrl TO  LR     3.23 beta +1.2676 effect(beta*sd_w) +0.0154 placebo  0.13 (max of 3:  1.44) | cross-fit dNDCG -0.00005+-0.00009 | null
+V6_missemb_gain                    val   ctrl FIN LR     3.47 beta +1.3148 effect(beta*sd_w) +0.0160 placebo  0.12 (max of 3:  1.42) | cross-fit dNDCG -0.00010+-0.00008 | null
+V6 hold: history events 5278813 | without own embedding 0.1554 | recovered 1112 = 0.0014 of the missing | feeds with >= 1 recovered event 0.0263 | rows with gain > 0: 0.0003 | mean gain where > 0: 0.0407
+--- LR read V6 hold ---
+V6_missemb_gain                    hold  ctrl H   LR     1.18 beta -7.8557 effect(beta*sd_w) -0.0090 placebo  0.10 (max of 3:  1.05) | cross-fit dNDCG -0.00001+-0.00001 | null
+done 56s

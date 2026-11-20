@@ -1,0 +1,193 @@
+PSEUDO-DIRECT (pseudo-feed co-training of the full ranker; reports/SOLVER_POWER_1113.md section 6.3 item 3) PRE-DECLARATION — DRAFT
+Written 2026-11-14 ~00:40 UTC by the PSEUDO-DIRECT phase-1 implementation agent (CURRENT_STATUS 2026-11-13 23:51: "PSEUDO-DIRECT phase 1
+(the pseudo-feed builder with leak-safe construction, tests and a DRAFT pre-declaration; no training until the lead reviews; smokes on GPU N)").
+STATUS: DRAFT. Nothing of this arm has been trained (checked at writing: no nn_x/w11/pseudo/logs/w5_e10_pseudo*, no nn_x/w11/pseudo/ckpt/w5_e10_*,
+no nn_x/w5/{logs,preds,ckpt}/*pseudo*; the only GPU runs of this agent were two W5_SMOKE=1 plumbing smokes (w11_smoke_base_s23 / w11_smoke_pseudo_s23,
+20K train feeds, 1 epoch, outputs deleted except logs/smoke_*.log) and tests/time_steps.py (40 timed steps, no checkpoint), all on GPU N; none of
+their numbers enters any rule). The lead reviews the tests, edits this draft if needed, and FREEZES it with `date -u` before the first stage-E run.
+
+======================================================================================================================================
+1. THE SPEC (SOLVER_POWER_1113.md section 6.3 item 3, quoted verbatim)
+======================================================================================================================================
+question      "Does co-training the full ranker on lists built from history events extract more than the pre2 input channel already does from
+              the same targets? This is the only route that turns GPU-hours into training examples."
+construction  "Pseudo-feeds built on the GPU from the batch's own histories. Target: a new type-1/source-1 event at t <= 63. History: the events
+              older than t + g, g ~ U[16, 64], recency re-indexed. Negatives: the source feed's non-clicked candidates. user_emb zeroed (a learned
+              no-user vector); a fourth domain embedding; f1-f5 and the 34 pre-computed columns on their missing path; K9 weight 0; listwise CE
+              weight 0.3; plateau only. The cooldown stays on real feeds for an absolute 19,670 steps (never cooldown_frac x total). Holdout users
+              and later same-user snapshots are never a source. The pseudo domain gets its own context-free linear head on [content, category],
+              so the shared pathway is not paid to learn the past-click marginal (shortcut AUC 0.590 is not removed by logQ). Report a
+              set-attention-masked variant on pseudo rows as information (set leak 0.608 vs 0.582)."
+first test    "10-epoch 2-seed pair at pseudo:real 1:1 against w5_e10_base s951/952, @last primary, E rule + diversity clause. Information arm:
+              pseudo + xdrop_pre2 vs abl_e10_xdrop_pre2 (from ENCODER-DOSE (B)), to test substitution. No 2-epoch GO: gains shrank from 2 to 10
+              epochs in every recorded case."
+kill          "member Δval < +0.001, OR holdout < 0, OR the gain appears only without pre2"
+escalation    "4:1 dose read (12-14 GPU-h), then a 7-root family with FT (60-70 GPU-h). A width arm only if the pseudo d128 member beats real-only
+              by >= +0.0037 val (one effective doubling) AND WIDTH-GATE is GO. In that case one d192 pseudo pair (20-26 GPU-h) must reach
+              d192 − d128 >= +0.0015 val, holdout >= +1 SE and an in-pool replay >= +0.0005."
+hard stops    "no pass by Nov 21 → no family; no width gate by Nov 22 → no width arm"
+P             "0.003 (the width increment adds ~0.001 that overlaps WIDTH-GATE)"
+Section 3 reasoning this test must respect: the P1 PSEUDO-FEED critique (section 6.4): "the pool is 8-10x, not 26x; logQ in-batch negatives leave the
+shortcut at 0.590; set-centroid leak; XRATE draws pseudo sources from unseen users and runs in the overfit regime, so it is biased to pass"; the
+intermediate metric for co-training (section 3.5 item 5): "effective real-feed equivalents, (2^(Δval/0.0037) − 1) × 3.12M, per visited pseudo-target.
+Also a substitution check: does the gain survive when the pre2 channel is removed?"; house rules 7.4 ("Read @last, or on a pre-declared selection
+set; never select on val"; "Every new flag defaults off and is bit-identical when off, with a unit test before launch").
+
+======================================================================================================================================
+2. CODE (phase 1, done; nn_x/w5/*.py and nn_x/w5/lane.sh untouched)
+======================================================================================================================================
+nn_x/w11/pseudo = the nn_x/w5 code (train.py, model.py, data.py, common.py, cd_arms*.py, finetune.py, holdout_eval.py, stale_pred.py, blend.py,
+w5_eval*.py, lane.sh, tests/{e2e_w5,mini_split}.py; NOT preds/ckpt/logs) + cd_arms11.py + the flags (all OFF by default):
+  --pseudo_ratio R (0 = off)   --pseudo_gap_min 16 --pseudo_gap_max 64   --pseudo_w 0.3   --pseudo_tmax 63   --pseudo_head 1   --pseudo_noset 0
+Lane arms (nn_x/w11/pseudo/lane.sh, appended LAST to E_BASE + HYG): E:pseudo = --pseudo_ratio 1; E:pseudo_xpre2 = --pseudo_ratio 1 --xt cvnd
+(the 6 pre2 columns dropped: cvnd_pre2s minus {pre2_fe_z, pre2_new_z, pre2_fe_s, pre2_new_s, pre2_hmax32, has:pre2_fe} == the cvnd preset, the same
+XT_REL / idcols / n_dense as nn_x/abl's --xt_exclude of those columns); E:pseudo_noset = --pseudo_ratio 1 --pseudo_noset 1; E:pseudo4 = --pseudo_ratio 4.
+Stage-E variants w5_e10_<arm>_s<seed> (outputs in nn_x/w11/pseudo/{logs,preds,ckpt}); stage-A / smoke variants w11_*.
+
+CONSTRUCTION AS IMPLEMENTED (cd_arms11.py docstring is the reference; per plateau step, from the gathered real batch of B feeds; history newest-first):
+  draws      P = ceil(R B) (source row, t, g) draws; the source rows are a cyclic random permutation of the batch rows (at an integer R every row is a
+             source exactly R times); g ~ U{16..64} per draw; a dedicated torch.Generator (seed + 1100011), so the real path's RNG is untouched.
+  source     rows of HOLDOUT USERS are never sources (user ids of the 30K holdout feeds; user 0 = the pooled bucket, never matched; the mask is logged).
+             "Later same-user snapshots" (val / test rows) are not read by this train-only stage at all (they matter for an FT variant only).
+  target     t uniform over the eligible indices t in [0, 63]: a valid event with an embedding, event_type 1 from event_source 1, NEW (its item occurs in
+             no older event of the loaded history, index > t; items identified by the item-table row, verified one-to-one with item_id over 22.1M items,
+             0 exceptions), NOT A CANDIDATE of the source feed (none of the feed's M candidates, clicked or not, is that item), and t + g <= H_cap − 1.
+             => by construction the positive of a pseudo-feed is never a candidate of its source feed (the set-centroid leak named by the reviewers).
+  history    the source row's events at index >= t + g, re-indexed to 0.. (the newest kept event is exactly g positions older than the target; the
+             target and the whole gap are dropped); H' = H_cap − t − g >= 1.
+  negatives  the source feed's NON-CLICKED candidates (y == 0) in their original order, MINUS the candidates whose item occurs in the history at an index
+             < t + g (the user did interact with them after the pseudo request time: masked out, not used as negatives); a draw with no remaining
+             negative is dropped. Exactly one positive per pseudo-feed (slot 0 = the target item's embedding + category).
+  inputs     f1-f5 = 0 and all 34 --xt columns = 0 (has:pre2_fe = 0) on EVERY candidate of a pseudo-feed; user_emb = 0 (cos_u = dot_u = 0; the user
+             token is u_lin's bias = the learned no-user vector); user0 flag of the source row; domain one-hot ROW 2; no production positions
+             (use_pos=False; the recipe has --no_pos anyway).
+  head       --pseudo_head 1: logit += Linear(128->1)(normalised content embedding) + Embedding(54,1)[category] on pseudo rows only; zero-init (an exact
+             no-op at step 0, unit-tested); parameters OUTSIDE the model's state_dict (own AdamW no-decay group, the run's lr schedule, not inside
+             clip_grad_norm_); saved to ckpt/<v>_pseudo_head.pt. Every checkpoint therefore stays loadable by finetune.py / holdout_eval.py /
+             stale_pred.py (no cfg change; the smoke's checkpoint cfg keys == w5_e10_base_s951's).
+  loss       loss = loss_real (listwise + K9 aux, unchanged) + 0.3 x listwise_loss(pseudo logits, norm=--loss_norm feed, denom=--max_feeds 512):
+             the SAME normalisation and constant denominator as the real loss (one pseudo-feed weighs 0.3 of one real feed). fw None (the recipe's
+             --prand_base -1). K9 aux never on pseudo rows. CLIPLOG main := main + 0.3 loss_p (aux stays K9 only).
+  steps      an EXTRA forward/backward inside the same step: step count 98,350, t_cool 78,680 and the cooldown's 19,670 steps are unchanged (unit-
+             and smoke-tested: same 'total steps'); pseudo-feeds on steps < t_cool only; cooldown / pool batches never see them.
+  variant    --pseudo_noset 1: the candidate-set self-attention blocks are skipped on pseudo rows only (model.use_set toggled around the pseudo forward).
+DEVIATIONS / INTERPRETATIONS of the spec text (for the lead's review; each is a one-line change if rejected):
+  (i)   "the events older than t + g": implemented as index >= t + g (the newest kept event is g positions older than the target), not > t + g.
+  (ii)  "f1-f5 and the 34 pre-computed columns on their missing path": applied to EVERY candidate of a pseudo-feed, not to the target only — the
+        target has no such inputs (they exist for candidate rows only) and a target-only missing pattern would identify the positive (a shortcut far
+        above the 0.59 content shortcut). The within-feed z / rank of these columns are then constant on pseudo rows.
+  (iii) "a fourth domain embedding": the pseudo rows use row 2 of the EXISTING 3-row domain table (the "exploration" row that the recipe never trains,
+        tr.dom[:, 2] = 0, nor uses at inference, infer_domain 1) — a dedicated embedding without a model / checkpoint change. The lead's brief said
+        "the exploration/random-like value": row 2 ("exploration") was chosen over row 1 ("random-like") so that pseudo rows do not share the
+        inference-time token.
+  (iv)  "Negatives: the source feed's non-clicked candidates": minus the candidates the user interacted with at an index < t + g (label noise).
+  (v)   "new": within the loaded history window (<= --max_hist 256 events); items beyond the window are invisible to the model as well.
+  (vi)  the head sits outside the model (checkpoint compatibility), its gradients are not part of the global clip (3 tensors, 183 parameters).
+  (vii) "pseudo:real 1:1" = one draw per real feed in the batch (R = 1); draws without an eligible target / negative are dropped, so the realised
+        pseudo count per batch is below B (statistics below). "listwise CE weight 0.3" = --pseudo_w 0.3 on top of R = 1.
+
+TESTS (nn_x/w11/pseudo/tests/test_pseudo.py; logs nn_x/w11/pseudo/logs/test_pseudo_{cpu,gpu}.log):
+  CPU 44/44: AST proof (train.py minus the 13 PSEUDO statements == the frozen nn_x/w5/train.py, md5 93b8c100…; module copies md5-identical; lane.sh diff =
+  documented lines only); unit tests on real mini batches (every pseudo-feed of 123 passes an independent brute-force checker: target type-1/source-1,
+  new, not a candidate, t <= 63, g in [16, 64], history == events at index >= t + g re-indexed, negatives == the non-clicked candidates in order,
+  no clicked item among them, one positive, user_emb / f / xt zero, domain row 2; holdout users blocked; reproducible draws; loss == real + 0.3 x pseudo
+  (rel 0) with norm / denom == the real call's; zero-init head no-op; noset restores use_set); CPU end-to-end on the mini split (flag OFF bit-identical
+  to the frozen nn_x/w5 code: batches, logits, logged lines, selected + @last checkpoints, val and holdout preds; flag ON: same batch sequence and step
+  count, combine on every plateau step and never in the cooldown, every pseudo-feed verified, backward scalar == real + 0.3 x pseudo, cfg unchanged).
+  GPU (GPU N): see section 6 (filled in after the smokes / timing).
+
+======================================================================================================================================
+3. RUNS (stage E only; no 2-epoch GO, per the spec)
+======================================================================================================================================
+PRIMARY PAIR   w5_e10_pseudo_s951 / s952 = lane.sh E_BASE + HYG + --pseudo_ratio 1 (E:pseudo:951 / 952; parser diff vs nn_x/w5 lane E:base = exactly
+               pseudo_ratio 0 -> 1, test C0c), one run per GPU, paired per seed vs the EXISTING w5_e10_base_s951 / s952 (nn_x/w5/preds: selected + @last
+               val / test preds, nn_x/w5/preds/holdout: selected + @last holdout preds).
+INFORMATION    w5_e10_pseudo_xpre2_s951 / s952 = E_BASE + HYG + --pseudo_ratio 1 --xt cvnd (E:pseudo_xpre2), paired per seed vs abl_e10_xdrop_pre2_s951 /
+ARM            s952 (ENCODER-DOSE (B), nn_x/abl; running at 00:03 UTC 11-14; their stored args == E_BASE + HYG + xt_exclude of the 6 pre2 columns, i.e. the
+               same inputs as --xt cvnd here; cross-lineage caveat: nn_x/abl is a separate code copy proven bit-identical to nn_x/w5 at flag-off by its own
+               tests). Substitution read: does the pseudo gain survive / appear only when the pre2 channel is absent?
+OPTIONAL INFO  w5_e10_pseudo_noset_s951 (E:pseudo_noset; the spec's "set-attention-masked variant on pseudo rows as information"): one seed, only if a
+               lane is idle; reported next to the primary pair, never a gate.
+GPUs           to be set by the lead (W5_GPUS=... bash nn_x/w11/pseudo/lane.sh <gpu> "E:pseudo:951" etc.); one run per GPU; lane.sh check_gpu (<= 3 compute
+               processes, >= 60 GB free) under the per-GPU flock; CUDA_VISIBLE_DEVICES = one id; 12 threads; wrapper PIDs in nn_x/w11/pseudo/RUNNING.txt and the
+               REAL python PIDs from /proc/<pid>/cmdline appended there and in nn_x/w5/logs/RUNNING_w5.txt; stops by exact PID only.
+COST / ETA     base 10-epoch run: 180-182 min on a shared GPU (w5_e10_base_s951 / 952 jsons). Pseudo step-time ratio r (section 6) applies to the 78,680 plateau
+               steps only: expected wall = (0.8 r + 0.2) x base + evals. Four 10-epoch runs (pair + information arm) ~ [filled in section 6] GPU-h.
+AFTER THE RUNS logs/<v>.json/.log, preds/nn_<v>[@last]_trainonly_{val,test}.npy, preds/holdout/nn_<v>[@last]_holdout.npy are copied into nn_x/w5 with
+               cp --update=none (new files only), so the nn_x/w5 read-out scripts find them; ckpt/<v>_pseudo_head.pt stays in nn_x/w11/pseudo.
+
+======================================================================================================================================
+4. RULES (read on SAVED predictions; written before any stage-E number exists; nothing is fine-tuned, pooled or submitted by the agent)
+======================================================================================================================================
+PRIMARY READ   the @last checkpoint (step 98,350; the spec: "@last primary"); the selected (holdout-best, select_min_step 12000) checkpoint is reported as
+               information. Deltas pooled over seeds 951 / 952 = the mean of the two per-feed delta vectors (train-only members, paired per seed).
+E RULE         (verbatim, nn_x/w5/logs/E_ap1_predeclared.txt / E_batch_predeclared.txt): "PASS iff pooled per-seed paired member val > 0 AND holdout > +1 SE
+               AND no val slice (M<50, M>=50, Tue, Thu) < -2 SE AND pmix >= -1 SE (w5_eval_e_ap1.py <arm> 951,952 mechanics)."
+DIVERSITY      (verbatim, E_batch_predeclared.txt amendment 1): "the arm becomes a FAMILY CANDIDATE iff (d1) pooled member val >= -0.0005 AND pooled member
+CLAUSE         holdout >= -0.0005 (same strength; selected ckpt), AND (d2) rho_bb - rho_x >= +0.005 on val, where rho_x = corr(arm pool{951,952}, base
+               pool{953,954}) and rho_bb = corr(base pool{951,952}, base pool{953,954}) (within-feed rank-z, Pearson; = the LATE-DROPOUT clause 5), AND
+               (d3) the 2-member pool arm vs base{951,952}: val >= -0.0005 and holdout >= -0.0005." — read here on the @last checkpoints (primary) with the
+               selected-checkpoint view as information; rho_bb(@last) is computed from the base @last preds by the same script.
+KILL RULE      (verbatim, section 6.3 item 3): "member Δval < +0.001, OR holdout < 0, OR the gain appears only without pre2". Operationalised:
+               KILL (no family, arm CLOSED) iff pooled member Δval(@last, pseudo − base) < +0.001, OR pooled member Δholdout(@last) < 0, OR
+               [Δval(pseudo_xpre2 − xdrop_pre2) >= +0.001 while Δval(pseudo − base) < +0.001] (the gain exists only when the pre2 channel is absent =
+               substitution of an existing input, not new information).
+VERDICT        FAMILY CANDIDATE iff the KILL RULE does not fire AND (the E RULE passes OR the DIVERSITY CLAUSE passes). Otherwise CLOSED. Everything else
+               is information: per-seed deltas, selected-checkpoint view, late (Sep 17-19) / early (Sep 6-8) holdout columns (audit amendment 11-13 16:10 b),
+               stale-val, M<50 / M>=50 / Tue / Thu slices, arm-arm and same-seed arm-base correlations, the 2-member pools, the information arm's own
+               deltas, the noset variant, train minutes, GPU memory, the per-eval 'wave-11 PSEUDO' statistics (pseudo-feeds built, mean M', H', t, g, dropped
+               draws, pseudo CE), the effective real-feed equivalents (2^(Δval/0.0037) − 1) x 3.12M per visited pseudo-target (section 3.5 item 5; visited
+               targets = the head file's cumulative 'feeds' count).
+IN-RUN KILL    (proposed, as in E_r3_predeclared.txt; the lead confirms or strikes): evaluated ONCE when BOTH pseudo logs contain their "step 60000/98350"
+GATE           eval line (mid-plateau, before the cooldown from step 78,680): h_base(60000) = 0.31659185 (s951) / 0.31739697 (s952) (w5_e10_base jsons,
+               verified 2026-11-14 00:3x), SE_gate 0.00076575 (the constant used by the r3 gate); KILL iff for BOTH seeds h_pseudo(60000) − h_base(60000)
+               < −2 SE_gate = −0.00153150, i.e. h_951 < 0.31506035 AND h_952 < 0.31586547 -> stop both by exact PID, arm CLOSED (information). Otherwise the
+               runs continue untouched. Plateau val/holdout of the base at 60000 for the same read: 0.39356 / 0.31659 (s951), 0.39336 / 0.31740 (s952).
+ESCALATION     only on FAMILY CANDIDATE and only by a new dated amendment: (verbatim) "4:1 dose read (12-14 GPU-h), then a 7-root family with FT (60-70 GPU-h).
+               A width arm only if the pseudo d128 member beats real-only by >= +0.0037 val (one effective doubling) AND WIDTH-GATE is GO. In that case one
+               d192 pseudo pair (20-26 GPU-h) must reach d192 − d128 >= +0.0015 val, holdout >= +1 SE and an in-pool replay >= +0.0005." The 4:1 dose = lane
+               arm E:pseudo4 (--pseudo_ratio 4, two seeds); the family = 7 fresh roots E:pseudo (seeds 951-957 or as the lead sets), n2cpv3 FT (NOTE: nn_x/w5/
+               finetune.py has no pseudo flags; the FT of a pseudo member is the plain n2cpv3 FT of its checkpoint — pseudo-feeds are a train-time-only device
+               and the head is not used at inference), decide7 (T1 = G3 + pseudo(n), T2 = F10 + F7x + pseudo(n)), FREEZE_PROTOCOL rules for any pick change.
+HARD STOPS     (verbatim) "no pass by Nov 21 → no family; no width gate by Nov 22 → no width arm". Also: a crashed run (process gone without its json) ->
+               INCOMPLETE (no verdict; a re-run needs a dated amendment); a run that fails twice -> stop and report.
+MULTIPLE LOOKS the step-60000 gate (one look, information unless it kills) and the final read are the only looks; the per-eval log lines are not read for a
+               decision before the runs end.
+
+======================================================================================================================================
+5. GPU / PROCESS RULES (CURRENT_STATUS section 3; SOLVER_POWER 7.4)
+======================================================================================================================================
+GPUs as granted by the lead for stage E (this agent's grant was GPU N for smokes / timing only); CUDA_VISIBLE_DEVICES = exactly one id per process; before
+every launch nvidia-smi shows <= 3 compute processes and >= 60 GB free on that GPU (lane.sh check_gpu under the per-GPU flock); OMP/MKL/OPENBLAS/POLARS
+threads 12; setsid nohup launches; REAL python PIDs resolved via /proc/<pid>/cmdline (never a wrapper's $!) and recorded in nn_x/w11/pseudo/RUNNING.txt and
+nn_x/w5/logs/RUNNING_w5.txt; stops only by exact PID after re-checking /proc/<pid>/cmdline; never pkill -f / kill $(pgrep); other processes untouched;
+no project data or user identity to external services.
+
+======================================================================================================================================
+6. CODE-TEST RESULTS ON GPU N (information; filled in by the agent after the smokes / timing; no number here enters a rule)
+======================================================================================================================================
+Filled 2026-11-14 ~00:40 UTC from nn_x/w11/pseudo/logs/test_pseudo_gpu.log (9/9 PASS) and logs/time_steps.json (GPU N, unshared, 0 other processes).
+SMOKES (W5_SMOKE=1 lane.sh 7 A:base:23 / A:pseudo:23 -> w11_smoke_base_s23 / w11_smoke_pseudo_s23: 19,827 training feeds, 1 epoch, 73 steps, t_cool 58,
+  evals every 25 steps; outputs deleted, log copies logs/smoke_{base,pseudo}.log): both rc 0; 'total steps' 73 == 73 (the step count is unchanged at R = 1);
+  val NDCG 0.31818 (base) / 0.31807 (pseudo) after one mini epoch (plumbing only, not a read); checkpoint cfg keys == w5_e10_base_s951's; head file written.
+  Pseudo statistics of the smoke (per eval interval): 5,047 pseudo-feeds from 5,832 draws (steps 0-24), 6,105 / 7,077 (25-49), 2,252 / 2,585 (50-57);
+  final 13,404 pseudo-feeds (= positives) from 15,494 draws on 58 plateau steps, 2,090 draws dropped (no eligible target), 0 dropped for no negative, 85 source
+  rows blocked (holdout users; 107 of the 19,827 training feeds belong to the 2,838 holdout users of the mini sample); mean M' 75.9, H' 134.9, t 28.9, g 39.6;
+  mean pseudo CE per feed 4.04 -> 3.56 (falling; the real listwise CE of the recipe is ~3 per feed late in training).
+STEP TIME (tests/time_steps.py: the real train split, the E recipe's model, 40 identical batches, mean B 330.5 feeds, real M 117.2, two interleaved passes per
+  mode; cuda.synchronize around dense + forward + loss + aux + backward + clip + AdamW/Muon step):
+  --pseudo_ratio 0: 34.6 ms/step (warm pass; cold first pass 36.2 median / 76.5 mean, kernel-selection warm-up of ~20 shapes)
+  --pseudo_ratio 1: 65.6 ms/step (warm; cold 65.7)  ->  RATIO 1.90 (warm), 1.82 (cold). Profile: build 2.2 ms, pseudo forward/backward 29.5 ms = the real
+  forward/backward (29.4 ms); the pseudo batch keeps the real batch's shapes (P = B rows, M' padded to the source Mx, H' to a multiple of 64), so no new
+  kernel shapes appear. Peak GPU memory 43.5 GB vs 40.2 GB. (Before the shape padding the first pass ran at 3.7x because every step had a new P.)
+PSEUDO-FEED STATISTICS PER BATCH (the same 40 batches, R = 1): 288.8 pseudo-feeds per batch of 330.5 feeds (87.4% of the draws realised; exactly one positive
+  each, 11,553 in total); 93.7% of the rows have >= 1 eligible target; 12.6% of the draws dropped for no eligible target (short histories / no new type-1
+  source-1 event with t + g <= H_cap - 1), 0.0% for no negative; 0.4% of the rows blocked as holdout users; M' mean 74.8 / median 56 (the real M is 117.2:
+  the clicked candidates and the future-interacted items are removed); H' mean 134.4 (source H 203.4); t mean 29.0 (slightly front-loaded: 368 draws at t = 0
+  vs ~160-180 per slot beyond t ~30); g mean 39.9, range 16-64.
+EXPECTED COST of the first test: pseudo-feeds on the 78,680 plateau steps only -> wall ~ (0.8 x 1.90 + 0.2) x 181 min ~ 5.2 h per 10-epoch run on an unshared
+  GPU (~3.0 h for the base), i.e. ~10.4 GPU-h for the primary pair and ~21 GPU-h with the information arm (the spec's "10-20 GPU-h"). Visited pseudo-targets
+  per run ~ 78,680 x 289 ~ 22.7M draws (~16-17.5M distinct targets at 1:1 over 8 plateau epochs per SOLVER_POWER 3.2), the denominator of the effective
+  real-feed-equivalents read (section 4, information).
+TESTS: nn_x/w11/pseudo/logs/test_pseudo_cpu.log 44/44, test_pseudo_gpu.log 9/9 (run 2; run 1 had two test-logic FAILs — an eval-boundary check and the cold-pass
+  ratio — fixed with the shape padding; no code-path difference at flag off: the AST proof and the end-to-end identity passed in both runs).

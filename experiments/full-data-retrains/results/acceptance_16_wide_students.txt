@@ -1,0 +1,79 @@
+# Cut from lab/nn_x/w12/stale/fulldata/logs/accept_F.txt (1,024 lines, several runs): the run on the complete set of stage-F members only. Kept: the run header, every check line of the first member, the in-sample holdout line (A2) of every member, any FAIL or WARN line, and the pool-level block. 16 members were checked; the dropped lines are the PASS lines of the structure checks of the other members.
+== accept_twins.py check F    [2026-11-15T12:50:16Z]
+   stage F: 16 of 16 twins finished
+   A2 bar in force: +0.00428 [R7 (G_s +0.01711, floor 0.00128; R4 bar 0.005)]
+  A1 w5_fd10_kd05w192_s951 (reference w5_e10_kd05w192_s951)
+    [PASS] w5_fd10_kd05w192_s951: 'training feeds 3121208 -> 3151208' 
+    [PASS] w5_fd10_kd05w192_s951: train feeds 3151208, steps/epoch 9984, total steps 99840 log: (3151208, 9984, 99840)
+    [PASS] w5_fd10_kd05w192_s951: pool 164118 feeds, of which 30000 holdout feeds 
+    [PASS] w5_fd10_kd05w192_s951: every eval line 'holdout_ndcg nan' (40 evals), one IN-SAMPLE line per eval 
+    [PASS] w5_fd10_kd05w192_s951: BEST step == total BEST step 99840
+    [PASS] w5_fd10_kd05w192_s951: logs/<v>.json and logs/<v>_fulldata.json exist 
+    [PASS] w5_fd10_kd05w192_s951: json args holdout_in_train True, keep 'last', holdout 30000; best_step == total; history holdout_ndcg all NaN 
+    [PASS] w5_fd10_kd05w192_s951: the run's own counts: 30000 holdout feeds in training, in every epoch's batches, 30000 in the pool; kept step == total (json: 30000, 30000, 30000, kept 99840)
+    [PASS] w5_fd10_kd05w192_s951: arguments == the reference run's arguments except variant / holdout_in_train / keep differing keys: {}; flags newer than the reference's log, at their defaults: ['aug_all', 'xfold', 'xfold_unlab']
+    [PASS] w5_fd10_kd05w192_s951: NO out-of-sample-named holdout file 
+    [PASS] w5_fd10_kd05w192_s951: in-sample holdout files present (2), 4630966 rows ['nn_w5_fd10_kd05w192_s951_holdoutINSAMPLE.npy', 'nn_w5_fd10_kd05w192_s951@last_holdoutINSAMPLE.npy']
+    [PASS] w5_fd10_kd05w192_s951: val files finite, 1389971 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+    [PASS] w5_fd10_kd05w192_s951: test files finite, 2904806 rows, not constant; kept vs @last max abs diff 0.00e+00 (same weights) 
+    [PASS] A2 w5_fd10_kd05w192_s951: IN-SAMPLE holdout NDCG at the last eval 0.33981 - reference's out-of-sample @last 0.32219 = +0.01762 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05w192_s952: IN-SAMPLE holdout NDCG at the last eval 0.33954 - reference's out-of-sample @last 0.32298 = +0.01656 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05w192_s953: IN-SAMPLE holdout NDCG at the last eval 0.33895 - reference's out-of-sample @last 0.32258 = +0.01637 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05w192_s954: IN-SAMPLE holdout NDCG at the last eval 0.33967 - reference's out-of-sample @last 0.32247 = +0.01720 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05w192_s955: IN-SAMPLE holdout NDCG at the last eval 0.33989 - reference's out-of-sample @last 0.32229 = +0.01760 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05w192_s956: IN-SAMPLE holdout NDCG at the last eval 0.33883 - reference's out-of-sample @last 0.32227 = +0.01656 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05w192_s957: IN-SAMPLE holdout NDCG at the last eval 0.33984 - reference's out-of-sample @last 0.32251 = +0.01733 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05w192_s958: IN-SAMPLE holdout NDCG at the last eval 0.33910 - reference's out-of-sample @last 0.32276 = +0.01634 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05t25w192_s951: IN-SAMPLE holdout NDCG at the last eval 0.33954 - reference's out-of-sample @last 0.32199 = +0.01755 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05t25w192_s952: IN-SAMPLE holdout NDCG at the last eval 0.33884 - reference's out-of-sample @last 0.32303 = +0.01581 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05t25w192_s953: IN-SAMPLE holdout NDCG at the last eval 0.33917 - reference's out-of-sample @last 0.32243 = +0.01674 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05t25w192_s954: IN-SAMPLE holdout NDCG at the last eval 0.33924 - reference's out-of-sample @last 0.32205 = +0.01719 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05t25w192_s955: IN-SAMPLE holdout NDCG at the last eval 0.34005 - reference's out-of-sample @last 0.32214 = +0.01791 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05t25w192_s956: IN-SAMPLE holdout NDCG at the last eval 0.33956 - reference's out-of-sample @last 0.32249 = +0.01707 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05t25w192_s957: IN-SAMPLE holdout NDCG at the last eval 0.33994 - reference's out-of-sample @last 0.32258 = +0.01736 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+    [PASS] A2 w5_fd10_kd05t25w192_s958: IN-SAMPLE holdout NDCG at the last eval 0.33939 - reference's out-of-sample @last 0.32235 = +0.01704 >= +0.00428 (the run's own count of holdout feeds per epoch: 30000; if that is 30000 and only A2 fails, the bar may be too high for this form: see PREDECLARED R6)
+  A3 pool level (arm w5_fd10_kd05t25w192): val NDCG 8-pool twins 0.40160 vs 8-pool references @last 0.40168: D = -0.00009 +- 0.00046 (n 14423); band 0.00127 = 3 s16 sqrt(16 / 8)
+     information: against the references' SELECTED checkpoints D = +0.00006 +- 0.00046
+     A3 verdict: ACCEPT
+  A4 member level (information): twin - reference @last, val
+     w5_fd10_kd05t25w192_s951 vs w5_e10_kd05t25w192_s951: -0.00041 +- 0.00084
+     w5_fd10_kd05t25w192_s952 vs w5_e10_kd05t25w192_s952: -0.00038 +- 0.00082
+     w5_fd10_kd05t25w192_s953 vs w5_e10_kd05t25w192_s953: +0.00165 +- 0.00084
+     w5_fd10_kd05t25w192_s954 vs w5_e10_kd05t25w192_s954: -0.00027 +- 0.00084
+     w5_fd10_kd05t25w192_s955 vs w5_e10_kd05t25w192_s955: +0.00060 +- 0.00085
+     w5_fd10_kd05t25w192_s956 vs w5_e10_kd05t25w192_s956: -0.00030 +- 0.00085
+     w5_fd10_kd05t25w192_s957 vs w5_e10_kd05t25w192_s957: -0.00046 +- 0.00085
+     w5_fd10_kd05t25w192_s958 vs w5_e10_kd05t25w192_s958: -0.00036 +- 0.00082
+  A3 pool level (arm w5_fd10_kd05w192): val NDCG 8-pool twins 0.40113 vs 8-pool references @last 0.40100: D = +0.00013 +- 0.00048 (n 14423); band 0.00127 = 3 s16 sqrt(16 / 8)
+     information: against the references' SELECTED checkpoints D = +0.00003 +- 0.00048
+     A3 verdict: ACCEPT
+  A4 member level (information): twin - reference @last, val
+     w5_fd10_kd05w192_s951 vs w5_e10_kd05w192_s951: +0.00083 +- 0.00086
+     w5_fd10_kd05w192_s952 vs w5_e10_kd05w192_s952: -0.00037 +- 0.00084
+     w5_fd10_kd05w192_s953 vs w5_e10_kd05w192_s953: +0.00030 +- 0.00082
+     w5_fd10_kd05w192_s954 vs w5_e10_kd05w192_s954: -0.00016 +- 0.00084
+     w5_fd10_kd05w192_s955 vs w5_e10_kd05w192_s955: -0.00010 +- 0.00084
+     w5_fd10_kd05w192_s956 vs w5_e10_kd05w192_s956: +0.00088 +- 0.00083
+     w5_fd10_kd05w192_s957 vs w5_e10_kd05w192_s957: +0.00169 +- 0.00082
+     w5_fd10_kd05w192_s958 vs w5_e10_kd05w192_s958: +0.00084 +- 0.00082
+  A3 pool level (all 16 twins of stage F): val NDCG 16-pool twins 0.40161 vs 16-pool references @last 0.40157: D = +0.00004 +- 0.00042 (n 14423); band 0.00090 = 3 s16 sqrt(16 / 16)
+     information: against the references' SELECTED checkpoints D = +0.00018 +- 0.00041
+     A3 verdict: ACCEPT
+  A4 member level (information): twin - reference @last, val
+     w5_fd10_kd05w192_s951 vs w5_e10_kd05w192_s951: +0.00083 +- 0.00086
+     w5_fd10_kd05w192_s952 vs w5_e10_kd05w192_s952: -0.00037 +- 0.00084
+     w5_fd10_kd05w192_s953 vs w5_e10_kd05w192_s953: +0.00030 +- 0.00082
+     w5_fd10_kd05w192_s954 vs w5_e10_kd05w192_s954: -0.00016 +- 0.00084
+     w5_fd10_kd05w192_s955 vs w5_e10_kd05w192_s955: -0.00010 +- 0.00084
+     w5_fd10_kd05w192_s956 vs w5_e10_kd05w192_s956: +0.00088 +- 0.00083
+     w5_fd10_kd05w192_s957 vs w5_e10_kd05w192_s957: +0.00169 +- 0.00082
+     w5_fd10_kd05w192_s958 vs w5_e10_kd05w192_s958: +0.00084 +- 0.00082
+     w5_fd10_kd05t25w192_s951 vs w5_e10_kd05t25w192_s951: -0.00041 +- 0.00084
+     w5_fd10_kd05t25w192_s952 vs w5_e10_kd05t25w192_s952: -0.00038 +- 0.00082
+     w5_fd10_kd05t25w192_s953 vs w5_e10_kd05t25w192_s953: +0.00165 +- 0.00084
+     w5_fd10_kd05t25w192_s954 vs w5_e10_kd05t25w192_s954: -0.00027 +- 0.00084
+     w5_fd10_kd05t25w192_s955 vs w5_e10_kd05t25w192_s955: +0.00060 +- 0.00085
+     w5_fd10_kd05t25w192_s956 vs w5_e10_kd05t25w192_s956: -0.00030 +- 0.00085
+     w5_fd10_kd05t25w192_s957 vs w5_e10_kd05t25w192_s957: -0.00046 +- 0.00085
+     w5_fd10_kd05t25w192_s958 vs w5_e10_kd05t25w192_s958: -0.00036 +- 0.00082
+   -> NO DEFECT FOUND

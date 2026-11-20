@@ -1,0 +1,130 @@
+DEEP_DIVE AGENT - ERROR ANALYSIS OF FD16P20 ON DISCOVERY (7,214 feeds, 697,304 rows). 2026-11-17
+Lens: confidently wrong cases, read one by one. CPU only, 12 threads. Scripts in scripts/ (a01..a20).
+
+BOTTOM LINE
+- The confident errors of the model (rank 1 negative with a large gap to rank 2; positives ranked 50+ in small feeds)
+  are not systematic for any feature or segment I could find. In every head segment I tested, rank 1 beats
+  rank 2, and rank-1 precision rises with the gap (top gap quintile: 20.3% vs 8.3% for rank 2). At matched
+  score, positives and negatives do not differ on any column beyond noise.
+- One weak rule submitted (rules/smallfeed_hmax.py): cross-fitted +0.00074, SE 0.00031, z 2.39. It was the best
+  of 144 segment x feature pairs, so after selection it is probably noise. It is up to the lead's sealed check.
+- Item prior from validation labels (the data idea): real but small. Cross-fitted +0.0003 to +0.0006, z 1.1 to 1.8.
+  Below the bar on discovery, and it needs labels when applied.
+- Diagnostics: (1) A residual LightGBM boosted from the model's own score (init_score = 0.98*score, the fitted
+  within-feed softmax slope), cross-fitted by user, gains at most +0.00023 (z 0.6). Larger versions lose
+  (-0.0010 to -0.0025). (2) A free stacker on all columns loses -0.006 to -0.011. So there is no learnable
+  residual structure in these columns at this sample size, and the model is close to calibrated on every
+  single column.
+
+FEEDS READ (scripts/feeds_*.txt; all columns of the top 10 and of the positives; small feeds in full)
+- 45 lens-(a) feeds (rank 1 negative, gap12 in the top quartile, best positive at 30+; 338 such feeds exist).
+- 25 lens-(b) feeds (positive at rank 50+ with M < 120; 302 such feeds).
+- 12 small feeds (M < 40) with the best positive at rank 8+, read in full.
+- 25 good feeds (best positive at rank 1-3).
+What I saw in lens (a):
+  * Rank 1 is very often in the category of the newest event (cat_newest_idx 0) and a near-copy of a recent
+    event (h1/h5 ~.95-1.0), often with many near-duplicates in history (n_hdup95 5-79). Examples: 14380, 11656, 418.
+  * A recurring sub-type is a brand-new, cold listing at rank 1: xp_imp_c50 = 0, f4 < .1, f5 ~ 0, often s_ft > s_to.
+    Examples: 315, 7536, 10645, 1202, 12210, 6240, 10648, 5726.
+  * In 35% of these feeds the positive is in the same category as rank 1 but deep inside it (within-category
+    loss). 11% are in a category absent from the history (exploration). Median best rank is 10 over all
+    confident-wrong feeds.
+In lens (b): positives are mostly exploration items (category absent from history, cat_n_in_feed 1-3, f1 at
+  its floor) or deep members of the main category. Nothing distinguishes them from their neighbours in rank.
+In the small feeds: the positives at ranks 8-22 look like their neighbours.
+
+BEHAVIOURAL HYPOTHESES AND TESTS (all on all of discovery)
+H1 "The model is overconfident about fresh, cold listings at the top" (lens a sub-type).
+   In confident feeds, a fresh-cold rank 1 has precision 12.5% (n=345) vs 20.3% (n=1459) for other rank 1s.
+   But its rank 2 is worse still (7.8%), and in no cell does rank 2 beat rank 1 (head_wide table, a07/a19).
+   At the same score level, fresh-cold items are calibrated: O/E 0.94-1.03 in every score band (a20).
+   Shrinking high scores of fresh/cold items: cross-fitted -0.0001 to -0.0003 (6 forms).
+   Demoting fresh-cold items in the top 3: -0.00035. REJECTED.
+H2 "Near-copies of history are saturated: the user has seen this listing type many times" (n_hdup95 large).
+   O/E is above 1 (1.05-1.6), not below. Demotion and boost are both <= 0 cross-fitted. REJECTED.
+H3 "Near-duplicate candidates split one click between them".
+   I rebuilt 56,550 near-duplicate pairs (same feed, category and cand_maxcos). 73 pairs have both members
+   positive, against about 12 expected under independence. Users who like one copy click both, so the copies
+   complement each other. Demoting the second member of a pair: cross-fitted -0.00037 (z -2.4). REJECTED.
+H4 "The model under-uses the current-session category (same_cat_newest) at the head".
+   O/E 1.09 at rank 1 vs 0.88 for non-matching items (z about 2). But at the head, every swap or boost of
+   matching items loses: the best weight in-sample is negative, -0.05. REJECTED.
+H5 Session-type segments (search session, after contact, after favourite, after order, after lead, guest, short
+   history, focused vs diverse user, night, small feed) x 12 item features (h1, hmax, same_cat_newest,
+   popularity, cold, freshness, ucos, c_order, c_contact, n_hdup95>0, category absent, f1).
+   144 pairs x 8 weights, cross-fitted. Best: small feed (M<40) x hmax, +0.00074 z 2.39, and guest x n_hdup95,
+   +0.00017 z 2.39. Worst: after_fav x hmax, z -3.1, and small feed x freshness, z -3.0. With 144 pairs, a
+   largest |z| near 3 is what chance alone gives. Only small_feed x hmax clears the brief's thresholds.
+H6 "Branch disagreement = uncertainty; the probability is convex in the score, so uncertain items deserve a bonus".
+   |s_ft - s_to| bonus: -0.00035. Power mean of exp scores: -0.00005. Weight a*s_ft + (1-a)*s_to: -0.00025
+   (a=0.5 is already optimal). Rank-disagreement bonus: -0.00046. REJECTED.
+H7 "The same user is shown an item again after ignoring it". Not testable: 6,872 of 6,887 users have a single
+   feed in discovery, and only 60 rows are repeat impressions (0 positives).
+H8 Global single-column corrections (28 forms from the O/E scan: f1, f2 bands, category absent, hmax bands,
+   hmax_type 4, hmax_idx, n_cand_dup95, ucos, seq_cv, cold, fresh, f5, cat_hist_share, ...): all cross-fitted
+   between -0.0009 and +0.0003; none has z > 1.5. The O/E deviations seen with a coarse rank-cell calibration
+   mostly vanish once the expectation is calibrated per feed (the number of positives differs between feeds).
+   Within-feed matched comparison (each positive vs its +/-3 rank neighbours) for ranks 4+: no column beyond |z| 3.1.
+   About 45 columns x 4 regions were scanned, so that is noise level.
+
+DATA IDEA: ITEM-LEVEL PRIOR FROM DISCOVERY LABELS (a08, a08b)
+- In discovery, 11.5% of rows show an item that also appears in another discovery feed. 0.24% of rows show an
+  item that was positive in another feed. On test: 12.7% and 0.33%.
+- Counting out of fold (counts from the other 4 user folds, as for a new population):
+  * Items with a prior positive: 1,327 rows, 47 positives vs 26.2 expected (O/E 1.79).
+  * Items seen before but never clicked: O/E 1.04 (a weak popularity signal).
+  * Items never seen: O/E 0.99.
+- Rules, cross-fitted:
+  * score + 0.5*log(smoothed rate / base): +0.00057, SE 0.00031, z 1.82.
+  * The same on prior positives only: +0.0003 to +0.0004, z 1.1 to 1.6.
+  * Impression count alone: negative.
+- Judgement: real (O/E 1.8) but tiny on discovery. On test the prior would be built from all 14.4k validation
+  feeds, about 2.5x more than the 4/5 of discovery used here, so coverage of prior positives rises to about
+  0.33% of rows. That suggests a gain on the order of +0.0005 to +0.001 at most. It also assumes the item's
+  appeal carries over in time, and test is a later period, so it may decay. It needs validation labels when
+  applied, so it cannot be a column-only rule. Not submitted. It is worth a quick check by the lead, who can
+  build the prior from all validation and measure it on the train-period holdout (no overlap there) or on a
+  time split.
+
+SUBMITTED RULE
+rules/smallfeed_hmax.py
+  new_score = score + 0.05 * [M < 40] * zscore_within_feed(hmax)   (NaN hmax -> 0.80)
+  kit.check_rule: delta +0.00074, SE 0.00031, z 2.39, order changed in 24.8% of feeds. Creates no ties, does not
+  depend on row order, runs with s_ft = NaN.
+  Cross-fit: w = 0.05 chosen in all 5 folds; per-fold OOF -0.00007, +0.00135, +0.00076, +0.00096, +0.00076.
+  Threshold sweep (all at w = 0.05):
+    M < 20: +0.00049 (z 1.96)
+    M < 30: +0.00061 (z 2.07)
+    M < 40: +0.00074 (z 2.39)
+    M < 50: +0.00065 (z 2.02)
+    M < 60: +0.00062 (z 1.89)
+  Weight curve (in-sample) is peaked: w = 0.02 +0.00028, 0.035 +0.00044, 0.05 +0.00074, 0.075 +0.00025, 0.1 0.00000.
+  By feed size, at w = 0.05:
+    Feed-size bands below 40: +0.0022, +0.0022, +0.0019 per feed.
+    The four bands at 40 and above: -0.0005 to -0.0011 per feed.
+  Inside small feeds: +0.0028 when H > 50 and -0.0037 when H <= 50 (270 feeds).
+  Related similarity columns in small feeds:
+    Long-range (h32, ucos, c_contact): about +0.0002 to +0.0004.
+    Short-range (h10, h5, c_vfeed): negative.
+  Possible story: in short feeds the model leans too much on the recent session and too little on the whole
+  history.
+  Caveat: it was picked as the best of 144 pairs. After selection it is more likely noise than not. Apply it only
+  if it holds on both sealed samples.
+
+FAILED ATTEMPTS (cross-fitted delta)
+- Residual LightGBM from the model's offset: binary +0.00023 / -0.00013 / -0.00105; lambdarank -0.0007 / -0.0010 / -0.0025.
+- Free stackers on all columns: -0.0061 (binary), -0.0112 (lambdarank). Calibration-only GBM: -0.0061.
+- 28 global single-column forms: best +0.00033 (f5, z 1.3) and +0.00026 (hmax_src = 6, z 1.5); most negative.
+- Branch re-weighting and uncertainty bonus (5 forms): -0.00005 to -0.00046.
+- Near-duplicate cluster leader boost -0.00101; non-leader demotion -0.00037.
+- Head rules:
+  * fresh-cold in the top 3: -0.00035
+  * n_hdup95 >= 10 in the top 10: +0.00012
+  * hmax_type 4 (favourite) in the top 5: -0.00016
+  * same category as the newest event in the top 5: +0.00025, but with a negative weight
+- Category depth or share in feed: -0.0009 to 0.
+- Fresh/cold score shrinkage (6 forms): -0.00025 to +0.00002.
+
+VARIANT COUNT (every weight/threshold evaluated): about 1,900 evaluations covering about 230 distinct rule forms or
+hypotheses. That includes 392 global, 1,152 segment, about 136 small-feed follow-up, 86 item-prior, 33 branch, 56 misc,
+30 shrinkage and 11 duplicate-cluster evaluations, plus 9 GBM configurations.

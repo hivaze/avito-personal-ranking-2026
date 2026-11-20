@@ -1,0 +1,45 @@
+PLAN written Thu Nov 12 21:40:43 UTC 2026 BEFORE any fine-tune or readout run (critique item 5: does the val FT branch transfer FORWARD in time?).
+
+Motivation: production FT (n2cpv3) is evaluated OOF with user-grouped 5-fold CV on val, i.e. every fold model is trained on ~80%
+of BOTH val days (Tue+Thu) and scored on same-day feeds. Cross-day transfer is never measured; test is 2-5 days after val.
+
+Data (data/flat/val/feeds.parquet, n = 14423 feeds): Tue := (timestamp+10800)//86400 < 20720 -> 7543 feeds (7542 on day 20718
+  + 1 on 20719); Thu := the rest -> 6880 feeds (6878 on 20720 + 2 on 20721). M<50: Tue 3070 / Thu 2823. Users: 7196 (Tue) /
+  6554 (Thu), overlap 10 users -> the user grouping of the production folds is essentially a within-day grouping.
+  Test days: 20722..20725 (Sat..Tue), i.e. 2-5 days after Thu.
+Members: r6_cd_m02_r101, r6_cd_m02_r103 (checkpoints nn_x/r6/ckpt/<v>.pt).
+  TO     = preds/nn_<v>_trainonly_val.npy (train-only branch)
+  FT_oof = preds/nn_<v>_n2cpv3_val_oof.npy (production OOF, final-EMA weights of the fold models)
+
+Recipe of FT_forward: identical to the production n2cpv3 command (nn_x/r6/logs/<v>_n2cpv3_ft.log: --extra n2c_pre_v3 (the 42
+  names listed in that log, parsed from it) --lr 5e-5 --wd 0.02 --warmup 30 --cand_budget 8192 --max_feeds 128 --loss softmax
+  --loss_norm batch --extra_lr_mult 10 --decay cos --ema 0.99 --ema_start 0.5 --epochs 4; predictions from the final EMA
+  weights) EXCEPT: no folds, ONE model trained on ALL Tue feeds for 4 epochs (cosine schedule over 4 x len(Tue batches) steps,
+  EMA starting at 0.5 x len(Tue batches) steps, exactly as finetune.py computes them from its training feed list), scored on
+  all val feeds. Seed 0 (= production fold-0 seed-0: torch.manual_seed(0), np rng 0). Extra-feature standardisation stats are
+  computed on all val feeds (as in production: va.attach_extra(names) with stats=None). finetune.py is not modified; a thin
+  wrapper (ft_day.py) imports build_model and the data/model helpers from the nn_x/w5 copy (whose common.py writes nothing
+  into preds/) and reproduces the inner training loop with a fixed training feed list. Checkpoint loaded from nn_x/r6/ckpt.
+  Sanity check: epoch-0 (pre-FT) predictions must match TO (corr > 0.999 after per-feed z) or the pipeline is wrong.
+
+PRIMARY READOUT (forward): on Thu feeds,
+  D_fwd = NDCG[0.5 z(FT_forward) + 0.5 z(TO)] - NDCG[0.5 z(FT_oof) + 0.5 z(TO)]
+  per member, and for the 2-member pool (c02 / hfit convention: per branch S = mean over members of per-feed z; blend =
+  0.5 z(S_ft) + 0.5 z(S_to)); paired per-feed NDCG differences, SE = sd/sqrt(n); slices M<50 / M>=50.
+  KILL RULE (critique item 5): pool D_fwd < -0.002 on Thu -> the FT branch does NOT transfer forward. Otherwise it does.
+Also reported on Thu: FT_forward - TO alone (does fine-tuning on Tue help Thu at all?), FT_oof - TO (production same-day OOF
+  gain on the same feeds), blend(FT_forward) - TO, blend(FT_oof) - TO; the in-sample Tue numbers of FT_forward (reference
+  only; not a readout); the per-epoch NDCG curve on the held-out day.
+REPLICATION (reverse): the same with training set = Thu feeds only, scored on Tue feeds (D_rev vs FT_oof on Tue).
+SECONDARY (seed noise, not part of the kill rule): seeds 1 and 2 in addition; report the seed-0 (primary) readout, the mean
+  over seeds, and the seed spread.
+SECONDARY CONTROL (training-set-size confound, not part of the kill rule): FT_forward trains on 7543 feeds, a production fold
+  model on ~11538 (80% of both days). C1: train on a random user-grouped subset of ALL val feeds with the same number of
+  feeds as the training day (seed 0, user-0 feeds as singleton groups), same recipe, scored on the held-out feeds of the
+  target day. On exactly those held-out feeds compare blend(C1) vs blend(FT_forward) vs blend(FT_oof): same training size,
+  the only difference between C1 and FT_forward is whether ~half of the training feeds are same-day feeds.
+
+Outputs: nn_x/audit/ftforward/{plan.txt, ft_day.py, readout.py, preds/nn_<v>_ft<set>_s<seed>_val.npy (+ _epochs.npy),
+  logs/*.log, *.json, results.txt}. Nothing is written into preds/ or nn*/ckpt or nn_x/*/preds.
+Compute: ONE process on GPU N (checked before launch: 2 compute processes, ~[n] GB free), CUDA_VISIBLE_DEVICES=N
+  OMP_NUM_THREADS=12; runs are sequential in one process per member. Readout on CPU (12 threads).

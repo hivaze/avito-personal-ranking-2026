@@ -1,0 +1,14 @@
+(1) W8 students: pool NDCG vs number of members k (mean over 20 random subsets; all 8 for k = 8), FT branch / TO branch / file
+  k  1 (of the 16 students): FT 0.39918 TO 0.39926 file 0.39966 | FT - TO -0.00007 | file - TO +0.00040
+  k  2 (of the 16 students): FT 0.40006 TO 0.40022 file 0.40064 | FT - TO -0.00017 | file - TO +0.00042
+  k  4 (of the 16 students): FT 0.40080 TO 0.40117 file 0.40135 | FT - TO -0.00037 | file - TO +0.00018
+  k  8 (of the 16 students): FT 0.40094 TO 0.40136 file 0.40147 | FT - TO -0.00042 | file - TO +0.00011
+  k 16 (of the 16 students): FT 0.40085 TO 0.40172 file 0.40173 | FT - TO -0.00087 | file - TO +0.00001
+
+(2) shift transplant onto the W8 TO pool
+  shift own (W8)                     RMS 0.1366 | lam 1: vs TO -0.00069+-0.00061 (vs own +0.00000+-0.00000) | lam 0.5: vs TO +0.00009+-0.00043 (vs own +0.00000+-0.00000)
+  shift N8                           RMS 0.1253 | lam 1: vs TO -0.00030+-0.00059 (vs own +0.00040+-0.00030) | lam 0.5: vs TO +0.00009+-0.00040 (vs own +0.00001+-0.00022)
+  shift C3                           RMS 0.1235 | lam 1: vs TO -0.00053+-0.00059 (vs own +0.00016+-0.00040) | lam 0.5: vs TO -0.00011+-0.00040 (vs own -0.00019+-0.00029)
+  shift mean(W8, N8)                 RMS 0.1297 | lam 1: vs TO -0.00043+-0.00059 (vs own +0.00026+-0.00022) | lam 0.5: vs TO +0.00017+-0.00041 (vs own +0.00008+-0.00016)
+  shift mean(W8, N8, C3, kd08)       RMS 0.1265 | lam 1: vs TO -0.00041+-0.00059 (vs own +0.00028+-0.00025) | lam 0.5: vs TO -0.00007+-0.00040 (vs own -0.00015+-0.00018)
+  shift mean(N8, C3, kd08) [no own]  RMS 0.1244 | lam 1: vs TO -0.00069+-0.00058 (vs own -0.00000+-0.00030) | lam 0.5: vs TO -0.00022+-0.00039 (vs own -0.00030+-0.00021)

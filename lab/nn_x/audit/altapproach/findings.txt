@@ -1,0 +1,180 @@
+ALT-APPROACH AUDIT (fresh eyes): what a top team would build that differs structurally from our pipeline, and what the
+CPU probes say about it.  2026-11-12 ~21:10 UTC.  CPU only (12 threads), nothing outside nn_x/audit/altapproach written.
+
+Scripts / logs (this directory):
+  probe_residuals.py  -> probe_residuals.log, probe_residuals.csv   (nested residual screen on G3, leak-free val)
+  probe_structure.py  -> probe_structure.log                         (user-0 / H slices, multi-positive structure, test density)
+  probe_order.py      -> probe_order.log                             (stored-order leak check)
+
+Conventions: val = 14,306 leak-free feeds (117 feeds whose non-zero user has a later val/test feed dropped, as in
+eda/errors/synthesis). Base G3 = 0.5 z(ens_G3_ft) + 0.5 z(ens_G3_to) = 0.40032 on all val, 0.40046 leak-free.
+"nested" = z(G3) + w z(x), w in {0,.05,.1,.2,.3,.5} chosen on 4/5 of the feeds (GroupKFold by user, user-0 singletons),
+applied to the other 1/5, 2 seeds; paired per-feed delta +- SE; "pmix" = the same delta reweighted to the private
+(M x cold-share) mix (src/pmix.py). "cell" = INSIGHTS_1112 item-5 cell: warm positive (LUO>0) with a same-category
+history event at hpos<8 whose category is G3's top (LSE) category, vs the warm same-category negatives G3 ranks above it
+(62,016 pairs, 2.6% of all pos-neg pairs; G3 has AUC 0 there by construction).
+
+=====================================================================================================================
+0. TL;DR
+=====================================================================================================================
+1. The structurally different levers a fresh top team would reach for are mostly already in the pipeline or closed, and
+   the CPU probes close the remaining "information" ones:
+   - item-ID collaborative signals on ALL histories (ALS f128, clean ALS f64, item2vec d128, exact co-visitation with
+     val+test sources, other-user val/test history popularity earlier/later than the feed): nested residual on G3 is
+     0.00000 (w=0 chosen) or NEGATIVE (-0.0002..-0.0005) for every variant, on G3 and on the TO branch, under the private
+     mix too. In the warm-beater cell their AUC is 0.39-0.46: they favour the (more popular) beaters. [probe_residuals]
+   - the pretrained-encoder ID channel (P8): pre2_idmax32 / pre2_id_contrib have cell AUC 0.477 / 0.470 (gate needs
+     >= 0.53) and nested 0.00000. P8 fails its own CPU gate; do not build the frozen-ID-table plumbing.
+   - category-level set aggregation of G3 (LSE / mean / max within feed x category): nested -0.0002..0.0000. G3 already
+     uses category coherence (multi-positive feeds: 39% of positive pairs share a category vs 20% chance; the other
+     positives sit in G3's top-1 category 42% vs 30% chance), so no set-level re-ranker is missing.
+   - stored candidate order / rank-from-end / item_id / emb_idx on val: NDCG 0.2880-0.2890 = random (0.2882). The 3.8%
+     target rate at stored position 0 is M composition (small feeds), not order information. Terminal clicks cannot be
+     recovered; the "additionally shuffled by one common permutation" statement holds.
+   - user_id 0: 4.6% of feeds but private-mix weight 2.02. FT-TO is +0.0049 +- 0.0030 there (vs -0.0008 +- 0.0006 for
+     user>0); routing TO-only on user-0 costs -0.00022 +- 0.00009 (pmix -0.0008). Nothing to change.
+2. What is genuinely untested and could plausibly be worth >= +0.002 private (ranked, with the running one first):
+   R1  TRUNC-PROD (true rank-from-end, production-only, training-only offset) - RUNNING (wave 5 stage E/B). The GBDT
+       proxy is +0.0022..+0.0031 val / +0.0020 holdout and replicated; every NN position tower so far was mis-indexed.
+       This is the only lever with member-level evidence >= +0.002. Do not duplicate; the follow-ups are listed in 3.
+   R2  Pretrained sequence encoder as the ranker's history-encoder INIT (+ frozen ID table), and scaling the pretraining
+       (2 epochs, 8M dense params today). pretrain_report TL;DR literally says "as initialisation for a train-fed
+       ID-aware ranker (not tried here)"; nn/train.py --init only loads ranker checkpoints. ARGUS-type evidence says the
+       feature-level gain roughly doubles with pretraining and grows with size. Prior is low after today's probes
+       (the ID channel carries no residual as a scalar and points the wrong way in the beater cell): P ~0.1.
+   R3  hzcd popularity-parity cooldown (INSIGHTS item 6): the one private-SPECIFIC lever (LUO==0 rate for 3-7-day
+       listings 0.62 val vs 0.86 private). Already planned; nothing new from me except that the transductive
+       alternatives are dead, which raises its relative priority.
+   R4  Process, not model: val is the over-used set; the public #1 jump is most parsimoniously the same-user later-feed
+       leak (+0.004 public / +0.0014 private) on a #2-level model. Nothing in the data supports chasing it with modelling.
+3. Everything else a top team would try is covered: joint [history; candidates] transformer with ListMLE-type loss
+   (= our ranker; Avito's production "model 5"), pretraining on all histories incl. val/test snapshots (= pre2s; the
+   corpus is train latest-snapshot + val/test earliest-snapshot per user + user-0 feeds, 2.59M sequences, 463.6M events),
+   transductive popularity (it_hist_*_luo already counts val+test snapshots; LEAKAGE-7 says the causal version loses
+   -0.0018), domain adaptation (domain token, m02 replay, 0/15 other cooldown-data arms), GBDT/stacker/LLM members (closed),
+   pseudo-labels (closed), multi-task on event types (do-not list), set-level re-rankers (closed), cold offsets (closed).
+
+=====================================================================================================================
+1. What the pre2s pretraining corpus actually was (asked explicitly)
+=====================================================================================================================
+pretrain/build_corpus.py + pretrain_report.md section 1-2:
+  * sequences: train = LATEST train snapshot per non-zero user + every user-0 train feed; val/test = EARLIEST snapshot
+    per non-zero user over val U test + every user-0 feed. 2.59M sequences, 463.6M events, old->new. So the corpus already
+    contains the val and test histories (unsupervised test-period adaptation), oversampled x4 (--vt_rep) in v3/v4.
+  * val-side features come from twins trained WITHOUT test snapshots (--exclude_test 1) to keep the information horizon
+    symmetric; test-side from train+val+test. Same-user later snapshots are never in any corpus (leak audit flat).
+  * model: SASRec/ARGUS-style causal transformer d=384, 4 layers, 8M dense + 40M-row item-ID table (dim 64/128), targets
+    = next NEW feed-originated open (et1/es1) + next new item, sampled softmax with logQ, 2 epochs (22 min / GPU).
+  * use in the ranker: 9 scalar features (pre2_fe/new, z, hmax32/8, fe_noid, id_contrib, idmax32) as train-stage inputs
+    (cvnd_pre2s: +0.0019 at 3 ep, +0.0009 at 10 ep) and FT extras. The encoder weights were never used as an
+    initialisation of the ranker's history encoder, and the ID table never entered the ranker (nn/train.py --init loads
+    ranker checkpoints only; grep finds no seqenc import outside pretrain/).
+What is transductive today: it_hist_*_luo (counts all snapshots of all splits, minus same-user-later; 1.9% of val count
+mass from later other-user snapshots, 0.9% test); seq_cv_* for val/test rows use train sources + val/test snapshots with
+ts < own ts (causal inside the split); pre2 test features see all test snapshots; ALS/item2vec on disk (als_*) were
+trained on train+val+test histories (clean version). My probe shows the fully transductive versions add nothing.
+
+=====================================================================================================================
+2. Probe results (numbers)
+=====================================================================================================================
+2.1 probe_residuals (G3 nested delta +- SE | pmix | cell AUC):   [full table: probe_residuals.log / .csv]
+  A  co-visitation, train sources (= seq_cv_invd20 in the NN)      0.00000          | cell 0.399
+     co-visitation, train+val+test sources                          0.00000          | cell 0.398
+     transductive increment only (val+test sources - train)         0.00000          | AUC all 0.507, cell 0.493
+     cv_rec5_norm / users5 / fwd5 / pop_hist (tvt)                  0.00000 each     | cell 0.43-0.46
+  B  other users' val+test histories: later_all / later_fc          0.00000 / -0.00027+-0.00014 | cell 0.498 / 0.496
+     earlier_all / earlier_fc                                       0.00000 / 0.00000 | cell 0.500 / 0.502
+     candidate exposure in other val/test feeds (all / later)       -0.00021+-0.00027 / -0.00028+-0.00025 | cell 0.51
+  C  ALS f128 evt: dot 0.00000; lastk20 -0.00040+-0.00011; profile exp5 -0.00054+-0.00015; last10 -0.00018+-0.00008;
+     samecat_exp10 0.00000; et1_exp5 -0.00025+-0.00008.  clean ALS f64: dot 0.00000, lastk20 -0.00048+-0.00014.
+     item2vec d128: cos_k5 -0.00023+-0.00007, maxcos_k5 -0.00037+-0.00011, prof_exp5 -0.00038+-0.00021,
+     prof_samecat -0.00037+-0.00019.  on-disk als_exp5 -0.00034+-0.00011.   cell AUC 0.43-0.46 for all of them.
+     (coverage 0.63/0.61 of val rows; single-feature AUC 0.56-0.59, i.e. strong alone, fully absorbed by G3.)
+  D  pre2_idmax32 0.00000 (cell 0.477, cov 0.447); pre2_id_contrib 0.00000 (cell 0.470); pre_idmax32 / pre_id_contrib_v2
+     identical; pre2_hmax32 -0.00032+-0.00015 (cell 0.343: content similarity favours the beaters).
+  E  cat LSE of G3 -0.00023+-0.00019; cat mean -0.00011+-0.00004; cat max -0.00004+-0.00005.
+  R  references already in the NN: seq_cv_invd20 0.00000, it_hist_all_luo 0.00000, pre2_fe -0.00023+-0.00014,
+     cos_u +0.00003+-0.00028, seq_max_all -0.00016+-0.00008, f1 -0.00019+-0.00013.  Cell AUC of content/similarity
+     inputs 0.31-0.41: in the "right category, buried" block every input we have points toward the beater.
+  Reading: a residual of exactly 0 means the inner folds never chose w>0; negatives are inner-fold noise-fits that do
+  not transfer. Nothing reaches +1 SE. The G3_to base gives the same picture (log).
+2.2 probe_structure:
+  user0 658 feeds (4.6%, pmix weight 2.02): G3 0.4097, ft 0.4098, to 0.4049, ft-to +0.0049+-0.0030.
+  user>0: ft-to -0.0008+-0.0006.  H=0 (193): ft-to +0.0055+-0.0073.  H<10 (478): +0.0032+-0.0039.  H=256 (4112, 28.7%):
+  ft-to -0.0019+-0.0010.  Routing TO-only on user-0: -0.00022+-0.00009 (pmix -0.00082+-0.00021).
+  -> the FT half helps short-history / anonymous feeds and hurts long-history feeds; this is the same post-hoc routing
+     pattern as the M-split, which failed its fresh-pool confirmation (CURRENT_STATUS 18:54). Report only.
+  multi-positive feeds 25.5%; same-category positive pairs 0.394 vs chance 0.196; other positives in G3's top-1 category
+  0.418 vs chance 0.297. NDCG by npos: 1: 0.3954, 2: 0.3975, 3: 0.4124, >=4: 0.4715; top-1 precision 0.12-0.19.
+  test density (label-free): other users' LATER test histories contain the candidate for 13.4% of public rows but only
+  6.5% of private rows; EARLIER ones 9.2% public / 13.3% private (val 17.0% / 4.5%). Candidate exposure in other test
+  feeds 35% of rows. So the only transductive signal that is denser on private is the "earlier" direction, whose
+  residual on val is exactly 0 (AUC 0.508). Expected private gain from a transductive rebuild: ~0.
+2.3 probe_order: random 0.2882 | stored order asc 0.2886 desc 0.2880 | last-stored-first 0.2880 | item_id 0.2885/0.2890 |
+  emb_idx 0.2890/0.2876. Target rate by stored position 0/1/2/3-9/10-49/50+: 3.77/4.05/3.77/3.39/2.00/1.03% (base 1.58%),
+  identical by stored rank-from-end -> pure M composition.
+
+=====================================================================================================================
+3. Alternative approaches, ranked by expected private gain x feasibility (with status against the registry)
+=====================================================================================================================
+Rank 1  TRUNC-PROD and its generalisations (position debiasing done right)        STATUS: RUNNING (wave 5), do not duplicate
+  mechanism: production feeds end at the last click -> the last shown item is positive 23.5% (M>=50); every NN tower used
+  M-1-raw pos (wrong in 85.5% of feeds). GBDT proxy +0.0022..+0.0031 val / +0.0020 holdout, replicated with 4 fresh seeds;
+  gain grows with training (INSIGHTS_1112 item 1; review 19:31).
+  follow-ups if stage E passes: L1 from-scratch family; the full pos+rkend training-only tower correctly indexed
+  (eda_labels_position b4: pos+rkend +0.0042 vs rkend-only; the 'exam' offset gave +0 on top of trunc in the proxy, so
+  the ceiling is probably the trunc part); keep exploration rows offset-free (A3 -0.0010).
+  expected: member +0.0003..+0.0010, pool ~half, private similar (P ~0.3). COVERAGE_MAP: "position tower CLOSED (old
+  recipe)" covers only mis-indexed towers.
+Rank 2  hzcd popularity-parity cooldown (train rows read it_hist_hz_* in the cooldown)   STATUS: planned (INSIGHTS item 6)
+  private-specific: LUO==0 rate for 3-7-day listings holdout 0.23 / val 0.62 / public 0.83 / private 0.86; TO act/exp 1.14 on
+  1-3-day listings. expected TO member +0.0003..+0.0006, pool +0.0001..+0.0003, more on private (P ~0.15-0.2). Prior:
+  featnew_it_hist_hz rejected it on GBDT gates only (+0.0011, z 1.5, cold/warm trade).
+Rank 3  Pretrained encoder as the ranker's history-encoder init + frozen ID table + scaled pretraining   STATUS: NEVER
+  mechanism: today the encoder reaches the ranker only through 9 scalars (train-stage +0.0009 at 10 ep). ARGUS: the
+  feature-level gain roughly doubles with pretraining and grows with model size (3.2M +1.35% -> 126M +2.32% pairwise
+  accuracy); PinnerFormer/TransAct: realtime sequence encoder + batch user embedding are complementary. Our encoder is
+  8M dense, 2 epochs (zero-shot curve still rising at 2 ep for v3: 0.3556 @4k -> 0.3573 @7.9k).
+  counter-evidence (today): ID-space similarity has zero residual on G3 and cell AUC 0.47; N4 hashed-ID residual was
+  -0.0022 (nn_report); idmax32 null (err_SYNTHESIS:183). So the ID memorisation that exists is already absorbed; the
+  upside is only what a bigger/longer encoder would add. P ~0.1; expected member +0.0005..+0.002 if it works.
+  protocol: (i) GPU days: pretrain d=512/6L (or d=384 with 6-8 epochs) on the same leak-safe corpus, measure the
+  zero-shot val NDCG vs 0.359 and the cvnd_pre2s-style train-stage increment first (the cheap gate: zero-shot must gain
+  >= +0.005 or stop); (ii) only then port the encoder weights into nn/model.py hist_enc (same d, or a projection) with
+  the ID table frozen (no-ID token learned) and run a 2-epoch paired screen (seeds 23/24) then the 10-epoch pair rule.
+  kill: zero-shot < +0.005 over v3/v4; or screen val < +1 SE or holdout < 0.
+Rank 4  Dec-9 selection discipline (0 GPU)   STATUS: policy, partly in rule.json
+  val has fed every decide rule; the two val-best candidates (M2, S2) landed below the holdout-best G3 on public; m02
+  members correlate more. Keep S = min(V, V-D) with D ~0.0005-0.0008 for re-cools, pick 2 = least test-correlated eligible
+  pool, never choose on public deltas < 0.003. Protects ~0.0005-0.001 of selection error (RESEARCH_SWEEP P1).
+Rank 5  Same-user later-history post-processing   STATUS: built (preds/ens_G3_later_test.npy exists); USER DECISION
+  +0.0040 public / +0.0014 private expected (eda_history_leak 3.3; 58 public / 48 private feeds affected). The most
+  parsimonious reading of public #1 (0.398256, first entry) is a #2-level model (+0.0019 over us) plus this leak.
+  Modelling cannot reproduce that jump; nothing else in the test data carries a signal of that size (sections 2.1-2.3).
+
+Closed by today's probes (do not re-propose): fully transductive co-vis / popularity rebuilds for test; EASE / ALS /
+item2vec / SASRec-score residuals (ALS, i2v and the SASRec-type pre2 score are all <= 0 on G3; EASE is infeasible at 40M
+items and its item-item signal is what the exact co-visitation kernel already computes, deep_seq_pretrain_cf R5);
+P8 frozen-ID channel (cell gate fails); category set-level aggregation; user-0 routing; stored-order / terminal-click
+recovery; FT-vs-TO routing by H (same pattern as the failed M-split; would need an a9-style fresh-pool test first).
+
+Cold items on private (41%): no new idea survives. The content path (pre2 fe_noid, cosines) is what scores them; the
+content-kNN COEC (T2) and cold offsets are closed; the NN is calibrated on cold items (act/exp 1.006). The lever is the
+cold/warm calibration of the TO half (R2 hzcd), not a new cold-item signal.
+Multi-task on event types: do-not list (labels_loss 01/05); the history event-type semantics already enter through the
+history tokens and per-type cosine/count inputs (a4u counts PROCEED but trade warm for cold).
+300-candidate structure: val/test feeds are the L2 top-300 minus viewed items, truncated at the last interaction, in a
+hidden random order; M, the feed category shares and the within-feed f-score z/ranks already enter the NN; the stored
+order is uninformative (2.3). Nothing further to extract.
+
+=====================================================================================================================
+4. Weak spots / eye fatigue noticed
+=====================================================================================================================
+* Decisions keep being made on val (14.4K feeds, paired SE 0.0005-0.001) with many looks; the holdout is train-period and
+  over-rewards popularity inputs 2.5x (LEAKAGE-1). Both yardsticks are known-biased in opposite directions; the pmix
+  column is the only private-shaped one and is report-only. Fine for vetoes, weak for picking between +0.0003 candidates.
+* Pool rho 0.93 (n_eff ~1.07): more members of any recipe are worthless; every gain must come from a different mean
+  function. The only generational mean-function change available is TRUNC (and maybe R3).
+* The private-mix weights put 2x weight on user-0 and H<10 feeds, where the FT half helps and the TO half is weaker;
+  if a future pool drops FT members (item 2(c) of INSIGHTS: FT only ~4 members), re-check the user-0 / H<10 slices.
+* The public leaderboard cannot resolve anything below ~0.003; the #1 entry should not change the plan.

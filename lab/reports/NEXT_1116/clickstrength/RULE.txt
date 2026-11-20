@@ -1,0 +1,95 @@
+RULE of lane A "repaired click strength" (reports/NEXT_1116/clickstrength/). Written 2026-11-16T14:29:06Z (date -u), BEFORE any array of the new forms exists
+and before any witness number (val, holdout, pool-row parity) of the new forms is computed. Read before this text: only the record (rescue.md, CRITIC2.md, their
+outputs, residual_rows.md 1.3, nx3_step0.md, nx3_verify.md, ledger R1-R4) and the label-free feed counts of out/p00_labelfree_counts.txt (feeds tables only).
+CPU only (CUDA_VISIBLE_DEVICES="", <= 12 threads). Nothing is trained, installed into data/feats or nn/feat_cache, or submitted unless section 6 says GO (then: arrays only, no training).
+
+1. WHAT IS REPAIRED (the three defects of bt5:rk on record, CRITIC2.md section 4)
+   (a) exposure: the rank form put every shown-and-not-clicked item below every unseen item; a placebo that keeps the window exposure read +2.56 / +2.34.
+       Repair: the statistic is clicks against EXPECTED clicks given the exposure pattern (null mean 0 at every exposure level), it is entered on a FIXED scale
+       (no per-feed z, no rank), and it is centred inside the exposure strata of the critic's placebo, so that an exposure-only column is 0 by construction.
+   (b) parity on private rows: train rows had lag 7 / 8 / 9 d to the newest source day (0.48 / 0.35 / 0.17), private rows 8 / 9 / 10 d (0.24 / 0.38 / 0.38); lag 10 did not
+       exist on train rows with 5 source days. Repair: view "P3" below = 3 consecutive source days for every row of every split and the PRIVATE lag profile on
+       test-like train rows, the natural-val lag profile on val-like train rows. Gate with NO row-share exemption.
+   (c) form chosen after the witnesses: the two forms of section 3 are fixed here; nothing else can pass.
+
+2. THE VIEW P3 (slot = MSK day - Sep 6; dense source slots 0..8, 11, 12, 13 = hz2_common.DENSE_SLOTS)
+   window(e) = slots {e-2, e-1, e}, e = newest source slot; every window used is three consecutive dense calendar days.
+   lag l = row slot - e.  u = hz2_common.hash_uniform(feed_id, 0x9E3779B97F4A7C15) (train), u2 = hash_uniform(feed_id, 0xBF58476D1CE4E5B9) (val twin).
+   TRAIN rows (the 30,000 holdout feeds and the pool feeds now; every train feed only after a GO):
+     slot 6        : l = 3                                      (e = 3)
+     slots 7, 8    : l = 5 if u < 0.668 else 3                  (e = 2..5)     -> target: natural val, lag 3 / 5 d = 0.523 / 0.477 of feeds
+     slot 11       : l = 8 if u < 0.390 else 9                  (e = 3, 2)
+     slots 12, 13  : l = 8 if u < 0.161, 9 if u < 0.412, else 10 (e = 2..5)    -> target: private rows, lag 8 / 9 / 10 d = 0.242 / 0.378 / 0.379 of feeds
+     every other slot (0-5; stragglers 9, 14): no view (NaN; has = 0).
+     (constants from out/p00_labelfree_counts.txt with the slot shares of ALL train feeds: 0.477 / 0.7138 = 0.668; 0.2424 / 0.6207 = 0.390; 0.3794 / 0.6454 = 0.588;
+      (0.2424 - 0.3546 x 0.390) / 0.6454 = 0.161. Slot 6 cannot have lag 5 and slot 11 cannot have lag 10 with three source days: data start Sep 6.)
+   VAL / TEST rows, natural: e = 13 (window 11, 12, 13): val lag 3 / 5 d, public 7 / 8 d, private 8 / 9 / 10 d.
+   VAL rows, private-like twin (witness T): slot 16: e = 8 if u2 < 0.390 else 7 (lag 8 / 9 d); slots >= 17: e = 8 (slot 18: lag 10 d). Expected lag mix 0.20 / 0.32 / 0.48
+     (more 10 d than private: slot 18 has no dense source day at lag 8 or 9).
+   Sources of every statistic: train feeds of the window that are NOT among the 30,000 holdout feeds. The window ends l >= 3 days before the row, so the row's own
+   feed, any later snapshot of anyone, and any val / test label can never be a source. No val label array is opened by a builder. The statistic is per item: no user is
+   linked (user 0 included); an EARLIER labelled feed of the same user can be a source, on train and on test rows alike (not removed; stated limit).
+
+3. THE STATISTIC AND THE TWO FORMS (sign on record: +)
+   For a window W and a set S of source feeds with >= 1 clicked candidate:
+     regime of a feed: X (exploration) if p_random > 0.5 (eda/labels_position/out/train_prandom.npz, raw, NaN -> 0), else P (production).
+     position weight w_r(pos) = (clicks_r[pos] + 20 x rate_r) / (rows_r[pos] + 20) over the non-holdout train feeds of regime r on slots 0-4 (before every row with a view).
+     for a row j of source feed f:  q_j = npos_f x w_r(pos_j) / sum over the rows k of f of w_r(pos_k)      (expected clicks given the feed's click count; BT score at theta = 0)
+     per item i:  c_i = clicks, e_i = sum of q, over S.
+     shrinkage a = clip(1 / tau2, 0.5, 50), tau2 = sum_i[(c_i - e_i)^2 - e_i] / sum_i e_i^2 over the items of window {0, 1, 2} (a = 50 if tau2 <= 0); ONE constant per form.
+     x_i = log((c_i + a) / (e_i + a)) - m_a(e_i),  m_a(e) = E[log((C + a) / (e + a))] for C ~ Poisson(e)   (null mean 0 at every exposure level); unseen item (e = 0): x = 0.
+   Label-free exposure of the window: imp3_i = rows of item i in ALL non-holdout train feeds of W (clicked or not).
+   Exposure strata of a feed (exactly the strata of critic/c07_condperm.py, on imp3): bin = min(floor(8 x (lens.feed_rk(imp3) + 0.5)), 7).
+   ENTERED VALUE of a row = x_item - mean of x over the rows of the SAME feed and the SAME exposure bin; NaN on a feed without a view (0 in the lens, has = 0 as an input).
+   No per-feed scaling, no rank, no clip.
+     F1  cs3a_c : S = all non-holdout train feeds of W (both regimes).
+     F2  cs3x_c : S = exploration feeds of W only (the data selection of the Bradley-Terry fit of record).
+   Two forms, not three. Nothing else (no z / rank variant, no other depth, no other shrinkage, no sum of the two) can pass.
+
+4. WITNESSES AND THE LENS
+   cz = condlib.Null.score (reports/INPUTS_1116/residual_rows; user-clustered score statistic), null model = pool + control block of the ranker's own inputs
+   + nx_rp3_z + nx_rp3_rk, exactly as r10_gates.py / CRITIC2.md.
+     H = the 30,000 holdout feeds, pool = 16 held-out wide students, nx3 = lag-view files (NaN -> 0); the form is 0 outside the 15,225 feeds of slots 6-8, 11-13.
+     T = val rows, train-only pool of the 16 wide students, nx3 = its stale-val twin; the form = its private-like twin of section 2.
+     N = val rows, natural form, natural nx3 (information in g1 and g2; binding only in g4).
+   Order of work: build -> g3 and the label-free part of g5 (no witness label) -> g1, g2 -> g4 -> rest of g5. Every gate is computed for BOTH forms whatever the others read.
+
+5. GATES. KILL RULE: any miss of g1-g5 for a form = that form is dead; no form alive = NO-GO, nothing is built for training.
+   g1 information. One-sided p of cz (sign +) on H and on T; p_form = max(p_H, p_T). Holm over the two forms at alpha = 1 - Phi(2.5) = 0.00621:
+        the smaller p_form must be <= alpha / 2 (cz >= 2.74 on BOTH witnesses), then the other needs <= alpha (cz >= 2.50 on both).
+        Each bar is multiplied by max(1, sd of the form's 100 within-feed permutations on that witness), and no such permutation may reach the read (0 of 100 with |cz| >= read).
+   g2 the read is the click part. Exposure-preserving placebos, 100 draws each, per form and witness (H and T): the item values x are permuted inside the feed among rows of the
+        same stratum, the entered value is recomputed and scored.
+        P1 strata = the 8 exposure bins of imp3 (CRITIC2 4.1, c07_condperm.py).   P2 strata = 8 bins built the same way from the form's own expected clicks e.
+        Required on both witnesses: |mean cz of P1| < 1.5 AND |mean cz of P2| < 1.5 AND (read - mean) / sd >= 2.5 against P1 AND against P2.
+   g3 parity (label-free; POOL feeds = p_random > 0.5, M >= 50, not holdout, has = 1 decide, ruling R1). Non-default indicator of a form: e_i > 0.
+        C3p  test-like pool rows (slots 11-13) against PRIVATE rows (M >= 50): share by the 7 listing-age buckets, dZ <= 0.05 and the largest of ALL 7 buckets <= 0.10 (no exemption).
+        C3v  val-like pool rows (slots 6-8) against VAL rows (M >= 50): the same, ALL 7 buckets (no exemption).
+        C3u  test-like pool rows against PUBLIC rows: the bar of record (dZ <= 0.05; largest bucket WITH row share >= 0.05 <= 0.10). The all-bucket value is printed and is NOT
+             a bar: public (lag 7 / 8 d) and private (8 / 9 / 10 d) rows differ from each other in the 7-10 d bucket, the view targets private. Stated before any value.
+        C4   PSI <= 0.25 of each entered value, pool has = 1 rows against val / public / private (binner of r10_gates.py: 9 val decile edges of the non-zero values + a zero bin);
+             the same per half (val-like against val, test-like against private) is printed.
+        C5   non-default share on every test day >= 0.5 x val's largest (all / slot 16 / slot 18).
+        Printed, no bar: realised lag tables; seen share by lag; holdout feeds as comparison; twin against private. NOT RUN unless GO: all has = 1 train rows (limit J0 of nx3).
+   g4 direct NDCG read, form of critic/c09_ndcg.py section N (5 user-grouped folds inside the witness, control block and nx3 re-weighted in BOTH arms), the single form over
+        null + nx3:  >= 0 on the lag-view holdout feeds AND >= 0 on its test-like half (slots 11-13) AND >= 0 on T (all feeds) AND >= 0 on N (all feeds).
+        Printed, no bar: pmix-public / pmix-private cells, the cross-witness reads.
+   g5 leak scans (form of nx3_verify.md, on the witness arrays): (1) causality: newest source slot = row slot - l on every feed with a view, 0 source rows at or after
+        (row day - 2); (2) re-derivation of c, e, imp3 and of the entered value from the raw arrays by a second code path on >= 2,000 sampled rows of the five query sets:
+        0 mismatches; (3) holdout feeds are never a source; no val / test label opened by the builder; (4) own-feed test: mean within-feed AUC of the entered value for the
+        click on pool rows (their feeds are sources of other rows) not above the holdout rows (never a source) by more than 3 SE, per half; (5) the checks can fail: a deliberately
+        leaky build (window that contains the row's own day and feed) must change values and must be caught by (1) and (4). Any failure = miss.
+        NOT RUN unless GO: the same audit on all 246.7M train rows (it then decides: a failure turns GO into NO-GO).
+   HOLDOUT-ONLY MISS (owner's rule of 2026-11-15: no rejection on the holdout alone). If a form passes every val-side and label-free clause (g1 on T, g2 on T, g3, g4 on T and N,
+        g5) and misses ONLY holdout clauses (g1 / g2 on H, g4 on H or its test-like half), the verdict of this lane stays NO-GO (nothing is built; the bar here is stricter
+        than nx3's, whose gate pass did not predict a trained gain), but it is recorded as "HOLDOUT-ONLY MISS, idea not rejected". What then decides whether the lead may
+        reopen it: val and the private-mix view, i.e. cz on T at the pmix-private weights >= +1.7 (0.67 x 2.5, the share a homogeneous effect keeps) AND nested NDCG on T
+        >= 0 at the pmix-private weights AND N cz >= +2.0. Both numbers are printed in any case. A miss on any val-side or label-free clause is a plain NO-GO.
+
+6. ON GO ONLY: full-train build of the surviving form(s) in the nx3 layout under NEW names (data/feats/<split>/cs3?_c.npy hard-linked to nn/feat_cache/<split>/, exclusive
+   create, NaN = no view; val twin outside feat_cache), the full-train audit and J0 read of g3 / g5, and the text of a proposed trained test. No training is launched by me.
+
+7. LOOKS. Deciding reads: 2 forms x 2 witnesses (g1) + 2 x 2 x 2 placebo means (g2) + 2 x 4 NDCG cells (g4). Everything else printed is information and cannot promote.
+   Nothing is transformed, re-binned, re-lagged, re-shrunk or re-stratified after a read. A bug fix after a read is reported as such with both values.
+   FORECAST (before any number): P(GO) 0.04. On record the click part alone was +2.0 / +2.2 sd with five source days and fresher lags; P3 has three source days and lags of
+   8-10 d on the test-like half, where the holdout read +0.95 / +0.34 at 8 / 9 d.

@@ -1,0 +1,48 @@
+LLM REVIEW OF THE FINAL RANKING, VALIDATION PILOT (2026-11-17)
+
+Question (owner, 2026-11-17): can language-model reviewers, given what we know about the data, find and fix
+mistakes in our best file's ranking feed by feed? First on validation, where labels exist; a 5% slice.
+
+Different from nn_x/llm_manual (2026-11-13): there the model ranked feeds from scratch with no trained
+model (0.3957 vs 0.4433, closed). Here the reviewers start from the FD16P20 order and may only move items.
+
+Set-up (code/):
+- Cards (cards.py): one text card per feed, candidates in the order of the FD16P20 final score
+  (0.5 z(ft) + 0.5 z(to) of ens_FD16P20kd; reproduces val NDCG 0.40271), with category name, f1..f5, user-item
+  cosine, max cosine to the history and its index/type, max cosine to the newest 10 events, the user's
+  history in the candidate's category, leave-user-out history count, train impressions. Own-feed history
+  only; nothing from later snapshots.
+- build_val.py: eval slice = 5% of validation by user (722 feeds, 722 users, seed 20261117), 49 blind
+  batches of about 15 feeds; study set = 100 labelled feeds from other users (50 random, 50 with the
+  best positive below rank 5); calibration from the 13,701 non-eval feeds (results/calibration.json).
+- primer.txt: task, metric, card columns, model description, calibration ("the item at rank 1 is
+  positive 13.1% of the time"), error-analysis facts from docs/02.
+- A workflow of reviewer agents (its script is not published), read-only on named files:
+  5 study agents (20 labelled feeds each) -> 1 guide writer -> 2 blind dry-run reviewers (batches 00, 01).
+  8 agents, 1.17M subagent tokens, 15 min. Audit of all tool calls (results/audit_tools.txt): only Read on
+  the primer, the agent's own study or batch file; no label file opened.
+
+Results:
+- Study (results/pilot_a.json): all five analysts concluded that no blind edit beats the model. Of 81
+  feeds with the best positive below rank 5, they judged 13 "explainable from the card", each post hoc and
+  contradicted elsewhere. Misses are same-category lotteries (no column singles out the clicked item) or
+  exploration clicks in categories absent from recent history.
+- Guide (results/guide_a.txt): default no edit; one rule allowed, R1 = demote an item at ranks 2-10 with
+  max history cosine >= .98 at history index >= 25 and h10 <= .60 to about rank 16 (feeds of 30+ only).
+- Dry run (results/dry_run_score.txt): 1 edit in 30 feeds (an R1 demotion, +0.004 on that feed);
+  +0.00014 +- 0.00014 per feed.
+- The proposed rules tested in code on the 13,701 labelled non-eval feeds (results/rules_test.txt):
+  R1 as written -0.00011 +- 0.00007 (fires on 4.4% of feeds; the flagged items are positive 5.0% of the
+  time, the base rate of ranks 2-10); 10 variants of R1 between -0.00008 and -0.00089; cold-listing
+  demotion -0.00070 +- 0.00019; fresh-listing demotion -0.00034 +- 0.00017; low-cosine demotion
+  -0.00043 +- 0.00016. None positive. On the 722-feed slice the same rules read between -0.0019 and +0.0005
+  with SEs of 0.0001 to 0.0015: the slice cannot resolve effects of this size.
+
+Verdict: NO GAIN; CLOSED. The reviewers see only what the model reads, and the model is calibrated on the
+items they would move. The remaining 47 blind batches were not run: with the guide's single rule they would
+apply R1, which the code test already shows to be slightly harmful.
+
+Scale, had it worked: test = 28,595 feeds, 2,904,806 predictions. 5% = 1,430 feeds = about 96 batches of
+15; full test = about 1,900 batches. A dry-run reviewer used about 9k output tokens and about 1M context
+tokens per batch, so the full test would be about 19M output and 2B context tokens. An edited test file is
+also not reproducible by code, which matters for the organisers' check of the top ten.

@@ -1,0 +1,55 @@
+build_r4.py FD16P20 (print-only) says:
+   references (final val): W8 0.40165 | W16 0.40158 | W8P20 0.40214   public: W8 0.394486, W16 0.394483, W8P20 0.395009
+   FD16P20: 16 base + 4 pop-light members at w 0.2 | final val 0.40271 | FT 0.40190 TO 0.40213
+      vs W8    : +0.00106+-0.00047 | M<50 +0.00022+-0.00087 M>=50 +0.00165+-0.00052 | pmix public +0.00138+-0.00058 private +0.00148+-0.00071 | test corr 0.9967 | paired public SE 0.00061
+      vs W16   : +0.00113+-0.00043 | M<50 +0.00005+-0.00080 M>=50 +0.00188+-0.00049 | pmix public +0.00124+-0.00053 private +0.00133+-0.00065 | test corr 0.9976 | paired public SE 0.00056
+      vs W8P20 : +0.00058+-0.00043 | M<50 +0.00018+-0.00082 M>=50 +0.00085+-0.00047 | pmix public +0.00075+-0.00053 private +0.00069+-0.00064 | test corr 0.9975 | paired public SE 0.00056
+
+PATH CHECK: base re-predictions identical to the stored train-only val files for 16 of 16 members; TO(base) vs stored ens_FD16P20kd_to_val.npy max|d| 0.00e+00; FT branch of build_r4 vs stored file max|d| 0.00e+00
+   reference (same path, stored inputs): FILE val 0.40271 (stored-file FD16P20 final 0.40271, build_r4 0.40271) | train-only branch 0.40213 | arm B: FILE 0.40248, train-only branch 0.40227
+   rows whose member prediction changes (mean over members): 0.999
+
+FILE: arm B (half dose) minus same-path reference, paired per feed
+   val (all feeds)        -0.00024 +- 0.00017  (z -1.41, n 14423)
+   val M<50               -0.00038 +- 0.00033  (z -1.18, n 5893)
+   val M>=50              -0.00014 +- 0.00018  (z -0.78, n 8530)
+   pmix-public            -0.00018 +- 0.00022  (z -0.83, ESS 9321)
+   pmix-private           -0.00013 +- 0.00027  (z -0.50, ESS 6389)
+   Tue (MSK day 20718)    -0.00017 +- 0.00021  (z -0.81, n 7542)
+   Thu (MSK day 20720)    -0.00031 +- 0.00027  (z -1.17, n 6878)
+   positives all cold     -0.00124 +- 0.00031  (z -3.95, n 3422)
+   no cold positive       +0.00015 +- 0.00023  (z +0.65, n 9118)
+   feeds changed 0.243; paired public SE (sd / sqrt(8562)) 0.00022
+
+TRAIN-ONLY BRANCH: arm B (half dose) minus same-path reference, paired per feed
+   val (all feeds)        +0.00014 +- 0.00022  (z +0.61, n 14423)
+   val M<50               +0.00018 +- 0.00039  (z +0.46, n 5893)
+   val M>=50              +0.00011 +- 0.00027  (z +0.40, n 8530)
+   pmix-public            +0.00003 +- 0.00029  (z +0.12, ESS 9321)
+   pmix-private           -0.00011 +- 0.00036  (z -0.32, ESS 6389)
+   Tue (MSK day 20718)    +0.00038 +- 0.00028  (z +1.36, n 7542)
+   Thu (MSK day 20720)    -0.00013 +- 0.00036  (z -0.36, n 6878)
+   positives all cold     -0.00254 +- 0.00039  (z -6.51, n 3422)
+   no cold positive       +0.00120 +- 0.00031  (z +3.87, n 9118)
+   feeds changed 0.342; paired public SE (sd / sqrt(8562)) 0.00029
+
+MEMBERS (each alone, arm B minus base):
+   w5_fd10_kd05w192_s951        +0.00003 +- 0.00028 (z +0.10)
+   w5_fd10_kd05w192_s952        +0.00014 +- 0.00028 (z +0.51)
+   w5_fd10_kd05w192_s953        +0.00019 +- 0.00028 (z +0.69)
+   w5_fd10_kd05w192_s954        +0.00011 +- 0.00027 (z +0.43)
+   w5_fd10_kd05w192_s955        +0.00021 +- 0.00028 (z +0.75)
+   w5_fd10_kd05w192_s956        +0.00032 +- 0.00026 (z +1.23)
+   w5_fd10_kd05w192_s957        -0.00004 +- 0.00026 (z -0.17)
+   w5_fd10_kd05w192_s958        +0.00018 +- 0.00026 (z +0.69)
+   w5_fd10_kd05t25w192_s951     +0.00018 +- 0.00025 (z +0.73)
+   w5_fd10_kd05t25w192_s952     +0.00027 +- 0.00026 (z +1.02)
+   w5_fd10_kd05t25w192_s953     +0.00026 +- 0.00025 (z +1.04)
+   w5_fd10_kd05t25w192_s954     +0.00019 +- 0.00025 (z +0.74)
+   w5_fd10_kd05t25w192_s955     +0.00061 +- 0.00026 (z +2.34)
+   w5_fd10_kd05t25w192_s956     +0.00019 +- 0.00027 (z +0.70)
+   w5_fd10_kd05t25w192_s957     +0.00029 +- 0.00026 (z +1.12)
+   w5_fd10_kd05t25w192_s958     +0.00034 +- 0.00024 (z +1.39)
+   positive members 15 of 16; mean +0.00022, sd across members 0.00014; kd05w192 x8 mean +0.00014, kd05t25w192 x8 mean +0.00029
+
+RULE (ledger 23:08:02Z Q6): FILE val delta >= 0: False (-0.00024) | pmix-private >= +1 SE: False (-0.00013 vs SE 0.00027, z -0.50) | val M<50 >= -1 SE: False (-0.00038 vs -0.00033)  ->  CLOSED

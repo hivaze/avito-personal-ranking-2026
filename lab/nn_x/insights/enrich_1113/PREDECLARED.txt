@@ -1,0 +1,57 @@
+ENRICH-1113 PRE-DECLARATION (external-knowledge / decoded-structure enrichment features on G3). Written BEFORE any
+feature of this batch was built or scored. Agent: enrichment research agent (CPU only, read-only on the project).
+Scratch: /tmp/scratchpad/enrich/
+
+PROTOCOL (copied from nn_x/insights/ccb_1113/PREDECLARED_ccb.txt B1-B9; harness = copy of scratchpad/ccb/tester2/harness.py):
+  base val b = zf(0.5 zf(ens_G3_ft_val) + 0.5 zf(ens_G3_to_val)) (0.40032); base holdout = zf(mean zf of the 20 train-only G3
+  members in preds/holdout) (0.32379). LIN listwise softmax s = beta b + sum_j [w_j1 zf(x_j) + w_j2 (pctrank(x_j)-0.5) + w_j3 isnan],
+  control = beta b; GroupKFold(5) by val user; nested paired per-feed delta; full-val theta applied to the holdout (+ LATE / EARLY
+  columns); pmix(private) on the nested per-feed deltas (veto only). Within-feed AUC of the raw column reported as information.
+  Cross-user / label-derived tables for val rows use TRAIN days only (all train days < val); for holdout rows (train day d) only
+  train days < d, the 30K holdout feeds never a source, same non-zero user skipped; rows on day 0 get the neutral value.
+  Own-history columns use only the feed's own history arrays (label-free).
+
+PASS BAR (one item = one LIN with all its primary columns; the bar applies to the item):
+  nested val delta >= +0.0005 AND z >= 2.5 AND holdout transfer delta >= 0 AND pmix >= -1 SE.  PASS -> lead for a 2-epoch NN
+  screen. Anything else = CLOSED with its number. Variants not listed here are INFORMATION only and can neither pass nor rescue.
+  Multiplicity: 8 items; under the null P(max z >= 2.5 of 8) ~ 0.05.
+
+ITEMS
+ S1 ext_season      external late-September demand index per leaf category, hand-coded from PUBLIC seasonality knowledge
+                    (sources listed in web/SOURCES.txt before scoring): values in {-2,-1,0,+1,+2}; columns: [idx]. Same table on
+                    val and holdout (label-free, external).
+ C1 cycle_x_recency external purchase-cycle class per leaf (long / medium / short, table in ext_tables.py) x own-history recency:
+                    columns: [long * log1p(cat_min_hpos) (0 if no same-category event), long * [cat_min_hpos <= 8],
+                    short * [cat_min_hpos <= 8]].
+ C2 cat_recency_lift train table lift[cat, bin(cat_min_hpos)] = P(y | cat, bin) / P(y | cat), bins {0-1,2-3,4-7,8-15,16-31,32-63,
+                    64-127,128-255,none}, Laplace 50 toward 1; fitted on a 300K random train-feed sample excluding the holdout;
+                    val rows: all 14 train days; holdout rows: days < d (day 0 -> 0). columns: [log lift].
+ C3 age_rel_ext     external typical listing lifetime per leaf (days, ext_tables.py): columns: [log(age_h(f4)/ (24*life_d)),
+                    [age_h < 24] * [life_d >= 30]] (age from data/feats/life_f4_age_knots.npy; NaN if f4 at cap).
+ R1 home_x_localnight f2 home flag (f2 == feed mode) x local-time bins, local hour = MSK hour - shift[home component],
+                    shift from nn_x/codes/features/04_k2_geo.log table (b) (components >= 1500 feeds; others 0), home
+                    component = majority K2 component (k2_item_comp.npy) among candidates at the feed's f2 mode:
+                    columns: [home * night(0-6 local), home * evening(18-24 local)].
+ R2 cat_x_localhour train table lift[cat, local-hour bin {night, morning 6-11, day 11-18, evening 18-24}] with the same local hour
+                    as R1 (train feeds' own home component), Laplace 50, same sampling / day rules as C2. columns: [log lift].
+ U1 cat_src_counts  own-history same-category counts by SOURCE: [# (e1,s2) events in cand category, # (e1,s2) with hpos < 32,
+                    # s4 events in cand category] (search-then-feed intent, never built per source before).
+ U2 guest_x_catlift [user_id == 0] x log lift_guest[cat] with lift_guest = P(y | cat, user0) / P(y | cat) from the train sample,
+                    Laplace 50, same day rules. columns: [the product] (0 on logged-in feeds).
+
+MEASUREMENTS (no gate): per-category CTR val vs train random-like feeds (drift) and G3 act/exp per category on val (does the FT
+  absorb the drift); the local-hour shift coverage; the share of val/holdout rows with each column non-zero.
+Fri Nov 13 19:12:00 UTC 2026
+Fri Nov 13 19:12:00 UTC 2026
+
+ADDENDUM (batch 2; written after the batch-1 numbers of C1-C3/R1/R2/U1/U2 were seen, before any batch-2 number). Same protocol and bar.
+ C4 complement_cats  external category-complement table (directional, ext_tables.COMPLEMENT: e.g. Cars -> Parts, Apartments ->
+                    Furniture / Appliances / Repair, Dogs/Cats -> Pet supplies, Vacancies <-> CVs, Desktop PCs <-> PC components ...):
+                    columns: [any history event with hpos < 32 in a category that is a complement-source of the candidate's
+                    category (0/1), log1p(# such events)], same-category events excluded (f3 already carries them).
+ X1 cat_actexp_offset INFORMATION ONLY (val-label-derived; cannot pass): per-leaf log(act/exp) of the control model fitted on the
+                    4 training folds and applied as one LIN column on the 5th; holdout = full-val offsets. Answers 'does the
+                    fine-tune absorb the category drift' in NDCG terms.
+ U2 note: user_id 0 is one GroupKFold group, so a guest-only column is identically 0 on every held-out fold where it is non-zero in
+                    training -> nested delta is 0 by construction; U2 is UNTESTABLE in this harness (holdout transfer reported).
+Fri Nov 13 19:19:47 UTC 2026

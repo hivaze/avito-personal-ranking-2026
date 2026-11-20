@@ -1,0 +1,58 @@
+{
+ "results": [
+  [
+   "flags OFF vs frozen w5: identical training-gather sequence (incl. pool steps), 39 steps",
+   true
+  ],
+  [
+   "flags OFF vs frozen w5: identical train-mode model logits and loss-input logits",
+   true
+  ],
+  [
+   "flags OFF vs frozen w5: identical logged loss / val / holdout / BEST lines",
+   true
+  ],
+  [
+   "flags OFF vs frozen w5: bit-identical checkpoint and val preds",
+   true
+  ],
+  [
+   "flags OFF: no FPCD line in the log",
+   true
+  ],
+  [
+   "ON vs OFF: the same number of training gathers (39) = step count unchanged",
+   true
+  ],
+  [
+   "ON vs OFF: every ON batch == the OFF batch of that step minus the Sep 6-8 feeds (split events are logged subsets)",
+   true
+  ],
+  [
+   "ON: NO excluded (Sep 6-8) feed in any training gather",
+   true
+  ],
+  [
+   "ON: logged realised regular-batch ratio in [0.6, 0.85] and the setup line present",
+   true
+  ],
+  [
+   "ON: evals / predicts unchanged in number; checkpoint differs from flags OFF (mechanism live)",
+   true
+  ],
+  [
+   "ON: checkpoint, val preds and json written",
+   true
+  ],
+  [
+   "long ON run: number of gathers == total steps; the final summary counts == the recorded gathers",
+   true
+  ],
+  [
+   "long ON run: NO excluded feed in any of the gathers",
+   true
+  ]
+ ],
+ "passed": 13,
+ "total": 13
+}

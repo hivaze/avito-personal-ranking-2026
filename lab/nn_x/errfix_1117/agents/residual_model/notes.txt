@@ -1,0 +1,100 @@
+RESIDUAL-MODEL LENS -- error analysis of FD16P20 on the discovery half (7,214 feeds, 697,304 rows), 2026-11-17
+Analyst folder: <repo>/lab/nn_x/errfix_1117/agents/residual_model/
+Base on discovery: NDCG 0.399392 (score). s_ft alone -0.00068, s_to alone -0.00113; the 50/50 mix is the optimum
+(w_ft 0.45..0.6 all within +-0.00004).
+
+BOTTOM LINE
+No rule is submitted. Every learned residual (trees, additive, linear, sparse-selected) has a cross-fitted NDCG change
+<= 0 within noise; the few single nudges that look positive are at z < 2 and below +0.0003 once measured honestly,
+and they are what one expects as the maximum of ~290 tried variants. The model is calibrated against every column
+and every pair of (category x context) cells we could form. The upper bound for a feature rule on this sample,
+measured by learned residuals, is ~0 (no learned residual beat 0 out of fold; best +0.00037, z 0.8).
+
+1. LEARNED RESIDUAL (the upper bound asked for)
+Setup: LightGBM on discovery with init_score = c * score (c = 1.0 = MLE scale of a per-feed softmax, fitted on the
+training folds), features = 60 raw columns + within-feed z-scores / percentiles / feed means of 22 item columns +
+rank_pct, s_ft - s_to, category share / rank ratios (130 columns). Cross-fitted on kit.folds (5 folds by user).
+Out-of-fold delta vs score (best tree count in brackets; every tree count is in cv_log.txt):
+  lambdarank  15 leaves lr .05 mdl 500          -0.0031 at 10 trees, -0.0119 at 400   (in-sample +0.037 at 50!)
+  lambdarank   7 leaves lr .02 mdl 3000 l2 100  +0.00037 (z 0.8) at 10 trees, then -0.0012 .. -0.0067
+  binary      15 leaves                          -0.0002 .. -0.0040
+  binary       4 leaves mdl 5000 l2 100          +0.00022 (z 1.7) at 50 trees, -0.0021 at 400
+  softmax (custom per-feed objective) 7 leaves   -0.0004 .. -0.0038
+  softmax 3 leaves mdl 20000 l2 100              +0.00014 (z 1.2) at 10 trees, -0.0015 at 800
+  softmax 4 leaves restricted to one feature group (similarity / popularity / category / context):
+      sim  +0.00011@10 .. -0.0023@400 ; pop -0.0001..-0.0015 ; cat -0.00004..-0.0005 ; ctx +0.00026@100 (z 0.7)
+  conditional logit, linear on 107 standardised columns:   -0.0010 (in-sample only +0.00047)
+  conditional logit, binned GAM (857 decile dummies):      -0.0011 (l2=1) .. -0.0114 (l2=.001)
+Power check: starting from the weaker s_to (-0.00113) with s_ft and s_ft - s_to among the features, the same tree
+learners recover at most half of the known gap (best -0.0006) and lose it again with more trees. So the learners'
+noise cost is ~0.0005-0.001 at this sample size: a learned residual can only reveal effects larger than that, and
+there are none. The in-sample gains (lambdarank +0.037 at 50 trees) are pure memorisation of ~11k positives.
+Verdict: the residual model itself is not submittable (no out-of-fold gain at any size).
+
+2. DISTILLATION (low-variance versions of the residual)
+a) One-term linear nudges, weight by per-feed softmax MLE on 4 folds (96 columns, one variant each): best
+   cat_rank_pct +0.00022 z 1.9; mean z over 96 columns -0.45. Null calibration with 40 random N(0,1) columns gives
+   mean z -0.28 (sd 0.83): the real columns behave like noise.
+   Note: many MLE weights are stable across folds (cat_n_in_feed +0.14+-0.02, cat_feed_share +0.09, ucos +0.04,
+   hmean5 +0.03) yet hurt NDCG out of fold: the likelihood gain sits in the tail, not in the head that NDCG weighs.
+b) One-term NDCG-direct nudges, weight on a grid chosen on 4 folds (96 columns): best h10 (w=-.02 per SD) +0.00052
+   z 1.93; p_f3 +0.00043 z 1.85; cat_user_rank +0.00031 z 1.56; mean z -0.87. All chosen weights are the smallest
+   non-zero grid value (tie-breaking among near ties). Per-fold signs of h10: + + - + +.
+c) Nested greedy forward selection (whole scan + pick-best inside each fold, up to 3 terms): see section 6.
+d) Head pairs: 1,473 feeds where exactly one of ranks 1/2 is positive (rank 1 wins 58.5%). Logistic on the
+   score gap + one feature difference, 97 columns: max |z| 2.5 (z_c_vfeed), consistent with noise.
+
+3. WHAT THE ERRORS LOOK LIKE (statistics and individual feeds; show_feeds.py)
+- Bad feeds (best positive at 30+, 1,481 feeds) are large: median M 167 vs 29 for good feeds (best positive 1-3,
+  1,994 feeds); 15.7 vs 9.5 categories in the feed. History length and guest share do not differ.
+- In feeds with M >= 100, positives the model puts at 30+ are "exploration" clicks: h1 0.54 vs 0.73 for positives at
+  rank 1-3, same_cat_newest 34% vs 66%, newest event of that category 15.5 vs 3.1 events back, pre2_fe_z 0.26 vs
+  1.19, fewer appearances in other users' histories (26 vs 37). The rank-1 negatives look exactly like the good
+  positives (h1 0.70, same_cat_newest 62%, pre2 1.14): the model's top is right on average and the miss is a click
+  that nothing in these columns predicts.
+- Typical bad feed: the user's main category fills the top 10 with near-identical listings (cat_user_rank 1,
+  hmax .9+), the click is on a different, rarer category or on a same-category listing that the columns do not tell
+  apart (feeds 13726, 13745, 493, 2188, 10882, 11958 printed in the run). Good feeds are mostly small (M 9-50).
+- Calibration scan (obs/exp positives per decile of 130 columns, expected = per-feed softmax of the score):
+  max |z| 3.4 over ~1,500 bins, i.e. the null maximum. Category x context (hour, weekday, newest event, M, H,
+  rank band, ...) 1,279 cells: 4 with |z| >= 2.8, 6.5 expected by chance. Engagement rate f5 by exposure: flat.
+
+4. NEAR MISSES (not submitted; listed so nobody re-mines them)
+- "category runner-up demotion": score - 0.03 * [cat_rank_in_feed == 2 and rank <= 10]. Cross-fitted +0.00029
+  (se .00016, z 1.89); in-sample +0.00039 (z 2.4; per fold +.00048 +.00038 +.00073 +.00001 +.00033). Same family:
+  boost category leaders not at rank 1 (+0.00043 cf, z 1.62), -a*log(cat_rank_in_feed) (+0.00013, z 1.26),
+  10 variants in the family. Mechanism check: when a top-10 item that is 2nd in its category is positive, its feed
+  has 2.27 positives on average vs 1.77 for a category leader (3.0 for 4th+), so its NDCG weight 1/IDCG is ~7% lower
+  (0.661 vs 0.712 in feeds of 100+); this is the one structural reason the metric-optimal key differs from the
+  marginal probability. A learned version (key = score + m * predicted log E[1/IDCG | positive, x], LightGBM on
+  positives, cross-fitted) gives -0.00005 at the theoretical m = 1 and -0.00054 with m chosen by cross-fit: the
+  model already absorbs it (its listwise training weights feeds equally).
+- Branch re-weighting by segment: score + 0.3 * (s_ft - s_to) for users whose newest 32 events are all in one
+  category (568 feeds): +0.00029 cf (z 2.12), but the segment was picked from a table of ~45 segments looked at
+  in-sample, and it cannot be checked on the holdout (s_ft is NaN there). Global and other segments: -0.0004..0.
+  An uncertainty penalty -w * |s_ft - s_to|: -0.00039 (z -2.1).
+- Learned residual relative to s_to vs relative to score (binned GAM, l2=1): -0.0001 vs -0.0011. I looked for a
+  leak-like anti-correlation (s_ft has seen the sealed half's labels through its own folds); the random-column null
+  (mean z -0.28) explains most of the negative drift, so no claim.
+
+5. VARIANTS COUNTED
+~30 GBM (config x tree count) + 13 power-check points + 27 group/strong-reg GBM points + 8 conditional-logit fits +
+96 MLE one-term + 96 NDCG one-term + 1 nested selection (3 steps) + 7 branch weights + 7 branch segment rules +
+9 category-rank rules + 1 metric-optimal key + 4 consistency checks = ~300 cross-fitted variants. With ~300 tries
+the expected best z under the null is ~2.7; the best honest result (+0.00052, z 1.93) is below it.
+
+6. NESTED FORWARD SELECTION (cross-fitted value of "scan everything, keep the best few terms")
+nested_fs.py: in each outer fold, scan 96 standardised columns x 10 weights (+-.005..+-.1) on the 4 training folds
+by NDCG, add the best term, repeat 3 times; measure on the held-out fold.
+  step 1: -0.00071 (se .00030, z -2.37)   step 2: -0.00109 (z -3.13)   step 3: -0.00143 (z -3.93)
+First picks differ in every fold (p_f5 -.01, f1 -.05, c_order -.05, it_hist_et1_luo +.02 twice) with training-fold
+gains of +0.0005..+0.0009 each: that is the size of the selection bias of a scan over this many columns, and
+the reason no single in-sample "finding" of ~+0.0005 on this sample should be believed.
+So the distillation procedure itself, measured honestly, loses NDCG.
+
+FILES
+prep.py (features, softmax scale, fast vectorised NDCG equal to kit's), resid_cv.py / resid_cv2.py (cross-fitted
+residual GBM), power_check.py, clogit_cv.py (linear / binned conditional logit), calib_scan.py (+ calib_scan.csv),
+inter_scan.py, single_scan.py (+ csv), ndcg_scan.py (+ csv/log), nested_fs.py (+ log), null_scan.py, branch_seg.py,
+rule_cv.py (cross-fitted one-parameter rule tester), catrank_check.py, iw_key.py, head_pairs.py, show_feeds.py,
+cv_log.txt (every cross-fitted residual run). rules/ is empty on purpose.

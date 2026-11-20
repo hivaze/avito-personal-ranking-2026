@@ -1,0 +1,22 @@
+PREDECLARED 2026-11-13 06:12:25 UTC -- skeptic + synthesis pass over the codes-exploit CPU tests (01-05, lensA, lensB). CPU only, 12 threads.
+Written before any number of THIS directory is computed. Known beforehand: every verdict in 01-05/lensA/lensB (all FAIL);
+A1 X1 val V-exact nested +0.00033 +- 0.00042, holdout transfer -0.00073 +- 0.00024 (unclustered SE).
+No label-fitted object except the x02 nested weight grid (fu_common.nested, user-grouped, user-0 singletons). Files only here.
+
+CHECKS (all are audits of existing verdicts; none can create a PASS on its own: a PASS would still need the full A1 gate)
+ K1 LEAK-FREE VAL X1. The A1 val build (V-exact) counts other users' card views from ALL splits at ANY time, including the
+    test split (days 20-23) that post-dates every val feed (days 16-19); other val users' feed clicks re-surface there as
+    (e1, s1) views = a cross-user, forward-in-time label leak. Rebuild n_e1, n_s1 (distinct user keys, guest snapshot = own key,
+    own user removed) under (i) V-lf: user keys whose first snapshot containing the (item, class) is on an MSK day strictly
+    earlier than the feed's day; (ii) V-notest: train + val histories only, any day. X1 = (n_s1 + 2 pc[cat])/(n_e1 + 2).
+    Parity: V-exact rebuilt here must equal lensA itsrc_val.npz e1/s1 exactly.
+    Readouts per variant: tail win (fu_common.Tail), x02 nested residual on G3 val (13-grid, fold weights), coverage.
+    Reading rule: the A1 FAIL is CONFIRMED unless V-lf nested > +0.0003 AND z > 2 (it cannot be overturned to PASS here,
+    since the gate also needs the holdout, which already chose w = 0). Prediction declared now: V-lf < V-exact.
+    K1b leak size: pair AUC of the forward-only increment (n_s1 exact - n_s1 lf) on the tail pairs and on all
+    (positive, negative) pairs within val feeds; > 0.5 on all-pairs = the forward counts carry label information.
+ K2 HOLDOUT SE CLUSTERING. fu_common.nested reports SE = sd/sqrt(n_feeds); holdout feeds are train feeds and users repeat.
+    Recompute the A1 X1/Y2 holdout transfer (fixed w = +0.05, the full-val weight) with a user-clustered SE. The statement
+    "the holdout contradicts val" is kept iff clustered z < -2; otherwise softened to "holdout does not support val".
+ K3 MULTIPLICITY LEDGER (no computation beyond counting): number of cue-looks on val across lensA/lensB/01-05 and the
+    expected max |z| under the null; reported, not gated.

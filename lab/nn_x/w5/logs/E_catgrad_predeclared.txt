@@ -1,0 +1,91 @@
+WAVE 9 arm CATGRAD — PRE-DECLARATION (implementation agent; idea + two skeptic reports: scratchpad w9/catgrad.json; lead decision
+reports/CURRENT_STATUS.md 11-13 13:09). Frozen 2026-11-13T13:38:39Z (`date -u`), BEFORE any run of this arm: 0 matching files existed
+(checked: no w9_catgrad_* / w9_base_* / w5_e10_catgrad_* in nn_x/w9/catgrad/{logs,preds,preds/holdout,ckpt} or nn_x/w5/{logs,preds,ckpt};
+the only files in nn_x/w9/catgrad/logs are the CPU test log/json tests/test_w9_catgrad.py cpu = 47/47 PASS, which runs no arm and
+produces no read-out number). A GPU PLUMBING SMOKE (W5_SMOKE=1 lane.sh, variant w9_smoke_catgrad_s23: 20K train feeds, 1 epoch; outputs
+deleted by the test) runs AFTER this declaration and before stage S; it yields no number that enters any rule.
+
+CODE: nn_x/w9/catgrad = a copy of the nn_x/w5 code (train.py, model.py, data.py, common.py, cd_arms*.py, finetune.py, holdout_eval.py,
+  stale_pred.py, blend.py, tests/, lane.sh; NOT preds/ckpt/logs) + ONE flag --catw grad (off by default; AST proofs: train.py / model.py
+  minus the wave-9 statements == the frozen nn_x/w5 files; CPU end-to-end flag-off run bit-identical to the frozen nn_x/w5 code).
+  Outputs land in nn_x/w9/catgrad/{logs,preds,ckpt}; nn_x/w5/*.py and nn_x/w5/lane.sh are not edited.
+ARM (model.py Ranker(catw='grad'), as amended by the skeptics' fixes (a)/(b)/(e) of both reports):
+  h_i = head(c_i) + wide(X_i) (the unchanged trunk item logit, fp32);
+  q_m = cg_q(c_m.detach()) + cg_wide(X_m)   with cg_q = LN-Linear-GELU-Linear(d->1), zero-init last layer; cg_wide = Linear(n_dense->1)
+        zero-init (the head sees f3, popularity and the other normalised inputs directly);
+  g_k = LSE_{m in k} q_m + b_k (cg_cat, zero-init) + cg_cnt(log1p n_k) (zero-init)   -> at init g_k = log n_k (the size prior);
+        an LSE pool (not a mean pool), so one strong sibling can carry its category (err_category_intent: LSE 0.780 vs mean 0.693);
+  logit_i = g_{k(i)} + h_i - LSE_{m in k(i)} h_m   (composite; feed softmax factorises EXACTLY as P(cat) * P(item | cat)).
+  NO train.py loss change (skeptics' fix): the unchanged listwise_loss(composite, norm feed) == L_c + L_w exactly; the trunk receives
+  only the within-category CE gradient (CPU tests: d CE/d trunk == d L_w/d trunk, d CE/d head == d L_c/d head to 1e-5 rel, and for
+  every (feed, category) sum_j dL/dh_j == 0), the detached category head only the category CE gradient. DISCLOSED (fix (d)/(e)): the
+  K9 production-order aux (unchanged, --aux_pos 0.5, anneal 0.1) still sends cross-category gradient into the trunk, so the "within-only
+  trunk" is partial. Singleton categories are ranked by g alone (13.3% of M<50 positives): the M<50 slice veto applies already at stage S.
+  Selection (--select_on holdout), --save_last / --save_holdout, finetune.py and stale_pred.py read the composite via Ranker(**cfg).
+
+STAGE S (2-epoch futility screen; GPUs N, two runs per GPU): nn_x/w9/catgrad/lane.sh A_BASE + HYG (= nn_x/w5/lane.sh A_BASE + HYG, verified
+  by the test's parser diff) -> w9_base_s23 / w9_base_s24 (my own paired reference) and + --catw grad -> w9_catgrad_s23 / w9_catgrad_s24.
+  Own base pair because no existing 2-epoch base pair has stored args IDENTICAL to this recipe: nn_x/w5 has no w5_base_s23/24 files; the
+  nn_x/abl/logs/abl_base_s23/24.json args carry two abl-only keys (xt_exclude '', xt_rel_extra '') and come from the nn_x/abl code
+  lineage -> abl_base_s23/24 is reported as a SECONDARY information reference only.
+  Checkpoint: the LAST checkpoint (@last preds) is PRIMARY, as the idea's rule says ("LAST checkpoint, paired per seed"); the selected
+  (holdout-best, step >= 12000) checkpoint is reported as information (DISCLOSED: the 2-epoch scale numbers quoted below come from
+  zoo2ep.py on selected checkpoints; at 2 epochs best_step is 19000-19670 of 19670, so the two views nearly coincide).
+  Metrics: src/metrics.ndcg_per_feed (val labels data/flat/val/cand_target.npy; holdout labels nn_x/w5/preds/holdout/holdout_y.npy, the
+  30K fixed holdout, category ids = data/flat/train/cand_category_id.npy of the holdout rows); within-feed z-score (scratchpad zoo2ep.py
+  zs); between/within split = (feed, category) group mean of z / residual (zoo2ep.py split; mask M >= 2); chain-rule parts (hybrid.py
+  parts: log P(cat) = LSE_cat - LSE_feed, log P(item | cat) = s - LSE_cat); category NDCG = eda/errors/category_intent/catlib.cat_ndcg
+  (rank the feed's categories; relevance = the category holds >= 1 positive; pessimistic ties).
+  CONTINUE to stage E iff ALL of (paired per seed, pooled over seeds 23/24 = mean of the two per-feed delta vectors):
+    (s1) pooled member val delta >= -0.0010 AND pooled holdout delta >= -0.0005 (catgrad - base);
+    (s2) 2-epoch diversity margin rho(base23, base24) - 0.5 [rho(catgrad23, base24) + rho(catgrad24, base23)] >= +0.003 (within-feed z,
+         Pearson over val candidates with M >= 2; scale on abl selected ckpts: base-base 0.9778; no_aux +0.0054, lnorm_batch +0.0016,
+         xdrop_pop +0.0185);
+    (s3) mechanism: the WITHIN-category component's cross-seed corr (0.5 [corr(within(catgrad23), within(base24)) + corr(within(catgrad24),
+         within(base23))]) is lower than corr(within(base23), within(base24)) by >= 0.002 (abl scale: base-base within 0.9735);
+    (s4) category-head strength (skeptic 2 (c), skeptic 1 (b)): graft "catgrad category + base within" = parts(catgrad)[0] + parts(base)[1]
+         minus base >= -0.0006 on val (pooled), AND category NDCG of the catgrad category marginal (= softmax(g)) minus category NDCG of
+         the base LSE marginal >= -0.002 on val;
+    (s5) within-part strength: graft "base category + catgrad within" = parts(base)[0] + parts(catgrad)[1] minus base >= -0.0008 on val
+         AND >= -0.0005 on the holdout (pooled);
+    (s6) slice veto (skeptic 2 (d)): the pooled val delta on M<50 feeds is not < -2 SE (z >= -2).
+  Otherwise CLOSED at stage S (report S and stop; no stage E). Read-out: nn_x/w9/catgrad/w9_eval_s_catgrad.py (CPU) ->
+  nn_x/w9/catgrad/logs/w9_eval_S_catgrad.{txt,json}, computed ONCE when all four @last + selected val and holdout pred files exist.
+  Information only: per-seed numbers, selected-ckpt view, between-category cross-seed corr, member corr to base (same seed and cross seed),
+  2-member pool (base_s + catgrad_s') - (base23 + base24), M>=50 / Tue / Thu slices, the singleton-category positives, train minutes,
+  learned cg_cnt / cg_cat values, the abl_base_s23/24 secondary reference.
+
+STAGE E (only if stage S CONTINUEs): nn_x/w9/catgrad/lane.sh E:catgrad:951 (GPU N) and E:catgrad:952 (GPU N), one run per GPU =
+  E_BASE + HYG + --catw grad (the arm flag appended last; parser diff vs nn_x/w5 lane E:base = exactly catw '' -> 'grad'), variants
+  w5_e10_catgrad_s951 / s952, paired per seed vs the EXISTING w5_e10_base_s951 / s952 (nn_x/w5/preds + preds/holdout; selected + @last
+  val / holdout / test preds verified present). After the runs: logs/<v>.json + .log, preds/nn_<v>_trainonly_{val,test}.npy, @last
+  variants and preds/holdout/nn_<v>_holdout.npy (+@last) are copied into nn_x/w5 with cp --update=none (new files only).
+  RULE = the E rule (as pre-declared for every 10-epoch pair today): PASS iff pooled per-seed paired member val > 0 AND holdout > +1 SE
+    AND no val slice (M<50, M>=50, Tue, Thu) < -2 SE AND pmix (src/pmix private mix) >= -1 SE; SELECTED checkpoint primary, @last
+    information. Read-out: cd <repo> && CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 .venv/bin/python
+    nn_x/w5/w5_eval_e_ap1.py catgrad 951,952 -> nn_x/w5/logs/w5_eval_E_catgrad.txt.
+  DIVERSITY CLAUSE (E_batch_predeclared.txt amendment 1, applies when the E rule FAILS; read-out scratchpad div_readout.py catgrad 951,952
+    -> nn_x/w5/logs/div_readout_catgrad.txt): family candidate iff (d1) pooled member val >= -0.0005 AND holdout >= -0.0005 (selected ckpt;
+    DISCLOSED: the idea's d1 used -0.0010 on val, aligned here to the project's clause per skeptic 1 (e)), AND (d2) rho_bb - rho_x >= +0.005
+    on val (rho_x = corr(catgrad pool{951,952}, base pool{953,954}), rho_bb = corr(base pool{951,952}, base pool{953,954}); the holdout
+    margin > 0 is information), AND (d3) the 2-member pool catgrad vs base{951,952}: val >= -0.0005 AND holdout >= -0.0005.
+  A FAMILY CANDIDATE is an arm that passes the E rule OR the diversity clause. Then I REPORT AND STOP: nothing is fine-tuned, pooled or
+  submitted by me (the lead runs seeds 953/954, n2cpv3 FT, decide7 T1 = G3 + catgrad(4) / T2 = F10 + F7x + catgrad(4), presub_gate).
+  Information only: member corr to base (target <= 0.92), within / between split, the composite base-category + catgrad-within and
+  catgrad-category + base-within at 10 epochs, category NDCG, M<50 singleton-category positives, train minutes, @last view.
+  STEP-60000 KILL GATE (the only interim look; evaluated once, when BOTH arm logs contain their step-60000 eval line; the base facts from
+    nn_x/tricks/late_dropout/PREDECLARED.txt: 98,350 steps, cooldown from 78,680, so step 60,000 = mid-plateau futility check):
+    h_base,s(60000) = w5_e10_base_s95<s>.json history holdout_ndcg at step 60000: s951 0.31659185, s952 0.31739697;
+    SE_gate = 0.00076575 (the LD addendum's constant: RMS of plateau holdout differences over the 15 seed pairs of w5_e10_base_s951-956
+    and the 16 plateau evals 40000..77500; base runs only, no arm data; reused unchanged);
+    KILL iff for BOTH seeds h_catgrad,s(60000) - h_base,s(60000) < -2 SE_gate = -0.00153150, i.e. iff h_951(60000) < 0.31506035 AND
+    h_952(60000) < 0.31586547 -> stop both train.py processes by exact PID (cmdline re-verified), record in RUNNING files, arm CLOSED
+    (information); otherwise the runs continue untouched and the gate numbers are information only.
+  A crashed run (process gone without its json) -> INCOMPLETE (no verdict); a re-run needs a new dated amendment. A run that fails twice
+  -> stop and report.
+
+GPU / PROCESS RULES: GPUs N and 1 only (CUDA_VISIBLE_DEVICES = exactly one id per process); before every launch nvidia-smi shows <= 3
+  compute processes and >= 60 GB free on that GPU (lane.sh check_gpu under the per-GPU flock); OMP/MKL/OPENBLAS/POLARS threads 12;
+  setsid nohup launches; REAL python PIDs resolved via /proc/<pid>/cmdline and recorded in nn_x/w9/catgrad/RUNNING.txt and
+  nn_x/w5/logs/RUNNING_w5.txt; stops only by exact PID after checking /proc/<pid>/cmdline; no pkill/pgrep; other processes untouched.
+Time cap: implementation passing its tests within 6 h (done at 2026-11-13T13:38:39Z); a run failing twice -> stop and report.

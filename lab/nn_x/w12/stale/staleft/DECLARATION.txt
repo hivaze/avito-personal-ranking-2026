@@ -1,0 +1,106 @@
+=== 2026-11-15T04:58:50Z staleft DECLARATION 1 (written before any stale column of mine is built or compared) ===
+SCOPE OF THE STALE VIEW (val rows only; test rows always keep their real inputs):
+ xt (train-stage inputs): exactly the project's stale-val scenario 'both_pre2both' of nn_x/w5/stale_pred.py (8 columns both_*, pre2_fe_z / pre2_fe_s / has:pre2_fe from pre2both_*).
+   pre2_new_z / pre2_new_s / pre2_hmax32 stay at live values (as in the declared scenario; this keeps the stale-val witness = the project's witness).
+ extras (n2c_pre_v3, 42 columns): the same construction, same scope:
+   it_hist_all_luo, it_hist_et1..4_luo, seq_cv_invd20, seq_cv_pop : the existing both_* files.
+   it_hist_et5..10_luo                : rebuilt by the s08_cf_feats.py 'both' construction (max(x - test_cnt_e + ov_e - late_cnt_e, 0)); my rebuild must
+                                        reproduce the five existing both_it_hist_* files exactly (max |d| = 0), otherwise et5..10 stay fresh.
+   it_hist_all_luo_rk / _zsl / _gap   : src/features_luo.py transforms (feed_rank_z, sign*log1p|z|, x - feed max) of both_it_hist_all_luo; my code must
+                                        reproduce the three FRESH columns from the fresh parent to max |d| <= 1e-5, otherwise the column stays fresh.
+   seq_cv_invd20_rk                   : src/features.py::_rel_feats rank of both_seq_cv_invd20; same reproduction bar.
+   pre_fe, pre_fe_z, pre_id_contrib_v2, pre_idmax32, pre_idmax32_has : the pre2both construction on the pre_ family (newly_cold = solvers/out/stale/cf/newly_cold.npy:
+                                        fe' = fe_noid, z per config (v3A, v4A calibrated to v3, v4) then mean, id_contrib' = 0, idmax32' = NaN, has' = 0).
+                                        Bar: fresh pre_fe / pre_fe_z reproduced from the per-config files to 1e-4, and P(pre_id_contrib_v2 == 0 | it_hist_all_luo == 0) >= 0.95 on val.
+   pre_new, pre_new_z, pre_hmax32_c, pre_hmax8_c, pre_hmax32_sent, pre_fe_noid : kept fresh (the declared scenario does not emulate the 'new' head or hmax for pre2 either).
+   centrality, seq_max_all, seq_top3, seq_argmax_hpos, ctx_nd_* : content / own-history columns, kept fresh (reported in the gate table for information).
+LABEL-FREE GATE (no target file is opened), per switched column, on the model's input scale (xt: attach_xt transform; extras: attach_extra transform with the FRESH val statistics, exactly what the test rows get):
+ populations: all val rows (fresh view, stale view) against PRIVATE test rows, PUBLIC test rows and ALL test rows (all M); seven listing-age buckets of nn_x/w12/next/poplag/pl_common.py, weights = val row share.
+ dZ(view, part) = sum_b w_b |special-share_view(b) - special-share_part(b)|, special = raw == 0 for count columns and pre_id_contrib_v2, NaN for pre_idmax32, == 0 for the has flags; not defined for rk / z / gap / score columns.
+ dM(view, part) = sum_b w_b |mean_view(b) - mean_part(b)| / SD_part.
+ A column is SWITCHED iff on PRIVATE rows and on ALL test rows: dZ(stale) <= dZ(fresh) (where defined) AND dM(stale) <= dM(fresh) + 0.005.
+ A column that fails is kept FRESH in the fine-tune's stale view and is named in the report. PUBLIC rows are reported next to it (the scenario is private-like; an overshoot against public rows is reported, not a veto:
+ the P = 0.5 arm is the hedge for it). The xt scenario is not altered by this gate (it is the declared witness); its 11 columns are reported in the same table and a failure there is stated plainly.
+
+=== 2026-11-15T05:03:47Z GATE RESULT (logs/gate.txt; label-free) and AMENDMENT 1, written before any GPU run and before any labelled read ===
+Result by the rule as written: 26 column instances pass; 7 fail: xt:it_hist_et4_luo, xe:it_hist_et4_luo, xe:it_hist_all_luo_gap, xe:it_hist_et7_luo, xe:it_hist_et9_luo, xe:it_hist_et10_luo, xe:pre_idmax32.
+ (the failures are in dM, not dZ, except et7 / et9: the 'both' construction REMOVES counts, so it matches the test rows' coverage but pushes magnitudes away: test rows have MORE history than val rows, not less.)
+ Also measured: the scenario OVERSHOOTS on it_hist_*: zero share of it_hist_all_luo fresh val 0.379 -> stale 0.485; private rows 0.456, public rows 0.428. Against PUBLIC rows the stale view is FARTHER than the fresh view
+ for the it_hist family (dZ 0.051 -> 0.055, dM 0.085 -> 0.108). A 50/50 feed mix averages 0.432. Stated in the report; P = 0.5 is the hedge as declared.
+Applied as written: xe it_hist_all_luo_gap, it_hist_et7_luo, it_hist_et9_luo, it_hist_et10_luo stay FRESH (logs/gate_exclude.txt).
+AMENDMENT 1 (structural consistency; no label involved): two instances are switched although their dM misses the bar, because keeping them fresh would create an input pattern no real row has:
+ (a) xe:it_hist_et4_luo: the xt branch reads the same raw file and the xt scenario is fixed (declared witness); the two branches of one model must read the same value of one column. (dZ improves 0.028 -> 0.022; dM 0.055 -> 0.061.)
+ (b) xe:pre_idmax32: its flag pre_idmax32_has passes and is switched; a row with has = 0 and a non-missing value does not exist in val or test. Decided jointly by dZ (identical for both, 0.052 -> 0.021). (dM 0.037 -> 0.042.)
+ xt:it_hist_et4_luo stays in the xt scenario (not altered by the gate, as declared); its failure (dM 0.055 -> 0.061 on private rows) is reported.
+FINAL STALE VIEW: xt = 11 columns of 'both_pre2both' (unchanged); extras = it_hist_all_luo, _rk, _zsl, it_hist_et1..6_luo, it_hist_et8_luo, seq_cv_invd20, seq_cv_invd20_rk, seq_cv_pop, pre_fe, pre_fe_z, pre_id_contrib_v2, pre_idmax32, pre_idmax32_has (18 of 42).
+
+=== 2026-11-15T05:03:47Z DECLARATION 2: PILOT READ (written before any fine-tune of mine has run) ===
+Members: w5_e10_kd05w192_s951, _s952, w5_e10_kd05t25w192_s951, _s952. Variants: P = 0 (control), 0.5, 1.0; recipe n2cpv3 with --seeds 1 (one fine-tune seed per fold); same seeds and batch stream in all variants.
+Pools: member-equal per-feed z-mean of the 4 members. FT branch = OOF final-EMA predictions; TO branch = the members' train-only val predictions (fresh: stored nn_x/w5/preds/nn_<v>_trainonly_val.npy; stale: epoch-0 predictions of
+ the same members on the stale view written by finetune_stale.py on the GPU = stale_pred.py's scenario; cross-checked against nn_x/w12/stale/veto/preds/cpu_<v>_staleval.npy). Final file = 0.5 z(FT pool) + 0.5 z(TO pool).
+Reads, all paired per feed against the P = 0 control on 14,423 val feeds: fresh val (all, M>=50, M<50), stale-val (stale FT OOF + stale TO), pmix-public / pmix-private (src/pmix.py weights) of the fresh and the stale read.
+RULE (the lead's, fixed): a variant PASSES iff final-file fresh-val delta >= 0 AND final-file stale-val delta >= +2 SE. "Within 1 SE of passing" = fresh-val delta >= -1 SE AND stale-val delta >= +1 SE.
+ Best variant = the passing one with the larger stale-val delta / SE; if none passes, the one nearest to passing by the same statistic.
+Reported, no decision: FT branch alone (same reads), label-free shift of the TEST predictions of the FT branch against the control (per-feed correlation, top-1 change, public and private days separately),
+ the training-noise floor: the stale-val and fresh-val deltas are paired per feed but each rests on ONE fine-tune seed per member; if the GPU run is not bit-reproducible I report the A/A spread I can measure
+ (the one-fold identity run against the stored 3-seed file) and treat a delta inside it as not shown.
+Identity check of the code (before the pilot is read): finetune_stale.py --stale_train 0 --seeds 3 --only_folds 0 on w5_e10_kd05w192_s951 against the stored nn_w5_e10_kd05w192_s951_n2cpv3s3_{val_oof,test_folds}.npy on the fold-0 rows:
+ bar = per-feed correlation >= 0.9995 on average and |NDCG difference| on the fold-0 feeds <= 0.0003 (GPU training is not bit-deterministic; a bit-identical result is reported if it occurs).
+
+=== 2026-11-15T05:08:12Z DECLARATION 2b (before any GPU run): A/A for the training-noise floor ===
+After the 12 pilot runs the queue repeats the P = 0 control of the 4 members under the name _sft_p0b (identical arguments). Delta (p0b - p0) at 4-pool level on fresh val and stale-val, FT branch and final file,
+ = the spread that GPU non-determinism alone produces in the statistic of the rule. A variant's delta is called "shown" only if it also exceeds twice the |A/A delta| of the same read; the lead's rule itself is applied as written
+ and the A/A is reported next to it. If p0b is bit-identical to p0 this floor is zero and says nothing about fine-tune seed noise (stated then).
+
+=== 2026-11-15T05:15:23Z DECLARATION 2c (before any GPU run of mine has started; both launchers still wait in the lock queues) ===
+Reported next to the rule, no decision: "mix read" = 0.5 (fresh-val delta) + 0.5 (stale-val delta) per feed, final file and FT branch. Reason (label-free, logs/gate_scen.txt): on the it_hist family a 50 / 50 mix of the fresh and
+ the stale view is the closest of the available views to PUBLIC rows (dZ 0.016 against 0.051 fresh / 0.055 stale) and about level with the stale view on PRIVATE rows; the stale view alone over-states the staleness of both test parts
+ in coverage (zero share 0.485 against 0.456 private / 0.428 public). The stale-val read is in-distribution for a P = 1 fine-tune (trained and scored on the same synthetic transformation), so it is an upper bound for it.
+ My recommendation between two passing variants is written here in advance: prefer P = 0.5 unless P = 1.0 is ahead of it on the MIX read by more than 1 SE of their paired difference.
+
+=== 2026-11-15T07:11:01Z IDENTITY RESULT + DECLARATION 2d (no pilot prediction has been read; first pilot job still running) ===
+Identity run (out/ident_check_w5_e10_kd05w192_s951.txt): correlation clause met (per-feed corr 0.999999), NDCG clause MISSED by 0.000003 (+0.000303 +- 0.000203 on 2,885 fold-0 feeds; bar 0.0003).
+ The starting model without any training differs from the stored train-only file by -0.000103 +- 0.000066 on the same feeds (top-1 differs on 0.17% of feeds: bf16 numerics change with the batch composition), and the seed-0 epoch curves of
+ three runs of the same seed (stored, identity, pilot control) differ by up to 0.0003 on fold 0. Reported as MISSED by the letter. Consequence: none of the pilot's comparisons uses a stored fine-tune file; the control is the same script at P = 0.
+ "Bit-identical behaviour at P = 0" is supported by the code diff (no statement of the training step is executed differently at P = 0) and is NOT demonstrable by a GPU re-run, because the stored run itself is not bit-reproducible.
+REPORTED, NO DECISION (added because one pilot job costs 8 GPU-min at the present load, so the full run of 24 members x 3 seeds would cost about 9.6 GPU-process-hours):
+ "ENSEMBLE MIX": FT branch = member-equal z-mean of the 4 control predictions and the 4 P = 1.0 predictions of the same members (8 predictions), final = 0.5 z(FT) + 0.5 z(TO), on the fresh and on the stale view.
+   Matched reference of the same size = control + its A/A repeat (p0 + p0b, 8 predictions); also p0 + p05. If the ensemble mix reads like the P = 0.5 fine-tune, the lead can ADD stale fine-tunes to the stored standard
+   fine-tunes instead of replacing them (no stored file is wasted; fewer seeds needed). Read with the same statistics as the rule; never a PASS on its own.
+
+=== 2026-11-15T07:58:26Z PILOT RESULT BY THE RULE (4 members x 1 seed; A/A still running) + DECLARATION 3: REPLICATION, written before any replication job has started ===
+P = 0.5: final fresh val -0.00021 +- 0.00020, final stale-val +0.00024 +- 0.00019 -> FAIL (fresh z -1.07: not within 1 SE of passing by my definition of 05:0xZ).
+P = 1.0: final fresh val -0.00017 +- 0.00025, final stale-val +0.00042 +- 0.00024 -> FAIL; within 1 SE of passing (fresh z -0.69 >= -1, stale z +1.77 >= +1). Best variant by the declared statistic = P = 1.0.
+ Declared preference 2c (P = 0.5 unless P = 1.0 leads the mix read by more than 1 SE of the paired difference): p10 - p05 on the final mix read = +0.00011 +- 0.00011, at the boundary; neither mix read differs from zero.
+REPLICATION (instead of starting a 24-member x 3-seed run that cannot finish inside my budget: 6-10 GPU-process-hours at 7-8 min per 1-seed job): the same pilot on the four OTHER W8 members
+ w5_e10_kd05w192_s953, _s954, w5_e10_kd05t25w192_s953, _s954: P = 0 and P = 1.0 first (8 jobs), then P = 0.5 (4 jobs) if time allows; 1 seed, same script, same rule.
+ Reads: (a) replication 4-pool alone; (b) POOLED W8 read = the 8 W8 members (the pool of the scored file W8), final = 0.5 z(FT 8-pool) + 0.5 z(TO 8-pool). The lead's rule is quoted on the 4-member pilot as specified;
+ (b) is the number I recommend the decision on, because it averages the fine-tune noise of 8 instead of 4 one-seed runs and is the pool the public has scored.
+ Recommendation rule for the full run, fixed now: RECOMMEND the full run of P = 1.0 iff the pooled W8 read has final stale-val delta >= +2 SE AND final fresh-val delta >= -1 SE AND the replication 4-pool has the same signs as the pilot
+ on stale-val (> 0). Otherwise: not recommended as a replacement of the standard fine-tune; the ensemble-mix read (2d) is then the only form still open.
+
+=== 2026-11-15T08:48:56Z REPLICATION RESULT (P = 1.0) BY THE RULES AS WRITTEN + DECLARATION 4, written before the extension starts and before the P20-form read is computed ===
+Replication 4-pool (s953, s954): final fresh -0.00005 +- 0.00025, final stale-val +0.00024 +- 0.00028 -> lead's rule FAIL (stale z +0.85); stale-val sign = pilot's sign.
+POOLED W8 (8 members, 1 seed): final fresh +0.00022 +- 0.00026 (z +0.87), final stale-val +0.00054 +- 0.00028 (z +1.93), mix read +0.00038 +- 0.00020.
+ Lead's rule on the W8 pool: fresh >= 0 holds, stale-val misses +2 SE by 0.07 SE -> FAIL by the letter, within 1 SE of passing.
+ My recommendation rule (DECLARATION 3: stale-val >= +2 SE AND fresh >= -1 SE AND replication stale > 0): NOT MET (first clause, z 1.93). As written: the 24-member x 3-seed replacement run is NOT recommended on this evidence.
+What I do instead of the 3-seed run (task step 4: a variant is within 1 SE of passing; my two slots are free when the replication queues exit; no lane waits on the GPU N / GPU N locks at 08:5xZ):
+ W16 EXTENSION AT ONE SEED: P = 1.0 for the eight other W16 members (kd05w192 / kd05t25w192, seeds 955-958), then their P = 0 controls (16 jobs, about 130 GPU-process-min), through launch_q.sh after my own queues have exited.
+ Reason for 1 seed: at pool level the 1-seed control equals the stored 3-seed fine-tune (final file 0.40136 vs 0.40131, 0.40113 vs 0.40106, W8 0.40166 vs 0.40165), a 3-seed run of 16 members costs 6 process-hours and cannot be read today.
+ READ (for the lead, when the 16 jobs are done; fixed now): W16 pool, the lead's rule as written: PASS iff final fresh-val delta >= 0 AND final stale-val delta >= +2 SE against the 1-seed P = 0 control of the same 16 members.
+   If PASS: the STALE-FT fine-tune branch (1 seed, 16 members; test files on disk) is a candidate FT branch for the W16-based files; a public reading is SE-denominated against the twin with the standard branch.
+   If not: STALE-FT is closed as a replacement of the fine-tune; nothing further is owed.
+INFORMATION (computed after this line from predictions already on disk; no decision): fresh-val final-file delta of the scored forms when the W8 FT branch is replaced by the 1-seed P = 1.0 branch:
+ W8 form against the STORED 3-seed W8 file, and the W8P20 form (per branch 0.8 z(W8) + 0.2 z(pop1kd d128 x4), popularity-light FT branch = stored standard) against the stored W8P20 form.
+
+=== 2026-11-15T08:49:51Z INFORMATION READ RESULT (out/p20_read.txt, fresh val) + DECLARATION 4b, before the extension queue has started ===
+W8 form: 1-seed P = 1.0 branch against the stored 3-seed file +0.00023 +- 0.00026; W8P20 form (the form of the team's best file): -0.00005 +- 0.00025 against the stored form, +0.00012 +- 0.00025 against the 1-seed control.
+ (Check of my pool code: W8P20 form - W8 form with the stored branches = +0.00049 +- 0.00031, the lead's number.)
+ On fresh val the stale fine-tune adds nothing to the form that already carries the popularity-light admixture.
+ADDED to the head of the extension list (4 jobs, about 34 GPU-process-min): the P = 0 run of the four popularity-light students abl_e10_pop1kd05t25_s951-954 through my script, only to obtain their fine-tuned and train-only
+ predictions on the STALE view. READ (p20_stale_read.py, fixed now): W8P20 form on fresh val and on stale-val, W8 fine-tune branch = 1-seed P = 1.0 against 1-seed P = 0 (popularity-light branch = its P = 0 run in both arms).
+ The lead's rule on that form: PASS iff fresh delta >= 0 AND stale-val delta >= +2 SE. This is the read I consider decisive for "does STALE-FT improve the file we would send", because the best file has the P20 form.
+
+=== 2026-11-15T09:14:43Z RESULT of the DECLARATION 4b read (out/p20_stale_read.txt) ===
+W8P20 form, W8 fine-tune branch = 1-seed P = 1.0 against 1-seed P = 0: final fresh +0.00001 +- 0.00025, final stale-val +0.00015 +- 0.00024 (z +0.62) -> the lead's rule FAILS on the form of the best file. P = 0.5: -0.00016 +- 0.00019 / +0.00019 +- 0.00019 -> FAIL.
+STALE-FT is not recommended for the P20-form files. The W16 extension (16 jobs left) keeps its declared read (plain W16 pool, lead's rule); it is low priority.

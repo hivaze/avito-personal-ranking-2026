@@ -1,0 +1,24 @@
+== WAVE-8 STAGE B (CD re-cool, roots (101, 102, 103, 104), reference w5_cd_m02ref_r<root>, CDSEED 900 + root; PRIMARY = SELECTED checkpoint, last = info). Rule (logs/B_wave8_predeclared.txt): PASS iff val > +2 SE (Holm over the two arms, primary cbs05) AND holdout >= 0 AND no val slice (M<50, M>=50, Tue, Thu) < -2 SE AND pmix >= -1 SE AND 4-root pool holdout >= +2 SE AND stale-val >= 0 ; STOP otherwise
+== runs: selected step / total | selected val, holdout (in-training eval) | last val, holdout | minutes
+  w5:w5_cd_m02ref_r101           best  19670/19670 | sel val 0.39721 hold 0.31976 | last val 0.39721 hold 0.31976 | 38 min
+  w5:w5_cd_m02ref_r102           best  17000/19670 | sel val 0.39727 hold 0.32010 | last val 0.39678 hold 0.31969 | 39 min
+  w5:w5_cd_m02ref_r103           best  19000/19670 | sel val 0.39646 hold 0.32026 | last val 0.39662 hold 0.32022 | 48 min
+  w5:w5_cd_m02ref_r104           best  19670/19670 | sel val 0.39602 hold 0.32024 | last val 0.39602 hold 0.32024 | 42 min
+  w5:w5_cd_cbs05_r101            (missing)
+  w5:w5_cd_cbs05_r102            (missing)
+  w5:w5_cd_cbs05_r103            (missing)
+  w5:w5_cd_cbs05_r104            (missing)
+  w5:w5_cd_cbs2_r101             (missing)
+  w5:w5_cd_cbs2_r102             (missing)
+  w5:w5_cd_cbs2_r103             (missing)
+  w5:w5_cd_cbs2_r104             (missing)
+
+== cbs05: INCOMPLETE on roots (101, 102, 103, 104) (missing selected val/holdout preds: w5_cd_cbs05_r101 w5_cd_cbs05_r102 w5_cd_cbs05_r103 w5_cd_cbs05_r104): not gated
+
+== cbs2: INCOMPLETE on roots (101, 102, 103, 104) (missing selected val/holdout preds: w5_cd_cbs2_r101 w5_cd_cbs2_r102 w5_cd_cbs2_r103 w5_cd_cbs2_r104): not gated
+
+== summary (wave 8, stage B, SELECTED checkpoints, pooled over roots 101-104 vs m02ref)
+  cbs05 INCOMPLETE (missing w5_cd_cbs05_r101 w5_cd_cbs05_r102 w5_cd_cbs05_r103 w5_cd_cbs05_r104)
+  cbs2  INCOMPLETE (missing w5_cd_cbs2_r101 w5_cd_cbs2_r102 w5_cd_cbs2_r103 w5_cd_cbs2_r104)
+
+== registry-ready one-liners

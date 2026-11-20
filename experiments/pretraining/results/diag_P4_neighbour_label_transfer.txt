@@ -1,0 +1,66 @@
+# Read-out copied from the raw run log (not published), unchanged below this line.
+[    0.1s] train feeds 3,151,208; val 14,423; test 28,595; holdout 30,000 (rng 12345 rule reproduced, M matches)
+[    0.1s] train feeds per day: {'Sep 06': 291760, 'Sep 07': 281767, 'Sep 08': 290992, 'Sep 09': 286479, 'Sep 10': 282716, 'Sep 11': 247429, 'Sep 12': 203548, 'Sep 13': 263115, 'Sep 14': 244596, 'Sep 15': 42, 'Sep 17': 269029, 'Sep 18': 256678, 'Sep 19': 233023, 'Sep 20': 34} | data days: ['Sep 06', 'Sep 07', 'Sep 08', 'Sep 09', 'Sep 10', 'Sep 11', 'Sep 12', 'Sep 13', 'Sep 14', 'Sep 17', 'Sep 18', 'Sep 19']
+[    0.1s] bankable train feeds: p>0.5 & M>=50 164,118; minus holdout 134,118; minus user0 / val / test / holdout users 125,846
+[    0.1s] === VAL queries
+[    4.0s] bank ['Sep 13', 'Sep 14', 'Sep 17', 'Sep 18', 'Sep 19']: 57,067 feeds, 56,660 users (1.01 feeds/user), 8,478,312 shown rows (CTR 0.0124), item keys 8,476,967, cl keys 3,404,975 [4s]
+[    8.7s]   val query days ['Sep 22', 'Sep 23', 'Sep 24', 'Sep 25'] -> bank ['Sep 13', 'Sep 14', 'Sep 17', 'Sep 18', 'Sep 19']: 14,423 feeds, top-32 cos mean 0.7103 (top1 0.7695, 32nd 0.6883), max weight mean 0.0568 [5s]
+[    8.7s] === HOLDOUT queries
+[    8.8s]   holdout day Sep 06: 2,674 feeds, no full 5-data-day window with gap >= 3 -> no bank
+[    8.8s]   holdout day Sep 07: 2,490 feeds, no full 5-data-day window with gap >= 3 -> no bank
+[    8.8s]   holdout day Sep 08: 2,659 feeds, no full 5-data-day window with gap >= 3 -> no bank
+[    8.8s]   holdout day Sep 09: 2,440 feeds, no full 5-data-day window with gap >= 3 -> no bank
+[    8.8s]   holdout day Sep 10: 2,365 feeds, no full 5-data-day window with gap >= 3 -> no bank
+[    8.8s]   holdout day Sep 11: 2,147 feeds, no full 5-data-day window with gap >= 3 -> no bank
+[    8.8s]   holdout day Sep 12: 1,801 feeds, no full 5-data-day window with gap >= 3 -> no bank
+[   12.3s] bank ['Sep 06', 'Sep 07', 'Sep 08', 'Sep 09', 'Sep 10']: 52,006 feeds, 51,628 users (1.01 feeds/user), 7,587,663 shown rows (CTR 0.0123), item keys 7,586,523, cl keys 3,051,110 [4s]
+[   12.8s]   holdout query days ['Sep 13'] -> bank ['Sep 06', 'Sep 07', 'Sep 08', 'Sep 09', 'Sep 10']: 2,499 feeds, top-32 cos mean 0.6819 (top1 0.7382, 32nd 0.6608), max weight mean 0.0555 [0s]
+[   16.0s] bank ['Sep 07', 'Sep 08', 'Sep 09', 'Sep 10', 'Sep 11']: 50,315 feeds, 49,962 users (1.01 feeds/user), 7,327,955 shown rows (CTR 0.0123), item keys 7,326,918, cl keys 2,953,747 [3s]
+[   16.5s]   holdout query days ['Sep 14'] -> bank ['Sep 07', 'Sep 08', 'Sep 09', 'Sep 10', 'Sep 11']: 2,646 feeds, top-32 cos mean 0.6951 (top1 0.7531, 32nd 0.6735), max weight mean 0.0563 [0s]
+[   19.6s] bank ['Sep 10', 'Sep 11', 'Sep 12', 'Sep 13', 'Sep 14']: 48,106 feeds, 47,822 users (1.01 feeds/user), 7,037,477 shown rows (CTR 0.0124), item keys 7,036,642, cl keys 2,849,823 [3s]
+[   20.9s]   holdout query days ['Sep 17', 'Sep 18', 'Sep 19'] -> bank ['Sep 10', 'Sep 11', 'Sep 12', 'Sep 13', 'Sep 14']: 8,279 feeds, top-32 cos mean 0.7029 (top1 0.7613, 32nd 0.6811), max weight mean 0.0564 [1s]
+[   20.9s] holdout eligible feeds 13,424 of 30,000 (days ['Sep 13', 'Sep 14', 'Sep 17', 'Sep 18', 'Sep 19'])
+[   24.7s] G3 val NDCG all 0.40032 ± 0.00205; leak-free (14,306) 0.40046 ± 0.00206
+[   24.7s] G3 holdout NDCG all 0.32379 ± 0.00116 (expect 0.32379); eligible (13,424) 0.32225 ± 0.00173
+[   24.7s] === DIAGNOSTICS
+[   24.7s] query-to-neighbour gap (days, neighbour's latest in-window feed) q[5, 25, 50, 75, 95]: val [2.96, 4.65, 6.17, 8.7, 10.87] | holdout [2.9, 4.22, 5.51, 6.81, 8.39]
+[   24.7s] mean top-32 cos: val 0.7103 ± 0.0009 | holdout(eligible) 0.6974 ± 0.0012
+[   24.7s] coverage val: any_item 0.0293 ± 0.0003; pos_item 0.0005 ± 0.0000; neg_item 0.0289 ± 0.0003; any_cl 0.8536 ± 0.0012; pos_cl 0.3356 ± 0.0019; neg_cl 0.8504 ± 0.0012; feeds_with_any_item_evidence 0.6692 ± 0.0039
+[   24.9s] coverage holdout_elig: any_item 0.0270 ± 0.0002; pos_item 0.0005 ± 0.0000; neg_item 0.0266 ± 0.0002; any_cl 0.8429 ± 0.0012; pos_cl 0.3196 ± 0.0017; neg_cl 0.8397 ± 0.0012; feeds_with_any_item_evidence 0.8255 ± 0.0033
+[   24.9s] label rate by evidence val: base 0.0158; item:pos>0 n=638 rate 0.0329; item:neg>0&pos=0 n=39,693 rate 0.0191; item:none n=1,336,713 rate 0.0157; cl:pos>0 n=462,188 rate 0.0205; cl:neg>0&pos=0 n=713,220 rate 0.0145; cl:none n=201,636 rate 0.0097
+[   24.9s] label rate by evidence holdout_elig: base 0.0114; item:pos>0 n=984 rate 0.0142; item:neg>0&pos=0 n=55,531 rate 0.0143; item:none n=2,033,133 rate 0.0113; cl:pos>0 n=667,897 rate 0.0147; cl:neg>0&pos=0 n=1,093,393 rate 0.0106; cl:none n=328,358 rate 0.0075
+[   25.1s] within-feed corr (pooled within-feed z) with cos_u, val leak-free: s_pos_item +0.0130; s_neg_item +0.0808; contrast_item -0.0786; s_pos_cl +0.3882; s_neg_cl +0.5234; contrast_cl -0.4712
+[   25.2s] within-feed corr with z(G3), val leak-free: s_pos_item +0.0130; s_neg_item +0.0555; contrast_item -0.0535; s_pos_cl +0.2427; s_neg_cl +0.2949; contrast_cl -0.2593
+[   25.4s] single-feature NDCG s_pos_item     val(leak-free) 0.19940 ± 0.00058 | holdout(elig) 0.16312 ± 0.00036
+[   25.6s] single-feature NDCG s_neg_item     val(leak-free) 0.21945 ± 0.00106 | holdout(elig) 0.18023 ± 0.00087
+[   25.8s] single-feature NDCG contrast_item  val(leak-free) 0.20095 ± 0.00059 | holdout(elig) 0.16395 ± 0.00036
+[   26.0s] single-feature NDCG s_pos_cl       val(leak-free) 0.26368 ± 0.00129 | holdout(elig) 0.20214 ± 0.00074
+[   26.5s] single-feature NDCG s_neg_cl       val(leak-free) 0.28168 ± 0.00129 | holdout(elig) 0.21563 ± 0.00073
+[   27.0s] single-feature NDCG contrast_cl    val(leak-free) 0.25130 ± 0.00106 | holdout(elig) 0.19466 ± 0.00058
+[   27.0s]   reference: constant score (all ties, pessimistic) val 0.19858
+[   27.0s] === CELL ('right category, buried', nn_x/r3/stage0_gate.py definition)
+[   27.4s] cell positives 7,543 (leak-free), beater pairs 151,885, feeds 5,334
+[   27.4s] cell pair AUC -log1p(it_hist_all_luo)    0.5700 ± 0.0051 (pairs with finite values 1.000, non-tied 0.817)
+[   27.4s] cell pair AUC -maxsim32                  0.6315 ± 0.0056 (pairs with finite values 0.985, non-tied 1.000)
+[   27.4s] cell pair AUC s_pos_item                 0.5001 ± 0.0003 (pairs with finite values 1.000, non-tied 0.002)
+[   27.4s] cell pair AUC s_neg_item                 0.4951 ± 0.0014 (pairs with finite values 1.000, non-tied 0.072)
+[   27.4s] cell pair AUC contrast_item              0.5050 ± 0.0014 (pairs with finite values 1.000, non-tied 0.074)
+[   27.4s] cell pair AUC s_pos_cl                   0.4679 ± 0.0047 (pairs with finite values 1.000, non-tied 0.551)
+[   27.4s] cell pair AUC s_neg_cl                   0.4438 ± 0.0055 (pairs with finite values 1.000, non-tied 0.794)
+[   27.4s] cell pair AUC contrast_cl                0.5451 ± 0.0056 (pairs with finite values 1.000, non-tied 0.795)
+[   27.4s] === NESTED RESIDUAL on G3
+[   53.8s] s_pos_item     val -0.00003 ± 0.00003 (z -0.96) | M<50 -0.00000 ± 0.00000 (z -0.97) M>=50 -0.00004 ± 0.00004 (z -0.92) | pmix -0.00004 ± 0.00005 | holdout(elig) +0.00001 ± 0.00002 (z +0.49) | holdout(all 30K) +0.00000 ± 0.00001 (z +0.49) | w val [-0.02, 0.0] hold [-0.15, -0.1, -0.05] | full-fit best val +0.00000@+0.00 hold +0.00002@-0.10 [26s]
+[   80.0s] s_neg_item     val -0.00011 ± 0.00005 (z -2.16) | M<50 -0.00011 ± 0.00006 (z -1.78) M>=50 -0.00011 ± 0.00008 (z -1.46) | pmix -0.00018 ± 0.00007 | holdout(elig) -0.00009 ± 0.00005 (z -1.71) | holdout(all 30K) -0.00004 ± 0.00002 (z -1.71) | w val [0.0, 0.02] hold [0.0, 0.02] | full-fit best val +0.00000@+0.00 hold +0.00000@+0.00 [26s]
+[  106.6s] contrast_item  val -0.00011 ± 0.00005 (z -2.10) | M<50 -0.00011 ± 0.00006 (z -1.73) M>=50 -0.00011 ± 0.00008 (z -1.42) | pmix -0.00017 ± 0.00007 | holdout(elig) -0.00009 ± 0.00005 (z -1.70) | holdout(all 30K) -0.00004 ± 0.00002 (z -1.70) | w val [-0.02, 0.0] hold [-0.02, 0.0] | full-fit best val +0.00000@+0.00 hold +0.00000@+0.00 [27s]
+[  134.0s] s_pos_cl       val -0.00066 ± 0.00028 (z -2.35) | M<50 -0.00097 ± 0.00053 (z -1.82) M>=50 -0.00045 ± 0.00030 (z -1.49) | pmix -0.00073 ± 0.00046 | holdout(elig) +0.00000 ± 0.00000 (z +0.00) | holdout(all 30K) +0.00000 ± 0.00000 (z +0.00) | w val [-0.05, -0.02, 0.0, 0.05] hold [0.0] | full-fit best val +0.00006@-0.02 hold +0.00000@+0.00 [27s]
+[  164.7s] s_neg_cl       val -0.00031 ± 0.00012 (z -2.59) | M<50 -0.00037 ± 0.00020 (z -1.86) M>=50 -0.00027 ± 0.00015 (z -1.81) | pmix -0.00025 ± 0.00018 | holdout(elig) -0.00021 ± 0.00010 (z -2.04) | holdout(all 30K) -0.00009 ± 0.00005 (z -2.04) | w val [-0.02, 0.0, 0.02] hold [0.0, 0.02] | full-fit best val +0.00000@+0.00 hold +0.00002@+0.02 [31s]
+[  191.0s] contrast_cl    val -0.00022 ± 0.00021 (z -1.07) | M<50 -0.00016 ± 0.00036 (z -0.45) M>=50 -0.00026 ± 0.00024 (z -1.07) | pmix -0.00003 ± 0.00033 | holdout(elig) -0.00016 ± 0.00007 (z -2.36) | holdout(all 30K) -0.00007 ± 0.00003 (z -2.36) | w val [-0.02, 0.02] hold [-0.02, 0.0] | full-fit best val +0.00009@-0.02 hold +0.00000@+0.00 [26s]
+[  451.0s] JOINT_ridge    val -0.00052 ± 0.00024 (z -2.16) | pmix -0.00031 ± 0.00039 | holdout(elig) +0.00000 ± 0.00000 (z +0.00) | w val [-0.05, -0.02, 0.0, 0.05] hold [0.0] | beta(val, [s_pos_item, s_neg_item, s_pos_cl, s_neg_cl, zG3]) [0.00015, -0.0001, 0.00047, 1e-05, 0.01197] [260s]
+[  451.0s] === GATE (PREDECLARED.txt)
+[  451.0s] s_neg_item     val -0.00011 ± 0.00005 (>= +0.0010: False; >= 3 SE: False) holdout(elig) -0.00009 (> 0: False) -> task gate FAIL; extras {'pmix_ok': False, 'corr_cos_u_ok': True, 'cell_ok': False} -> FAIL
+[  451.0s] contrast_item  val -0.00011 ± 0.00005 (>= +0.0010: False; >= 3 SE: False) holdout(elig) -0.00009 (> 0: False) -> task gate FAIL; extras {'pmix_ok': False, 'corr_cos_u_ok': True, 'cell_ok': False} -> FAIL
+[  451.0s] s_neg_cl       val -0.00031 ± 0.00012 (>= +0.0010: False; >= 3 SE: False) holdout(elig) -0.00021 (> 0: False) -> task gate FAIL; extras {'pmix_ok': False, 'corr_cos_u_ok': True, 'cell_ok': False} -> FAIL
+[  451.0s] contrast_cl    val -0.00022 ± 0.00021 (>= +0.0010: False; >= 3 SE: False) holdout(elig) -0.00016 (> 0: False) -> task gate FAIL; extras {'pmix_ok': True, 'corr_cos_u_ok': True, 'cell_ok': False} -> FAIL
+[  451.0s] P4 VERDICT: CLOSED
+[  451.0s] done
+# restored from uknn_gate.stdout (check_transfer.py exec'd the header and truncated this file at 05:3x UTC; content identical to the gated run's stdout)

@@ -1,0 +1,216 @@
+KEY = witness. Judging rules of this agent, each block written BEFORE the read it judges. Lead's rules (nn_x/w5/logs/E_kd_predeclared.txt,
+blocks 2026-11-15T02:15:30Z "NEW EVIDENCE POLICY" and "ARM hz") are applied as written; nothing here replaces them.
+
+=== BLOCK 1, 2026-11-15T02:25Z (file written 02:24-02:25Z, before the workers started at 02:25:59Z): written before any prediction of mine exists (no stale-val, no lagged number of my own computed) ===
+What I already know (not blind): the lead's 6-pair table (val, pmix-public, in-period holdout, PUBLIC) at FINAL-file level; the reviewer's subset
+read (W8 pool 0.32334 -> 0.32002, S_lag +0.00024 +- 0.00031, S_0 -0.00050 +- 0.00032, D +0.00074 +- 0.00040); the 11-12 hzcd closure numbers.
+
+(1) CONTROLS (validity of my two tools; a failed control = the tool's numbers are not used for any reading):
+  A. Lagged holdout: my own CPU fp32 scoring of 3 of the 12 staged members (w5_e10_kd05w192_s952, w5_e10_kd05t25w192_s953, abl_e10_pop1kd05t25_s952)
+     on the subset under lag0 / priv / pub must equal the staged files (poplag: lag0, priv; poplag_verify: pub) with max |diff| <= 1e-3 in logit
+     and per-member subset NDCG difference <= 0.00002; then, with the other 9 members taken from the staged files, my read-out must give
+     W8 pool 0.32334 -> 0.32002 (each within 0.00002) and S_lag(w 0.2, priv) = +0.00024 +- 0.00031 (within 0.00002).
+  B. Stale-val on CPU: (b1) CPU fp32 WITHOUT overrides against the stored GPU bf16 train-only val predictions: per-member val NDCG within 0.0010
+     and corr >= 0.9995 (the bf16 band measured on the holdout by poplag was 0.00018 per member; bar as there);
+     (b2) CPU stale-val against the stored GPU stale-val file for >= 4 members that have one (w5_cd_hzcd_r101, w5_cd_m02ref_r101, abl_pop1_s23,
+     abl_base_s23): per-member stale-val NDCG within 0.0010, and the pair statistic (hzcd - m02ref, r101, per-feed z of single members)
+     CPU vs GPU within +-1 SE of its paired difference. If b2 fails only through bf16 noise at member level but pool deltas agree, I say so.
+(2) WITNESS DEFINITIONS (train-only level, pools = member mean of per-feed z; A = arm, B = reference; all paired per feed):
+  val        = stored GPU train-only val predictions, 14,423 feeds (also M>=50, M<50).
+  pmix-pub / pmix-priv = the val per-feed delta reweighted with src/pmix.weights() (public / private mix of M bin x cold-share bin).
+  stale-val  = val re-predicted with the private-like override inputs of nn_x/w5/stale_pred.py (it_hist x5, seq_cv x3, pre2_fe / _z / _s),
+               CPU fp32 for BOTH pools (never CPU against GPU).
+  hold       = stored GPU in-period holdout predictions, 30,000 feeds (reported; for the staleness family not a veto).
+  HOLD-SHORT = arm_read8.py's construction (random sub-feeds of the stored holdout predictions, sizes from val M<50, 4 replicates, seed 20261114).
+  lag0 / lag-priv / lag-pub = my CPU fp32 scoring of the subset (13,424 feeds) under the three views; D_priv = delta(priv) - delta(lag0), D_pub alike.
+  coldpos / warmpos = val feeds whose positives are all cold / all warm (it_hist_all_luo == 0 on the val row; nn_x/r6/r6_eval.py definition).
+(3) CALIBRATION (task C). Scored pairs with a public reading: (i) 0.8 z(W8) + 0.2 z(pop1kd x4) vs W8 [+0.000523], (ii) W16 vs W8 [-0.000003],
+  (iii) S16 vs W8 [-0.000408], (iv) C3 members vs G3 members [+0.000634] if scoreable. (v) W8 vs base x4 has no public reading of its own: reported
+  as a scale reference only, not scored. The public files are FINAL files (0.5 FT + 0.5 TO); my witnesses are train-only pools: a known mismatch,
+  stated, not corrected. Public paired SE per pair = sd(val per-feed delta of the train-only pools) / sqrt(8,562).
+  Candidate statistics (fixed now): single = val, pmix-pub, pmix-priv, stale-val, hold, lag0, lag-priv, lag-pub;
+     pairs = SV2 := per-feed mean of (val delta, stale-val delta) on the 14,423 val feeds;
+             inverse-variance means of independent samples: (val, lag-pub), (val, lag-priv), (stale-val, lag-priv), (SV2, lag-priv), (pmix-pub, lag-pub).
+  Scores per candidate over the scored pairs: (a) SIGN = number of pairs with |public delta| >= 1 public SE whose sign the candidate gets right
+     (pairs below 1 SE are reported, not counted); (b) X2 = mean over scored pairs of (candidate - public)^2 / (SE_candidate^2 + SE_public^2);
+     (c) slope through the origin of public on candidate (information).
+  RECOMMENDATION RULE: among candidates with no sign error in (a), the smallest X2; ties within 0.25 -> the smaller SE on the 16-vs-16 contrast.
+  A candidate that needs CPU inference is recommended over a free one (val / pmix) only if its X2 is smaller by more than 0.25.
+  With 3-4 pairs this calibration has little power; I will say what it cannot distinguish.
+(4) READ hz (task D): the lead's RULE hz is applied as written on the SELECTED checkpoints, train-only pools paired by snapshot:
+     PASS iff val delta >= 0 AND stale-val delta >= +2 SE AND val M<50 delta >= -1 SE.  Closed again iff val < 0 OR stale-val < +1 SE.  Otherwise: neither.
+  My implementation choices, fixed now: stale-val = CPU fp32 for hz AND ref (same runner); val / M<50 / pmix / hold / HOLD-SHORT from the stored GPU
+  files of both arms; only complete (hz, ref) snapshot pairs (both logs/<variant>.json exist) enter, the same snapshots on both sides;
+  the read is made once at about 07:15Z on whatever pairs exist (>= 8 pairs required for a verdict; fewer -> tools and command only).
+  If stale-val on CPU is missing for some complete pair at read time, that pair is dropped from EVERY column (stated).
+  The second table [0.8 z(hz) + 0.2 z(pop1kd x4)] vs [0.8 z(ref) + 0.2 z(pop1kd x4)] carries no decision; "add" := its val and stale-val deltas are
+  each >= half of the plain hz - ref deltas; "substitute" := both < half; otherwise "mixed".
+
+=== BLOCK 2, 2026-11-15T02:42Z: change of the CPU batching (label-free), written before any labelled read of mine ===
+Measured (logs/bench.log, logs/bench2.log; member w5_e10_kd05w192_s951, 1,500 subset feeds, no label opened): the uncut batches of common.predict run at
+6.6-8.3 K rows/s on 12 threads; cutting each reference batch into sub-batches of about 2,048 candidates runs at 28.7 K rows/s. The model output depends on
+the history padding of the batch (max |logit diff| 5.6e-2 when a sub-batch pads to a shorter history), so the sub-batches are ANCHORED: each holds a feed
+whose history pads to the reference batch's length (max |logit diff| to the uncut batches 1.5e-5, the level the reviewer found between two CPU runs).
+From 02:41Z both tools use anchored sub-batches (wt_common.anchored_batches). Control A is unchanged and now also tests this: member
+w5_e10_kd05w192_s952 was scored with the uncut batches (all three views), w5_e10_kd05t25w192_s953 lag0 uncut and priv / pub anchored,
+abl_e10_pop1kd05t25_s952 anchored; all must equal the staged files within the bars of block 1 (1) A.
+With the freed CPU time the calibration pair (iv) C3 vs G3 is scored (28 members); its members come from two other code families (nn/, nn_x/r6),
+so each of them must pass a member-level control first: CPU lag0 on the subset within 0.0010 NDCG of the stored GPU holdout file on the same feeds
+(the bar of the poplag control); a member that fails is reported and pair (iv) is then not scored for the lagged columns.
+
+=== BLOCK 3, 2026-11-15T03:03Z: result of control B and a second, properly sized control B' (declared before any of its new numbers exists) ===
+Control B as declared in block 1 (logs/control_B.txt, run 03:01Z):
+  b1 VALID (CPU without overrides vs stored GPU val: -0.00006 +- 0.00016, -0.00030 +- 0.00020, +0.00038 +- 0.00019; corr >= 0.999993).
+  b2 member level ok (4 members within 0.00034 of the stored GPU stale-val NDCG; corr >= 0.999992), but the pair statistic hzcd_r101 - m02ref_r101 is
+  CPU +0.00037 +- 0.00075 against GPU +0.00061 +- 0.00075: CPU - GPU = -0.00024 +- 0.00023 = 1.04 SE, outside my bar of 1 SE -> b2 FAILS BY THE LETTER.
+  The second pair (abl_pop1_s23 - abl_base_s23) is inside (-0.00020 +- 0.00023).
+  Applied as written: tool B's numbers are NOT cleared by control B. My opinion (stated, not applied): the 1 SE bar was mis-sized by me; a pure fp32 / bf16
+  numerics difference lands outside 1 SE in 32% of pairs, in 54% of cases for at least one of two pairs.
+Control B' (new; a failed B' closes tool B for every reading, a valid B' is reported NEXT TO the failed b2 and the lead decides which one governs):
+  What I have seen before writing this: the means above, including that abl_pop1_s23 has the same CPU - GPU offset with and without overrides
+  (-0.00034 / -0.00030) and w5_cd_hzcd_r101 too (+0.00000 / -0.00006). Not seen: any SE of the quantities below; m02ref_r101 and abl_base_s23 without
+  overrides on CPU; roots r102-r104 of either arm on CPU.
+  B'1 (effect of the override, per member, numerics offset cancelled): E_cpu = NDCG(CPU stale-val) - NDCG(CPU val without overrides),
+      E_gpu = NDCG(stored GPU stale-val) - NDCG(stored GPU val), paired per feed. Bar: |E_cpu - E_gpu| <= 2 SE of the paired difference for each of
+      w5_cd_hzcd_r101, w5_cd_m02ref_r101, abl_pop1_s23, abl_base_s23, AND the mean of E_cpu - E_gpu over the four within +-0.00015.
+  B'2 (pool level, the form every reading uses): stale-val delta of the 4-pool w5_cd_hzcd_r101-104 against the 4-pool w5_cd_m02ref_r101-104
+      (the 11-12 closure read: GPU files, +0.00107 +- 0.00036 by the lead's log): CPU delta - GPU delta, paired per feed, within +-2 SE AND within +-0.0003.
+  B' VALID iff B'1 and B'2 both hold. Cost: 2 val runs without overrides + 6 stale-val runs (about 16 worker-minutes), queued first.
+
+=== BLOCK 4, 2026-11-15T03:36Z: RESUME after the account-limit cut (first run 02:18-03:22Z; resumed 03:31Z); written before any new pool-level read ===
+State found: workers A (pid 4023835) and B (pid 4019986) of the first run alive and working through tasks.txt v3; 35 stale-val / val-base files and
+3 x 12 lagged files in the cache. Re-check of the cache (recheck_cache.py, logs/recheck_cache_0335Z.txt): every file intact; control A numbers reproduced
+from the cache (W8 pool 0.32334 -> 0.32002, S_lag +0.00024 +- 0.00031). Seen in that re-check and therefore NOT blind any more: the member-level CPU
+stale-val NDCG of the 8 W8 members, the 8 narrow students, the 4 pop1kd students (stale-val minus stored val per member: wide and narrow students
+-0.0007 .. -0.0020, pop1kd students -0.0001 .. +0.0000). No pool delta of any calibration pair under stale-val has been computed yet; no lagged number
+other than control A; nothing of hz (the hz K lanes started training at 03:34Z, no hz file exists).
+(5) CPU BUDGET. Two workers x 12 threads give about 28,000 worker-seconds until 07:35Z; the v3 queue needs about 60,000. Priorities (tasks.txt v4):
+  P1 calibration stale-val (running) -> P2 hz / ref SELECTED stale-val (the decision witness of RULE hz) -> P3 lagged lag0 + priv of the 8 narrow students
+  and base x4 (pairs iii, v) -> P4 pair (iv) stale-val on the REDUCED pools below -> P5 hz / ref selected lagged, kcd half (8 snapshot pairs) ->
+  P6 hz / ref @last stale-val, kcd half -> P7 pair (iv) lagged, reduced pools -> P8 hz / ref selected lagged, lcd half -> P9 @last stale-val, lcd half ->
+  P10 ref2 stale-val (null of a re-cool), lagged of W16's 8 newer members (pair ii), @last lagged, public-like view of hz / ref.
+  What is not scored at the read is said in the report as "not checked"; no column is filled from a GPU file against a CPU file.
+(6) PAIR (iv) ON REDUCED POOLS (fixed now, members = the first seeds of each group, no selection on any number):
+  F10h = v23_gru_pre2s_s501-503, F7xh = r6_cd_m02_r101-103, F7x70h = r6_cd_m02_p70k_r101-103, pop1h = abl_e10_pop1_s951-954 (13 members instead of 28).
+  G3h = 6/20 mean z(F10h) + 7/20 mean z(F7xh) + 7/20 mean z(F7x70h); C3h = (6 mean z(F10h) + 7 mean z(F7xh) + 7 mean z(F7x70h) + 8 mean z(pop1h)) / 28
+  (group means of member z WITHOUT re-standardisation, group weights = the member counts of the member-equal pools G3 (20) and C3 (28): the reduced
+  pool is an estimate of the member-equal pool with fewer seeds per group).
+  Free statistics (val, pmix-pub, pmix-priv, hold) of pair (iv) are scored on the FULL pools (C3 = 28 members, G3 = 20, member-equal); statistics with a
+  CPU component (stale-val, SV2, lag0, lag-priv, lag-pub and the lagged half of the combinations) on the reduced pools; SV2 takes both halves from the
+  reduced pools. Representativeness check, stated with the result: (reduced val delta - full val delta) and (reduced hold delta - full hold delta), paired
+  per feed; if either is outside +-2 SE, pair (iv) is reported but NOT scored for the CPU-based candidates.
+  Family controls (block 2 stays): first member of each foreign family (v23_gru_pre2s_s501, r6_cd_m02_r101, r6_cd_m02_p70k_r101, abl_e10_pop1_s951):
+  CPU val without overrides within 0.0010 NDCG of the stored GPU val file and corr >= 0.9995; every reduced-pool member: CPU lag0 on the subset within
+  0.0010 NDCG of the stored GPU holdout file on the same feeds. A failing member closes the corresponding columns of pair (iv).
+  Pool identity check (label-free): the per-feed z of my train-only pools W8, W16, S16, G3, C3 and 0.8 z(W8) + 0.2 z(pop1kd) against the lead's stored
+  train-only halves preds/ens_<tag>_to_val.npy (tags W8kd, W16kd, S16kd, G3, Q2a8s3, W8P20kd): feed-mean Pearson r reported; r < 0.999 = my pool is
+  not the scored file's train-only half and the pair is flagged.
+(7) SE OF THE RECOMMENDED STATISTIC ON A 16-vs-16 CONTRAST (method fixed now): (a) per-feed paired SE measured on a real 16-vs-16 contrast: the ref
+  re-cools vs the 16 original wide students (harness-control pair) and, at the read, hz vs ref; (b) seed noise from the A/A splits of c_calib.py
+  (sd over 40 random disjoint N-vs-N splits of the 16 wide students, N = 4 and 8; for 16-vs-16 of INDEPENDENT seeds the 8-vs-8 sd is scaled by
+  sqrt(8 / 16)); total SE := sqrt(SE_feed^2 + sd_seed^2), reported next to the per-feed SE. For re-cool arms PAIRED BY SNAPSHOT the seed noise is smaller
+  (shared snapshot); it is measured by ref2 vs ref (4 snapshot pairs) only if P10 is reached, otherwise the independent-seed value is given as an upper bound.
+(8) INFORMATION ROWS added to the calibration table (not scored, no public reading or not a pair of the task): W8 vs C3 [public +0.001032; C3 reduced for
+  the CPU columns]; ref 16-pool vs W16 (harness control: must be ~0 on every witness); x1 / x2 of c_calib.py as before.
+(9) READ hz: unchanged from block 1 (4): once, at about 07:15Z, on the complete (hz, ref) snapshot pairs that have CPU stale-val on both sides;
+  >= 8 pairs for a verdict. Lagged and @last columns are filled for the pairs that have those files at the read (pair counts printed per table).
+CORRECTION to block 4 (03:37Z): "the hz K lanes started training at 03:34Z" is wrong. nn_x/w5/logs/lane_hz_K_95x.log read "GPU N: 4 compute
+processes, 31 GB free (need <= 3 and >= 60 GB)" at 03:34Z: the lanes are WAITING for a GPU slot; no hz run has started. Nothing else changes.
+
+=== BLOCK 5, 2026-11-15T03:41Z: first run of c_calib2.py (logs/calib2_run1.out, 03:38Z) and its consequence for pair (iv) ===
+Seen in that run: pool identity r = 1.00000 for all six scored files (my train-only pools ARE the train-only halves of the lead's files); the free
+witnesses of every pair; stale-val of pairs (i), (iii), (v); lagged of pair (i) (= control A). NOT seen: any stale-val or lagged number of pair (iv),
+the lagged columns of (ii), (iii), (v), anything of hz / ref.
+Representativeness check of the reduced pools of pair (iv), block 4 (6), APPLIED AS WRITTEN: val reduced - full -0.00034 +- 0.00043 (ok), hold reduced - full
++0.00073 +- 0.00025 (+2.98 SE: OUTSIDE 2 SE; reduced C3h - G3h on the holdout +0.00001 against -0.00073 for the full pools) -> the CPU-based candidates
+are NOT scored on pair (iv) with the reduced pools.
+Change (made before any CPU number of pair (iv) exists): the STALE-VAL of pair (iv) is computed on the FULL pools (28 + 20 members, 32 CPU runs with the
+four family controls) and is then scored like every other pair (no reduced pool is involved; SV2 too). The LAGGED columns of pair (iv) stay on the reduced
+pools of block 4 (6) and are REPORTED ONLY (levels, D_priv = delta(priv) - delta(lag0), and the pool drops); they enter no score. Full-pool lagged
+scoring of 28 members (10,640 worker-seconds) does not fit the budget next to the hz read; that is a limit of this report.
+Queue (tasks.txt v5): P1 calibration stale-val -> P2 hz / ref selected stale-val -> P3 pair (iv) full stale-val -> P4 lagged of the 8 narrow students (pair iii)
+-> P5 hz / ref selected lagged, kcd half -> P6 hz / ref @last stale-val, kcd half -> P7 pair (iv) lagged on the reduced pools -> P8 lagged base x4 (pair v)
+-> P9 hz / ref selected lagged, lcd half -> P10 @last stale-val lcd half -> P11 ref2 stale-val, W16's newer members lagged, @last lagged, public-like view.
+
+=== BLOCK 6, 2026-11-15T03:45Z: sub-pool sensitivity (subpool_D.py, logs/subpool_D.txt) and the queue ===
+Measured on pair (i) from the cache (no new prediction): over 60 random half-size sub-pools (4 of 8 W8 + 2 of 4 pop1kd) the admixture statistic has a
+seed sd of 0.00025 (lag0), 0.00024 (priv) and 0.00030 for D = S_priv - S_lag0: D is NOT less sensitive to the choice of seeds than the deltas
+(I had hoped a reduced pool could give D for pair (iv)). A 13-member reduced read of pair (iv) would carry about 0.0003 of seed noise on top of a
+per-feed SE of about 0.0004 against an expected effect of about 0.0007: not worth 4,940 worker-seconds.
+Change (no number of pair (iv), (ii), (iii), (v) under the lagged views has been seen): the lagged read of pair (iv) on the reduced pools is DROPPED
+from the plan (moved to the very end of the queue; if it is not reached, pair (iv) has no lagged column and the report says so). In its place:
+lagged lag0 + priv of the 8 newer wide students (pair (ii), the 16-member A/A of the lagged statistics, and x1 = 0.8 z(W16) + 0.2 z(pop1kd) vs W16 as a
+second read of the admixture under lag on the 16-member base), then base x4 (pair v).
+Consequence for the SE the lead asked for: the seed noise of a statistic is reported next to its per-feed SE (block 4 (7)); for the admixture statistic
+of pair (i) at full size the seed sd is about 0.00025 / sqrt(2) = 0.00018 under either view [I: 1 / sqrt(N) scaling from the half-size sub-pools].
+
+=== BLOCK 7, 2026-11-15T03:54Z: the SE formula of block 4 (7) double-counts; what is reported ===
+Seen (logs/calib2_run2.out, A/A part; logs/subpool_D.txt): over random same-recipe splits with FIXED feeds the sd of the delta is 0.75-1.00 of the mean
+per-feed SE for val, stale-val, SV2, pmix, the in-period holdout, lag-priv / lag-pub and for the admixture statistic (0.75-0.77). So the per-feed paired SE
+already contains the seed noise (seed noise acts feed by feed, with no component common to all feeds), and "total := sqrt(SE_feed^2 + sd_seed^2)" of
+block 4 (7) counts it twice. Exceptions: lag0 (1.25) and D (1.44 / 1.61) of an N-vs-N split, where a seed-level component common to all feeds exists.
+Applied as written: the block 4 (7) "total" is printed. Reported next to it and, in my opinion, the right number:
+  SE_16v16 := sqrt(SE_feed^2 + max(0, sd_splits^2 - SE_feed,splits^2) * N_split / 16), with SE_feed measured on a real 16-vs-16 contrast
+  (ref re-cools vs the original wide students; hz vs ref at the read) and the excess term from the A/A splits (zero when the ratio is <= 1).
+The recommendation rule of block 1 (3) is unchanged; its tie-break "smaller SE on the 16-vs-16 contrast" uses the per-feed SE of the real 16-vs-16
+contrast (the excess term is zero for every val-sample candidate).
+
+=== BLOCK 8, 2026-11-15T04:19Z: queue order for the hz read (no hz number seen; label-free scheduling only) ===
+Seen with ps at 04:19Z: 12 hz re-cools are training (kcd s952, 954-958; lcd s952, 954-958; 12-37 minutes in, a re-cool trains 57 min); the four
+s951 / s953 runs wait for a GPU slot. Capacity until the read is about 320 worker-minutes; the full hz / ref package needs 319 (selected stale-val 37,
+@last stale-val 74, selected lagged 208). Order (tasks.txt v7): P2 selected stale-val (decision witness) -> P4 lagged of the 8 narrow students (pair iii,
+runs before the first hz file exists) -> @last stale-val of every snapshot -> selected lagged, kcd half, then lcd half -> the rest. Expected at the read:
+selected and @last stale-val for every complete pair, lagged for about 12 pairs. Read time unchanged (about 07:15Z, once).
+
+=== BLOCK 9, 2026-11-15T04:40Z: time of the hz read (no hz number seen; the first hz run, w5_kcd_hz_s952, finished at about 04:40Z) ===
+The read is made ONCE: at about 07:15Z on whatever complete pairs exist (block 1 (4)), or earlier if all 16 (hz, ref) pairs already have every scheduled
+file (selected and @last CPU stale-val, selected lagged lag0 + priv); an earlier read on a complete set is the same read. After the read no further hz
+pair is added to the decision table by me; later pairs are for the lead (hz_tasks.txt + d_hz.py).
+
+=== BLOCK 10, 2026-11-15T04:59Z: queue order (label-free scheduling; no hz number seen) ===
+At 04:58Z nine hz runs are finished (kcd s952, 954, 956, 957, 958; lcd s952, 954, 956, 958), the other seven are training or waiting; all 16 ref runs are finished.
+Capacity until the read about 270 worker-minutes; needs: hz selected stale-val 15, selected lagged 160, @last stale-val 70, lagged of the 8 newer wide
+students 40, base x4 20. Order (tasks.txt v8): selected stale-val -> selected lagged of the kcd half -> @last stale-val (all) -> lagged of the 8 newer wide
+students (pairs ii and x1 of the calibration) -> selected lagged of the lcd half -> base x4. Whatever is not scored at the read is listed as not checked.
+Seen since block 9 (calibration only, logs/calib2_run5.out): pair (iii) under the lagged views (lag0 -0.00039 +- 0.00027, private-like -0.00028 +- 0.00027).
+
+=== BLOCK 11, 2026-11-15T05:00Z: one more reported column, declared before the hz read (no hz number seen) ===
+Label-free parity of the stale-val inputs (sv_parity.py, logs/sv_parity.txt): zero share of it_hist_all_luo 0.379 on val as stored, 0.485 under the stale-val
+override, 0.428 on test public, 0.456 on test private. On that axis public sits 46% and private 73% of the way from val to stale-val.
+New REPORTED column (no decision, in every read-out from now on): SVpriv := per-feed 0.27 * (val delta) + 0.73 * (stale-val delta) = the private-like
+position; SV2 (0.5 / 0.5) stays the public-like position. Not scored in the calibration (its weights were set after the calibration table was seen; the
+public readings are public-part readings and cannot test a private-like statistic anyway).
+
+=== BLOCK 12, 2026-11-15T05:21Z: queue order again (label-free scheduling; no hz number seen) ===
+A lagged view now takes 175-180 s (machine load); the full package does not fit before the read. The selected lagged of the lcd half moves in front of the
+lagged of the 8 newer wide students: the hz table then has its lagged columns on (nearly) all 16 pairs, and the question of calibration row x1 (does the
+popularity-light admixture still help under lag on a 16-member base) is answered on the 16 ref re-cools inside the hz read ("value of the admixture on the
+ref pool", now also with lag0 / private-like / D). Consequence: pair (ii) W16 - W8 and pair (v) W8 - base x4 will probably have NO lagged column (not checked).
+Remark fixed before the read: the K / L harness selects the "selected" checkpoint on the in-period holdout (--select_on holdout), the witness the new policy
+calls biased against this family; RULE hz decides on the selected checkpoints and is applied as written; the @last table is selection-free and is reported next to it.
+
+=== BLOCK 13, 2026-11-15T06:18Z: after the hz package (label-free scheduling; no hz number seen; the single hz read is still to come) ===
+The machine got faster (a lagged view 95 s, a stale-val run 65-80 s). All 32 selected and 32 @last stale-val files and the 16 kcd lagged members exist; the lcd
+lagged members finish at about 06:35Z, then the hz read is made (block 9: every scheduled file of all 16 pairs is there). Queue after it (tasks.txt v10):
+ref2 stale-val (A/A null of a snapshot-paired re-cool contrast under the decision witness; read by ref2_null.py: ref2 - ref on the pairs that have both,
+val / stale-val / SV2 / holdout, pool and mean member) -> lagged of the 8 newer wide students -> base x4 -> @last lagged of the kcd half.
+If the @last lagged files of a half are complete before I close, d_hz.py is run a second time ONLY to fill the @last lagged rows; the decision table and the
+verdict are those of the first run (the numbers are deterministic functions of the same files).
+
+=== BLOCK 14, 2026-11-15T06:31:13Z: THE hz READ IS STARTED NOW (d_hz.py hz ref), once ===
+State: all 16 (hz, ref) snapshot pairs complete (json on both sides); CPU stale-val for the selected and the @last checkpoints of all 32 members; lagged lag0 +
+private-like for the selected checkpoints of all 32 members; no @last lagged, no public-like view. No hz number has been computed or seen before this line.
+
+=== BLOCK 15, 2026-11-15T06:42Z: after the hz read (logs/read_hz_vs_ref_0631Z.txt): result by the rule, and a POST-HOC robustness read (information only) ===
+RULE hz on 16 of 16 pairs, selected checkpoints, applied as written: val -0.00009 +- 0.00040 (>= 0: NO), stale-val +0.00113 +- 0.00043 = +2.60 SE (>= +2 SE: yes),
+val M<50 -0.00025 +- 0.00072 = -0.34 SE (>= -1 SE: yes) -> not PASS; closing clause "val < 0 OR stale-val < +1 SE": val < 0 -> CLOSED AGAIN under KD.
+Cross-check: the lead's arm_read8.py rc:hz gives the same val / holdout / HOLD-SHORT numbers (logs/xcheck_arm_read8_hz.txt).
+Seen after the read (ref2_null.py): ref2 - ref stale-val +0.00046 +- 0.00031, ref - originals -0.00056 +- 0.00030, ref2 - originals -0.00010 +- 0.00033: the ref pool is
+a low draw under stale-val among three same-recipe pools. POST-HOC and for information only (it changes no verdict; the rule's reference is ref):
+hz_refs.py reads the hz 16-pool against (a) ref, (b) ref2, (c) the original wide students, (d) the 48-member pool of all three, on every witness that exists for
+both sides, selected and @last.
+
+=== BLOCK 16, 2026-11-15T07:16:57Z: second run of d_hz.py, ONLY for the @last lagged rows (block 13) ===
+The @last lagged files of the kcd half (8 pairs) exist; the lcd half was not scored. The decision table and the verdict are those of the 06:31Z run; the second
+run adds the @last lagged rows on the 8 kcd pairs (and, since two pools of 8 are read there, the val / stale-val / holdout of those 8 pairs for reference).
+Workers stopped through logs/STOP_A / logs/STOP_B at the same time (they finish the member they are scoring).

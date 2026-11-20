@@ -1,0 +1,84 @@
+LATE-DROPOUT 10-epoch pair: PRE-DECLARED RULE
+written: Fri Nov 13 04:50:54 UTC 2026  (date -u), BEFORE any arm run exists (abl_e10_latedrop_* not launched; no arm number computed)
+source: reports/TRICKS_SWEEP_1113.md section 3 item 1 + the skeptics' fixes (single pre-declared primary arm, 10-epoch pair
+only, no 2-epoch screen, holdout > +2 SE bar, seed-corr clause). CLOSURE / INFORMATION readout: nothing is adopted or
+submitted by this item; a PASS is pool material only (it reaches a pick only via the decide6 holdout-led pool rule vs G3
++ presub_gate, and replacing pick 1 needs holdout >= +2 SE vs G3 and val >= 0).
+
+ARM (verified by the CPU probe nn_x/tricks/late_dropout/probe_dropout_schedule.{py,txt,json}: PASS 9/9)
+  LD = E_BASE + HYG + '--drop 0 --attn_drop 0.1 --drop_cd 0.1' (appended last), nn_x/abl/train.py, variants
+  abl_e10_latedrop_s951 (GPU N) and abl_e10_latedrop_s952 (GPU N):
+    cd <repo>/nn_x/abl && CUDA_VISIBLE_DEVICES=<0|1> OMP_NUM_THREADS=12 MKL_NUM_THREADS=12 OPENBLAS_NUM_THREADS=12
+    NUMBA_NUM_THREADS=12 POLARS_MAX_THREADS=12 setsid nohup <repo>/.venv/bin/python train.py
+    --variant abl_e10_latedrop_s<951|952> --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain
+    --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon
+    --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3
+    --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed <951|952>
+    --drop 0 --attn_drop 0.1 --drop_cd 0.1 > logs/abl_e10_latedrop_s<seed>.stdout 2>&1 < /dev/null &
+  Schedule (probe, from train.py's own parser / Ranker call / t_cool statement / drop_cd block on real CPU batches):
+    steps 0 .. 78679 (warmup 500 + plateau): the 11 nn.Dropout sites (HistRetrieval value dp, Block FFN-hidden ff.2 and
+    residual dr in hist_enc.0, cross.0-1, sets.0-1) p = 0 (identity); the 5 attention-probability sites p = 0.1.
+    steps 78680 .. 98349 (WSD cooldown, t_cool = round(0.8 * 98350) = 78680): every site p = 0.1 (= the base everywhere).
+    Parser diff vs E_BASE + HYG = exactly drop 0.1->0, attn_drop -1->0.1, drop_cd -1->0.1; E_BASE + HYG = the
+    w5_e10_base_s951 recipe (no other arg differs). Same init weights as the base at the same seed (dropout has no params).
+  Launch only when nn_x/abl/logs/abl_e10_xdrop_pop_s95{<ids>}.json all exist AND that GPU shows < 4 compute processes
+  and >= 60 GB free (nvidia-smi), under the per-GPU flock nn_x/abl/logs/locks/gpu<g>.lock held until the run has loaded
+  its data. s953/954 are NOT part of this item (only if 951/952 PASS, under a new declaration).
+
+REFERENCE: w5_e10_base_s951 / s952 (nn_x/w5/preds, nn_x/w5/preds/holdout), paired per seed. Diversity reference pool
+  w5_e10_base_s953 + s954.
+
+PRIMARY READOUT (computed ONCE, when both runs have json + selected holdout + selected trainonly_val preds;
+  nn_x/tricks/late_dropout/readout_late_dropout.py; template nn_x/abl/popfree/readout_popfree.py):
+  checkpoint: the SELECTED checkpoint (holdout-selected among evals at step >= 12000; the E-rule / readout_popfree
+    convention, = the member that would enter a pool): nn_<v>_trainonly_val.npy and holdout/nn_<v>_holdout.npy.
+  per-feed metric: src/metrics.ndcg_per_feed (binary gain, pessimistic ties); val labels data/flat/val/cand_target.npy,
+    holdout labels / meta nn_x/w5/preds/holdout/holdout_{y,meta}.npy.
+  d_val[f] = mean over seeds {951,952} of (NDCG_LD,s[f] - NDCG_base,s[f]) over the 14,423 val feeds; SE = sd(d)/sqrt(n).
+  d_hold[f] likewise over the 30,000 holdout feeds.
+  slices (val): M<50, M>=50, Tue ((timestamp+10800)//86400 < 20720), Thu (the rest); z = mean(d_val[slice]) / SE(slice).
+  pmix: src/pmix.wmean_se(d_val, pmix.weights()['private']) -> (pm, pse).
+  diversity: within-feed rank-z (src/stack_val.feed_rank_z column 1) of each member; a pool = feed_rank_z of the mean of
+    its members' z (readout_popfree convention); corr = Pearson over all val candidates.
+    rho_x  = corr( LD pool {951,952} , base pool {953,954} )
+    rho_bb = corr( base pool {951,952} , base pool {953,954} )
+    i.e. "the within-feed corr of the 2-member LD pool to a 2-member base pool" vs "the base-vs-base (seed) corr" at the
+    same pool size and with disjoint seeds, so neither the shared init / batch order of a same-seed pair nor the
+    member-vs-pool size mismatch biases the comparison. (Information only: same-seed pool corr LD{951,952} vs
+    base{951,952}; the r6/r7 member convention rho_x_mem = mean(corr(LD951,B952), corr(LD952,B951)) vs rho_bb_mem =
+    corr(B951,B952); holdout versions; corr of the LD pool and of the base pool to the G3 train-only pool.)
+  PASS iff ALL of
+    (1) mean(d_val) > 0
+    (2) mean(d_hold) > +2 * SE(d_hold)
+    (3) no val slice z < -2 (M<50, M>=50, Tue, Thu)
+    (4) pm >= -1 * pse
+    (5) rho_x <= rho_bb - 0.005
+  else FAIL. Every clause and number is reported whatever the outcome.
+  Information only (never gates): per-seed deltas, the @last checkpoint view, SE_cal = sqrt(SE^2 + sigma_run^2/2) with
+  sigma_run 0.00035 val / 0.00015 holdout, the 2-member LD pool vs 2-member base pool deltas, the step-60000 gate numbers,
+  train minutes. A crashed run (process gone without its json) -> RESULT INCOMPLETE (no PASS/FAIL); any re-run needs a
+  new declaration.
+
+PLATEAU KILL GATE (the only interim look; evaluated once, when BOTH arm logs contain their step-60000 eval line):
+  FACT disclosed before any run: at 10 epochs the run has 98,350 steps and the cooldown starts at step 78,680 (base log
+  line 8: 'cooldown mix: p=0.02 from step 78680'), so step 60,000 is NOT the end of the plateau and NOT the first cooldown
+  eval (the last plateau eval is 77,500, the first cooldown eval 80,000). The task text and TRICKS_SWEEP_1113 name step
+  60,000 and the base's step-60,000 holdouts; that number is kept as the gate step (61% of training, mid-plateau, LD
+  dropout state at that point = stable phase), so the gate is a mid-plateau futility check.
+  h_base,s(60000): w5_e10_base_s95<s>.json history entry step 60000, holdout_ndcg (s951 0.31659 / s952 per its json).
+  h_LD,s(60000): the 'step 60000/98350 ... holdout_ndcg X' line of nn_x/abl/logs/abl_e10_latedrop_s<s>.log.
+  SE_gate (single-seed run-to-run SD of a plateau holdout difference, from BASE runs only, no arm data):
+    SE_gate = sqrt( mean over the 15 seed pairs i<j of w5_e10_base_s951..s956 and the 16 plateau evals
+                    t = 40000, 42500, ..., 77500 of (h_i(t) - h_j(t))^2 )   (json histories).
+  KILL iff for BOTH seeds s in {951, 952}: h_LD,s(60000) - h_base,s(60000) < -2 * SE_gate.
+  On KILL: stop both abl_e10_latedrop train.py processes by exact PID (PID recorded at launch, /proc/<pid>/cmdline
+  re-verified to be '<python> train.py --variant abl_e10_latedrop_s<s> ...' before kill), record the stop in
+  nn_x/abl/RUNNING.txt, write RESULT.txt = FAIL (plateau kill gate) with the gate numbers; no readout of partial runs.
+  Otherwise the runs continue untouched and the gate numbers are information only.
+
+ADDENDUM (written Fri Nov 13 04:51:13 UTC 2026; still before any arm run exists): kill-gate constant computed by se_gate.py from the six
+base runs exactly as declared above (their recipes verified identical up to variant / seed; later-version flags at OFF):
+  SE_gate = 0.00076575 (15 pairs x 16 plateau evals 40000..77500); kill threshold per seed: d < -0.00153150.
+  h_base(60000): s951 0.31659185, s952 0.31739697 (json, full precision).
+  -> KILL iff h_LD,951(60000) < 0.31506035 AND h_LD,952(60000) < 0.31586547.
+  (info: RMS at step 60000 alone 0.00107 over the 15 pairs; the pooled window is the declared estimator.)

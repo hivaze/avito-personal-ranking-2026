@@ -1,0 +1,178 @@
+TAIL ERROR ANATOMY of G3 (val) -- RESULT, written 2026-11-13 ~05:35 UTC
+Code: nn_x/insights/tail_1113/tail.py (CPU, 12 threads, 21 s). Full log: tail_log.txt (= tail_stdout.txt); numbers: tail_results.json.
+No ranker trained, nothing adopted or submitted, nothing written outside this directory. The only fitted models are the
+label-free "is this a tail feed" classifiers of §3 (nested, user-grouped).
+
+DEFINITIONS
+- G3 = preds/ens_G3_final_val.npy (val NDCG 0.40032 reproduced). Ranks follow src/metrics.py (score desc, pessimistic ties).
+- TAIL feed = >= 1 positive and NO positive in G3's top-8; HEAD = the other feeds with positives (every val feed has one).
+- Focal positive = the feed's best-ranked positive (defines tail membership). Top neg = the best-ranked negative.
+  "Beaters" = the negatives ranked above the focal positive.
+- +- = user-clustered SE (user_id 0 feeds as singletons). "M-adj" = tail-head difference with M-decile fixed effects.
+- Popularity = it_hist_all_luo (NaN -> 0). Cosines from the int8 item embeddings (unit-normalised), max over the full
+  history and over the newest 5 events (hpos 0-4). Near-duplicate = cos > 0.98 to some history item.
+- Label-side slices are DESCRIPTIVE (where the loss is), not causal.
+
+HEADLINE
+- TAIL = 7,379 feeds (51.2%) carrying 66.0% of val loss; mean NDCG tail 0.226 vs head 0.583.
+- Tail is first of all a FEED-SIZE phenomenon: median M 109 vs 32 (M>=50: 79% vs 38%); M alone predicts tail at AUC
+  0.766 +- 0.004; every other label-free feed statistic plus G3's own score shape adds only +0.007 +- 0.001 (AUC 0.773),
+  and WITHIN M deciles the best model reaches AUC 0.558 (M-only 0.511). Beyond M, failure is barely predictable.
+- Inside a tail feed, the positive LOSES TO ITS BEATERS ON EVERY CUE the ranker has: pairwise P(cue_pos > cue_beater)
+  = 0.37 (cosine to history, newest-5 cosine, user_emb cosine), 0.38 (f1), 0.41 (f3), 0.42-0.43 (category share of history,
+  category in newest-5), 0.45 (popularity, f5), 0.46 (f4), 0.47 (category in history at all); f2 0.507 +- 0.004 (null);
+  all SEs 0.003-0.005. The G3 order is consistent with every observable cue; the tail positives are atypical clicks.
+- Loss is spread in proportion to positives across popularity groups and history-category states (loss per tail positive
+  0.54-0.61 in every cell): there is no concentrated segment to target.
+- Calibration: moving every tail feed's best positive up by ONE rank is worth +0.0019 val; by 10% of its rank +0.0040.
+  A generational step (+0.002) = "every tail positive one rank higher" without hurting the head.
+
+(1)-(2) TAIL vs HEAD (head | tail | tail-head +- SE | M-adj +- SE)
+Feed descriptors
+  M (mean)                                   61.7 | 129.5 | +67.8 +- 1.3     | (M-adj by construction ~0)
+  history length H                          171.8 | 174.7 | +2.8 +- 1.3      | +3.8 +- 1.5    (negligible)
+  H at the 256 cap                          0.281 | 0.298 | +0.017 +- 0.008  | +0.021 +- 0.009
+  user_id 0 share                           0.046 | 0.045 | -0.002 +- 0.004  | -0.010 +- 0.004
+  positives per feed (label side)           1.65  | 1.40  | -0.25 +- 0.03    | -0.70 +- 0.05
+The positive's category
+  share of candidates in the pos category   0.323 | 0.260 | -0.062 +- 0.004  | -0.051 +- 0.004
+  same-category candidates above the pos    1.2   | 11.2  | +10.0 +- 0.2     | +7.5 +- 0.1
+  other-category candidates above the pos   1.2   | 25.8  | +24.6 +- 0.4     | +20.3 +- 0.3
+  share of beaters in the pos category      0.522 | 0.366 | -0.156 +- 0.007  | -0.242 +- 0.008
+  pos is its category's top-ranked item     0.494 | 0.140 | -0.353 +- 0.007  | -0.263 +- 0.009
+  pos within-category relative rank         0.152 | 0.389 | +0.237 +- 0.005  | +0.329 +- 0.004
+  top neg in the pos category               0.539 | 0.356 | -0.183 +- 0.008  | -0.269 +- 0.009
+  pos category in history (any)             0.958 | 0.905 | -0.053 +- 0.004  | -0.070 +- 0.005
+  pos category in the newest 5 events       0.726 | 0.536 | -0.190 +- 0.008  | -0.267 +- 0.009
+  pos category = newest event's category    0.510 | 0.338 | -0.172 +- 0.008  | -0.237 +- 0.009
+  top-neg category in the newest 5 events   0.785 | 0.827 | +0.042 +- 0.007  | -0.010 +- 0.007
+Popularity (it_hist_all_luo)
+  log1p pop of the positive                 2.08  | 1.74  | -0.33 +- 0.03    | -0.47 +- 0.03
+  log1p pop, positive - top neg            -0.17  | -0.55 | -0.38 +- 0.04    | -0.52 +- 0.04
+  log1p pop, positive - feed median        +0.89  | +0.57 | -0.32 +- 0.03    | -0.48 +- 0.03
+  P(pos pop > feed median)                  0.600 | 0.519 | -0.081 +- 0.008  | -0.127 +- 0.009
+  P(pos pop > top-neg pop)                  0.466 | 0.400 | -0.066 +- 0.008  | -0.090 +- 0.009
+  positive is cold (pop 0)                  0.242 | 0.322 | +0.081 +- 0.008  | +0.108 +- 0.008
+  top neg is cold                           0.209 | 0.203 | -0.006 +- 0.007  | -0.005 +- 0.008
+Embedding similarity to the history
+  cos max (full history): pos / top neg     0.899 / 0.915 | 0.851 / 0.923 | pos-topneg -0.056 +- 0.002 | M-adj -0.062 +- 0.002
+  cos max (newest 5): pos / top neg         0.760 / 0.794 | 0.669 / 0.816 | pos-topneg -0.114 +- 0.004 | M-adj -0.121 +- 0.004
+  pos cos-max within-feed percentile        0.730 | 0.601 | -0.128 +- 0.004  | -0.184 +- 0.005
+  cos to user_emb, pos - top neg           -0.010 | -0.047 | -0.037 +- 0.002 | -0.045 +- 0.002
+  pos near-duplicate of a history item      0.145 | 0.050 | -0.095 +- 0.005  | -0.130 +- 0.006
+  top neg near-duplicate                    0.196 | 0.236 | +0.040 +- 0.007  | -0.010 +- 0.008
+  (any positive near-dup: tail 6.2%, head 17.0%; base rates: all positives 8.7%, all negatives 3.7%. The 367 tail feeds with a
+   near-dup positive still rank it at median 17, with a median 3 near-dup NEGATIVES above it. A candidate's own item_id
+   never occurs in its feed's history: 0 of 1.39M rows, structural.)
+f1..f5 (positive vs top neg; P(pos > top neg), ties 0.5 | positive's within-feed percentile)
+  f1   0.440 | 0.286 (-0.154 +- 0.008; M-adj -0.166)     percentile 0.706 | 0.577 (-0.129 +- 0.004)
+  f2   0.479 | 0.489 (+0.009 +- 0.007)                   percentile 0.496 | 0.495 (null: f2 carries no pairwise signal)
+  f3   0.465 | 0.359 (-0.106 +- 0.006; M-adj -0.126)     percentile 0.662 | 0.565 (-0.097 +- 0.004)
+  f4   0.473 | 0.474 (+0.001 +- 0.008; M-adj -0.026 +- 0.010)  percentile 0.570 | 0.530 (-0.040 +- 0.005)
+  f5   0.477 | 0.413 (-0.065 +- 0.008)                   percentile 0.599 | 0.540 (-0.060 +- 0.005)
+  f4 especially: it is the dominant input by replay (zeroing it costs -0.0138 val), yet as a pairwise cue it is weak and
+  does NOT separate tail from head (P(pos > top neg) 0.473 vs 0.474; cue AUC vs all negatives 0.536 tail / 0.560 head).
+  f4's value lives in interactions (it is the cold-positive channel: coldpos -0.031 when zeroed), not in a monotone
+  "higher f4 = click" signal that the tail positives lack. f1 (user x sub-category affinity per the LLM pilot) and f3
+  (user x category affinity) are the f-features that separate tail from head.
+
+(2b) CUE AUCs: P(cue_pos > cue_neg) for the focal positive (pooled over pairs, +- SE 0.003-0.005)
+  cue                       tail vs beaters | tail vs all negs | head vs all negs
+  cos max to history            0.373       |     0.630        |     0.782
+  cos max newest-5              0.367       |     0.607        |     0.793
+  cos to user_emb               0.366       |     0.626        |     0.765
+  f1                            0.382       |     0.607        |     0.754
+  f3                            0.411       |     0.591        |     0.691
+  cat share of history          0.423       |     0.570        |     0.646
+  cat in newest-5               0.426       |     0.560        |     0.678
+  pop (all / et1)            0.448 / 0.445  |  0.545 / 0.545   |  0.609 / 0.613
+  f5                            0.452       |     0.549        |     0.615
+  f4                            0.458       |     0.536        |     0.560
+  cat in history                0.470       |     0.538        |     0.565
+  f2                            0.507       |     0.494        |     0.502
+  Caveat: "vs beaters" is conditioned on G3 having put them above, so it is biased below 0.5 for any cue G3 uses.
+  The point is that NO cue escapes this: a cue the ranker under-uses would show > 0.5 against the beaters; none does.
+
+(2c) WITHIN- vs CROSS-CATEGORY decomposition of the lost NDCG (exact Shapley over two oracles; shares of each group's loss)
+  W = within-category oracle (each category keeps its slots, its positives move to its earliest slots);
+  C = category oracle (candidates of positive-containing categories move above the rest, order kept); f(WC) = f(CW) exactly.
+  Oracle gains on all val: W +0.294, C +0.171, both +0.578 (residual 0.021 = interleaving of >= 2 positive categories).
+                within (Shapley)  cross (Shapley)  interleave | W-first order: within / cross
+  all            0.585 +- 0.003   0.380 +- 0.003   0.036      | 0.490 / 0.510
+  TAIL           0.580 +- 0.004   0.388 +- 0.004   0.032      | 0.450 / 0.550
+  HEAD           0.594 +- 0.005   0.363 +- 0.006   0.043      | 0.567 / 0.433
+  tail M<50      0.459 +- 0.009   0.532 +- 0.009   0.010
+  tail M>=50     0.611 +- 0.004   0.352 +- 0.004   0.037
+  By the focal positive's history state (tail feeds): category in newest 5 (54% of tail feeds) -> 76-80% WITHIN-category
+  (median rank 19-22: the user is in the right category; ~11 same-category items outrank the click); category in history
+  but not newest 5 -> 57-63% CROSS; category never in history -> 68-75% CROSS (median rank 30-36).
+  So the tail is not mainly a "wrong category" problem: most of its loss is the ordering of items INSIDE the right category.
+
+(2d) PARETO DOMINANCE (negatives >= the focal positive on EVERY cue at once; any scoring non-decreasing in those cues ranks them above)
+  8 informative cues (pop, cos max, cos newest-5, cos user_emb, cat in newest-5, f1, f3, f5):
+    tail: 50.9% of feeds have >= 1 dominating negative, 12.5% have >= 8 (head 15.6% / 0.5%). Those 12.5% of tail feeds hold
+    8.7% of ALL val loss: no monotone scoring of these 8 cues can bring their positive into the top-8.
+  5 cues (cos max, cos newest-5, cat in newest-5, f1, f3): 50.6% of tail feeds have >= 8 dominating negatives (34% of all loss).
+  3 cues (cos max, f1, pop): 39.6% (27% of all loss).
+
+(3) IS FAILURE PREDICTABLE FROM THE FEED ALONE? (nested user-grouped 5-fold logistic; inner 4-fold choice of C; 300 cluster
+    bootstrap reps for the SE; features label-free at test time)
+  model                                                      OOF AUC          AUC within M deciles   vs M-only
+  M only (log M, log M^2)                                    0.766 +- 0.004       0.511               --
+  A: + H, H-cap, H=0, user0, candidate/history category
+     entropy, n categories/M, popularity spread (sd, max-med,
+     cold share), max-cosine spread (sd, max-med, max)         0.770 +- 0.004       0.534          +0.0032 +- 0.0010
+  B: A + shares (cat in history / newest-5, near-dups,
+     emb missing) + f1..f5 within-feed sd                      0.771 +- 0.004       0.549          +0.0050 +- 0.0013
+  C: B + G3 score shape (top1-top8 z gap, top-1 z, entropy)    0.773 +- 0.004       0.558          +0.0068 +- 0.0014
+  HGB on C (fixed params)                                    0.773 +- 0.004       0.557          +0.0063 +- 0.0016
+  Tail rate by M decile: 0.01 (M<12), 0.18, 0.36, 0.44, 0.56, 0.62, 0.66, 0.71, 0.77, 0.78 (M>=247).
+  Within M<50: AUC M-only 0.735 -> C 0.760; within M>=50: 0.602 -> 0.611.
+  Reading: whether a feed fails is set by its size; the feed's other statistics (history, category mix, popularity and
+  similarity spreads, user0) and even G3's own confidence carry almost nothing beyond M. There is no "hard feed type" to
+  route to a special model; the failure is per-positive, not per-feed.
+
+(4) WHERE THE TAIL LOSS IS (exact per-positive split of 1-NDCG: positive j at rank r_j carries (disc(j)-disc(r_j))/IDCG)
+  Absolute popularity groups (tercile cuts of all val positives are 1 and 11; 30.3% of positives have pop 0):
+     group            share of TAIL loss   share of ALL loss   share of tail positives   loss per tail positive
+     pop 0-1          0.418 +- 0.005        0.276               0.417                     0.553
+     pop 2-11         0.274 +- 0.005        0.181               0.276                     0.548
+     pop > 11         0.308 +- 0.005        0.203               0.307                     0.555
+  Within-feed popularity third: bottom 0.349, middle 0.285, top 0.366 of tail loss (+- 0.005; again = positive shares).
+  Category vs history:
+     cat in newest 5            0.518 +- 0.006    0.342    0.532    0.538
+     cat in history, older      0.379 +- 0.005    0.250    0.376    0.556
+     cat never in history       0.102 +- 0.003    0.068    0.092    0.614
+  3x3 (share of TAIL loss; SE <= 0.005):   pop 0-1   pop 2-11   pop > 11
+     cat in newest 5                        0.243     0.142      0.133
+     cat in history, older                  0.135     0.105      0.139
+     cat never in history                   0.039     0.028      0.036
+  The largest single cell, "recent category, cold-ish item" (pop 0-1), holds 24% of tail loss = 16% of all val loss.
+  In every cell the loss share equals the positive share within ~1 point: the tail loss is NOT concentrated in cold items
+  or novel categories; novel-category positives lose only slightly more per positive (0.61 vs 0.54).
+
+(5) READING: what information would lift tail positives, and does it exist in our data?
+  - What the tail is: big feeds (median M 109) where the clicked item is, on every cue we have, a weaker match than the
+    candidates above it (median 23, mean 37 of them): less similar to the history (newest-5 cosine 0.67 vs 0.82 for the top negative), less often in the
+    user's recent category (54% vs 83%), less popular (32% cold vs 20%), lower user x category affinity (f1/f3), and rarely a
+    near-duplicate of something already viewed (5% vs 24% for the top negative). The ranker is not misreading these cues;
+    the clicks are atypical relative to them.
+  - What would be needed: a cue on which the clicked item beats the items G3 prefers. Inside the right category (the
+    larger, 58% part) that is item-level preference beyond similarity and popularity: price relative to the user's range,
+    photo/title quality, seller reputation, distance, listing freshness relative to the user's last session, or the
+    user's state after the history snapshot. Across categories (39%) it is an intent switch not visible in the history.
+  - Does it exist? Not as a separate channel. The data hold anonymised codes (category, event type/source), five
+    anonymised scalars f1..f5, 128-d item embeddings and a user embedding; the ranker consumes all of them (cosines,
+    retrieval, sim_bias, category features, f1..f5 and their within-feed transforms). Price/text/photos/seller/location
+    are not in the data except as whatever the item embedding and f2/f4/f5 encode. Prior probes agree: the future-window
+    intent oracle is worth +0.0028 on 15% of feeds (FUTWIN), pre-trained encoders side with the beaters (cell AUC
+    0.31-0.33), item priors from labels are null (+0.0004 at z 1.4), and the LLM pilot (an agent reading every cue) ranked
+    like a one-column heuristic.
+  - Where a residual chance remains: (a) the content inside the item embedding (the running nn_x/emb study: drift between
+    tables, structure, whitening), because "within-category item preference" is exactly what a content tower could
+    carry, and (b) a semantic decoding of f2/f4/f5 or the event codes (nn_x/codes) that the model cannot learn from the raw
+    values. Both would have to produce a cue with AUC > 0.5 against the beaters inside tail feeds; this script can be
+    re-run with any new per-candidate column added to the cue list as the cheapest pre-screen (one number per cue).
+  - Honest bottom line: the tail is information-limited given current inputs. A uniform one-rank lift of every tail
+    positive is worth +0.0019 val, but nothing we measured points to where that rank would come from. P(a generational
+    gain from tail-targeted work on current inputs) ~0.03.

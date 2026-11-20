@@ -1,0 +1,120 @@
+{
+ "tag": "b1_mcc4_s0",
+ "n_val": 14423,
+ "n_hold": 30000,
+ "val": 0.3814814104224621,
+ "val_se": 0.00197265388545958,
+ "hold": 0.3047968787727835,
+ "hold_se": 0.0010805401479635633,
+ "w16_val": 0.40143578947217784,
+ "w16_hold": 0.32459720573745354,
+ "gap_val": 0.019954379049715792,
+ "gap_val_se": 0.0014300928646671974,
+ "gap_hold": 0.01980032696467003,
+ "gap_hold_se": 0.0008764359950548464,
+ "rho_val": 0.8460059508194681,
+ "rho_hold": 0.8498244470391334,
+ "rho_global_val": 0.8507321806802539,
+ "rho_global_hold": 0.8502227975414431,
+ "law_record": -0.004678465966034676,
+ "law_refit": -0.004479992524554121,
+ "law_record_hold": -0.004691258307573154,
+ "member_rule": {
+  "val": {
+   "delta": -0.0003883325286661726,
+   "se": 0.00039720199261499917,
+   "z": -0.9776701423614872,
+   "n": 14423
+  },
+  "hold": {
+   "delta": 3.763124522028051e-05,
+   "se": 0.0002165439256513876,
+   "z": 0.1737811167276184,
+   "n": 30000
+  },
+  "pooled_z": -0.5684353813471549,
+  "pass": false
+ },
+ "mix_w005": {
+  "val": {
+   "delta": -3.972275058062694e-05,
+   "se": 0.00026459015342472045,
+   "z": -0.15012936069795435,
+   "n": 14423
+  },
+  "hold": {
+   "delta": 2.5938476749038198e-05,
+   "se": 0.00014980894862850003,
+   "z": 0.17314370727853567,
+   "n": 30000
+  },
+  "pooled_z": 0.016273600531706487,
+  "pass": false
+ },
+ "mix_w020": {
+  "val": {
+   "delta": -0.001114000816013815,
+   "se": 0.0005670683617855622,
+   "z": -1.9644912167310724,
+   "n": 14423
+  },
+  "hold": {
+   "delta": -0.0004504011186807608,
+   "se": 0.0003254108188737267,
+   "z": -1.3841000131453396,
+   "n": 30000
+  },
+  "pooled_z": -2.367811566067412,
+  "pass": false
+ },
+ "stop_rule_val_ge_0.3900": false,
+ "stop_rule_law_ge_-0.002": false,
+ "extra": {
+  "n_fit_feeds": 120591,
+  "n_sel_feeds": 13527,
+  "best_iter": 515,
+  "trees_built": 520,
+  "budget_stop": false,
+  "fit_seconds": 4209.7197144031525,
+  "s_per_iter": 8.095614835390677,
+  "total_seconds": 4274.970913648605,
+  "peak_rss_gb": 49.44781494140625,
+  "params": {
+   "iterations": "520",
+   "learning_rate": "0.2",
+   "depth": "8",
+   "l2_leaf_reg": "5",
+   "loss_function": "YetiRank",
+   "border_count": "254",
+   "od_wait": "100",
+   "od_type": "Iter",
+   "thread_count": "12",
+   "random_seed": "0",
+   "use_best_model": "False",
+   "metric_period": "25",
+   "max_ctr_complexity": "4",
+   "has_time": "True",
+   "eval_metric": "NDCG:type=Base",
+   "allow_writing_files": "False",
+   "simple_ctr": "['Borders:CtrBorderCount=255:CtrBorderType=Uniform:TargetBorderCount=1:TargetBorderType=MinEntropy:Prior=0/1:Prior=0.5/1:Prior=1/1', 'Counter:CtrBorderCount=15:CtrBorderType=Uniform:Prior=0/1']",
+   "combinations_ctr": "['Borders:CtrBorderCount=255:CtrBorderType=Uniform:TargetBorderCount=1:TargetBorderType=MinEntropy:Prior=0/1:Prior=0.5/1:Prior=1/1', 'Counter:CtrBorderCount=15:CtrBorderType=Uniform:Prior=0/1']"
+  },
+  "set": "xm(shuf0)",
+  "selection": "trainside",
+  "args": {
+   "tag": "b1_mcc4_s0",
+   "keys": "clu",
+   "mcc": 4,
+   "seed": 0,
+   "set": "xm",
+   "max_feeds": 0,
+   "budget_min": 105.0,
+   "iters": 520,
+   "msr": null,
+   "leaf_limit": null,
+   "out": "<repo>/nn_x/w12/cb/famB/preds",
+   "ctr": "255"
+  },
+  "leak": "native CTR keys are candidate-level only; has_time with feeds in time order and rows shuffled inside feeds; statistics come from the training pool only (fit feeds: no holdout feed, no val / test row)"
+ }
+}

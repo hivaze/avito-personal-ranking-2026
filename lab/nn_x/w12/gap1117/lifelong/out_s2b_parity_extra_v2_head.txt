@@ -1,0 +1,6 @@
+## (i) positive check of the single-snapshot aligner (cap pretended 192; snapshot also cut to 192; truth = stored 193-256)
+holdout: feeds with a snapshot 3000; with >= 1 recovered event 2227; events 68854: exact position 0.464; true event 193-256 (any order) 0.752; NOT a true event 193-256 but stored among the newest 192 (placement error) 0.003
+train (non-holdout): feeds with a snapshot 3000; with >= 1 recovered event 2282; events 69539: exact position 0.515; true event 193-256 (any order) 0.779; NOT a true event 193-256 but stored among the newest 192 (placement error) 0.002
+val: feeds with a snapshot 2160; with >= 1 recovered event 1284; events 48507: exact position 0.365; true event 193-256 (any order) 0.666; NOT a true event 193-256 but stored among the newest 192 (placement error) 0.004
+test: feeds with a snapshot 3000; with >= 1 recovered event 1484; events 61513: exact position 0.332; true event 193-256 (any order) 0.645; NOT a true event 193-256 but stored among the newest 192 (placement error) 0.004
+

@@ -1,0 +1,23 @@
+== STAGE S read-out r2 (2026-11-13T17:24:05Z): ['w10_r2_s23', 'w10_r2_s24'] (nn_x/w10/r2, 2-epoch A_BASE + HYG + --xoff 0.5) vs PRIMARY abl_base_s[23, 24] (nn_x/abl) and REPLICATION w9_base_s[23, 24] (nn_x/w9/dw3); LAST checkpoint primary, selected reported; rule nn_x/w5/logs/E_r2_predeclared.txt stage S
+[abl last] seed 23: base val 0.39364 hold 0.31754 | r2 val 0.39378 hold 0.31779 | d val +0.00014 d hold +0.00025
+[abl last] seed 24: base val 0.39348 hold 0.31753 | r2 val 0.39338 hold 0.31712 | d val -0.00010 d hold -0.00041
+[abl last] POOLED member: val +0.00002+-0.00028 (z_feed +0.06; SE_cal 0.00037, z_cal +0.05) | holdout -0.00008+-0.00015 (z -0.53; SE_cal 0.00019) | pmix -0.00017+-0.00043 (z -0.40) | slices M<50 +0.00029 (z +0.6) M>=50 -0.00017 (z -0.6) Tue +0.00013 (z +0.3) Thu -0.00011 (z -0.3)
+[abl last] info: diversity margin rho_bb - rho_x -0.00011 (rho_x 0.97956, rho_bb 0.97945, arm-arm 0.97969, same-seed 0.99781) | 2-member pool r2 vs base: val -0.00025+-0.00032 hold +0.00013+-0.00018
+[abl sel] seed 23: base val 0.39348 hold 0.31756 | r2 val 0.39378 hold 0.31779 | d val +0.00030 d hold +0.00023
+[abl sel] seed 24: base val 0.39348 hold 0.31753 | r2 val 0.39301 hold 0.31731 | d val -0.00047 d hold -0.00021
+[abl sel] POOLED member: val -0.00009+-0.00033 (z_feed -0.26; SE_cal 0.00041, z_cal -0.21) | holdout +0.00001+-0.00018 (z +0.05; SE_cal 0.00021) | pmix +0.00035+-0.00050 (z +0.70) | slices M<50 +0.00003 (z +0.1) M>=50 -0.00017 (z -0.5) Tue -0.00001 (z -0.0) Thu -0.00017 (z -0.4)
+[abl sel] info: diversity margin rho_bb - rho_x -0.00095 (rho_x 0.97871, rho_bb 0.97776, arm-arm 0.97957, same-seed 0.99657) | 2-member pool r2 vs base: val +0.00036+-0.00041 hold +0.00043+-0.00021
+[w9 last] seed 23: base val 0.39377 hold 0.31738 | r2 val 0.39378 hold 0.31779 | d val +0.00001 d hold +0.00041
+[w9 last] seed 24: base val 0.39346 hold 0.31757 | r2 val 0.39338 hold 0.31712 | d val -0.00008 d hold -0.00046
+[w9 last] POOLED member: val -0.00003+-0.00027 (z_feed -0.11; SE_cal 0.00037, z_cal -0.08) | holdout -0.00002+-0.00015 (z -0.15; SE_cal 0.00018) | pmix -0.00017+-0.00042 (z -0.41) | slices M<50 +0.00047 (z +0.9) M>=50 -0.00037 (z -1.3) Tue -0.00021 (z -0.6) Thu +0.00017 (z +0.4)
+[w9 last] info: diversity margin rho_bb - rho_x +0.00004 (rho_x 0.97977, rho_bb 0.97981, arm-arm 0.97969, same-seed 0.99787) | 2-member pool r2 vs base: val -0.00002+-0.00033 hold +0.00011+-0.00018
+[w9 sel] seed 23: base val 0.39377 hold 0.31738 | r2 val 0.39378 hold 0.31779 | d val +0.00001 d hold +0.00041
+[w9 sel] seed 24: base val 0.39346 hold 0.31757 | r2 val 0.39301 hold 0.31731 | d val -0.00045 d hold -0.00026
+[w9 sel] POOLED member: val -0.00022+-0.00030 (z_feed -0.74; SE_cal 0.00039, z_cal -0.56) | holdout +0.00008+-0.00016 (z +0.46; SE_cal 0.00020) | pmix +0.00005+-0.00045 (z +0.11) | slices M<50 +0.00026 (z +0.5) M>=50 -0.00055 (z -1.8) Tue -0.00036 (z -0.9) Thu -0.00007 (z -0.1)
+[w9 sel] info: diversity margin rho_bb - rho_x +0.00010 (rho_x 0.97971, rho_bb 0.97981, arm-arm 0.97957, same-seed 0.99738) | 2-member pool r2 vs base: val +0.00012+-0.00036 hold +0.00014+-0.00020
+[refs last] w9_base - abl_base (same args, run noise): val +0.00005+-0.00027 | holdout -0.00006+-0.00015
+[refs sel] w9_base - abl_base (same args, run noise): val +0.00013+-0.00030 | holdout -0.00007+-0.00016
+gates (PRIMARY abl reference, LAST ckpt): (s1) val > +1 SE_cal NO; (s2) holdout >= 0 NO; (s3) no val slice < -2 SE OK; (s4) pmix >= -1 SE OK
+replication reference w9 (information): val -0.00003 (z_cal -0.08), holdout -0.00002, pmix -0.00017, min slice z -1.3 -> would be STOP
+VERDICT stage S r2: STOP (futility) (val +0.00002 +- 0.00028 [SE_cal 0.00037], holdout -0.00008 +- 0.00015, pmix -0.00017, margin -0.00011)
+registry: w10_r2_s23/24 (A_BASE + HYG + --xoff 0.5, nn_x/w10/r2) vs abl_base (2-epoch pair, LAST ckpt, pre-declared stage-S rule 16:57:46Z): val +0.00002 +- 0.00028 (z_cal +0.0), holdout -0.00008 +- 0.00015 (z -0.5), pmix -0.00017, M<50 +0.00029 M>=50 -0.00017 Tue +0.00013 Thu -0.00011, diversity margin -0.00011, pool val -0.00025 / hold +0.00013; vs w9_base val -0.00003 / hold -0.00002; selected ckpt val -0.00009 / hold +0.00001 -> STOP (<repo>/nn_x/w10/r2/logs/s_readout_r2.txt)

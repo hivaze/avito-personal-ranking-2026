@@ -1,0 +1,36 @@
+# Wide distilled student of the full view, teacher = mean of 11 hard-label members.
+# FD16P20 holds 8 of these (seeds 951 to 958, listed under [record]) next to 8 of
+# student_wide_t25.toml. One run: 99,840 steps, about 4 hours on one GPU.
+
+model = "full"                     # configs/recipes/model_full.toml: 34 inputs, width 192
+
+[targets]
+teacher = "mean11"                 # entry of [teachers] in configs/paths.toml
+teacher_weight = 0.5               # main target = 0.5 * clicks / n_clicks + 0.5 * softmax(teacher scores)
+position_weight = 0.5              # weight of the production-order loss until the cooldown ...
+position_weight_end = 0.1          # ... then annealed with the learning rate down to this
+position_temperature = 10.0        # its target is softmax(-position / 10)
+
+[schedule]
+epochs = 10                        # 9,984 steps per epoch over the 3,151,208 train feeds
+learning_rate = 2e-3
+weight_decay = 0.02
+warmup_steps = 500
+cooldown_fraction = 0.2            # 1-sqrt decay to 3% of the peak over the last 20% of the steps
+exploration_probability = 0.02     # chance that a cooldown step trains on a batch of random-order feeds
+
+[batches]
+max_candidates = 32768             # padded candidates per batch
+max_feeds = 512
+
+[holdout]
+feeds = 0                          # train on every train feed and keep the last step
+eval_every = 2500                  # steps between two validation scores in the log
+
+[record]
+# The stored runs of this recipe; their checkpoints, logs and prediction files carry these names.
+# The trainer does not read this table.
+members = [
+    "w5_fd10_kd05w192_s951", "w5_fd10_kd05w192_s952", "w5_fd10_kd05w192_s953", "w5_fd10_kd05w192_s954",
+    "w5_fd10_kd05w192_s955", "w5_fd10_kd05w192_s956", "w5_fd10_kd05w192_s957", "w5_fd10_kd05w192_s958",
+]

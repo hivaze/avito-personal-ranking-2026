@@ -1,0 +1,90 @@
+{
+ "res": {
+  "OFE10": {
+   "rounds": 0,
+   "inner_gain": 0.0,
+   "forced50_val_B": [
+    8.74275439608036e-05,
+    0.00042186138426954754
+   ],
+   "forced50_hold": [
+    0.0003491726425379081,
+    0.000166406127650345
+   ],
+   "forced50_top": [
+    "zb_rk",
+    "GroupByThenRank(ctx_hn_e1_rrw,cat)",
+    "(f1/zb)",
+    "min(f5,ctx_nd_top5u)",
+    "(cat_share_all*pre2_new_z)",
+    "(ctx_nd_hcent-ctx_hn_rrw)",
+    "(seq_cv_pop-pre2_fe_z)",
+    "(ctx_hn_rrw/ctx_hs_t10)"
+   ]
+  },
+  "OFE40": {
+   "rounds": 0,
+   "inner_gain": 0.0,
+   "forced50_val_B": [
+    0.00036927903025618615,
+    0.00044038753396408013
+   ],
+   "forced50_hold": [
+    -6.227336142575913e-05,
+    0.00017985334607653277
+   ],
+   "forced50_top": [
+    "zb_rk",
+    "(seq_max_all+ctx_hn_rrw)",
+    "zb",
+    "(feed_cat_share/ctx_nd_knn_h_dev)",
+    "min(f3,cos_het3)",
+    "(cos_het3/ctx_nd_knn_u_dev)",
+    "(cos_het1+ctx_nd_knn_f1)",
+    "(f5-cos_het4)"
+   ]
+  }
+ },
+ "top": [
+  "(seq_cv_pop-pre2_fe_z)",
+  "(seq_top3/cat_cnt_et1)",
+  "GroupByThenRank(f1,cat)",
+  "GroupByThenRank(ctx_hn_e1_rrw,cat)",
+  "(ctx_hn_rrw/ctx_hs_t10)",
+  "min(cos_het1,cat_cnt_et1)",
+  "(cat_share_all*pre2_new_z)",
+  "min(f5,ctx_nd_top5u)",
+  "(f1/zb)",
+  "(ctx_nd_hcent-ctx_hn_rrw)",
+  "GroupByThenRank(cos_hall,cat_cnt_et3)",
+  "(cos_hall-ctx_nd_ucent)",
+  "(feed_cat_share/ctx_nd_knn_h_dev)",
+  "(ctx_hn_bestrk/ctx_hn_margin)",
+  "(cos_het3/ctx_nd_knn_u_dev)",
+  "(cos_het3*cos_het4)",
+  "(f5-cos_het4)",
+  "(f5-ctx_hn_bestrk)",
+  "GroupByThenRank(cat_min_hpos,cat)",
+  "(f1*ctx_nd_top5h)",
+  "(cos_het2-ctx_hs_k128)",
+  "(cat_cnt_all/ctx_hn_soft05)",
+  "(ctx_hs_t10/pre2_new_z)",
+  "GroupByThenMedian(ctx_hn_e1_rrw,feed)",
+  "(ctx_hn_bestrk/cat_cnt_et3)",
+  "(ctx_nd_knn_h_dev*ctx_nd_max)",
+  "(ctx_nd_max/ctx_hn_margin)",
+  "(f2-seq_cv_pop)",
+  "(cos_het4-it_hist_all_luo)",
+  "(cos_het1+ctx_nd_knn_f1)",
+  "(seq_max_all+ctx_hn_rrw)",
+  "GroupByThenRank(f1,cat_cnt_et3)",
+  "(f1-ctx_nd_max)",
+  "(it_hist_et4_luo+pre2_hmax32)",
+  "min(f3,cos_het3)",
+  "(ctx_hn_e1_rrw-ctx_hs_t10)",
+  "min(seq_max_all,it_hist_et4_luo)",
+  "max(seq_max_all,pre2_fe_z)",
+  "max(f2,feed_cat_share)",
+  "(f1*ctx_nd_knn_u_dev)"
+ ]
+}

@@ -1,0 +1,570 @@
+"""Tests of train.py --hzcd (popularity-parity cooldown, helpers cd_arms6.py; INSIGHTS_1112 item 6; pre-flight
+nn_x/w5/hzcd/preflight.txt) and the lane.sh arms B:hzcd / E:hzcd. Pre-change copies: tests/ref_pre_hzcd/*.txt (md5.txt).
+
+  cpu part:  CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 .venv/bin/python nn_x/w5/tests/test_hzcd.py cpu
+  gpu part:  CUDA_VISIBLE_DEVICES=<one id> OMP_NUM_THREADS=12 [HZ_GPU_REF=<other id>] [HZ_GPU_ONLY=G1|G2]
+             .venv/bin/python nn_x/w5/tests/test_hzcd.py gpu   (4 e2e subprocesses of 24 CD steps, run as 2 pairs; with
+             HZ_GPU_REF the first run of each pair goes to that GPU concurrently; HZ_GPU_ONLY runs one pair)
+CPU part
+  H0 code. (a) ref_pre_hzcd copies intact; train.py minus the hzcd statements (tests/strip_hzcd.py, exact set: cd_arms6
+     import, --hzcd add_argument, `tr_hz = None`, 3 x `if a.hzcd:`, the gather conditional expression) == the previous
+     train.py (AST, docstrings stripped); parse(): hzcd False, every other default == the previous parser.
+     (b) lane.sh: DRY commands of EVERY previous job (A base/trunc/auxf 23-24; B m02ref/truncp/truncp2/auxf 101-107;
+     E base/trunc/trunc2/auxf 951-954) byte-identical to the previous lane.sh; B:hzcd:101-104 == B:m02ref + {hzcd True}
+     (CDSEED 900+root, init v17_pre2s_s<root>@77500); E:hzcd:951-954 == E:base + {hzcd True}; A:hzcd refused; bash -n.
+     (c) call sites: setup_hzcd once behind `if a.hzcd` in main(); save_holdout_hz once behind `if a.hzcd`; the gather
+     conditional once, inside the training loop; `tr_hz` read nowhere else (6 Name nodes); eval_subset / predict in
+     train.py never take tr_hz; no other nn_x/w5 module imports cd_arms6; common / model / data contain no hzcd code;
+     cd_arms6 imports only time / numpy / torch.  (d) guards: hzcd False at the defaults and in every existing DRY
+     command; the conditional test is False at any step when tr_hz is None.
+  H1 files: data/feats_new/<split>/it_hist_hz_{all,et1..et4}.npy exist for train / val / test, float32, length == sum of M;
+     val / test hz BYTE-IDENTICAL to nn/feat_cache luo; train: no NaN, hz <= luo everywhere (full 246.7M rows), changed share.
+  H2 MiniSplit (CPU, real train feeds incl. feeds with many changed rows): luo_cols(cvnd_pre2s xt_names of the F7 checkpoint)
+     == columns 3-7; the checkpoint's xt_rel contains column 3 (so the in-model rank / z of it_hist_all_luo follow the
+     swap); xt_transform(luo name, feat_cache luo rows) cast as attach_xt == MiniSplit.xt column (bitwise = attach_xt parity);
+     HzTrainView.gather == SplitData.gather in every key / column except the 5 LUO columns, which equal a brute-force
+     per-cell gather fp16(log1p(max(hz, 0))) -> fp32 (padding reads the feed's first row, as xt does); changed cells > 0;
+     delegated attributes / batches / scatter; setup_hzcd refuses no-xt / --hcap / t_cool >= total before loading anything.
+  H3 the exact gather conditional of train.py: tr_hz None -> previous object at every step (tr, or tr_cap in the cooldown);
+     tr_hz set, t_cool 12 -> tr before step 12, the view from step 12.
+GPU part (deterministic wrapper tests/e2e_hzcd.py; 24 CD steps from v17_pre2s_s101@77500, cooldown_mix 0.2, evals at 12 / 24)
+  G1 flags OFF, previous train.py (scratch code dir) vs new: identical batch sequence, train-mode logits, loss-input logits,
+     logged metric lines, bit-identical checkpoint and val preds; every eval-mode dense call carried luo (0 mismatches).
+  G2 new flags OFF `--cooldown_frac 0.5` vs new `--hzcd --cooldown_frac 0.5 --save_holdout` (t_cool 12, pool mixing from
+     step 12 in both): same batch sequence; steps 0-11 bitwise-identical train-mode / loss-input logits (view inactive before
+     the cooldown) and gathered from tr with the LUO slots == brute-force luo; steps 12-23 gathered through the view with the
+     LUO slots == brute-force hz (exact), != luo on some rows, logits differ; every eval-mode call through tr (holdout
+     selection evals, val predicts, save_holdout) carried luo; predict saw the view exactly once (save_holdout_hz, after
+     training) and those batches carried hz exactly; nn_<v>_holdout_hz.npy written (shape of the as-built file, finite);
+     hzcd log lines present; checkpoint differs from the flags-off run.
+Writes nn_x/w5/logs/test_hzcd_<part>.log (+ .json). Test runs are named w5_thz_*; their outputs are deleted.
+"""
+import argparse
+import ast
+import collections
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+
+PART = sys.argv[1] if len(sys.argv) > 1 else "cpu"
+assert PART in ("cpu", "gpu"), "usage: test_hzcd.py cpu|gpu"
+_CVD = os.environ.get("CUDA_VISIBLE_DEVICES", "x")
+if PART == "cpu":
+    assert _CVD == "", "cpu part: run with CUDA_VISIBLE_DEVICES=''"
+else:
+    assert re.fullmatch(r"\d", _CVD), "gpu part: CUDA_VISIBLE_DEVICES=<exactly one GPU id>"
+    os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+NT = min(12, int(os.environ.get("OMP_NUM_THREADS", "12")))
+import numpy as np  # noqa: E402
+import polars as pl  # noqa: E402
+import torch  # noqa: E402
+
+torch.set_num_threads(NT)
+HERE = os.path.dirname(os.path.abspath(__file__))
+W5 = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
+sys.path.insert(1, W5)
+import warnings  # noqa: E402
+
+warnings.filterwarnings("ignore", message=".*CUDA is not available.*")
+import cd_arms as CA  # noqa: E402
+import cd_arms6 as C6  # noqa: E402
+from strip_hzcd import EXPECT as HZ_EXPECT, HZ_IFEXP, strip_hzcd  # noqa: E402
+
+ROOT = "<repo>"
+PY = f"{ROOT}/.venv/bin/python"
+REF = f"{HERE}/ref_pre_hzcd"
+TRAIN_PY, LANE = f"{W5}/train.py", f"{W5}/lane.sh"
+INIT = f"{ROOT}/nn/ckpt/v17_pre2s_s101@77500.pt"
+FC = f"{ROOT}/nn/feat_cache"
+WD = f"{ROOT}/nn_x/w5"  # common.py writes every run's outputs here (absolute paths)
+SCR = os.environ.get("T5_SCRATCH", "/tmp/scratchpad/t5")
+os.makedirs(SCR, exist_ok=True)
+os.makedirs(f"{WD}/logs", exist_ok=True)
+LOG = open(f"{WD}/logs/test_hzcd_{PART}.log", "w")
+RES = {"checks": []}
+FAIL = []
+N_CAND = {"train": 246745836, "val": 1389971, "test": 2904806}
+
+
+def P(*a):
+    s = " ".join(str(x) for x in a)
+    print(s, flush=True)
+    LOG.write(s + "\n")
+    LOG.flush()
+
+
+def check(name, ok, info=""):
+    P(f"  [{'PASS' if ok else 'FAIL'}] {name} {info}")
+    RES["checks"].append(dict(name=name, ok=bool(ok), info=str(info)))
+    if not ok:
+        FAIL.append(name)
+
+
+def load_parse(path):
+    tree = ast.parse(open(path).read())
+    fn = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "parse"][0]
+    ns = {"argparse": argparse, "POOL_P_DEFAULT": CA.POOL_P_DEFAULT}
+    exec(compile(ast.Module(body=[fn], type_ignores=[]), "train_parse", "exec"), ns)
+
+    def parse(argv):
+        sys.argv = ["train.py"] + argv
+        return ns["parse"]()
+    return parse
+
+
+def strip_doc(tree):
+    for n in [tree] + [x for x in ast.walk(tree) if isinstance(x, (ast.FunctionDef, ast.ClassDef))]:
+        if n.body and isinstance(n.body[0], ast.Expr) and isinstance(n.body[0].value, ast.Constant) \
+                and isinstance(n.body[0].value.value, str):
+            n.body = n.body[1:] or [ast.Pass()]
+    return tree
+
+
+def lane_dry(script, jobs, gpu="0"):
+    r = subprocess.run(["bash", script, gpu, jobs], capture_output=True, text=True, env={**os.environ, "DRY": "1"})
+    return r.returncode, r.stdout, r.stderr
+
+
+def dry_cmds(out, parse):
+    cmds = {}
+    for ln in out.splitlines():
+        if " train.py " in ln:
+            argv = ln.split(" train.py ", 1)[1].split()
+            cmds[argv[argv.index("--variant") + 1]] = (vars(parse(argv)), ln)
+    return cmds
+
+
+def diff(a, b):
+    return {k: (a[k], b[k]) for k in a if k != "variant" and a[k] != b[k]}
+
+
+# ================================================================================================= CPU part
+def h0_code():
+    P("\n== H0 code identity vs the pre-change copies (tests/ref_pre_hzcd), lane.sh, call sites, guards")
+    import hashlib
+    rec = dict(line.split()[::-1] for line in open(f"{REF}/md5.txt"))
+    okm = {k: hashlib.md5(open(f"{REF}/{k}", "rb").read()).hexdigest() == v for k, v in rec.items()}
+    check("ref_pre_hzcd copies intact (md5.txt: train.py, lane.sh, test_w5.py, test_trunc_lifts.py)",
+          all(okm.values()) and len(okm) == 4, okm)
+    # (a) train.py
+    hz_t, removed = strip_hzcd(ast.parse(open(TRAIN_PY).read()))
+    new_t, old_t = strip_doc(hz_t), strip_doc(ast.parse(open(f"{REF}/train.py.txt").read()))
+    check("train.py minus the hzcd statements (exact set) == previous train.py (AST, docstrings stripped)",
+          ast.dump(new_t) == ast.dump(old_t) and removed == HZ_EXPECT, f"removed {dict(removed)}")
+    parse, old_parse = load_parse(TRAIN_PY), load_parse(f"{REF}/train.py.txt")
+    a0, o0 = vars(parse(["--variant", "w5_x"])), vars(old_parse(["--variant", "w5_x"]))
+    check("parse(): hzcd default False; every other default == the previous parser",
+          a0.get("hzcd") is False and {k: v for k, v in a0.items() if k != "hzcd"} == o0)
+    # (b) lane.sh
+    old_jobs = ([f"A:{a}:{s}" for s in (23, 24) for a in ("base", "trunc", "auxf")]
+                + [f"B:{a}:{r}" for r in range(101, 108) for a in ("m02ref", "truncp", "truncp2", "auxf")]
+                + [f"E:{a}:{s}" for s in range(951, 955) for a in ("base", "trunc", "trunc2", "auxf")])
+    rc_o, out_o, _ = lane_dry(f"{REF}/lane.sh.txt", " ".join(old_jobs))
+    rc_n, out_n, _ = lane_dry(LANE, " ".join(old_jobs))
+    check(f"lane.sh DRY: all {len(old_jobs)} previous jobs print byte-identical commands to the previous lane.sh",
+          rc_o == rc_n == 0 and out_o == out_n and out_n.count(" train.py ") == len(old_jobs),
+          f"{out_n.count(' train.py ')} commands")
+    new_jobs = [f"B:hzcd:{r}" for r in range(101, 105)] + [f"E:hzcd:{s}" for s in range(951, 955)]
+    rc2, out2, err2 = lane_dry(LANE, " ".join(new_jobs + ["B:m02ref:101", "E:base:951"]))
+    cmds = dry_cmds(out2, parse)
+    P("  DRY commands of the new arms:")
+    for v, (_, ln) in cmds.items():
+        if "hzcd" in v:
+            P("    " + ln)
+    RES["dry_new"] = [ln for v, (_, ln) in cmds.items() if "hzcd" in v]
+    okB = okE = True
+    for r in range(101, 105):
+        d = diff(cmds["w5_cd_m02ref_r101"][0], cmds[f"w5_cd_hzcd_r{r}"][0])
+        d.pop("seed", None)
+        d.pop("init", None)
+        t = cmds[f"w5_cd_hzcd_r{r}"][0]
+        okB &= d == {"hzcd": (False, True)} and t["seed"] == 900 + r and t["init"].endswith(f"v17_pre2s_s{r}@77500.pt")
+    for s in range(951, 955):
+        d = diff(cmds["w5_e10_base_s951"][0], cmds[f"w5_e10_hzcd_s{s}"][0])
+        d.pop("seed", None)
+        okE &= d == {"hzcd": (False, True)} and cmds[f"w5_e10_hzcd_s{s}"][0]["seed"] == s
+    check("B:hzcd:101-104 == B:m02ref + {hzcd True}; CDSEED 900 + root; init v17_pre2s_s<root>@77500", rc2 == 0 and okB, err2[-200:])
+    check("E:hzcd:951-954 == E:base + {hzcd True}; seed 951-954", rc2 == 0 and okE)
+    rc_bad = [lane_dry(LANE, j)[0] for j in ("A:hzcd:23", "B:hzcd:108", "E:hzcd:23")]
+    check("hzcd is a stage-B / stage-E arm only; roots / seeds range-checked (bad jobs refused)", all(rc_bad), rc_bad)
+    check("bash -n lane.sh", subprocess.run(["bash", "-n", LANE]).returncode == 0)
+    # (c) call sites
+    tree = ast.parse(open(TRAIN_PY).read())
+    parents = {ch: p_ for p_ in ast.walk(tree) for ch in ast.iter_child_nodes(p_)}
+
+    def chain(n):
+        c, x = [], n
+        while x in parents:
+            x = parents[x]
+            if isinstance(x, ast.If):
+                c.append("if " + ast.unparse(x.test))
+            if isinstance(x, ast.For):
+                c.append("for " + ast.unparse(x.target))
+            if isinstance(x, ast.FunctionDef):
+                c.append("def " + x.name)
+        return c
+    calls = {f: [chain(n) for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == f]
+             for f in ("setup_hzcd", "save_holdout_hz")}
+    check("setup_hzcd and save_holdout_hz: one call each, behind `if a.hzcd`, in main()",
+          calls == {"setup_hzcd": [["if a.hzcd", "def main"]], "save_holdout_hz": [["if a.hzcd", "def main"]]}, calls)
+    ifexps = [chain(n) for n in ast.walk(tree) if isinstance(n, ast.IfExp) and ast.unparse(n.test) == HZ_IFEXP]
+    check("the hzcd gather conditional appears once, in the training loop of main()",
+          ifexps == [["for (step, fb)", "def main"]], ifexps)
+    names = [n for n in ast.walk(tree) if isinstance(n, ast.Name) and n.id == "tr_hz"]
+    uses = sorted({ast.unparse(parents[n]).split("\n")[0][:80] for n in names})
+    check("`tr_hz`: 6 Name nodes (init, setup assignment, conditional test + body, save_holdout_hz argument, release)",
+          len(names) == 6, uses)
+    ev = [ast.unparse(n) for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+          and n.func.id in ("eval_subset", "predict", "feature_stats", "save_holdout", "save_last", "save_last_test")
+          and "tr_hz" in ast.unparse(n)]
+    check("train.py: eval_subset / predict / feature_stats / save_* never take tr_hz", ev == [], ev)
+    users = sorted(f for f in os.listdir(W5) if f.endswith(".py") and f not in ("cd_arms6.py", "train.py")
+                   and re.search(r"\bcd_arms6\b", open(f"{W5}/{f}").read()))
+    check("no other nn_x/w5 module imports cd_arms6 (predict / eval / holdout_eval / stale_pred / finetune untouched)",
+          users == [], users)
+    cm = "".join(open(f"{W5}/{f}").read() for f in ("common.py", "model.py", "data.py"))
+    check("common.py / model.py / data.py contain no hzcd code", not re.search(r"hzcd|HzTrainView|cd_arms6", cm))
+    imps = sorted({(n.module if isinstance(n, ast.ImportFrom) else n.names[0].name).split(".")[0]
+                   for n in ast.walk(ast.parse(open(f"{W5}/cd_arms6.py").read())) if isinstance(n, (ast.Import, ast.ImportFrom))})
+    check("cd_arms6.py imports only time / numpy / torch (no GPU guard; unit tests call the real functions)",
+          imps == ["numpy", "time", "torch"], imps)
+    # (d) guards
+    a_def = parse(["--variant", "w5_x"])
+    vals = {s: bool(eval(HZ_IFEXP, {}, dict(tr_hz=None, step=s, t_cool=0))) for s in (0, 1, 12, 19669)}
+    check("guards: hzcd False at the defaults; the gather conditional test is False at any step when tr_hz is None",
+          a_def.hzcd is False and not any(vals.values()), vals)
+    allc = dry_cmds(out_n, parse)
+    check(f"hzcd False in every existing DRY command ({len(allc)})", all(v[0]["hzcd"] is False for v in allc.values()))
+
+
+def h1_files():
+    P("\n== H1 hz files (data/feats_new) vs the feat_cache luo files")
+    ok = True
+    info = {}
+    for sp in ("train", "val", "test"):
+        for c, luo_n, hz_n in C6.luo_cols(list(C6.LUO_TO_HZ)):
+            a = np.load(C6.hz_path(sp, hz_n), mmap_mode="r")
+            ok &= a.dtype == np.float32 and a.shape == (N_CAND[sp],)
+            if sp != "train":
+                b = np.load(f"{FC}/{sp}/{luo_n}.npy")
+                ok &= np.asarray(a).tobytes() == b.tobytes()
+    check("hz files: float32, length == sum of M for train / val / test; val / test hz BYTE-IDENTICAL to feat_cache luo", ok)
+    for c, luo_n, hz_n in C6.luo_cols(list(C6.LUO_TO_HZ)):
+        a = np.load(C6.hz_path("train", hz_n))
+        b = np.load(f"{FC}/train/{luo_n}.npy")
+        info[hz_n] = dict(nan=int(np.isnan(a).sum()), subset=bool((a <= b).all()), changed=float((a != b).mean()),
+                          zero_luo=float((b == 0).mean()), zero_hz=float((a == 0).mean()))
+        del a, b
+    check("train hz: no NaN, hz <= luo on every row (subset of the as-built LUO occurrences), rows changed > 5% for 'all'",
+          all(v["nan"] == 0 and v["subset"] for v in info.values()) and info["it_hist_hz_all"]["changed"] > 0.05, info)
+    RES["files"] = info
+
+
+def pick_feeds():
+    """Real train feeds: random-like / production / M<50 / holdout + 60 feeds with many hz != luo rows (young listings)."""
+    f = pl.read_parquet(f"{ROOT}/data/flat/train/feeds.parquet", columns=["M", "cand_off"])
+    M, off = f["M"].to_numpy().astype(np.int64), f["cand_off"].to_numpy().astype(np.int64)
+    pr = np.nan_to_num(np.load(f"{ROOT}/eda/labels_position/out/train_prandom.npz")["p_random"].astype(np.float32), nan=0.0)
+    pr[M < 50] = 0.0
+    hold = np.sort(np.random.default_rng(12345).choice(np.where((pr > 0.9) & (M >= 50))[0], 30000, replace=False))
+    rng = np.random.default_rng(11)
+    a = np.load(C6.hz_path("train", "it_hist_hz_all"), mmap_mode="r")
+    b = np.load(f"{FC}/train/it_hist_all_luo.npy", mmap_mode="r")
+    cand = rng.choice(np.where((M >= 50) & (M <= 300))[0], 3000, replace=False)
+    nch = np.array([int((np.asarray(a[off[x]:off[x] + M[x]]) != np.asarray(b[off[x]:off[x] + M[x]])).sum()) for x in cand])
+    young = cand[np.argsort(-nch)[:60]]
+    groups = [np.where((pr > 0.9) & (M >= 50) & (M <= 400))[0], np.where((pr < 0.1) & (M >= 50) & (M <= 200))[0],
+              np.where(M < 50)[0], hold]
+    feeds = np.unique(np.concatenate([rng.choice(g, 30, replace=False) for g in groups] + [young]))
+    return feeds, M, off, int(nch[np.argsort(-nch)[:60]].sum())
+
+
+def h2_view():
+    P("\n== H2 MiniSplit: luo columns, attach_xt transform parity, HzTrainView.gather == brute force")
+    from mini_split import MiniSplit
+    ck = torch.load(INIT, map_location="cpu", weights_only=False)
+    xt_names = ck["cfg"]["xt_names"]
+    cols = C6.luo_cols(xt_names)
+    check("luo_cols(F7 checkpoint xt_names = cvnd_pre2s, 34 inputs) == columns 3-7 it_hist_{all,et1,et2,et3,et4}_luo",
+          len(xt_names) == 34 and cols == [(3, "it_hist_all_luo", "it_hist_hz_all"), (4, "it_hist_et1_luo", "it_hist_hz_et1"),
+                                           (5, "it_hist_et2_luo", "it_hist_hz_et2"), (6, "it_hist_et3_luo", "it_hist_hz_et3"),
+                                           (7, "it_hist_et4_luo", "it_hist_hz_et4")], cols)
+    check("checkpoint cfg xt_rel contains column 3 (in-model within-feed rank / z of it_hist_all_luo follow the swap); "
+          "xt_drop 0", 3 in (ck["cfg"].get("xt_rel") or []) and ck["cfg"].get("xt_drop", 0) == 0,
+          f"xt_rel {ck['cfg'].get('xt_rel')} xt_drop {ck['cfg'].get('xt_drop')}")
+    feeds, M, off, nyoung = pick_feeds()
+    ms = MiniSplit("train", feeds, xt_names=xt_names)
+    crow = np.concatenate([np.arange(off[f], off[f] + M[f]) for f in ms.src_feeds])
+    ok = True
+    for c, luo_n, _ in cols:
+        raw = np.asarray(np.load(f"{FC}/train/{luo_n}.npy", mmap_mode="r")[crow])
+        mine = torch.from_numpy(C6.xt_transform(luo_n, raw)).to(torch.float16)
+        ok &= torch.equal(mine, ms.xt[:, c])
+    check("xt_transform(luo name, raw feat_cache rows) cast as attach_xt == MiniSplit.xt column (bitwise; same transform path "
+          "for the hz columns, names start with it_hist)", ok, f"{ms.n} feeds, {len(crow)} rows")
+    hz = C6.load_hz("train", cols, torch.device("cpu"), rows=crow)
+    view = C6.HzTrainView(ms, cols, hz)
+    hz_raw = [np.asarray(np.load(C6.hz_path("train", hz_n), mmap_mode="r")[crow]) for _, _, hz_n in cols]
+    bad_other = bad_luo = nb = nchg = 0
+    keys_ok = True
+    for fb in ms.batches(np.arange(ms.n), 8192, 64, shuffle=True, rng=np.random.default_rng(0)):
+        b0 = ms.gather(fb, with_pos=True)
+        b1 = view.gather(fb, with_pos=True)
+        keys_ok &= set(b0) == set(b1) and all(torch.equal(b0[k], b1[k]) for k in b0 if k != "xt")
+        x0, x1 = b0["xt"], b1["xt"]
+        other = [i for i in range(x0.shape[-1]) if i not in {c for c, _, _ in cols}]
+        bad_other += int(not torch.equal(x0[..., other], x1[..., other]))
+        ci = b1["ci"].numpy()
+        for k, (c, _, _) in enumerate(cols):
+            exp = torch.from_numpy(C6.xt_transform("it_hist_hz", hz_raw[k][ci.ravel()])).to(torch.float16).float().numpy().reshape(ci.shape)
+            bad_luo += int(not np.array_equal(x1[..., c].numpy(), exp))
+        nchg += int((x0[..., [c for c, _, _ in cols]] != x1[..., [c for c, _, _ in cols]]).sum())
+        nb += 1
+    check(f"HzTrainView.gather on {nb} batches / {ms.n} feeds: every key and every non-LUO xt column == SplitData.gather; "
+          "the 5 LUO columns == brute-force fp16(log1p(max(hz, 0))) -> fp32 at every position (padding reads the feed's first "
+          "row, as xt does)", keys_ok and bad_other == 0 and bad_luo == 0, f"bad other {bad_other}, bad luo {bad_luo}")
+    check("the swap is active: changed LUO cells > 0 (feeds with young listings included)", nchg > 0,
+          f"changed cells {nchg}; young-feed changed rows {nyoung}")
+    rng1, rng2 = np.random.default_rng(3), np.random.default_rng(3)
+    same_b = all(np.array_equal(x, y) for x, y in zip(ms.batches(np.arange(ms.n), 4096, 32, rng=rng1),
+                                                       view.batches(np.arange(ms.n), 4096, 32, rng=rng2)))
+    out = torch.zeros(ms.n_cand)
+    b = view.gather(np.arange(min(8, ms.n)))
+    view.scatter(out, b, torch.ones_like(b["cmask"], dtype=torch.float32))
+    check("delegation: view.n / n_cand / device / M_np / target_np / batches / scatter are the split's own; view.hzcd True",
+          view.n == ms.n and view.n_cand == ms.n_cand and view.device == ms.device and view.M_np is ms.M_np
+          and view.target_np is ms.target_np and same_b and int(out.sum()) == int(ms.M_np[:min(8, ms.n)].sum()) and view.hzcd)
+    refusals = {}
+    for nm, a, tr in (("no xt", argparse.Namespace(hcap=""), MiniSplit("train", feeds[:5], xt_names=None)),
+                      ("hcap", argparse.Namespace(hcap="1:110"), ms), ("t_cool>=total", argparse.Namespace(hcap=""), ms)):
+        try:
+            C6.setup_hzcd(a, tr, None if nm == "no xt" else xt_names, np.zeros(1), 10 if nm == "t_cool>=total" else 0, 10, print)
+            refusals[nm] = False
+        except AssertionError as e:
+            refusals[nm] = str(e)[:60]
+    check("setup_hzcd refuses: no xt inputs, --hcap, t_cool >= total (before loading anything)",
+          all(refusals.values()), refusals)
+
+
+def h3_loop():
+    P("\n== H3 the exact gather conditional of train.py")
+    tree = ast.parse(open(TRAIN_PY).read())
+    node = [n for n in ast.walk(tree) if isinstance(n, ast.IfExp) and ast.unparse(n.test) == HZ_IFEXP][0]
+    src = ast.unparse(node)
+    P(f"  expression: {src}")
+    tr, cap, hz = object(), object(), object()
+    res = {}
+    for nm, env in (("off", dict(tr_hz=None, tr_cap=None)), ("hcap", dict(tr_hz=None, tr_cap=cap)),
+                    ("hzcd", dict(tr_hz=hz, tr_cap=None))):
+        res[nm] = [eval(src, {}, dict(tr=tr, t_cool=12, step=s, **env)) for s in range(24)]
+    ok = (all(x is tr for x in res["off"]) and all(x is tr for x in res["hcap"][:12]) and all(x is cap for x in res["hcap"][12:])
+          and all(x is tr for x in res["hzcd"][:12]) and all(x is hz for x in res["hzcd"][12:]))
+    check("tr_hz None -> previous object at every step (tr; tr_cap in the cooldown with hcap); tr_hz set, t_cool 12 -> tr "
+          "before step 12, the view from step 12", ok)
+    check("the expression's else branch is exactly the previous gather expression",
+          ast.unparse(node.orelse) == "tr_cap if tr_cap is not None and step >= t_cool else tr", ast.unparse(node.orelse))
+
+
+# ================================================================================================= GPU part
+E2E = ("--init {init} --epochs 0.0025 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 "
+       "--aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.2 --loss_norm feed --holdout 30000 "
+       "--select_on holdout --eval_every 12 --seed 811 --no_test")
+
+
+def outputs(v):
+    fs = [f"{WD}/logs/{v}.log", f"{WD}/logs/{v}.json", f"{WD}/logs/{v}_cliplog.npz", f"{WD}/preds/holdout/nn_{v}_holdout_hz.npy"]
+    for x in (v, f"{v}@last"):
+        fs += [f"{WD}/ckpt/{x}.pt", f"{WD}/preds/nn_{x}_trainonly_val.npy", f"{WD}/preds/nn_{x}_trainonly_test.npy",
+               f"{WD}/preds/holdout/nn_{x}_holdout.npy"]
+    return fs
+
+
+def clean(v):
+    for f in outputs(v):
+        if os.path.exists(f):
+            os.remove(f)
+
+
+def e2e_start(code_dir, v, extra, gpu=None):
+    rec = f"{SCR}/rec_{v}.npz"
+    cmd = [PY, f"{code_dir}/tests/e2e_hzcd.py", f"{code_dir}/train.py", rec, "--variant", v] + E2E.format(init=INIT).split() + extra
+    env = {**os.environ, "OMP_NUM_THREADS": str(NT)}
+    if gpu is not None:
+        env["CUDA_VISIBLE_DEVICES"] = str(gpu)
+    out = open(f"{SCR}/{v}.stdout", "w")
+    t0 = time.time()
+    pr = subprocess.Popen(cmd, stdout=out, stderr=subprocess.STDOUT, cwd=code_dir, env=env)
+    return pr, rec, t0, v, code_dir, env["CUDA_VISIBLE_DEVICES"]
+
+
+def e2e_wait(h):
+    pr, rec, t0, v, code_dir, gpu = h
+    rc = pr.wait()
+    P(f"  ran {v} from {code_dir} ({time.time() - t0:.0f}s, rc {rc}, GPU {gpu})")
+    assert rc == 0, open(f"{SCR}/{v}.stdout").read()[-3000:]
+    return dict(np.load(rec, allow_pickle=True)), open(f"{WD}/logs/{v}.log").read()
+
+
+def metric_lines(log):
+    return [re.sub(r" [\d.]+ min", "", ln) for ln in log.splitlines() if ln.startswith("step ") or ln.startswith("BEST")]
+
+
+def batches_of(rec, key, width=None):
+    sh, out, k = rec["shapes"], [], 0
+    for b_, m_ in sh:
+        n = b_ * m_
+        out.append(rec[key][k:k + n].reshape(b_, m_) if width is None else rec[key][k:k + n].reshape(b_, m_, width))
+        k += n
+    return out
+
+
+def ck_equal(a, b):
+    ca = torch.load(a, map_location="cpu", weights_only=False)["state_dict"]
+    cb = torch.load(b, map_location="cpu", weights_only=False)["state_dict"]
+    return ca.keys() == cb.keys() and all(torch.equal(ca[k], cb[k]) for k in ca)
+
+
+def eval_ok(rec, allow_hz=False):
+    """Every eval-mode dense call matched its reference exactly (luo through tr; hz through the view, allowed only if
+    allow_hz, and then it must exist and differ from luo on some rows)."""
+    ev = json.loads(str(rec["eval_counts"]))
+    tr_keys = [k for k in ev if "|tr|" in k]
+    hz_keys = [k for k in ev if "|hz|" in k]
+    ok = all(ev[k][1] == 0 for k in ev) and sum(v[0] for v in ev.values()) > 0 and len(tr_keys) >= 1
+    ok &= (hz_keys == ["train|hz|eval"] and ev["train|hz|eval"][3] > 0) if allow_hz else (hz_keys == [])
+    return ok, ev
+
+
+def g_e2e():
+    P("\n== G e2e (deterministic wrapper; 24 CD steps from v17_pre2s_s101@77500, cooldown_mix 0.2, evals at 12 / 24)")
+    names = ["w5_thz_pre_off", "w5_thz_new_off", "w5_thz_new_off05", "w5_thz_new_on05"]
+    only = os.environ.get("HZ_GPU_ONLY", "")  # '' = both pairs, 'G1' or 'G2' = one pair
+    for v in names:
+        clean(v)
+    pre = f"{SCR}/w5_pre_hzcd_code"  # previous train.py with every other module of this checkout
+    shutil.rmtree(pre, ignore_errors=True)
+    os.makedirs(f"{pre}/tests")
+    for f in os.listdir(W5):
+        if f.endswith(".py"):
+            shutil.copy(f"{W5}/{f}", f"{pre}/{f}")
+    shutil.copy(f"{HERE}/e2e_hzcd.py", f"{pre}/tests/e2e_hzcd.py")
+    shutil.copy(f"{REF}/train.py.txt", f"{pre}/train.py")
+    gpu_ref = os.environ.get("HZ_GPU_REF")  # optional second GPU for the reference run (concurrent)
+    try:
+        if only in ("", "G1"):
+            ha = e2e_start(pre, names[0], [], gpu=gpu_ref)
+            if gpu_ref is None:
+                ra, la = e2e_wait(ha)
+            hb = e2e_start(W5, names[1], [])
+            rb, lb = e2e_wait(hb)
+            if gpu_ref is not None:
+                ra, la = e2e_wait(ha)
+            nb = len(rb["off"]) - 1
+            check("G1 flags OFF, previous vs new train.py: identical batch sequence (24 steps incl. pool), train-mode logits and "
+                  "loss-input logits", np.array_equal(ra["fidx"], rb["fidx"]) and np.array_equal(ra["off"], rb["off"])
+                  and np.array_equal(ra["lg_model"], rb["lg_model"]) and np.array_equal(ra["lg_loss"], rb["lg_loss"]) and nb == 24,
+                  f"{nb} batches")
+            check("G1 identical logged metric lines; bit-identical checkpoint and val preds",
+                  metric_lines(la) == metric_lines(lb) and len(metric_lines(lb)) >= 3
+                  and ck_equal(f"{WD}/ckpt/{names[0]}.pt", f"{WD}/ckpt/{names[1]}.pt")
+                  and np.array_equal(np.load(f"{WD}/preds/nn_{names[0]}_trainonly_val.npy"),
+                                     np.load(f"{WD}/preds/nn_{names[1]}_trainonly_val.npy")), metric_lines(lb)[-1] if metric_lines(lb) else "")
+            oka, eva = eval_ok(ra)
+            okb, evb = eval_ok(rb)
+            check("G1 every training batch gathered from tr (src 'tr'); every eval-mode dense call carried luo (0 mismatches) in "
+                  "both runs; predict / eval_subset never saw a view",
+                  all(s == "tr" for s in rb["src"]) and oka and okb and not rb["eval_hz"].any() and not rb["predict_hz"].any(),
+                  f"eval counts new {evb}")
+            RES["e2e_g1"] = dict(off_lines=metric_lines(lb))
+        if only in ("", "G2"):
+            # arm ON: both with --cooldown_frac 0.5 (pool mixing from step 12 in both -> the same batch sequence)
+            hd = e2e_start(W5, names[2], ["--cooldown_frac", "0.5"], gpu=gpu_ref)
+            if gpu_ref is None:
+                rd, ld = e2e_wait(hd)
+            hc = e2e_start(W5, names[3], ["--hzcd", "--cooldown_frac", "0.5", "--save_holdout"])
+            rc_, lc = e2e_wait(hc)
+            if gpu_ref is not None:
+                rd, ld = e2e_wait(hd)
+            cols = C6.luo_cols(torch.load(INIT, map_location="cpu", weights_only=False)["cfg"]["xt_names"])
+            lgm_d, lgm_c = batches_of(rd, "lg_model"), batches_of(rc_, "lg_model")
+            lgl_d, lgl_c = batches_of(rd, "lg_loss"), batches_of(rc_, "lg_loss")
+            same_pre = all(np.array_equal(lgm_d[i], lgm_c[i]) and np.array_equal(lgl_d[i], lgl_c[i]) for i in range(12))
+            diff_cd = sum(int(not np.array_equal(lgm_d[i], lgm_c[i])) for i in range(12, 24))
+            check("G2 --hzcd vs flags OFF, both --cooldown_frac 0.5 (t_cool 12): same batch sequence (24 steps); steps 0-11 "
+                  "bitwise-identical train-mode and loss-input logits (view inactive before the cooldown); steps 12-23 differ",
+                  np.array_equal(rc_["fidx"], rd["fidx"]) and np.array_equal(rc_["off"], rd["off"]) and len(rc_["src"]) == 24
+                  and len(rd["src"]) == 24 and same_pre and diff_cd > 0, f"differing cooldown batches {diff_cd}/12")
+            src = list(rc_["src"])
+            check("G2 sources: steps 0-11 from tr, steps 12-23 through the hz view (flags OFF: 24 from tr); all from the train split",
+                  src[:12] == ["tr"] * 12 and src[12:] == ["hz"] * 12 and all(s == "train" for s in rc_["split"])
+                  and list(rd["src"]) == ["tr"] * 24, dict(collections.Counter(src)))
+            luo_ref = [np.load(f"{FC}/train/{luo_n}.npy", mmap_mode="r") for _, luo_n, _ in cols]
+            hz_ref = [np.load(C6.hz_path("train", hz_n), mmap_mode="r") for _, _, hz_n in cols]
+            cis, xts = batches_of(rc_, "ci"), batches_of(rc_, "xt", width=len(cols))
+            bad_pre = bad_cd = 0
+            diff_cells = 0
+            for i in range(24):
+                ci, xt = cis[i], xts[i]
+                m = ci >= 0
+                rows = ci[m]
+                for k, (_, luo_n, _) in enumerate(cols):
+                    e_luo = torch.from_numpy(C6.xt_transform(luo_n, luo_ref[k][rows])).to(torch.float16).float().numpy()
+                    e_hz = torch.from_numpy(C6.xt_transform("it_hist_hz", hz_ref[k][rows])).to(torch.float16).float().numpy()
+                    got = xt[m][:, k]
+                    if i < 12:
+                        bad_pre += int((got != e_luo).sum())
+                    else:
+                        bad_cd += int((got != e_hz).sum())
+                        diff_cells += int((e_hz != e_luo).sum())
+            check("G2 pre-cooldown batches: LUO slots == brute-force luo (exact); cooldown batches: LUO slots == brute-force hz "
+                  "(exact, fp16(log1p) -> fp32) and != luo on some rows", bad_pre == 0 and bad_cd == 0 and diff_cells > 0,
+                  f"bad pre {bad_pre}, bad cd {bad_cd}, hz != luo cells in the cooldown {diff_cells}")
+            okc, evc = eval_ok(rc_, allow_hz=True)
+            okd, evd = eval_ok(rd)
+            check("G2 every eval-mode dense call through tr (holdout selection evals, val predicts, save_holdout) carried luo "
+                  "(0 mismatches); predict saw the view exactly once (save_holdout_hz, after training) and those batches carried "
+                  "hz exactly (and != luo); eval_subset never saw the view; flags OFF: no view anywhere",
+                  okc and okd and rc_["predict_hz"].tolist()[-1] is True and int(rc_["predict_hz"].sum()) == 1
+                  and not rc_["eval_hz"].any() and not rd["predict_hz"].any() and not rd["eval_hz"].any(),
+                  f"eval counts on {evc}; predict_hz {rc_['predict_hz'].tolist()}")
+            hzf, asb = f"{WD}/preds/holdout/nn_{names[3]}_holdout_hz.npy", f"{WD}/preds/holdout/nn_{names[3]}_holdout.npy"
+            h1, h0 = (np.load(hzf) if os.path.exists(hzf) else None), (np.load(asb) if os.path.exists(asb) else None)
+            check("G2 nn_<v>_holdout_hz.npy written: shape of the as-built holdout file, finite",
+                  h1 is not None and h0 is not None and h1.shape == h0.shape and np.isfinite(h1).all(),
+                  f"max |hz - as built| {float(np.abs(h1 - h0).max()) if h1 is not None and h0 is not None else 'n/a'}")
+            check("G2 log: hzcd setup line (from step 12 of 24) and the holdout-with-hz line; checkpoint differs from flags OFF",
+                  any("wave-5 hzcd: from step 12 (of 24)" in ln for ln in lc.splitlines())
+                  and any("holdout NDCG with hz inputs" in ln for ln in lc.splitlines())
+                  and not ck_equal(f"{WD}/ckpt/{names[3]}.pt", f"{WD}/ckpt/{names[2]}.pt"),
+                  [ln[:200] for ln in lc.splitlines() if "wave-5 hzcd" in ln])
+            RES["e2e_g2"] = dict(off_lines=metric_lines(ld), on_lines=metric_lines(lc),
+                                 hz_lines=[ln for ln in lc.splitlines() if "wave-5 hzcd" in ln])
+    finally:
+        for v in names:
+            clean(v)
+        shutil.rmtree(pre, ignore_errors=True)
+
+
+def main():
+    t_all = time.time()
+    P(f"== nn_x/w5 --hzcd tests, part {PART} ({time.ctime()}, CPU threads {NT})")
+    if PART == "cpu":
+        h0_code()
+        h1_files()
+        h2_view()
+        h3_loop()
+    else:
+        g_e2e()
+    RES["failed"] = FAIL
+    P(f"\n== {len(RES['checks']) - len(FAIL)}/{len(RES['checks'])} checks passed; failed: {FAIL}; {time.time() - t_all:.0f}s")
+    json.dump(RES, open(f"{WD}/logs/test_hzcd_{PART}.json", "w"), indent=1, default=str)
+    return 0 if not FAIL else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

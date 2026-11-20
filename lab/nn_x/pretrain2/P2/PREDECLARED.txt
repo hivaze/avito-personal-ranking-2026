@@ -1,0 +1,52 @@
+P2 (PRETRAIN_PLAN_1113 §4 P2, E3-reduced): how much Avito's user vector knows beyond the history.
+Pre-declared at: Fri Nov 13 05:15:18 UTC 2026  (written before any P2 result was computed; only array shapes/dtypes, the hpos convention
+(0 = newest), the event-type range 1..10, emb_idx = -1 for missing content and the existence of user_emb for
+val/test/train (train 3,151,208 x 128) were looked at.)
+
+DATA / CORPUS FOR f(history)  (label-free)
+- Fit corpus: 200,000 random train feeds (np.random.default_rng(7)) with user_id != 0, H >= 1, ||u|| > 0 and not in the
+  holdout set, PLUS the 30,000 holdout feeds (nn_x/r6/train.py rule: rng 12345 over p_random > 0.9 & M >= 50; holdout
+  feeds with user_id 0 / H 0 / ||u|| 0 are not fitted and get no residual).
+- Cross-fitting: GroupKFold(5, shuffle, random_state=0) by user_id over that corpus. Fold model k is fitted on 4/5 of
+  the users and predicts the remaining 1/5 (out-of-fold). Holdout feeds get their OOF prediction; val (and test, if
+  computed) get the mean of the 5 fold models. R^2 (pooled over the 128 dims of the L2-normalised u) is reported per fold.
+- Target: u / ||u|| (int8 user_emb, own feed only; never another snapshot of the same user).
+- Inputs (own feed's history only, own split's item table, items L2-normalised, emb_idx -1 skipped):
+  mean of all events; recency-weighted mean (weight 0.5^(hpos/8)); last1; mean of last 5 / 20 / 32 positions;
+  per-event-type means over the last 64 positions for et in {1},{2},{3},{4},{5..10}; category histogram (54 bins)
+  of the last 64 and of all events (shares); event-type shares (10); log1p(H); missing-content share; a zero-filled
+  block gets an indicator. Features standardised on the fit fold.
+- Ridge lambda (on standardised inputs) chosen from {1,10,100,1000,10000} by mean OOF R^2 (label-free choice).
+- r = u/||u|| - f(h); nr = ||r||.
+
+RESIDUAL TEST ON G3 (nested, val)
+- Base: zG3 = per-feed z of preds/ens_G3_final_val.npy.
+- Population: leak-free val feeds (qt.leak_mask, 14,306). Feeds with user_id 0, ||u|| 0 or H 0 are EXCLUDED from all
+  fitting and keep G3 unchanged (delta 0).
+- Features (per candidate; missing candidate content -> 0 after NaN-aware feed z):
+  x1 = z(cos_u)   [cos_u = cos(candidate int8 emb, user_emb), recomputed and checked vs data/feats cos_u]
+  x2 = nr_s * z(cos_u)
+  x3 = nr_s * z(cos(c, r))
+  nr_s = (nr - mean)/sd over the non-excluded feeds of the split (label-free).
+- PRIMARY fit (3-parameter ridge): within-feed-demeaned least squares of y on [zG3, x1, x2, x3], zG3 unpenalised,
+  ridge penalty 0.01 * N_rows on the x coefficients; weights w = beta_x / beta_zG3; score = zG3 + X w.
+  Fitted on 4/5 of the users (GroupKFold(5, shuffle) by user, user-0 singletons, fold seeds 0 and 1), evaluated on the
+  held-out 1/5; per-feed delta = mean over the 2 fold seeds; paired per-feed NDCG delta vs G3 (src/metrics.ndcg_per_feed).
+- Holdout replica: identical nested procedure on the 30,000 holdout feeds, base = member-equal per-feed z-mean of the 20
+  G3 train-only members' holdout preds (F10 v23_gru_pre2s_s501-506, F7x r6_cd_m02_r101-107, F7x70 r6_cd_m02_p70k_r101-107;
+  must reproduce 0.32379), f via OOF cross-fit. Info only: full-val-fit weights applied to the holdout (transfer).
+- SE = sd(per-feed delta)/sqrt(n_feeds) over the gate population.
+
+GATE (verdict)
+- Task gate: PASS iff val OOF delta (14,306 leak-free feeds, excluded feeds at 0) >= +0.001 AND delta/SE >= 3
+  AND holdout OOF delta > 0 (sign agreement). Otherwise CLOSED.
+- Plan conditions (PRETRAIN_PLAN_1113 §4/§6), required in addition for a PASS: pmix-weighted val delta (src/pmix,
+  private weights) >= 0; and the decile diagnostic shows G3 worse in high-||r|| deciles (residual contrast D8-10 minus
+  D1-3 < 0, residual after OLS of per-feed G3 NDCG on [1, log M, log1p H]). Plan kill: if that contrast >= 0 OR the
+  nested residual misses +0.001 at 3 SE -> close user_emb decomposition.
+- Reported but not gating: parity (median nr on val within 10% of the holdout = train random-like feeds; outside ->
+  'format artefact'); R^2 by fold; nr distribution per split; G3 NDCG by nr decile (val + holdout); within-feed
+  Spearman of cos(c,r) with cos_u and with abl_base_s23 train-only val logits; 'right category, buried' cell
+  (nn_x/r3/stage0_gate.py definition) pair AUC of z(cos_u), z(cos_cr), the blend, and the controls -log1p(it_hist_all_luo),
+  -maxsim32; secondary NDCG-grid nested fit of the same 3 weights (grid {-.1,-.05,-.02,0,.02,.05,.1}^3, info only, no verdict).
+- No val labels outside nested folds; no test labels; no submissions; CPU only (12 threads).

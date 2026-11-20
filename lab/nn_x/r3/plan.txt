@@ -1,0 +1,72 @@
+R3: pretrained ID-aware sequence encoder as the ranker's history-encoder initialisation (frozen ID table + learned no-ID token)
+Written 2026-11-12 21:58 UTC (date -u), BEFORE any stage-0 computation. Agent: r3 agent. Work dir: nn_x/r3 (new files only).
+
+Context (from reports/pretrain_report.md, nn_x/audit/altapproach/findings.txt, critique item 7, RESEARCH_SWEEP P8):
+* Encoders: pretrain/seqenc.py SeqEncoder d=384, 4 layers, 8 heads, RoPE, causal, BOS token; ItemTower = MLP(int8 content)
+  + E_cat + id_proj(E_id[slot]) with E_id = 40.3M rows (count >= 3), dim 64 (v3*) / 128 (v4*), + per-item logit bias in v4*.
+  Heads fe / new: logit = scale * cos(q_head(h_last), out_vec(ItemTower(cand))).  Checkpoints data/pretrain/ckpt_{v3,v3A,v4,v4A}.pt
+  (state_dict incl. the ID table; 10-21 GB) and the windowed w{1,2,3}r_{v3,v4}. Corpus (data/pretrain/*): train LATEST snapshot
+  per user + user-0 train feeds + val/test EARLIEST snapshot per user (2.59M seqs, 463.6M events); v3A/v4A exclude test snapshots.
+  => the "scaled-up pretraining on all histories" of the task is ALREADY what the pre2s corpus is (val/test snapshots included,
+  x4 oversampled); only train NON-latest snapshots are absent (they are prefixes of the latest one, so they add no new events).
+* Zero-shot head scores already on disk: preds/pre_<variant>_<head>_val.npy for variants v1,v2,v3,v3A,v4,v4A,v4s1 and heads
+  fe,new,fe_noid,new_noid,hmax32,hmax8,idmax32(,ibias); preds/pre_final_val.npy (= mean over v3A,v4A of 0.5(z(fe)+z(new)), 0.3590).
+* G3 = 0.5 z(ens_G3_ft_val) + 0.5 z(ens_G3_to_val) = 0.40032 (public 0.392820). G3's members already take the pre2s scalar
+  scores (pre2_fe, pre2_new, z's, hmax, fe_noid, id_contrib, idmax32) as train-stage inputs.
+
+STAGE 0 (CPU, this script: nn_x/r3/stage0_gate.py -> nn_x/r3/stage0_gate.log / stage0_gate.json)
+(a) Inventory: load ckpt args/shapes (mmap) and confirm the ID table is inside; confirm what the corpus includes.
+(b) Zero-shot NDCG (val, 14,423 feeds; also the 14,306 leak-free feeds) of the encoder used ALONE to score candidates:
+    - each single head score fe / new per variant (next-item logit = scale * cos(history state, ID+content item vector));
+    - pre_final (the deliverable, clean val side v3A+v4A);
+    - ENS_clean = z-mean of fe,new over v3A,v4A (= pre_final);  ENS_all = z-mean of fe,new over v2,v3,v3A,v4,v4A,v4s1
+      (v3/v4/v4s1 saw test snapshots in pretraining: <= +0.0004 'other users' future' optimism on val, reported as an upper bound);
+    - ENS_all+h = ENS_all plus z(hmax32) of the same variants (encoder-space retrieval; still label-free, still "encoder alone").
+(c) Ensemble value with G3 for S in {pre_final, ENS_all, ENS_all+h, best single head}:
+    - equal z-mix: 0.5 z(G3) + 0.5 z(S), paired per-feed delta vs G3 +- SE;
+    - nested residual: z(G3) + w z(S), w in {0,.05,.1,.15,.2,.3,.5} chosen on 4/5 of the feeds (GroupKFold by user, user-0
+      singletons), applied to the held-out 1/5, 2 fold seeds -> paired per-feed delta +- SE (overall, leak-free, M<50/M>=50/Tue/Thu,
+      pmix private-mix report-only); the same on the G3_to (train-only) base.
+    - 'right category, buried' cell (task definition, nn_x/insights/errors/05_mass.py conventions): positives whose category is
+      G3's LSE top category (pcr == 0) AND with >= 3 same-category candidates ranked above them by G3 (within-category rank >= 3).
+      Pairs = (such positive, same-category negatives that G3 ranks above it) = the beaters. Report: pair AUC of z(S) on these
+      pairs (chance 0.5; G3 is 0 by construction), the pair AUC of the nested blend at its full-val-chosen w, and the paired
+      per-feed NDCG delta of the nested blend restricted to feeds that contain a cell positive. The probe's narrower cell
+      (warm + recent same-category history, nn_x/audit/altapproach) is reported alongside for comparability with P8.
+GATE (pre-declared, read conservatively):
+    proceed to stage 1 only if  [zero-shot encoder alone >= 0.36 val]  AND  ( [nested residual on G3 > +0.0005 AND > 2 SE]
+    OR [in-cell pair AUC of the encoder score - 0.5 > +0.02, i.e. cell AUC > 0.52] ).
+    'Encoder alone' = the best label-free encoder-only score among (b) (ENS_all+h at most); if only the optimistic ENS_all variants
+    reach 0.36 while the clean pre_final does not, say so explicitly. The critique's kill ("zero-shot gain < +0.005 or train-stage
+    increment < 2 SE -> stop before plumbing") is applied on top: a nested residual <= +0.0005 with the ID channel's cell AUC
+    <= 0.52 means STOP, whatever the equal-mix number says (an equal mix with a 0.36 model is expected to lose).
+STAGE 1 (only if the gate passes): nn_x/r3 copy of nn_x/w5 train/model/data; history encoder initialised from ckpt_v3A/v4A
+    (val side) / v3/v4 (test side); frozen E_id (+ learned no-ID token); F7 m02 recipe (w5 E_BASE); flags-off parity tests
+    (AST + end-to-end); 2-epoch paired screen seeds 23/24 and one 10-epoch pair vs w5_e10_base_s951. PASS = member val > +1 SE
+    and holdout >= 0 at 10 epochs. GPU: one process on a GPU with < 4 procs and >= 60 GB free; CUDA_VISIBLE_DEVICES one id;
+    12 threads; PIDs in nn_x/r3/RUNNING.txt.
+
+----------------------------------------------------------------------------------------------------------------------
+STAGE-0 RESULT (appended 2026-11-12 21:59 UTC after stage0_gate.py ran; log: nn_x/r3/stage0_gate.log, json: stage0_gate.json)
+(a) Inventory: ckpt_v3A / v4A (val side, no test snapshots) and v3 / v4 (train+val+test): d=384, nl=4, nh=6, 8.0M dense params,
+    ID table (39.9M / 40.3M rows, dim 64 / 128) INSIDE the checkpoints; corpus 2,588,072 sequences (train 2,545,717 latest
+    snapshots, val 14,204, test 28,151 earliest snapshots), 463.6M events. Scaled-up "all histories" pretraining already exists.
+(b) Zero-shot encoder alone (val 14,423 feeds): single heads 0.3537-0.3588 (best v4s1 new 0.3588); pre_final (clean v3A+v4A
+    fe+new) 0.3590 (< 0.36); ENS_clean+h (+ hmax32) 0.3613; ENS_all (6 variants, 3 saw test snapshots) 0.3613; ENS_all+h 0.3625.
+    Condition "alone >= 0.36": met only by encoder ensembles that add the hmax32 retrieval channel (clean 0.3613) or test-snapshot
+    variants (0.3625); the deliverable score itself is 0.3590.
+(c) Value on G3 (0.40046 leak-free), paired per-feed, user-grouped nested w:
+    equal z-mix: -0.0079 .. -0.0111 (+-0.0011) for every encoder score (expected for a 0.36 model).
+    nested residual on G3: pre_final -0.00018 +- 0.00020; ENS_clean+h -0.00011 +- 0.00005; ENS_all -0.00017 +- 0.00009;
+      ENS_all+h -0.00026 +- 0.00012; best single -0.00011 +- 0.00007; ID-only (pre2_id_contrib, pre2_idmax32) exactly 0 (w=0 chosen
+      in every fold). On G3_to: -0.00012 .. -0.00047. Fixed w=0.05: +0.00003 (pre_final) at best; w >= 0.1 loses -0.0003..-0.0008.
+    'right category, buried' cell (positive in G3's LSE-top category with >= 3 same-category items above; 7,624 positives in 5,383
+      feeds; 151,881 beater pairs; 37% of G3's loss = cat#1|w3-9 16.5% + cat#1|w10+ 20.9%): pair AUC of the encoder score
+      0.308-0.328 (it sides with the beaters MORE than chance), ID-only parts 0.471 / 0.476 (cov 0.21), content-only 0.329.
+      P8 cell (warm + recent same-cat history): 0.298-0.324 / 0.470 / 0.477. Nothing is > 0.52.
+GATE: [alone >= 0.36] True only via ENS_clean+h / ENS_all+h;  [nested > +0.0005 and > 2 SE] False (all <= 0);
+      [cell AUC - 0.5 > +0.02] False (all < 0.5).  ==> STOP before plumbing. No stage-1 code, no GPU job launched.
+Reading: the encoder's item-identity memory, trained on next-feed-open, is popularity-aligned: in exactly the cell where an
+identity signal must help it prefers the same popular same-category beaters that G3 prefers, and the ranker (which already takes
+the pre2s scalars as inputs) leaves no residual. Initialising the history encoder from it would transfer that bias, not new
+information; the critique's own kill rule ("zero-shot gain < +0.005 ... stop before plumbing") applies.

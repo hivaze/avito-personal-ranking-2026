@@ -1,0 +1,64 @@
+PLAN written 2026-11-12 15:36:55 UTC BEFORE any fitting/evaluation run.
+STUDY A: family weights fitted on the HOLDOUT (train-only member preds), evaluated on VAL (out-of-sample).
+
+Data
+- holdout: preds/holdout/holdout_{meta,y}.npy + nn_<m>_holdout.npy (train-only). Feed indices of the holdout are
+  reconstructed exactly as nn/holdout_eval.py (rng 12345 over p_random>0.9 & M>=50 train feeds) -> user_id from
+  data/flat/train/feeds.parquet for user-grouped CV on the holdout.
+- val/test: preds/nn_<m>_trainonly_{val,test}.npy (to) and nn_<m>_n2cpv3_{val_oof,test}.npy (ft).
+- family z-mean = mean over members of per-feed z (stack_val.feed_rank_z[:,1]).
+Families (members with complete ft+to+holdout files only):
+  F5cd(6) F6(6) F7(v17, 7) F7x(7) F7x70(7) F9(6) F10(6) F12(7) V27 gru_m02 V28 lr1_m02 V29 d192_m02 (as available at run time)
+Pools studied (fixed before results):
+  P6  = PF7x families  F5cd,F6,F7x,F9,F10,F12           (38 members; ref member-equal = PF7x)
+  P3  = G3 families    F10,F7x,F7x70                    (20; ref = G3)
+  P11 = ALL families above incl. F7 and new m02 families
+Weighted score: S_h = sum_f w_f * zmean_f(h) for h in {ft,to}; final = 0.5*z(S_ft)+0.5*z(S_to) (holdout: S_to only).
+References: ME = member-equal (w_f proportional to n_f), FE = family-equal (w_f = 1/F).
+
+Fitting variants (all on the holdout only; val never used for fitting or selection):
+  W1 ListNet softmax-CE, w = scale * simplex(nonneg), L2 shrinkage of simplex weights toward ME; lambda chosen by
+     5-fold user-grouped CV on the holdout (CV NDCG), then refit on the full holdout.
+  W2 same, lambda = 0 (unshrunk simplex, nonneg).
+  W3 same as W1 but shrink toward FE.
+  W4 direct NDCG coordinate ascent on the simplex (holdout), step grid, no shrinkage (reference for surrogate gap).
+  W5 unconstrained linear (weights may be negative), ListNet, lambda by CV (reference only).
+Reported per variant: holdout in-sample delta vs ME (reference only), 2-fold user-grouped holdout OOS delta vs ME
+(fit on half A eval on half B and vice versa, paired per-feed, SE), val delta vs ME and vs FE with paired per-feed SE,
+val slices M<50, M>=50, Tue, Thu ((ts+10800)//86400 < 20720), coldpos, warmpos (cold = it_hist_all_luo==0; coldpos =
+all positives cold, warmpos = no positive cold).
+
+PRE-DECLARED ACCEPTANCE (lead's rule): (i) out-of-sample (holds by construction: fit on holdout, eval on val),
+(ii) val delta vs the EQUAL pool of the SAME members (ME; FE reported too) > 2 SE, (iii) holdout OOS (2-fold) delta
+>= -1 SE vs ME, (iv) no val slice < -2 SE. Multiple variants x pools are tested: I will report all of them and treat
+a single marginal pass among ~15 tests with caution (flag it). If accepted: write cand_S1_hfit_<pool>_<variant>.parquet
+via a new builder (same z-mean spec, weighted) and run src/presub_gate.py (ref = 0.5*nn_final5v3_val_oof +
+0.5*nn_final5_trainonly_val / test analog; members = all nonzero-weight members).
+CPU only: OMP/MKL/POLARS threads = 12. No GPU needed.
+
+ADDENDUM 2026-11-12 15:40:58 UTC (written after seeing P6/P3 W1-W2 results, before any run of the pool below):
+- Holdout fits tilt toward F7x (m02 re-cool), and CURRENT_STATUS 15:22 documents a val-only re-cool excess (~+0.001
+  per unit re-cooled share). Val gains of F7x-tilted weights are therefore confounded. Diagnostic pool (exploratory,
+  same variants and same rule, reported separately): P9nr = F5cd,F6,F7,F9,F10,F12,V27,V28,V29 (no m02 re-cools).
+- evalS.py adds decide5-style proxies for every fitted weighting: V, Vto, H(2-fold OOS), D = Vto - H, S = min(V, V-D),
+  and the re-cooled share. Context only; the acceptance rule above is unchanged.
+2026-11-12 15:48:18 UTC v1 fits (torch float32) found to stall at the init on several folds (P11/P3 2-fold weights == ME/FE); v1 logs moved to logs/v1_torchf32 (superseded). Re-running all pools with the float64 numba/L-BFGS-B fit (same variants, same rule).
+
+ADDENDUM 2 2026-11-12 15:52:05 UTC (after the v2 results: 0/20 accepted; evalS shows Vto gains but V ~0 in P9nr):
+- Exploratory variant "TOonly": apply the already-fitted holdout weights (same JSON weights, no refit) to the TO half
+  only; FT half stays member-equal: final = 0.5*z(ME ft) + 0.5*z(sum_f w_f zmean_f(to)). Rationale: the holdout only
+  sees train-only predictions, and family strengths differ between to and ft (F5cd/F6 strong in ft, weak in to).
+  Same acceptance rule (ii)-(iv); holdout OOS = the same 2-fold OOS numbers (holdout has to only). 20 more tests ->
+  any marginal pass will be flagged as multiple-testing-suspect.
+
+ADDENDUM 3 2026-11-12 15:53:56 UTC: P11-W1/W2-TOonly passed rule (ii)-(iv) (val +0.00054+-0.00021, 2.5 SE; hold OOS +0.00016;
+all slices >0). Built subs/cand_S1_hfit_P11W1to.parquet; presub_gate PASS with the 6 known prew WARNs.
+Stability diagnostics (NOT new candidates, no selection on them): (a) val TOonly of each 2-fold half's weights; (b) bagged
+weights = mean of 30 user-bootstrap holdout fits (W2, lam 0), val TOonly; (c) per-family leave-one-out of the TO
+weights (set w_f=0, renormalise) on val and holdout, to see which families carry the val gain.
+
+RESULT 2026-11-12 15:55:08 UTC: main study 0/20 accepted (P6,P3,P11,P9nr x W1-W5; v2 float64 fits). Exploratory TOonly:
+P11-W1/W2-TOonly passes (ii)-(iv) (val +0.00054+-0.00021 vs ME; hold OOS +0.00016+-0.00017; slices all >0) but: added after the
+main study failed (40 tests), bagged-weight version +0.00029 (1.5 SE), half-1 weights +0.00018 (0.8 SE), re-cool D +0.00036 ->
+S vs ME +0.00018; vs G3: V +0.00013+-0.00034, H -0.00022+-0.00019, S +0.00005 (indistinguishable from G3). Built
+subs/cand_S1_hfit_P11W1to.parquet; presub_gate PASS (6 known prew WARN). Logs: logs/*.txt, evalS.log, compare.log, stab.log.

@@ -1,0 +1,757 @@
+"""Unit + end-to-end tests of the nn_x/w5 WAVE-5 harness (reports/INSIGHTS_1112.md 3.1 items 1 TRUNC-PROD, 3 AUXF,
+8 hygiene): train.py --trunc_off / --aux_norm / --aux_norm_c / --cliplog / --save_last / --save_holdout /
+--select_min_step (helpers cd_arms5.py), lane.sh / launch_w5.sh / wait_w5_readout.sh, the nn_artifacts inputs.
+(11-12 ~20:30 UTC: --trunc_lifts added to the wave-5 flag set / guard below; its own tests: tests/test_trunc_lifts.py.)
+(11-12 ~22:10 UTC: --hzcd (cd_arms6.py) added; its statements are stripped FIRST by tests/strip_hzcd.py so the AST proof
+ below still compares the r6 code path; hzcd's own tests: tests/test_hzcd.py.)
+
+  cpu part:  CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 .venv/bin/python nn_x/w5/tests/test_w5.py cpu
+  gpu part:  CUDA_VISIBLE_DEVICES=<g> OMP_NUM_THREADS=12 .venv/bin/python nn_x/w5/tests/test_w5.py gpu   (ONE GPU,
+             sequential subprocesses, 12 CPU threads)
+
+CPU part
+  C0 code. (a) lane.sh DRY commands parse with train.py's own parser: stage-A base == nn_x/r7 screen.sh BASE2 except
+     --cooldown_mix 0.02 + the hygiene flags; stage-B m02ref == nn_x/r6/cd_lane.sh m02 except seed 900+root + hygiene;
+     trunc / truncp differ from their reference ONLY by --trunc_off 1.0, auxf ONLY by --aux_norm feed; lane.sh refuses
+     GPUs N; scripts pass bash -n; launch DRY lists the 18 stage-A/B jobs. (b) AST proof: train.py minus the
+     wave-5 statements (guards False at the defaults, the setup assignment, the cd_arms5 / ndcg imports, the parser
+     lines) with the AUXF conditional replaced by its else branch and `gn = clip_grad_norm_(...)` by the bare call ==
+     the frozen nn_x/r6/train.py (tests/ref_train_r6.py.txt, md5 recorded at copy time). (c) every wave-5 guard is False
+     at the defaults; for the base / m02ref commands the ARM guards are False. (d) call sites: trunc.offset once, in the
+     training loop, behind `if trunc is not None`; setup_wave5 once behind its guard; no other nn_x/w5 module imports
+     cd_arms5; predict / eval code (common.py) never sees the offset. (e) module copies: model / cd_arms / cd_arms4 /
+     blend / holdout_eval byte-identical to nn_x/r6; data / common / stale_pred AST-equal up to strings and R6 -> W5.
+  C1 artifacts (FULL train split): train_rkend_true.npy == an independent recomputation from data/flat/train/cand_pos.npy
+     + feeds.parquet (stable sort by feed, descending shown position) for all 246.7M candidates; shown positions unique
+     within every feed; rank + rkend == M - 1; trunc_lift.json == lifts recomputed from the train labels with the
+     production groups (prod M<50 / prod M>=50 by the NN rule) to 1e-9, and == the analysis numbers 1.00/0.54/2.01,
+     2.81/-0.20/-0.22 (2 decimals).
+  C2 TRUNC table: trunc_coef on the real feeds: pool-eligible and holdout feeds 0, column rkend>=3 0, M<50 and M>=50
+     production rows == L * (1 - p_soft); TruncOffset.offset on MiniSplit batches == a brute-force per-candidate loop.
+  C3 AUXF constant: exact c from SplitData.batches over the training feeds (3 shuffles) == 1.695 +- 0.002; realised
+     multiplier ~1; pool-batch multiplier and aux:main by Mpad (info).
+GPU part
+  G1 AUXF: the exact `loss = loss + aux_w(step) * ...` statement of train.py, exec'd on a real F7 @77.5k train-mode batch
+     (regular and pool): batch norm == the r6 statement (bitwise) == weighted mean; feed norm == 1.695 * sum / 512.
+  G2 end-to-end (deterministic wrapper tests/e2e_w5.py; 39 CD steps, cooldown_mix 0.2, evals at 20 and 39):
+     ref_off (frozen r6 train.py) vs new_off: identical batch sequence, model logits, loss-input logits, logged lines,
+     bit-identical checkpoint and val preds. new_hyg (--cliplog 10 --save_last --save_holdout) vs new_off: the same
+     (diagnostics / hygiene have no side effect); its save_holdout file == holdout_eval.py (bitwise); @last files exist.
+     new_on (--trunc_off 1 --aux_norm feed --cliplog 10 --save_last --save_holdout --select_min_step 39, with test
+     preds): same batch sequence as new_off; for EVERY training batch the logits reaching the main listwise loss ==
+     model logits + the brute-force numpy offset (exact), zero on pool / random-like feeds, non-zero on production
+     feeds; selection at 39 only; @last checkpoint / holdout / test preds == the selected ones; CLIPLOG arrays sane.
+     Test runs are named r6_t5e2e_* / w5_t5e2e_*; all their outputs are deleted afterwards.
+Writes nn_x/w5/logs/test_w5_<part>.log (+ .json).
+"""
+import argparse
+import ast
+import collections
+import copy
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+
+PART = sys.argv[1] if len(sys.argv) > 1 else "cpu"
+assert PART in ("cpu", "gpu"), "usage: test_w5.py cpu|gpu"
+_CVD = os.environ.get("CUDA_VISIBLE_DEVICES", "x")
+if PART == "cpu":
+    assert _CVD == "", "cpu part: run with CUDA_VISIBLE_DEVICES=''"
+else:
+    assert _CVD in ("0", "1", "2", "4"), "gpu part: CUDA_VISIBLE_DEVICES=<one of the wave-5 GPUs N <ids>>"
+    os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+NT = min(12, int(os.environ.get("OMP_NUM_THREADS", "12")))
+import numpy as np  # noqa: E402
+import polars as pl  # noqa: E402
+import torch  # noqa: E402
+
+torch.set_num_threads(NT)
+DEV = torch.device("cuda:0" if PART == "gpu" else "cpu")
+if DEV.type == "cuda":
+    torch.use_deterministic_algorithms(True, warn_only=True)
+    torch.backends.cuda.matmul.allow_tf32 = False
+    torch.backends.cudnn.allow_tf32 = False
+    torch.backends.cuda.enable_flash_sdp(False)
+    torch.backends.cuda.enable_mem_efficient_sdp(False)
+    torch.backends.cuda.enable_cudnn_sdp(False)
+HERE = os.path.dirname(os.path.abspath(__file__))
+W5 = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
+sys.path.insert(1, W5)
+import warnings  # noqa: E402
+
+warnings.filterwarnings("ignore", message=".*CUDA is not available.*")
+warnings.filterwarnings("ignore", message=".*device_type of 'cuda'.*")
+import cd_arms as CA  # noqa: E402
+import cd_arms5 as C5  # noqa: E402
+import data as D  # noqa: E402
+from mini_split import MiniSplit, pick_train_feeds  # noqa: E402
+from strip_hzcd import EXPECT as HZ_EXPECT, strip_hzcd  # noqa: E402  (hzcd statements, stripped before the wave-5 proof)
+
+ROOT = "<repo>"
+R6 = f"{ROOT}/nn_x/r6"
+PY = f"{ROOT}/.venv/bin/python"
+INIT = f"{ROOT}/nn/ckpt/v17_pre2s_s101@77500.pt"
+TRAIN_PY = f"{W5}/train.py"
+REF_TRAIN = f"{HERE}/ref_train_r6.py.txt"
+LANE, LAUNCH, WAITER = f"{W5}/lane.sh", f"{W5}/launch_w5.sh", f"{W5}/wait_w5_readout.sh"
+W5_FLAGS = ("--trunc_off", "--trunc_lifts", "--aux_norm", "--aux_norm_c", "--cliplog", "--save_last", "--save_holdout",
+            "--select_min_step")
+OFF5 = dict(trunc_off=0.0, trunc_lifts="", aux_norm="batch", aux_norm_c=1.695, cliplog=0, save_last=False,
+            save_holdout=False, select_min_step=0, hzcd=False)
+HYG = dict(save_last=True, save_holdout=True, select_min_step=12000, cliplog=50)
+SCR = os.environ.get("T5_SCRATCH", "/tmp/scratchpad/t5")
+os.makedirs(SCR, exist_ok=True)
+os.makedirs(f"{W5}/logs", exist_ok=True)
+LOG = open(f"{W5}/logs/test_w5_{PART}.log", "w")
+RES = {"checks": []}
+FAIL = []
+
+
+def P(*a):
+    s = " ".join(str(x) for x in a)
+    print(s, flush=True)
+    LOG.write(s + "\n")
+    LOG.flush()
+
+
+def check(name, ok, info=""):
+    P(f"  [{'PASS' if ok else 'FAIL'}] {name} {info}")
+    RES["checks"].append(dict(name=name, ok=bool(ok), info=str(info)))
+    if not ok:
+        FAIL.append(name)
+
+
+def md5(path):
+    return hashlib.md5(open(path, "rb").read()).hexdigest()
+
+
+def load_parse(path):
+    tree = ast.parse(open(path).read())
+    fn = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "parse"][0]
+    ns = {"argparse": argparse, "POOL_P_DEFAULT": CA.POOL_P_DEFAULT}
+    exec(compile(ast.Module(body=[fn], type_ignores=[]), "train_parse", "exec"), ns)
+
+    def parse(argv):
+        sys.argv = ["train.py"] + argv
+        return ns["parse"]()
+    return parse
+
+
+def train_meta():
+    f = pl.read_parquet(f"{ROOT}/data/flat/train/feeds.parquet", columns=["M", "cand_off"])
+    M = f["M"].to_numpy().astype(np.int64)
+    pr = np.load(C5.PRANDOM_PATH)
+    p = np.nan_to_num(pr["p_random"].astype(np.float32), nan=0.0)
+    p[M < 50] = 0.0
+    cand = np.where((p > 0.9) & (M >= 50))[0]
+    hold = np.sort(np.random.default_rng(12345).choice(cand, 30000, replace=False))
+    feeds = np.setdiff1d(np.arange(len(M)), hold)
+    return dict(M=M, off=f["cand_off"].to_numpy().astype(np.int64), p=p, hold=hold, feeds=feeds,
+                p_soft=C5.p_soft_all(n=len(M)))
+
+
+class FakeTr:
+    batches = D.SplitData.batches
+
+    def __init__(self, M):
+        self.M_np = M
+
+
+# ================================================================================================= CPU part
+_norm = lambda s: ast.unparse(ast.parse(s, mode="eval").body)  # noqa: E731
+G5_IF = collections.Counter({_norm(s): k for s, k in (
+    ('a.trunc_off or a.trunc_lifts or a.aux_norm != "batch" or a.cliplog', 1), ("a.select_min_step", 1),
+    ("trunc is not None", 1),
+    ("cliplog is not None", 4), ("cliplog is not None and step % a.cliplog == 0", 1),
+    ("a.select_min_step and step + 1 < a.select_min_step", 1), ("a.save_last", 2), ("a.save_holdout", 1))})
+G5_IFEXP = {_norm('a.aux_norm == "feed"'): _norm("fw_aux.sum().clamp_min(1e-6)")}
+ARM_GUARDS = [_norm('a.trunc_off or a.trunc_lifts or a.aux_norm != "batch" or a.cliplog'), _norm("trunc is not None")]
+REF_ASSERT = ('assert a.variant.startswith("r6_"), "nn_x/r6 copy: variant names must start with r6_"',
+              'assert a.variant.startswith("w5_"), "nn_x/w5 copy: variant names must start with w5_"')
+
+
+class StripWave5(ast.NodeTransformer):
+    def __init__(self):
+        self.ifs, self.ifexps, self.other = collections.Counter(), [], []
+
+    def visit_ImportFrom(self, n):
+        if n.module == "cd_arms5" or (n.module == "common" and [a.name for a in n.names] == ["ndcg"]):
+            self.other.append(f"from {n.module} import {[a.name for a in n.names]}")
+            return None
+        return n
+
+    def visit_Expr(self, n):
+        v = n.value
+        if (isinstance(v, ast.Call) and isinstance(v.func, ast.Attribute) and v.func.attr == "add_argument"
+                and v.args and isinstance(v.args[0], ast.Constant) and v.args[0].value in W5_FLAGS):
+            self.other.append(f"add_argument {v.args[0].value}")
+            return None
+        return self.generic_visit(n)
+
+    def visit_Assign(self, n):
+        u = ast.unparse(n)
+        if u == "trunc, cliplog = (None, None)":
+            self.other.append(u)
+            return None
+        if u == "gn = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)":
+            self.other.append("gn = clip_grad_norm_ -> bare call")
+            return ast.copy_location(ast.Expr(value=n.value), n)
+        return self.generic_visit(n)
+
+    def visit_If(self, n):
+        t = ast.unparse(n.test)
+        if t in G5_IF:
+            self.ifs[t] += 1
+            return None
+        return self.generic_visit(n)
+
+    def visit_IfExp(self, n):
+        t = ast.unparse(n.test)
+        if t in G5_IFEXP:
+            self.ifexps.append((t, ast.unparse(n.orelse)))
+            return self.visit(n.orelse)
+        return self.generic_visit(n)
+
+
+def strip_doc(tree):
+    if tree.body and isinstance(tree.body[0], ast.Expr) and isinstance(tree.body[0].value, ast.Constant):
+        tree.body = tree.body[1:]
+    return tree
+
+
+def dry_cmds(script, gpu, jobs, rx):
+    out = subprocess.run(["bash", script, str(gpu), jobs], capture_output=True, text=True, env={**os.environ, "DRY": "1"})
+    cmds = {}
+    for line in out.stdout.splitlines():
+        if " train.py " in line:
+            m = re.search(rx, line)
+            cmds[m.group(0)] = line.split(" train.py ", 1)[1].split()
+    return out.returncode, cmds
+
+
+def diff_ns(a, b, skip=("variant",)):
+    return {k: (a[k], b[k]) for k in a if k not in skip and a[k] != b[k]}
+
+
+def c0_code(parse):
+    P("\n== C0 code: lane / launch commands, AST flag-off proof, guards, call sites, module copies")
+    jobs = " ".join([f"A:{a}:{s}" for s in (23, 24) for a in ("base", "trunc", "auxf")]
+                    + [f"B:{a}:{r}" for r in (101, 104) for a in ("m02ref", "truncp", "auxf")])
+    rc, cmds = dry_cmds(LANE, 0, jobs, r"w5_\w+")
+    check("lane.sh DRY: one train.py command per job (6 stage-A + 6 stage-B)", rc == 0 and len(cmds) == 12, sorted(cmds))
+    ns = {k: vars(parse(v)) for k, v in cmds.items()}
+    r7 = subprocess.run(["bash", f"{ROOT}/nn_x/r7/screen.sh", "flags", "base"], capture_output=True, text=True)
+    r7ns = vars(parse(["--variant", "w5_x", "--seed", "23"] + r7.stdout.split()))
+    for s in (23, 24):
+        base = ns[f"w5_base_s{s}"]
+        d = diff_ns(r7ns, base, skip=("variant", "seed"))
+        want = {"cooldown_mix": (0.1, 0.02), "save_last": (False, True), "select_min_step": (0, 12000),
+                "cliplog": (0, 50)}
+        check(f"A s{s} base == r7 BASE2 except cooldown_mix 0.02 + hygiene (save_holdout already in BASE2); seed {s}",
+              d == want and base["seed"] == s and base["init"] == "" and base["epochs"] == 2.0, d)
+        check(f"A s{s} trunc differs from base ONLY by trunc_off 1.0",
+              diff_ns(base, ns[f"w5_trunc_s{s}"]) == {"trunc_off": (0.0, 1.0)}, diff_ns(base, ns[f"w5_trunc_s{s}"]))
+        check(f"A s{s} auxf differs from base ONLY by aux_norm feed",
+              diff_ns(base, ns[f"w5_auxf_s{s}"]) == {"aux_norm": ("batch", "feed")}, diff_ns(base, ns[f"w5_auxf_s{s}"]))
+    rc6, c6 = dry_cmds(f"{R6}/cd_lane.sh", 0, "m02:101 m02:104", r"r6_cd_\w+")
+    for r in (101, 104):
+        ref = vars(parse(c6[f"r6_cd_m02_r{r}"]))
+        m = ns[f"w5_cd_m02ref_r{r}"]
+        d = diff_ns(ref, m)
+        want = {"seed": (811, 900 + r), "save_last": (False, True), "save_holdout": (False, True),
+                "select_min_step": (0, 12000), "cliplog": (0, 50)}
+        check(f"B r{r} m02ref == r6 cd_lane m02 except CDSEED {900 + r} + hygiene; same init snapshot",
+              rc6 == 0 and d == want and m["init"].endswith(f"v17_pre2s_s{r}@77500.pt"), d)
+        check(f"B r{r} truncp differs from m02ref ONLY by trunc_off 1.0",
+              diff_ns(m, ns[f"w5_cd_truncp_r{r}"]) == {"trunc_off": (0.0, 1.0)})
+        check(f"B r{r} auxf differs from m02ref ONLY by aux_norm feed",
+              diff_ns(m, ns[f"w5_cd_auxf_r{r}"]) == {"aux_norm": ("batch", "feed")})
+    RES["lane_cmds"] = {k: " ".join(v) for k, v in cmds.items()}
+    refused = [subprocess.run(["bash", LANE, str(g), "A:base:23"], capture_output=True, text=True,
+                              env={**os.environ, "DRY": "1"}).returncode != 0 for g in (3, 5, 6, 7)]
+    check("lane.sh refuses GPUs N (also in DRY mode)", all(refused), refused)
+    syn = [subprocess.run(["bash", "-n", f], capture_output=True).returncode == 0 for f in (LANE, LAUNCH, WAITER)]
+    check("bash -n: lane.sh, launch_w5.sh, wait_w5_readout.sh", all(syn), syn)
+    out = subprocess.run(["bash", LAUNCH], capture_output=True, text=True, env={**os.environ, "DRY": "1"})
+    jl = re.search(r"jobs: (.*)", out.stdout)
+    njobs = len(jl.group(1).split()) if jl else -1
+    check("launch_w5.sh DRY: 18 jobs (6 A + 12 B), 3 lanes on each of GPUs N <ids>, every job command printed",
+          out.returncode == 0 and njobs == 18 and out.stdout.count("lane GPU") == 12
+          and out.stdout.count(" train.py ") == 18, f"{njobs} jobs")
+
+    # (b) AST proof
+    ref_src = open(REF_TRAIN).read()
+    rec = dict(line.split()[::-1] for line in open(f"{HERE}/r6_source_md5.txt"))
+    check("frozen reference == nn_x/r6/train.py at copy time (md5 in tests/r6_source_md5.txt)",
+          md5(REF_TRAIN) == rec["nn_x/r6/train.py"], md5(REF_TRAIN))
+    P(f"  info: nn_x/r6/train.py now {'UNCHANGED' if md5(f'{R6}/train.py') == rec['nn_x/r6/train.py'] else 'CHANGED'} "
+      f"since the copy")
+    assert ref_src.count(REF_ASSERT[0]) == 1
+    ref_src = ref_src.replace(*REF_ASSERT)
+    new_src = open(TRAIN_PY).read()
+    st = StripWave5()
+    hz_t, hz_removed = strip_hzcd(ast.parse(new_src))  # hzcd statements first (tests/strip_hzcd.py; exact set asserted)
+    new_t = strip_doc(st.visit(hz_t))
+    ident = ast.dump(new_t) == ast.dump(strip_doc(ast.parse(ref_src)))
+    n_other = collections.Counter(re.sub(r" \S+$", "", x) if x.startswith("add_argument") else x for x in st.other)
+    check("AST: train.py minus the hzcd statements (exact set) minus the wave-5 statements == frozen nn_x/r6/train.py "
+          "(flag-off path unchanged)",
+          ident and hz_removed == HZ_EXPECT and st.ifs == G5_IF and [t for t, _ in st.ifexps] == list(G5_IFEXP)
+          and all(e == G5_IFEXP[t] for t, e in st.ifexps) and n_other["add_argument"] == len(W5_FLAGS)
+          and len(st.other) == len(W5_FLAGS) + 4,
+          f"hzcd removed {dict(hz_removed)}; ifs {dict(st.ifs)}; ifexp {st.ifexps}; other {st.other}")
+    # (c) guards
+    a_def = parse(["--variant", "w5_x"])
+    check("parse(): every wave-5 flag OFF by default", {k: getattr(a_def, k) for k in OFF5} == OFF5)
+    env = dict(a=a_def, trunc=None, cliplog=None, step=0)
+    vals = {g: bool(eval(g, {}, {**env, "step": s})) for g in list(G5_IF) + list(G5_IFEXP) for s in (0, 50, 19669)}
+    check("every wave-5 guard / conditional test is False at the defaults (any step)", not any(vals.values()), vals)
+    for k in ("w5_base_s23", "w5_cd_m02ref_r101"):
+        aa = argparse.Namespace(**ns[k])
+        armv = {g: bool(eval(g, {}, dict(a=aa, trunc=None, cliplog=None, step=1)))
+                for g in [_norm("a.trunc_off"), _norm("a.trunc_lifts"), _norm('a.aux_norm != "batch"'),
+                          _norm('a.aux_norm == "feed"'), _norm("a.hzcd")]}
+        check(f"{k}: arm switches OFF (trunc_off 0, trunc_lifts '', aux_norm batch, hzcd False); hygiene ON {HYG}",
+              not any(armv.values()) and all(ns[k][x] == y for x, y in HYG.items()), armv)
+    # (d) call sites
+    tree = ast.parse(new_src)
+    parents = {ch: p_ for p_ in ast.walk(tree) for ch in ast.iter_child_nodes(p_)}
+
+    def chain(n):
+        c, x = [], n
+        while x in parents:
+            x = parents[x]
+            if isinstance(x, ast.If):
+                c.append("if " + ast.unparse(x.test))
+            if isinstance(x, ast.For):
+                c.append("for " + ast.unparse(x.target))
+            if isinstance(x, ast.FunctionDef):
+                c.append("def " + x.name)
+        return c
+    off_calls = [chain(n) for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                 and n.func.attr == "offset"]
+    check("trunc.offset: one call, in the training loop, behind `if trunc is not None`",
+          off_calls == [["if trunc is not None", "for (step, fb)", "def main"]], off_calls)
+    trunc_uses = sorted({ast.unparse(parents[n]).split("\n")[0][:90]
+                         for n in ast.walk(tree) if isinstance(n, ast.Name) and n.id == "trunc"})
+    check("`trunc` is read only by its guard and the offset statement (lg = lg + trunc.offset(b)...)",
+          len([n for n in ast.walk(tree) if isinstance(n, ast.Name) and n.id == "trunc"]) == 4, trunc_uses)
+    su = [chain(n) for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+          and n.func.id == "setup_wave5"]
+    check("setup_wave5: one call behind its guard in main()",
+          su == [["if " + _norm('a.trunc_off or a.trunc_lifts or a.aux_norm != "batch" or a.cliplog'), "def main"]], su)
+    users = sorted(f for f in os.listdir(W5) if f.endswith(".py") and f not in ("cd_arms5.py", "train.py")
+                   and re.search(r"\bcd_arms5\b", open(f"{W5}/{f}").read()))
+    check("no other nn_x/w5 module imports cd_arms5 (predict / eval / holdout_eval / stale_pred untouched)", users == [],
+          users)
+    cm = open(f"{W5}/common.py").read() + open(f"{W5}/model.py").read()
+    check("common.py / model.py (predict, eval_subset, forward) contain no trunc / aux_norm code",
+          not re.search(r"trunc|aux_norm|rkend", cm))
+    # (e) module copies
+    same = {f: md5(f"{W5}/{f}") == rec[f"nn_x/r6/{f}"] for f in ("model.py", "cd_arms.py", "cd_arms4.py", "blend.py",
+                                                                    "holdout_eval.py")}
+    check("model / cd_arms / cd_arms4 / blend / holdout_eval byte-identical to the nn_x/r6 copies", all(same.values()), same)
+
+    class Norm(ast.NodeTransformer):
+        def visit_Constant(self, n):
+            return ast.Constant(value="S") if isinstance(n.value, str) else n
+
+        def visit_Name(self, n):
+            return ast.Name(id="W5" if n.id in ("R6", "W5") else n.id, ctx=n.ctx)
+    eq = {}
+    for f in ("data.py", "common.py", "stale_pred.py"):
+        r6src = open(f"{R6}/{f}").read()
+        eq[f] = (ast.dump(Norm().visit(ast.parse(open(f"{W5}/{f}").read())))
+                 == ast.dump(Norm().visit(ast.parse(r6src)))) and md5(f"{R6}/{f}") == rec[f"nn_x/r6/{f}"]
+    check("data / common / stale_pred == nn_x/r6 up to string constants and R6 -> W5 (paths, messages only)",
+          all(eq.values()), eq)
+
+
+def c1_artifacts(meta):
+    P("\n== C1 TRUNC artifacts on the FULL train split (246.7M candidates)")
+    t0 = time.time()
+    M, off = meta["M"], meta["off"]
+    n = len(M)
+    check("feeds.parquet cand_off == exclusive cumsum of M (the artifact builder used cumsum offsets)",
+          np.array_equal(off, np.concatenate([[0], np.cumsum(M)[:-1]])))
+    pos = np.load(f"{ROOT}/data/flat/train/cand_pos.npy").astype(np.int64)
+    rk = np.load(C5.RKEND_PATH)
+    rank = np.load(f"{C5.ART}/train_rank_true.npy")
+    N = int(M.sum())
+    check("rkend / rank arrays: int16, one value per train candidate in flat order",
+          rk.shape == (N,) and rank.shape == (N,) and pos.shape == (N,) and rk.dtype == np.int16, (rk.shape, N))
+    fid = np.repeat(np.arange(n, dtype=np.int64), M)
+    assert pos.min() >= 0 and pos.max() < 32768
+    key = fid * 32768 + (32767 - pos)  # within a feed: descending shown position
+    # tie rule of 15_nn_artifacts.py (lexsort by (feed, pos), stable): among equal shown positions the LATER flat row
+    # is closer to the end, i.e. rkend_i = #{pos_j > pos_i} + #{pos_j == pos_i, j > i}. A stable sort of the REVERSED
+    # arrays reproduces exactly that order.
+    o = N - 1 - np.argsort(key[::-1], kind="stable")
+    ks = key[o]
+    dup = np.flatnonzero(ks[1:] == ks[:-1])
+    tied = np.unique(np.concatenate([o[dup], o[dup + 1]])) if len(dup) else np.zeros(0, np.int64)
+    P(f"  info: duplicated shown positions: {len(dup)} pairs in {len(np.unique(fid[tied]))} feeds ({len(tied)} rows, "
+      f"{int((rk[tied] <= 2).sum())} of them at rkend <= 2): ranked by the flat-order tie rule above")
+    check("duplicated shown positions are negligible (< 50 feeds, < 1000 rows)",
+          len(np.unique(fid[tied])) < 50 and len(tied) < 1000)
+    del ks
+    re_ = np.empty(N, np.int64)
+    re_[o] = np.arange(N) - off[fid[o]]
+    del o, key
+    check("train_rkend_true.npy == independent recomputation (#later-shown candidates of the same feed; flat-order "
+          "ties), all 246.7M candidates", np.array_equal(re_, rk.astype(np.int64)),
+          f"mismatches {int((re_ != rk).sum())}; {time.time() - t0:.0f}s")
+    check("rank + rkend == M - 1 for every candidate (train_rank_true.npy consistent)",
+          np.array_equal(rank.astype(np.int64) + rk.astype(np.int64), M[fid] - 1))
+    nz = np.bincount(fid[rk == 0], minlength=n)
+    check("exactly one rkend-0 candidate per feed", (nz == 1).all())
+    P(f"  info: rkend != M-1-raw pos in {float(np.mean(rk.astype(np.int64) != np.maximum(M[fid] - 1 - pos, 0))):.3f} of "
+      f"candidates; feeds with position gaps {float(np.mean(np.bincount(fid, pos, n) != M * (M - 1) / 2)):.3f}")
+    del re_, rank, pos
+    y = np.load(f"{ROOT}/data/flat/train/cand_target.npy").astype(np.float64)
+    g = C5.trunc_groups(M, meta["p"])
+    gh = g.copy()
+    gh[meta["hold"]] = 3
+    gc = gh[fid]
+    j = json.load(open(C5.LIFT_PATH))
+    rec = {}
+    for k, nm in enumerate(C5.GROUPS):
+        m = gc == k
+        base = y[m & (rk >= 3)].mean()
+        rec[nm] = [float(np.log(y[m & (rk == r)].mean() / base)) for r in range(3)]
+    d = max(abs(rec[nm][r] - j[nm][f"rkend{r}"]) for nm in C5.GROUPS for r in range(3))
+    check("trunc_lift.json production lifts == recomputed from train labels with the NN-rule groups (|d| < 1e-9)",
+          d < 1e-9, {nm: np.round(v, 4).tolist() for nm, v in rec.items()})
+    want = {"prod_M<50": [1.00, 0.54, 2.01], "prod_M>=50": [2.81, -0.20, -0.22]}
+    got = {nm: [round(j[nm][f"rkend{r}"], 2) for r in range(3)] for nm in C5.GROUPS}
+    check("lift table == the analysis numbers (prod M<50 1.00/0.54/2.01, prod M>=50 2.81/-0.20/-0.22)", got == want, got)
+    L = C5.load_lifts()
+    check("load_lifts(): rows prod M<50 / prod M>=50 from the json, random-like row and rkend>=3 column zero",
+          np.allclose(L[0, :3], rec["prod_M<50"]) and np.allclose(L[1, :3], rec["prod_M>=50"]) and not L[2].any()
+          and not L[:, 3].any())
+    RES["lifts"] = rec
+    del y, gc, fid, rk
+
+
+def c2_trunc(meta):
+    P("\n== C2 TRUNC table on the real feeds + TruncOffset.offset on MiniSplit batches")
+    L = C5.load_lifts()
+    M, p, ps, hold = meta["M"], meta["p"], meta["p_soft"], meta["hold"]
+    coef, g = C5.trunc_coef(1.0, M, p.astype(np.float64), ps, L, hold)
+    pool = (p > 0.5) & (M >= 50)
+    check("pool-eligible (NN p > 0.5) and holdout feeds: offset 0; column rkend>=3: 0",
+          not coef[pool].any() and not coef[hold].any() and not coef[:, 3].any(),
+          f"{int(pool.sum())} pool-eligible incl. {len(hold)} holdout")
+    w = 1.0 - ps
+    m0, m1 = (M < 50), (M >= 50) & ~pool
+    ok0 = np.allclose(coef[m0, :3], (L[0, :3][None, :] * w[m0, None]).astype(np.float32), rtol=0, atol=0)
+    ok1 = np.allclose(coef[m1, :3], (L[1, :3][None, :] * w[m1, None]).astype(np.float32), rtol=0, atol=0)
+    check("M<50 rows == L[prod M<50] * (1 - p_soft) and M>=50 production rows == L[prod M>=50] * (1 - p_soft) (exact)",
+          ok0 and ok1 and (g[m0] == 0).all() and (g[m1] == 1).all())
+    hid = m0 & (ps > 0.5)
+    RES["trunc_weights"] = dict(M_lt50_mean_w=float(w[m0].mean()), M_lt50_hidden_expl=int(hid.sum()),
+                                M_lt50_hidden_expl_mean_w=float(w[hid].mean()), prod_M_ge50_mean_w=float(w[m1].mean()))
+    P(f"  info: mean (1 - p_soft): M<50 {w[m0].mean():.3f} (of which p_soft > 0.5: {int(hid.sum())} feeds, mean weight "
+      f"{w[hid].mean():.3f}); production M>=50 {w[m1].mean():.3f}; random-like 0")
+    feeds = pick_train_feeds(n_each=40, seed=5)
+    ms = MiniSplit("train", feeds, xt_names=None)
+    rk_full = np.load(C5.RKEND_PATH, mmap_mode="r")
+    crow = np.concatenate([np.arange(meta["off"][f], meta["off"][f] + M[f]) for f in ms.src_feeds])
+    to = object.__new__(C5.TruncOffset)
+    to.rk3 = torch.from_numpy(np.minimum(np.asarray(rk_full[crow]), 3).astype(np.uint8))
+    to.coef = torch.from_numpy(coef[ms.src_feeds])
+    bad, nb, nz = 0, 0, 0
+    holdset = set(hold.tolist())
+    for fb in ms.batches(np.arange(ms.n), 8192, 64, shuffle=True, rng=np.random.default_rng(0)):
+        b = ms.gather(fb, with_pos=True)
+        o_ = to.offset(b).numpy()
+        ci, cm = b["ci"].numpy(), b["cmask"].numpy()
+        for i, f in enumerate(fb):
+            src = ms.src_feeds[f]
+            for jj in range(o_.shape[1]):
+                if not cm[i, jj]:
+                    exp = 0.0
+                else:
+                    r = int(rk_full[crow[ci[i, jj]]])
+                    gg = 0 if M[src] < 50 else (2 if p[src] > 0.5 else 1)
+                    exp = 0.0 if (r > 2 or gg == 2 or src in holdset) else float(np.float32((1.0 * L[gg, r]) * w[src]))
+                bad += int(o_[i, jj] != exp)
+                nz += int(exp != 0)
+        nb += 1
+    check(f"TruncOffset.offset == brute-force per-candidate loop on {nb} MiniSplit batches (0 on padding / random-like)",
+          bad == 0 and nz > 0, f"mismatches {bad}, non-zero offsets {nz}")
+
+
+def c3_auxf(meta):
+    P("\n== C3 AUXF constant from the real batch construction")
+    tr = FakeTr(meta["M"])
+    p = meta["p"].astype(np.float64)
+    cs, mults = [], []
+    for seed in (0, 23, 101):
+        bs = tr.batches(meta["feeds"], 32768, 512, shuffle=True, rng=np.random.default_rng(seed))
+        mult, c = C5.auxf_multiplier(bs, p, C5.AUXF_C, 512)
+        cs.append(c)
+        mults.append(mult)
+    check("exact c (batches per epoch / sum_b sum_f (1-p_f) / 512) == 1.695 +- 0.002 for 3 shuffles; realised "
+          "multiplier with c = 1.695 within 1 +- 0.002", all(abs(c - 1.695) < 0.002 for c in cs)
+          and all(abs(m - 1) < 0.002 for m in mults), f"c {np.round(cs, 4).tolist()}, multiplier {np.round(mults, 4).tolist()}")
+    pool = meta["feeds"][p[meta["feeds"]] > 0.5]
+    pb = tr.batches(pool, 32768, 512, shuffle=True, rng=np.random.default_rng(1))
+    pm, _ = C5.auxf_multiplier(pb, p, C5.AUXF_C, 512)
+    bs = tr.batches(meta["feeds"], 32768, 512, shuffle=True, rng=np.random.default_rng(0))
+    rows = collections.defaultdict(list)
+    for fb in bs:
+        Mp = int(-(-meta["M"][fb].max() // 16) * 16)
+        rows[Mp].append((len(fb), (1 - p[fb]).sum()))
+    prof = {mp: (round(0.5 / (np.mean([b for b, _ in v]) / 512), 2),
+                 round(0.5 * C5.AUXF_C * np.mean([s for _, s in v]) / 512 / (np.mean([b for b, _ in v]) / 512), 2))
+            for mp, v in sorted(rows.items())[::3]}
+    P(f"  info: m02 pool batches under AUXF get an aux multiplier of {pm:.3f} (live recipe 1.0); aux:main per batch by "
+      f"Mpad (live, AUXF) {prof}")
+    RES["auxf"] = dict(c=cs, mult=mults, pool_mult=pm)
+
+
+# ================================================================================================= GPU part
+def clone(m):
+    for mod in m.modules():
+        for k in ("aux_out", "intent_logp"):
+            mod.__dict__.pop(k, None)
+    return copy.deepcopy(m)
+
+
+def aux_stmt(path):
+    tree = ast.parse(open(path).read())
+    st = [n for n in ast.walk(tree) if isinstance(n, ast.Assign) and ast.unparse(n).startswith("loss = loss + aux_w(step)")
+          and "tgt * lp" in ast.unparse(n)]
+    assert len(st) == 1
+    return compile(ast.Module(body=[st[0]], type_ignores=[]), "aux_stmt", "exec"), ast.unparse(st[0])
+
+
+def g1_auxf():
+    import model as M5
+    P("\n== G1 AUXF: train.py's aux statement exec'd on real train-mode batches (F7 @77.5k)")
+    ck = torch.load(INIT, map_location="cpu", weights_only=False)
+    base = M5.Ranker(**ck["cfg"])
+    base.load_state_dict(ck["state_dict"])
+    base.to(DEV)
+    feeds = pick_train_feeds(n_each=48, seed=3)
+    ms = MiniSplit("train", feeds, xt_names=ck["cfg"]["xt_names"]).to(DEV)
+    new_c, new_s = aux_stmt(TRAIN_PY)
+    ref_c, ref_s = aux_stmt(REF_TRAIN)
+    P(f"  statement: {new_s}")
+    prn = ms.prand.cpu().numpy()
+    for nm, ix in (("regular", np.where((prn < 0.1) & (ms.M_np >= 50))[0][:64]),
+                   ("pool", np.where((prn > 0.5) & (ms.M_np >= 50))[0][:64]), ("M<50", np.where(ms.M_np < 50)[0][:64])):
+        mdl = clone(base)
+        mdl.train()
+        torch.manual_seed(5)
+        b = ms.gather(ix, with_pos=True)
+        mdl(b, mdl.dense(b), use_pos=True)
+        m = b["cmask"]
+        tgt = torch.softmax((-b["pos"].float() / 10.0).masked_fill(~m, -1e4), 1) * m
+        lp = torch.log_softmax(mdl.aux_out.masked_fill(~m, -1e4), 1)
+        fw_aux = 1 - ms.prand[b["fidx"]]
+        out = {}
+        for norm in ("batch", "feed"):
+            a = argparse.Namespace(aux_norm=norm, aux_norm_c=1.695, max_feeds=512)
+            ns = dict(a=a, aux_w=lambda s: 0.5, step=0, loss=torch.zeros((), device=DEV), tgt=tgt, lp=lp, fw_aux=fw_aux,
+                      torch=torch)
+            exec(new_c, ns)
+            out[norm] = ns["loss"]
+        ns = dict(aux_w=lambda s: 0.5, step=0, loss=torch.zeros((), device=DEV), tgt=tgt, lp=lp, fw_aux=fw_aux, torch=torch)
+        exec(ref_c, ns)
+        ce = -(tgt * lp).sum(1)
+        wm = 0.5 * (ce * fw_aux).sum() / fw_aux.sum().clamp_min(1e-6)
+        ff = 0.5 * 1.695 * (ce * fw_aux).sum() / 512
+        ratio = float(out["feed"] / out["batch"])
+        check(f"{nm} batch (B {len(ix)}): batch norm == r6 statement (bitwise) == weighted mean; feed norm == 1.695 * "
+              f"sum / 512", torch.equal(out["batch"], ns["loss"]) and torch.allclose(out["batch"], wm, rtol=1e-6)
+              and torch.allclose(out["feed"], ff, rtol=1e-6),
+              f"aux batch {out['batch'].item():.5f} feed {out['feed'].item():.5f} (ratio {ratio:.3f} = 1.695 * "
+              f"sum(1-p) / 512 = {1.695 * fw_aux.sum().item() / 512:.3f})")
+
+
+E2E = ("--init {init} --epochs 0.004 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 "
+       "--aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.2 --loss_norm feed --holdout 30000 "
+       "--select_on holdout --eval_every 20 --seed 811")
+
+
+def outputs(v):
+    fs = [f"{W5}/logs/{v}.log", f"{W5}/logs/{v}.json", f"{W5}/logs/{v}_cliplog.npz", f"{W5}/logs/{v}_holdout.stdout"]
+    for x in (v, f"{v}@last"):
+        fs += [f"{W5}/ckpt/{x}.pt", f"{W5}/preds/nn_{x}_trainonly_val.npy", f"{W5}/preds/nn_{x}_trainonly_test.npy",
+               f"{W5}/preds/holdout/nn_{x}_holdout.npy"]
+    return fs
+
+
+def clean(v):
+    for f in outputs(v):
+        if os.path.exists(f):
+            os.remove(f)
+
+
+def e2e_run(train_file, v, extra, no_test=True):
+    rec = f"{SCR}/rec_{v}.npz"
+    args = E2E.format(init=INIT).split() + (["--no_test"] if no_test else []) + extra
+    cmd = [PY, f"{HERE}/e2e_w5.py", train_file, rec, "--variant", v] + args
+    t0 = time.time()
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=W5, env={**os.environ, "OMP_NUM_THREADS": str(NT)})
+    open(f"{SCR}/{v}.stdout", "w").write(r.stdout + "\n" + r.stderr)
+    P(f"  ran {v} ({time.time() - t0:.0f}s, rc {r.returncode})")
+    assert r.returncode == 0, r.stderr[-3000:]
+    return dict(np.load(rec, allow_pickle=True)), open(f"{W5}/logs/{v}.log").read()
+
+
+def metric_lines(log):
+    return [re.sub(r" [\d.]+ min", "", ln) for ln in log.splitlines() if ln.startswith("step ") or ln.startswith("BEST")]
+
+
+def batches_of(rec, key):
+    sh, out, k = rec["shapes"], [], 0
+    for b_, m_ in sh:
+        out.append(rec[key][k:k + b_ * m_].reshape(b_, m_))
+        k += b_ * m_
+    return out
+
+
+def ck_equal(a, b):
+    ca = torch.load(a, map_location="cpu", weights_only=False)["state_dict"]
+    cb = torch.load(b, map_location="cpu", weights_only=False)["state_dict"]
+    return ca.keys() == cb.keys() and all(torch.equal(ca[k], cb[k]) for k in ca)
+
+
+def g2_e2e(meta):
+    P("\n== G2 end-to-end train.py runs (deterministic wrapper; 39 CD steps, cooldown_mix 0.2, evals at 20 and 39)")
+    names = ["r6_t5e2e_ref_off", "w5_t5e2e_new_off", "w5_t5e2e_new_hyg", "w5_t5e2e_new_on"]
+    for v in names:
+        clean(v)
+    ref_copy = f"{SCR}/train_r6_frozen.py"
+    open(ref_copy, "w").write(open(REF_TRAIN).read())
+    ra, la = e2e_run(ref_copy, names[0], [])
+    rb, lb = e2e_run(TRAIN_PY, names[1], [])
+    nb = len(ra["off"]) - 1
+    same_b = np.array_equal(ra["fidx"], rb["fidx"]) and np.array_equal(ra["off"], rb["off"])
+    check("flags OFF vs frozen r6: identical training-batch sequence (incl. pool steps)", same_b and nb == 39, f"{nb} batches")
+    check("flags OFF vs frozen r6: identical train-mode model logits and loss-input logits (no offset)",
+          np.array_equal(ra["lg_model"], rb["lg_model"]) and np.array_equal(ra["lg_loss"], rb["lg_loss"])
+          and np.array_equal(rb["lg_loss"], rb["lg_model"]))
+    ma, mb = metric_lines(la), metric_lines(lb)
+    check("flags OFF vs frozen r6: identical logged loss / val / holdout / BEST lines", ma == mb and len(ma) >= 3,
+          mb[-1] if mb else "")
+    check("flags OFF vs frozen r6: bit-identical checkpoint and val preds",
+          ck_equal(f"{W5}/ckpt/{names[0]}.pt", f"{W5}/ckpt/{names[1]}.pt")
+          and np.array_equal(np.load(f"{W5}/preds/nn_{names[0]}_trainonly_val.npy"),
+                             np.load(f"{W5}/preds/nn_{names[1]}_trainonly_val.npy")))
+    # hygiene + diagnostics only
+    rh, lh = e2e_run(TRAIN_PY, names[2], ["--cliplog", "10", "--save_last", "--save_holdout"])
+    check("hygiene/CLIPLOG run vs flags OFF: identical batches, model logits, logged lines, checkpoint, val preds",
+          np.array_equal(rh["fidx"], rb["fidx"]) and np.array_equal(rh["lg_model"], rb["lg_model"])
+          and metric_lines(lh) == mb and ck_equal(f"{W5}/ckpt/{names[2]}.pt", f"{W5}/ckpt/{names[1]}.pt")
+          and np.array_equal(np.load(f"{W5}/preds/nn_{names[2]}_trainonly_val.npy"),
+                             np.load(f"{W5}/preds/nn_{names[1]}_trainonly_val.npy")))
+    lastck = torch.load(f"{W5}/ckpt/{names[2]}@last.pt", map_location="cpu", weights_only=False)
+    check("hygiene run: @last checkpoint (step 39) + its val and holdout preds written",
+          lastck["step"] == 39 and all(os.path.exists(f) for f in (
+              f"{W5}/preds/nn_{names[2]}@last_trainonly_val.npy", f"{W5}/preds/holdout/nn_{names[2]}@last_holdout.npy")))
+    hp = f"{W5}/preds/holdout/nn_{names[2]}_holdout.npy"
+    mine = np.load(hp)
+    os.rename(hp, f"{SCR}/save_holdout_copy.npy")
+    # holdout_eval.py under the same deterministic kernel settings as the e2e wrapper (SDP math kernel, deterministic
+    # algorithms); otherwise the attention kernel choice alone makes the two predictions differ in the last bits
+    det = ("import os, runpy, sys, torch; torch.use_deterministic_algorithms(True, warn_only=True); "
+           "torch.backends.cuda.enable_flash_sdp(False); torch.backends.cuda.enable_mem_efficient_sdp(False); "
+           "torch.backends.cuda.enable_cudnn_sdp(False); sys.path.insert(0, os.getcwd()); "
+           f"sys.argv = ['holdout_eval.py', '{names[2]}']; runpy.run_path('holdout_eval.py', run_name='__main__')")
+    r = subprocess.run([PY, "-c", det], capture_output=True, text=True, cwd=W5,
+                       env={**os.environ, "OMP_NUM_THREADS": str(NT), "CUBLAS_WORKSPACE_CONFIG": ":4096:8"})
+    he = np.load(hp) if os.path.exists(hp) else None
+    mx = float(np.abs(mine - he).max()) if he is not None else float("nan")
+    check("--save_holdout preds == holdout_eval.py preds of the same checkpoint (bitwise, same kernel settings)",
+          r.returncode == 0 and he is not None and np.array_equal(mine, he), f"max|d| {mx:.2e}; "
+          + r.stdout.strip().splitlines()[-1][-60:] if r.stdout.strip() else r.stderr[-300:])
+    cl = np.load(f"{W5}/logs/{names[2]}_cliplog.npz")
+    check("CLIPLOG arrays: 39 finite pre-clip norms, main/aux split at steps 0/10/20/30, summary json",
+          len(cl["gn"]) == 39 and np.isfinite(cl["gn"]).all() and (cl["gn"] > 0).all()
+          and cl["split"][:, 0].tolist() == [0, 10, 20, 30] and "verdict" in json.loads(str(cl["summary"])),
+          f"gn median {np.median(cl['gn']):.3f} max {cl['gn'].max():.3f}; split {cl['split'][:, 3:].round(3).tolist()}")
+    # arms ON
+    rc_, lc = e2e_run(TRAIN_PY, names[3], ["--trunc_off", "1", "--aux_norm", "feed", "--cliplog", "10", "--save_last",
+                                           "--save_holdout", "--select_min_step", "39"], no_test=False)
+    check("arms ON: same training-batch sequence as flags OFF (arms share the data order)",
+          np.array_equal(rc_["fidx"], rb["fidx"]) and int(rc_["n_loss"]) == int(rc_["n_model"]) == 39)
+    rk = np.load(C5.RKEND_PATH, mmap_mode="r")
+    j = json.load(open(C5.LIFT_PATH))
+    Lj = {0: [j["prod_M<50"][f"rkend{r}"] for r in range(3)], 1: [j["prod_M>=50"][f"rkend{r}"] for r in range(3)]}
+    holdset = set(meta["hold"].tolist())
+    M, p, ps = meta["M"], meta["p"], meta["p_soft"]
+    lgm, lgl, cis = batches_of(rc_, "lg_model"), batches_of(rc_, "lg_loss"), batches_of(rc_, "ci")
+    bad, nz_prod, nz_rand, n_rand_feeds = 0, 0, 0, 0
+    for i in range(39):
+        fb = rc_["fidx"][rc_["off"][i]:rc_["off"][i + 1]]
+        ci = cis[i]
+        exp = np.zeros(ci.shape, np.float32)
+        for a_, f in enumerate(fb):
+            g = 0 if M[f] < 50 else (2 if p[f] > 0.5 else 1)
+            if g == 2 or f in holdset:
+                n_rand_feeds += 1
+                continue
+            for b_ in np.flatnonzero(ci[a_] >= 0):
+                r = int(rk[ci[a_, b_]])
+                if r <= 2:
+                    exp[a_, b_] = np.float32((1.0 * Lj[g][r]) * (1.0 - float(ps[f])))
+        got = lgl[i]
+        bad += int(not np.array_equal(got, lgm[i] + exp))
+        d = got - lgm[i]
+        rnd = np.array([(M[f] >= 50 and p[f] > 0.5) for f in fb])
+        nz_prod += int(np.count_nonzero(d[~rnd]))
+        nz_rand += int(np.count_nonzero(d[rnd])) if rnd.any() else 0
+    check("arms ON: for EVERY training batch, logits into the main listwise loss == model logits + brute-force offset "
+          "a * L[group, rkend] * (1 - p_soft) (exact, fp32)", bad == 0, f"{bad} mismatching batches")
+    check("arms ON: offsets non-zero on production feeds, zero on every random-like (pool) feed",
+          nz_prod > 0 and nz_rand == 0, f"non-zero production cells {nz_prod}, random-like {nz_rand} "
+                                        f"({n_rand_feeds} random-like feed rows)")
+    jj = json.load(open(f"{W5}/logs/{names[3]}.json"))
+    check("arms ON: selection only at step >= 39 (best_step 39); @last checkpoint == selected checkpoint (bitwise)",
+          jj["best_step"] == 39 and ck_equal(f"{W5}/ckpt/{names[3]}.pt", f"{W5}/ckpt/{names[3]}@last.pt"), jj["best_step"])
+    same_p = all(np.array_equal(np.load(f"{W5}/{d_}nn_{names[3]}{s_}"), np.load(f"{W5}/{d_}nn_{names[3]}@last{s_}"))
+                 for d_, s_ in (("preds/", "_trainonly_val.npy"), ("preds/", "_trainonly_test.npy"),
+                                ("preds/holdout/", "_holdout.npy")))
+    check("arms ON: @last val / test / holdout preds == the selected checkpoint's (same weights)", same_p)
+    check("arms ON: setup log lines (TRUNC-PROD, AUXF multiplier, CLIPLOG, selection, LAST checkpoint)",
+          all(s in lc for s in ("wave-5 TRUNC-PROD: a 1.0", "wave-5 AUXF:", "wave-5 CLIPLOG final",
+                                "wave-5 selection: checkpoint chosen only among evals at step >= 39",
+                                "wave-5 LAST checkpoint (step 39)", "wave-5 saved last-checkpoint test preds")),
+          [ln for ln in lc.splitlines() if "wave-5" in ln][:3])
+    check("arms ON changes training (checkpoint differs from flags OFF)",
+          not ck_equal(f"{W5}/ckpt/{names[3]}.pt", f"{W5}/ckpt/{names[1]}.pt"))
+    RES["e2e"] = dict(off_lines=mb, on_lines=metric_lines(lc), w5_lines=[ln for ln in lc.splitlines() if "wave-5" in ln])
+    for v in names:
+        clean(v)
+
+
+def main():
+    t_all = time.time()
+    P(f"== nn_x/w5 wave-5 tests, part {PART} ({time.ctime()}, device {DEV}, CPU threads {NT})")
+    meta = train_meta()
+    if PART == "cpu":
+        c0_code(load_parse(TRAIN_PY))
+        c3_auxf(meta)
+        c2_trunc(meta)
+        c1_artifacts(meta)
+    else:
+        g1_auxf()
+        g2_e2e(meta)
+    RES["failed"] = FAIL
+    P(f"\n== {len(RES['checks']) - len(FAIL)}/{len(RES['checks'])} checks passed; failed: {FAIL}; "
+      f"{time.time() - t_all:.0f}s")
+    json.dump(RES, open(f"{W5}/logs/test_w5_{PART}.json", "w"), indent=1, default=str)
+    return 0 if not FAIL else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

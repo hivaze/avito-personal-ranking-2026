@@ -1,0 +1,255 @@
+{
+ "checks": [
+  {
+   "name": "data.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms4.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms5.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms6.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms7.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms8.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "blend.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "holdout_eval.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "stale_pred.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "finetune.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "nn_x/w5/train.py unchanged since the copy (md5 tests/w5_source_md5.txt)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "nn_x/w5/model.py unchanged since the copy (md5 tests/w5_source_md5.txt)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "nn_x/w5/data.py unchanged since the copy (md5 tests/w5_source_md5.txt)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "nn_x/w5/common.py unchanged since the copy (md5 tests/w5_source_md5.txt)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "common.py: W5 output path -> nn_x/w9/joint",
+   "ok": true,
+   "info": "W5 = ROOT / 'nn_x' / 'w9' / 'joint'"
+  },
+  {
+   "name": "common.py AST-equal to nn_x/w5/common.py apart from the W5 path",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "model.py AST proof: removed set == expected",
+   "ok": true,
+   "info": "{'class JointAttn': 1, 'class JointBlock': 1, 'Ranker.__init__ kwargs joint_layers, joint_hq': 1, 'if joint_layers': 2, 'self.joint, self.joint_hq = ...': 1, 'def Ranker._joint': 1, 'if self.joint is not None': 1}"
+  },
+  {
+   "name": "model.py minus the JOINT statements == nn_x/w5/model.py (ast.unparse)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "train.py AST proof: removed set == expected",
+   "ok": true,
+   "info": "{'add_argument --joint_layers': 1, 'add_argument --joint_hq': 1, 'variant assert w5_|w9_ -> w5_': 1, 'assert not (a.init and a.joint_layers)': 1, 'Ranker(... joint_layers=, joint_hq=)': 2}"
+  },
+  {
+   "name": "train.py minus the JOINT statements == nn_x/w5/train.py (ast.unparse)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "lane.sh DRY: 5 w9 commands, 4 w5 reference commands",
+   "ok": true,
+   "info": "['w5_e10_joint_s951', 'w5_e10_joint_s952', 'w9_joint_s23', 'w9_joint_s24', 'w9_jointhq0_s23']"
+  },
+  {
+   "name": "A:joint:23 == w5 A:base:23 + exactly {joint_layers 4, blocks 0, hist_layers 0}",
+   "ok": true,
+   "info": "{'hist_layers': (1, 0), 'joint_layers': (0, 4), 'blocks': (2, 0)}"
+  },
+  {
+   "name": "A:joint:24 == w5 A:base:24 + exactly {joint_layers 4, blocks 0, hist_layers 0}",
+   "ok": true,
+   "info": "{'hist_layers': (1, 0), 'joint_layers': (0, 4), 'blocks': (2, 0)}"
+  },
+  {
+   "name": "A:jointhq0 == A:joint + joint_hq 0",
+   "ok": true,
+   "info": "{'joint_hq': (1, 0)}"
+  },
+  {
+   "name": "E:joint:951 == w5 E:base:951 + exactly {joint_layers 4, blocks 0, hist_layers 0}",
+   "ok": true,
+   "info": "{'hist_layers': (1, 0), 'joint_layers': (0, 4), 'blocks': (2, 0)}"
+  },
+  {
+   "name": "E:joint:952 == w5 E:base:952 + exactly {joint_layers 4, blocks 0, hist_layers 0}",
+   "ok": true,
+   "info": "{'hist_layers': (1, 0), 'joint_layers': (0, 4), 'blocks': (2, 0)}"
+  },
+  {
+   "name": "abl_base_s23 stored args == A_BASE + HYG (the screen's paired base; abl-only / w9-only flags at their off values)",
+   "ok": true,
+   "info": "{'joint_hq': (None, 1), 'xt_rel_extra': ('', None), 'rdrop_cd': (None, 0.0), 'sam_cd': (None, 0.0), 'xt_exclude': ('', None)}"
+  },
+  {
+   "name": "abl_base_s24 stored args == A_BASE + HYG (the screen's paired base; abl-only / w9-only flags at their off values)",
+   "ok": true,
+   "info": "{'joint_hq': (None, 1), 'xt_rel_extra': ('', None), 'rdrop_cd': (None, 0.0), 'sam_cd': (None, 0.0), 'xt_exclude': ('', None)}"
+  },
+  {
+   "name": "lane.sh refuses GPUs N <ids>",
+   "ok": true,
+   "info": "[True, True, True, True, True, True]"
+  },
+  {
+   "name": "bash -n lane.sh",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "state_dict keys and values bit-identical",
+   "ok": true,
+   "info": "153 tensors"
+  },
+  {
+   "name": "cfg identical (no joint keys at flags off)",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "w9 Ranker(**w5 cfg) builds (finetune / holdout_eval / stale_pred path) and matches the state_dict keys",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "dense features bit-identical on 4 real train batches",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "eval-mode logits bit-identical",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "train-mode logits + aux_out bit-identical (same RNG state, dropout on)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cfg stores joint_layers / joint_hq only when ON",
+   "ok": true,
+   "info": "params base 1.009M, joint2 0.561M, joint4 0.859M"
+  },
+  {
+   "name": "Muon matrix set covers the joint q/k/v/o/gate/FFN weights (train.py rule)",
+   "ok": true,
+   "info": "28 joint matrices in Muon"
+  },
+  {
+   "name": "joint_hq 1: allowed[b, q, k] == key validity for EVERY query row",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "logits shape [B, M], finite",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "joint_hq 0: user / history queries blocked from candidate keys, everything else == key validity",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "backward: finite gradients on every joint / seg parameter",
+   "ok": true,
+   "info": "41 tensors"
+  },
+  {
+   "name": "seg_bias (zero-init) and seg embedding receive non-zero gradients",
+   "ok": true,
+   "info": "|grad seg_bias| [0.0015551656251773238, 0.0010180099634453654]"
+  },
+  {
+   "name": "padded history slots + padded candidate slots never influence the valid logits (joint model, bitwise)",
+   "ok": true,
+   "info": "0.0e+00 0.0e+00 0.0e+00 0.0e+00"
+  },
+  {
+   "name": "(sanity) the same holds for the flag-off model",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "one feed never influences another (perturbing feed j: others bitwise equal, feed j changes)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "joint_hq 0: [user; history] rows after the joint stack are bit-identical when a candidate is dropped",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "joint_hq 1: they change (feed-conditioned history)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cfg round trip: Ranker(**cfg) + load_state_dict(strict) reproduces the logits",
+   "ok": true,
+   "info": ""
+  }
+ ],
+ "fail": []
+}

@@ -1,0 +1,7 @@
+low-correlation feeds of validation (a): within-feed corr(CPU 3-mean, teacher/3) < 0.999, all five sets
+  feeds below 0.999: 140 of 61107 (0.0023); by set: W0S 39, W0L 42, H0 9, W1S 42, W1L 8
+  within-feed sd of the teacher logit: low-corr feeds median 0.898 (p90 1.215) vs other feeds median 1.065 (p10 0.797)
+  within-feed RMS difference of centred logits (CPU - teacher): low-corr feeds median 0.0521 vs other feeds median 0.0084; all feeds p99 0.0316 max 0.1110
+  mean M: low-corr feeds 59.9 vs others 107.1
+  reading (corrected after seeing the numbers): the 140 feeds have a 6x larger absolute difference between the fp32 CPU path and the bf16 GPU teacher (RMS 0.05 logit against a within-feed
+  spread of 0.9) at an ordinary spread; the lowest correlation of any feed is 0.983, so no feed is misaligned (a misaligned feed reads about 0: wrong-alignment control -0.0007).

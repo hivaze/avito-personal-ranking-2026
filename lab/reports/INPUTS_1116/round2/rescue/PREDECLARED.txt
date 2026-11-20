@@ -1,0 +1,60 @@
+RESCUE (round 2 explorer): pieces dropped in round 1 for parity / staleness reasons.
+Written 2026-11-16 ~05:00 UTC, BEFORE any array of this directory existed and before any label of a new column was read.
+Everything here is CPU only, <= 12 threads, write-new under reports/INPUTS_1116/round2/rescue/.
+
+1. THE VIEW ("D5" = the nx3 lag view + equal depth)
+   slot = MSK day - Sep 6. Dense slots = hz2_common.DENSE_SLOTS = 0..8, 11, 12, 13 (slots 9, 10, 14 hold 76 feeds; never a source).
+   window(cut) = the LAST 5 DENSE SLOTS below cut. One rule for every row of every split:
+     train rows (holdout + pool feeds only; no full-train build): has = slot >= 6, cut' = max(slot - L, 5) exactly as nx3
+        (nn_x/w12/nx3/out/raw/train_cut_feed.npy, re-derived here from hz2_lag.npy); sources = train feeds of window(cut').
+     val / test rows, natural: cut = 14 -> window = slots 7, 8, 11, 12, 13.
+     val rows, stale-val twin: cut = slot - L (nn_x/w12/nx3/out/raw/val_twin_cut_feed.npy, re-derived from hz2_common.assign_lags) -> window(cut), cuts 7..12.
+   Differences to the nx3 lag view: (i) depth is 5 dense source days for EVERY row (nx3: 5-7 on train rows, 12 on val / test rows);
+   (ii) no sparse members (label statistics cannot have them on val / test rows; label-free pieces drop them for one rule).
+   What is equal by construction: the number of source days, the rule that picks them, the lag rule of nx3. What is NOT equal by construction
+   and is therefore gated: traffic per source day, the two empty days inside the val / test window, the feed mix, weekday.
+   Label statistics: sources are train feeds of the window that are not holdout feeds; the window ends before the cut, the cut is <= the row's slot - 1,
+   so no label of the row's own feed, no later snapshot of anyone, no val / test label can enter. Rows with slot < 6 have no view (has = 0).
+
+2. PIECES, COLUMNS, FORMS (fixed now; z = within-feed z over present rows, NaN -> 0, clip 5; rk = within-feed mid-rank percentile - 0.5, NaN -> 0)
+   P1 click strength bt   : bt5 = Bradley-Terry theta (c06_build.fit_bt, lambda 3; sources p_random > 0.5, >= 1 positive, not holdout, in the window),
+                            unseen item -> 0.  Looks: bt5:z, bt5:rk, bt5_seen:z.                 Sign on record: theta +, seen -.
+   P2 all-feed click rate : coec5 = (clicks + 1) / (expected + 1) over the window (formula of src/features_tte.py tte_it_coec; expected from a position
+                            prior fitted on non-holdout feeds of slots 0-4 only, which is before every cut), unseen -> 1.
+                            Looks: coec5:z, coec5:rk.  (ctr5 = (clicks + 0.0159*20) / (imp + 20) is printed, not eligible.)   Sign +.
+   P3 density             : kn1_5 / kn20_5 = highest / mean-top-20 cosine to the index items of the candidate's 4096-cluster (b3_build_c.py block c),
+                            index = <= 1500 most-shown items per cluster with >= 5 impressions IN THE WINDOW (non-holdout feeds), own item skipped.
+                            Looks: kn1_5:z, kn1_5:rk, kn20_5:z, kn20_5:rk.                         Sign -.
+   P4 surface split       : X3_5 = log((n_s1 + 1) / (n_s2 + 1)), ns2_5 = n_s2; n_c = distinct OTHER users with a type-1 history event of source c on the item
+                            in a snapshot of a train feed of the window (02_s1s2contrast/run.py, V-lf).  Looks: X3_5:z, X3_5:rk, ns2_5:z, ns2_5:rk.  Sign X3 +, n_s2 -.
+   P5 first-seen gap      : gapf5 = 5 - (index of the first window slot in which the item is a train candidate), 1..5, NaN if never; never5 = flag.
+                            Looks: gapf5:z, gapf5:rk, never5:z.                                    Sign gap -; never5: same sign on both witnesses.
+   P6 same-user earlier feeds: uc5 = (pos + 0.0159*20) / (imp + 20) of (user, category) over the user's labelled non-holdout train feeds of the window
+                            (tte_uc_ctr formula), NaN for user 0 and for users without a feed in the window; reshown5 = item was a candidate of the same user
+                            in the window.  Looks: uc5:z, uc5:rk, reshown5:z.                      Sign uc +, reshown -.
+                            Built only if its label-free coverage gate does not fail by more than a factor of two; otherwise the piece stops there.
+   P7 ALS                 : als5 = cosine(item factor, sum over the row's history of exp(-hpos / 5) * item factor); factors = implicit ALS (f 64, 12 iterations,
+                            alpha 5 on 1 + #distinct event types, reg 0.05, CG 3) on the de-duplicated (sequence, history item) pairs of the window's dense
+                            sequences (latest feed per non-zero user, every user-0 feed), label-free, items with >= 2 sequences.  Looks: als5:z, als5:rk.  Sign +.
+                            First pass on the three largest windows (cut' = 5 holdout feeds; natural; twin cuts 9-11); the rest only if that passes.
+   Total: 21 column-forms x 2 witnesses = 42 reads that can decide. Anything else printed is information.
+
+3. GATES (form of nn_x/w12/nx3/nx3_gates.py; bars unchanged)
+   G-parity, label-free, read first:
+     C3 non-default share by the 7 listing-age buckets: test-like train rows (POOL feeds = p_random > 0.5, M >= 50, not holdout, slots 11-13) against
+        PRIVATE and against PUBLIC rows (test feeds with M >= 50); val-like (slots 6-8) against val rows (M >= 50): dZ <= 0.05, largest bucket <= 0.10.
+        The same on the holdout feeds is printed. Non-default = seen (P1), impression in the window (P2, P5), n_s1 + n_s2 > 0 (P4), value present (P6, P7);
+        P3 has no default value: its C3 is the share of rows with kn1_5 above the natural-val median (stated as a substitute).
+     C4 PSI <= 0.25 of every entered form, pool has = 1 rows against val / public / private (10 val deciles of the non-zero values + an exact-zero bin).
+     C5 non-default share on every test day >= 0.5 x val's largest (overall / slot 16 / slot 18).
+   G-info: score test of condlib.Null, null model = pool + the control block of the ranker's own inputs + nx_rp3_z + nx_rp3_rk
+        (holdout: the lag-view values of nn_x/w12/nx3/out/files/train, NaN -> 0; val: data/feats/val = natural, as the task orders; the same read with
+        the nx3 stale-val twin in the null model is printed), so a pass means information beyond nx3.
+     Witness H = holdout rows of the 15,225 lag-view feeds (pool = 16 held-out wide students). Witness T = val rows with the stale-val twin of the column (TO16).
+     A column-form PASSES if it has the sign on record and |cz| >= 2.5 on H AND on T, and its |cz| on each witness exceeds every placebo of that witness.
+     Placebo: 20 within-feed permutations of each piece's first z column per witness (>= 140 draws per witness); sd and maximum are printed, and the
+     threshold is restated as 2.5 x max(1, placebo sd).
+     Family-wise false pass under independence of the two witnesses: 21 x P(|z| >= 2.5)^2 / 2 = 21 x 0.0124^2 / 2 = 0.0016.
+   VERDICT per piece: SURVIVES = G-parity ok and a column-form passes G-info. INFORMATION WITHOUT PARITY = G-info passes, G-parity fails.
+     NOT SHOWN = G-info fails (with the witness that failed). STOPPED = no rebuild can exist (reason given).
+   Nothing is re-binned, re-transformed or re-lagged after a read. Every look is counted in the report.

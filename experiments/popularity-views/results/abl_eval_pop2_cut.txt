@@ -1,0 +1,79 @@
+lab/nn_x/abl/logs/abl_eval_pop2.txt in full (78 lines); lines longer than 600 characters are cut.
+== ABLATION SCREEN (2-epoch from-scratch, base = A_BASE + HYG, seeds (23, 24), primary = last checkpoint; rules in the abl_eval.py docstring, frozen 2026-11-13 00:08 UTC)
+== runs: selected step / total | selected val, holdout (in-training eval) | last val, holdout | minutes
+  abl:abl_base_s23               best  19000/19670 | sel val 0.39348 hold 0.31756 | last val 0.39364 hold 0.31754 | 37 min
+  abl:abl_base_s24               best  19670/19670 | sel val 0.39348 hold 0.31754 | last val 0.39348 hold 0.31754 | 37 min
+  abl:abl_xdrop_pop_s23          best  18000/19670 | sel val 0.39013 hold 0.30991 | last val 0.39141 hold 0.30976 | 44 min
+  abl:abl_xdrop_pop_s24          best  19670/19670 | sel val 0.39103 hold 0.31043 | last val 0.39103 hold 0.31043 | 45 min
+  abl:abl_pop2_s23               best  19670/19670 | sel val 0.39308 hold 0.31169 | last val 0.39308 hold 0.31169 | 12 min
+  abl:abl_pop2_s24               best  19670/19670 | sel val 0.39254 hold 0.31120 | last val 0.39254 hold 0.31120 | 12 min
+
+== pop2 (SCALE-UP: click-rate input xp_ctr_c = clip(log(tte_it_ctr / 0.0159), -2, 2) on the pop-free inputs (--xt_exclude <8 pop> --xt_add xp_ctr_c)) vs xdrop_pop (B = arm, delta = arm - xdrop_pop) [PRIMARY pre-declared comparison]
+    VAL  abl_pop2_s23@last 0.39308 vs abl_xdrop_pop_s23@last 0.39141: +0.00167
+    VAL  abl_pop2_s24@last 0.39254 vs abl_xdrop_pop_s24@last 0.39103: +0.00151
+    HOLD abl_pop2_s23@last 0.31168 vs abl_xdrop_pop_s23@last 0.30977: +0.00191
+    HOLD abl_pop2_s24@last 0.31119 vs abl_xdrop_pop_s24@last 0.31044: +0.00075
+  [last] VAL  pooled: all +0.00159+-0.00058 (z +2.74)  M<50 +0.00092+-0.00107 (z +0.85)  M>=50 +0.00205+-0.00064 (z +3.19)  Tue +0.00201+-0.00080 (z +2.51)  Thu +0.00113+-0.00084 (z +1.34)  coldpos -0.00125+-0.00111 (z -1.12)  warmpos +0.00286+-0.00079 (z +3.64)
+  [last] HOLD pooled: all +0.00133+-0.00035 (z +3.83)  late20% +0.00110+-0.00076 (z +1.45)
+  [last] val SE_cal 0.00063 (z_cal +2.52)
+  [last] hold SE_cal 0.00036 (z_cal +3.66)
+    VAL  abl_pop2_s23 0.39308 vs abl_xdrop_pop_s23 0.39013: +0.00296
+    VAL  abl_pop2_s24 0.39254 vs abl_xdrop_pop_s24 0.39103: +0.00151
+    HOLD abl_pop2_s23 0.31168 vs abl_xdrop_pop_s23 0.30991: +0.00178
+    HOLD abl_pop2_s24 0.31119 vs abl_xdrop_pop_s24 0.31044: +0.00075
+  [selected (info)] VAL  pooled: all +0.00223+-0.00060 (z +3.74)  M<50 +0.00148+-0.00110 (z +1.35)  M>=50 +0.00275+-0.00067 (z +4.12)  Tue +0.00310+-0.00083 (z +3.75)  Thu +0.00128+-0.00086 (z +1.48)  coldpos +0.00041+-0.00112 (z +0.37)  warmpos +0.00317+-0.00081 (z +3.90)
+  [selected (info)] HOLD pooled: all +0.00126+-0.00036 (z +3.53)  late20% +0.00103+-0.00077 (z +1.35)
+  MINUTES base [44.2, 45.0] arm [12.2, 12.1] -> ratio 0.27
+  PMIX private-mix pooled delta +0.00242 +- 0.00092 (z +2.65); < -1 SE: no
+  STALE-VAL pooled delta (private-like inputs): +0.00147 +- 0.00058 (z +2.55); < -1 SE: no
+  PRIVATE TRADE (stale-val delta - val delta): -0.00012 (arm loses MORE than the base under the private-like coverage shift)
+  stale-val (selected checkpoints, info):
+  STALE-VAL pooled delta (private-like inputs): +0.00216 +- 0.00059 (z +3.64); < -1 SE: no
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent +0.00137+-0.00046 (pos 0.460)  warm|mid +0.00015+-0.00017 (pos 0.110)  warm|novel +0.00044+-0.00020 (pos 0.127)  cold|recent -0.00033+-0.00027 (pos 0.219)  cold|mid -0.00012+-0.00009 (pos 0.038)  cold|novel +0.00010+-0.00010 (pos 0.046)  cat#1|w3+ +0.00061+-0.00025 (pos 0.347)  total +0.00162+-0.00058 (pos 1.000)
+  CLIPLOG abl_xdrop_pop_s23: warmup clipped 0.148 (median 0.397); plateau clipped 0.000 (median 0.294); cooldown clipped 0.000 (median 0.286); pool clipped 0.000 (median 0.234) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.35 208:0.55 256:0.65 304:1.35
+  CLIPLOG abl_xdrop_pop_s24: warmup clipped 0.202 (median 0.423); plateau clipped 0.000 (median 0.295); cooldown clipped 0.000 (median 0.281); pool clipped 0.000 (median 0.227) | aux/main grad norm by Mpad 16:0.02 64:0.11 112:0.20 160:0.37 208:0.53 256:0.76 304:1.15
+  CLIPLOG abl_pop2_s23: warmup clipped 0.110 (median 0.389); plateau clipped 0.000 (median 0.299); cooldown clipped 0.000 (median 0.290); pool clipped 0.000 (median 0.241) | aux/main grad norm by Mpad 16:0.02 64:0.11 112:0.23 160:0.36 208:0.57 256:0.68 304:1.47
+  CLIPLOG abl_pop2_s24: warmup clipped 0.078 (median 0.400); plateau clipped 0.000 (median 0.299); cooldown clipped 0.000 (median 0.283); pool clipped 0.000 (median 0.231) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.22 160:0.39 208:0.49 256:0.80 304:1.28
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> pop2 vs xdrop_pop: val +0.00159 (SE_cal 0.00063, z_cal +2.52; seeds +0.00167 +0.00151), holdout +0.00133 (z_cal +3.66; seeds +0.00191 +0.00075) -> PASS -> 10-epoch family abl_e10_pop2_s951-954 (E_BASE + HYG + the pop2 flags) + std FT + Q3 / Q3b pools vs G3 (ledger section 8) [strict-promote] [COLD/WARM TRADE: stale-val + pmix required]
+
+== pop2 (SCALE-UP: click-rate input xp_ctr_c = clip(log(tte_it_ctr / 0.0159), -2, 2) on the pop-free inputs (--xt_exclude <8 pop> --xt_add xp_ctr_c)) vs base (B = arm, delta = arm - base) [INFORMATION only: the primary comparison is vs xdrop_pop]
+    VAL  abl_pop2_s23@last 0.39308 vs abl_base_s23@last 0.39364: -0.00056
+    VAL  abl_pop2_s24@last 0.39254 vs abl_base_s24@last 0.39348: -0.00094
+    HOLD abl_pop2_s23@last 0.31168 vs abl_base_s23@last 0.31754: -0.00586
+    HOLD abl_pop2_s24@last 0.31119 vs abl_base_s24@last 0.31753: -0.00634
+  [last] VAL  pooled: all -0.00075+-0.00090 (z -0.83)  M<50 -0.00088+-0.00160 (z -0.55)  M>=50 -0.00066+-0.00105 (z -0.63)  Tue +0.00064+-0.00126 (z +0.51)  Thu -0.00228+-0.00130 (z -1.76)  coldpos +0.02148+-0.00155 (z +13.88)  warmpos -0.00996+-0.00124 (z -8.04)
+  [last] HOLD pooled: all -0.00610+-0.00059 (z -10.30)  late20% -0.00279+-0.00127 (z -2.20)
+  [last] val SE_cal 0.00094 (z_cal -0.80)
+  [last] hold SE_cal 0.00060 (z_cal -10.14)
+    VAL  abl_pop2_s23 0.39308 vs abl_base_s23 0.39348: -0.00040
+    VAL  abl_pop2_s24 0.39254 vs abl_base_s24 0.39348: -0.00094
+    HOLD abl_pop2_s23 0.31168 vs abl_base_s23 0.31756: -0.00587
+    HOLD abl_pop2_s24 0.31119 vs abl_base_s24 0.31753: -0.00634
+  [selected (info)] VAL  pooled: all -0.00067+-0.00092 (z -0.73)  M<50 -0.00094+-0.00162 (z -0.58)  M>=50 -0.00049+-0.00107 (z -0.45)  Tue +0.00064+-0.00128 (z +0.50)  Thu -0.00211+-0.00132 (z -1.60)  coldpos +0.02347+-0.00159 (z +14.78)  warmpos -0.01069+-0.00126 (z -8.51)
+  [selected (info)] HOLD pooled: all -0.00611+-0.00060 (z -10.18)  late20% -0.00278+-0.00129 (z -2.16)
+  MINUTES base [37.1, 37.5] arm [12.2, 12.1] -> ratio 0.33
+  PMIX private-mix pooled delta +0.00127 +- 0.00135 (z +0.94); < -1 SE: no
+  STALE-VAL pooled delta (private-like inputs): +0.00058 +- 0.00092 (z +0.63); < -1 SE: no
+  PRIVATE TRADE (stale-val delta - val delta): +0.00133 (arm loses LESS than the base under the private-like coverage shift)
+  stale-val (selected checkpoints, info):
+  STALE-VAL pooled delta (private-like inputs): +0.00064 +- 0.00093 (z +0.69); < -1 SE: no
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00457+-0.00075 (pos 0.460)  warm|mid -0.00059+-0.00026 (pos 0.110)  warm|novel -0.00056+-0.00024 (pos 0.127)  cold|recent +0.00396+-0.00038 (pos 0.219)  cold|mid +0.00052+-0.00013 (pos 0.038)  cold|novel +0.00051+-0.00012 (pos 0.046)  cat#1|w3+ +0.00233+-0.00036 (pos 0.347)  total -0.00073+-0.00090 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_pop2_s23: warmup clipped 0.110 (median 0.389); plateau clipped 0.000 (median 0.299); cooldown clipped 0.000 (median 0.290); pool clipped 0.000 (median 0.241) | aux/main grad norm by Mpad 16:0.02 64:0.11 112:0.23 160:0.36 208:0.57 256:0.68 304:1.47
+  CLIPLOG abl_pop2_s24: warmup clipped 0.078 (median 0.400); plateau clipped 0.000 (median 0.299); cooldown clipped 0.000 (median 0.283); pool clipped 0.000 (median 0.231) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.22 160:0.39 208:0.49 256:0.80 304:1.28
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> pop2: val -0.00075 (SE_cal 0.00094, z_cal -0.80; seeds -0.00056 -0.00094), holdout -0.00610 (z_cal -10.14; seeds -0.00586 -0.00634) -> INFO (not a gate): would-FAIL [COLD/WARM TRADE: stale-val + pmix required]
+
+== SUMMARY (last checkpoints; delta = arm - base, pooled over seeds; ABLATION worth = -delta)
+  (rows <arm>_vs_<ref>: delta = arm - the pre-declared reference arm REFS[arm]; the plain <arm> row vs base is information)
+  arm          type      val d (z_cal)        hold d (z_cal)      M<50     M>=50    Tue      Thu      coldpos  warmpos  late20%  pmix     stale    min  -> verdict
+  pop2_vs_xdrop_pop SCALE-UP  +0.00159 (+2.52)  +0.00133 (+3.66)  +0.00092 +0.00205 +0.00201 +0.00113 -0.00125 +0.00286 +0.00110 +0.00242 +0.00147 0.27 -> PASS -> 10-epoch family abl_e10_pop2_s951-954 (E_BASE + HYG + the pop2 flags) + std FT + Q3 / Q3b pools vs G3 (ledger section 8) [strict-promote] [COLD/WARM TRADE: stale-val + pmix required]
+  pop2         SCALE-UP  -0.00075 (-0.80)  -0.00610 (-10.14)  -0.00088 -0.00066 +0.00064 -0.00228 +0.02148 -0.00996 -0.00279 +0.00127 +0.00058 0.33 -> INFO (not a gate): would-FAIL [COLD/WARM TRADE: stale-val + pmix required]
+
+== COMPONENT WORTH on the current recipe (ablation arms; -delta; val / holdout; +SE_cal)
+
+  PRE-DECLARED pop2_vs_xdrop_pop: PASS -> 10-epoch family abl_e10_pop2_s951-954 (E_BASE + HYG + the pop2 flags) + std FT + Q3 / Q3b pools vs G3 (ledger section 8) [strict-promote] [COLD/WARM TRADE: stale-val + pmix required]

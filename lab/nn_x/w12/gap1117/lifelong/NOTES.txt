@@ -1,0 +1,241 @@
+gap1117 / TASK B / lifelong history from earlier snapshots  --  NOTES (2026-11-17, 03:20-03:50Z)
+Directory: lab/nn_x/w12/gap1117/lifelong/        Arrays: artifacts/data/feats_new/histext_1117/{train,val,test}/
+Marks: [M] measured here, [D] arithmetic from [M], [I] judgement. Labels were read ONLY in p_power.py / p_swapnull.py /
+read_hx.py ref2, i.e. on the two existing REFERENCE re-cool pools of the harness (ref, ref2): an A/A null for the power
+calculation. No pass with the extension was ever scored against a label.
+
+================================================================================================================
+0. DECISION: GO for ONE re-cool test (16 re-cools, the T1117 harness), under its own bucket rule (section 6).
+   NOT a promise of a file gain: the most the lever can add is about +0.0001..+0.0002 NDCG on private at pool level.
+================================================================================================================
+Why GO [I], in one paragraph: everything except the GPU run is now done and checked. The arrays are built with a leak check on
+every event. The patch reproduces the stored predictions bit for bit when the flag is off. Training rows get extensions as
+long as test rows do (dose KS 0.09), so the 2.8-day vs 14.2-day snapshot gap that was the parity worry does not show up in
+what the model sees. A read restricted to the bucket of extended feeds has power 0.71 at the replay's proxy effect, and its
+SE is calibrated by a member-swap null, so the test can answer the question the replay could not ("closed for lack of power").
+The cost is 16 re-cools, about 17 GPU-hours, on GPUs that are idle. By the lead's own practice (kw08 / m05 were run at
+P(pass) 0.03-0.04), a P(pass) of about 0.26 is worth one run.
+Why it is only a small GO [I]: the extension reaches 7.2% of test feeds (private-like 7.0%). Even if all of the replay's proxy
+effect is captured, the pool-level gain is about +0.00012..+0.00019 on private. That is below every file-level MDE (val
+near-copy 0.00086, public 0.0011). A pass therefore decides the mechanism, not a file. Promotion would need re-cooling the 20
+FD16P20 members and their fine-tunes (section 6.4). Expected private gain of the whole route: about +0.00003. Its value is
+mostly in closing the question.
+
+----------------------------------------------------------------------------------------------------------------
+1. WHAT WAS BUILT (step 1) -- s1_align_all.py, s3_build_arrays.py, hx_lib.py
+----------------------------------------------------------------------------------------------------------------
+Rule, identical for every split (train rows are built exactly like val / test rows):
+  snapshot  = the MOST RECENT snapshot of the same user_id (never user 0) with a STRICTLY smaller timestamp, from an admissible
+              split (train rows: train; val rows: train + earlier val, never test; test rows: any), at least k days older
+              (main variant k0: k = 0; alternative k7: k = 7 days);
+  alignment = the reviewed refill aligner (lab/nn_x/w12/seg/refill/align_lib.py: LCS on (item, type, source) + tie-swap
+              repair), imported read-only, with ONE snapshot (union_timeline(..., snaps=[that one]));
+  kept      = criterion A (>= 16 anchors and an exact run >= 8) AND B (the deepest anchored stored event has index >= H - 8);
+  block     = the snapshot's events placed after the feed's oldest stored event (older than it), newest first, at most 128.
+Positive check of the single-snapshot aligner (cap pretended 192, snapshot also cut to 192, truth = stored events 193-256;
+3,000 capped feeds per set; out_s2b_parity_extra_v2_head.txt) [M]: placement error (recovered, not a true 193-256 event, but
+stored among the newest 192) 0.3% holdout / 0.2% train / 0.4% val / 0.4% test (refill, union of snapshots: 0.4-0.5%); a true
+event 193-256 75% / 78% / 67% / 65%; same position 46% / 52% / 37% / 33%. As the refill found, a refilled history is not the
+history a deeper cap would have stored: 22-35% of recovered events are real earlier events that the later snapshot drops at any depth.
+Leak checks on EVERY written event (out_s3_build.txt) [M]: train k0 10,307,309 events / 281,639 feeds, k7 4,094,998 / 75,851;
+val 48,668 / 1,482 and 45,895 / 1,242; test 101,346 / 2,872 and 101,697 / 2,822. All pass the following assertions: the source
+row lies inside the snapshot's own history (hist_fidx == snapshot fidx); same user_id, never 0; snapshot timestamp strictly
+smaller; snapshot split admissible (val: no test snapshot). A recovered event is taken from the history of an earlier request
+and is therefore older than the feed. The aligner only places it; it cannot import a later event. No label file was opened by
+any builder.
+Arrays (artifacts/data/feats_new/histext_1117/<split>/ = k0, <split>/k7/ = k7; meta.json in each; fidx order of data/flat):
+  feed level  ext_off int64, ext_n int16 (0..128), ext_status int8 (0 none / 1 not aligned / 2 not end-anchored / 3 no older event
+              / 4 extended), ext_snap_split int8, ext_snap_fidx int32, ext_gap_days float32, ext_nT_full int16, ext_capped bool
+  event level ext_item_id int32, ext_category_id int8, ext_event_type int8, ext_event_source int8 (the data/flat codes),
+              ext_emb_idx int32, ext_src_split int8 + ext_src_row int64 (provenance)
+  ext_emb_idx: < n_table = row of THIS split's item table (the item occurs in the split); >= n_table = row (idx - n_table) of
+              <split>/ext_table.npy (int8 [n,128], the source split's vector, one row per item id); -1 = no vector.
+  val / test: 61-66% of recovered events are on items absent from the split's own table (ext_table: val 27,036 rows, test 45,759).
+              Where an item is in both tables the vectors are bit-identical in 74-85% of cases (cosine >= 0.984 at the 1st percentile).
+              Train: always the train table.
+  Size: train 414 MB, val 6 MB, test 11 MB. Intermediates: out/align_<split>.npz (per feed x k stats + events), out/s2_summary.npz.
+
+----------------------------------------------------------------------------------------------------------------
+2. COVERAGE AND AGE GAP (step 2) -- out_s2_stats.txt, out_s2b_parity_extra.txt
+----------------------------------------------------------------------------------------------------------------
+k0, all feeds (capped and uncapped) [M]:
+  set               feeds    capped   has snapshot  A of has  B of A  EXTENDED        among capped  among uncapped  extra events/extended (capped/uncapped)  5/25/50/75/95%    all 128  extra/feed
+  train          3151208    0.423    0.181         0.974     0.785   0.0894 (281639) 0.193         0.013           36.6 (38.0 / 21.3)                       2/8/24/57/111     0.030    3.27
+  holdout (train)  30000    0.387    0.179         0.967     0.754   0.0802 (2406)   0.186         0.013           36.2 (38.1 / 19.4)                       1/7/22/57/110     0.028    2.90
+  val              14423    0.290    0.303         0.898     0.705   0.1028 (1482)   0.271         0.034           32.8 (36.4 / 21.3)                       1/9/21/46/117     0.043    3.37
+  test             28595    0.288    0.294         0.842     0.740   0.1004 (2872)   0.250         0.040           35.3 (41.5 / 19.6)                       2/9/22/50/125     0.048    3.54
+  test public-like  8562                                             0.1052          0.263                                                                                               3.76
+  test private-like 20033                                            0.0984          0.244                                                                                               3.45
+Capped feeds only (the recommended restriction, section 3) [M]: train 8.18% of feeds (19.3% of capped; 257,660 feeds, 9.8M
+events), holdout 7.20% (2,159), val 7.85% (1,132; mean 36.4 events), test 7.20% (2,059; mean 41.5), test public-like 7.72%,
+private-like 6.98%.
+Age gap feed -> snapshot used, days, extended feeds, k0, 5/25/50/75/95% [M]:
+  train 0.11 / 1.07 / 3.03 / 5.89 / 10.49   holdout 0.11 / 1.06 / 3.09 / 5.97 / 10.48   val 3.11 / 5.67 / 9.98 / 13.56 / 16.66
+  test 7.08 / 10.16 / 14.77 / 18.12 / 21.33  test private-like 8.31 / 10.80 / 15.35 / 18.80 / 21.85
+  54.5% of extended test feeds have a gap >= 14 d, which no train feed can have (the train period is 14 days).
+Train share extended by day (k0): 1.4% on day 0, rising to 14.7% on day 13. With k7 the share is 0 before day 7 (out_s2_stats.txt).
+Uncapped feeds (H < 256) also have older events in 1.3% (train) / 4.0% (test) of cases, about 20 per feed: histories are also
+cut by age or by a filter, not only by the 256 cap (out_s0b_uncapped.txt). This part is parity-skewed (8.5% of extended train
+feeds against 28% of extended test feeds), so the patch leaves it out by default (--hist_ext_uncapped turns it on).
+Comparison with the refill (union of all earlier snapshots): its design-1 read set was 9.6% of val and 8.15% of private-like
+test. A single snapshot plus the capped restriction gives 7.85% and 6.98%. U events (the newer views removed by the per-type
+caps) are not built: they are not older than the stored 256th, so positions 257-384 would misplace them.
+
+----------------------------------------------------------------------------------------------------------------
+3. PARITY (step 2) -- what the model sees in a train extension vs a test extension
+----------------------------------------------------------------------------------------------------------------
+[M] KS distances, extended feeds, train(k) vs test(k0):
+  train k   capped only  train extended  gap KS  dose KS  dose mean tr/te  view-share KS  view share tr/te  no-vector tr/te
+  0         no           8.94%           0.78    0.04     36.6 / 35.3      0.10           0.28 / 0.22       0.23 / 0.22
+  0         yes          8.18%           0.78    0.09     38.0 / 41.5      0.14           0.26 / 0.17       0.28 / 0.27
+  3         no           5.58%           0.68    0.14     46.7 / 35.3      0.11
+  5         no           3.83%           0.61    0.18     50.7 / 35.3      0.13
+  7         no           2.41%           0.58    0.21     54.0 / 35.3      0.14
+  7         yes          2.18%           0.55    0.19     57.5 / 41.5      0.16           0.28 / 0.17
+  10        no           1.02%           0.57    0.24     57.2 / 35.3      0.14
+  val k0 vs test k0, capped:  gap KS 0.32, dose KS 0.08, view-share KS 0.015 (0.167 / 0.169)  -> val is a test-like witness
+Reading [D/I]:
+ - The gap problem the refill and the review sized (2.9 vs 14.2 days) does NOT carry over to what the model sees in T
+   extensions. A T block is "the events just older than the stored 256th". Its size grows with the gap, but on test a long gap
+   also breaks the alignment for heavy users (A fails for 16% on test, 2.6% on train), and the two effects cancel: the dose
+   distribution matches at k0 (KS 0.04 on all feeds, 0.09 capped). A k-day restriction makes the dose parity WORSE (KS 0.14-0.24),
+   because train snapshots >= k days back carry more events, and it cuts train coverage to 2-6%. Reweighting train by gap
+   cannot work: 54.5% of the test mass (gap >= 14 d) has no train counterpart, and the effective sample size is 0.195.
+ - The view share of the block (train 0.26, test 0.17) is inherited from the generic train-format difference, which is larger in
+   the stored histories themselves (all capped feeds: train 0.53, test 0.38, KS 0.53; val vs test KS 0.008). It is not
+   specific to the extension. The --hcap arm that targeted this format difference was null.
+ - Uncapped extensions are the one parity-skewed part (8.5% of extended train feeds against 28% of test). Excluded by default.
+PARITY RESTRICTION RECOMMENDED: k0 (most recent strictly earlier snapshot, same rule on every split) + capped feeds only.
+ Coverage after it: train 8.18% of feeds (19.3% of capped), holdout 7.20%, val 7.85%, test 7.20% (private-like 6.98%).
+ Optional dose-bin reweighting of train extended feeds (weights 0.65-1.98, ESS 0.92) is available but not needed (KS 0.09).
+ The k7 arrays are written in case the lead prefers gap matching over dose matching: train 2.18% of feeds.
+
+----------------------------------------------------------------------------------------------------------------
+4. MODEL AND LOADER CHANGE (step 3) -- model_patch.diff (NOT applied), t_patch.py, bench_attn.py, s4_retrieval_share.py
+----------------------------------------------------------------------------------------------------------------
+Base: lab/nn_x/w5/{data,model,train,finetune,holdout_eval}.py as of 03:34Z (copies + sha256 in patch_base/). The current files
+are unchanged at 03:41Z and the diff applies cleanly (patch --dry-run). train.py is being edited by task A: re-run
+`patch -p1 --dry-run` before applying; the train.py hunks are small and anchored on stable lines (import, --max_hist, the two
+SplitData lines, the --init block, the from-scratch Ranker call, the test SplitData line).
+Design (all OFF at --hist_ext 0. The flag-off cfg and state dict are exactly the old ones, and every flag-off path is the old code):
+ - Loader (data.SplitData(hist_ext=128, hist_ext_dir, hist_ext_var, hist_ext_uncapped)): loads ext_* and appends ext_table rows to
+   the item table. gather() returns the block as separate keys xe_raw / xemb_ok / xmask / xcat / xet / xes / xidx / Hx (width
+   Kx = 64 or 128). When a batch holds an extended feed, the stored block is forced to its full 256 width, so extension token j
+   sits at history position 256 + j (positions 257-384 counted from 1). The stored keys (he_raw, hmask, H, ...) are untouched.
+ - Dense inputs: dense_features never sees the x* keys. All 104 dense inputs (max / mean / top-3 / per-type cosine, category
+   counts, recency of the newest same-category event, log(1 + H), count / H, ...) stay computed on the stored 256 events, and so
+   do the 34 precomputed xt columns. T4 verifies dense inputs are identical with and without x* keys.
+ - Model (Ranker(hist_ext=128)): new parameter rec_x = nn.Embedding(128, d), the position codes of slots 256..383, built last
+   under its own RNG fork. Ranker._hist_view concatenates stored and extension tokens for the TOKEN PATH only: history encoder
+   (1 self-attention layer over user + 256 + Kx tokens), the 2 cross-attention blocks with their cosine bias (sim_bias 1), and
+   the retrieval.
+ - New position rows when re-cooling a checkpoint (train.py --init with --hist_ext): every tensor loads strictly. rec_x is the
+   only missing key (asserted) and is initialised by --hist_ext_init:
+     row255 (DEFAULT): every extension slot = rec row 255. This is the convention of the refill's untrained pass d1, measured at
+       d1 - a = +0.0009 +- 0.0006 pooled, so the re-cool starts from a known, non-harmful point. T3: with row255 and no
+       training, extended val feeds move little (score corr 0.99996, top-1 changes in 10% of them).
+     shift128: slot 256 + j = rec row 128 + j.  deep_mean: the mean of rows 192-255 rescaled to their mean norm.
+   Why not something smoother [M]: the trained rows are not smooth in position (cosine of neighbouring rows 0.33 for rows
+   128-254, 0.65 for 0-31; cosine to row 255 of rows 200+ is about 0.2-0.4), so there is no trend to extrapolate.
+ - Retrieval of the 16 most similar history items (HistRetrieval, retr_m 16, no de-duplication in the finals): the top-16 is
+   taken over stored AND extension events, by raw cosine, with events without a vector excluded as today. The recency bucket
+   floor(log2(1 + idx)) already saturates at 8 from position 255, so extension events share bucket 8 with the oldest stored
+   slot (again the d1 convention; a distinct bucket 9 would need e_rec to grow and is not in the patch). How it treats them,
+   label-free (out_s4_retrieval_share.txt) [M]: extension events take 7.9% (val) / 9.2% (test) / 7.1% (train) of the 16 slots
+   on extended feeds (they are 12-14% of the tokens). 37% / 42% / 35% of candidates there have at least one extension event in
+   their top 16. 94% of extension events are on items NOT among the feed's stored 256 events (new items).
+ - Fine-tune (finetune.py) and test inference read hist_ext from the checkpoint cfg (data.hist_ext_kwargs). holdout_eval.py
+   refuses extension models: the harness writes holdout predictions in train.py (--save_holdout).
+ - Not combinable (asserted): --hcap, --rec_q, --rho_file, --hzcd, --aug_hist / --aug_cand, gru / din, item-ID residual, sim_bias 2.
+Checks run on GPU N (out_t_patch.txt; the diff is applied to a temporary copy of patch_base; label-free) [M]:
+ T1 flag off, fp32, all 14,423 val feeds: patched minus base max |diff| = 0. bf16 against the STORED val predictions of
+    w5_e10_kd05w192_s951: corr 1.0000000, max |diff| 0.
+ T2 flag on with the extension emptied: max |diff| 0 against flag off.
+ T3 flag on (k0, capped only, row255): non-extended feeds max |diff| 0 (bit-identical although their batches are now 384 wide).
+ T4 train split with the extension: 3 optimiser steps on batches with extended feeds (history width 256 + 128): losses finite,
+    rec_x receives gradient (all 128 rows), dense inputs identical with and without the x* keys.
+Step-time cost of +128 tokens (bench_attn.py, GPU N, final-student architecture d 192, synthetic batches; out_bench_attn.txt) [M]:
+ train step 256 -> 384 history tokens: x1.185 (M 32 x B 512), x1.150 (64 x 512), x1.104 (128 x 256), x1.126 (256 x 128),
+ x1.074 (512 x 64); +64 tokens costs about half of that. In 97.4% of training batches at least one feed has more than 64
+ extension events, so nearly every batch runs at 384 tokens: epoch-weighted training-step time x1.13. Inference x1.07-1.17
+ (full val pass 0.73 -> 0.82 s). A re-cool (about 57 min today) therefore takes about 64 min.
+
+----------------------------------------------------------------------------------------------------------------
+5. EXPECTED GAIN AND POWER (step 4) -- p_power.py, p_swapnull.py, read_hx.py
+----------------------------------------------------------------------------------------------------------------
+Effect sizes on the table (refill.md / refill_review.md, design 1 = events older than the 256th; per extended feed, 4-pool):
+ replay proxy c - b (worth when shown in trained slots): holdout +0.00117 +- 0.00082, val +0.00269 +- 0.00157, pooled +0.00173 +- 0.00078
+ untrained d1 - a (extension at 256+, rec 255, dense held: the re-cool's start point): +0.00087 +- 0.00061 pooled
+Pool-level gain if a re-cool captures them [D]: private-like 6.98% x +0.0017..+0.0027 = +0.00012..+0.00019 (full proxy);
+ x +0.0009 = +0.00006 (start point). This is the TO branch. The FT branch adds the same only if the fine-tune also reads the
+ extension (the patch does that).
+Harness noise (16-pool, ref2 - ref, the harness's own A/A null) [M]: all feeds val +0.00011 +- 0.00033, holdout +0.00013 +- 0.00018.
+ On the BUCKET (extended capped feeds): val (1,132) +0.00196 +- 0.00104 (z 1.88), holdout (2,159) +0.00060 +- 0.00067 (z 0.90),
+ pooled z 1.97. That one A/A draw is a tail draw, as the swap null shows.
+Swap null (60 random swaps of the 16 exchangeable (ref, ref2) seed pairs, out_p_swapnull.txt) [M]: bucket pooled z sd 0.79,
+ 0 of 60 >= 2.5, 1.7% |z| >= 1.96; user-cluster SE = plain SE on the bucket. The bucket SE is calibrated, slightly
+ conservative. SIDE FINDING FOR TASK A [M]: the WHOLE-VAL z of the harness is over-dispersed under the same swap null
+ (sd 1.53, 22% |z| >= 1.96; whole-set pooled z sd 1.27, 11.7% |z| >= 1.96). The plain per-feed SE misses the member-draw
+ component on all val feeds, so T1117's Holm bars on the pooled z are less strict than their nominal level. Patterns share
+ members, so these sds are themselves rough.
+Power of a 16-re-cool test (normal approximation, ignoring the both->=0 clause, so an upper bound) [D] (out_p_power.txt):
+ effect per bucket feed           all-feeds pooled z  P(>=2.5)  | bucket pooled z  P(>=2.5)  P(>=1.96)
+ replay proxy (val / holdout sets)  0.79              0.04      | 3.06              0.71      0.86
+ replay proxy pooled                0.79              0.04      | 3.00              0.69      0.85
+ untrained d1 level / half proxy    0.40              0.02      | 1.51              0.16      0.33
+ no effect                          0                 0.006     | 0                 0.006     0.025
+ -> Under the T1117 all-feeds form the test cannot pass even at the full proxy (P 0.04). Only the bucket read is informative.
+P(pass) of the bucket rule [I]: about 0.3 x 0.71 + 0.3 x 0.16 + 0.4 x 0.006 = 0.26, with priors 0.3 (re-cool captures the
+ proxy) / 0.3 (about the start point) / 0.4 (nothing usable).
+
+----------------------------------------------------------------------------------------------------------------
+6. THE TEST (for the lead to declare; nothing launched here)
+----------------------------------------------------------------------------------------------------------------
+6.1 Arm hx: re-cool of the 16 plateau snapshots (stages K and L, seeds 951-958) + `--hist_ext 128` (k0 arrays, capped only,
+    --hist_ext_init row255). Everything else as the stage. References: the STORED w5_kcd_ref / w5_lcd_ref (same cooldown seeds
+    1000 + x, same batch order). lane.sh needs one arm line (not added: lane.sh is task A's), e.g.
+        K:hx|L:hx) echo "--hist_ext 128" ;;   # gap1117 lane B: lifelong extension (lab/nn_x/w12/gap1117/lifelong/NOTES.txt)
+    jobs: K:hx:951 .. K:hx:958 L:hx:951 .. L:hx:958 (variants w5_kcd_hx_s9xx / w5_lcd_hx_s9xx). <= 3 processes per GPU,
+    >= 60 GB free; about 64 min each, 17 GPU-hours, about 1.5 h on the GPUs at 2 per GPU.
+    Before launch: apply model_patch.diff after task A's train.py edits are final (dry-run first), then repeat
+    `CUDA_VISIBLE_DEVICES=<g> .venv/bin/python lab/nn_x/w12/gap1117/lifelong/t_patch.py`. NOTE: t_patch.py applies the diff to
+    patch_base/; after a rebase, refresh patch_base/ and the diff together.
+6.2 Read, once, after all 16 finish: `python lab/nn_x/w12/gap1117/lifelong/read_hx.py hx` (whole-set, bucket and rest deltas;
+    validated on the A/A pair: `read_hx.py ref2`, out_read_hx_AA_ref2.txt). Also report arm_read8.py rc:hx for the T1117 form.
+6.3 Proposed rule: PASS iff bucket pooled z >= 2.5 AND both bucket deltas (val 1,132 / holdout 2,159 feeds) >= 0 AND the
+    whole-set deltas val >= -1 SE and holdout >= -1 SE. Descriptive mechanism check: the delta on the non-bucket feeds (inputs
+    identical there) should be within its A/A noise. No pass -> the coverage-map row closes for good, as decided with power 0.7
+    at the replay proxy, not as a lack-of-power closure.
+6.4 On PASS (the lead's file rule applies; my reading): the change goes to the 20 FD16P20 members by re-cooling their @77500
+    snapshots with --hist_ext 128 (wide students: lab/nn_x/w5/ckpt/w5_fd10_*@77500.pt exist; the pop1 students' snapshots must
+    be checked), then n2cpv3s3 fine-tunes (finetune.py reads hist_ext from the cfg), file, gate. The file-level effect
+    (+0.0001..+0.0002) cannot be verified on val or public: adoption rests on the bucket read. A cleaner promotion also
+    re-cools the same 20 members without the extension (40 re-cools in all), so that the file contrast is not confounded with
+    re-cool noise (16-pool A/A sd on val +-0.0003, larger than the gain).
+Risks, explicitly:
+ EXPECTED GAIN: at most about +0.0002 on private at pool level (+0.00006 if the re-cool only reaches the untrained start point).
+   Expected value of the route about +0.00003.
+ PARITY: low for what the model sees (dose KS 0.09, retrieval share 7.1% / 9.2%, val test-like on every block statistic). The
+   snapshot gap (3 vs 15 d) is invisible to the model except through dose and selection. Selection differs: heavy test users
+   whose snapshot does not overlap get no block (A fails 16% on test vs 2.6% on train). The holdout bucket reads the train-like
+   extension, val reads the test-like one: if they disagree in sign, read val as the parity witness.
+ LEAK: low. Every event is checked (section 1). Only history events of an earlier request are used, never a label or a later
+   snapshot, and no user 0. Val never reads test. The extension of a training feed may come from a holdout feed's history, but
+   that history predates the holdout feed and carries no holdout label.
+ ENGINEERING: low to medium. The patch is written and verified bit-exact when off. Remaining work: rebase on task A's
+   train.py, one lane.sh arm line, and the FD promotion path if it passes. Two things are untested: finetune.py end to end with
+   the flag, and test-split inference through train.py's final block (the same SplitData / gather code as val, which was tested).
+
+----------------------------------------------------------------------------------------------------------------
+7. HARD RULES AND FILES
+----------------------------------------------------------------------------------------------------------------
+GPU: GPU N only, CUDA_VISIBLE_DEVICES=N checked before each launch (0 compute processes, [n] GB free). Two short foreground
+ processes: bench_attn.py (synthetic, about 1 min) and t_patch.py (about 40 s). Both finished; nothing is left running.
+ CPU: <= 12 threads (alignment: 11 single-thread workers).
+Writes: only lab/nn_x/w12/gap1117/lifelong/ and artifacts/data/feats_new/histext_1117/{train,val,test}/ (new files; the builder
+ refuses to overwrite). Nothing written into lab/nn_x/w5 (bytecode off; model / data / train pyc there predate my imports and
+ belong to task A), nothing into lab/nn_x/w12/seg/refill (imported read-only). No process signalled. No submission, no training run.
+Files: hx_lib.py; s0_counts.py, s0b_uncapped_probe.py; s1_align_all.py -> out/align_<split>.npz; s2_stats.py -> out_s2_stats.txt;
+ s2b_parity_extra.py -> out_s2b_parity_extra.txt (+ _v2_head: refined placement error); s3_build_arrays.py -> out_s3_build.txt +
+ the arrays; s4_retrieval_share.py; bench_attn.py; model_patch.diff + patch_base/ (+ SHA256_BASE.txt); t_patch.py -> out_t_patch.txt;
+ p_power.py, p_swapnull.py, read_hx.py (+ out_read_hx_AA_ref2.txt).

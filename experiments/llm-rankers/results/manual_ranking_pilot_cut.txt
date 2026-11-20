@@ -1,0 +1,130 @@
+Cut of lab/nn_x/llm_manual/RESULT.txt (279 lines): the summary and the detailed tables 1-7; the input paths, the interpretation paragraph and the rankers' strategy notes are left out.
+SUMMARY (100 val feeds; NDCG mean +- SE; paired delta vs G3 mean +- SE)
+  LLM (5 rankers x 20 feeds)  0.3957 +- 0.0256   delta -0.0476 +- 0.0232  (W/T/L vs G3 33/10/57; 95% CI of delta about [-0.093, -0.002])
+  G3 ensemble                 0.4433 +- 0.0256   (same feeds; G3 on the full val split = 0.4003, so this sample is easier than average for G3)
+  random (200 perms)          0.3336 +- 0.0116   delta -0.1097 +- 0.0214
+  H1 cos_max_to_history       0.3888 +- 0.0243   delta -0.0545 +- 0.0208  (random ties: 0.4002)
+  H2 cos_to_newest_5          0.3791 +- 0.0234   delta -0.0642 +- 0.0235  (random ties: 0.3857)
+  H3 popularity               0.3472 +- 0.0219   delta -0.0961 +- 0.0263
+  H4 n_same_cat > cos_max     0.3940 +- 0.0244   delta -0.0493 +- 0.0235  (random ties: 0.4011)
+  H5 best = f1 desc           0.3499 +- 0.0201   delta -0.0934 +- 0.0212  (picked on these feeds; random ties: 0.3887)
+  LLM - H1 +0.0069 +- 0.0163 | LLM - H2 +0.0167 +- 0.0126 | LLM - H4 +0.0017 +- 0.0196 | LLM - random +0.0621 +- 0.0205
+  Top-1 hit: LLM 0.150 +- 0.036, G3 0.140 +- 0.035 (paired +0.010 +- 0.039); first positive in top-5: LLM 0.32, G3 0.45
+  Extra (not requested): per-feed rank-average blend of LLM and G3: w_LLM 0.25 -> -0.0214 +- 0.0116, 0.5 -> -0.0297 +- 0.0177 vs G3 (no complementary signal).
+[...]
+DETAILED TABLES
+Feeds: 100 val feeds (nn_x/llm_manual/feeds), 5 rankers x 20 feeds (ranker k = feeds 20(k-1)+1..20k in feeds_meta order).
+Metric: src/metrics.ndcg_per_feed (binary gain, full-list NDCG, pessimistic ties). SE = sd/sqrt(n). Paired delta = per-feed (method - G3).
+Validation: 100 rankings parsed; feeds needing repair (missing/duplicate/out-of-range idx): 0
+Sanity: labels == data/flat/val/cand_target and feed-file item_ids == cand_item_id for all 100 feeds (asserted).
+G3 reference on the full val split: mean NDCG 0.4003 over all 14423 feeds; 0.4003 over the 14423 feeds with >=1 positive.
+Sample composition: M median 30 (min 5, max 281); npos=1 in 80 feeds, >1 in 20; history length median 197.
+H5 best = H5_f1+ (chosen on these 100 feeds -> optimistic). All 10 H5 variants listed below.
+
+TABLE 1. All 100 feeds
+  method             n  mean NDCG      SE  delta vs G3      SE   wins/ties/losses vs G3
+  LLM              100     0.3957  0.0256      -0.0476  0.0232                 33/10/57
+  G3               100     0.4433  0.0256      +0.0000  0.0000                  0/100/0
+  RAND             100     0.3336  0.0116      -0.1097  0.0214                  40/0/60
+  H1_cosmax        100     0.3888  0.0243      -0.0545  0.0208                 33/12/55
+  H2_cos5          100     0.3791  0.0234      -0.0642  0.0235                  34/8/58
+  H3_pop           100     0.3472  0.0219      -0.0961  0.0263                  31/3/66
+  H4_nsame>cmax    100     0.3940  0.0244      -0.0493  0.0235                  35/9/56
+  H5_best          100     0.3499  0.0201      -0.0934  0.0212                 26/10/64
+
+TABLE 2a. M <= 30 (n=50)
+  method             n  mean NDCG      SE  delta vs G3      SE   wins/ties/losses vs G3
+  LLM               50     0.5135  0.0419      -0.0519  0.0372                 13/10/27
+  G3                50     0.5654  0.0372      +0.0000  0.0000                   0/50/0
+  RAND              50     0.4190  0.0135      -0.1463  0.0342                  19/0/31
+  H1_cosmax         50     0.5209  0.0389      -0.0445  0.0322                 15/12/23
+  H2_cos5           50     0.4931  0.0370      -0.0723  0.0379                  15/8/27
+  H3_pop            50     0.4650  0.0355      -0.1003  0.0449                  16/3/31
+  H4_nsame>cmax     50     0.5136  0.0399      -0.0518  0.0402                  16/8/26
+  H5_best           50     0.4413  0.0323      -0.1240  0.0338                  11/9/30
+
+TABLE 2b. 30 < M <= 80 (n=30)
+  method             n  mean NDCG      SE  delta vs G3      SE   wins/ties/losses vs G3
+  LLM               30     0.2999  0.0231      -0.0393  0.0340                  14/0/16
+  G3                30     0.3392  0.0324      +0.0000  0.0000                   0/30/0
+  RAND              30     0.2727  0.0091      -0.0666  0.0308                  13/0/17
+  H1_cosmax         30     0.2885  0.0183      -0.0507  0.0344                  12/0/18
+  H2_cos5           30     0.2850  0.0228      -0.0542  0.0329                  12/0/18
+  H3_pop            30     0.2415  0.0120      -0.0977  0.0341                   8/0/22
+  H4_nsame>cmax     30     0.2807  0.0189      -0.0586  0.0346                  11/0/19
+  H5_best           30     0.2902  0.0216      -0.0491  0.0296                  10/1/19
+
+TABLE 2c. M > 80 (n=20)
+  method             n  mean NDCG      SE  delta vs G3      SE   wins/ties/losses vs G3
+  LLM               20     0.2450  0.0277      -0.0493  0.0497                   6/0/14
+  G3                20     0.2943  0.0425      +0.0000  0.0000                   0/20/0
+  RAND              20     0.2115  0.0110      -0.0828  0.0430                   8/0/12
+  H1_cosmax         20     0.2093  0.0120      -0.0850  0.0423                   6/0/14
+  H2_cos5           20     0.2351  0.0280      -0.0592  0.0510                   7/0/13
+  H3_pop            20     0.2112  0.0202      -0.0831  0.0482                   7/0/13
+  H4_nsame>cmax     20     0.2653  0.0251      -0.0290  0.0345                   8/1/11
+  H5_best           20     0.2111  0.0179      -0.0832  0.0445                   5/0/15
+
+TABLE 3a. exactly 1 positive (n=80)
+  method             n  mean NDCG      SE  delta vs G3      SE   wins/ties/losses vs G3
+  LLM               80     0.3867  0.0299      -0.0536  0.0279                 25/10/45
+  G3                80     0.4403  0.0295      +0.0000  0.0000                   0/80/0
+  RAND              80     0.3292  0.0124      -0.1111  0.0257                  36/0/44
+  H1_cosmax         80     0.3886  0.0276      -0.0517  0.0248                 29/12/39
+  H2_cos5           80     0.3635  0.0269      -0.0768  0.0280                  25/8/47
+  H3_pop            80     0.3477  0.0259      -0.0927  0.0313                  25/3/52
+  H4_nsame>cmax     80     0.3852  0.0280      -0.0552  0.0286                  28/8/44
+  H5_best           80     0.3411  0.0234      -0.0992  0.0251                 19/10/51
+
+TABLE 3b. >1 positive (n=20)
+  method             n  mean NDCG      SE  delta vs G3      SE   wins/ties/losses vs G3
+  LLM               20     0.4318  0.0463      -0.0236  0.0327                   8/0/12
+  G3                20     0.4553  0.0512      +0.0000  0.0000                   0/20/0
+  RAND              20     0.3513  0.0305      -0.1040  0.0300                   4/0/16
+  H1_cosmax         20     0.3899  0.0531      -0.0654  0.0312                   4/0/16
+  H2_cos5           20     0.4415  0.0447      -0.0139  0.0341                   9/0/11
+  H3_pop            20     0.3454  0.0374      -0.1099  0.0411                   6/0/14
+  H4_nsame>cmax     20     0.4296  0.0489      -0.0257  0.0262                   7/1/12
+  H5_best           20     0.3853  0.0363      -0.0700  0.0345                   7/0/13
+
+TABLE 4. Positive at rank 1 (share of feeds), and rank of the first positive
+  LLM        top-1 hit 0.150 +- 0.036
+  G3         top-1 hit 0.140 +- 0.035
+  H2_cos5    top-1 hit 0.100 +- 0.030
+  paired LLM - G3 top-1: +0.010 +- 0.039  (LLM-only hits 8, G3-only hits 7, both 7, neither 78)
+  first-positive rank: LLM median 8 (mean 21.7), G3 median 7 (mean 14.6); first positive in top-5: LLM 0.32, G3 0.45
+  top-1 by M bucket (LLM / G3): M<=30: 0.28 / 0.24; 30<M<=80: 0.00 / 0.03; M>80: 0.05 / 0.05
+
+TABLE 5. Per ranker (20 feeds each; each ranker used its own hand-written rule, see strategies)
+  ranker        LLM       G3    LLM-G3      SE       H2    LLM-H2      SE   medM
+  1          0.3855   0.4757   -0.0901  0.0565   0.3820   +0.0035  0.0136     21
+  2          0.3648   0.4507   -0.0859  0.0629   0.3806   -0.0158  0.0248     27
+  3          0.3787   0.3927   -0.0140  0.0265   0.3124   +0.0664  0.0319     64
+  4          0.3540   0.4003   -0.0463  0.0417   0.3822   -0.0282  0.0232     31
+  5          0.4956   0.4972   -0.0016  0.0641   0.4381   +0.0575  0.0372     22
+
+TABLE 6. Paired LLM vs heuristics (LLM - heuristic, all 100 feeds)
+  LLM - RAND             +0.0621 +- 0.0205
+  LLM - H1_cosmax        +0.0069 +- 0.0163
+  LLM - H2_cos5          +0.0167 +- 0.0126
+  LLM - H3_pop           +0.0485 +- 0.0281
+  LLM - H4_nsame>cmax    +0.0017 +- 0.0196
+  LLM - H5_best          +0.0458 +- 0.0181
+
+TABLE 7. Heuristics with ties broken at random instead of pessimistically (the rendered columns are rounded to 2 decimals and
+         f3 is constant within a category, so pessimistic ties penalise them; mean over 50 random tie-breaks)
+  heuristic        pessimistic  random-tie   rt - G3      SE
+  H1_cosmax             0.3888      0.4002   -0.0431  0.0216
+  H2_cos5               0.3791      0.3857   -0.0576  0.0234
+  H3_pop                0.3472      0.3581   -0.0852  0.0261
+  H4_nsame>cmax         0.3940      0.4011   -0.0422  0.0236
+  H5_f1+                0.3499      0.3887   -0.0546  0.0222
+  H5_f1-                0.2711      0.2917   -0.1516  0.0259
+  H5_f2+                0.2700      0.3250   -0.1184  0.0241
+  H5_f2-                0.3118      0.3554   -0.0879  0.0252
+  H5_f3+                0.2929      0.3662   -0.0771  0.0223
+  H5_f3-                0.2727      0.2952   -0.1481  0.0269
+  H5_f4+                0.3186      0.3209   -0.1224  0.0254
+  H5_f4-                0.3071      0.3126   -0.1307  0.0237
+  H5_f5+                0.3356      0.3413   -0.1021  0.0248
+  H5_f5-                0.2932      0.2977   -0.1456  0.0264

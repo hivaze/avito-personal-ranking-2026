@@ -1,0 +1,42 @@
+[A] val: Spearman(item_id, posting time) over candidates with decodable age (0.9811): -0.0004 | Spearman(item_id, f4) +0.0002
+[B] val: Spearman(emb_idx, item_id) cand -0.0022 | Spearman(emb_idx, row order of first use) -0.0005 | Spearman(emb_idx, posting time) +0.0034
+[B] val: Spearman(emb_idx, item_id) hist +0.0005
+[B] val: distinct (item, emb_idx) pairs 2516711 | distinct items 2516711 | distinct emb_idx 2516711
+[D] val: candidate rows whose (feed, item) is duplicated: 0.000000
+[E] val f1: distinct (feed, value) groups 1047321 for 1389971 rows | rows in a tie group of size>=2: 0.2946 | size>=5: 0.2054 | groups(size>=2) spanning >1 category: 0.1795
+[E] val f2: distinct (feed, value) groups 234739 for 1389971 rows | rows in a tie group of size>=2: 0.9113 | size>=5: 0.7883 | groups(size>=2) spanning >1 category: 0.7112
+[E] val f3: distinct (feed, value) groups 145743 for 1389971 rows | rows in a tie group of size>=2: 0.9778 | size>=5: 0.8833 | groups(size>=2) spanning >1 category: 0.0646
+[E] val f4: distinct (feed, value) groups 1352254 for 1389971 rows | rows in a tie group of size>=2: 0.0389 | size>=5: 0.0160 | groups(size>=2) spanning >1 category: 0.7937
+[E] val f5: distinct (feed, value) groups 1222335 for 1389971 rows | rows in a tie group of size>=2: 0.1354 | size>=5: 0.1175 | groups(size>=2) spanning >1 category: 0.8817
+[C] val: Spearman(user_id, H) +0.0121 | Spearman(user_id, M) -0.0050 | Spearman(user_id, timestamp) +0.0087 | Spearman(feed_id, M) +0.0017 Spearman(feed_id, user_id) +0.0094
+[A] test: Spearman(item_id, posting time) over candidates with decodable age (0.9806): +0.0008 | Spearman(item_id, f4) -0.0007
+[B] test: Spearman(emb_idx, item_id) cand +0.0008 | Spearman(emb_idx, row order of first use) +0.0018 | Spearman(emb_idx, posting time) +0.0080
+[B] test: Spearman(emb_idx, item_id) hist -0.0003
+[B] test: distinct (item, emb_idx) pairs 4710948 | distinct items 4710948 | distinct emb_idx 4710948
+[D] test: candidate rows whose (feed, item) is duplicated: 0.000000
+[E] test f1: distinct (feed, value) groups 2198524 for 2904806 rows | rows in a tie group of size>=2: 0.2909 | size>=5: 0.2021 | groups(size>=2) spanning >1 category: 0.1736
+[E] test f2: distinct (feed, value) groups 484441 for 2904806 rows | rows in a tie group of size>=2: 0.9128 | size>=5: 0.7907 | groups(size>=2) spanning >1 category: 0.7131
+[E] test f3: distinct (feed, value) groups 299496 for 2904806 rows | rows in a tie group of size>=2: 0.9789 | size>=5: 0.8860 | groups(size>=2) spanning >1 category: 0.0643
+[E] test f4: distinct (feed, value) groups 2833510 for 2904806 rows | rows in a tie group of size>=2: 0.0359 | size>=5: 0.0137 | groups(size>=2) spanning >1 category: 0.7959
+[E] test f5: distinct (feed, value) groups 2574702 for 2904806 rows | rows in a tie group of size>=2: 0.1276 | size>=5: 0.1108 | groups(size>=2) spanning >1 category: 0.8814
+[C] test: Spearman(user_id, H) +0.0047 | Spearman(user_id, M) +0.0120 | Spearman(user_id, timestamp) -0.0030 | Spearman(feed_id, M) +0.0033 Spearman(feed_id, user_id) -0.0066
+[H] val: mean relative row index of positives 0.5005 (0.5 = none); positive rate at index 0 0.0377, at last index 0.0378, overall 0.0158 | mean feed positive rate vs feed_id Spearman -0.0039
+[A] val: median listing age (h) by item_id decile: 685 674 676 672 672 670 672 688 681 680
+[C] val: non-zero users 13740 | in train 0.3180 | median user_id in-train 1227385 vs not-in-train 1227355 | max train user_id 2483761
+[C] test: non-zero users 27308 | in train 0.3025 | median user_id in-train 1253686 vs not-in-train 1259845 | max train user_id 2483761
+[C] train: Spearman(user_id, first feed time) -0.0002 | Spearman(user_id, H) -0.0035
+[F] train candidate items with an embedding: 38947611
+[F] train history events without embedding: 0.1551 | train history items with an embedding: 66794676
+[F] val: history events without embedding 0.1421 | of those: item has an embedding in the train table 0.2156, in the test table 0.0006, elsewhere in the own table 0.0000 | missing-emb events by hpos<32: 0.0190
+[F] val: missing-embedding share by event type: e1:0.058 e2:0.200 e3:0.159 e4:0.242 e5:0.194 e6:0.202 e7:0.253 e8:0.257 e9:0.329 e10:0.013
+[F] val: candidates without embedding 0.00015; recoverable from train table 0.5935
+[J] val: history events whose item is a train candidate (with or without emb): 0.5334
+[F] test: history events without embedding 0.1404 | of those: item has an embedding in the train table 0.2629, in the val table 0.0039, elsewhere in the own table 0.0000 | missing-emb events by hpos<32: 0.0185
+[F] test: missing-embedding share by event type: e1:0.056 e2:0.200 e3:0.159 e4:0.236 e5:0.198 e6:0.204 e7:0.255 e8:0.255 e9:0.324 e10:0.011
+[F] test: candidates without embedding 0.00016; recoverable from train table 0.7319
+[J] test: history events whose item is a train candidate (with or without emb): 0.5108
+[G] val: train feeds of val users: 7156 (users 4369)
+[G] val: feeds whose user has a train feed 0.3041 | candidate rows also shown to the same user in a train feed: 2495 = 0.00180 of rows, 0.00579 of rows of linked feeds
+[G] val: positive rate of re-shown rows 0.0164 (n 2495; earlier label positive share 0.0064) vs all rows of linked feeds 0.0167
+[G] test: train feeds of test users: 13341 (users 8262)
+[G] test: feeds whose user has a train feed 0.2912 | candidate rows also shown to the same user in a train feed: 3538 = 0.00122 of rows, 0.00415 of rows of linked feeds

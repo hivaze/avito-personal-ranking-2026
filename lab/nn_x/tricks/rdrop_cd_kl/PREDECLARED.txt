@@ -1,0 +1,36 @@
+PREDECLARED at: 2026-11-13 04:45:42 UTC
+ITEM: RDROP-CD KL probe (reports/TRICKS_SWEEP_1113.md section 3 item 4; SAM-CD item 7 bundled). No training, GPU N only.
+
+MEASUREMENT (fixed before any number is computed):
+  Model code: nn_x/abl/model.py Ranker(**ckpt['cfg']) + load_state_dict (imported read-only, PYTHONDONTWRITEBYTECODE=1).
+  Data: nn_x/abl/data.py SplitData('train', max_hist=256), attach_xt(cfg['xt_names']), training domain token
+        tr.dom = [1-p, p, 0] with p = train_prandom (NaN->0, M<50 -> 0), exactly as train.py does for a domain model.
+  Feeds: all train feeds minus the fixed 30K random-like holdout (rng 12345, p_random>0.9, M>=50), as train.py --holdout 30000.
+  Batches: tr.batches(feeds, 32768, 512, shuffle=True, rng=np.random.default_rng(1113)); the FIRST 64 batches, gathered with
+           with_pos=True (regular cooldown batches; the 2% m02 pool batches are not sampled). Same 64 batches for every checkpoint.
+  Forward: torch.no_grad(); X = model.dense(b) once per batch; logits = model(b, X, use_pos=True) under bf16 autocast, as in
+           the training loop (cfg use_pos_tower False, xt_drop 0, id_buckets 0, so dropout is the only train-mode noise).
+           Pass 1 and pass 2: model.train() (dropout p=0.1 on every nn.Dropout site + SDPA attention-probability dropout,
+           independent masks from the advancing torch RNG; torch.manual_seed(1113) once per checkpoint).
+           Pass E: model.eval() (deterministic).
+  Per feed (valid candidates only): p = softmax(logits over the feed's M candidates), fp32/fp64 math;
+           symKL = 0.5 [KL(p1||p2) + KL(p2||p1)] in nats; within-feed Spearman of the two score vectors (average ranks);
+           top-1 changed = argmax pass1 != argmax pass2. Same three quantities for E vs train pass 1.
+  Primary statistic S(ckpt): mean of the per-feed train-vs-train symKL over the feeds with M >= 2 in the 64 batches
+           (M = 1 feeds have KL = 0 identically; the all-feeds mean is reported as info).
+
+DECISION CHECKPOINTS (all four; the m02 cooldown form named by the sweep, its start and end, and the 10-ep base the task names):
+  (a) nn_x/w5/ckpt/w5_cd_m02ref_r101.pt          (holdout-selected checkpoint of the 2-ep m02 re-cool, CDSEED 1001) [headline]
+  (b) nn_x/w5/ckpt/w5_cd_m02ref_r101@last.pt     (end of that cooldown)
+  (c) nn/ckpt/v17_pre2s_s101@77500.pt            (the cooldown START = the --init an RDROP-CD root-101 run would start from)
+  (d) nn_x/w5/ckpt/w5_e10_base_s951.pt           (10-ep base, in-run m02 cooldown)
+
+RULE (from the sweep, applied conservatively against false closure):
+  If S < 1e-3 nats on ALL four decision checkpoints -> RDROP-CD, SAM-CD and any two-pass consistency regulariser are
+  CLOSED as inert.
+  If S >= 1e-3 nats on ANY of them -> they stay QUEUED, with the measured KL (headline (a), and the max over (a)-(d)) as the prior.
+INFO ONLY (no effect on the verdict): median / p90 / p99 / max of the per-feed symKL, batch-cluster SE of the mean,
+  all-feeds mean, M<50 / M>=50 split, feeds-with-positives subset, Spearman (mean / median / p10), top-1 change share,
+  eval-vs-train-mode KL / Spearman / top-1, the training listwise CE of the same batches for scale, and the eval-mode
+  inter-seed symKL between w5_cd_m02ref_r101.pt and w5_cd_m02ref_r102.pt (same batches) as a scale reference.
+Nothing is trained, adopted or submitted.

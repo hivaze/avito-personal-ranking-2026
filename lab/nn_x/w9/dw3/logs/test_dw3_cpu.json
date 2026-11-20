@@ -1,0 +1,63 @@
+{
+ "part": "cpu",
+ "passed": 31,
+ "total": 31,
+ "fails": [],
+ "res": {
+  "c0": {
+   "removed": {
+    "import cd_arms9": 1,
+    "add_argument --prand_norm": 1,
+    "add_argument --prand_until_cool": 1,
+    "dw3 = None": 1,
+    "if a.prand_norm or a.prand_until_cool": 1,
+    "if dw3 is not None": 1
+   },
+   "lane_diff": [
+    "+# nn_x/w9/dw3 copy (WAVE 9 arm DW3, 2026-11-13 ~13:35 UTC): runs from @W (its own logs/ preds/ ckpt/),",
+    "+#   GPUs N 7 only (the DW3 agent's grant), stage-A variants w9_<arm>_s<seed> (own 2-epoch base pair w9_base_s23/24), stage-E variants",
+    "+#   w5_e10_<arm>_s<seed> as in nn_x/w5 (paired vs nn_x/w5's w5_e10_base_s951/952); PIDs go to nn_x/w9/dw3/RUNNING.txt.",
+    "+#   Arm dw3 (A:dw3 | E:dw3) = --prand_base 0.3 --prand_norm --prand_until_cool (cd_arms9.py; rule nn_x/w5/logs/E_dw3_predeclared.txt).",
+    "-ALLOWED=${W5_GPUS:-\"0 1 2 4\"}",
+    "+ALLOWED=${W5_GPUS:-\"6 7\"}",
+    "-TL=@W/trunc_lifts_mbucket.json",
+    "+TL=<repo>/nn_x/w5/trunc_lifts_mbucket.json",
+    "+    A:dw3|E:dw3) echo \"--prand_base 0.3 --prand_norm --prand_until_cool\" ;;  # wave-9 DW3 (cd_arms9.py)",
+    "-RUN=logs/RUNNING_w5.txt",
+    "+RUN=RUNNING.txt  # nn_x/w9/dw3/RUNNING.txt (wrapper PIDs; the REAL python PIDs are recorded there by the agent from /proc)",
+    "-    v=w5_${arm}_s${x}; args=\"$A_BASE $HYG --seed $x $f\"",
+    "+    v=w9_${arm}_s${x}; args=\"$A_BASE $HYG --seed $x $f\"  # nn_x/w9/dw3: stage-A variants w9_<arm>_s<seed>",
+    "-    v=${v/w5_/w5_smoke_}; args=\"$args --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10\"",
+    "+    v=${v/#w5_/w5_smoke_}; v=${v/#w9_/w9_smoke_}; args=\"$args --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10\""
+   ]
+  },
+  "c1": {
+   "n_batches": 19,
+   "mini_mean": 0.5178010034810656
+  },
+  "c2": {
+   "prand_base": 0.3,
+   "n_train": 3121208,
+   "n_pool": 134118,
+   "mean_p": 0.04822521240676987,
+   "mean_w": 1.0,
+   "pool_share_weight": 0.13994509489023196,
+   "pool_share_count": 0.04296990139715136,
+   "pool_mean_w": 3.2568167563798385,
+   "prod_mean_w": 0.8986706963191096,
+   "short_mean_w": 0.8615114279823113,
+   "max_w": 3.7332132780853344,
+   "sd_w": 0.5091500479061674,
+   "epoch_mean": 1.0,
+   "first1000_mean": 0.990559478210928,
+   "batch_mean_of_means": 1.0647251734904917,
+   "n_batches": 9835,
+   "t_cool_2ep": 15736,
+   "t_cool_10ep": 78680
+  },
+  "c3": {
+   "ratio_norm": 1.1013704705794034,
+   "ratio_raw": 0.570860036636879
+  }
+ }
+}

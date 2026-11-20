@@ -1,0 +1,17 @@
+== PSEUDO-KD screen: kd05w192ps vs kd05w192, seeds [951, 952, 953, 954, 955, 956, 957, 958] (paired per feed and seed; rule RULE_predeclared.txt)
+  seed 951: val member 0.39983 vs ref 0.39859  delta +0.00124 +- 0.00082 (z +1.51)
+  seed 952: val member 0.40028 vs ref 0.39968  delta +0.00060 +- 0.00083 (z +0.72)
+  seed 953: val member 0.39992 vs ref 0.39914  delta +0.00078 +- 0.00081 (z +0.96)
+  seed 954: val member 0.39974 vs ref 0.39931  delta +0.00043 +- 0.00081 (z +0.52)
+  seed 955: val member 0.39861 vs ref 0.39948  delta -0.00086 +- 0.00082 (z -1.05)
+  seed 956: val member 0.39936 vs ref 0.39861  delta +0.00075 +- 0.00081 (z +0.93)
+  seed 957: val member 0.39916 vs ref 0.39866  delta +0.00049 +- 0.00081 (z +0.61)
+  seed 958: val member 0.39896 vs ref 0.39868  delta +0.00028 +- 0.00082 (z +0.34)
+  MEMBER (decision)   val +0.00046 +- 0.00031 (z +1.51) | pmix-public +0.00038 +- 0.00038 (z +1.00) | pmix-private +0.00032 +- 0.00046 (z +0.69) | M<50 +0.00013 +- 0.00057 (z +0.24) | M>=50 +0.00069 +- 0.00034 (z +2.04)
+                      checks: (1) val >= +0.0008 NO (+0.00046); (2) pmix-private >= 0 yes (+0.00032); (3) no M half < -1 SE yes (M<50 +0.00013 vs -0.00057, M>=50 +0.00069 vs -0.00034) -> KILL
+  POOL (information)  val +0.00054 +- 0.00047 (z +1.16) | pmix-public +0.00012 +- 0.00057 (z +0.20) | pmix-private -0.00001 +- 0.00070 (z -0.01) | M<50 +0.00049 +- 0.00089 (z +0.55) | M>=50 +0.00058 +- 0.00050 (z +1.15)
+                      checks: (1) val >= +0.0008 NO (+0.00054); (2) pmix-private >= 0 NO (-0.00001); (3) no M half < -1 SE yes (M<50 +0.00049 vs -0.00089, M>=50 +0.00058 vs -0.00050) -> KILL
+  holdout (selected)  member +0.00023 +- 0.00018 (z +1.29) | pool +0.00010 +- 0.00027 (z +0.37)  (information)
+  holdout (@last)     member +0.00025 +- 0.00018 (z +1.39) | pool +0.00023 +- 0.00027 (z +0.85)  (information)
+  absolute: val member 0.39948 (ref 0.39902), 8-pool 0.40164 (ref 0.40110)
+RULE VERDICT: KILL

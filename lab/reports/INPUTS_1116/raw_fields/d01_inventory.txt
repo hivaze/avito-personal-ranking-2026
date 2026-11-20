@@ -1,0 +1,63 @@
+===== val =====
+feeds 14423 | feed_id min 158 max 3193563 unique 14423 | corr(feed_id, timestamp) -0.0002 | feed_id sorted by time monotone share 0.9155
+timestamp UTC 09-21 21:00:48 .. 09-24 21:00:48 | distinct 1240 | share on 128 s grid (t % 128 mode) 1.0000 mode residue 0 | feeds sharing a timestamp with another feed 0.9981
+user_id min 0 max 2483571 distinct 13741 | user 0 feeds 658 (0.0456) | non-zero users with >1 feed 25 | feeds of such users 50
+M min 5 max 299 mean 96.37 | H min 0 max 256 mean 173.30 H==256 0.2895 H==0 0.0135
+cand_category_id: int8 rows 1389971 | min 2 max 53 | distinct 52 | ==0 0.00000 | ==-1 0.00000 | singletons 0.0000 of distinct
+cand_f1: float32 rows 1389971 (stats on 1389971) | NaN 0.00000 | ==0 0.00000 | min 0.0179 max 0.9821 mean 0.3995 | distinct 1012226
+cand_f2: float32 rows 1389971 (stats on 1389971) | NaN 0.00000 | ==0 0.15443 | min 0.0000 max 0.9844 mean 0.4399 | distinct 215165
+cand_f3: float32 rows 1389971 (stats on 1389971) | NaN 0.00000 | ==0 0.00000 | min 0.0161 max 0.9839 mean 0.4507 | distinct 132365
+cand_f4: float32 rows 1389971 (stats on 1389971) | NaN 0.00000 | ==0 0.00000 | min 0.0156 max 0.9844 mean 0.5051 | distinct 333480
+cand_f5: float32 rows 1389971 (stats on 1389971) | NaN 0.00000 | ==0 0.01347 | min 0.0000 max 0.9839 mean 0.4419 | distinct 1132477
+cand_emb_idx: int32 rows 1389971 | min -1 max 2516710 | distinct 1239207 | ==0 0.00000 | ==-1 0.00015 | singletons 0.9099 of distinct
+cand_item_id: int32 rows 1389971 | min 100 max 111319521 | distinct 1239391 | ==0 0.00000 | ==-1 0.00000 | singletons 0.9099 of distinct
+cand_pos: absent
+cand_target: int8 rows 1389971 | min 0 max 1 | distinct 2 | ==0 0.98418 | ==-1 0.00000 | singletons 0.0000 of distinct
+hist_item_id: int32 rows 2499547 | min 9 max 111319570 | distinct 1584249 | ==0 0.00000 | ==-1 0.00000
+hist_category_id: int8 rows 2499547 | min 0 max 53 | distinct 53 | ==0 0.00003 | ==-1 0.00000 | shares 0:0.0000 2:0.0951 3:0.1007 4:0.0030 5:0.0126 6:0.0587 7:0.0484 8:0.0212 9:0.0037 10:0.0433 11:0.0226 12:0.0054 13:0.1496 14:0.0127 15:0.0434 16:0.0289 17:0.0028 18:0.0153 19:0.0014 20:0.0093 21:0.0223 22:0.0031 23:0.0219 24:0.0054 25:0.0035 26:0.0103 27:0.0130 28:0.0114 29:0.0204 30:0.0033 31:0.0007 32:0.0144 33:0.0174 34:0.0062 35:0.0055 36:0.0020 37:0.0013 38:0.0048 39:0.0078 40:0.0026 41:0.0067 42:0.0041 43:0.0027 44:0.0103 45:0.0061 46:0.0027 47:0.0169 48:0.0324 49:0.0015 50:0.0601 51:0.0010 52:0.0001 53:0.0001
+hist_event_type: int8 rows 2499547 | min 1 max 10 | distinct 10 | ==0 0.00000 | ==-1 0.00000 | shares 1:0.4387 2:0.1394 3:0.1203 4:0.1072 5:0.0530 6:0.0467 7:0.0424 8:0.0321 9:0.0150 10:0.0052
+hist_event_source: int8 rows 2499547 | min 0 max 26 | distinct 27 | ==0 0.45437 | ==-1 0.00000 | shares 0:0.4544 1:0.3376 2:0.1378 3:0.0259 4:0.0178 5:0.0093 6:0.0066 7:0.0067 8:0.0010 9:0.0009 10:0.0007 11:0.0005 12:0.0004 13:0.0002 14:0.0001 15:0.0000 16:0.0000 17:0.0000 18:0.0000 19:0.0000 20:0.0000 21:0.0000 22:0.0000 23:0.0000 24:0.0000 25:0.0000 26:0.0000
+hist_emb_idx: int32 rows 2499547 | min -1 max 2516700 | distinct 1361785 | ==0 0.00000 | ==-1 0.14205
+item table rows 2516711 | referenced by cand only 0.4589 hist only 0.5076 both 0.0335 unreferenced 0.00000
+===== test =====
+feeds 28595 | feed_id min 199 max 3194169 unique 28595 | corr(feed_id, timestamp) 0.0085 | feed_id sorted by time monotone share 0.9133
+timestamp UTC 09-25 21:00:48 .. 09-29 20:58:40 | distinct 2524 | share on 128 s grid (t % 128 mode) 1.0000 mode residue 0 | feeds sharing a timestamp with another feed 0.9972
+user_id min 0 max 2483558 distinct 27309 | user 0 feeds 1179 (0.0412) | non-zero users with >1 feed 105 | feeds of such users 213
+M min 5 max 300 mean 101.58 | H min 0 max 256 mean 173.92 H==256 0.2881 H==0 0.0086
+cand_category_id: int8 rows 2904806 | min 2 max 53 | distinct 52 | ==0 0.00000 | ==-1 0.00000 | singletons 0.0000 of distinct
+cand_f1: float32 rows 2904806 (stats on 2904806) | NaN 0.00000 | ==0 0.00000 | min 0.0179 max 0.9821 mean 0.3965 | distinct 2081376
+cand_f2: float32 rows 2904806 (stats on 2904806) | NaN 0.00000 | ==0 0.15037 | min 0.0000 max 0.9844 mean 0.4399 | distinct 441258
+cand_f3: float32 rows 2904806 (stats on 2904806) | NaN 0.00000 | ==0 0.00000 | min 0.0161 max 0.9839 mean 0.4466 | distinct 270814
+cand_f4: float32 rows 2904806 (stats on 2904806) | NaN 0.00000 | ==0 0.00000 | min 0.0156 max 0.9844 mean 0.5083 | distinct 492673
+cand_f5: float32 rows 2904806 (stats on 2904806) | NaN 0.00000 | ==0 0.01061 | min 0.0000 max 0.9839 mean 0.4436 | distinct 2305723
+cand_emb_idx: int32 rows 2904806 | min -1 max 4710947 | distinct 2381332 | ==0 0.00000 | ==-1 0.00016 | singletons 0.8582 of distinct
+cand_item_id: int32 rows 2904806 | min 42 max 111319550 | distinct 2381673 | ==0 0.00000 | ==-1 0.00000 | singletons 0.8582 of distinct
+cand_pos: absent
+cand_target: absent
+hist_item_id: int32 rows 4973106 | min 31 max 111319568 | distinct 3010579 | ==0 0.00000 | ==-1 0.00000
+hist_category_id: int8 rows 4973106 | min 0 max 53 | distinct 53 | ==0 0.00003 | ==-1 0.00000 | shares 0:0.0000 2:0.0979 3:0.0992 4:0.0031 5:0.0118 6:0.0587 7:0.0489 8:0.0211 9:0.0041 10:0.0426 11:0.0225 12:0.0054 13:0.1514 14:0.0127 15:0.0442 16:0.0280 17:0.0027 18:0.0150 19:0.0016 20:0.0083 21:0.0222 22:0.0034 23:0.0198 24:0.0049 25:0.0042 26:0.0102 27:0.0129 28:0.0121 29:0.0205 30:0.0033 31:0.0006 32:0.0140 33:0.0176 34:0.0052 35:0.0049 36:0.0021 37:0.0012 38:0.0049 39:0.0069 40:0.0026 41:0.0070 42:0.0038 43:0.0034 44:0.0101 45:0.0063 46:0.0027 47:0.0168 48:0.0333 49:0.0016 50:0.0610 51:0.0012 52:0.0001 53:0.0001
+hist_event_type: int8 rows 4973106 | min 1 max 10 | distinct 10 | ==0 0.00000 | ==-1 0.00000 | shares 1:0.4409 2:0.1377 3:0.1200 4:0.1069 5:0.0531 6:0.0470 7:0.0426 8:0.0317 9:0.0152 10:0.0049
+hist_event_source: int8 rows 4973106 | min 0 max 29 | distinct 29 | ==0 0.45176 | ==-1 0.00000 | shares 0:0.4518 1:0.3433 2:0.1353 3:0.0254 4:0.0178 5:0.0090 6:0.0070 7:0.0066 8:0.0010 9:0.0008 10:0.0006 11:0.0006 12:0.0003 13:0.0002 14:0.0001 15:0.0001 16:0.0000 17:0.0000 18:0.0000 19:0.0000 20:0.0000 21:0.0000 22:0.0000 23:0.0000 24:0.0000 25:0.0000 26:0.0000 27:0.0000 29:0.0000
+hist_emb_idx: int32 rows 4973106 | min -1 max 4710940 | distinct 2578375 | ==0 0.00000 | ==-1 0.14039
+item table rows 4710948 | referenced by cand only 0.4527 hist only 0.4945 both 0.0528 unreferenced 0.00000
+===== train =====
+feeds 3151208 | feed_id min 1 max 3194226 unique 3151208 | corr(feed_id, timestamp) -0.0012 | feed_id sorted by time monotone share 0.9976
+timestamp UTC 09-05 21:00:48 .. 09-19 21:00:48 | distinct 7613 | share on 128 s grid (t % 128 mode) 1.0000 mode residue 0 | feeds sharing a timestamp with another feed 1.0000
+user_id min 0 max 2483761 distinct 2455382 | user 0 feeds 123904 (0.0393) | non-zero users with >1 feed 421339 | feeds of such users 993262
+M min 5 max 300 mean 78.30 | H min 0 max 256 mean 185.19 H==256 0.4227 H==0 0.0111
+cand_category_id: int8 rows 246745836 | min 2 max 53 | distinct 52 | ==0 0.00000 | ==-1 0.00000 | singletons 0.0000 of distinct
+cand_f1: float32 rows 246745836 (stats on 24674584) | NaN 0.00000 | ==0 0.00000 | min 0.0179 max 0.9821 mean 0.4427 | distinct 13643923
+cand_f2: float32 rows 246745836 (stats on 24674584) | NaN 0.00000 | ==0 0.11863 | min 0.0000 max 0.9844 mean 0.4428 | distinct 8476588
+cand_f3: float32 rows 246745836 (stats on 24674584) | NaN 0.00000 | ==0 0.00000 | min 0.0161 max 0.9839 mean 0.4876 | distinct 8710505
+cand_f4: float32 rows 246745836 (stats on 24674584) | NaN 0.00000 | ==0 0.00000 | min 0.0156 max 0.9844 mean 0.5041 | distinct 1031305
+cand_f5: float32 rows 246745836 (stats on 24674584) | NaN 0.00000 | ==0 0.01437 | min 0.0000 max 0.9839 mean 0.4803 | distinct 12660144
+cand_emb_idx: int32 rows 246745836 | min -1 max 81557943 | distinct 38947612 | ==0 0.00000 | ==-1 0.00003 | singletons 0.4251 of distinct
+cand_item_id: int32 rows 246745836 | min 2 max 111319563 | distinct 38950205 | ==0 0.00000 | ==-1 0.00000 | singletons 0.4252 of distinct
+cand_pos: int16 rows 246745836 | min 0 max 299 | distinct 300 | ==0 0.01089 | ==-1 0.00000 | singletons 0.0000 of distinct
+cand_target: int8 rows 246745836 | min 0 max 1 | distinct 2 | ==0 0.97793 | ==-1 0.00000 | singletons 0.0000 of distinct
+hist_item_id: int32 rows 583586378 | min 1 max 111319574 | distinct 94705754 | ==0 0.00000 | ==-1 0.00000
+hist_category_id: int8 rows 583586378 | min 0 max 53 | distinct 54 | ==0 0.00003 | ==-1 0.00000 | shares 0:0.0000 1:0.0000 2:0.0986 3:0.1000 4:0.0032 5:0.0125 6:0.0588 7:0.0476 8:0.0202 9:0.0044 10:0.0467 11:0.0236 12:0.0054 13:0.1458 14:0.0127 15:0.0458 16:0.0289 17:0.0027 18:0.0149 19:0.0016 20:0.0093 21:0.0206 22:0.0033 23:0.0204 24:0.0049 25:0.0038 26:0.0096 27:0.0127 28:0.0109 29:0.0208 30:0.0031 31:0.0006 32:0.0126 33:0.0169 34:0.0056 35:0.0050 36:0.0021 37:0.0014 38:0.0051 39:0.0069 40:0.0024 41:0.0071 42:0.0038 43:0.0029 44:0.0106 45:0.0059 46:0.0028 47:0.0176 48:0.0359 49:0.0011 50:0.0595 51:0.0011 52:0.0002 53:0.0001
+hist_event_type: int8 rows 583586378 | min 1 max 10 | distinct 10 | ==0 0.00000 | ==-1 0.00000 | shares 1:0.5188 2:0.1164 3:0.1082 4:0.0929 5:0.0441 6:0.0411 7:0.0367 8:0.0255 9:0.0119 10:0.0044
+hist_event_source: int8 rows 583586378 | min 0 max 30 | distinct 31 | ==0 0.39343 | ==-1 0.00000 | shares 0:0.3934 1:0.3757 2:0.1593 3:0.0223 4:0.0192 5:0.0099 6:0.0079 7:0.0075 8:0.0015 9:0.0009 10:0.0008 11:0.0006 12:0.0004 13:0.0002 14:0.0001 15:0.0001 16:0.0000 17:0.0000 18:0.0000 19:0.0000 20:0.0000 21:0.0000 22:0.0000 23:0.0000 24:0.0000 25:0.0000 26:0.0000 27:0.0000 28:0.0000 29:0.0000 30:0.0000
+hist_emb_idx: int32 rows 583586378 | min -1 max 81557935 | distinct 66794677 | ==0 0.00000 | ==-1 0.15511
+item table rows 81557944 | referenced by cand only 0.1810 hist only 0.5225 both 0.2965 unreferenced 0.00000

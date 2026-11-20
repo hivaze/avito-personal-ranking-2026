@@ -1,0 +1,43 @@
+MEMBERSHIP (recomputed from train.py rules; label-free)
+  u20a: training feeds 2496456 (fold 0 dropped: 624752), cooldown pool 107273 | u20b: training feeds 3121208, unlabelled 624752, cooldown pool 107273 | u20c: training feeds 3121208, cooldown pool 134118
+  W0S: 11022 feeds | in u20a training 0 | in u20b training 11022, of them unlabelled (teacher-only target, aux weight 0) 11022, in u20b cooldown pool 0 | in u20c training (labelled) 11022, in u20c cooldown pool 0
+  W0L: 26883 feeds | in u20a training 0 | in u20b training 26883, of them unlabelled (teacher-only target, aux weight 0) 26883, in u20b cooldown pool 0 | in u20c training (labelled) 26883, in u20c cooldown pool 17462
+  H0: 5974 feeds | in u20a training 0 | in u20b training 0, of them unlabelled (teacher-only target, aux weight 0) 0, in u20b cooldown pool 0 | in u20c training (labelled) 0, in u20c cooldown pool 0
+  log w5_e10_xf0_s951: w12 xfold 0: 624752 feeds of the fold dropped, 2496456 training feeds || train feeds 2496456, steps/epoch 7871, total steps 78710 || cooldown mix: p=0.02 from step 62968, exploration pool 107273 feeds
+  log w5_e10_xf0_s952: w12 xfold 0: 624752 feeds of the fold dropped, 2496456 training feeds || train feeds 2496456, steps/epoch 7871, total steps 78710 || cooldown mix: p=0.02 from step 62968, exploration pool 107273 feeds
+  log w5_e10_xf1_s951: w12 xfold 1: 624702 feeds of the fold dropped, 2496506 training feeds || train feeds 2496506, steps/epoch 7867, total steps 78670 || cooldown mix: p=0.02 from step 62936, exploration pool 107328 feeds
+  log w5_e10_xf1_s952: w12 xfold 1: 624702 feeds of the fold dropped, 2496506 training feeds || train feeds 2496506, steps/epoch 7867, total steps 78670 || cooldown mix: p=0.02 from step 62936, exploration pool 107328 feeds
+  log w5_e10_base_s951: train feeds 3121208, steps/epoch 9835, total steps 98350 || cooldown mix: p=0.02 from step 78680, exploration pool 134118 feeds
+  log w5_e10_base_s952: train feeds 3121208, steps/epoch 9835, total steps 98350 || cooldown mix: p=0.02 from step 78680, exploration pool 134118 feeds
+  witness feeds without a positive (the only label-dependent factor of the unlabelled target, train.py l.502): 0
+
+=== SELECTED checkpoints, domain token tr === scored: xf0 [951, 952], xf1 [951, 952], base [951, 952]
+  feeds                            n |   xf0 member  pool |   xf1 member  pool |  base member  pool | B-A member (per seed) ; B-A pool | C-A member ; C-A pool [IN-SAMPLE for C on W0*] | B-C member
+  W0S short, all               11022 | 0.49156 0.49494 | 0.51405 0.51749 | 0.51612 0.51950 | +0.02249+-0.00107 (+0.01551 +0.02947) ; +0.02254+-0.00125 | +0.02456+-0.00107 ; +0.02456+-0.00124 | -0.00207+-0.00108
+    M 5-9                       1266 | 0.69419 0.69807 | 0.71634 0.71770 | 0.71940 0.72293 | +0.02215+-0.00351 (+0.01209 +0.03221) ; +0.01964+-0.00403 | +0.02521+-0.00337 ; +0.02486+-0.00396 | -0.00306+-0.00329
+    M 10-19                     1872 | 0.55618 0.55800 | 0.58197 0.58457 | 0.58561 0.58562 | +0.02579+-0.00278 (+0.01762 +0.03396) ; +0.02657+-0.00327 | +0.02943+-0.00281 ; +0.02762+-0.00316 | -0.00364+-0.00283
+    M 20-34                     3930 | 0.47319 0.47804 | 0.49331 0.49682 | 0.49741 0.50124 | +0.02012+-0.00176 (+0.01513 +0.02510) ; +0.01878+-0.00205 | +0.02422+-0.00176 ; +0.02320+-0.00201 | -0.00410+-0.00182
+    M 35-49                     3954 | 0.41434 0.41686 | 0.43775 0.44216 | 0.43673 0.44122 | +0.02341+-0.00170 (+0.01599 +0.03082) ; +0.02531+-0.00200 | +0.02239+-0.00171 ; +0.02436+-0.00202 | +0.00101+-0.00168
+    excl. user-0 bucket        10654 | 0.49056 0.49374 | 0.51293 0.51629 | 0.51502 0.51844 | +0.02237+-0.00109 (+0.01539 +0.02936) ; +0.02255+-0.00128 | +0.02447+-0.00109 ; +0.02470+-0.00126 | -0.00209+-0.00109
+  W0L long, all                26883 | 0.31806 0.32014 | 0.33534 0.33784 | 0.33545 0.33727 | +0.01728+-0.00051 (+0.01196 +0.02259) ; +0.01770+-0.00059 | +0.01739+-0.00050 ; +0.01713+-0.00056 | -0.00011+-0.00049
+    in C cooldown pool         17462 | 0.31734 0.31916 | 0.33519 0.33774 | 0.33609 0.33802 | +0.01785+-0.00064 (+0.01217 +0.02353) ; +0.01858+-0.00074 | +0.01875+-0.00062 ; +0.01886+-0.00070 | -0.00090+-0.00061
+    not in C pool               9421 | 0.31939 0.32197 | 0.33562 0.33803 | 0.33426 0.33589 | +0.01622+-0.00086 (+0.01159 +0.02085) ; +0.01606+-0.00100 | +0.01487+-0.00082 ; +0.01393+-0.00092 | +0.00135+-0.00084
+    old p>0.9 (holdout-like)    9392 | 0.31902 0.32101 | 0.33632 0.33949 | 0.33860 0.34082 | +0.01730+-0.00087 (+0.01197 +0.02263) ; +0.01848+-0.00101 | +0.01957+-0.00086 ; +0.01981+-0.00096 | -0.00228+-0.00082
+    M 50-99                     9143 | 0.36127 0.36445 | 0.38206 0.38439 | 0.38173 0.38344 | +0.02078+-0.00100 (+0.01355 +0.02801) ; +0.01994+-0.00116 | +0.02045+-0.00097 ; +0.01899+-0.00111 | +0.00033+-0.00097
+    M 100-300                  17740 | 0.29579 0.29731 | 0.31127 0.31385 | 0.31160 0.31348 | +0.01547+-0.00058 (+0.01115 +0.01980) ; +0.01655+-0.00067 | +0.01581+-0.00056 ; +0.01617+-0.00062 | -0.00033+-0.00055
+    excl. user-0 bucket        25806 | 0.31666 0.31878 | 0.33387 0.33614 | 0.33404 0.33583 | +0.01720+-0.00052 (+0.01177 +0.02264) ; +0.01736+-0.00060 | +0.01738+-0.00051 ; +0.01705+-0.00057 | -0.00018+-0.00050
+  W0S + W0L                    37905 | 0.36851 0.37097 | 0.38731 0.39008 | 0.38799 0.39026 | +0.01880+-0.00048 (+0.01300 +0.02460) ; +0.01911+-0.00056 | +0.01947+-0.00047 ; +0.01929+-0.00053 | -0.00068+-0.00047
+  H0 fold-0 holdout             5974 | 0.31545 0.31804 | 0.31540 0.31789 | 0.31682 0.31859 | -0.00005+-0.00094 (-0.00151 +0.00142) ; -0.00016+-0.00110 | +0.00137+-0.00097 ; +0.00055+-0.00114 | -0.00142+-0.00096
+  W1S control (fold 1)         11228 | 0.51408 0.51801 | 0.49202 0.49440 | 0.51586 0.51879 | -0.02206+-0.00106 (-0.01581 -0.02831) ; -0.02360+-0.00123 | +0.00178+-0.00104 ; +0.00078+-0.00121 | -0.02384+-0.00105
+  W1L control (fold 1)          6000 | 0.33610 0.34018 | 0.31858 0.32027 | 0.33648 0.33868 | -0.01752+-0.00114 (-0.01214 -0.02290) ; -0.01991+-0.00131 | +0.00038+-0.00106 ; -0.00149+-0.00120 | -0.01790+-0.00107
+  SHORT witness re-weighted to the val M<50 size mix (exact M; effective n 9366): B - A +0.02290+-0.00120
+  TRANSDUCTIVE READ (SELECTED checkpoints): B - A on natural SHORT witness feeds +0.02249+-0.00107 (n 11022); on LONG witness feeds +0.01728+-0.00051 (n 26883); both +0.01880+-0.00048
+    contrast "this feed's inputs seen" minus "only the user's other feeds seen" (long: W0L minus H0, independent feed sets): +0.01733+-0.00107
+    same contrast on the population-matched subset (W0L feeds with old p_random > 0.9, the holdout's own selection rule; n 9392): +0.01734+-0.00128
+    in-sample bound (C trained on these labels; NOT evidence): C - A short +0.02456+-0.00107, long +0.01739+-0.00050; B - A as a share of that bound: short +0.916, long +0.994
+  teacher_xf0 (GPU bf16 file, 3 hard-label members that never saw fold 0) NDCG: W0S 0.49489, W0L 0.32085, H0 0.31869
+  mean within-feed corr to the teacher (member mean over seeds): W0S: xf0 0.9785 xf1 0.9514 base 0.9563 ; B-A -0.02708+-0.00028 | W0L: xf0 0.9808 xf1 0.9562 base 0.9616 ; B-A -0.02461+-0.00008 | H0: xf0 0.9811 xf1 0.9570 base 0.9624 ; B-A -0.02412+-0.00018
+  anchor on H0, CPU fp32 minus stored GPU bf16 file, per member: xf0_s951 +0.00024+-0.00019; xf0_s952 +0.00003+-0.00022; xf1_s951 +0.00007+-0.00023; xf1_s952 -0.00009+-0.00019; base_s951 +0.00019+-0.00019; base_s952 +0.00028+-0.00022; 
+
+=== @last checkpoints, domain token tr === scored: xf0 [], xf1 [], base []
+DONE

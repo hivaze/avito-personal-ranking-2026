@@ -1,0 +1,36 @@
+# Teacher of student_wide.toml, student_wide_holdout.toml, student_popularity_light.toml and
+# student_popularity_free.toml: the per-feed-centred mean of the train scores of 11 click-label
+# (hard-label) members of the full view at width 128. Written to [teachers] mean11 of
+# configs/paths.toml by scripts/05_build_teacher.py average.
+# The members' scores were dumped in groups; each group file (under [teachers] dumps) holds the sum
+# of its members' scores, and <file>.n next to it their number.
+# Members r6_cd_m02_r101..r107 are an earlier recipe of the same model: a two-epoch cooldown
+# restarted from step 77,500 of an older run. w5_e10_base_s951..s954 are teacher_hard_label.toml.
+# The seven r6_cd_m02 members have no recipe in configs/ and no stored checkpoint: their group
+# files can be averaged, not dumped again.
+
+name = "mean11"
+
+[[dumps]]
+file = "teacher_a"
+members = ["r6_cd_m02_r101", "r6_cd_m02_r102"]
+
+[[dumps]]
+file = "teacher_b"
+members = ["r6_cd_m02_r103", "r6_cd_m02_r104"]
+
+[[dumps]]
+file = "teacher_c"
+members = ["r6_cd_m02_r105", "r6_cd_m02_r106"]
+
+[[dumps]]
+file = "teacher_d"
+members = ["r6_cd_m02_r107", "w5_e10_base_s953"]
+
+[[dumps]]
+file = "teacher_e"
+members = ["w5_e10_base_s954", "w5_e10_base_s951"]
+
+[[dumps]]
+file = "teacher_f"
+members = ["w5_e10_base_s952"]

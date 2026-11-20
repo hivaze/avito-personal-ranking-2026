@@ -1,0 +1,28 @@
+members 16 val rows 1389971 holdout rows 4630966
+W16 TO pool: val 0.40144 (src/metrics.py 0.40144) holdout 0.32460
+
+== 8|8 random disjoint splits of the 16 wide students, 400 splits (47 s)
+ per-feed paired SE (mean): val 0.00047 holdout 0.00026
+ sd of the pool delta over splits: val 0.00040 holdout 0.00023  (ratio to the per-feed SE: 0.86 / 0.86)
+ sd of z_val 0.86, z_hold 0.86, pooled z 0.80; corr(z_val, z_hold) over splits -0.15
+ P(both deltas >= 0) 0.215; quantiles of pooled z: 95% +1.36, 97.5% +1.57, 99% +1.81; share of pooled z >= 1.60 (the W8 - NEW8 reading): 0.0238
+ pass rate [both >= 0 and pooled z >= 1.3]: 0.0537   (pooled z >= 1.3 alone: 0.0612)
+ pass rate [both >= 0 and pooled z >= 1.6]: 0.0213   (pooled z >= 1.6 alone: 0.0238)
+ pass rate [both >= 0 and pooled z >= 2.0]: 0.0025   (pooled z >= 2.0 alone: 0.0025)
+ pass rate [both >= 0 and pooled z >= 2.5]: 0.0000   (pooled z >= 2.5 alone: 0.0000)
+ pass rate [both >= 0 and pooled z >= 3.0]: 0.0000   (pooled z >= 3.0 alone: 0.0000)
+
+== 4|4 random disjoint splits of the 16 wide students, 400 splits (35 s)
+ per-feed paired SE (mean): val 0.00057 holdout 0.00032
+ sd of the pool delta over splits: val 0.00053 holdout 0.00027  (ratio to the per-feed SE: 0.94 / 0.83)
+ sd of z_val 0.94, z_hold 0.83, pooled z 0.87; corr(z_val, z_hold) over splits -0.04
+ P(both deltas >= 0) 0.234; quantiles of pooled z: 95% +1.42, 97.5% +1.71, 99% +1.87; share of pooled z >= 1.60 (the W8 - NEW8 reading): 0.0338
+ pass rate [both >= 0 and pooled z >= 1.3]: 0.0675   (pooled z >= 1.3 alone: 0.0737)
+ pass rate [both >= 0 and pooled z >= 1.6]: 0.0312   (pooled z >= 1.6 alone: 0.0338)
+ pass rate [both >= 0 and pooled z >= 2.0]: 0.0063   (pooled z >= 2.0 alone: 0.0063)
+ pass rate [both >= 0 and pooled z >= 2.5]: 0.0000   (pooled z >= 2.5 alone: 0.0000)
+ pass rate [both >= 0 and pooled z >= 3.0]: 0.0000   (pooled z >= 3.0 alone: 0.0000)
+
+== kd05t25w192 x8 minus kd05w192 x8 (same seeds 951-958): val +0.00044 +- 0.00048 (z +0.91) holdout -0.00021 +- 0.00027 (z -0.79) pooled z +0.09
+== W8 (seeds 951-954) minus NEW8 (seeds 955-958): val +0.00034 +- 0.00047 (z +0.73) holdout +0.00042 +- 0.00028 (z +1.53) pooled z +1.60
+== kd05w192 s951-954 4-pool: val 0.40134 holdout 0.32408; kd05w192 s951-958 8-pool: val 0.40110 holdout 0.32430

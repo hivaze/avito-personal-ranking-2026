@@ -1,0 +1,39 @@
+PREDECLARED at 2026-11-13 04:45:44 UTC (written before any feature, delta or pool score is computed)
+
+ITEM: FUTWIN Step A closure (oracle; CPU only; nothing adopted, nothing submitted). u_fut uses future information and is NOT a feature.
+
+DATA / SETS
+- Holdout H30K: exactly nn_x/r6/train.py / nn_x/r6/holdout_eval.py: p = nan_to_num(train_prandom.p_random), p[M<50]=0,
+  cand = where(p>0.9 & M>=50), hold = sort(default_rng(12345).choice(cand, 30000, replace=False)). Assert M/offsets/labels
+  equal preds/holdout/holdout_meta.npy and holdout_y.npy.
+- Kept set S: holdout feeds a with user_id != 0 for which some LATER train feed b of the same user exists with
+  ts_b - ts_a >= 86400 s; b := the EARLIEST such feed (feeds in between with gap < 24 h are skipped).
+- Future window W(a) = multiset difference of b's history minus a's history on the key (item_id, event_type):
+  for each key, max(0, count_b - count_a) events of b (newest-first, i.e. the excess events of that key at the
+  smallest hpos) are "future". All event types count. Category of an event = hist_category_id.
+- Base pool: G3 train-only holdout pool = per-feed z-mean of the 20 members F10 (v23_gru_pre2s_s501-506) + F7x
+  (r6_cd_m02_r101-107) + F7x70 (r6_cd_m02_p70k_r101-107) holdout preds (member z = per-feed z, population sd + 1e-9),
+  as nn_x/insights/ensemble/lib.py final(G3, 'holdout'). Sanity: its holdout NDCG must reproduce 0.32379 (+-1e-5).
+
+FEATURES (per candidate j of feed a in S, category c_j = cand_category_id)
+- u_fut  = (# events in W(a) with category c_j) / |W(a)|   (0 for all candidates if |W(a)| = 0)
+- u_past = (# events in a's own history with category c_j) / H_a  (0 if H_a = 0)
+- u_echo = 1[c_j in {categories of a's positive candidates}]  (label-echo control; all 0 if the feed has no positive)
+
+SCORING (single pre-declared weight, no tuning)
+- s_x = zf(G3pool) + 0.1 * zf(u_x), zf = per-feed z (population sd + 1e-9; a constant feature gives 0 => no change),
+  i.e. the _z column of src/stack_val.feed_rank_z. Base = zf(G3pool) (same ranking as G3pool).
+- NDCG = src/metrics.ndcg_per_feed (binary gain, pessimistic ties). Feeds outside S are untouched (delta 0) and
+  excluded from the readout.
+- delta(x) = mean over S of per-feed [NDCG(s_x) - NDCG(base)]; SE = sd(ddof=1)/sqrt(|S|); z = delta/SE.
+- Also report: paired delta(u_fut) - delta(u_past) with its paired SE; within-feed corr of u_fut with u_past
+  (pooled Pearson of per-feed-z values over candidates of feeds where both vary; plus mean/median per-feed Pearson).
+
+DECISION RULE (from reports/TRICKS_SWEEP_1113.md, verbatim intent)
+- FUTWIN (any future-window / dense category-intent aux, incl. Step B / PFD) stays DEFERRED only if ALL hold:
+    (1) delta(u_fut) >= +0.005 AND z(u_fut) >= 3
+    (2) delta(u_fut) - delta(u_past) >= +0.003   (point estimate)
+    (3) delta(u_fut) >= 0.30 * delta(u_echo)
+  otherwise the category-intent aux family is CLOSED for good.
+- INFO ONLY (cannot change the verdict): weights 0.05/0.2/0.3; u_fut with the current feed's positive items removed
+  from W(a) (u_fut_nopos); subset |W(a)| >= 1; slices by |W(a)| and by gap.

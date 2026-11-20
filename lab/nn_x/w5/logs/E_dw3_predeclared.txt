@@ -1,0 +1,81 @@
+WAVE 9 arm DW3 (random-order-domain-weighted PLATEAU) PRE-DECLARATION — frozen 2026-11-13T13:27:30Z (`date -u`), BEFORE any run of this arm
+(checked at 2026-11-13T13:27:30Z: 0 matching files — no nn_x/w9/dw3/logs/w9_*, no nn_x/w9/dw3/ckpt/*, no nn_x/w5/logs|preds/*dw3*; no GPU process
+of this agent had been started; only the CPU test suite nn_x/w9/dw3/tests/test_dw3.py cpu had run, which trains nothing).
+Idea / skeptic reports: scratchpad w9/dw3.json (fresh-eye round, CURRENT_STATUS 13:09). Code copy: nn_x/w9/dw3 (= nn_x/w5 code + cd_arms9.py;
+nothing in nn_x/w5/*.py is edited); every run is launched from nn_x/w9/dw3 (its own logs/ preds/ ckpt/), GPUs N only, one train.py per GPU,
+OMP/MKL/OPENBLAS/POLARS threads 12, nvidia-smi check (<= 3 compute processes, >= 60 GB free) before every launch, real PIDs from /proc in
+nn_x/w9/dw3/RUNNING.txt + one line in nn_x/w5/logs/RUNNING_w5.txt.
+
+SPEC ERROR FOUND AND FIXED (both skeptic reports): the spec's flag (ii) '--prand_pool_off: fw = None on m02 pool batches, so the cooldown
+pool dose equals the base's' is FALSE in gradient terms. The up-weighted feeds (p_random > 0.5, M >= 50, holdout excluded) ARE the 134,118
+m02 pool feeds, and they also appear in the NON-pool cooldown batches (the regular stream) at ~3.3x weight; with --prand_pool_off alone the
+cooldown pool-feed gradient share would rise ~2.5x (from ~2.9 to ~8 pass-equivalents), i.e. into the CLOSED m04 / mix-0.1 dose range
+(wave-6 m04 STOP; r6 mix 0.1 end-minus-peak -0.0033). FIX = weight the PLATEAU only: flag --prand_until_cool: fw = None on EVERY step
+>= t_cool (regular and pool batches), so the whole WSD cooldown, and hence the m02 pool dose, is weighted exactly as the base (tests:
+a cooldown-only run with the flags ON is bit-identical to the flags-off run). --prand_pool_off is NOT implemented (moot). Second slip in the
+spec, not fatal: '~17.5% of the main-loss weight; production 0.84x' was computed with the holdout-inclusive 164K feeds and p ~ 0.93; the
+real training-feed numbers (3,121,208 feeds, mean p 0.0482, pool mean p 0.834) give 17.9% / 0.86x at prand_base 0.2 (= pw_aux_sim's
+closed dose) and 14.0% / 0.90x at 0.3.
+
+FLAGS (nn_x/w9/dw3/train.py + cd_arms9.py, both OFF by default; flag-off path AST-identical to nn_x/w5/train.py and end-to-end bit-identical):
+  --prand_norm        fw_f = (prand_base + p_f) / mean over the 3,121,208 training feeds of (prand_base + p)  -> mean per-feed weight 1
+                      under --loss_norm feed (without it the main loss would shrink by ~2.9x against the K9 aux and the 1.0 clip norm)
+  --prand_until_cool  per-feed weights on plateau steps < t_cool only; fw = None from t_cool on (regular AND m02 pool batches)
+DOSE (exact, from the data; logs/test_dw3_dose.json): --prand_base 0.3 --prand_norm --prand_until_cool. mean(0.3 + p) = 0.3482, scale 2.872;
+  the 134,118 pool feeds (4.30% of the training feeds) carry 13.99% of the main-loss weight (3.26x the base's share; mean weight 3.257x,
+  max 3.733x); production (p <= 0.5) feeds 0.899x; M<50 feeds (p = 0, 51% of feeds, 41% of val) 0.862x; realised mean weight over the
+  training batches of an epoch 1.0000 (first 1,000 batches 0.991). Plateau = steps 0-78,679 of 98,350 (10 epochs) / 0-15,735 of 19,670
+  (2 epochs); the cooldown (19,670 / 3,934 steps, m02) is unweighted = the base. WHY 0.3: the idea's dose; it realises the idea's intended
+  RATIO (~3.3x the base's random-like share, the '3.4x' of the mechanism text) while staying below pw_aux_sim's 0.2 (6x relative weight,
+  through the whole AdamW run, batch-normalised: -0.001 strength); the only other recorded reweighting arm (lnorm_batch) sits at the same
+  order of relative weight. One dose only (no sweep).
+
+RUNS AND RULES (read on SAVED predictions by the scripts below; nothing is fine-tuned, pooled or submitted by this agent):
+STAGE S (2-epoch futility screen, first): w9_dw3_s23 / s24 = lane.sh A_BASE + HYG + the arm flags, paired per feed vs an OWN base pair
+  w9_base_s23 / s24 = exactly A_BASE + HYG in the same code copy (nn_x/abl's abl_base_s23/24 have different stored args: abl-only keys;
+  nn_x/w5 has no 2-epoch base pair). Primary read = LAST checkpoint (step 19,670; the 2-epoch screen convention of w5 stage A / abl);
+  selected checkpoint reported. Read-out nn_x/w9/dw3/s_readout.py dw3 23,24 -> nn_x/w9/dw3/logs/s_readout_dw3.txt.
+  CONTINUE to stage E iff ALL of (s1) pooled member val >= -0.0010; (s2) pooled member holdout >= -0.0005; (s3) no val slice (M<50, M>=50,
+  Tue, Thu) < -2 SE_feed; (s4) pmix >= -1 SE; (s5) member-level diversity margin rho_bb - rho_x >= +0.003 on val (rho_x = mean of
+  corr(dw3_s23, base_s24), corr(dw3_s24, base_s23); rho_bb = corr(base_s23, base_s24); within-feed rank-z Pearson). Otherwise STOP and report
+  (the arm is closed at stage S). (s1)-(s4) = the idea's (S) as amended val-led by skeptic 2; (s5) = the lowest margin from which the
+  10-epoch pool margin +0.005 is plausible (lnorm_batch 0.0023 / r7 best 0.0036 were 'no diversity'; cset 0.0055 was a family candidate).
+STAGE E (only if S CONTINUES): w5_e10_dw3_s951 / s952 = lane.sh E_BASE + HYG + '--prand_base 0.3 --prand_norm --prand_until_cool' (lane case
+  E:dw3), one per GPU (6 / 7), paired per seed vs the existing w5_e10_base_s951 / s952 (nn_x/w5/preds, selected + @last, holdout). Outputs
+  copied into nn_x/w5 with cp --update=none (logs/<v>.json/.log, preds/nn_<v>[@last]_trainonly_{val,test}.npy, preds/holdout/nn_<v>[@last]_holdout.npy).
+  Read-outs: w5_eval_e_ap1.py dw3 951,952 -> nn_x/w5/logs/w5_eval_E_dw3.txt (E rule) and scratchpad div_readout.py dw3 951,952 ->
+  nn_x/w5/logs/div_readout_dw3.txt (diversity clause). Selected checkpoint primary, @last information.
+  E RULE: PASS iff pooled per-seed paired member val > 0 AND holdout > +1 SE AND no val slice (M<50, M>=50, Tue, Thu) < -2 SE AND pmix >= -1 SE.
+  DIVERSITY CLAUSE (E_batch_predeclared.txt amendment 1): (d1) pooled member val >= -0.0005 AND holdout >= -0.0005; (d2) rho_bb - rho_x >= +0.005
+  on val (rho_x = corr(dw3 pool{951,952}, base pool{953,954}), rho_bb = corr(base pool{951,952}, base pool{953,954}) = 0.97364);
+  (d3) 2-member pool dw3 vs base{951,952}: val >= -0.0005 AND holdout >= -0.0005.
+  FAMILY CANDIDATE iff the E rule PASSES OR the diversity clause PASSES (d1 AND d2 AND d3); then reported to the lead (seeds 953/954, FT,
+  decide7 are the lead's). Otherwise CLOSED. Information (never gates): the idea's (P) swap pool z-mean{dw3_951, dw3_952, base_953, base_954}
+  minus z-mean{base_951..954} on val and holdout (the idea's bar +0.0003 val / >= 0 holdout); member cross-corr vs the 0.92 target; the
+  holdout margin; @last deltas; coldpos / warmpos if available. The holdout is random-like (p > 0.9) and therefore IN-DOMAIN for DW3
+  (skeptic 2: LEAKAGE-1 popularity inflation): no holdout number is read without its val counterpart; a gain confined to the holdout does
+  not qualify on its own (the E rule already requires val > 0; the clause requires val >= -0.0005 at member and pool level).
+KILL GATE at step 60,000 (10-epoch runs; the plateau, before the cooldown; logged eval at step 60000): STOP BOTH runs by exact PID and
+  close the arm (information) iff BOTH seeds' logged holdout_ndcg@60000 < base@60000 - 2 x 0.00077 (base s951 0.31659 -> 0.31505,
+  s952 0.31740 -> 0.31586) OR BOTH seeds' logged val_ndcg@60000 < base@60000 - 0.0015 (s951 0.39356 -> 0.39206, s952 0.39336 -> 0.39186)
+  (the idea's holdout gate + skeptic 1's val-led leg, since the holdout is in-domain for DW3). Otherwise the runs complete.
+COST / ETA: stage S 4 x ~20-35 min (2 per GPU), stage E 2 x ~90-180 min; total <= ~8 GPU-h.
+DEVIATIONS FROM THE SPEC, disclosed: (1) --prand_pool_off replaced by --prand_until_cool (the skeptics' fix); (2) own 2-epoch base pair;
+  (3) the stage-S rule is constructed from the idea's (S)/(D) as amended (the idea text has no explicit 2-epoch stage); (4) kill gate val leg added.
+
+RESULT ADDENDUM — 2026-11-13T14:03:00Z (written after the stage-S read-out; the rules above are unchanged)
+Tests before any stage run: nn_x/w9/dw3/tests/test_dw3.py cpu 31/31 (AST proof, statement identity, realised dose), gpu 20/20 on GPU N (flag-off
+  runs bit-identical to the frozen nn_x/w5/train.py, cooldown-only and from scratch; flags ON: plateau weights == (0.3 + p) * 2.8717, feed-weighted
+  mean 0.9989, cooldown and pool batches unweighted; a cooldown-only flags-ON run is bit-identical to the base); lane smoke w9_smoke_dw3_s23 (GPU N) OK.
+STAGE S (2-epoch, 13:35-14:01 UTC, 24.2-24.5 min per run, two runs per GPU on 6 / 7; nn_x/w9/dw3/logs/s_readout_dw3.txt, copy nn_x/w5/logs/w9_dw3_stageS_readout.txt):
+  w9_dw3_s23/24 vs w9_base_s23/24, LAST ckpt (= selected on all 4 runs, step 19670): pooled member val -0.00071 +- 0.00047 (z -1.5), holdout
+  +0.00002 +- 0.00027, pmix -0.00070 +- 0.00070 (z -1.00), slices M<50 -0.00086 (z -1.0) M>=50 -0.00060 (z -1.2) Tue -0.00007 Thu -0.00141 (z -2.1);
+  per seed d val -0.00030 / -0.00111, d hold +0.00069 / -0.00065; member diversity margin rho_bb - rho_x = 0.97981 - 0.97848 = +0.00133 (holdout
+  +0.00144; arm-arm 0.9788, same-seed arm-base 0.9860); 2-member pool val -0.00070 / holdout -0.00009; coldpos +0.00025 (z +0.3), warmpos -0.00101
+  (z -1.6). Gates: (s1) OK (s2) OK (s3) NO (Thu z -2.1) (s4) OK (s5) NO (margin +0.0013 < +0.003).
+  VERDICT: STOP (futility). Stage E NOT launched; nothing copied into nn_x/w5/preds, nothing fine-tuned, pooled or submitted. Arm CLOSED at stage S.
+  Reading: the plateau-only domain weighting at 3.3x the random-like share leaves the member a near copy of the base (cross-seed corr 0.9785 vs
+  base-base 0.9798: the decorrelation is ~1/4 of the +0.005 bar and far from the 0.92 target), at a small strength cost concentrated on warm-positive /
+  Thu feeds; the holdout (in-domain for DW3) is flat. Information: plateau-end (step 15000) holdout is LOWER for dw3 on both seeds (0.31406 vs
+  0.31508; 0.31362 vs 0.31413) and the unweighted m02 cooldown recovers it; plateau pre-clip grad-norm median 0.361 (dw3) vs 0.322 (base), clipped
+  share 0.0001 (no clipping effect).

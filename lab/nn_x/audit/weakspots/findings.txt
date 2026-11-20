@@ -1,0 +1,190 @@
+WEAK SPOTS AND EYE FATIGUE AUDIT  (nn_x/audit/weakspots, 2026-11-12 ~21:40 UTC, CPU only, 12 threads, no GPU, nothing outside this dir written)
+=====================================================================================================================
+Scope: skeptical-outsider read of CURRENT_STATUS (full log), INSIGHTS_1112, EXPERIMENT_REGISTRY, COVERAGE_MAP, review_leakage,
+sol_advval, eda_* and the code (nn/train.py, finetune.py, model.py, data.py, run_final*.sh, src/metrics.py, presub_gate.py,
+calib.py, pmix.py, feats_v2/seq_/feat_covis.py, src/features_luo.py). Eight CPU checks were run on existing preds/data
+(scripts t1..t10 here; outputs in the matching .txt/.log). "+-" = paired per-feed SE.
+
+---------------------------------------------------------------------------------------------------------------------
+0. TL;DR
+---------------------------------------------------------------------------------------------------------------------
+- Two "could explain #1" dead ends are now CLOSED by measurement: (T1) the stored candidate order of val/test carries no
+  label signal (score=-index 0.2886 vs random 0.2893; per-M chi-square Fisher p 0.52; train's stored order is not pos either);
+  (T5/T5b) the per-feed z-mean combiner is not a weak spot: a raw-logit / global-z mean gives G3 +0.00023+-0.00010 on val
+  but 0.0000 on the fresh 12-member m02 pool, on Pall (38), on Cd (19) and on the holdout. Chance maximum, same pattern as
+  the M-split and the S2 stacker.
+- The FT branch adds nothing at pool level (T7: G3 blend - TO-only = -0.00003+-0.00039 val; M<50 -0.0013, M>=50 +0.0009)
+  and has never been isolated on the public LB. One submission of the TO-only branch is a cheap, decisive forward-transfer
+  test (pre-registered expectation below).
+- The largest never-measured mis-specification I found: 51% of train feeds (M<50) are hard-labelled PRODUCTION
+  (p_random := 0 in nn/train.py:160) for the domain token and for the K9 production-order aux at FULL weight, and are
+  excluded from the cooldown pool and the holdout. T10: 409K of them (25.5% of M<50 feeds, 13% of all train feeds) have
+  zero pos-gaps and a random-like position curve (rank-0 lift 1.00 at M<20, 1.89 at M 20-49, vs 4.7 for production
+  M>=50 and 1.74 for the random-like M>=50 holdout pool). The K9 aux therefore distils a RANDOM order into ~13% of the
+  training stream, exactly in the M<50 regime that is 39% of test feeds and 34% of the loss, and that no holdout sees.
+- Measurement: the holdout ranks FAMILIES well (rho 0.93 across 170 members) but seeds/checkpoints poorly: within family
+  rho(holdout, val) = +0.33, rho(holdout, val M<50) = +0.20, and val M<50 vs val M>=50 agree at only +0.26 (n=102,
+  15 families). Seed-level val differences (sd 0.0006-0.0012) are mostly noise; no lens measures M<50 besides val itself.
+- Operations: subs are valid (rank-valued float32, 0 ties, 2,904,806 keys); but there is NO git, NO backup of preds/
+  (21 GB, the only copy of every member's FT predictions: FT fold models are not saved, so no member is bit-reproducible),
+  and EVERY pick/decision script (build_pool.py, decide3-6.py, build_gate5.sh ...) exists only in the /tmp scratchpad.
+  The top-10 report + materials check (rules 8.6.3) needs a reproducible path; today there is none.
+
+---------------------------------------------------------------------------------------------------------------------
+1. ASSUMPTIONS NEVER TESTED (with what I could measure today)
+---------------------------------------------------------------------------------------------------------------------
+1.1 "All M<50 train feeds are production feeds" (nn/train.py:160; domain token, K9 aux weight 1-p, pool, holdout).
+    T10 (label-free gap proxy + descriptive label check):
+      gap share mean: M<50 0.109; M>=50 random-like (p>0.9) 0.016; M>=50 production (p<0.1) 0.102.
+      rank-0 lift by gap bin, M[5,20): gap=0 1.00 (n=301K) vs gap>0.03 1.38-1.62; M[20,50): gap=0 1.89 (n=107K) vs 2.35-3.22.
+      Position curves P(y|rank 0..7): M<50 gap=0 0.132 0.091 0.149 0.131 0.091 0.089 0.083 0.082 (mean 0.085: ~flat);
+      M<50 gap>0 0.144 0.089 0.077 0.073 0.066 ... (monotone, production-like); M>=50 p>0.9 0.025 0.022 0.018 ...;
+      M>=50 p<0.1 0.091 0.057 0.041 ...
+    So the zero-gap M<50 set (408,963 feeds) is strongly enriched in random-order feeds. Consequences never measured:
+      (a) K9 aux at full weight distils a random permutation on these feeds (INSIGHTS item 6 found the aux weight is
+          also 5-7x on pool batches: AUXF addresses normalisation, not the M<50 mislabel);
+      (b) the domain token says "production" for them, so at inference (token = exploration) the model has never seen an
+          exploration-labelled M<50 feed;
+      (c) the cooldown pool (134K feeds, all M>=50) has no small feed while test is 39% M<50;
+      (d) no holdout covers M<50. INSIGHTS L6 lists a relabel as "idle lane only"; T10 says it deserves a real screen.
+1.2 "The FT branch (val OOF under random user folds) measures what the FT does on test 2-7 days later".
+    T7: at pool level the FT half is worth 0 on val (blend - TO -0.00003+-0.00039; M<50 -0.00131+-0.00067,
+    M>=50 +0.00085+-0.00046; w_ft sweep flat: 0.25 +0.00036+-0.00026, 0.0 +0.00003). Calibrated public: blend 0.39227,
+    TO-only 0.39220, FT-only 0.39181. T4: on test the 5 fold models agree at per-feed rho 0.993 (fold-mean 0.996) vs
+    0.983 TO-vs-FT, so the test FT branch is a mild 5-bag of what OOF measured (small positive asymmetry, ~0 at pool level).
+    Never done: an LB isolation of the FT branch, or a time-forward FT (fit on Tue, score Thu).
+1.3 "Checkpoint and member selection on the 30K M>=50 train-period holdout transfers to M<50 and to seeds".
+    T2 (170 members with holdout + TO val preds): across members rho(hold,val) 0.93, rho(hold, val M<50) 0.90 (family
+    strength dominates). Within family (seed level, 15 families, n=102): rho(hold,val) +0.33, rho(hold, val M<50) +0.20,
+    rho(hold, val M>=50) +0.34, rho(hold, val M<20) +0.19, rho(val M<50, val M>=50) +0.26. Several families are at 0 or
+    negative (r6_cd_m02 n=11: -0.15; v28_lr1_m02: 0.00; v23_gru: -0.14; v20_e2 n=12: +0.03). Seed sd of val 0.0005-0.0012
+    vs holdout 0.0002-0.0004. Reading: the holdout cannot select seeds or late-cooldown checkpoints, and nothing but val
+    measures M<50. Gate (a) "single TO val within 0.002 of the best" operates inside seed noise.
+1.4 "The per-feed z-mean is the right combiner at small M" -> TESTED, closed (T5/T5b): G3 raw mean +0.00023+-0.00010
+    (M[10,20) +0.00084+-0.00048, M[20,50) +0.00032+-0.00014) does not replicate: NEW -0.00002+-0.00009, Pall +0.00001,
+    Cd +0.00003, holdout 0.0000. Per-feed member-sd CV is 0.14 at M<10, 0.07 at M>=100, so the z is noisy there, but the
+    pool is insensitive. Keep the z-mean.
+1.5 "The stored candidate order is uninformative" -> TESTED, confirmed (T1). Dataset-page phrase "additionally shuffled by
+    one common permutation" leaves no trace: no index-label dependence at any M bin, no structure vs item_id/emb_idx/f1/
+    category (|rho| 0.11 ~ chance), adjacent same-category share 0.2144 vs 0.2111 under within-feed shuffle.
+1.6 Listwise loss vs full-list NDCG on >=5-candidate feeds: not an issue. T3: every train feed has >=1 positive and M>=5
+    (0 dead feeds), the loss is per-feed normalised, labels_loss showed CE gradient ~ LambdaRank. Nothing to test.
+1.7 f1..f5 raw levels as inputs: the level shifts train->val (f1 0.443->0.400, f3 0.488->0.451, f5 0.480->0.444) and the
+    f4 sign flip (position artefact) are documented; the model also gets within-feed z and pct-rank. A rank/z-only input
+    variant was never run (the pre2 "_s" rescale was the same idea for another feature and was adopted). Low prior.
+1.8 K9 aux (0.5, tau 10) was adopted on an old recipe (+0.0024); never re-controlled (aux 0) under Muon/WSD/m02/pre2s.
+    It is the natural control arm next to AUXF.
+1.9 The 0.5/0.5 blend: flat (T7 sweep), nothing to do.
+1.10 Candidate budget/bucketing: batches are M-homogeneous (Mpad 16); with loss_norm=feed every feed has weight 1/512 so a
+    long-feed batch (B 107-128) carries 0.2x the gradient of a short-feed batch. Under Muon/Adam the step size is
+    roughly scale-invariant, so the intended equal weighting holds only through momentum mixing. Measured once as K1.
+    Not worth a run.
+
+---------------------------------------------------------------------------------------------------------------------
+2. WHAT A TOP TEAM WOULD DO THAT WE SKIPPED (or did only partly)
+---------------------------------------------------------------------------------------------------------------------
+2.1 Isolate the FT branch on the LB (one submission; see experiment E2). We have 10 public entries and all are 0.5/0.5
+    blends; the only lever that touches 39% of test feeds negatively on val (M<50 -0.0013) has no LB evidence.
+2.2 Use the M<50 half of train as exploration data where it is exploration (E1): relabel by the zero-gap proxy for the
+    domain token and the aux weight, admit those feeds to the cooldown pool, and build an M<50 holdout from them (E3).
+2.3 The truncation offset (wave 5, running) and the item-ID/CF channel (P8, CPU-gated) are the two information levers
+    left; INSIGHTS already ranks them. Nothing else in the registry has a mechanism for the "right category, buried" block.
+2.4 Bigger/longer models, mixed precision, more data per epoch: measured null (d192, 12 epochs, batch x2) and bf16 is on.
+    I see no skipped capacity lever. Two never-varied knobs remain: lr > 2e-3 (low prior) and cooldown mix 0.05 (between
+    the tested 0.02 and 0.1; low value).
+2.5 Transductive other-user FUTURE histories for val/test co-visitation (feat_covis.py keeps val/test sources causal,
+    ts < own feed, while train rows' it_hist_luo already contain 56% future mass). The organiser rule bans only same-user
+    later snapshots. Expected small (future share of it_hist on val 1.9%, test 0.9%), and it would inflate val relative
+    to private (val sees test's 4 days of histories; private sees <=2 days). Only worth it with a time-matched val
+    (Tue feeds using Thu histories only). Low priority.
+2.6 The same-user later-feed leak (+0.004 public / +0.0014 private): the user's call, outside this audit's scope.
+2.7 Process: a top team would have frozen the pick protocol and the candidate list by now. Today's log shows four
+    pre-declared rules (decide3-6) written in one day, a tie broken on val post hoc (11:31), a non-blind rule (12:59),
+    and two val-best candidates (M2, S2) landing below the holdout-best on public.
+
+---------------------------------------------------------------------------------------------------------------------
+3. MEASUREMENT BLIND SPOTS
+---------------------------------------------------------------------------------------------------------------------
+3.1 M<50 (41% of val, 39% of test, 34% of G3's loss): no holdout, no pool exposure, seed-level val M<50 vs M>=50 rho 0.26.
+    Every M<50 claim rests on the same 5,893 val feeds that every nested rule has already used.
+3.2 Seed/checkpoint-level selection is inside noise (1.3). Positive: "keep last checkpoint" (wave-5 hygiene) costs nothing.
+3.3 Screen power: single-run val sd 0.0008-0.0011 and same-seed non-determinism |dval| 0.0007 give the 2-seed 2-epoch
+    screens an MDE of ~0.0010-0.0016, while every lever in INSIGHTS expects +0.0003-0.0008. The registry's CLOSED list is
+    therefore "not large at screen power", not "null"; e.g. r7's 13 blocks, Q2 typed/adrop0/a4w. Do not reopen them, but
+    do not cite them as proof when a mechanism recurs.
+3.4 Val over-use: public = 0.0022 + 0.976 val over 8 points; both val-best pools under-performed on public; three nested
+    +2 SE combiner effects (M-split, S2, raw pooling) failed member-level replication within 24 h. The public LB paired
+    SE 0.0005-0.0007 cannot adjudicate anything below ~0.0015, so public cannot rescue val.
+3.5 The holdout rewards popularity/memorisation inputs 2.5x (review_leakage LEAKAGE-1) and is the population furthest
+    from test in time; it is still the best FAMILY-level lens (rho 0.93) and ordered the 5 public pools better than val
+    (Spearman +0.70 vs +0.10, n=5, context only).
+3.6 user0 (4.6% of val, 4.1% test): the FT half is +0.0049+-0.0030 there (T7) - fine, but any user-level feature or fold
+    logic treats it as a bucket; presub reports the slice.
+3.7 Public is 100% weekend, private 24%, val 0%: the only weekend evidence is the train holdout (m02 gain larger on
+    weekend feeds). No lens can show a weekday-trained artefact on public; accepted risk.
+3.8 Per-feed z-mean at small M: measured, insensitive (1.4).
+3.9 FT fold-bagging asymmetry on test: measured, negligible at pool level (1.2).
+
+---------------------------------------------------------------------------------------------------------------------
+4. OPERATIONAL RISKS BEFORE DEC 9 (T6 + rules.txt)
+---------------------------------------------------------------------------------------------------------------------
+4.1 Timeline (rules 7.4): submissions until 2026-12-08 23:59 MSK (20:59 UTC); FINAL-solution choice until 2026-12-09
+    12:00 MSK (09:00 UTC). The rules do not state how many final solutions can be selected: check the platform setting
+    now (if it is 1, pick 2 is only a hedge for a failed upload; if 2, the hedge should be the least test-correlated pool).
+4.2 Rule 8.6.3: top-10 must hand in a report + solution materials; the organiser checks compliance and picks 3 winners
+    "at its discretion" on metric fidelity. Rule 5.3 bans third-party IP; rule 5.5 forbids disclosing the solution later
+    than 7 days before the end of the submission period (from Dec 1). Today the solution is not reproducible from the
+    repo: FT fold models are never saved (finetune.py writes predictions only; GPU non-determinism |dval| 0.0007),
+    preds/ is 21 GB with no backup, no git anywhere, nn/feat_cache hard links, and the pick-building and decision scripts
+    (build_pool.py, build_pall.py, build_pf7x.py, decide3-6.py, build_gate5.sh) live only in /tmp/scratchpad
+    Minimum: copy the scratchpad scripts into the repo (nn_x/picks/), git init, rsync preds/ + nn/ckpt + nn_x/r6/ckpt +
+    subs/ to a second disk (ample space free), and keep a manifest (sha256 of every member pred used by each candidate file).
+4.3 Submission validity: all four candidate/pick files are 2,904,806 rows, keys == sample_submission, float32, 0 ties,
+    rank-valued (0..299), no duplicates. presub_gate covers A-F; keep it mandatory.
+4.4 Pick rule forking paths: decide3's val tie-break, decide4's non-blind contender, decide5's timing amendment, and the
+    daily pick churn (v12 -> PF7x -> G3 in 24 h, 13 candidate files). Freeze by Dec 6/7 as the critical review proposed;
+    one holdout-led rule, val and pmix as vetoes, at most 6 candidates, no post-hoc tie-break.
+4.5 The re-cool D-discount (0.0005-0.0015 depending on the estimate) decides between G3 (70% re-cooled) and from-scratch
+    pools; its mechanism test (INSIGHTS item 4) is the one experiment that changes the final pick, not the LB.
+4.6 presub leak probe has SE ~0.006 (117 has-later feeds); it cannot detect a leak below +0.012 on those feeds. If the
+    user opts to use the later-history leak, it must be an explicit, separately gated post-process, never a model input.
+4.7 CPU/GPU hygiene incidents are logged (pgrep -f killed the lead's shell; a 5th process on GPU N; truncp2 lanes
+    launched early). Nothing broke, but final-week launches should go through one launcher with a process-count check.
+
+---------------------------------------------------------------------------------------------------------------------
+5. TOP-5 UNTESTED ASSUMPTIONS -> CHEAP DECISIVE TESTS
+---------------------------------------------------------------------------------------------------------------------
+E1  M<50 exploration relabel (assumption 1.1).  2-epoch paired screen, seeds 23/24, fresh base in the same harness copy
+    (r7 style), arm = p_random(M<50 & zero gap) := 0.8 (soft domain token [0.2, 0.8, 0], K9 aux weight 0.2), everything
+    else unchanged; second arm (optional) adds those feeds to the cooldown pool (--cooldown_mix 0.02). Read val all,
+    M<50, M>=50, holdout. PASS: pooled val > 0 AND M<50 > +1 SE AND holdout >= -1 SE. Expected: member +0.0003..+0.0010,
+    mostly M<50 (P ~0.3). Cost ~1.5 GPU-h (4 runs). Kill: val < 0 or holdout < -1 SE. Prior check: T10 (this dir).
+E2  FT branch forward transfer (1.2).  (a) ONE public submission of the G3 TO-only branch: ranks of preds/ens_G3_to_test.npy
+    (presub_gate vs G3 first). Pre-registered expectation: public delta 0.0000 +- 0.0005 (calib 0.39220 vs 0.39227).
+    Decision: TO-only - G3 > +0.0010 -> FT branch harmful forward, final pools use w_ft 0..0.25; < -0.0010 -> FT transfers
+    better than OOF says, keep 0.5; else inconclusive, keep 0.5 as hedge. Cost 1 submission.
+    (b) GPU: time-forward FT on 2 members (fit folds = Tue feeds only, score Thu) vs the standard OOF on the same Thu
+    feeds; paired per feed. ~10 GPU-min per member. Kill (b): forward - OOF < -0.002 means the FT gain is same-day only.
+E3  Label-free M<50 holdout (1.3 / 3.1).  Take 30K zero-gap M<50 train feeds (seeded, excluded from training in all NEW
+    runs; for existing members they were in training, so score only NEW members or treat as diagnostic), score with
+    holdout_eval-like inference (~2 GPU-min per member), then compute seed-level rho(M<50-holdout, val M<50) for one
+    family. PASS (useful lens): rho > 0.5 over >= 6 seeds. Cost: ~0.5 GPU-h for a family. Prior check: T2, T10.
+E4  Raw f1..f5 levels (1.7).  2-epoch paired screen: zero the 5 raw columns in dense_features (keep z + pct-rank), seeds
+    23/24. PASS: val > +1.5 SE and holdout >= 0. Expected -0.0005..+0.0005 (P ~0.15). Cost ~1.5 GPU-h. Kill: val < 0.
+    Alternative of equal cost and higher control value: aux_pos 0 next to AUXF (1.8).
+E5  Reproducibility drill (4.2).  CPU, today: copy the scratchpad scripts into nn_x/picks/, re-run the G3 build from
+    preds/ with the repo copy, diff against subs/cand_G_F10F7xF7x70_memeq.parquet (must be identical), git init, start the
+    rsync of preds/ckpt/subs, write the manifest. PASS: byte-identical rebuild + backup verified. Cost: ~1 h CPU/IO.
+
+---------------------------------------------------------------------------------------------------------------------
+6. FILES
+---------------------------------------------------------------------------------------------------------------------
+t1_stored_order.py / .txt   stored candidate order vs labels (val), structure (val/test), train stored order vs pos
+t2_holdout_info.py / .txt   170 members: val all / M<50 / M>=50 / M<20 vs holdout; within-family seed-level correlations
+t3_train_npos.py / .txt     train positives per feed by M bucket, batch composition, p_random availability
+t4_ft_folds.py / .txt       FT fold-model agreement on test vs TO-FT agreement (6 members)
+t5_pool_norm_by_M.py / .txt per-feed z vs global-z vs raw vs rank pooling for G3 by M bucket; ties in pools
+t5b_pool_norm_confirm.py/.txt  replication on NEW / Pall / Cd pools and the holdout
+t6_ops.py / .txt            submission validity, artifacts, scripts location, backups, git
+t7_branches.py / .txt       G3 blend vs TO-only vs FT-only by slice, w_ft sweep, calib, public-vs-val/holdout order
+t10_m50_mix.py / .txt       M<50 train feeds: gap proxy, position curves, zero-gap share

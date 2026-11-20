@@ -1,0 +1,54 @@
+# Read-out copied from the raw run log (not published), unchanged below this line.
+[   2.3s] val: 14423 feeds, leak-free 14306, fittable 13550 (leak-free & fittable 13435); G3 NDCG all 0.40032 leak-free 0.40046 (numba == metrics)
+[   5.0s] holdout: 30000 feeds, fittable 27335; G3 (20 TO members) NDCG 0.32379 (recorded 0.32379)
+[   5.0s] R2 by fold (lambda 1000.0): [0.5892586301252927, 0.5896057695518621, 0.589739614565822, 0.5899332041732793, 0.5894437490800842]; R2 val 0.5909, test 0.5885, holdout OOF 0.5801
+[   5.0s] nr quantiles: val {'1': 0.317, '10': 0.387, '25': 0.4291, '50': 0.4766, '75': 0.5292, '90': 0.5827, '99': 0.7005}
+   holdout {'1': 0.3178, '10': 0.3898, '25': 0.4322, '50': 0.4809, '75': 0.5352, '90': 0.5904, '99': 0.7149}
+   train sample {'1': 0.3165, '10': 0.3872, '25': 0.4292, '50': 0.4783, '75': 0.5327, '90': 0.5877, '99': 0.7101}
+   test public {'1': 0.3192, '10': 0.3921, '25': 0.4318, '50': 0.48, '75': 0.5341, '90': 0.5902, '99': 0.7199}
+   test private {'1': 0.3196, '10': 0.3889, '25': 0.43, '50': 0.4778, '75': 0.5315, '90': 0.5855, '99': 0.708}
+[   5.0s] parity: median nr val / holdout 0.991 -> OK (within 10%)
+[   5.0s] --- G3 NDCG by ||r|| decile, val (13435 feeds) ---
+[   5.0s]    D 1 nr [0.219,0.387] n  1344  NDCG 0.4154±0.0067  resid +0.0034±0.0059  M 89 H 179
+[   5.0s]    D 2 nr [0.387,0.418] n  1343  NDCG 0.4019±0.0067  resid -0.0043±0.0059  M 90 H 181
+[   5.0s]    D 3 nr [0.418,0.440] n  1344  NDCG 0.4105±0.0068  resid +0.0053±0.0060  M 95 H 182
+[   5.0s]    D 4 nr [0.440,0.460] n  1343  NDCG 0.3975±0.0067  resid +0.0049±0.0060  M 100 H 185
+[   5.0s]    D 5 nr [0.460,0.477] n  1343  NDCG 0.4068±0.0066  resid +0.0064±0.0060  M 94 H 188
+[   5.0s]    D 6 nr [0.477,0.496] n  1344  NDCG 0.4023±0.0069  resid +0.0025±0.0060  M 97 H 184
+[   5.0s]    D 7 nr [0.496,0.518] n  1343  NDCG 0.4029±0.0067  resid +0.0034±0.0059  M 98 H 185
+[   5.0s]    D 8 nr [0.518,0.544] n  1344  NDCG 0.3948±0.0067  resid -0.0039±0.0060  M 96 H 181
+[   5.0s]    D 9 nr [0.544,0.583] n  1343  NDCG 0.3898±0.0066  resid -0.0082±0.0059  M 96 H 174
+[   5.0s]    D10 nr [0.583,0.911] n  1344  NDCG 0.3841±0.0066  resid -0.0094±0.0058  M 102 H 159
+[   5.0s]    contrast D8-10 minus D1-3: residual -0.00861 ± 0.00482 (z -1.79); raw -0.01969 ± 0.00547
+[   5.0s] --- G3 NDCG by ||r|| decile, holdout (27335 feeds) ---
+[   5.0s]    D 1 nr [0.220,0.390] n  2734  NDCG 0.3286±0.0037  resid +0.0065±0.0036  M 153 H 188
+[   5.0s]    D 2 nr [0.390,0.421] n  2733  NDCG 0.3295±0.0038  resid +0.0072±0.0037  M 152 H 190
+[   5.0s]    D 3 nr [0.421,0.443] n  2734  NDCG 0.3284±0.0038  resid +0.0063±0.0037  M 153 H 192
+[   5.0s]    D 4 nr [0.443,0.462] n  2733  NDCG 0.3182±0.0037  resid -0.0020±0.0036  M 157 H 192
+[   5.0s]    D 5 nr [0.462,0.481] n  2733  NDCG 0.3212±0.0039  resid -0.0005±0.0038  M 153 H 192
+[   5.0s]    D 6 nr [0.481,0.500] n  2734  NDCG 0.3199±0.0038  resid -0.0008±0.0037  M 155 H 194
+[   5.0s]    D 7 nr [0.500,0.522] n  2733  NDCG 0.3121±0.0037  resid -0.0084±0.0036  M 156 H 191
+[   5.0s]    D 8 nr [0.522,0.550] n  2734  NDCG 0.3212±0.0039  resid +0.0006±0.0038  M 156 H 187
+[   5.0s]    D 9 nr [0.550,0.590] n  2733  NDCG 0.3204±0.0038  resid -0.0005±0.0038  M 156 H 180
+[   5.0s]    D10 nr [0.590,1.071] n  2734  NDCG 0.3135±0.0037  resid -0.0082±0.0037  M 156 H 156
+[   5.0s]    contrast D8-10 minus D1-3: residual -0.00936 ± 0.00303 (z -3.09); raw -0.01045 ± 0.00308
+[   7.4s] within-feed Spearman (mean over val feeds): cos_cr~cos_u 0.2424 (q10/q50/q90 [-0.42   0.315  0.763]), cos_cr~abl_base_s23 0.0298, cos_u~abl_base_s23 0.5919, cos_cr~G3 0.0358
+[   7.4s] zero-shot NDCG (val leak-free fittable): cos_u 0.3443, cos_cr 0.2910, G3 0.4006
+[   8.7s] === PRIMARY nested 3-parameter ridge (x1 z(cos_u), x2 nr_s*z(cos_u), x3 nr_s*z(cos_cr)) ===
+[   8.7s]    val fold weights (10 fits): mean [ 0.0301 -0.0532 -0.0205] sd [0.0051 0.0066 0.0039]
+[   8.7s]    holdout fold weights: mean [ 0.0176 -0.0499 -0.0103] sd [0.0031 0.0022 0.0034]
+[   8.7s]    VAL OOF delta (14,306 leak-free, excluded at 0): -0.00034 ± 0.00033 (z -1.04)
+[   8.7s]    VAL OOF delta (fittable leak-free only, n 13435): -0.00037 ± 0.00035
+[   8.7s]    VAL slice M<50 (n 5860): -0.00093 ± 0.00061
+[   8.7s]    VAL slice M>=50 (n 8446): +0.00006 ± 0.00036
+[   8.7s]    VAL pmix (private weights): -0.00024 ± 0.00049
+[   8.7s]    HOLDOUT OOF delta (30,000; excluded at 0): -0.00006 ± 0.00016 (z -0.36)
+[   8.7s]    info: full-val weights [ 0.0301 -0.0532 -0.0206] -> holdout delta -0.00025 ± 0.00019
+[  18.5s] === secondary NDCG-grid nested (info only): val +0.00025 ± 0.00028 (full-fit best (0.0, 0.05, -0.02)); holdout -0.00003 ± 0.00012 (full-fit best (0.02, -0.02, 0.0))  [10s]
+[  18.9s] cell: 7543 positives, 151885 beater pairs on leak-free feeds (139204 on fittable feeds)
+[  18.9s]    pair AUC z(cos_u)                         0.3641
+[  18.9s]    pair AUC z(cos_cr)                        0.4930
+[  18.9s]    pair AUC blend(full-val ridge)            0.0282
+[  18.9s]    pair AUC ctrl -log1p(it_hist_all_luo)     0.5630
+[  18.9s]    pair AUC ctrl -maxsim32                   0.6300
+[  18.9s] VERDICT: task gate FAIL (val -0.00034 ± 0.00033, need >= +0.001 and z >= 3; holdout -0.00006, need > 0); plan conditions pmix>=0 False, decile contrast<0 True -> CLOSED

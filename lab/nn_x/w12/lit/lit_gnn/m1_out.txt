@@ -1,0 +1,48 @@
+
+== val: rows 1,389,971
+  it_hist_all_luo == 0: 0.3794 | seq_cv_pop == 0: 0.4197 | both (cold): 0.3794
+  pairwise co-vis score > 0: 0.1135 (of rows with seq_cv_pop > 0: 0.1955)
+  cold (both counters 0): n 527,423; kn_cos1 NaN 0.0001; p10/p25/p50/p75/p90 0.897 / 0.933 / 0.964 / 0.984 / 0.992
+     share kn_cos1 >= 0.90 / 0.95 / 0.97 / 0.99: 0.890 / 0.628 / 0.432 / 0.142
+     kn_cos20 (mean cos of 20 nearest) p50 0.924; share >= 0.90: 0.660
+     index items with cos > 0.95: share rows with >= 1 / >= 5: 0.628 / 0.398; cos > 0.90: >= 1 / >= 5: 0.890 / 0.735
+     kn_ex20 (expected clicks of the 20 neighbours = support) p10/p50/p90: 4.58 / 8.29 / 17.26
+  warm (either counter > 0): n 862,548; kn_cos1 NaN 0.0002; p10/p25/p50/p75/p90 0.922 / 0.952 / 0.976 / 0.989 / 0.994
+     share kn_cos1 >= 0.90 / 0.95 / 0.97 / 0.99: 0.951 / 0.765 / 0.579 / 0.214
+     kn_cos20 (mean cos of 20 nearest) p50 0.943; share >= 0.90: 0.795
+     index items with cos > 0.95: share rows with >= 1 / >= 5: 0.765 / 0.541; cos > 0.90: >= 1 / >= 5: 0.951 / 0.851
+     kn_ex20 (expected clicks of the 20 neighbours = support) p10/p50/p90: 5.37 / 10.37 / 24.29
+  rows with NO pairwise co-vis (0.8865 of rows): share with kn_cos1 >= 0.95: 0.692; >= 0.97: 0.497
+
+feeds columns: ['fidx', 'feed_id', 'timestamp', 'user_id', 'M', 'H', 'cand_off', 'hist_off'] -> time column ['timestamp']
+public feeds 8,562 of 28,595
+
+== test public: rows 886,924
+  it_hist_all_luo == 0: 0.4276 | seq_cv_pop == 0: 0.4642 | both (cold): 0.4276
+  pairwise co-vis score > 0: 0.1023 (of rows with seq_cv_pop > 0: 0.1909)
+  cold (both counters 0): n 379,250; kn_cos1 NaN 0.0000; p10/p25/p50/p75/p90 0.899 / 0.934 / 0.965 / 0.984 / 0.993
+     share kn_cos1 >= 0.90 / 0.95 / 0.97 / 0.99: 0.897 / 0.640 / 0.443 / 0.147
+     kn_cos20 (mean cos of 20 nearest) p50 0.926; share >= 0.90: 0.673
+     index items with cos > 0.95: share rows with >= 1 / >= 5: 0.640 / 0.411; cos > 0.90: >= 1 / >= 5: 0.897 / 0.747
+     kn_ex20 (expected clicks of the 20 neighbours = support) p10/p50/p90: 4.63 / 8.38 / 17.63
+  warm (either counter > 0): n 507,674; kn_cos1 NaN 0.0002; p10/p25/p50/p75/p90 0.921 / 0.952 / 0.976 / 0.989 / 0.994
+     share kn_cos1 >= 0.90 / 0.95 / 0.97 / 0.99: 0.950 / 0.765 / 0.580 / 0.215
+     kn_cos20 (mean cos of 20 nearest) p50 0.943; share >= 0.90: 0.796
+     index items with cos > 0.95: share rows with >= 1 / >= 5: 0.765 / 0.542; cos > 0.90: >= 1 / >= 5: 0.950 / 0.852
+     kn_ex20 (expected clicks of the 20 neighbours = support) p10/p50/p90: 5.40 / 10.44 / 24.62
+  rows with NO pairwise co-vis (0.8977 of rows): share with kn_cos1 >= 0.95: 0.693; >= 0.97: 0.498
+
+== test private: rows 2,017,882
+  it_hist_all_luo == 0: 0.4558 | seq_cv_pop == 0: 0.4764 | both (cold): 0.4558
+  pairwise co-vis score > 0: 0.0976 (of rows with seq_cv_pop > 0: 0.1865)
+  cold (both counters 0): n 919,809; kn_cos1 NaN 0.0001; p10/p25/p50/p75/p90 0.900 / 0.936 / 0.966 / 0.985 / 0.993
+     share kn_cos1 >= 0.90 / 0.95 / 0.97 / 0.99: 0.901 / 0.652 / 0.456 / 0.151
+     kn_cos20 (mean cos of 20 nearest) p50 0.928; share >= 0.90: 0.683
+     index items with cos > 0.95: share rows with >= 1 / >= 5: 0.652 / 0.424; cos > 0.90: >= 1 / >= 5: 0.901 / 0.756
+     kn_ex20 (expected clicks of the 20 neighbours = support) p10/p50/p90: 4.68 / 8.51 / 17.96
+  warm (either counter > 0): n 1,098,073; kn_cos1 NaN 0.0002; p10/p25/p50/p75/p90 0.922 / 0.953 / 0.976 / 0.989 / 0.994
+     share kn_cos1 >= 0.90 / 0.95 / 0.97 / 0.99: 0.951 / 0.768 / 0.584 / 0.215
+     kn_cos20 (mean cos of 20 nearest) p50 0.943; share >= 0.90: 0.798
+     index items with cos > 0.95: share rows with >= 1 / >= 5: 0.768 / 0.545; cos > 0.90: >= 1 / >= 5: 0.951 / 0.853
+     kn_ex20 (expected clicks of the 20 neighbours = support) p10/p50/p90: 5.42 / 10.51 / 24.62
+  rows with NO pairwise co-vis (0.9024 of rows): share with kn_cos1 >= 0.95: 0.697; >= 0.97: 0.503

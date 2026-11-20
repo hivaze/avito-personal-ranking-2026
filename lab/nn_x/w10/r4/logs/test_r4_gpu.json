@@ -1,0 +1,77 @@
+{
+ "checks": [
+  {
+   "name": "identical training-batch sequence (incl. pool steps)",
+   "ok": true,
+   "info": "39 batches"
+  },
+  {
+   "name": "identical train-mode model logits and loss-input logits",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "identical logged loss / val / holdout / BEST lines",
+   "ok": true,
+   "info": "BEST step 20 val_ndcg 0.39150; train time"
+  },
+  {
+   "name": "bit-identical checkpoint and val preds",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flag-off checkpoint cfg carries no dcn keys; args carry dcn_par 0",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flags-ON run completes (rc 0)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "selected + @last checkpoints, val / holdout / test preds, log / json / cliplog written",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "checkpoint cfg stores dcn_par 2, dcn_rank 32, dcn_nox False",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "training ran >= 40 steps with finite losses; val / holdout NDCG logged",
+   "ok": true,
+   "info": "73 steps"
+  },
+  {
+   "name": "Muon log line counts the 8 extra matrices (base 31 -> 39)",
+   "ok": false,
+   "info": "muon: 54 matrices"
+  },
+  {
+   "name": "wave-10 R4 log line present",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "the trained branch is live (output weight non-zero after training)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "holdout_eval.py (Ranker(**cfg) rebuild) == --save_holdout preds of the r4 checkpoint (bitwise)",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "finetune.build_model rebuilds the r4 model from the stored cfg and loads the state_dict strictly",
+   "ok": true,
+   "info": "FT_BUILD_OK True 2 2 104"
+  }
+ ],
+ "fail": [
+  "Muon log line counts the 8 extra matrices (base 31 -> 39)"
+ ]
+}

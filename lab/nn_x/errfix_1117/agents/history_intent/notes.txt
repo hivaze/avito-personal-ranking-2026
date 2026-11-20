@@ -1,0 +1,93 @@
+ERROR ANALYSIS, LENS "RECENT INTENT FROM THE HISTORY" (agent history_intent, 2026-11-17)
+Data: discovery half only (7,214 feeds, 697,304 rows), via kit.load(). CPU only, 12 threads.
+Base NDCG on discovery 0.39939. Rules submitted: NONE (no variant came close to +0.0003 with z >= 2 under cross-fitting).
+
+TOOLS (all in this folder)
+ hi.py            fast vectorised NDCG (matches kit.evaluate exactly), cross-fit over kit.folds (choose w on 4 folds,
+                  score the 5th), conditional-logit (within-feed softmax) fit and score test.
+ resid1-6.py      observed/expected (O/E) tables. Expected = npos_f * softmax(0.98 * score) within the feed
+                  (a conditional logit on score alone; slope 0.98, and quadratic terms add nothing, so the
+                  score is a calibrated within-feed log-odds).
+ scan.py/scan2.py clogit score tests for 1,307 (whole list) and 1,155 (top-20 only) segment x feature terms.
+ neartie.py       near-tie pair test (see finding 5), the most direct test of whether a re-ranking rule can work.
+ pairs.py         cross-fitted pairwise logistic in the top 15 (score gap + lens differences).
+ gbm_resid*.py    cross-fitted residual LightGBM (lambdarank with init_score = score; binary with clogit offset).
+ t_*.py           cross-fitted rule tests (each line printed = one counted variant). null_rand.py = null calibration.
+ show.py          prints individual good / bad feeds (bad1.txt, good2.txt).
+
+FINDINGS
+1. Calibration of the lens features is very good. Marginal O/E by bin of h1, h5, h10, hmean5, hmax, c_contact,
+   c_order, c_fav, c_lead, c_vfeed, c_vsearch, cat_newest_idx and same_cat_newest stays within 0.93-1.07 in
+   every bin with 200+ positives. Exceptions are small and at the edges: hmax < 0.7 O/E 0.87 (z -3; already
+   tried by others as "cold / far from history"), cat_newest_idx = -1 O/E 0.93 (z -2), hmean5 >= 0.8 O/E 1.08-1.21.
+2. By newest event (contact 1,124 feeds, fav 486, order 354, view from feed 3,313, from search 888, other sources 327):
+   - Contact newest: near-copies of contacted items are clicked a bit MORE than expected (c_contact >= .95:
+     O/E 1.18 on 255 positives; h1 >= .8: 1.06-1.11). This points to the user continuing the search, not to a satisfied
+     need. But boosting them loses (H2 variants: oof -0.00022 to -0.00001).
+   - View from search or another surface newest: near-copies of that item (h1 >= .9) are clicked LESS than expected
+     (O/E 0.76 / 0.64 for search / other, 81 positives in all). Story: the user already saw them on the search results
+     page. The demotion rule gives in-sample +0.0002 and oof +0.00003 to +0.00023 (z <= 1.2): too few positives.
+   - Order / completion newest: near-copy O/E 1.9-2.0, on 9-19 positives (noise).
+   - Fav: items whose nearest history event is a favourite, ranked 1-3: O/E 0.79 (136 pos). Demoting them gives oof -0.0002 to 0.0000.
+3. Recency calibration at fixed model rank (resid3.py). In the top 10, items with hmean5 >= 0.8 are under-predicted
+   in every fold (O/E 1.09-1.20 against 0.91-1.00 for the other top-10 items, about 750 positives).
+   This is NOT a ranking error. In top-10 pairs where exactly one of the two has hmean5 >= .8 and the score gap is
+   < 0.1, the upper item is the positive 50% of the time either way (0.495 vs 0.488; 0.536 vs 0.545). The excess
+   comes only from pairs that the model already orders by a large gap (gap > 0.4: 0.77 vs 0.59). So the model
+   ranks focused-intent items correctly but compresses their score magnitude, which does not change the order.
+   Every hmean5 boost (relu, indicator, z; ranks 3/10/30/all) is negative or zero under cross-fitting (best oof
+   +0.00013, z 0.6).
+4. Large feeds (M >= 150; they carry most of the lost NDCG). The whole-list clogit test says recency is
+   under-weighted there (cni <= 5: z +4.8; h1/h10/hmean5: z +4.3-4.4; these survive the multiplicity of ~1,300 tests).
+   But the fitted effect is only about 0.07-0.09 score units per within-feed SD, it sits in the tail (ranks 50-300),
+   and the cross-fitted NDCG of every form is <= +0.00013 (z < 1).
+5. Near-tie test, the key result (neartie.py). Take head pairs (top 30) with a score gap < 0.05 and exactly one positive:
+   13,647 pairs in 3,679 feeds. The upper item is positive 49.9% of the time. No feature (lens or other, 34 tested)
+   predicts which one is positive beyond |z| 2.3. All the lens features lean slightly NEGATIVE: at a near-tie, the item
+   LESS similar to recent history wins slightly more often (hmean5 z -2.1, c_contact -2.3, same_cat_newest -2.0,
+   h1 -1.6). As a composite "novelty" tie-breaker this gives oof -0.00005. With a gap < 0.2, only s_ft and s_to carry
+   information (z 4.2 / 3.6), and they are the score itself.
+6. Profile of the misses. Positives at rank 31+ come from large feeds (median M 193), are less like the recent history
+   (median h1 0.52 against 0.69 for top-3 items) and are more often exploration (category absent from history 10%,
+   against 3.3% for positives at ranks 1-3). Positives at ranks 1-3 cannot be told apart from top-3 negatives on any lens feature (bad1.txt /
+   good2.txt show feeds where the clicked item looks like the 8 items above it). The misses are not systematic:
+   they are clicks that the history does not predict.
+7. Cross-fitted residual GBMs on the lens features (+ rank, M, score) or on all columns: best oof +0.00009 (z 0.4) at
+   25 trees; anything larger is negative (to -0.0076 for lambdarank). The pairwise logistic (gap + 17 lens
+   differences) has a worse out-of-fold log loss than the gap alone (0.6384 against 0.6370).
+8. Branch weights (s_ft against s_to) by newest-event group, cross-fitted: oof -0.00040 (z -1.4). Fav-newest and
+   unknown-source-view segments prefer s_ft in-sample (+0.003 / +0.006 on 486 / 226 feeds): noise.
+
+NULL CALIBRATION (null_rand.py). 40 random within-feed-z features through the same cross-fit grid give an oof mean of
+-0.00011, an SD of 0.00026, a maximum of +0.00051 and a maximum z of 1.88. So any single variant with an oof below
+about +0.0005 is within chance. The best variant of mine, -z(c_vfeed) as a tie-breaker (oof +0.00039, z 1.97), is
+therefore not evidence: about 110 variants were tried, and its in-sample curve peaks at w = 0.01 and turns negative
+from w = 0.03, the shape of near-tie noise.
+
+VARIANTS COUNTED
+ Cross-fitted rule variants: 108 (t_hmean5 16, t_bigM 24, t_hyp1 20, t_tie 20, t_vfeed 4, t_offcat 14, t_h3 3,
+ t_hm_ind 4, t_novelty 2, branch-by-group 1) + 20 residual GBM configurations. Screening tests (not rules):
+ 2,462 clogit score tests, 102 near-tie tests, 1 pairwise model.
+
+FAILED ATTEMPTS (cross-fitted oof delta, z)
+ relu(hmean5 - t) boosts in head / everywhere       -0.00018 .. -0.00002   (16 variants)
+ indicator hmean5 >= .75/.8 in top 10/30            -0.00024 .. +0.00013
+ z(recency) boosts in M >= 100/150/200              -0.00019 .. +0.00013   (24 variants)
+ demote nearest-is-favourite (c_fav >= t)           -0.00022 .. +0.00011
+ boost newest-contact near-copies                   -0.00022 .. +0.00002
+ demote near-copies of newest search/other view     -0.00005 .. +0.00023 (z 1.2)
+ boost c_order >= .9/.95                            -0.00043 / -0.00023
+ demote items outside the newest category in head   -0.00053 .. 0.00000
+ small tie-breakers on recency similarities          -0.00056 .. +0.00039 (null max +0.00051)
+ novelty composite tie-breaker                      -0.00006
+ branch alpha per newest group                       -0.00040
+ residual GBM (lens / all)                           <= +0.00009
+
+TAKE-AWAY FOR THE LEAD
+Within the recent-intent lens, FD16P20 is calibrated where it matters: at near-ties in the head, no history
+feature separates the clicked item from its neighbour. The visible O/E residuals (focused-intent items in the
+head, recency in large feeds, near-copies after a contact) are magnitude effects. They are real on likelihood,
+but they do not change the order, so a re-ranking rule built on them cannot raise NDCG. Further gains from
+history intent would need new information, not a re-weighting of these columns. Examples: event timestamps, to
+tell whether the newest event was seconds or days ago; and the impressions the user saw in search, to test the
+"already seen on the results page" story behind finding 2.

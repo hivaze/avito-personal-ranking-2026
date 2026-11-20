@@ -1,0 +1,52 @@
+counts 7
+subsets 8
+
+==== FEED-LEVEL adversarial
+-- val (0) vs test (1)
+  [intrinsic feed feats] n=43018 pos=0.665 AUC=0.5239  top gain: uemb_norm(4%), uemb_mean(4%), c_f4_mean(4%), c_f3_mean(4%), c_f4_std(4%), c_f5_mean(4%), c_f5_std(4%), h_es2(3%), c_f3_std(3%), c_f2_std(3%), c_f2_mean(3%), c_f2_zero(3%)
+  [intrinsic] top single-feature AUCs (|AUC-0.5| sorted): c_ncat=0.522, M=0.517, c_f5_std=0.488, h_es1=0.511, c_f4_mean=0.510, h_et1=0.508, h_ncat=0.508, c_f3_mean=0.493, h_es5=0.494, c_f4_std=0.494, uemb_zero=0.494, uemb_norm=0.506
+  [+train-overlap feats] n=43018 pos=0.665 AUC=0.9090  top gain: c_in_train_cand(37%), c_f4_mean(13%), c_f5_std(9%), c_f4_std(6%), M(5%), c_log_train_hist(5%), c_in_train_hist(5%), c_f5_mean(2%), h_in_train_hist(2%), c_f1_mean(1%), c_ncat(1%), c_f3_mean(1%)
+  [+hour] n=43018 pos=0.665 AUC=0.5771  top gain: hour(16%), uemb_norm(4%), c_f5_mean(3%), uemb_mean(3%), c_f5_std(3%), c_f3_mean(3%), c_f4_mean(3%), c_f4_std(3%), h_es2(3%), M(3%), c_f3_std(3%), c_f2_std(3%)
+  [user_emb 128d only] n=43018 pos=0.665 AUC=0.5160  top gain: uemb_mean(1%), ue16(1%), ue121(1%), ue123(1%), ue40(1%), ue74(1%), ue93(1%), ue107(1%), ue57(1%), ue31(1%), uemb_norm(1%), ue17(1%)
+-- train (0) vs val (1)
+  [intrinsic feed feats] n=44423 pos=0.325 AUC=0.9254  top gain: c_f5_std(12%), c_f4_std(9%), c_f3_mean(9%), c_f5_mean(9%), H(8%), c_f2_zero(7%), h_et1(6%), c_f4_mean(6%), c_f1_mean(4%), c_f1_min(3%), M(3%), c_ncat(3%)
+  [intrinsic] top single-feature AUCs (|AUC-0.5| sorted): c_f3_mean=0.340, c_f5_std=0.645, c_f1_min=0.629, c_f2_zero=0.625, c_f4_std=0.384, c_f1_mean=0.391, c_f5_mean=0.395, c_ncat=0.594, h_et1=0.417, c_f1_std=0.578, M=0.569, c_f3_std=0.565
+  [+train-overlap feats] n=44423 pos=0.325 AUC=1.0000  top gain: c_in_train_cand(79%), h_in_train_hist(19%), user_in_train(1%), c_in_train_hist(1%), H(0%), M(0%), user0(0%), c_f4_mean(0%), c_f4_std(0%), h_ncat(0%), h_es0(0%), c_ncat(0%)
+  [+hour] n=44423 pos=0.325 AUC=0.9302  top gain: c_f5_std(13%), c_f5_mean(9%), c_f4_std(9%), c_f3_mean(9%), H(7%), c_f2_zero(7%), h_et1(6%), c_f4_mean(5%), c_f1_mean(4%), hour(4%), c_f1_min(3%), M(3%)
+  [user_emb 128d only] n=44423 pos=0.325 AUC=0.5131  top gain: ue113(1%), ue107(1%), ue52(1%), ue103(1%), ue25(1%), ue55(1%), uemb_norm(1%), ue122(1%), uemb_mean(1%), ue10(1%), ue12(1%), ue88(1%)
+-- train (0) vs test (1)
+  [intrinsic feed feats] n=58595 pos=0.488 AUC=0.9280  top gain: c_f5_std(12%), c_f3_mean(10%), c_f4_std(10%), H(9%), c_f5_mean(8%), c_f2_zero(8%), h_et1(6%), c_f4_mean(6%), c_f1_mean(4%), M(3%), c_f1_min(3%), c_ncat(2%)
+  [intrinsic] top single-feature AUCs (|AUC-0.5| sorted): c_f3_mean=0.332, c_f5_std=0.635, c_f1_min=0.632, c_f2_zero=0.627, c_f4_std=0.378, c_f1_mean=0.388, c_ncat=0.612, c_f5_mean=0.400, M=0.586, c_f1_std=0.577, h_et1=0.424, c_f4_mean=0.566
+  [+train-overlap feats] n=58595 pos=0.488 AUC=1.0000  top gain: c_in_train_cand(79%), h_in_train_hist(18%), c_in_train_hist(1%), user_in_train(0%), H(0%), c_f4_mean(0%), c_f4_std(0%), M(0%), h_ncat(0%), user0(0%), h_es1(0%), h_et10(0%)
+  [+hour] n=58595 pos=0.488 AUC=0.9279  top gain: c_f5_std(13%), c_f3_mean(10%), c_f4_std(10%), c_f5_mean(9%), H(8%), c_f2_zero(7%), h_et1(7%), c_f4_mean(6%), c_f1_mean(4%), M(3%), c_f1_min(3%), c_ncat(2%)
+  [user_emb 128d only] n=58595 pos=0.488 AUC=0.5314  top gain: ue52(1%), uemb_mean(1%), ue86(1%), ue16(1%), ue97(1%), ue121(1%), ue56(1%), ue3(1%), ue42(1%), ue55(1%), ue41(1%), ue33(1%)
+<repo>/eda/shift_overlap/s04_adversarial.py:72: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+  print(f'\n==== test public/private: 30% boundary ts={bound} = {dt.datetime.utcfromtimestamp(int(bound)+3*3600)} MSK; feeds at boundary ts: {(ts==bound).sum()}')
+
+==== test public/private: 30% boundary ts=1790497920 = 2026-09-27 11:32:00 MSK; feeds at boundary ts: 18
+  [test pub(1) vs priv(0) intrinsic] n=28595 pos=0.300 AUC=0.5115  top gain: c_f4_std(4%), c_f4_mean(4%), M(4%), uemb_norm(4%), c_f3_mean(4%), uemb_mean(4%), c_f5_mean(3%), c_f2_mean(3%), c_f5_std(3%), h_es2(3%), c_f2_zero(3%), h_et4(3%)
+  [test pub(1) vs priv(0) +overlap] n=28595 pos=0.300 AUC=0.6571  top gain: c_in_train_cand(13%), c_f4_mean(6%), c_f5_std(5%), M(5%), c_log_train_hist(4%), c_f4_std(3%), h_in_train_hist(3%), c_in_train_hist(3%), c_f5_mean(3%), uemb_mean(3%), c_f3_mean(3%), uemb_norm(2%)
+  [test pub(1) vs priv(0) user_emb] n=28595 pos=0.300 AUC=0.5104  top gain: ue52(1%), ue104(1%), ue96(1%), ue121(1%), ue45(1%), uemb_norm(1%), ue56(1%), ue81(1%), ue122(1%), ue30(1%), ue82(1%), ue15(1%)
+  [pub vs priv] top single-feature AUCs (|AUC-0.5| sorted): c_in_train_cand=0.600, c_in_train_hist=0.565, c_log_train_hist=0.544, h_in_train_hist=0.535, c_f4_std=0.479, c_f4_mean=0.509, c_f1_min=0.491, c_f5_mean=0.509, M=0.509, user_in_train=0.508, h_es2=0.492, uemb_mean=0.493
+  [val vs test-public intrinsic] n=23001 pos=0.373 AUC=0.5330  top gain: uemb_norm(4%), uemb_mean(4%), c_f4_std(4%), c_f4_mean(4%), c_f3_mean(4%), c_f5_mean(4%), c_f5_std(3%), M(3%), c_f1_std(3%), c_f2_std(3%), c_f2_zero(3%), h_es2(3%)
+  [val vs test-private intrinsic] n=34440 pos=0.581 AUC=0.5211  top gain: uemb_mean(4%), c_f4_mean(4%), uemb_norm(4%), c_f5_mean(4%), c_f5_std(4%), h_es2(4%), c_f3_mean(4%), c_f1_min(3%), c_f4_std(3%), M(3%), c_f2_mean(3%), c_f2_std(3%)
+
+==== CANDIDATE-LEVEL adversarial (feeds as CV groups)
+-- val (0) vs test (1)
+  [f1..f5+category+emb_missing] n=1200000 pos=0.500 AUC=0.5116  top gain: f3(36%), category_id(33%), f2(14%), f1(13%), f4(3%), f5(1%), emb_missing(0%)
+  [+M] n=1200000 pos=0.500 AUC=0.5116  top gain: M(29%), category_id(23%), f3(23%), f2(15%), f1(8%), f4(1%), f5(0%), emb_missing(0%)
+  [item emb 16 dims+norm] n=1200000 pos=0.500 AUC=0.5013  top gain: e6(7%), e0(7%), e12(7%), e15(7%), e10(7%), e2(6%), e7(6%), e11(6%), e1(6%), e3(5%), e4(5%), e8(5%)
+  [+train-overlap counts] n=1200000 pos=0.500 AUC=0.6295  top gain: f4(56%), log_train_cand(12%), category_id(10%), f3(7%), log_train_hist(6%), f5(4%), f2(3%), f1(3%), emb_missing(0%)
+-- train (0) vs val (1)
+  [f1..f5+category+emb_missing] n=1200000 pos=0.500 AUC=0.6426  top gain: category_id(28%), f3(20%), f5(17%), f2(13%), f1(11%), f4(11%), emb_missing(0%)
+  [+M] n=1200000 pos=0.500 AUC=0.6691  top gain: M(32%), category_id(19%), f3(15%), f2(10%), f5(10%), f4(7%), f1(7%), emb_missing(0%)
+  [item emb 16 dims+norm] n=1200000 pos=0.500 AUC=0.5524  top gain: e4(13%), e2(8%), e10(7%), e12(6%), e9(6%), e5(6%), e13(6%), e11(6%), e1(6%), e3(5%), e7(5%), e0(5%)
+  [+train-overlap counts] n=1200000 pos=0.500 AUC=0.8578  top gain: log_train_cand(53%), f4(25%), log_train_hist(7%), category_id(6%), f3(3%), f5(3%), f1(2%), f2(2%), emb_missing(0%)
+-- train (0) vs test (1)
+  [f1..f5+category+emb_missing] n=1200000 pos=0.500 AUC=0.6465  top gain: category_id(27%), f3(18%), f5(16%), f4(15%), f1(12%), f2(11%), emb_missing(0%)
+  [+M] n=1200000 pos=0.500 AUC=0.6769  top gain: M(34%), category_id(19%), f3(14%), f5(9%), f4(9%), f2(8%), f1(7%), emb_missing(0%)
+  [item emb 16 dims+norm] n=1200000 pos=0.500 AUC=0.5568  top gain: e4(15%), e2(9%), e10(7%), e13(6%), e5(6%), e7(6%), e1(6%), e12(5%), e15(5%), e9(5%), e6(5%), e11(5%)
+  [+train-overlap counts] n=1200000 pos=0.500 AUC=0.9067  top gain: log_train_cand(59%), f4(25%), log_train_hist(5%), category_id(4%), f5(2%), f3(2%), f1(2%), f2(1%), emb_missing(0%)
+  [test priv(0) vs pub(1) cand base] n=1200000 pos=0.500 AUC=0.5252  top gain: f3(34%), category_id(31%), f2(14%), f1(13%), f4(8%), f5(0%), emb_missing(0%)
+  [test priv(0) vs pub(1) cand +overlap] n=1200000 pos=0.500 AUC=0.5581  top gain: f4(33%), category_id(23%), f3(20%), f2(9%), f1(9%), log_train_cand(3%), log_train_hist(2%), f5(1%), emb_missing(0%)
+done 324

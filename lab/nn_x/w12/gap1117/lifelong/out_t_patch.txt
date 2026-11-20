@@ -1,0 +1,18 @@
+diff applied cleanly to patch_base (tmp /tmp/scratchpad/w5patch_8p7c6grh)
+[data] val: 14423 feeds, 1389971 cands, 2499547 hist, table (2516711, 128), 0s, gpu mem 0.4 GB
+[data] val: 14423 feeds, 1389971 cands, 2499547 hist, table (2516711, 128), 0s, gpu mem 0.8 GB
+T1 flags off, fp32, all 14423 val feeds: max |patched - base| = 0.000e+00 (must be 0)
+T1b flags off, bf16 (as common.predict) vs the STORED val predictions of w5_e10_kd05w192_s951: corr 1.0000000, max |diff| 0.000e+00
+[data] val: hist_ext 128 from <repo>/artifacts/data/feats_new/histext_1117/val: 1132 feeds extended (0.0785), 41197 events, +27036 item rows
+[data] val: 14423 feeds, 1389971 cands, 2499547 hist, table (2543747, 128), 0s, gpu mem 0.8 GB
+T2 flags on, extension emptied: max |diff| vs flags off = 0.000e+00 (must be 0)
+T3 flags on (k0, capped only, rec_x = row 255): 1132 of 14423 val feeds extended; non-extended feeds max |diff| 0.00e+00 (fp32 noise of other kernel shapes; batches now 384 wide), extended feeds mean |diff| 0.0684 (score sd 13.657), corr 0.99996
+   extended feeds whose top-scored candidate changes: 116 of 1132 (0.102)
+T3b val inference pass, bf16, extension off: 0.73 s
+T3b val inference pass, bf16, extension on: 0.82 s
+[data] train: hist_ext 128 from <repo>/artifacts/data/feats_new/histext_1117/train: 257660 feeds extended (0.0818), 9797161 events, +0 item rows
+[data] train: 3151208 feeds, 246745836 cands, 583586378 hist, table (81557944, 128), 6s, gpu mem 21.8 GB
+T4 train step 0: batch 512 feeds (extended 41, history width 256 + 128), loss 2.1251 finite True, rec_x grad norm 1.375e-03 (rows with grad 128), dense inputs identical with / without the x* keys: True
+T4 train step 1: batch 341 feeds (extended 29, history width 256 + 128), loss 4.2920 finite True, rec_x grad norm 1.519e-03 (rows with grad 128), dense inputs identical with / without the x* keys: True
+T4 train step 2: batch 512 feeds (extended 38, history width 256 + 128), loss 3.8568 finite True, rec_x grad norm 9.995e-04 (rows with grad 106), dense inputs identical with / without the x* keys: True
+done in 37s

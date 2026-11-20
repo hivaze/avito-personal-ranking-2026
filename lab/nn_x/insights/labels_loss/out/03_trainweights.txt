@@ -1,0 +1,48 @@
+train feeds (holdout excluded) 3121208, pool (p>0.5, M>=50) 134118, holdout 30000
+steps/epoch (approx) 9835
+
+M bin | train% | prod% | randlike% | val% | test% | public% | private% | B (feeds/batch) | main w share% | aux w share% | aux/main per-feed ratio (rel) | test/train
+[5,10) |  10.7 |  11.2 |   0.0 |   7.2 |   6.5 |   6.3 |   6.5 | 512 |  10.7 |   6.6 | 0.62 | 0.61
+[10,20) |  14.7 |  15.3 |   0.0 |  10.4 |   9.8 |   9.5 |   9.9 | 512 |  14.7 |   9.1 | 0.62 | 0.67
+[20,30) |  11.6 |  12.1 |   0.0 |   9.3 |   8.5 |   8.4 |   8.5 | 512 |  11.6 |   7.2 | 0.62 | 0.73
+[30,50) |  14.5 |  15.1 |   0.0 |  13.9 |  14.3 |  14.5 |  14.1 | 512 |  14.5 |   9.0 | 0.62 | 0.99
+[50,75) |  11.9 |  11.5 |  21.2 |  12.6 |  12.1 |  11.8 |  12.2 | 512 |  11.9 |   8.0 | 0.67 | 1.01
+[75,100) |   8.4 |   8.1 |  15.9 |   9.5 |   9.6 |   9.2 |   9.8 | 341 |   8.4 |   7.6 | 0.90 | 1.14
+[100,150) |  10.4 |  10.0 |  21.2 |  12.9 |  12.9 |  12.8 |  12.9 | 256 |  10.4 |  13.2 | 1.26 | 1.23
+[150,200) |   6.5 |   6.2 |  14.0 |   8.0 |   8.3 |   8.6 |   8.2 | 186 |   6.5 |  11.4 | 1.76 | 1.28
+[200,250) |   5.9 |   5.6 |  11.5 |   6.4 |   7.1 |   7.1 |   7.1 | 136 |   5.9 |  13.3 | 2.26 | 1.21
+[250,301) |   5.4 |   4.9 |  16.3 |   9.7 |  11.0 |  11.7 |  10.7 | 120 |   5.4 |  14.5 | 2.69 | 2.04
+
+H bin | train% | val% | test%
+[0,1) |   1.1 |   1.3 |   0.9
+[1,32) |   5.9 |   5.9 |   5.7
+[32,128) |  19.2 |  22.1 |  22.0
+[128,256) |  31.4 |  41.7 |  42.6
+[256,257) |  42.3 |  29.0 |  28.8
+
+m02 pool batches (cooldown, 2% of steps): per batch the aux still sums to aux_w; production mass sum(1-p) per batch:
+  Mpad 64: B 512, mean(1-p) pool 0.178 vs regular 0.914 -> aux weight per unit of production mass x5.1
+  Mpad 96: B 341, mean(1-p) pool 0.175 vs regular 0.904 -> aux weight per unit of production mass x5.2
+  Mpad 128: B 256, mean(1-p) pool 0.176 vs regular 0.902 -> aux weight per unit of production mass x5.1
+  Mpad 192: B 170, mean(1-p) pool 0.164 vs regular 0.900 -> aux weight per unit of production mass x5.5
+  Mpad 256: B 128, mean(1-p) pool 0.151 vs regular 0.916 -> aux weight per unit of production mass x6.1
+  Mpad 304: B 107, mean(1-p) pool 0.100 vs regular 0.664 -> aux weight per unit of production mass x6.7
+  pool mean (1-p) = 0.166; share of pool feeds with p>0.9: 0.446
+
+exploration-like share of main-loss feed weight: plateau 0.0430 (p-weighted 0.0482); test = 1.0 (all exploration)
+  mean feeds per pool batch 272, per regular batch 320; m02 adds ~0.0170 of feed weight in the cooldown; m10 ~0.0849
+
+metric-ideal per-feed weight w*(M) = Sm/Sl(val) x test/train share (normalised to train-weighted mean 1); current main = 1; per-batch-mean (pre-K1) = 512/B
+[5,10) | Sm/Sl 1.33 | test/train 0.61 | w* 0.81 | w*(sens only) 1.26 | batch-mean 0.63
+[10,20) | Sm/Sl 1.25 | test/train 0.67 | w* 0.83 | w*(sens only) 1.18 | batch-mean 0.63
+[20,30) | Sm/Sl 1.19 | test/train 0.73 | w* 0.87 | w*(sens only) 1.12 | batch-mean 0.63
+[30,50) | Sm/Sl 1.13 | test/train 0.99 | w* 1.11 | w*(sens only) 1.07 | batch-mean 0.63
+[50,75) | Sm/Sl 1.02 | test/train 1.01 | w* 1.03 | w*(sens only) 0.96 | batch-mean 0.63
+[75,100) | Sm/Sl 0.98 | test/train 1.14 | w* 1.12 | w*(sens only) 0.93 | batch-mean 0.94
+[100,150) | Sm/Sl 0.88 | test/train 1.23 | w* 1.09 | w*(sens only) 0.83 | batch-mean 1.25
+[150,200) | Sm/Sl 0.83 | test/train 1.28 | w* 1.06 | w*(sens only) 0.78 | batch-mean 1.72
+[200,250) | Sm/Sl 0.73 | test/train 1.21 | w* 0.88 | w*(sens only) 0.69 | batch-mean 2.35
+[250,301) | Sm/Sl 0.71 | test/train 2.04 | w* 1.45 | w*(sens only) 0.67 | batch-mean 2.67
+
+squared log-deviation from w*: batch-mean 0.2343, feed (current) 0.0283; K1 calibration c = 0.0097 -> predicted gain of moving feed -> w*: +0.00028 val
+(sensitivity-only w*, no composition term): batch-mean 0.5532, feed 0.0452, c 0.0039, predicted gain +0.00018

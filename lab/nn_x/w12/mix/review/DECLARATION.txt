@@ -1,0 +1,115 @@
+DECLARATION of the ADVERSARIAL REVIEWER (directory nn_x/w12/mix/review, report reports/MIX_1115/review.md)
+Marks: [M] measured here, [D] read in a file, [I] inferred. Every block carries its 'date -u' stamp and is written BEFORE the number it judges is computed.
+
+=== 2026-11-15T13:46:33Z BLOCK 0: what I have seen before any number of my own ===
+Read [D]: reports/CURRENT_STATUS.md sections 1-4; E_kd_predeclared.txt blocks 09:27Z-13:38Z; build_r4.py, src/stack_val.py, src/metrics.py, src/pmix.py, src/common.py; both searchers' DECLARATION.txt, rulesA/lib.py,
+gateB/lib.py, lib2.py, gate.py; the searchers' return values (task text); reports/STALE_1115/premortem.md sections 0, 3.1-3.3 (origin of the rule: 3 gates (M >= 50, cold share >= 0.30, >= 0.45) x 25 weight pairs from {0, .1, .2, .3, .4} = 75 rules,
+nested on user halves, W16 + 8 students). No labelled number computed by me yet. Label-free numbers seen: val 14,423 feeds / 13,741 users / share M >= 50 0.5914 / user-0 share 0.0456; test 28,595 feeds, share M >= 50 0.6097.
+Default position: every gated rule is overfit until shown otherwise; the M-rule is in-sample on val (cut 50 and weights 0.2 / 0.4 were prompted by a full-val table and a 75-rule scan on other models of the SAME val feeds).
+
+=== 2026-11-15T13:46:33Z BLOCK 1: own code path ===
+Own loader (polars read of data/flat/<split>/feeds.parquet, np.load of member files and labels; NO import of build_r4, rulesA or gateB code), own per-feed z (float64, sd + 1e-9), own NDCG kernel (stable sort with negatives placed first
+among ties = pessimistic ties; feeds without positives -> 1), own user-grouped folds (group = user_id; each user_id 0 feed its own group; fold = seeded permutation of groups mod 5; FOLD SEEDS 7001..7010, used by neither searcher: A used 11..55, B 0..4).
+src/metrics.ndcg_per_feed and stack_val.feed_rank_z are imported ONLY as the reference to check my kernel against.
+Compositions (val): C1 = FD16 + 4 wide full-data popularity-light (FDP); C2 = FD8 (s951-954) + FDP; C3 = W16 + P1w (held-out twins); C4 = W8 + P1w.
+Member-disjoint halves (my own replication design, members shared by NO pair of halves): HA = FD base s951-954 (8) + FDP s951,952 ; HB = FD base s955-958 (8) + FDP s953,954 ; and the same two halves of the twins (WA, WB).
+Grid tensor E[feed, w_pop, w_ft]: w_pop in {0, .05, .., .80} (same weight in both branches), w_ft in {.20, .25, .., .80}; build_r4 form final = w_ft z((1-w) z(baseFT) + w z(popFT)) + (1-w_ft) z((1-w) z(baseTO) + w z(popTO)).
+PLAIN = (0.2, 0.5). MRULE = (0.2 if M < 50 else 0.4, 0.5). D(f) = E(0.4, 0.5) - E(0.2, 0.5) per feed ("dose contrast").
+SE convention: user-clustered SE of the per-feed paired difference (cluster = fold group); the per-feed SE is printed next to it where a searcher's number is compared.
+
+=== 2026-11-15T13:46:33Z BLOCK 2: CHECK 1 reproduction bars ===
+R0a kernel: own NDCG vs src/metrics.ndcg_per_feed on the own-path final scores of C1 plain: max abs per-feed difference <= 1e-9. Own z path vs project path (feed_rank_z, float32): |difference of mean final val| <= 5e-6.
+R0b levels (5 decimals, as logged): FD16P20 0.40271, FD16P20@m 0.40298, FD8P20 0.40240, FD8P20@m 0.40290, W16P20w 0.40214, W16P20w@m 0.40285 (= 0.402141 / 0.402847 by B), W8P20w rule minus plain +0.00043.
+R0c searchers' in-sample numbers, tolerance 2e-5 each: A: C(M50) in-sample best on C1 +0.00053; A (constant) +0.00054; F(Hq) +0.00076 [A's grid: w_pop {0..0.6 step .1}, w_ft {.3...8 step .1}];
+    B: best constant (0.40, 0.70) +0.00054 on C1 and (0.40, 0.40) +0.00044 on C3; MSTEP in-sample +0.00067 (C1) / +0.00083 (C3) [B's grid, cuts 25 / 50 / 100]; dose contrast D all feeds +0.00048 (C1) / +0.00022 (C3);
+    D on M < 50: +0.00053 (C1) / -0.00119 (C3); D on M >= 50: +0.00044 / +0.00119.
+PASS iff all hold; any miss is reported with both numbers and investigated before anything else.
+
+=== 2026-11-15T13:46:33Z BLOCK 3: CHECK 2 nesting ===
+(a) Code audit (reading): folds user-grouped with user 0 as singletons? any threshold / grid / family / primary composition / reported candidate chosen with labels outside the loop? Each such choice is listed with its severity.
+(b) Numeric re-run with MY folds (10 seeds x 5 folds), rule = argmax of the training-part mean, read on the held-out part; per-feed nested value = mean over seeds:
+    on A's grid: families A (constant), C(M50), C(M70), F(Hq) (w_ft by H >= 190, w_pop constant), G(M3q) (M < 39 | 39-116 | >= 117), K(M70, Hq) (w_pop on the 2 x 2 cells, w_ft 0.5) on C1..C4;
+    on B's grid: CONSTp, CONST2, MSTEP (cuts 25 / 50 / 100), HSTUMP (own (w_pop, w_ft) on each side of a cut on H at the training-part quantiles .2 / .35 / .5 / .65 / .8; B's STUMP1 picked history length in 24 of 25 fits) on C1, C3.
+    A searcher's nested number is CONFIRMED iff |mine - theirs| <= 0.00015 (fold-seed noise allowance, about half a paired SE); otherwise it is listed as FOLD-SEED SENSITIVE with both numbers. HSTUMP is not B's STUMP1 (1 feature instead of 8):
+    it is compared for sign and size only.
+
+=== 2026-11-15T13:46:33Z BLOCK 4: CHECK 3 placebo of my own design (not used by either searcher) ===
+SIGN-FLIP NULL: one Rademacher sign s_g per user group; every contrast to PLAIN is flipped jointly, E'(f, .) = E_plain(f) + s_g(f) (E(f, .) - E_plain(f)), on all compositions with the SAME signs (shared val feeds stay shared).
+Under it every rule has expected gain exactly 0 over PLAIN, the correlation of the rules across feeds and across member sets and the heavy tails are kept, and a held-out user's sign is independent of the training users: a correct nested
+procedure must read 0 on average. 400 draws (seed 20261115), fold seed 7001 only inside the placebo (the real statistic compared with the null is then also the seed-7001 value), identical search code.
+SANITY BAR for my own code: |mean over draws of the nested gain| <= 3 SE(mean) for every family; a violation = a leak in MY procedure, stop.
+Statistics placed in the null, p = (1 + #{null >= observed}) / (1 + 400):
+  P1 nested gain over PLAIN of each family of block 3 on C1, C3 and their mean T2 (A's and B's post hoc statistic);
+  P2 family-wise: max over my families of the nested gain on C1 (the row A named was the top of 95 families: its p must be read against the max);
+  P3 nested (family - nested C(M50)) for F(Hq), HSTUMP, K, G (is anything above the M-rule family?);
+  P4 ORIGIN EMULATION for the fixed M-rule: on C3 (twins) the in-sample best of the pre-mortem's scan shape, 3 gates (M >= 50, luo cold share >= 0.30, >= 0.45) x 25 pairs from {0, .1, .2, .3, .4} at w_ft 0.5 = 75 rules, is selected on ALL val feeds
+     and read on C1 (full-data members, same feeds). Null distribution of that transferred read; observed = the fixed M-rule's read on C1 (+0.00026 on record) and on C2 (+0.00051). Also the mirror (select on C1, read on C3).
+     The null mean of the transferred read = the optimism that "other trained models, same val feeds" carries under the global null.
+SECOND PLACEBO (specificity of M as the gate; exact randomisation): a random set of feeds of the size of {M >= 50} gets 0.4, the rest 0.2; 2000 random sets. The fixed rule's gain is placed in it. Equivalent fixed contrast (one look per
+composition, nothing fitted): INTERACTION I = mean of D on M >= 50 minus mean of D on M < 50, with clustered SE. "The gate is specific on a composition" iff I >= +2 SE.
+
+=== 2026-11-15T13:46:33Z BLOCK 5: CHECK 5 the M-rule estimate (fixed here) ===
+Per composition X in {C1 = FD16 + 4, C3 = W16 + 4} (also printed for C2, C4):
+  H2 = fixed rule minus PLAIN on all val feeds (in-sample; optimistic through the shared feeds);
+  H1 = nested refit of the family C(M50) on B's grid, own folds (honest in users; carries the refit variance);
+  H1c = the same with the cut also chosen in the training part among the label-free cuts {20, 30, 50, 70, 100, 150} (the cut 50 was label-prompted);
+  H3 = cross-member-set nested: C(M50) weights fitted on the training users of the TWIN composition (C1 <-> C3, C2 <-> C4), read on the held-out users of X (honest in users AND in trained models);
+  H4 = member-disjoint halves: fixed rule minus PLAIN on HA and HB (WA, WB), and the correlation of the two per-feed contrasts (the shared-feed part of a "replication on other models").
+HEADLINE ESTIMATE for X = (H1 + H3) / 2 from the per-feed mean of the two nested vectors, with clustered SE, quoted NEXT TO H2. Placebo calibration = sign-flip p of H1, H3 and of the headline.
+Statements: "M-rule minus plain is SHOWN on X" iff headline >= +2 SE and its sign-flip p <= 0.05; "SUPPORTED, not shown" iff headline > 0 and p <= 0.20; else "NOT SHOWN on X".
+P(public gain of the M-rule file over its plain twin) [I] = Phi(headline / sqrt(SE_headline^2 + SE_pub^2)), SE_pub = paired per-feed sd of the fixed-rule contrast / sqrt(8562); printed for the FD16 and the FD8 pair.
+
+=== 2026-11-15T13:46:33Z BLOCK 6: CHECK 4 transfer (label-free on test; public-like = timestamp < 1790497920) ===
+T1 share of feeds in each gate cell (M >= 50; H >= 190) on val / public-like / private-like; two-sample KS distance of log M (and of H) INSIDE each cell, val against each test part. "Same range" iff every cell share differs by <= 5 points
+   and every within-cell KS <= 0.10; otherwise the cell is named.
+T2 own-path test scores of C1 plain and C1 M-rule (not a submission; arrays stay in memory): share of test feeds whose top-1 item differs, by part and by cell; the same on val for comparison.
+T3 concentration: the fixed rule's val gain (C1 and C3) by pmix cell (M bin x cold-share bin, eda/errors/segments tables) against the cell shares on val / public / private. FLAG iff more than half of the positive gain sits in cells whose
+   private share is below half their val share AND the pmix-private gain is below half the plain val gain.
+T4 label-free agreement of the two pools (per-feed Pearson of z(base pool) and z(popularity-light pool), train-only branch and fine-tuned branch) by cell on val / public-like / private-like: a weight tuned on val acts on a different
+   pool geometry on test iff the cell means differ by more than 0.02.
+
+=== 2026-11-15T13:46:33Z BLOCK 7: verdict rules ===
+"confirmed" (a candidate is safe for a public slot) = TRUE iff a rule OTHER than PLAIN and the standing M-rule passes: nested gain over the fixed M-rule >= +2 SE on C1 with my folds, >= 0 on C3, sign-flip family-wise p <= 0.05, and T1.
+The searchers named no new candidate; the default is FALSE. The standing M-rule gets its own statement from block 5 and is NOT what "confirmed" refers to.
+Multiplicity to be reported: rules looked at by A, by B, by the pre-mortem, by the lead's dose lines, and by me.
+
+=== 2026-11-15T13:50:34Z BLOCK 8: READ of checks 1, 2 (real statistics) + two corrections made BEFORE the placebo is run ===
+CHECK 1 PASS [M] (log_step1.txt): own kernel = src/metrics on every feed (max abs diff 0.0, also on heavily tied scores); own path = project path to 6 decimals; FD16P20 0.402714 / @m 0.402975, FD8P20 0.402396 / 0.402904,
+ W16P20w 0.402141 / 0.402847, W8P20w +0.00043; every in-sample number of block 2 R0c reproduced to 1e-5 (A const +0.00054, C(M50) +0.00053, F(Hq) +0.00076; B (0.40, 0.70) +0.00054, (0.40, 0.40) +0.00044, MSTEP +0.00067 / +0.00083, D contrasts).
+CHECK 2 numeric [M] (log_step2.txt, my folds 7001..7010): every nested number of A that I re-ran is within 0.00015 of mine (largest gaps: C(M70) on C1 +0.00008 vs +0.00023; A-const on C1 +0.00039 vs +0.00027; C(M50) on C1 +0.00008 vs +0.00018).
+ B: CONSTp / CONST2 / HSTUMP within 0.00015; MSTEP(25,50,100) on C1 +0.00007 (mine) vs +0.00024 (B): FOLD-SEED SENSITIVE (my range over 10 seeds -0.00043..+0.00037).
+ Seen before the placebo: headline (H1+H3)/2 = +0.00002 (C1), +0.00015 (C2), +0.00030 (C3), +0.00015 (C4); interaction I z -0.12 (C1), +1.26 (C2), +3.83 (C3), +3.06 (C4).
+CORRECTION 1 (P4, definition only): the origin scan's cold-share gates use the pmix table's cold_share (eda/errors/segments; val shares 0.564 / 0.352 / 0.084), which is the variable the pre-mortem used [D premortem.md 3.2], not the feat_cache
+ luo share named in block 4. Nothing was computed with either yet.
+CORRECTION 2 (placebo run plan): the 400 draws are run as two processes of 200 (draw d seeded by default_rng([20261115, d])), all four compositions with the same signs; statistics also recorded for C2 / C4 (H1, H3, headline, P4 read on C2).
+ The real value compared with the null is the fold-seed-7001 value computed by the same script with all signs +1.
+ADDED STATISTIC (declared now, before the placebo): P5 = sign-flip null of the fixed M-rule's mean over the 4 member-disjoint halves (HA, HB, WA, WB) and of its mean over C1, C2 (the two full-data files with the owner), with the
+ selection emulated as in P4 but on the pooled twins: the 75-rule winner is selected on the mean contrast of C3 and C4 (all feeds) and read on the mean of C1 and C2. Observed = fixed M-rule on the mean of C1 and C2.
+
+=== 2026-11-15T13:55:44Z BLOCK 9: READ of the sign-flip placebo (log_placebo_read.txt; 400 draws) and POST HOC additions declared before they are computed ===
+SANITY PASS [M]: worst |z| of a null mean over 56 nested statistics = 2.22 (bar 3): my nested code reads 0 under the null.
+Read by the declared rules [M]: headline (H1+H3)/2 (10 fold seeds) C1 +0.00002+-0.00027, sign-flip p 0.42 -> "NOT SHOWN on C1"; C3 +0.00030+-0.00026, p 0.25 -> "NOT SHOWN on C3" (C2 +0.00015, p 0.23; C4 +0.00015, p 0.45).
+ Fixed rule (H2), no selection in the null: p 0.097 (C1), 0.012 (C2), 0.002 (C3), 0.025 (C4). With the origin selection emulated (P4): C1 p 0.27 (read minus null mean +0.00015), C2 p 0.08 (+0.00039); P5 mean(C1, C2) p 0.14 (+0.00025).
+ Family-wise (P2): top nested row on C1 (F(Hq) +0.00076) p 0.157 among 6 of A's families, 0.272 among my 12. Interaction I: -0.12 SE (C1), +1.26 (C2), +3.83 (C3), +3.06 (C4): gate specific on the twins only.
+ Seen [D] rulesA/pl_PLA_FD16.npz, pl_PLA_W16.npz: A's member-role placebo has a null sd of the nested family gains of 0.00020-0.00026 and of the fixed rule of 0.00015 / 0.00008, against 0.00040-0.00049 and 0.00021 under the sign-flip null.
+POST HOC (none can produce a candidate; block 7 stands):
+ P6  in-sample family-wise p of the origin winner: null distribution (same 400 sign draws) of the in-sample maximum over the 75-rule scan of (a) the C3 contrast, (b) the mean contrast of C3 and C4, (c) the mean of C1..C4; observed = the
+     fixed M-rule's mean on the same object (+0.00071 / +0.00057 / +0.00048). Also the same with the scan replaced by the single gate M >= 50 (25 rules).
+ V1  why A's / B's member-role placebo is narrower: per-feed sd of the fixed-rule contrast (M-rule minus the placebo's own plain) for B's 4 structured same-recipe splits of FD16 and of W16 (pseudo popularity-light pool = 4 same-recipe
+     wide students, base = the other 12), against the real compositions C1 / C3. Reading fixed now: if the placebo's per-feed sd is below 0.8 of the real one, the member-role placebo UNDERSTATES the noise of the real search and the p-values
+     drawn from it (A: p_A, p2; B: D1 z) are anti-conservative; reported as MAJOR. No decision rests on it.
+ V2  fold-seed share of the null spread: sign-flip null sd of nested C(M50) and F(Hq) on C1 with 5 fold seeds averaged (100 draws) against the 1-seed null sd, so that A's 5-seed nested numbers are compared with a like-for-like null.
+
+=== 2026-11-15T13:59:56Z BLOCK 10: READ of block 9 additions and of CHECK 4 by the declared rules [M] (log_extra.txt, log_transfer.txt) ===
+P6: in-sample, against the null maximum of the 75-rule origin scan: fixed M-rule on C3 p 0.090, on mean(C3, C4) 0.107, on mean(C1..C4) 0.110, on mean(C1, C2) 0.387, C1 0.733, C2 0.297 (M gate alone, 25 rules: 0.055 / 0.070 / 0.065 / 0.279 / 0.621 / 0.192).
+V1: per-feed sd of the fixed-rule contrast in the same-recipe placebo pools = 0.58-0.72 of the real pools (8 splits; bar 0.8) -> the member-role placebo UNDERSTATES the noise: MAJOR, as declared.
+    (row correlation of base and pseudo pool 0.9955 against 0.985 for the real popularity-light pool.)
+V2: sign-flip null sd with 5 fold seeds averaged = 0.9 of the 1-seed sd (C(M50) 0.00041, F(Hq) 0.00051; A's placebo: 0.00020 / 0.00022). F(Hq) on C1, 5 seeds: +0.00073, p 0.129 alone, 0.208 family-wise over 6 families (A: 0.010 / 0.030).
+T1 PASS: cell shares within 2.2 points (M >= 50: val 0.591, public 0.613, private 0.608; H >= 190: 0.504 / 0.502 / 0.499), within-cell KS <= 0.040, same ranges (M 5..300 against 5..299).
+T2: top-1 differs from the plain file on 1,246 of 28,595 test feeds for the FD16 pair (public 392, private 854; 7.5% / 7.0% of long feeds; val 7.2%) and 1,327 for the FD8 pair (431 / 896). Own-path test scores equal the stored
+    branches of both built FD16 files (max abs diff 6e-7).
+T3: FLAG no on all four compositions by the declared rule. Reported anyway: on C1 72% of the positive cell contributions sit in cells that are rarer on private (cold share < 30%: 34% of val, 14% of public, 8% of private feeds), the
+    private-mix read rests on the 480 val feeds of the >= 45% cell, and the gain is on the first val day only (+0.00052+-0.00030 against -0.00002+-0.00030); C2, C3, C4 do not show either pattern.
+T4: per-feed correlation of the two pools equal on val / public / private to 0.001 in both branches: same pool geometry.
+VERDICT by block 7: no rule other than PLAIN and the standing M-rule was put forward by either searcher, and none passes my bars (F(Hq): +0.00047+-0.00026 over the fixed M-rule on C1, -0.00079 on C3, family-wise p >= 0.16) -> confirmed = FALSE.
+M-rule by block 5: NOT SHOWN on C1 (headline +0.00002+-0.00027, p 0.42) and NOT SHOWN on C3 (+0.00030+-0.00026, p 0.25).

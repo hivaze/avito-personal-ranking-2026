@@ -1,0 +1,243 @@
+PUBLIC-LEADERBOARD ABLATION PROGRAMME (nn_x/audit/publicprobe, 2026-11-13 ~00:30-01:30 UTC, CPU only, 12 threads)
+=====================================================================================================================
+Scope: a prioritised, pre-registered programme of public submissions whose EXACT public deltas vs G3 (scores shown to 10
+digits for the fixed 8,562 public feeds) answer what val cannot: (1) input-family carry-over to the test period, (2) member-
+family value on test, (3) per-slice calibration of val->public, (4) the FT branch weight. Three files are built and gated.
+Scripts / outputs (all under <repo>/nn_x/audit/publicprobe/):
+  probe_design.py  -> out/probe_design.txt (full table incl. slices), out/probe_design.json, out/cand_<probe>_{val,test}.npy
+  build_top3.py    -> preds/candP_{wft100_FTonly,msplit_M50,NEW12}_{val,test}.npy (new files; the presub spec names),
+                      subs/cand_P_G3_FTonly.parquet, subs/cand_P_G3_msplit_TOlt50.parquet, subs/cand_P_NEW12_memeq.parquet
+  out/gate_cand_P_*.txt (presub_gate output), out/sha256.txt
+Conventions: d = per-feed val NDCG(probe) - NDCG(G3), paired over 14,423 val feeds. "pubmix"/"privmix" = d reweighted to the
+public / private feed-size (M) mix (src/calib.py). Public paired SE = sqrt(Var_pubmix(d) / 8,562), private = sqrt(Var_privmix(d)
+/ 20,033): the 'Mw' noise model of nn_x/pubdiag/noise, which matched the realised public residuals (chi2(3) p 0.19). "pmix" =
+M x cold-share reweighting (src/pmix.py; report-only, level-miscalibrated by +0.004, deltas still informative). G3 = preds/
+ens_G3_final_* = z(0.5 z(ft) + 0.5 z(to)) over F10 (6) + F7x (7) + F7x70 (7); rebuilt from the member files at corr 1.000000.
+Slice-restricted probe (A on slice S, G3 elsewhere): exact public delta = (1/8562) sum_{i in public & S} d_i; expectation
+(n_S_pub/8562) * mean_S(d) with M-reweighting inside S; SE = sqrt(n_S_pub * Var_S(d)) / 8562. Everything is from existing
+preds/ arrays; no model was run.
+
+---------------------------------------------------------------------------------------------------------------------
+0. BOTTOM LINE
+---------------------------------------------------------------------------------------------------------------------
+1. What public can resolve: paired SE 0.00035-0.00065 for near-copies of G3 (within-feed corr 0.995-0.9995), so only
+   contrasts whose val-vs-public disagreement is >= 0.001 are readable in one shot; slice twins have SE 0.00026-0.00036 but
+   test smaller expectations. Nothing below 0.0007 (2 SE) should ever decide anything on one submission.
+2. Composition facts that shape the programme (label-free, exact): public is ALREADY private-like on the cold axis (share of
+   feeds with cold share > 0.3: val 0.427, public 0.735, private 0.836; LUO==0 rate of 3-7 d listings val 0.62 / public 0.83 /
+   private 0.86 per the features audit). The remaining public -> private composition gaps are hour of day (feeds at 14-24h:
+   public 0.361, private 0.597; 18-24h 0.181 vs 0.369) and weekend share (1.00 vs 0.24); M mix differs little (M<50 0.387 vs
+   0.392). So the val->public calibration residual of a candidate already carries most of the coverage shift; the public ->
+   private step needs only an hour-of-day reprojection, which slice twins can measure.
+3. The four realised public deltas vs G3 (Cd, PF7x, M2, TO-only) are consistent with ONE structure: the non-re-cooled
+   differences transfer ~1:1 and the m02 RE-COOL component carries a val-only excess that scales with the re-cool share of
+   the pool. WLS of the public residual (realised - pubmix expectation) on re-cool share: slope -0.00130 +- 0.00076 per unit
+   share (Cd share 0 resid +0.00059; PF7x 0.18 +0.00050; M2 1.00 -0.00098; G3 0.70 = reference). It is a 1.7-sigma pattern;
+   the programme's first job is to make it 3-sigma or kill it, because it decides the member composition of the final pick.
+4. Built now, gate PASS (WARN only), today's three slots: (A) cand_P_G3_FTonly (w_ft 1.0), (B) cand_P_G3_msplit_TOlt50 (TO-only
+   on M<50 feeds, G3 elsewhere), (C) cand_P_NEW12_memeq (the 12 gate-passing from-scratch m02 members, re-cool share 0).
+   Pre-registered expectations and rules are in section 4. Their sha256 are in section 3.
+5. Input-family counterfactuals on TEST (question 1 proper) cannot be built on CPU: the stale / zeroed-input predictions exist
+   for val only (nn_x/r6/preds/stale, nn_x/audit/features/out/replay). Section 2.4 gives the exact GPU recipe (~5 GPU-min);
+   it is the only probe in the programme that needs inference.
+6. Final-pick design (section 5): a frozen candidate list (<= 6 pools), one full public readout per candidate plus at most two
+   slice twins, a pre-registered private-oriented estimator (pmix val delta corrected by the fitted re-cool slope, averaged
+   0.5/0.5 with the hour-reprojected public delta), a 2-SE switch rule vs G3, pick 2 = the least-correlated eligible pool, a
+   hard cap of 30 programme submissions, and never a raw public max.
+
+---------------------------------------------------------------------------------------------------------------------
+1. PUBLIC READOUTS THAT ALREADY EXIST (exact) AND THE TRANSFER CHECK
+---------------------------------------------------------------------------------------------------------------------
+   file            public     val      d_pub vs G3  val-expected (pubmix)  resid    z     what it says
+   G3              0.392820   0.40032   reference
+   M2 (F7x+F7x70)  0.392434   0.40094   -0.00039     +0.00059               -0.00098 -1.78  F10 (GRU, no re-cool) ADDS on test although it subtracts on val
+   PF7x (38)       0.39272    0.39974   -0.00010     -0.00060               +0.00050 +0.78  the 5 old families + F7 cost nothing on test
+   Cd (18)         0.39208    0.39901   -0.00074     -0.00133               +0.00059 +0.75  same direction
+   TO-only         0.392346   0.40035   -0.00047     -0.00007               -0.00040 -0.64  the FT half is worth ~+0.0005 forward in time (val says 0)
+   S2 stacker      0.392473   0.40088   -0.00035     (+0.00056 val)         -0.0009         val-selected recombination did not transfer
+   overlay         0.392819   0.40486   0.00000      (+0.00454 val)                         leak neutralised by the organisers (status 21:52)
+   (z uses sqrt(SE_pub^2 + SE_val^2); SE_pub 0.00043 / 0.00050 / 0.00062 / 0.00050.)
+   Joint reading: residual vs re-cool share (G3 = 0.70 reference) fits slope -0.00130 +- 0.00076 / unit share (section 0.3).
+   Under this "dose-response" hypothesis H2 the unscored pools are predicted at: NEW12 +0.00014, Pall -0.00047, F10only
+   -0.00069, N1 +0.00006 (vs the 1:1 hypothesis H1: -0.00077, -0.00138, -0.00160, -0.00028). Each single probe separates H1
+   from H2 by only 1.4-1.7 SE; the three share-0 probes together separate by ~2.6 SE (section 4.3).
+
+---------------------------------------------------------------------------------------------------------------------
+2. THE PROGRAMME (recipe | val prediction of the public delta | public paired SE | decision + kill rule | priority)
+---------------------------------------------------------------------------------------------------------------------
+All val numbers are paired vs G3 (out/probe_design.txt has every slice: M<50 / M>=50, 5 hour buckets, cold-share bins,
+new / train users, Tue / Thu, and the public-mix contribution of each slice).
+
+2.1 TIER A: build now (done), submit in this order.
+ A1  cand_P_NEW12_memeq  = member-equal pool of the 12 from-scratch m02 members (v27_gru_m02 s511/513/515, v28_lr1_m02 s411/
+     413/414/415/417, v29_d192_m02 s711/712, v30_f7_m02 s901/902; decide5 gate-a list), final = 0.5 z(ft) + 0.5 z(to).
+     Re-cool share 0, same m02 recipe and inputs as G3's trunks, 4 architectures.
+     val -0.00077 +- 0.00049 (M<50 -0.00125, M>=50 -0.00044; h<14 -0.00135, h>=14 -0.00015; cold>.3 -0.00001, cold<=.3 ~-0.0013;
+     Tue -0.00142, Thu -0.00006). pubmix -0.00077, SE_pub 0.00062; privmix -0.00076, SE_priv 0.00041; pmix -0.00058 / -0.00055.
+     Decides: whether G3's re-cool component (70% of its members) is val-only -> the member composition of the final pick.
+     H1 (1:1 transfer) -0.00077; H2 (dose-response) +0.00014. Rule in 4.3. PRIORITY 1.
+ A2  cand_P_G3_FTonly   = z(ens_G3_ft_test) (w_ft = 1.0), the twin of the scored TO-only (w_ft = 0).
+     val -0.00049 +- 0.00040 (M<50 -0.00170, M>=50 +0.00035; h<14 -0.00061, h>=14 -0.00035; cold0 -0.00397, cold>.3 -0.00009).
+     pubmix -0.00046, SE_pub 0.00051; privmix -0.00046, SE_priv 0.00034; pmix -0.00019 / -0.00007.
+     Decides: the public w_ft curve at its three determining points (0: -0.00047 realised; 0.5: 0; 1.0: ?). Rule in 4.1.
+     PRIORITY 2 (the critique's R4 objection - "one-shot 2-SE read on the least stale split" - is answered by using the
+     curve's two endpoints and by never moving w_ft beyond 0.75 on public evidence alone).
+ A3  cand_P_G3_msplit_TOlt50 = G3 on M>=50 feeds, TO-only (z(ens_G3_to_test)) on M<50 feeds (slice-restricted FT contrast;
+     3,314 public feeds = 38.7%, 7,847 private = 39.2%).
+     val +0.00054 +- 0.00028 (all of it M<50 +0.00131; Tue +0.00034, Thu +0.00075); exact public expectation +0.00048, SE 0.00035;
+     private +0.00050, SE 0.00023. Under "FT value uniform over M on public" the expectation is -0.00018 (= -0.00047 x 0.387).
+     Decides: (i) the M<50 part of the FT value on public (fresh sample, same members; the val-found M-split failed fresh-member
+     confirmation, -0.00017 +- 0.00031, status 18:54); (ii) with A2 and TO-only, the M>=50 part follows by subtraction.
+     Rule in 4.2. PRIORITY 3.
+
+2.2 TIER B: next 1-3 days (built in out/, not yet parquet; make_sub + gate when scheduled).
+ B1  Pall (subs/cand_Pall_memeq_6fam.parquet exists, PICK 2 hedge, never on public): val -0.00136 +- 0.00043; pubmix -0.00138,
+     SE_pub 0.00055; H2 predicts -0.00047. The second share-0 point of the dose-response AND the public verification a declared
+     pick needs anyway. Kill: realised < -0.0019 (= H1 - 1 SE) -> Pall is dropped as pick 2 in favour of N1 or NEW-heavy pools.
+     PRIORITY 4.
+ B2  F10only (6 GRU pre2s members, no m02, no re-cool): val -0.00151 +- 0.00049; pubmix -0.00160, SE 0.00063; H2 -0.00069.
+     Third share-0 point (also "no-m02 at all"). PRIORITY 5. (With B1 and A1 the pooled re-cool-excess estimate has SE ~0.0004.)
+ B3  Hour twins of the Tier-A contrast that deviates most from its val expectation (conditional; built already):
+     NEW12_h14 (NEW12 on feeds at 14-24h MSK, G3 elsewhere; 3,086 public feeds, 11,939 private): val -0.00007, public expectation -0.00005, SE 0.00036.
+     FTonly_h14 (FT-only on 14-24h feeds): val -0.00017, expectation -0.00015, SE 0.00031.
+     Purpose: the private hour mix (14-24h = 0.597 vs public 0.361) reprojection of the decisive contrast:
+     delta_priv ~= 0.403 * delta_pub(h<14)/0.639 + 0.597 * delta_pub(h>=14)/0.361, both parts exact from (full, twin).
+     Trigger: submit the twin of a Tier-A probe only if |realised - pubmix expectation| > 2 SE_pub. PRIORITY 6 (conditional).
+ B4  Cold twins (built): NEW12_coldle3 / FTonly_coldle3 = probe on cold-share <= 0.3 feeds (2,270 public, 3,295 private), G3 elsewhere; public
+     expectation -0.00035 / -0.00020, SE 0.00031 / 0.00026. Since public is already 73.5% cold>.3 (private 83.6%), the cold
+     reprojection changes a private estimate by < 15% of the contrast; run only if the h14 twin leaves a > 2 SE gap. PRIORITY 8.
+ B5  wft75 (w_ft 0.75): val -0.00015 +- 0.00027; pubmix -0.00013, SE 0.00035. Only if A2 reads >= -0.0002 (section 4.1); it then
+     confirms the hedge value 0.75 before it enters a pick. PRIORITY 7 (conditional).
+
+2.3 TIER C: low value per submission, listed so they are not re-proposed.
+ C1  Leave-one-re-cool-family-out: noF7x70 (F10+F7x, 13) val -0.00013, SE_pub 0.00035; noF7x (F10+F7x70, 13) val -0.00029,
+     SE_pub 0.00037; H1-H2 separation 0.6 SE. Unreadable; the re-cool question is answered by A1/B1/B2 instead. DO NOT RUN.
+ C2  N1 = G3+NEW (32): val -0.00025 +- 0.00028, SE_pub 0.00036, separation 1.0 SE. Run only as a FINAL-candidate readout
+     (section 5), not as a probe.
+ C3  wft25: val +0.00036 +- 0.00026, SE_pub 0.00034: a flat region of the curve; never decisive. DO NOT RUN unless A2 reads
+     <= -0.0008 and a 0.25 hedge is wanted.
+ C4  4-root CD arms vs their references (hcap, truncp, auxf, m0: TO pools, val |d| <= 0.0003): below public resolution. DO NOT RUN.
+ C5  Calendar / external-data probe on public (the user's external-data line). Public is the ONLY weekend-labelled sample we
+     have (val is Tue/Thu; private is 24% weekend). Facts on record: the category x weekend prior is null on the 30K holdout's
+     weekend feeds (+0.00010 +- 0.00015, avito audit a01) and the feature-label relation shows no weekend effect on train
+     (eda_shift_overlap s08). Pre-registered slot: if the external-data agent produces a label-free per-candidate adjustment A
+     (from train weekends / calendar / market series) with holdout-weekend nested delta >= +1.5 SE, submit G3 + lambda z(A)
+     (lambda fixed on the holdout); adopt only for a final candidate if public delta > 2 SE_pub AND the holdout weekday delta
+     >= 0 (private is 76% weekday). Otherwise the weekday part of any calendar feature is validated on val/holdout, not public.
+
+2.4 GPU-ONLY ITEM (question 1 proper; the lead's call, ~5 GPU-min, no CPU path exists).
+ G1  "popularity family zeroed on test": re-run inference of the 20 G3 members (TO checkpoint + the 5 n2cpv3 fold models each
+     = 120 passes, ~1-2 s per pass on one GPU) with the 8 popularity columns of the cvnd_pre2s xt set (seq_cv_invd20, seq_cv_pop,
+     seq_cv_norm, it_hist_{all,et1,et2,et3,et4}_luo; group "pop" = xt columns 0-7 in nn_x/audit/features/s02_replay_ablation.py)
+     set to the NaN->0 "missing" state on BOTH val and test (stale_pred.py already overrides val inputs by name; it needs a test
+     branch and an override dict of zero arrays), then the same 0.5/0.5 pool. Val prediction per the features audit: zeroing
+     popularity costs -0.0057 (r6_cd_m02_r101) / -0.0061 (v23_gru_s501) per member, coldpos +0.037 / warmpos -0.024; at pool
+     level expect ~-0.005 +- 0.0008 public (per-feed corr with G3 ~0.95 -> SE ~0.0008).
+     Reading: the public cost tells how much the family is worth AT TEST-PERIOD COVERAGE (public is already private-like on
+     coverage). Rule: public cost >= 0.8 x val cost -> the family carries over; the hzcd / parity retrain line (nn_x/w5/hzcd)
+     has little to gain on private and stays a CD arm. Public cost <= 0.5 x val cost -> the model over-relies on a family that is
+     weaker on test: promote hzcd to a 10-epoch from-scratch pair (the only private-specific lever left). Between: no action.
+     The pre2 family needs no probe (st_pre2 +0.00006 / -0.00010; not a private risk). Cost: 1 submission. PRIORITY: equal to A1
+     once a GPU lane is free; it is the single most informative probe for the private-specific question.
+
+---------------------------------------------------------------------------------------------------------------------
+3. THE THREE FILES BUILT NOW (all via src/make_sub.make_sub; presub_gate --members "" vs ens_G3_final_{val,test})
+---------------------------------------------------------------------------------------------------------------------
+   subs/cand_P_G3_FTonly.parquet          sha256 4fbf85bfcbe1e47ccb619c7a4f0ef1b8f518ae4b2dbb9be4bfd3f73166792253  (15,289,569 B)
+     spec: --val candP_wft100_FTonly_val --test candP_wft100_FTonly_test (= preds/ens_G3_ft_* within-feed z; ranks identical)
+     gate: PASS with 2 WARN: "C no --members" (recombination of the audited G3 members; their inputs were audited in the G3/PF7x
+     gates) and "D slice M<50 below -2 SE" (-0.00170 +- 0.00069: this IS the FT branch's known M<50 harm, the thing the probe
+     measures). Leak probe +0.00058 +- 0.00170 (nothing). B min Spearman 1.000000. F val 0.9945 / test 0.9951 (parity OK).
+     predicted (calib) public 0.3918 / private 0.3944 vs G3 0.3923 / 0.3949.
+   subs/cand_P_G3_msplit_TOlt50.parquet   sha256 d1cbe30423545a4187c4f0ff3bfc6274b3e5095c2c5298758e010796b6043127  (15,289,094 B)
+     spec: --val candP_msplit_M50_val --test candP_msplit_M50_test (z(G3) on M>=50 rows, z(ens_G3_to) on M<50 rows)
+     gate: PASS with 1 WARN (C no --members, as above). D +0.00054 +- 0.00028 (M<50 +0.00131, M>=50 exactly 0, Tue +0.00034,
+     Thu +0.00075, user0 -0.00110 +- 0.00116). Leak probe +0.00224 +- 0.00360 (nothing). B 1.000000. F 0.9967 / 0.9971.
+   subs/cand_P_NEW12_memeq.parquet        sha256 14120881b21ff3597a1ea6f4b4c1d644f213b7330d302446271b78f20792ce71  (15,289,008 B)
+     spec: --val candP_NEW12_val --test candP_NEW12_test (12 members, member-equal per-feed z-mean per branch, 0.5/0.5)
+     gate: PASS with 3 WARN: C no --members (the 12 members passed gate (a) in decide5 with the same 34 cvnd_pre2s inputs as G3's
+     trunks, verified via presub_gate.train_feat_list); "D slice Tue below -2 SE" (-0.00142 +- 0.00064, part of the -0.00077
+     deficit the probe tests); "D slice has_later below -2 SE" (-0.00765 +- 0.00375 on 117 feeds: the NEW members gain LESS on
+     has-later feeds, i.e. the safe direction; leak probe -0.00694 +- 0.00378). B 1.000000. F 0.9901 / 0.9903 (parity OK).
+     predicted (calib) public 0.3915 / private 0.3941.
+   Build note: the first build failed check B on cand_P_NEW12 (min per-feed Spearman 0.999877): make_sub breaks EXACT within-feed
+   ties with a random key while the gate's reproduction breaks them by index order; one M~46 public feed had two identically
+   scored candidates. build_top3.py now breaks exact ties deterministically in the stored test arrays (k-th duplicate + k * 4e-6,
+   above float32 z resolution; 4 / 5 / 7 ties over 2.9M rows; non-tied rows untouched) and builds the submission from the gate's
+   own transform (feed_rank_z of the stored array), so B reads 1.000000 for all three. The ties are pairs of candidates with
+   identical scores in every member (identical content rows), i.e. an irrelevant coin flip either way.
+   Submission budget: 2 of today's 5 were used at 21:52 UTC 11-12 (= 00:52 MSK 11-13: overlay, TO-only); if the organiser's day is
+   MSK, these three fit today. Tier B then needs 1-2 slots per day for 2-3 days.
+
+---------------------------------------------------------------------------------------------------------------------
+4. PRE-REGISTERED READOUT RULES (written before any of the three scores exists)
+---------------------------------------------------------------------------------------------------------------------
+Let r(X) = public(X) - 0.392820, exact. SE_pub as in section 2 (0.00051 / 0.00035 / 0.00062 for A2 / A3 / A1).
+4.1 FT branch weight (A2, with TO-only r = -0.00047 and the blend r = 0):
+    - r(FTonly) >= -0.0002: the FT branch is at least as strong alone as the blend on the test period (val said -0.0005):
+      final-pick candidates get w_ft 0.75 (never 1.0 on public evidence); submit wft75 (B5) as confirmation; keep 0.5 if
+      r(wft75) < -0.0003.
+    - -0.0008 < r(FTonly) < -0.0002: the public curve is the val curve shifted by ~+0.0004 toward FT; keep w_ft 0.5. No more
+      w_ft submissions.
+    - r(FTonly) <= -0.0008: FT-only is worse on public than val says; keep 0.5, and record that the "+0.0005 forward value of
+      FT" (status 21:52) was within noise. Kill the w_ft line.
+    The three points also give the public M>=50 part of the FT value by subtraction with A3 (section 4.2).
+4.2 M-split (A3): r(msplit) = the M<50 part of (TO-only - blend) on public. Val expectation +0.00048, uniform-value null -0.00018.
+    - r >= +0.0007 (2 SE): the FT harm on small feeds replicates on a fresh sample with the G3 members -> the final pick's
+      recipe uses TO-only on M<50 (the M-split), and the h14 twin of the FT contrast (B3) is run to reproject it to private.
+    - +0.0002 < r < +0.0007: suggestive only; the M-split enters the candidate list (section 5) but is not adopted on this alone.
+    - r <= +0.0002: the M-split is closed for good (it was val-specific, as the fresh-member test said).
+    Derived, reported in all cases: FT value on M>=50 public feeds = -0.00047 - r (val contribution +0.00052).
+4.3 Re-cool transfer (A1 now, B1/B2 next): define the re-cool excess estimate E = mean over the scored share-0 pools of
+    (realised r - H1 expectation), H1 = pubmix val delta (NEW12 -0.00077, Pall -0.00138, F10only -0.00160).
+    - After A1 alone: r(NEW12) >= +0.0004 (i.e. resid >= +0.0012, 1.9 SE) -> H2 provisionally confirmed; B1 and B2 are submitted
+      the next day to firm it up. r(NEW12) <= -0.0010 -> H2 killed (the M2 shortfall was noise); B1 still runs as pick-2
+      verification, B2 is dropped. Between: run B1 and B2, decide on the pooled E.
+    - Pooled rule (3 points, SE ~0.0004): E >= +0.0008 -> the final-pick estimator applies the re-cool discount -b_hat *
+      (share_C - 0.70) with b_hat from the WLS over ALL scored points (currently -0.00130 +- 0.00076); candidates with a lower
+      re-cool share and a non-negative discounted score replace G3 only under the section-5 switch rule. E <= +0.0004 -> no
+      discount, val ordering stands. Between: half discount (b_hat / 2).
+    Note: the from-scratch pool also tests the "generational" claim of INSIGHTS 12 (re-cooled members carry ~+0.0015 val the
+    holdout does not confirm; the review's same-trunk estimate is +0.0005..+0.0008). A1's residual is the public-side estimate
+    of exactly that number.
+
+---------------------------------------------------------------------------------------------------------------------
+5. COMBINING MANY PUBLIC READOUTS INTO A PRIVATE-ORIENTED FINAL PICK WITHOUT OVERFITTING PUBLIC
+---------------------------------------------------------------------------------------------------------------------
+5.1 What public is for. Public is a labelled sample of the test period (not of val) that is private-like on coverage and M, and
+    unlike private on hour (morning-heavy) and weekend (100%). It is used (a) to estimate transfer FACTORS of named components
+    (re-cool share, FT branch, M<50 recipe, popularity family), (b) to reproject one or two decisive contrasts by hour, and (c) to
+    verify every declared pick once. It is NOT used to rank near-copies: picking the max public score among K near-copies with
+    SE 0.0005 inflates by ~0.0005 * sqrt(2 ln K) (~0.001 at K = 20), larger than every real difference we have.
+5.2 Frozen candidate list (<= 6; additions only through a pre-declared decide rule, each addition logged here with its date):
+    G3 (reference) | N1 = G3+NEW (32) | NEWx = NEW12 + F10 (18; share 0) | Pall (38; share 0, pick-2 hedge) | T1 = G3 + TRUNC
+    members if the wave-5 E readout passes | the w_ft / M-split variant of whichever of these wins, as ONE variant only.
+    Each candidate gets at most one full public readout (its own file) and at most two slice twins. Hard cap: 30 programme
+    submissions in total (Tier A 3, Tier B <= 6, G1 1, candidate readouts <= 6, twins <= 8, reserve 6). Every look is logged.
+5.3 Estimator for candidate C vs G3 (all deltas paired, per feed):
+      V_C = pmix-private reweighted val delta (src/pmix.py; SE_v = pmix SE)   [val, private composition]
+      D_C = -b_hat * (share_C - 0.70)                                          [re-cool discount, b_hat +- SE_b from 4.3]
+      P_C = hour-reprojected public delta: 0.403 * d_pub(h<14)/0.639 + 0.597 * d_pub(h>=14)/0.361 when C's h14 twin exists,
+            else the full public delta r(C) (SE_p = SE_pub(C), inflated x1.3 when no twin exists, for the composition gap)
+      H_C = holdout delta of the train-only pool (SE_h)                        [selection-free lens, eligibility only]
+      S_C = 0.5 * (V_C + D_C) + 0.5 * P_C,  SE_S = 0.5 * sqrt(SE_v^2 + (share_C - 0.70)^2 SE_b^2 + SE_p^2)
+    (0.5/0.5 is the RESEARCH_SWEEP plan "val shrunk + 0.5 public"; val's SE_v is further multiplied by sqrt(1 + 0.1 * n_looks)
+    where n_looks = number of candidates evaluated on val for this decision, as the selection inflation of a val max.)
+5.4 Switch and hedge rules: pick 1 = G3 unless some C has S_C > 2 SE_S, H_C >= -1 SE_h, no val slice (M<50, M>=50, Tue, Thu)
+    < -2 SE, pmix >= -1 SE and presub_gate PASS; among qualifiers the highest S_C. Pick 2 = the eligible pool (S >= -1 SE_S,
+    H >= -1 SE_h) with the LOWEST within-feed test correlation to pick 1 (the hedge; currently Pall at 0.9971 vs G3). If two
+    candidates are within 1 SE_S, prefer the lower re-cool share (the component with the demonstrated val-only excess).
+5.5 Reading twins into private: a slice twin only ever reprojects a contrast; it never promotes a slice-specific recipe (the
+    M-split is the one exception and needs 4.2's 2-SE bar on the exact public slice delta plus the hour twin).
+5.6 Timing: Tier A today; B1/B2 (+ conditional twins) over the next 2 days; G1 when a GPU lane is free; candidate readouts only
+    after their decide rule exists; the final estimator is run once, on a fixed date (Dec 7), with every number already on
+    record, and the two picks are the output of that single run.
+
+---------------------------------------------------------------------------------------------------------------------
+6. WHAT PUBLIC CANNOT TELL US (so nobody spends slots on it)
+---------------------------------------------------------------------------------------------------------------------
+- Differences below 0.0007 between near-copies (every pool-of-pools, stacker, weight, aggregation or 4-root arm question).
+- Anything about private beyond the hour/weekend reprojection: public has the private coverage regime already, and the extra
+  1-2 days of staleness on private cannot be emulated by a public probe.
+- Weekday-specific effects (private is 76% weekday): those are val's job (Tue/Thu) and the holdout's.
+- Member-level selection: a per-member public readout costs 20+ slots for SE 0.0012 each (corr ~0.90).

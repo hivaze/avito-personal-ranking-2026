@@ -1,0 +1,43 @@
+== 1. hard-label twins (w5_e10_base, 1-seed FT) vs students at the same seeds, FT OOF - TO, paired per feed
+  base (hard labels, d128): -0.00029+-0.00041 | M<50 -0.00050+-0.00071 | M>=50 -0.00014+-0.00049
+  kd05        : +0.00001+-0.00044 | minus base twin +0.00030+-0.00039 (M<50 +0.00014+-0.00073, M>=50 +0.00041+-0.00043)
+  kd05t25     : -0.00003+-0.00042 | minus base twin +0.00026+-0.00038 (M<50 +0.00005+-0.00071, M>=50 +0.00040+-0.00042)
+  kd08        : +0.00013+-0.00048 | minus base twin +0.00042+-0.00042 (M<50 -0.00021+-0.00077, M>=50 +0.00085+-0.00049)
+  kd05w192    : -0.00012+-0.00044 | minus base twin +0.00017+-0.00040 (M<50 -0.00018+-0.00073, M>=50 +0.00041+-0.00045)
+  kd05t25w192 : -0.00073+-0.00045 | minus base twin -0.00045+-0.00040 (M<50 -0.00110+-0.00072, M>=50 +0.00000+-0.00046)
+  m02 x7 (re-cooled F7 roots, hard labels): +0.00046+-0.00040 | base twin minus m02: -0.00075+-0.00035
+
+== 2. member level, W8: NDCG(z_TO + lam * s_m) - NDCG(z_TO), mean over 8 members (paired SE)
+  lam 0.10: +0.00022+-0.00007
+  lam 0.20: +0.00033+-0.00011
+  lam 0.30: +0.00027+-0.00015
+  lam 0.50: +0.00022+-0.00023
+  lam 0.75: -0.00003+-0.00032
+  lam 1.00: -0.00043+-0.00041
+  (logged raw-weight epoch-1 gain, W8 mean: +0.00047; saved EMA-final: -0.00043)
+
+== 3. pool proxy: z(TO pool W8) + s_m (ONE member shift) vs the true FT pool W8 and vs the TO pool
+  w5_e10_kd05w192_s951         proxy - TOpool -0.00046+-0.00065 | proxy - true FTpool +0.00023+-0.00041
+  w5_e10_kd05w192_s952         proxy - TOpool -0.00106+-0.00065 | proxy - true FTpool -0.00037+-0.00040
+  w5_e10_kd05w192_s953         proxy - TOpool -0.00044+-0.00064 | proxy - true FTpool +0.00025+-0.00040
+  w5_e10_kd05w192_s954         proxy - TOpool -0.00075+-0.00063 | proxy - true FTpool -0.00006+-0.00040
+  w5_e10_kd05t25w192_s951      proxy - TOpool -0.00087+-0.00065 | proxy - true FTpool -0.00018+-0.00044
+  w5_e10_kd05t25w192_s952      proxy - TOpool -0.00094+-0.00063 | proxy - true FTpool -0.00025+-0.00039
+  w5_e10_kd05t25w192_s953      proxy - TOpool -0.00093+-0.00064 | proxy - true FTpool -0.00024+-0.00040
+  w5_e10_kd05t25w192_s954      proxy - TOpool -0.00160+-0.00063 | proxy - true FTpool -0.00091+-0.00039
+  mean of 8 single-member proxies - TO pool: -0.00088+-0.00055 ; true FT pool - TO pool: -0.00069+-0.00061
+  lam 0.25: 2-member proxies (kd05w192_s951, kd05t25w192_s951) - TO pool +0.00024+-0.00028 ; true pooled shift +0.00044+-0.00029
+  lam 0.5: 2-member proxies (kd05w192_s951, kd05t25w192_s951) - TO pool +0.00038+-0.00041 ; true pooled shift +0.00009+-0.00043
+
+== 4. fold-specific part of the test shift: common to members? (test_folds; residual of fold k = shift_k - mean_k shift)
+  fold-residual RMS (member w5_e10_kd05w192_s951): 0.0526; full single-fold shift RMS 0.1549
+  corr of fold-k residuals between two members: same fold 0.725 | different folds -0.183
+  pooled (8 members) fold-residual RMS 0.0456 -> on test the 5-fold mean removes it; on val OOF it is in every prediction
+
+== 5. quadratic model d(lam) = a*lam - b*lam^2 of NDCG(z(TO pool) + lam * pooled shift) - NDCG(TO pool); lam grid 0..1 step 0.1 (least squares)
+  W8    a +0.00138 b +0.00230 -> lam* 0.30, max gain +0.00021; d(0.25) +0.00030+-0.00028 d(0.5) +0.00009+-0.00043 d(1) -0.00069+-0.00061
+  N8    a +0.00004 b +0.00015 -> lam* 0.14, max gain +0.00000; d(0.25) +0.00010+-0.00024 d(0.5) -0.00015+-0.00039 d(1) -0.00012+-0.00059
+  C3    a +0.00001 b +0.00061 -> lam* 0.01, max gain +0.00000; d(0.25) -0.00017+-0.00026 d(0.5) -0.00002+-0.00039 d(1) -0.00060+-0.00057
+  kd08  a +0.00023 b +0.00044 -> lam* 0.26, max gain +0.00003; d(0.25) +0.00010+-0.00025 d(0.5) +0.00004+-0.00039 d(1) -0.00008+-0.00060
+  mean of the 4 pools: a +0.00042 (boot sd 0.00073) b +0.00088 (sd 0.00056); max gain over lam +0.00005 (boot mean +0.00013, 95% upper +0.00050)
+  if the noise term b were halved / quartered with a unchanged: best gain +0.00010 / +0.00020; upper-95% a: +0.00163 -> gain at b/4: +0.00304

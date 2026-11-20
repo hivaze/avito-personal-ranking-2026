@@ -1,0 +1,15 @@
+# Extract from lab/nn_x/w12/cb/PREDECLARED.txt: only the rule lines of the two blocks written before the runs (2026-11-14T23:09:07Z and 2026-11-15T01:08:21Z); 43 other lines cut.
+WHAT A TREE MEMBER MUST REACH (frontier law on record, gain of the equal mix over the better pool = 0.0186 (1 - rho) - 0.378 gap; refit 0.0103 / 0.304):
+  at rho 0.90 the gap to W16 must be below 0.0049 (law on record) to break even: val >= about 0.3965; at rho 0.95 below 0.0025.
+MEMBER RULE (decision): tree model X (train-only; trained without val labels and without the 30K holdout feeds) enters a candidate file only if
+  0.9 z(W16 train-only pool) + 0.1 z(X) vs z(W16 train-only pool) reads val delta >= 0 AND holdout delta >= 0 AND (z_val + z_holdout)/sqrt(2) >= 2 (paired per feed).
+  The weight 0.1 is fixed (0.05 and 0.2 are reported, never chosen). Bundles of tree models count as one X (member-equal z-mean), declared before the read.
+PROGRESS RULE (cheap screen for arms): an arm is KEPT iff it improves its own baseline on BOTH witnesses (val and holdout) by >= 2 SE pooled, single-seed differences below 0.003 between tree arms are noise (W25 lesson: read arms at 3 seeds or on paired per-feed SE).
+STOP RULE: if the best tree model after the planned arms is below val 0.3900 (less than +0.005 over the distilled student of record) or its law value is below -0.002, the tree-member track is closed again.
+LEAK RULES: target statistics / CTRs / KNN-type embedding calcers are fitted on TRAIN rows only and never on the holdout, val or test labels; NN-derived inputs for train rows must be out-of-fold
+  (teacher_oof.npy / xf0-4 fold models) or the model must be read with that caveat; never a user's later snapshots.
+RULES (the MEMBER RULE of the first block is unchanged and is the only decision for a file):
+ SCREEN (replaces the level-based progress rule): arm X is PROMISING iff its NATS gain is >= 0.0016 on val AND on the holdout (single seed is enough: the statistic reads the record at z 5).
+   PROMISING arms get 3 seeds, are bundled (member-equal z-mean) as declared here, and the bundle is read with the MEMBER RULE at w 0.1 against the W16 train-only pool.
+ STOP (replaces "val < 0.3900"): after families B, S, N below, if no arm and no declared bundle reaches 0.0016 nats on both witnesses, the tree-member track is closed. Level alone never keeps it open.
+ SELECTION of the tree count: train-side split only (cbx.trainside_split); no val label anywhere in fitting or selection. Selection among arms uses the SCREEN on val AND holdout as written (no best-of-N on one witness).

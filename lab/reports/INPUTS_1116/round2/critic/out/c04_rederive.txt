@@ -1,0 +1,47 @@
+[     0s] views: holdout feeds 30000 (has = 1 on 15225), pool feeds with has = 1 69173; cuts in use [5, 6, 7, 8, 9, 10, 11, 12, 14]
+[     0s]    cut  5: window slots [0, 1, 2, 3, 4] (key 31)
+[     0s]    cut  6: window slots [1, 2, 3, 4, 5] (key 62)
+[     0s]    cut  7: window slots [2, 3, 4, 5, 6] (key 124)
+[     0s]    cut  8: window slots [3, 4, 5, 6, 7] (key 248)
+[     0s]    cut  9: window slots [4, 5, 6, 7, 8] (key 496)
+[     0s]    cut 10: window slots [4, 5, 6, 7, 8] (key 496)
+[     0s]    cut 11: window slots [4, 5, 6, 7, 8] (key 496)
+[     0s]    cut 12: window slots [5, 6, 7, 8, 11] (key 992)
+[     0s]    cut 14: window slots [7, 8, 11, 12, 13] (key 3968)
+[     0s]    hold: 30000 feeds, rows 4630966; feeds by cut {-1: 14775, 5: 13362, 6: 1291, 7: 572}
+[     0s]    pool: 69173 feeds, rows 10254287; feeds by cut {5: 60776, 6: 5892, 7: 2505}
+[     0s]    val_nat: 14423 feeds, rows 1389971; feeds by cut {14: 14423}
+[     0s]    val_twin: 14423 feeds, rows 1389971; feeds by cut {7: 1965, 8: 1987, 9: 3751, 10: 3460, 11: 1760, 12: 1500}
+[     0s]    test_nat: 28595 feeds, rows 2904806; feeds by cut {14: 28595}
+[     0s] === A. kn1_5 from the raw candidate log ===
+[     1s] clusters [145, 261, 1464, 2486, 2570, 3482]: train candidate rows 508040
+[     1s] items 68733; items with more than one cluster / more than one embedding row among their train rows: 0 / 0
+[     1s]   hold: rows 150, cuts [5, 6, 7]; max |mine - stored| 1.34e-07; NaN-pattern mismatches 0; rows differing by more than 2e-5: 0; min (row slot - newest slot in its index) 2 d
+[     2s]   pool: rows 150, cuts [5, 6, 7]; max |mine - stored| 1.38e-07; NaN-pattern mismatches 0; rows differing by more than 2e-5: 0; min (row slot - newest slot in its index) 2 d
+[     2s]   val_nat: rows 150, cuts [14]; max |mine - stored| 1.70e-07; NaN-pattern mismatches 0; rows differing by more than 2e-5: 0; min (row slot - newest slot in its index) 3 d
+[     2s]   val_twin: rows 150, cuts [7, 8, 9, 10, 11, 12]; max |mine - stored| 1.66e-07; NaN-pattern mismatches 0; rows differing by more than 2e-5: 0; min (row slot - newest slot in its index) 7 d
+[     2s]   test_nat: rows 150, cuts [14]; max |mine - stored| 1.54e-07; NaN-pattern mismatches 0; rows differing by more than 2e-5: 0; min (row slot - newest slot in its index) 7 d
+[     2s] A: 750 rows, 0 mismatches, largest difference 1.70e-07
+[     2s] === B. ns2_5 from the raw history arrays ===
+[    10s] history events on the 1000 sampled items: 68259; type 1 and source 2: 6161
+[    10s]   hold: rows 200 (stored > 0 on 140); mismatches 0; min (row slot - newest contributing slot) 2 d
+[    10s]   pool: rows 200 (stored > 0 on 138); mismatches 0; min (row slot - newest contributing slot) 2 d
+[    10s]   val_nat: rows 200 (stored > 0 on 140); mismatches 0; min (row slot - newest contributing slot) 3 d
+[    10s]   val_twin: rows 200 (stored > 0 on 137); mismatches 0; min (row slot - newest contributing slot) 7 d
+[    10s]   test_nat: rows 200 (stored > 0 on 148); mismatches 0; min (row slot - newest contributing slot) 7 d
+[    10s] B: 1000 rows, 0 mismatches
+[    10s] === C. bt5: seen flag from the raw arrays, and the own-feed leak test (labels opened here) ===
+[    11s] source feeds (p_random > 0.5, not holdout, >= 1 positive, dense slot): 485010
+[    12s]   hold: rows 400, seen 0.347; seen-flag mismatches 0; rows with theta != 0 while unseen 0
+[    12s]   pool: rows 400, seen 0.335; seen-flag mismatches 0; rows with theta != 0 while unseen 0
+[    12s]   val_nat: rows 400, seen 0.388; seen-flag mismatches 0; rows with theta != 0 while unseen 0
+[    12s]   val_twin: rows 400, seen 0.253; seen-flag mismatches 0; rows with theta != 0 while unseen 0
+[    13s]   test_nat: rows 400, seen 0.290; seen-flag mismatches 0; rows with theta != 0 while unseen 0
+[    13s] C(i): 2000 rows, 0 mismatches
+[    13s] C(ii) own-feed leak test: mean within-feed AUC of the column for the click (feeds with a view and >= 1 positive), +- 1 SE over feeds
+[    13s]   bt5    | pool slots 6-8: 0.5006 +- 0.0013 (31074 feeds) | pool slots 11-13: 0.4975 +- 0.0011 (38099 feeds) | hold slots 6-8: 0.4979 +- 0.0028 (6946 feeds) | hold slots 11-13: 0.4927 +- 0.0023 (8279 feeds)
+[    14s]   coec5  | pool slots 6-8: 0.5123 +- 0.0014 (31074 feeds) | pool slots 11-13: 0.5028 +- 0.0013 (38099 feeds) | hold slots 6-8: 0.5054 +- 0.0031 (6946 feeds) | hold slots 11-13: 0.5016 +- 0.0027 (8279 feeds)
+[    14s]   ctr5   | pool slots 6-8: 0.5136 +- 0.0015 (31074 feeds) | pool slots 11-13: 0.5042 +- 0.0013 (38099 feeds) | hold slots 6-8: 0.5089 +- 0.0031 (6946 feeds) | hold slots 11-13: 0.5041 +- 0.0027 (8279 feeds)
+[    14s]   kn1_5  | pool slots 6-8: 0.5003 +- 0.0014 (31074 feeds) | pool slots 11-13: 0.4996 +- 0.0013 (38099 feeds) | hold slots 6-8: 0.4997 +- 0.0031 (6946 feeds) | hold slots 11-13: 0.5061 +- 0.0028 (8279 feeds)
+[    14s]   ns2_5  | pool slots 6-8: 0.5264 +- 0.0012 (31074 feeds) | pool slots 11-13: 0.5221 +- 0.0011 (38099 feeds) | hold slots 6-8: 0.5314 +- 0.0026 (6946 feeds) | hold slots 11-13: 0.5260 +- 0.0023 (8279 feeds)
+[    14s] DONE

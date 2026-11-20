@@ -1,0 +1,46 @@
+=== audit lens, written 2026-11-14 about 23:13Z (header timestamp corrected 23:22Z; body unchanged) before any number of this lens was computed ===
+This lens trains NO candidate member. It reads existing predictions and runs small CPU diagnostic fits.
+Reference pool: W16 train-only = member-equal mean of per-feed z of w5_e10_kd05w192_s951-958 + w5_e10_kd05t25w192_s951-958.
+z = per-feed score z (stack_val.feed_rank_z[:,1]); rho = corr of the z arrays (project 'wcorr'); Spearman variant reported too.
+Blend statistic: (1-w) z(W16) + w z(X) vs z(W16), w in {0.05, 0.1, 0.2} (+ 0.5 only to compare with the law), paired per feed,
+  val 14,423 feeds and holdout 30,000 feeds. Member statistic = the PREDECLARED.txt rule at w 0.1.
+Tree bundles declared here before the read (diagnostic only, member-equal z-mean, each counts as one X):
+  B2_hard  = {cb26_e3_xm_yeti, w25_A2c}
+  B3_mixed = {cb26_e3_xm_yeti, w25_A2c, lgb_K_xm_134118}
+Slices fixed before the read: M bins [5,20) [20,50) [50,100) [100,200) [200,inf); history length H bins 0, 1-9, 10-49, 50-149,
+  150-255, 256 (cap); user type = user 0 / known (user_id seen in train feeds) / new (user_id not in train); cold share of the
+  candidates (cold = it_hist_all_luo <= 0, the cb26 definition) terciles; number of positives 1 / 2 / 3-4 / 5+; weekday (val: the
+  two val days; holdout: weekday of the feed). Candidate level (positives only): popularity bins of it_hist_all_luo, category
+  seen / unseen in the history (cat_cnt_all > 0), within-feed rank pct of seq_max_all (max cosine to a history event), and the
+  tree's own rank of the positive.
+Ceiling probes (LightGBM student, arm K of long_bets/gbdt_kd.py, 60K exploration feeds, same data and seed):
+  KL0 = same params, 2400 rounds (reads: 600 must reproduce 0.38469 / 0.30807);  KL1 = more capacity (declared when launched).
+  Read: 'round-limited' iff val AND holdout at the last round exceed round 600 by >= 2 paired SE each; the asymptote is the
+  level reported, and it is compared with the stop-rule line 0.3900.
+
+--- added 2026-11-14 ~23:40Z, before KL1 is launched (KL0 is at round 1400: val 0.38562 / holdout 0.30907) ---
+KL1 = the same student (60K feeds, same rows, same target) with more capacity and a faster rate: num_leaves 1023, min_data_in_leaf 50,
+  learning_rate 0.15, 1000 rounds, read at 200 / 400 / 600 / 1000. Read: 'capacity-limited' iff KL1's best logged round beats KL0's last
+  round by >= 2 paired SE on val AND holdout. Otherwise the student is input-limited at the KL0 asymptote.
+Representation test (stage 1 / stage 2), declared before any stage-2 number exists:
+  stage 1 = LightGBM, 177 features -> z(W16), 3-way cross-fit over test / val / holdout feed sets (no label in any fit).
+  stage 2 = LightGBM on the stage-1 residual from ONE new block (emb = raw candidate embedding 128 dims; seq = 58 per-history-event
+  columns; prod = 256 element-wise products with the user embedding and the mean history embedding; all_new = the three; same177 =
+  control, the 177 features again), + stage-1 prediction, M, H as conditioning columns. Read on val (train H+T) and on the holdout
+  (train V+T; all_new and the best single block only). A block 'contains missing signal' iff NDCG(stage 1 + stage 2) - NDCG(stage 1)
+  >= 2 paired SE on val AND it beats the same177 control by >= 2 SE.
+
+--- added 2026-11-15 ~00:05Z, before the probe below is run ---
+Pool-residual probe (diagnostic only; it trains on holdout / val LABELS, so it can never be a train-only member): does an input block
+carry label information the W16 pool lacks? LightGBM lambdarank (lr 0.03, 31 leaves, min_data_in_leaf 500, feature_fraction 0.3,
+bagging 0.5, lambda_l2 50, truncation 1000, FIXED 150 rounds, no early stopping, no tuning) with init_score = beta * z(W16)
+(beta = the conditional-logit coefficient on the training set), cross-wise: train on the 30K holdout labels -> read on val; train on the
+val labels -> read on the holdout. Blocks: same177 (the tree's own features), all_new (raw embedding + per-event + products), both.
+Read: delta = NDCG(beta z(W16) + f) - NDCG(z(W16)), paired per feed on the read set. A block 'carries pool-independent signal' iff
+delta >= 2 SE in BOTH directions. Record to compare with: cb26 E1 (CatBoost residual on G3, 30K holdout feeds, tabular) -0.00031 val.
+
+--- added 2026-11-15 ~00:35Z ---
+Joint representation test (177 + emb + seq + prod -> z(W16), train H+T, read val, lr 0.1): round 800 reads +0.00115 +- 0.00084 over the
+177-feature control at the same round and was still rising (+0.001 per 200 rounds). To read both at their plateau: the SAME two fits at
+learning_rate 0.2, 1000 rounds, read at 400 / 600 / 800 / 1000 (tags s1j_V_none_lr0.2 = control, s1j_V_emb+seq+prod_lr0.2). Read: the
+plateau difference, paired per feed on val; and whether the joint fit reaches the stop-rule line 0.3900.

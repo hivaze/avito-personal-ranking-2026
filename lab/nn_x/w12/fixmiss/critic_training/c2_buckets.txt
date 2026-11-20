@@ -1,0 +1,22 @@
+  row.append(f"{d[m].mean():+.5f}")
+  ret = ret.dtype.type(ret / rcount)
+test feeds 28595 (public 8562, private 20033); M mean val 96.4 public 103.6 private 100.7
+bucket shares  val / public / private:
+  M [2,30): 0.269 / 0.242 / 0.250
+  M [30,50): 0.139 / 0.145 / 0.141
+  M [50,75): 0.126 / 0.119 / 0.121
+  M [75,100): 0.095 / 0.092 / 0.098
+  M [100,150): 0.129 / 0.128 / 0.129
+  M [150,300): 0.242 / 0.274 / 0.260
+  M [300,1000000): 0.000 / 0.000 / 0.000
+FD16+FDP4 (file)         val +0.00017 | M>=50 buckets [50,75) [75,100) [100,150) [150,300): +0.00104 -0.00064 +0.00153 -0.00038 +nan | test-mix expectation public +0.00016+-0.00014 private +0.00016+-0.00014
+W16+PD4w                 val +0.00018 | M>=50 buckets [50,75) [75,100) [100,150) [150,300): +0.00118 +0.00058 +0.00057 -0.00038 +nan | test-mix expectation public +0.00016+-0.00015 private +0.00017+-0.00015
+W16+PC4a(1-seed FT)      val +0.00021 | M>=50 buckets [50,75) [75,100) [100,150) [150,300): +0.00076 -0.00048 +0.00044 +0.00044 +nan | test-mix expectation public +0.00022+-0.00015 private +0.00022+-0.00015
+FD16+PC4a(1-seed FT)     val +0.00024 | M>=50 buckets [50,75) [75,100) [100,150) [150,300): -0.00035 +0.00063 +0.00116 +0.00031 +nan | test-mix expectation public +0.00025+-0.00014 private +0.00025+-0.00014
+W16+PD4d                 val +0.00035 | M>=50 buckets [50,75) [75,100) [100,150) [150,300): +0.00158 +0.00084 +0.00028 +0.00014 +nan | test-mix expectation public +0.00034+-0.00013 private +0.00035+-0.00014
+per-feed corr of item-1 deltas between member sets (M>=50 feeds):
+  FD16+FDP4 (file)       1.00 0.30 0.26 0.24 0.22
+  W16+PD4w               0.30 1.00 0.35 0.14 0.36
+  W16+PC4a(1-seed FT)    0.26 0.35 1.00 0.27 0.28
+  FD16+PC4a(1-seed FT)   0.24 0.14 0.27 1.00 0.17
+  W16+PD4d               0.22 0.36 0.28 0.17 1.00

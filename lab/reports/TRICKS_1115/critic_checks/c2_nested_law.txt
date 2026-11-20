@@ -1,0 +1,86 @@
+## A. w_ft (delta against w_ft 0.5, paired per feed)
+FD16P20:
+   w_ft 0.00: val -0.00058 +- 0.00041 | pmix-public -0.00070 +- 0.00051 | pmix-private -0.00061 +- 0.00062
+   w_ft 0.25: val -0.00027 +- 0.00029 | pmix-public -0.00038 +- 0.00038 | pmix-private -0.00034 +- 0.00046
+   w_ft 0.35: val -0.00015 +- 0.00023 | pmix-public -0.00028 +- 0.00031 | pmix-private -0.00028 +- 0.00039
+   w_ft 0.60: val -0.00011 +- 0.00016 | pmix-public -0.00009 +- 0.00020 | pmix-private -0.00007 +- 0.00024
+   w_ft 0.65: val -0.00027 +- 0.00020 | pmix-public -0.00010 +- 0.00025 | pmix-private -0.00007 +- 0.00030
+   w_ft 0.75: val -0.00043 +- 0.00027 | pmix-public -0.00030 +- 0.00033 | pmix-private -0.00029 +- 0.00040
+   w_ft 0.85: val -0.00049 +- 0.00032 | pmix-public -0.00040 +- 0.00039 | pmix-private -0.00035 +- 0.00047
+   w_ft 1.00: val -0.00081 +- 0.00040 | pmix-public -0.00082 +- 0.00049 | pmix-private -0.00075 +- 0.00059
+W8P20:
+   w_ft 0.00: val -0.00002 +- 0.00042 | pmix-public -0.00033 +- 0.00052 | pmix-private -0.00059 +- 0.00064
+   w_ft 0.25: val +0.00009 +- 0.00030 | pmix-public +0.00013 +- 0.00037 | pmix-private +0.00019 +- 0.00045
+   w_ft 0.35: val +0.00020 +- 0.00024 | pmix-public +0.00015 +- 0.00029 | pmix-private +0.00015 +- 0.00035
+   w_ft 0.60: val -0.00024 +- 0.00016 | pmix-public -0.00036 +- 0.00021 | pmix-private -0.00050 +- 0.00026
+   w_ft 0.65: val -0.00011 +- 0.00020 | pmix-public -0.00021 +- 0.00026 | pmix-private -0.00030 +- 0.00031
+   w_ft 0.75: val -0.00023 +- 0.00026 | pmix-public -0.00037 +- 0.00033 | pmix-private -0.00046 +- 0.00042
+   w_ft 0.85: val -0.00033 +- 0.00032 | pmix-public -0.00048 +- 0.00040 | pmix-private -0.00056 +- 0.00049
+   w_ft 1.00: val -0.00047 +- 0.00039 | pmix-public -0.00060 +- 0.00049 | pmix-private -0.00061 +- 0.00061
+mean of 4 disjoint 8-pools:
+   w_ft 0.00: val -0.00029 +- 0.00029 | pmix-public -0.00051 +- 0.00037 | pmix-private -0.00067 +- 0.00045
+   w_ft 0.25: val -0.00003 +- 0.00018 | pmix-public -0.00009 +- 0.00022 | pmix-private -0.00008 +- 0.00027
+   w_ft 0.35: val +0.00003 +- 0.00013 | pmix-public +0.00004 +- 0.00016 | pmix-private +0.00006 +- 0.00020
+   w_ft 0.60: val +0.00002 +- 0.00010 | pmix-public +0.00011 +- 0.00012 | pmix-private +0.00016 +- 0.00014
+   w_ft 0.65: val -0.00004 +- 0.00013 | pmix-public +0.00006 +- 0.00015 | pmix-private +0.00010 +- 0.00019
+   w_ft 0.75: val -0.00031 +- 0.00018 | pmix-public -0.00018 +- 0.00022 | pmix-private -0.00011 +- 0.00026
+   w_ft 0.85: val -0.00053 +- 0.00023 | pmix-public -0.00048 +- 0.00028 | pmix-private -0.00044 +- 0.00034
+   w_ft 1.00: val -0.00077 +- 0.00029 | pmix-public -0.00073 +- 0.00036 | pmix-private -0.00063 +- 0.00044
+NESTED pick of w_ft among the 9 weights (out-of-sample delta against 0.5; mean and sd over 40 fold assignments):
+   FD16P20 | picked by plain val: mean picked w_ft 0.48 | out-of-sample val -0.00021 (0.00012) | pmix-public -0.00023 (0.00015) | pmix-private -0.00023 (0.00017)
+   FD16P20 | picked by pmix-private: mean picked w_ft 0.54 | out-of-sample val -0.00032 (0.00019) | pmix-public -0.00044 (0.00026) | pmix-private -0.00054 (0.00029)
+   mean of 4 disjoint 8-pools | picked by plain val: mean picked w_ft 0.45 | out-of-sample val -0.00019 (0.00006) | pmix-public -0.00015 (0.00009) | pmix-private -0.00013 (0.00013)
+   mean of 4 disjoint 8-pools | picked by pmix-private: mean picked w_ft 0.56 | out-of-sample val -0.00007 (0.00007) | pmix-public -0.00007 (0.00010) | pmix-private -0.00009 (0.00013)
+   the four pools at 0.60, pmix-private one by one: e10 s951-954 -0.00006 +- 0.00023, e10 s955-958 +0.00014 +- 0.00031, fd10 s951-954 +0.00043 +- 0.00022, fd10 s955-958 +0.00014 +- 0.00024
+
+## B. z-blend of two files built from disjoint members, minus the mean of the two files (per feed)
+   file heldout A (e10 s951-954 + e10 pop d128): final val 0.40214
+   file heldout B (e10 s955-958 + e10 pop wide): final val 0.40242
+   file alldata A (fd10 s951-954 + fd pop s951-954): final val 0.40240
+   file alldata B (fd10 s955-958 + fd pop s955-958): final val 0.40248
+   blend(heldout A, heldout B) - mean: val -0.00041 +- 0.00021 | pmix-public -0.00036 +- 0.00025 | pmix-private -0.00045 +- 0.00031 | sd per feed 0.02507
+   blend(heldout A, alldata A) - mean: val +0.00040 +- 0.00022 | pmix-public +0.00033 +- 0.00027 | pmix-private +0.00024 +- 0.00033 | sd per feed 0.02636
+   blend(heldout A, alldata B) - mean: val -0.00006 +- 0.00022 | pmix-public +0.00002 +- 0.00027 | pmix-private +0.00012 +- 0.00034 | sd per feed 0.02600
+   blend(heldout B, alldata A) - mean: val +0.00012 +- 0.00021 | pmix-public +0.00002 +- 0.00027 | pmix-private +0.00002 +- 0.00032 | sd per feed 0.02577
+   blend(heldout B, alldata B) - mean: val -0.00013 +- 0.00021 | pmix-public -0.00009 +- 0.00026 | pmix-private +0.00000 +- 0.00032 | sd per feed 0.02471
+   blend(alldata A, alldata B) - mean: val +0.00007 +- 0.00021 | pmix-public -0.00001 +- 0.00026 | pmix-private -0.00005 +- 0.00032 | sd per feed 0.02490
+   MEAN over the 6 disjoint pairs: val -0.00000 +- 0.00012 | pmix-public -0.00001 +- 0.00015 | pmix-private -0.00002 +- 0.00018
+   BL = blend(W8P20, FD16P20) - mean: val -0.00009 +- 0.00020 | pmix-public -0.00023 +- 0.00025 | pmix-private -0.00038 +- 0.00030 | sd per feed 0.02443 -> public sampling SE 0.00026 | BL final val 0.40234
+   BL minus the 6-pair mean bonus (is BL an outlier of the same quantity?): val -0.00009 +- 0.00019 | pmix-public -0.00022 +- 0.00024 | pmix-private -0.00036 +- 0.00030
+   BL public forecast = mean of the two public scores 0.394951 + bonus [synthesis: BL val residual at the public mix] -0.000235 = 0.394716 +- 0.000264 -> P(> 0.3950094) 0.13
+   BL public forecast = mean of the two public scores 0.394951 + bonus [zero bonus] +0.000000 = 0.394951 +- 0.000264 -> P(> 0.3950094) 0.41
+   BL public forecast = mean of the two public scores 0.394951 + bonus [mean bonus of the 6 disjoint pairs at the public mix] -0.000015 = 0.394936 +- 0.000264 -> P(> 0.3950094) 0.39
+
+## C. ENSA against the expected FD16P20-type file (all 495 draws of 4 of the 12 all-data wide pop1 students on the FD16 base)
+   495 draws: mean final val 0.40249, sd 0.00013, min 0.40214, max 0.40286; realised FD16P20 0.40271 is above 472 of 495
+   FD16P20 minus the expected draw: val +0.00022 +- 0.00015 | pmix-public +0.00044 +- 0.00018 | pmix-private +0.00053 +- 0.00022
+   ENSA minus the expected draw:    val -0.00002 +- 0.00024 | pmix-public -0.00004 +- 0.00029 | pmix-private +0.00006 +- 0.00035
+   ENSB minus the expected draw:    val -0.00033 +- 0.00022 | pmix-public -0.00036 +- 0.00029 | pmix-private -0.00031 +- 0.00036
+   W8P20 minus the expected draw:   val -0.00035 +- 0.00041 | pmix-public -0.00031 +- 0.00050 | pmix-private -0.00016 +- 0.00061
+
+## D. mean pairwise correlation of member z (train-only, val), reference recipe kd05w192: spread over seed subsets
+   kd05w192 s951-958: mean pair correlation 0.9723, sd over the 28 pairs 0.0005, min 0.9713, max 0.9734
+   over the 70 subsets of 4 seeds: mean 0.9723, sd 0.0003, range 0.9718 .. 0.9728; s951-954 0.9722, s955-958 0.9724
+   kd05t25w192 s951-958 (held-out): mean pair correlation 0.9726
+   fd10 kd05w192 s951-958 (all data): mean pair correlation 0.9735
+   leave-one-seed-out jackknife SE of the 8-seed mean: 0.0003
+
+## E. anchored public forecast, leave-one-out over the nine scored files (own code)
+   final val rebuilt: W8 0.40165, W16 0.40158, W8P20 0.40214, W8TO 0.40157, S16 0.40173, FD16P20 0.40271, FD16P20m 0.40298, C3 0.40101, G3 0.40032
+   anchored with the val residual (the synthesis form): RMS error 0.000224 | mean +0.000042 | per file +0.00001 +0.00006 +0.00024 +0.00030 -0.00003 +0.00014 -0.00044 -0.00016 +0.00026
+   anchored weights only (residual set to 0): RMS error 0.000343 | mean -0.000081 | per file -0.00006 +0.00011 +0.00054 -0.00034 -0.00021 +0.00027 -0.00015 -0.00022 -0.00067
+   nearest scored file + pmix-public delta: RMS error 0.000305 | mean -0.000017 | per file +0.00011 -0.00015 -0.00011 +0.00018 -0.00019 +0.00041 -0.00041 -0.00044 +0.00044
+   nearest scored file only: RMS error 0.000446 | mean -0.000099 | per file -0.00052 -0.00000 +0.00052 -0.00048 -0.00041 +0.00015 -0.00015 +0.00063 -0.00063
+   level line 0.0074 + 0.963 val: RMS error 0.000338 | mean -0.000058 | per file +0.00030 +0.00036 +0.00035 -0.00010 -0.00019 -0.00032 -0.00072 -0.00012 -0.00009
+   same, only the three files with the popularity-light admixture (W8P20, FD16P20, FD16P20m): anchored with the val residual: RMS 0.000299 | anchored weights only: RMS 0.000357 | nearest scored file + pmix-public delta: RMS 0.000342 | nearest scored file only: RMS 0.000325 | level line 0.0074 + 0.963 val: RMS 0.000497
+
+## F. the probe trigger (reading >= W8 - 0.00005 = 0.39444; paired public SE of the probe against W8 from check 1: 0.00052)
+   truth = val reading -0.00078: P(trigger) 0.08
+   truth = pmix-public reading -0.00072: P(trigger) 0.10
+   truth = scan forecast with the fold term -0.00051: P(trigger) 0.19
+   truth = anchored forecast -0.00096: P(trigger) 0.04
+   truth = true delta -0.00033 (the smallest loss at which 0.60 is at least as good as 0.50 on a quadratic through the three W8 points): P(trigger) 0.30
+   truth = true delta 0: P(trigger) 0.54
+   probe reads W8 -0.00005: posterior delta of the fine-tuned-only file -0.00025 (prior -0.00051 sd 0.00058 [R int_ft 3.4]); quadratic through the W8 points: optimum 0.58, gain of 0.60 over 0.50 +0.000008
+   probe reads W8 +0.00000: posterior delta of the fine-tuned-only file -0.00023 (prior -0.00051 sd 0.00058 [R int_ft 3.4]); quadratic through the W8 points: optimum 0.59, gain of 0.60 over 0.50 +0.000011
+   probe reads W8 +0.00030: posterior delta of the fine-tuned-only file -0.00006 (prior -0.00051 sd 0.00058 [R int_ft 3.4]); quadratic through the W8 points: optimum 0.69, gain of 0.60 over 0.50 +0.000031

@@ -1,0 +1,8 @@
+2026-11-13T16:45:45Z FPCD-lite pre-gate: pre2-blank (Sep 6-8 train format) vs normal val preds of r6_cd_m02_r101-104 (nn_x/r6/ckpt, read-only); GPU inference as train.py's val predict (bf16 autocast)
+xt (34): pre2 block columns ['pre2_fe_z', 'pre2_new_z', 'pre2_fe_s', 'pre2_new_s', 'pre2_hmax32', 'has:pre2_fe'] (indices [28, 29, 30, 31, 32, 33]); n_dense 104; xt_rel [0, 3, 30, 31, 32] xt_relonly [30, 31, 32]
+r6_cd_m02_r101: val normal 0.39730 blank 0.39574 delta -0.00156 +- 0.00055 | within-feed Pearson mean 0.9904 pooled 0.9924 | Spearman mean 0.9839 | top-1 agree 0.839 | (9s; normal-mode check vs stored preds: corr 1.0000000 max|d| 0.00e+00)
+r6_cd_m02_r102: val normal 0.39728 blank 0.39503 delta -0.00225 +- 0.00056 | within-feed Pearson mean 0.9898 pooled 0.9917 | Spearman mean 0.9831 | top-1 agree 0.832 | (2s; normal-mode check vs stored preds: corr 1.0000000 max|d| 0.00e+00)
+r6_cd_m02_r103: val normal 0.39563 blank 0.39373 delta -0.00191 +- 0.00057 | within-feed Pearson mean 0.9893 pooled 0.9910 | Spearman mean 0.9825 | top-1 agree 0.831 | (3s; normal-mode check vs stored preds: corr 1.0000000 max|d| 0.00e+00)
+r6_cd_m02_r104: val normal 0.39678 blank 0.39437 delta -0.00241 +- 0.00054 | within-feed Pearson mean 0.9904 pooled 0.9923 | Spearman mean 0.9833 | top-1 agree 0.838 | (2s; normal-mode check vs stored preds: corr 1.0000000 max|d| 0.00e+00)
+SUMMARY: within-feed Pearson mean 0.9893-0.9904 (mean 0.9900); Spearman mean 0.9825-0.9839; top-1 0.831-0.839; NDCG delta -0.00241..-0.00156 -> gate: GREY ZONE 0.98-0.99 -> run as a 4-root INFORMATION arm on the idle GPUs (lead's standing instruction)
+2026-11-13T16:46:02Z done

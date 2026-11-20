@@ -1,0 +1,177 @@
+{
+ "tag": "R_knn50_pair_n6k_s0",
+ "n_val": 14423,
+ "n_hold": 30000,
+ "val": 0.381716268836022,
+ "val_se": 0.001967208904760808,
+ "hold": 0.30546557689090564,
+ "hold_se": 0.0010748050847252514,
+ "w16_val": 0.40143578947217784,
+ "w16_hold": 0.32459720573745354,
+ "gap_val": 0.01971952063615587,
+ "gap_val_se": 0.0013961190513580289,
+ "gap_hold": 0.019131628846547944,
+ "gap_hold_se": 0.0008519891385035342,
+ "rho_val": 0.8799017263756901,
+ "rho_hold": 0.8847452205098775,
+ "rho_global_val": 0.8870555769407605,
+ "rho_global_hold": 0.8857780274613613,
+ "law_record": -0.005220150911054754,
+ "law_refit": -0.004757722055060992,
+ "law_record_hold": -0.005088016805478844,
+ "member_rule": {
+  "val": {
+   "delta": -0.0002798288764135272,
+   "se": 0.0003788595084787623,
+   "z": -0.7386085610920163,
+   "n": 14423
+  },
+  "hold": {
+   "delta": 1.1625358305795934e-05,
+   "se": 0.00020962506612618963,
+   "z": 0.0554578635114072,
+   "n": 30000
+  },
+  "pooled_z": -0.48306049083156904,
+  "pass": false
+ },
+ "mix_w005": {
+  "val": {
+   "delta": 0.00017906031635484755,
+   "se": 0.0002623402538917217,
+   "z": 0.6825499087484794,
+   "n": 14423
+  },
+  "hold": {
+   "delta": -0.0001254315818588407,
+   "se": 0.00014157712565665033,
+   "z": -0.8859593756906363,
+   "n": 30000
+  },
+  "pooled_z": -0.14383221343233998,
+  "pass": false
+ },
+ "mix_w020": {
+  "val": {
+   "delta": -0.0006599320519402831,
+   "se": 0.000546911023986749,
+   "z": -1.2066534097807335,
+   "n": 14423
+  },
+  "hold": {
+   "delta": -0.00046710813318708933,
+   "se": 0.00031015724293330306,
+   "z": -1.5060365147994863,
+   "n": 30000
+  },
+  "pooled_z": -1.9181614409270973,
+  "pass": false
+ },
+ "stop_rule_val_ge_0.3900": false,
+ "stop_rule_law_ge_-0.002": false,
+ "extra": {
+  "n_fit_rows": 879369,
+  "n_sel_rows": 219426,
+  "best_iter": 771,
+  "trees_built": 800,
+  "budget_stop": false,
+  "fit_seconds": 2277.560760974884,
+  "s_per_iter": 2.846950951218605,
+  "predict_seconds": 386.61035537719727,
+  "model_mb": 359.3666305541992,
+  "peak_rss_gb": 14.274166107177734,
+  "params": {
+   "loss_function": "RMSE",
+   "eval_metric": "NDCG:type=Base",
+   "iterations": "800",
+   "learning_rate": "0.2",
+   "depth": "8",
+   "l2_leaf_reg": "5",
+   "border_count": "254",
+   "random_seed": "0",
+   "od_type": "Iter",
+   "od_wait": "801",
+   "use_best_model": "False",
+   "allow_writing_files": "False",
+   "thread_count": "12",
+   "metric_period": "10",
+   "task_type": "CPU",
+   "has_time": "True",
+   "embedding_calcers": "['KNN:k=50']"
+  },
+  "top": [
+   [
+    "e_pair",
+    6.41
+   ],
+   [
+    "category_id",
+    5.93
+   ],
+   [
+    "pre2_fe_z",
+    4.09
+   ],
+   [
+    "seq_max_all_rk",
+    3.99
+   ],
+   [
+    "tte_c_ctr",
+    3.51
+   ],
+   [
+    "cos_u_z",
+    3.39
+   ],
+   [
+    "f5",
+    3.29
+   ],
+   [
+    "it_hist_all_luo_rk",
+    2.9
+   ],
+   [
+    "it_hist_et1_luo",
+    2.87
+   ],
+   [
+    "f5_rk",
+    2.55
+   ],
+   [
+    "ctx_nd_knn_u_dev",
+    2.29
+   ],
+   [
+    "f3",
+    2.09
+   ]
+  ],
+  "new_feature_importance": [
+   [
+    "e_pair",
+    6.41
+   ]
+  ],
+  "selection": "trainside",
+  "arm": "R_knn50_pair",
+  "seed": 0,
+  "nfit": 6000,
+  "nsel": 1500,
+  "pool_seconds": 17.70251441001892,
+  "cfg": {
+   "loss": "RMSE",
+   "label": "oof",
+   "has_time": "True",
+   "emb": "[('e_pair', 'pair', 32)]",
+   "calcers": "['KNN:k=50']",
+   "text": "None",
+   "tset": "None",
+   "extra_cols": "None",
+   "cb": "{}",
+   "cols_file": "None"
+  }
+ }
+}

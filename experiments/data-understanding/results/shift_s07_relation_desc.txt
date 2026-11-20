@@ -1,0 +1,23 @@
+==== single-feature NDCG: train sample (60k feeds, Sep 16-19) vs val; random tie-break averaged over 3 seeds
+  f1: train 0.3619 (neg 0.2873) | val 0.3365 (neg 0.2539)
+  f2: train 0.3252 (neg 0.3265) | val 0.2911 (neg 0.2939)
+  f3: train 0.3499 (neg 0.2882) | val 0.3177 (neg 0.2531)
+  f4: train 0.3194 (neg 0.3274) | val 0.2974 (neg 0.2666)
+  f5: train 0.3417 (neg 0.3012) | val 0.2981 (neg 0.2632)
+  random: train 0.3256 | val 0.2881
+  train -pos (production order): 0.3634
+  train mean M 78.0 pos/feed 1.747 rate 2.24% | val M 96.4 pos/feed 1.524 rate 1.58%
+
+==== positive rate by global decile (val-defined edges): train | val  (ratio to split mean)
+  f1 train: [nan, 0.45, 0.55, 0.71, 0.82, 1.01, 1.15, 1.27, 1.38, 1.57]
+  f1 val  : [nan, 0.54, 0.63, 0.77, 0.92, 1.04, 1.14, 1.33, 1.43, 1.67]
+  f3 train: [0.25, 0.41, 0.53, 0.72, 0.9, 1.09, 1.24, 1.34, 1.45, 1.4]
+  f3 val  : [0.37, 0.54, 0.65, 0.84, 0.98, 1.14, 1.31, 1.38, 1.4, 1.39]
+  f4 train: [1.22, 1.12, 0.97, 0.95, 0.94, 0.94, 0.93, 0.97, 0.97, 0.93]
+  f4 val  : [0.46, 0.89, 0.97, 1.05, 1.13, 1.11, 1.12, 1.08, 1.13, 1.06]
+
+train positive rate by pos bucket (0-9,10-19,...): [6.26, 3.54, 2.68, 2.22, 1.96, 1.76, 1.62, 1.5, 1.41, 1.38, 1.26, 1.23, 1.12, 1.12, 0.98, 0.99]
+train within-feed Spearman(pos, f1) over feeds with M>=20: mean -0.077, q10/50/90 [-0.254, -0.071, 0.084], share |rho|<0.1 51.3%
+train: M/(max pos+1) mean 0.893; share feeds with no gaps 13.3%
+
+==== candidate-level adversarial AUC (f1..f5 only) by normalisation

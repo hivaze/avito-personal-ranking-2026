@@ -1,0 +1,39 @@
+# Hard-label member of the popularity-light view at width 128: trained on clicks alone, with
+# 30,000 exploration-like train feeds held out to choose the checkpoint. Eight of the 25 members
+# of teacher_mean25.toml are this recipe (seeds 951 to 958, listed under [record]).
+# One run: 98,350 steps.
+
+model = "popularity_light_narrow"  # configs/recipes/model_popularity_light_narrow.toml: 27 inputs, width 128
+
+[targets]
+teacher_weight = 0.0               # no teacher: the main target is the clicks
+position_weight = 0.5              # weight of the production-order loss until the cooldown ...
+position_weight_end = 0.1          # ... then annealed with the learning rate down to this
+position_temperature = 10.0        # its target is softmax(-position / 10)
+
+[schedule]
+epochs = 10                        # 9,835 steps per epoch over the 3,121,208 training feeds
+learning_rate = 2e-3
+weight_decay = 0.02
+warmup_steps = 500
+cooldown_fraction = 0.2            # 1-sqrt decay to 3% of the peak over the last 20% of the steps
+exploration_probability = 0.02     # chance that a cooldown step trains on a batch of random-order feeds
+
+[batches]
+max_candidates = 32768             # padded candidates per batch
+max_feeds = 512
+
+[holdout]
+feeds = 30000                      # exploration-like train feeds kept out of training
+select_from_step = 12000           # keep the checkpoint with the best holdout NDCG from this step on
+# 12,000 was set for the 2-epoch cooldown runs, whose cooldown gain appeared only after about 10,000
+# steps; in a 10-epoch run it leaves out the first four evaluations.
+eval_every = 2500                  # steps between two holdout scores
+
+[record]
+# The stored runs of this recipe; their checkpoints, logs and prediction files carry these names.
+# The trainer does not read this table.
+members = [
+    "abl_e10_pop1_s951", "abl_e10_pop1_s952", "abl_e10_pop1_s953", "abl_e10_pop1_s954",
+    "abl_e10_pop1_s955", "abl_e10_pop1_s956", "abl_e10_pop1_s957", "abl_e10_pop1_s958",
+]

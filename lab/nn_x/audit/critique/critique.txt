@@ -1,0 +1,234 @@
+ADVERSARIAL CRITIQUE of reports/AUDIT_1112.md and the five audits (testinfo, altapproach, features, avito, weakspots)
+Written 2026-11-12 ~21:35 UTC. CPU only (12 threads), no file outside nn_x/audit/critique touched.
+Scripts + logs: c01_v5lh_vs_overlay, c02_numbers, c03_m50_gap0, c03b_m50_bins, c04_stale_age (.py/.log in this directory).
+Conventions as in the audit: +- = paired per-feed SE over the 14,423 val feeds; G3 = cand_G_F10F7xF7x70_memeq (val 0.40032).
+
+=====================================================================================================================
+0. VERDICT IN FIVE LINES
+=====================================================================================================================
+1. The audit's central explanation of the 0.3983 leader ("#2-class model + the same-user later-feed leak, +0.0040 public")
+   has a direct, uncited COUNTER-OBSERVATION in the project's own record: on day 1 the identical boost was submitted
+   (sub_v5_nnfinal2_res2_lh, 2026-11-11 05:34) and scored 0.3802 = the unboosted v5 (archive/STATUS_LOG_2026-11-11 §1-2,
+   COVERAGE_MAP "later-history signal | CLOSED (test-null; banned) | public +0"). c01 verifies the day-1 file was built
+   correctly: 172 of the 183 rows the overlay flags today were pushed to the top (mean rank-from-top 33.0 -> 1.83,
+   0 ties, 54 public feeds). Under the audit's mechanism that file had to read +0.0040; if the flags were negatives on
+   test, about -0.0006; it read 0.0000. Nothing in the five audits or the synthesis mentions this. Until it is resolved,
+   every statement built on "+0.0040 public" (the #1 arithmetic, the overlay's expected 0.3967, the 2.8x asymmetry
+   discount) is unsupported. Resolution costs zero submissions: read the exact 6-decimal score of the v5_lh entry on
+   the ods.ai submissions page (expected 0.3842 if the leak is real on public, ~0.3796 if the flags are negatives,
+   0.3802xx identical to v5 => the file was never scored / uploaded twice).
+2. Even under the audit's reading, "#1's model is +0.0016..+0.0019 better than G3" is a ~1-SE statement: the public
+   paired SE of a difference against a DIFFERENT team's model is 0.0012-0.0018 (per-feed corr 0.90-0.77; c02), not the
+   0.0005-0.0007 that holds only between near-copies of our own pools. The honest range is: #1 is +0.0014 +- 0.0015
+   (if it uses the leak) or +0.0054 +- 0.0015 (if it does not) better than G3 on public.
+3. The weakspots' headline mis-specification ("409K M<50 train feeds are random-order; K9 distils a random order into
+   13% of the stream") is REFUTED by a label-free test the audit did not run: within-feed corr(pos, f1) is -0.122 for
+   M[5,10) gap-0 feeds and -0.063 for M[10,20) (production M>=50: -0.064; random-like M>=50: +0.009; c03b). Their
+   display order follows the ranker. The 25.5% share is confirmed; the inference is not. Plan item 5 should not be built.
+4. The features audit's private-like cost of the TO half (-0.00175 +- 0.00053) reproduces exactly (c04), but it is the
+   PESSIMISTIC emulation ("both": train ends Sep 14 AND no future snapshots; review_shift: coverage-matched = -0.0006
+   +- 0.0006), it sits in M<50 feeds (-0.0036 vs -0.0005 at M>=50) and 42% of feeds (>76 d positives) carry a third of
+   it; the proposed remedy (hzcd) is a re-proposal of a CLOSED family (COVERAGE_MAP: it_hist_hz CLOSED; registry:
+   "staleness levers all closed; each one trades cold feeds against warm ones"; ROUND5 §2a agedrop: stale +0.0009 but
+   holdout -0.0019). It stays a cheap CD arm, not a "private-specific lever".
+5. Of the 11 ranked items, 4 are duplicates of closed or do-not entries (3b TO-only probe / w_ft, 4c H-split routing,
+   10 post-hoc age offsets, and item 5 as motivated), 3 are measurement/protocol items with no LB gain (2, 8, 9), and the
+   remaining experiments all have expected pool gains (+0.0001..+0.0005) below the project's MDE (~0.0005-0.001 val,
+   0.0016 for 6-vs-6 families) and below the public resolution (paired SE 0.0005 even for near-copies). The last five
+   public-scored pools show a val->public slope of 0.14 (c02), i.e. the last +0.002 of val gains has not transferred.
+   The only item with member-level evidence >= +0.002 is TRUNC-PROD, which is running (E at step 60k/98k at 21:28,
+   plateau reads +-0.0008, not readable yet).
+
+=====================================================================================================================
+1. THE SIX MOST DECISION-RELEVANT NUMBERS, RE-CHECKED INDEPENDENTLY
+=====================================================================================================================
+N1. Leak gain and coverage (testinfo 01; audit §1.1). CONFIRMED ON VAL, NOT ESTABLISHED ON TEST.
+    c02 (src/later_overlay.py on G3): val+test later feeds +0.00454 +- 0.00047 (110 flagged feeds, 184 rows; affected
+    0.383 -> 0.943; per flagged feed +0.661 +- 0.016 over the 99 feeds whose NDCG moves); val-only later feeds
+    +0.00105 +- 0.00023 (25 feeds). Test: 57 public / 46 private feeds with >= 1 flagged candidate -> projection
+    +0.0044 (SE 0.00014 from the per-feed spread) public, +0.0015 private.
+    c01 (day-1 file vs today's flags): sub_v5_nnfinal2_res2_lh changed 3,917 rows in 97 feeds (54 public, 43 private);
+    172 rows UP to the top (168/172 at rank 1, mean rank 33.0 -> 1.83), 3,745 pushed down mechanically, 0 tied scores;
+    the 172 boosted (feed,item) keys are a subset of today's 183 flags (overlap 172, day-1-only 0). Public delta that
+    file must have produced: +0.00401 if the boosted rows are positives (and the feed's only positives), -0.00065 if
+    they are negatives. Recorded: v5 0.3802, v5+lh 0.3802 ("no gain"; archive §1, §2, 3c "the boost was applied
+    correctly and the public test labels simply do not carry this signal"). The public/private boundary is the
+    organisers' rule (review_metric.md:73-74; research_competition_avito.md:9), so "the 54 feeds were not public"
+    does not explain it either. The 0.0000 is consistent with NEITHER hypothesis; most likely an upload/duplicate
+    artefact or a leaderboard-best display read as the entry's score. Either way the claim "+0.0040 public" is
+    currently contradicted by the only public datum, and the eda_history_leak.md projections (file mtime 04:42, i.e.
+    written BEFORE the 05:34 submission) were never reconciled with it.
+N2. Leaderboard arithmetic (audit §1.1). PARTLY REFUTED.
+    c02 calibration over the 9 public-scored submissions: public = +0.0078 + 0.962 * val, residual sd 0.0008 (the audit
+    quotes 0.0022 + 0.976 over 8 points; same conclusion). #1 0.398256 -> val-equivalent 0.4060 (+0.0057 vs G3);
+    #2 -> +0.0020; #3 -> +0.0010. Over the five MODERN pools only (Cd, PF7x, M2, G3, S2) the slope is 0.139: val gains
+    of +0.0019 (Cd -> M2) moved public by +0.0004. The SE of (#1 - G3) on public: G3's per-feed NDCG sd is 0.2467; a
+    paired difference vs a model at per-feed corr 0.90 / 0.85 / 0.77 has SE 0.0012 / 0.0015 / 0.0018 (vs
+    nn_final2_trainonly: corr 0.773 -> 0.0018; vs a GBDT: 0.665 -> 0.0021). So the "residual gap ~0.0016 after our
+    overlay" is one SE; "#2 + 0.0040 = 0.3987 ~= 0.3983" is one of several hypotheses that fit within noise (another:
+    #2's 35 entries already include the leak and #1 is #2 + 0.0036 of model).
+N3. FT branch at pool level (weakspots t7; audit item 3b/4). CONFIRMED ON VAL; THE DECISION RULE IS REFUTED.
+    c02: blend - TO -0.00003 +- 0.00039 (M<50 -0.00131 +- 0.00067, M>=50 +0.00085 +- 0.00046); w_ft 0.25 - 0.5
+    +0.00036 +- 0.00026 (z 1.4); FT-only - TO -0.00052 +- 0.00058. Under the private mix: blend - TO +0.00060 +- 0.00059,
+    FT - TO +0.00053 +- 0.00091 (direction = review_shift SHIFT-3: the FT half is worth +0.0025 +- 0.0008 under the
+    emulated private mix, "keep the fine-tuned half; do not drop it"). Public-projected paired SE of blend - TO is
+    0.00050, so the pre-registered rule "TO - blend > +0.0010 -> w_ft 0..0.25" is a one-shot 2-SE read on the LEAST
+    stale split, used to set the weight for the MOST stale split, against three closed verdicts (ROUND5 §2c w_ft
+    nested FAIL "do not reopen w_ft or a w_ft per M segment"; sol_ensemble stop-list "w_ft != 0.5"; INSIGHTS do-not
+    "Global w_ft"). It also spends a public submission that the leak question needs more.
+N4. M<50 "random-order" feeds (weakspots t10; audit item 5). SHARES CONFIRMED, INFERENCE REFUTED.
+    c03: train 3,151,208 feeds, M<50 = 51.0% of feeds / 14.2% of rows; gap==0 (max pos == M-1) in 408,963 of
+    1,605,861 M<50 feeds (25.5%; 13.0% of all feeds); gap==0 share by M: [5,10) 0.51, [10,20) 0.29, [20,35) 0.16,
+    [35,50) 0.09 (the shorter the feed, the more often nothing was filtered). pos is not the array index (0.12% of
+    gap-0 feeds; corr(pos, array index) 0.000). nn/train.py:160 does force p_random = 0 for M<50 (mechanism confirmed).
+    c03b, label-free test "is the display order the ranker's order?" = within-feed corr(pct rank of pos, pct rank of
+    f1 / f3 / f5): production M>=50 -0.064/-0.052/-0.023; random-like M>=50 (p_random > 0.9) +0.009/+0.007/+0.001;
+    M[5,10) gap-0 -0.122/-0.105/-0.035; M[10,20) gap-0 -0.063/-0.050/-0.018; M[20,35) gap-0 -0.054; M[35,50) gap-0
+    -0.066. The gap-0 M<50 feeds carry the ranker's order as strongly as production feeds; random display would give
+    ~0 as it does for the detector's random-like feeds. Their P(y|pos) lifts at rank 0 are 1.85 (M[20,35)) and 2.18
+    (M[35,50)), not 1.0; the weakspots' "lift 1.00" is an M[5,20) artefact of a non-monotone curve (M[5,10): 0.88 0.57
+    1.58 1.37 ...) whose one robust feature is that the LAST shown item is almost never positive for M<20 (lift
+    0.03-0.16 vs 9-25 for M>=35) -- which the trunc2 per-M table (M1-16 rkend0 -1.82, CURRENT_STATUS 20:14) already
+    encodes. Relabelling them "exploration" (p=0.8) would mislabel production-ordered feeds and drop the K9 signal
+    where it exists.
+N5. Private-like coverage cost of the TO half (features findings 3-5; audit items 6, L3, L4). CONFIRMED, RE-FRAMED.
+    c04 (stored GPU stale preds, both_pre2both, F7x roots 101-104 TO z-mean pool): live 0.40070 -> stale 0.39895,
+    -0.00175 +- 0.00053; pmix-private -0.00227 +- 0.00081; members -0.00120 / -0.00224 / -0.00120 / -0.00052 (seed
+    spread as large as the mean: a 4-root "stale-val > +2 SE" bar is inside seed noise). By M: M<50 -0.00360 +- 0.00096,
+    M>=50 -0.00046 +- 0.00061 (the loss is a small-feed loss). By mean age of the feed's positives: <1 d +0.0211,
+    1-3 d +0.0146, 3-7 d -0.0015, 7-24 d -0.0091 +- 0.0014 (contribution -0.00165), 24-76 d -0.0024 (-0.00054),
+    >76 d -0.0028 +- 0.0007 (-0.00116; 42% of feeds). So "concentrated at 7-24 d" is half the story: it is the usual
+    cold<->warm trade (young positives gain +0.0017, everything older loses -0.0034), the shape the registry says every
+    staleness lever has. Scenario caveat: "both" is review_shift's pessimistic emulation; the coverage-matched
+    trunc17 cost was -0.0006 +- 0.0006 (review_shift table). pmix: ESS 6,389 of 14,423 (private; public 9,321) --
+    usable as a veto (not the invalid 2,880 case of sol_advval), but its SEs are 1.5x val's and its LEVEL was
+    miscalibrated by +0.004 on public (EXPERIMENT_REGISTRY 12:42), so "private-specific" claims priced only by pmix
+    are not evidence.
+N6. Listing-age calibration and the AGE-PROD ceiling (avito a06/a07; audit items 7, 10). CONFIRMED (null).
+    c04 act/exp by age bin [<3h, 3-12h, 12-24h, 1-3d, 3-14d, 2w-3m, 3m-1y, >1y]: blend 0.868 1.015 0.996 1.085 1.050
+    0.992 0.967 0.984; TO 0.877 .. 1.136 ..; FT 0.857 .. 1.035 .. (row shares 0.048 0.034 0.033 0.075 ...). Cross-fitted
+    8-bin offset (user-grouped folds): w 0.5 -0.00000 +- 0.00023, w 1.0 +0.00023 +- 0.00033 (pmix +0.00029 +- 0.00055;
+    M<50 -0.00035, M>=50 +0.00062). The miscalibration sits on 8% of rows and its val value is zero; any training-side
+    sibling (AGE-PROD) inherits that ceiling on val and a conjecture on private.
+Interim TRUNC state (21:28 UTC): E pairs at step 60,000/98,350 (plateau): s951 trunc - base val -0.0008 / holdout
+    +0.0010; s952 -0.0002 / +0.0001. Plateau reads are not readable (INSIGHTS 13); the pre-declared readout stands.
+
+=====================================================================================================================
+2. REFUTED OR UNSUPPORTED CLAIMS (claim -> why)
+=====================================================================================================================
+R1 "The leak alone gives +0.0040 public; '#2-class model + leak' reproduces #1" -> contradicted by the day-1 public
+   test of the same rows (0.3802 = 0.3802); unresolved; the audits did not cite COVERAGE_MAP's own row.
+R2 "#1's model is +0.0016..+0.0019 better than G3 on public" -> SE of a cross-team public difference is 0.0012-0.0018.
+R3 "409K M<50 feeds are random-order; K9 distils a random order into 13% of the stream" -> corr(pos, f1) -0.06..-0.12
+   (production-like); random-like feeds give +0.01. Only the terminal slot of M<20 feeds is anomalous (lift 0.03-0.16).
+R4 "A TO-only public probe decides w_ft (rule +-0.0010)" -> 2-SE one-shot on the least stale split; w_ft CLOSED three
+   times; pmix-private favours keeping FT (+0.0006 +- 0.0006); review_shift SHIFT-3 says FT matters more on private.
+R5 "H-split FT-vs-TO weight (R4 / item 4c)" -> INSIGHTS do-not "Segment routing (history length, ...)", sol_ensemble
+   stop-list, M-split fresh confirmation -0.00017 +- 0.00031; the audit itself rates it "most likely 0".
+R6 "hzcd re-targeted at 7-24 d is a private-specific lever worth +0.0001..+0.0004" -> re-proposal of a CLOSED family
+   (COVERAGE_MAP inputs row; registry "each one trades cold vs warm"); the cost is the pessimistic emulation; the loss
+   is M<50-dominated and spread over 7-24 d and >76 d; adoption on "stale-val > +2 SE" is a protocol change (stale-val
+   is ADOPTED as "report only", sol_cpu_CPU2) and r5_agedrop shows stale gains with holdout losses. Keep as a CD arm
+   only with holdout >= 0 in the rule.
+R7 "Post-hoc age offset: +0.0001..+0.0004 private (P 0.2)" -> OOF -0.00000 +- 0.00023 (w 0.5) / +0.00023 +- 0.00033
+   (w 1.0); INSIGHTS do-not "Post-hoc age or cold offsets as a blend rule". Kill.
+R8 "AGE-PROD: member +0.0002..+0.0006 val, possibly larger on private (P 0.25)" -> val ceiling is the N6 null; private
+   is a conjecture priced by pmix; GPU not justified before the TRUNC E/trunc2 readouts (same mechanism, same lanes).
+R9 "Public paired SE 0.0005-0.0007" used for the #1 comparison -> applies only to near-copies of our pools.
+R10 "val -> public maps about 1:1 for the #1 gap" -> 0.96 over generations, 0.14 over the last five pools; the plan's
+   +0.0002..+0.0005 pool gains are below what public can confirm (SE 0.0005) and below MDE on val.
+R11 "LEAK-DECISION has no kill criterion ('cannot fail on val')" -> it has one: the public reading; and the day-1
+   datum says it failed once.
+R12 "This audit enumerated every label-free channel; no more information audits" -> fine as a do-not, but the one
+   channel that matters was never checked against its own public test; the omission is the eye-fatigue finding.
+R13 Features audit "no used input has a private-support problem" -> consistent; but the per-family replay rests on
+   2 members (r101, s501) and the 4-root pool; member spread -0.0005..-0.0022 means family-level claims need >= 6.
+
+=====================================================================================================================
+3. DUPLICATE CHECK OF THE RANKED ITEMS (COVERAGE_MAP / EXPERIMENT_REGISTRY / sol_* / review_* / INSIGHTS)
+=====================================================================================================================
+item 1 TRUNC-PROD chain: not a duplicate (position towers CLOSED were mis-indexed; INSIGHTS 1 / L1); running; keep.
+item 2 backup/reproducibility: new; keep.
+item 3a G3+overlay public reading: DUPLICATE of the day-1 v5_lh public test (archive §1-2; COVERAGE_MAP shift row
+   "later-history signal CLOSED (test-null; banned) public +0"). Re-run only after the submissions-page check.
+item 3b TO-only public probe: duplicates ROUND5 §2c (w_ft nested FAIL, "do not reopen"), sol_ensemble §2.2 and
+   stop-list, INSIGHTS do-not (global w_ft); review_shift SHIFT-3 points the other way. Drop.
+item 4b Tue->Thu forward FT (GPU): new and cheap (~0.3 GPU-h); keep as the FT decision test instead of 3b.
+item 4c H-split rule: duplicates INSIGHTS do-not "Segment routing (history length, diversity, cold share, hour)",
+   sol_ensemble "Do not use segment weights", M-split fresh FAIL (CURRENT_STATUS 18:54). Drop.
+item 5 M<50 relabel: INSIGHTS L6 (idle lane, 0..+0.0004, P 0.15); its upgrade rests on t10, refuted by c03b. Drop
+   the arm; keep a CPU diagnostic conditioned on exact M if anyone wants to revisit.
+item 6 hzcd: INSIGHTS 6 (already planned as 4 CD runs in wave 5, §3.4; not launched); FEATURES_REVIEW §3.1 / COVERAGE_MAP
+   inputs row (it_hist_hz CLOSED on GBDT gates); registry "staleness levers closed". Keep only as the already-planned
+   CD arm with holdout in the rule; the "(a) CPU replay of 20 members" is fine but changes nothing.
+item 7 AGE-PROD: sibling of TRUNC (new mechanism) but INSIGHTS 11 / errors 13 bound it at +0.0003 on val; r5_agedrop
+   (CLOSED) is the input-side analogue. CPU proxy only, after the E readout.
+item 8 Dec-9 protocol: RESEARCH_SWEEP P1 / §3.4, nn_x/pubdiag/build/rule.json (partially done). Keep; amend (§4).
+item 9 label-free M<50 holdout: new; measurement only; keep at low priority.
+item 10 post-hoc age offset: INSIGHTS do-not; c04 null. Drop.
+item 11 slope diagnostic + annealed production weight: INSIGHTS do-not "re-weighting against production-agreeing
+   feeds" names IPS of any calibration; the annealed variant is a new variant of a closed class (rho70 -0.0035,
+   rec33 -0.0021). CPU diagnostic only; no GPU.
+L2 pretrained-encoder init: pretrain_report "not tried"; RESEARCH_SWEEP P8 gate failed on the scalar version; LLM
+   backbones CLOSED (different thing). The only structural bet; relevant mainly under H2 (leak null on public).
+L3 age-conditional FT extras: feat_life_ "drop (indistinguishable from noise)", featnew_it_hist_hz CLOSED; pmix-only
+   evidence (+0.0014 +- 0.0007, chance maximum of ~30). Drop unless L4-type stale-emulated OOF is adopted as a yardstick.
+L5 raw f1..f5 ablation / aux0 control: never run (nnx PLE is different); cheap; keep as idle-lane.
+
+=====================================================================================================================
+4. CORRECTED TOP-8 (what to do, expected size, cost, kill)
+=====================================================================================================================
+1. RESOLVE THE LEAK ON PUBLIC BEFORE ANY FURTHER "#1" REASONING (0 GPU, 0-1 submissions).
+   Step 1 (free): read the exact score of sub_v5_nnfinal2_res2_lh on the ods.ai submissions page (not the leaderboard
+   best). Expected: 0.3842 +- 0.0003 (leak real on public), ~0.3796 (flags are negatives on test), 0.3802 identical to
+   v5 (file never scored). Step 2 only if step 1 is unavailable: submit cand_G3_later_overlay (expected 0.3967 +-
+   0.0003 under H1; 0.3922 if negatives; 0.3928 if null). Kill: a reading within +-0.0005 of the base -> H2: #1 is a
+   genuinely +0.0054 +- 0.0015 better model, the overlay is dropped from all picks, and item 7 is promoted.
+   Decision value: everything in §1.1 of the audit and the overlay-on-pick-1 rule.
+2. TRUNC-PROD chain as pre-declared (running; 0 new GPU). Amendment: the coarse E arm applies +1.00 at rkend0 to all
+   M<50 feeds although the measured lift is -1.82 at M<16 (and the last-shown item is almost never positive at M<20,
+   c03b), so an E FAIL driven by the M<50 slice does not close TRUNC: trunc2 (per-M table, launched 21:24 on GPUs N)
+   is the real test. Expected pool +0.0002..+0.0005 (P 0.3). Kill: the 19:33 rule, read on E AND trunc2.
+3. Backup + reproducibility drill (CPU/IO ~1 h). Kill: non-identical G3 rebuild blocks everything.
+4. Dec-9 protocol, frozen now, with three amendments: (i) public enters as a precision-weighted guard only, using the
+   modern-pool slope 0.14 (val gains have not been transferring), (ii) no comparison with other teams' entries at a
+   resolution better than +-0.0015, (iii) the overlay goes on exactly one of the two picks until item 1 is resolved
+   (hedge), on both only if H1 is confirmed. Protects ~0.0005-0.001. Kill: E and S disagree by < 0.0004 -> pick by S.
+5. FT branch decision by the GPU forward-transfer test (weakspots E2b): Tue->Thu fine-tune of 2 G3 members vs the
+   n2cpv3 OOF on the same Thu feeds (~0.3 GPU-h). Rule: forward - OOF < -0.002 -> stop fine-tuning new members (saves
+   ~75% of FT GPU) and keep w_ft 0.5 for existing pools; otherwise keep 0.5. No TO-only public probe, no w_ft change
+   on public. Expected LB gain 0; GPU saving only.
+6. hzcd as the already-planned wave-5 CD arm (roots 101-104 vs m02ref, ~2 GPU-h), after trunc2 lanes free. Rule
+   (amended): val >= -1 SE AND holdout >= 0 (as built AND with hz inputs) AND stale(both) delta > +2 SE AND
+   coverage-matched (trunc17-type) delta >= 0 AND pmix >= -1 SE AND act/exp 1-3 d < 1.08. Expected pool 0..+0.0003
+   (P 0.15). Kill: any clause fails; or coldpos/warmpos trade of the agedrop shape.
+7. Under H2 only (item 1 says the leak is null on public): the one structural bet with a cheap gate, L2 pretrained
+   sequence-encoder initialisation + scaled pretraining (gate before any plumbing: zero-shot val > +0.005 over v3/v4
+   and train-stage increment > 2 SE; 1-2 GPU-days). Expected member +0.0005..+0.002 if gated in (P 0.1). Kill: gate
+   fails. Under H1 it stays "later".
+8. AGE-PROD CPU proxy gate only (~1 h CPU; the GBDT harness that reproduced TRUNC), after the E readout; no GPU unless
+   proxy val > +1 SE AND stale-val >= 0 AND the gain is not confined to the <3 h rows (8% of val rows). Expected member
+   +0.0002..+0.0006 (P 0.2), pool below MDE. Kill: proxy fails or TRUNC E/trunc2 fails (same mechanism).
+Dropped from the audit's list: 3b TO-only probe, 4c H-split, 5 M<50 relabel (as motivated), 10 post-hoc age offset,
+11's GPU arm, L3. Unchanged low-priority: 9 label-free M<50 holdout (measurement), L4/L5/L6 hygiene arms.
+
+=====================================================================================================================
+5. PROCESS FINDING (the "eye fatigue" the user asked about)
+=====================================================================================================================
+The ban on same-user later snapshots (CURRENT_STATUS §3) survived the 02:15 restructuring, but its EVIDENCE (a null
+public test of the exact mechanism) survived only as one archive table row and one COVERAGE_MAP cell. On day 2 the
+ban was lifted on the strength of a val number that had already failed its public test, five fresh-eyes audits
+re-derived the val number, and the synthesis built the leaderboard story on it. Rule to adopt: every do-not / CLOSED
+row carries its decisive measurement inline, and every re-opened item must quote and overturn that measurement first.
+Second instance of the same pattern: w_ft / segment weights are re-proposed by weakspots and altapproach although
+closed three times; the M<50 relabel was promoted on a proxy without the label-free check that falsifies it.
+
+=====================================================================================================================
+6. FILES
+=====================================================================================================================
+nn_x/audit/critique/c01_v5lh_vs_overlay.py/.log  (day-1 file vs today's flags; direction, ties, public membership)
+nn_x/audit/critique/c02_numbers.py/.log           (pmix ESS; calibration line; FT/TO deltas; overlay; gap SE)
+nn_x/audit/critique/c03_m50_gap0.py/.log          (M<50 gap-0 shares; pos vs array index; corr(pos, f1) by group)
+nn_x/audit/critique/c03b_m50_bins.py/.log         (the same by M bin; last-shown lift)
+nn_x/audit/critique/c04_stale_age.py/.log         (stale cost by member / M / positives' age; act/exp; post-hoc offset)
+nn_x/audit/critique/critique.txt                  (this file)

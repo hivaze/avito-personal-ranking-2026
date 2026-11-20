@@ -1,0 +1,98 @@
+WAVE 10 arm R2 = XOFF (examination offset on EXPLORATION training rows only) PRE-DECLARATION — frozen 2026-11-13T16:57:46Z (`date -u`), BEFORE any GPU run
+of this arm (checked at 2026-11-13T16:57:46Z: 0 matching files — no nn_x/w10/r2/logs/w10_*, no nn_x/w10/r2/ckpt/*, no nn_x/w5/logs|preds/*r2*; no GPU process of
+this agent exists (nvidia-smi compute apps scanned for 'w10/r2': 0); only the CPU premise check (nn_x/w10/r2/premise/) and the CPU test suite
+nn_x/w10/r2/tests/test_r2.py cpu (33/33) had run, which train nothing). Spec: reports/EXTERNAL_SCAN_1113.md section 2.2 R2 (x10.3); skeptic notes
+of the scan (position-tower item). Code copy: nn_x/w10/r2 (= nn_x/w5 code + cd_arms10.py; nothing in nn_x/w5/*.py or lane.sh is edited); every run
+is launched from nn_x/w10/r2 (own logs/ preds/ ckpt/), GPUs N ONLY, one train.py per GPU, OMP/MKL/OPENBLAS/POLARS threads 12, nvidia-smi
+check (<= 3 compute processes, >= 60 GB free) before every launch, real PIDs from /proc in nn_x/w10/r2/RUNNING.txt + one line in
+nn_x/w5/logs/RUNNING_w5.txt. Time cap 4 h from 16:40 UTC.
+
+PREMISE CHECK (CPU, nn_x/w10/r2/premise/premise_check.py -> premise_check.txt, 16:46 UTC; the gate the lead set before any GPU):
+  Rows = the 134,118 exploration train feeds (NN p_random > 0.5, M >= 50, 30K holdout excluded; = the m02 pool), 19.6M non-end candidates.
+  The last shown item (rkend 0) is excluded everywhere (truncation spike: positive rate 0.284 vs 0.011; an end-of-feed term is the CLOSED A3).
+  Positive rate by within-feed rank (base 0.01058): rank 0 0.03336 +- 0.00049 (lift 3.15, z +46), 1 0.02697 (2.55), 2 0.02081 (1.97), 3 0.02050,
+  4 0.01761 (1.66), 5-6 1.62x, 7-9 1.57x, 10-14 1.47x, 15-19 1.38x, 20-29 1.25x, 30-49 1.17x, 50-99 0.95x, 100-199 0.72x (z -81), 200-299 0.62x.
+  By raw displayed pos (with gaps): the same curve (3.17x at pos 0). Tests: chi-square homogeneity over 14 bins 28,023 on 13 df (p ~ 0);
+  feed-level mean normalised rank of the positives - 0.5 = -0.0580 +- 0.0008 (z -73; 113,377 feeds); WLS slope of log rate on log1p(rank)
+  -0.281 +- 0.002. The gradient is present in every subset: p > 0.9 feeds (59,794) rank-0 lift 2.53 (z +23), 0.5 < p <= 0.9 (74,324) 3.57 (z +40);
+  M 50-99 2.56x, M 100-199 2.90x, M 200-300 2.67x; the 30K holdout (p > 0.9) 2.68x (z +18). Reference: production-like feeds (p <= 0.05,
+  200K sample) 6.38x at rank 0, feed-level z -202 (the confounded curve, ~2x as steep in log). The detector p_random is label-free (Spearman
+  of a position proxy vs pos + gap share), so this is not a selection artefact; the holdout control of data_usage (a position-blind model
+  finds top-slot positives HARDER) says it is examination, not relevance.
+  VAL (14,423 feeds; random-order by construction): the organisers SHUFFLED the candidate order of val/test by one permutation and do not
+  publish pos (data/competition/readme.md), so the only index is the candidate index: feed-level mean normalised index of the positives - 0.5
+  = +0.0007 +- 0.0023 (z +0.3; M >= 50: -0.0006 +- 0.0028, z -0.2) = FLAT, as a permutation must be (the bin chi-square there is the
+  M-composition confound only). Reading: val/test LABELS carry the same examination effect but the position is unobservable at inference,
+  so it is pure label noise there; the mechanism's fuel is the TRAIN exploration rows, where the position is known and the gradient is 3x.
+  VERDICT of the premise gate: a real examination gradient exists on the exploration training rows -> PROCEED (the lead's STOP condition,
+  'label rate flat in position within noise', does not hold).
+
+EXACT SPEC (nn_x/w10/r2/cd_arms10.py, train.py --xoff A, OFF at the default 0; flag-off path AST-identical to nn_x/w5/train.py and end-to-end
+bit-identical, tests/test_r2.py cpu 33/33; the GPU part runs next, before the stage runs):
+  lg[f, i] += A * 1[p_f > 0.5] * g_noend[clamp(pos_i, 0, 299)]   on the MAIN listwise logits of every TRAINING batch (regular stream in the
+  plateau and the cooldown, and the m02 pool batches), A = 0.5 (the spec's half strength; one dose only, no sweep).
+  p_f = the NN p_random (M < 50 -> 0; holdout feeds coef 0: never trained on); production feeds (95.7% of the training feeds) and every
+  M < 50 feed get exactly 0. pos_i = the raw displayed slot (data/flat/train/cand_pos.npy; gaps = items the user had already viewed).
+  g_noend = nn_x/w10/r2/premise/g_noend_pos_oe.json (md5 53524aceef738cfb7ebee6d9d6a66566; premise_g.py): log of the WITHIN-FEED observed /
+  expected positive-rate lift by raw pos on the pool rows (O = positives at pos, E = sum of the feeds' own non-end rates; rkend-0 items
+  excluded from O and E -> NO end-of-feed term), raw per pos for pos 0-19 (>= 129K rows each), bins above, log1p interpolation, clamp 299:
+  g at pos 0/1/2/3/5/10/20/50/100/200/299 = +0.969/+0.759/+0.502/+0.491/+0.297/+0.262/+0.115/-0.056/-0.107/-0.147/-0.172
+  (lift 2.64 at pos 0; the within-feed O/E form was chosen over the pooled curve of premise_check.py (3.17x / 0.62x) because the pooled tail is
+  the M-composition confound: deep slots exist only in long, low-rate feeds). Offset at A = 0.5: +0.485 at pos 0, -0.086 at pos 299; mean over
+  the pool rows -0.018, over the pool positives +0.001 (test_r2_dose.json). Never on the K9 aux head, never at eval / holdout selection /
+  val / test prediction, never on val feeds (--val_mix refused), not combined with --trunc_off / rdrop / sam / aug. This is NOT the closed
+  TRUNC-PROD / trunc2 / truncp (production rows, rank from the end), not the learned position tower (production-confounded g(pos)) and not
+  the PAL proxy gated by (1 - p_random) (production rows): only the exploration rows' own examination pattern is offset.
+
+RUNS AND RULES (read on SAVED predictions by the scripts below; nothing is fine-tuned, pooled or submitted by this agent):
+STAGE S (2-epoch screen, first): w10_r2_s23 / s24 = lane.sh A_BASE + HYG + '--xoff 0.5' (nn_x/w10/r2/lane.sh A:r2), one run per GPU (4 / 5),
+  paired per feed on the same seed vs the PRIMARY reference abl_base_s23 / s24 (nn_x/abl/preds; stored args verified == A_BASE + HYG every
+  non-default flag, test_r2 C0c) and, as a REPLICATION reference (information + run-noise read, never a gate), w9_base_s23 / s24 (nn_x/w9/dw3/preds,
+  same args, flag-off = this code path). Primary read = the LAST checkpoint (step 19,670; the 2-epoch screen convention of nn_x/abl / w5 stage A);
+  the selected checkpoint is reported. Read-out nn_x/w10/r2/s_readout.py r2 23,24 -> nn_x/w10/r2/logs/s_readout_r2.txt (copy to nn_x/w5/logs/
+  w10_r2_stageS_readout.txt). SE_feed = sd / sqrt(n_feeds) of the pooled per-feed delta; SE_cal = sqrt(SE_feed^2 + sigma_run^2 / 2),
+  sigma_run 0.00035 val / 0.00015 holdout (the frozen abl SCALE-UP form).
+  STRENGTH lever (not a diversity family): CONTINUE to stage E iff ALL of (s1) pooled member val (last ckpt) > +1 SE_cal(val);
+  (s2) pooled member holdout (last) >= 0; (s3) no val slice (M<50, M>=50, Tue, Thu) < -2 SE_feed; (s4) pmix >= -1 SE (src/pmix.py private mix,
+  veto only). Otherwise STOP and report (the arm is closed at stage S). The diversity margin is reported as information only.
+STAGE E (only if S CONTINUES): w5_e10_r2_s951 / s952 = lane.sh E_BASE + HYG + '--xoff 0.5' (E:r2), one per GPU (4 / 5), paired per seed vs the
+  existing w5_e10_base_s951 / s952 (nn_x/w5/preds, selected + @last, holdout). Outputs copied into nn_x/w5 with cp --update=none (logs/<v>.json/.log,
+  preds/nn_<v>[@last]_trainonly_{val,test}.npy, preds/holdout/nn_<v>[@last]_holdout.npy), then nn_x/w5/w5_eval_e_ap1.py r2 951,952 ->
+  nn_x/w5/logs/w5_eval_E_r2.txt. E RULE: PASS iff pooled per-seed paired member val > 0 AND holdout > +1 SE AND no val slice (M<50, M>=50, Tue,
+  Thu) < -2 SE AND pmix >= -1 SE (selected checkpoint primary, @last information). PASS -> reported to the lead (seeds 953/954, FT, decide7 are
+  the lead's). FAIL -> CLOSED. No diversity clause (strength lever).
+KILL GATE at step 60,000 (10-epoch runs; the plateau, before the cooldown; logged eval line 'step 60000/98350'): STOP BOTH runs by exact PID
+  (after a /proc cmdline check) and close the arm (information) iff BOTH seeds' logged holdout_ndcg@60000 < base@60000 - 2 x 0.00077
+  (s951 0.31659 -> 0.31505, s952 0.31740 -> 0.31586) OR BOTH seeds' logged val_ndcg@60000 < base@60000 - 0.0015 (s951 0.39356 -> 0.39206,
+  s952 0.39336 -> 0.39186). Otherwise the runs complete. Waiter: nn_x/w10/r2/kill_gate_r2.sh <pid951> <pid952> -> logs/kill_gate_r2.txt.
+COST / ETA: GPU tests ~10 min (GPU N); stage S 2 x ~20-25 min (one per GPU); stage E 2 x ~90-120 min; within the 4-h cap (ends ~20:40 UTC).
+MULTIPLE LOOKS, disclosed: none on any model output. The premise check was run once; the offset-table estimator (within-feed O/E instead
+  of the pooled curve) was chosen on the premise numbers before any GPU run (both tables are kept in premise/).
+DEVIATIONS FROM THE SPEC, disclosed: (1) the reference pair is abl_base_s23/24 (args verified) + w9_base_s23/24 (replication) instead of an own
+  base pair (saves 2 GPU runs; the flag-off path is bit-identical to nn_x/w5, so any A_BASE + HYG run is the same population); (2) the scan's
+  'Step 0: loss_zoo xoff, 6 seeds' (MLP proxy) is skipped: GBDT/MLP-proxy gains never justify or block NN GPU (TRUNC lesson); the NN screen is
+  the gate; (3) the scan's 'Step 1: CD arm B:xoff roots 101-104' (cooldown-only re-cool) is replaced by the lead's stage-S / stage-E from-scratch
+  pairs (the offset acts on the plateau too; a cooldown-only form would see only the 2% pool dose); (4) g is indexed by the raw displayed pos
+  (the spec's clamp(pos, 0, 299)) with the within-feed O/E estimator instead of theta_rand_rank (which is by rank and includes the M-composition
+  tail); (5) the stage-S rule is the frozen SCALE-UP form + the lead's slice / pmix vetoes (the scan's 'B rule' belongs to the CD harness).
+
+RESULT ADDENDUM — 2026-11-13T17:25:16Z (written after the stage-S read-out; the rules above are unchanged)
+Tests before any stage run: nn_x/w10/r2/tests/test_r2.py cpu 33/33 (AST proof: train.py minus the 6 XOFF statements == the frozen nn_x/w5/train.py;
+  module copies md5-identical; lane DRY commands; reference args verified; offset unit tests on MiniSplit batches; full-set dose: coef > 0 on exactly
+  134,118 training feeds, 0 on the holdout / M<50; offset at a = 0.5 in [-0.086, +0.485], mean -0.018 over pool rows, +0.001 over pool positives),
+  gpu 18/18 on GPU N (flag-off runs bit-identical to the frozen nn_x/w5/train.py, cooldown-only and from scratch: batch sequence, logits, log lines,
+  checkpoint, val preds; flag ON: lg_loss - lg_model == 0.5 g[pos] on every exploration-feed candidate (206,509 / 163,492 candidates) and exactly 0
+  on every other candidate; eval / predict paths untouched); lane smoke w10_smoke_r2_s23 (GPU N, 20K feeds, 1 epoch) OK.
+STAGE S (2-epoch, 17:05:44-17:23:39 UTC, 17 min per run, one per GPU N; nn_x/w10/r2/logs/s_readout_r2.txt, copy nn_x/w5/logs/w10_r2_stageS_readout.txt):
+  w10_r2_s23/24 vs PRIMARY abl_base_s23/24, LAST ckpt (step 19670): pooled member val +0.00002 +- 0.00028 (z_cal +0.05; SE_cal 0.00037), holdout
+  -0.00008 +- 0.00015 (z -0.5), pmix -0.00017 +- 0.00043 (z -0.4), slices M<50 +0.00029 (z +0.6) M>=50 -0.00017 (z -0.6) Tue +0.00013 Thu -0.00011;
+  per seed d val +0.00014 / -0.00010, d hold +0.00025 / -0.00041; selected ckpt val -0.00009 / holdout +0.00001; 2-member pool val -0.00025 / hold +0.00013;
+  diversity margin rho_bb - rho_x = -0.00011 (same-seed arm-base corr 0.9978, arm-arm 0.9797 = base-base 0.9795: a near copy of the base).
+  REPLICATION vs w9_base_s23/24 (last): val -0.00003 +- 0.00027, holdout -0.00002 +- 0.00015, pmix -0.00017 -> the same STOP; run noise between the two
+  references (w9_base - abl_base, same args): val +0.00005 +- 0.00027, holdout -0.00006 +- 0.00015.
+  Gates (primary, last): (s1) val > +1 SE_cal NO; (s2) holdout >= 0 NO; (s3) slices OK; (s4) pmix OK.
+  VERDICT: STOP (futility). Stage E NOT launched; nothing copied into nn_x/w5/preds, nothing fine-tuned, pooled or submitted. Arm CLOSED at stage S.
+  Reading: the examination gradient on the exploration rows is real (3x at slot 0) but the offset that explains it is small in logit units
+  (mean |offset| 0.06 at a = 0.5) on 4.3% of the feeds, and the position-blind model already learns relevance up to a constant on random-order
+  rows (position is independent of the item there), so the offset only removes a little label variance: the member is an exact null and a near
+  copy (corr 0.998) of the base. Training loss at step 2000 equal to the base's to 4 decimals (4.1991 vs 4.1992). No GPU hours left open on this arm.

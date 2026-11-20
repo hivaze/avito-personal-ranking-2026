@@ -1,0 +1,34 @@
+ITEM-PRIOR audit (fair branch: val labels are provided data). Written 2026-11-12T20:35:17Z BEFORE any computation.
+CPU only (12 threads). New files only under nn_x/audit/itemprior/. Base = preds/ens_G3_final_{val,test}.npy
+(= z(0.5 z(ft) + 0.5 z(to)); val NDCG 0.40032; verified identical to the blend, no later-overlay inside).
+
+PRIOR (per candidate row, item i): x = log(p_i / p0), p_i = (s_i + a*p0) / (n_i + a), x = 0 if n_i = 0,
+  s_i / n_i = clicks / impressions of item i on SOURCE rows of OTHER users (leave-user-out: the evaluated feed's user_id,
+  if > 0, contributes nothing; user-0 feeds are an anonymous pooled bucket and are treated as distinct users, as in the
+  probe). p0 = global click rate of the source. a in {5, 20, 50} (nested).
+SOURCES: (V) val labels, OOF by the FT folds (sklearn GroupKFold(5), groups = user_id, user-0 feeds as singleton groups
+  -1-arange, exactly nn/finetune.py --u0_singleton); (T) train feeds with p_random > 0.5
+  (eda/labels_position/out/train_prandom.npz, 515,023 feeds, Sep 6-19); (U) union of V and T counts (train rows weighted
+  w in {0.3, 1.0}, nested); (C) category-level prior from val labels (OOF).
+SCORE: s = z(G3) + beta * x, beta in {0.02, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5}. Primary form = log-ratio residual (the
+  probe's form). Secondary (information): within-feed z(x).
+NESTED PROTOCOL: for outer fold k, (a, beta[, w]) is chosen by the mean paired delta over the 4 other folds, where each
+  inner fold j's prior is built from the folds not in {j, k} (strict: the outer fold's labels never enter the inner
+  selection); the chosen setting is applied to fold k with the prior built from the 4 folds != k. The nested val delta
+  = mean over all 14,423 feeds of (NDCG_new - NDCG_G3), SE = sd/sqrt(n). Slices: M<50, M>=50, Tue, Thu (same per-feed
+  deltas). Time-forward check: source = Tue rows (leave-user-out), target = Thu feeds, (a, beta) chosen nested over the
+  FT folds restricted to Thu feeds; reported delta on Thu. Both V and T sources get the full table; T needs no OOF.
+DUPLICATION CHECK: Pearson/Spearman of x_V with it_hist_all_luo (log1p and within-feed z), it_hist_et1_luo, it_tr_ctr,
+  it_tr_coec, it_cand_cnt_split_rk, seq_cv_pop (on covered rows); residual gain of x after adding a nested gamma *
+  z(it_hist_all_luo) term, and the gain of x residualised (OLS on covered rows) on those popularity features.
+TEST COVERAGE: share of test candidate rows (public: ts < 1790497920; private: rest) whose item has >= 1 / >= 3 val
+  impressions (leave-user-out), share of test feeds with any covered row; same for T and U. PROJECTION: test gain =
+  nested val gain x (test row coverage / val OOF row coverage), separately for public and private. ASSUMPTION stated
+  explicitly: the gain is proportional to the covered share of candidate rows and the per-covered-row effect is the same
+  on test as on val (ignores that test items are colder and that the val->test gap is 2-5 days vs 0-2 days inside val).
+ACCEPTANCE (all four): nested val delta > 2 SE; no slice < -2 SE; Tue->Thu time-forward delta >= 0; projected PRIVATE
+  test gain >= +0.0003. Otherwise: closed, no submission files.
+IF ACCEPTED: test prior from ALL val rows (leave-user-out of the test feed's user), (a, beta) = argmax of the full-val
+  OOF delta (reported next to the nested value); write preds/ens_G3_itemprior_{val,test}.npy (val = the OOF-prior
+  score at that setting), subs/cand_G3_itemprior.parquet via src/make_sub.make_sub, run src/presub_gate.py
+  (--members ""), report its output. The prior never uses a same-user later feed (leave-user-out on every target).

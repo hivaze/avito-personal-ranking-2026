@@ -1,0 +1,62 @@
+# Merged from raw run logs (not published): the five s04b_*.log files (nested per-feed softmax residual) and the six s04_*.log files (nested LightGBM residual), each under its file name. Differences are val NDCG against the pool, paired per feed.
+===== s04b_base.log =====
+base L2=0.0001: all +0.00000+-0.00000  M<50 +0.00000+-0.00000  M>=50 +0.00000+-0.00000  Tue +0.00000+-0.00000  Thu +0.00000+-0.00000  all_cold +0.00000+-0.00000
+  mean weights: z_v11 +0.964
+===== s04b_cand.log =====
+cand L2=0.0001: all -0.00058+-0.00049  M<50 -0.00160+-0.00092  M>=50 +0.00013+-0.00053  Tue -0.00078+-0.00067  Thu -0.00036+-0.00071  all_cold +0.00466+-0.00114
+  mean weights: z_v11 +0.945, pre_fe_fz +0.078, ag_age_fz -0.066, cat_cnt_et10_fz +0.061, cat_min_hpos_fz +0.061, feed_cat_share_fz +0.055, pre_new_fz -0.055, cold_item_fz -0.047, pre_hmax32_fz +0.039, f3_fz -0.038, maxsim32_fz -0.036, ctx_nd_knn_h_fz +0.027, f5_fz +0.027, ctx_nd_c95_fz +0.025
+===== s04b_pre.log =====
+pre L2=0.0001: all -0.00036+-0.00026  M<50 -0.00053+-0.00051  M>=50 -0.00025+-0.00026  Tue -0.00090+-0.00035  Thu +0.00022+-0.00039  all_cold -0.00107+-0.00050
+  mean weights: z_v11 +0.948, pre_fe_fz +0.103, pre_new_fz -0.086, pre_hmax32_fz +0.012
+===== s04b_nd.log =====
+nd L2=0.0001: all +0.00005+-0.00027  M<50 -0.00012+-0.00046  M>=50 +0.00018+-0.00032  Tue +0.00009+-0.00036  Thu +0.00001+-0.00039  all_cold +0.00116+-0.00064
+  mean weights: z_v11 +0.957, ctx_nd_c95_fz +0.024, ctx_nd_knn_h_fz +0.018, ctx_nd_c90_fz -0.014, ctx_nd_max_fz +0.004, ctx_hn_rrw_fz -0.003
+===== s04b_age.log =====
+age L2=0.0001: all -0.00043+-0.00028  M<50 -0.00113+-0.00055  M>=50 +0.00005+-0.00029  Tue -0.00060+-0.00038  Thu -0.00025+-0.00042  all_cold +0.00417+-0.00070
+  mean weights: z_v11 +0.968, ag_age_fz -0.048, cold_item_fz -0.042, f4_fz -0.015
+===== s04_cand.log =====
+cand (1389971, 47)
+  fold0 top gain: [('ctx_hn_rrw', np.float64(49.7)), ('ctx_nd_max', np.float64(18.6)), ('centrality', np.float64(8.2)), ('ctx_nd_c90', np.float64(7.1)), ('z_v11', np.float64(6.4)), ('feed_cat_share', np.float64(6.3)), ('v11_pct', np.float64(6.0)), ('ctx_nd_knn_h', np.float64(4.8)), ('cos_h10', np.float64(4.6)), ('seq_argmax_hpos', np.float64(4.3)), ('seq_dcos_hl2', np.float64(4.0)), ('maxsim32', np.float64(3.9)), ('f1', np.float64(3.8)), ('seq_max_all', np.float64(2.9)), ('cat_min_hpos', np.float64(2.7))]
+  seed 0 done 24s
+  seed 1 done 25s
+ cand R=100: all -0.00954+-0.00089  M<50 -0.01300+-0.00164  M>=50 -0.00716+-0.00099  Tue -0.00907+-0.00123  Thu -0.01007+-0.00129  all_cold -0.00544+-0.00213  per-seed [-0.00975, -0.00934]
+ cand R=200: all -0.01076+-0.00091  M<50 -0.01436+-0.00167  M>=50 -0.00827+-0.00103  Tue -0.01032+-0.00128  Thu -0.01123+-0.00130  all_cold -0.00696+-0.00215  per-seed [-0.01125, -0.01026]
+ cand R=300: all -0.01098+-0.00093  M<50 -0.01430+-0.00170  M>=50 -0.00869+-0.00105  Tue -0.01044+-0.00131  Thu -0.01159+-0.00132  all_cold -0.00670+-0.00216  per-seed [-0.0111, -0.01087]
+===== s04_cand_feed.log =====
+cand_feed (1389971, 64)
+  fold0 top gain: [('M', np.float64(120.1)), ('ctx_hn_rrw', np.float64(7.1)), ('hist_et1_share', np.float64(5.3)), ('H', np.float64(4.5)), ('hist_es2_share', np.float64(3.5)), ('hist_es4_share', np.float64(3.5)), ('hist_es1_share', np.float64(3.4)), ('f1', np.float64(3.3)), ('hist_es3_share', np.float64(3.1)), ('coldshare', np.float64(2.6)), ('ctx_nd_max', np.float64(2.4)), ('hist_et6_share', np.float64(2.2)), ('hist_et3_share', np.float64(2.1)), ('hist_n_uniq_cat', np.float64(2.1)), ('seq_max_all', np.float64(1.8))]
+  seed 0 done 24s
+  seed 1 done 25s
+ cand_feed R=100: all -0.00161+-0.00043  M<50 -0.00241+-0.00081  M>=50 -0.00106+-0.00046  Tue -0.00163+-0.00056  Thu -0.00159+-0.00066  all_cold +0.00038+-0.00100  per-seed [-0.00171, -0.00152]
+ cand_feed R=200: all -0.00162+-0.00045  M<50 -0.00310+-0.00083  M>=50 -0.00060+-0.00050  Tue -0.00192+-0.00060  Thu -0.00129+-0.00067  all_cold +0.00204+-0.00110  per-seed [-0.00166, -0.00158]
+ cand_feed R=300: all -0.00223+-0.00049  M<50 -0.00408+-0.00089  M>=50 -0.00095+-0.00056  Tue -0.00257+-0.00066  Thu -0.00185+-0.00073  all_cold +0.00250+-0.00120  per-seed [-0.00201, -0.00245]
+===== s04_cand_feed_lrmono.log =====
+cand_feed (1389971, 63)
+  fold0 top gain: [('ctx_hn_rrw', np.float64(3.4)), ('f4', np.float64(2.6)), ('seq_max_all', np.float64(2.2)), ('f5', np.float64(2.1)), ('centrality', np.float64(2.0)), ('cos_u', np.float64(2.0)), ('pre_hmax32', np.float64(1.8)), ('pre_fe', np.float64(1.7)), ('seq_argmax_hpos', np.float64(1.7)), ('f1', np.float64(1.7)), ('ctx_nd_max', np.float64(1.7)), ('ctx_nd_knn_h', np.float64(1.6)), ('it_tr_coec', np.float64(1.6)), ('f2', np.float64(1.6)), ('seq_cv_invd20', np.float64(1.6))]
+  seed 0 done 25s
+  seed 1 done 24s
+ cand_feed lambdarank c1.0 R=100: all -0.00168+-0.00058  M<50 -0.00248+-0.00095  M>=50 -0.00113+-0.00072  Tue -0.00216+-0.00077  Thu -0.00116+-0.00086  all_cold +0.01068+-0.00143  per-seed [-0.00184, -0.00152]
+ cand_feed lambdarank c1.0 R=200: all -0.00258+-0.00065  M<50 -0.00345+-0.00108  M>=50 -0.00197+-0.00080  Tue -0.00370+-0.00088  Thu -0.00135+-0.00095  all_cold +0.01133+-0.00157  per-seed [-0.00277, -0.00239]
+ cand_feed lambdarank c1.0 R=300: all -0.00322+-0.00070  M<50 -0.00402+-0.00118  M>=50 -0.00266+-0.00086  Tue -0.00432+-0.00096  Thu -0.00200+-0.00102  all_cold +0.01067+-0.00165  per-seed [-0.00319, -0.00325]
+===== s04_cand_lambdarank.log =====
+cand (1389971, 47)
+  fold0 top gain: [('v11_pct', np.float64(12.2)), ('z_v11', np.float64(8.1)), ('ctx_hn_rrw', np.float64(3.1)), ('f4', np.float64(2.9)), ('f5', np.float64(2.5)), ('ctx_nd_knn_h', np.float64(2.5)), ('cos_u', np.float64(2.5)), ('centrality', np.float64(2.4)), ('seq_argmax_hpos', np.float64(2.3)), ('it_tr_coec', np.float64(2.3)), ('ctx_nd_max', np.float64(2.3)), ('seq_max_all', np.float64(2.2)), ('pre_fe', np.float64(2.2)), ('f3', np.float64(2.0)), ('f2', np.float64(1.9))]
+  seed 0 done 27s
+ cand lambdarank c1.0 R=100: all -0.00301+-0.00085  M<50 -0.00550+-0.00172  M>=50 -0.00129+-0.00082  Tue -0.00405+-0.00118  Thu -0.00186+-0.00123  all_cold +0.01051+-0.00205  per-seed [-0.00301]
+ cand lambdarank c1.0 R=200: all -0.00390+-0.00093  M<50 -0.00542+-0.00184  M>=50 -0.00284+-0.00094  Tue -0.00400+-0.00131  Thu -0.00378+-0.00133  all_cold +0.00770+-0.00220  per-seed [-0.0039]
+ cand lambdarank c1.0 R=300: all -0.00559+-0.00098  M<50 -0.00797+-0.00194  M>=50 -0.00395+-0.00099  Tue -0.00571+-0.00138  Thu -0.00546+-0.00140  all_cold +0.00667+-0.00237  per-seed [-0.00559]
+===== s04_cand_lrmono.log =====
+cand (1389971, 46)
+  fold0 top gain: [('ctx_hn_rrw', np.float64(3.8)), ('f4', np.float64(2.8)), ('seq_max_all', np.float64(2.7)), ('f5', np.float64(2.6)), ('cos_u', np.float64(2.4)), ('ctx_nd_max', np.float64(2.2)), ('ctx_nd_knn_h', np.float64(2.2)), ('centrality', np.float64(2.2)), ('pre_new', np.float64(2.0)), ('seq_dcos_hl2', np.float64(2.0)), ('it_tr_coec', np.float64(2.0)), ('f2', np.float64(1.9)), ('f3', np.float64(1.9)), ('seq_cv_invd20', np.float64(1.8)), ('pre_fe', np.float64(1.8))]
+  seed 0 done 28s
+  seed 1 done 28s
+ cand lambdarank c1.0 R=100: all -0.00151+-0.00059  M<50 -0.00197+-0.00100  M>=50 -0.00119+-0.00072  Tue -0.00250+-0.00081  Thu -0.00042+-0.00087  all_cold +0.01206+-0.00149  per-seed [-0.00149, -0.00153]
+ cand lambdarank c1.0 R=200: all -0.00203+-0.00067  M<50 -0.00284+-0.00115  M>=50 -0.00147+-0.00081  Tue -0.00321+-0.00092  Thu -0.00073+-0.00098  all_cold +0.01258+-0.00163  per-seed [-0.00235, -0.0017]
+ cand lambdarank c1.0 R=300: all -0.00300+-0.00070  M<50 -0.00337+-0.00121  M>=50 -0.00274+-0.00084  Tue -0.00429+-0.00097  Thu -0.00159+-0.00102  all_cold +0.01103+-0.00173  per-seed [-0.00285, -0.00314]
+===== s04_cand_xendcg.log =====
+cand (1389971, 47)
+  fold0 top gain: [('z_v11', np.float64(73.9)), ('v11_pct', np.float64(21.0)), ('seq_max_all', np.float64(2.0)), ('maxsim32', np.float64(1.8)), ('pre_hmax32', np.float64(0.6)), ('cos_u', np.float64(0.5)), ('pre_fe', np.float64(0.4)), ('f5', np.float64(0.3)), ('seq_cv_invd20', np.float64(0.3)), ('seq_dcos_hl2', np.float64(0.2)), ('ctx_hn_rrw', np.float64(0.2)), ('it_hist_all_luo', np.float64(0.2)), ('f3', np.float64(0.1)), ('pre_new', np.float64(0.1)), ('f1', np.float64(0.1))]
+  seed 0 done 23s
+ cand xendcg c1.0 R=100: all -0.00980+-0.00097  M<50 -0.01216+-0.00202  M>=50 -0.00818+-0.00087  Tue -0.01139+-0.00132  Thu -0.00807+-0.00143  all_cold +0.00424+-0.00250  per-seed [-0.0098]
+ cand xendcg c1.0 R=200: all -0.02405+-0.00124  M<50 -0.02069+-0.00217  M>=50 -0.02638+-0.00146  Tue -0.02603+-0.00169  Thu -0.02189+-0.00181  all_cold -0.00321+-0.00302  per-seed [-0.02405]
+ cand xendcg c1.0 R=300: all -0.02543+-0.00125  M<50 -0.01902+-0.00208  M>=50 -0.02987+-0.00155  Tue -0.02651+-0.00170  Thu -0.02426+-0.00184  all_cold -0.01066+-0.00308  per-seed [-0.02543]

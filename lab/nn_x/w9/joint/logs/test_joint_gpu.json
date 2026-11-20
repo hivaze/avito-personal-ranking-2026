@@ -1,0 +1,60 @@
+{
+ "checks": [
+  {
+   "name": "identical training-batch sequence (incl. pool steps)",
+   "ok": true,
+   "info": "39 batches"
+  },
+  {
+   "name": "identical train-mode model logits and loss-input logits",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "identical logged loss / val / holdout / BEST lines",
+   "ok": true,
+   "info": "BEST step 20 val_ndcg 0.39150; train time"
+  },
+  {
+   "name": "bit-identical checkpoint and val preds",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flag-off checkpoint cfg carries no joint keys; args carry joint_layers 0",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flags-ON run completes (rc 0)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "selected + @last checkpoints, val / holdout / test preds, log / json / cliplog written",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "checkpoint cfg stores joint_layers 2, joint_hq True, blocks 0, hist_layers 0",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "training ran >= 40 steps with finite losses; val / holdout NDCG logged",
+   "ok": true,
+   "info": "73 steps"
+  },
+  {
+   "name": "holdout_eval.py (Ranker(**cfg) rebuild) == --save_holdout preds of the joint checkpoint (bitwise)",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "finetune.build_model rebuilds the joint model from the stored cfg and loads the state_dict strictly",
+   "ok": true,
+   "info": "FT_BUILD_OK True 2 2 True"
+  }
+ ],
+ "fail": []
+}

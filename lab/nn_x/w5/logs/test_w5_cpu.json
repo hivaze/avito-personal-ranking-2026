@@ -1,0 +1,260 @@
+{
+ "checks": [
+  {
+   "name": "lane.sh DRY: one train.py command per job (6 stage-A + 6 stage-B)",
+   "ok": true,
+   "info": "['w5_auxf_s23', 'w5_auxf_s24', 'w5_base_s23', 'w5_base_s24', 'w5_cd_auxf_r101', 'w5_cd_auxf_r104', 'w5_cd_m02ref_r101', 'w5_cd_m02ref_r104', 'w5_cd_truncp_r101', 'w5_cd_truncp_r104', 'w5_trunc_s23', 'w5_trunc_s24']"
+  },
+  {
+   "name": "A s23 base == r7 BASE2 except cooldown_mix 0.02 + hygiene (save_holdout already in BASE2); seed 23",
+   "ok": true,
+   "info": "{'cooldown_mix': (0.1, 0.02), 'cliplog': (0, 50), 'save_last': (False, True), 'select_min_step': (0, 12000)}"
+  },
+  {
+   "name": "A s23 trunc differs from base ONLY by trunc_off 1.0",
+   "ok": true,
+   "info": "{'trunc_off': (0.0, 1.0)}"
+  },
+  {
+   "name": "A s23 auxf differs from base ONLY by aux_norm feed",
+   "ok": true,
+   "info": "{'aux_norm': ('batch', 'feed')}"
+  },
+  {
+   "name": "A s24 base == r7 BASE2 except cooldown_mix 0.02 + hygiene (save_holdout already in BASE2); seed 24",
+   "ok": true,
+   "info": "{'cooldown_mix': (0.1, 0.02), 'cliplog': (0, 50), 'save_last': (False, True), 'select_min_step': (0, 12000)}"
+  },
+  {
+   "name": "A s24 trunc differs from base ONLY by trunc_off 1.0",
+   "ok": true,
+   "info": "{'trunc_off': (0.0, 1.0)}"
+  },
+  {
+   "name": "A s24 auxf differs from base ONLY by aux_norm feed",
+   "ok": true,
+   "info": "{'aux_norm': ('batch', 'feed')}"
+  },
+  {
+   "name": "B r101 m02ref == r6 cd_lane m02 except CDSEED 1001 + hygiene; same init snapshot",
+   "ok": true,
+   "info": "{'seed': (811, 1001), 'cliplog': (0, 50), 'save_last': (False, True), 'save_holdout': (False, True), 'select_min_step': (0, 12000)}"
+  },
+  {
+   "name": "B r101 truncp differs from m02ref ONLY by trunc_off 1.0",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "B r101 auxf differs from m02ref ONLY by aux_norm feed",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "B r104 m02ref == r6 cd_lane m02 except CDSEED 1004 + hygiene; same init snapshot",
+   "ok": true,
+   "info": "{'seed': (811, 1004), 'cliplog': (0, 50), 'save_last': (False, True), 'save_holdout': (False, True), 'select_min_step': (0, 12000)}"
+  },
+  {
+   "name": "B r104 truncp differs from m02ref ONLY by trunc_off 1.0",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "B r104 auxf differs from m02ref ONLY by aux_norm feed",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "lane.sh refuses GPUs N (also in DRY mode)",
+   "ok": true,
+   "info": "[True, True, True, True]"
+  },
+  {
+   "name": "bash -n: lane.sh, launch_w5.sh, wait_w5_readout.sh",
+   "ok": true,
+   "info": "[True, True, True]"
+  },
+  {
+   "name": "launch_w5.sh DRY: 18 jobs (6 A + 12 B), 3 lanes on each of GPUs N <ids>, every job command printed",
+   "ok": true,
+   "info": "18 jobs"
+  },
+  {
+   "name": "frozen reference == nn_x/r6/train.py at copy time (md5 in tests/r6_source_md5.txt)",
+   "ok": true,
+   "info": "5c9969fabe32e00d1414214cfe777c68"
+  },
+  {
+   "name": "AST: train.py minus the wave-7 statements (exact set) minus the valcd statements (exact set) minus the hzcd statements (exact set) minus the wave-5 statements == frozen nn_x/r6/train.py (flag-off path unchanged)",
+   "ok": true,
+   "info": "w7 removed {'import cd_arms8': 1, 'add_argument --rdrop_cd': 1, 'add_argument --sam_cd': 1, 'rdrop, sam = None, None': 1, 'if a.rdrop_cd > 0': 1, 'if a.sam_cd > 0': 1, 'if rdrop is not None and step >= t_cool': 1, 'if sam is not None and step >= t_cool': 1, 'if rdrop is not None': 1, 'if sam is not None': 1}; valcd removed {'import cd_arms7': 1, 'add_argument --val_mix': 1, 'add_argument --val_fold': 1, 'valcd = None': 1, 'if a.val_mix > 0': 1, 'if valcd is not None and step >= t_cool and valcd.draw(is_pool)': 1, 'if valcd is not None and valcd.is_val': 1, 'if valcd is not None': 2}; hzcd removed {'import cd_arms6': 1, 'add_argument --hzcd': 1, 'tr_hz = None': 1, 'if a.hzcd': 3, 'ifexp tr_hz': 1}; ifs {\"a.trunc_off or a.trunc_lifts or a.aux_norm != 'batch' or a.cliplog\": 1, 'a.select_min_step': 1, 'trunc is not None': 1, 'cliplog is not None': 4, 'cliplog is not None and step % a.cliplog == 0': 1, 'a.select_min_step and step + 1 < a.select_min_step': 1, 'a.save_last': 2, 'a.save_holdout': 1}; ifexp [(\"a.aux_norm == 'feed'\", 'fw_aux.sum().clamp_min(1e-06)')]; other [\"from cd_arms5 import ['save_holdout', 'save_last', 'save_last_test', 'setup_wave5']\", \"from common import ['ndcg']\", 'add_argument --trunc_off', 'add_argument --trunc_lifts', 'add_argument --aux_norm', 'add_argument --aux_norm_c', 'add_argument --cliplog', 'add_argument --save_last', 'add_argument --save_holdout', 'add_argument --select_min_step', 'trunc, cliplog = (None, None)', 'gn = clip_grad_norm_ -> bare call']"
+  },
+  {
+   "name": "parse(): every wave-5 flag OFF by default",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "every wave-5 guard / conditional test is False at the defaults (any step)",
+   "ok": true,
+   "info": "{\"a.trunc_off or a.trunc_lifts or a.aux_norm != 'batch' or a.cliplog\": False, 'a.select_min_step': False, 'trunc is not None': False, 'cliplog is not None': False, 'cliplog is not None and step % a.cliplog == 0': False, 'a.select_min_step and step + 1 < a.select_min_step': False, 'a.save_last': False, 'a.save_holdout': False, \"a.aux_norm == 'feed'\": False}"
+  },
+  {
+   "name": "w5_base_s23: arm switches OFF (trunc_off 0, trunc_lifts '', aux_norm batch, hzcd False, val_mix 0, rdrop_cd 0, sam_cd 0); hygiene ON {'save_last': True, 'save_holdout': True, 'select_min_step': 12000, 'cliplog': 50}",
+   "ok": true,
+   "info": "{'a.trunc_off': False, 'a.trunc_lifts': False, \"a.aux_norm != 'batch'\": False, \"a.aux_norm == 'feed'\": False, 'a.hzcd': False, 'a.val_mix > 0': False, 'a.rdrop_cd > 0': False, 'a.sam_cd > 0': False}"
+  },
+  {
+   "name": "w5_cd_m02ref_r101: arm switches OFF (trunc_off 0, trunc_lifts '', aux_norm batch, hzcd False, val_mix 0, rdrop_cd 0, sam_cd 0); hygiene ON {'save_last': True, 'save_holdout': True, 'select_min_step': 12000, 'cliplog': 50}",
+   "ok": true,
+   "info": "{'a.trunc_off': False, 'a.trunc_lifts': False, \"a.aux_norm != 'batch'\": False, \"a.aux_norm == 'feed'\": False, 'a.hzcd': False, 'a.val_mix > 0': False, 'a.rdrop_cd > 0': False, 'a.sam_cd > 0': False}"
+  },
+  {
+   "name": "trunc.offset: one call, in the training loop, behind `if trunc is not None`",
+   "ok": true,
+   "info": "[['if trunc is not None', 'for (step, fb)', 'def main']]"
+  },
+  {
+   "name": "`trunc` is read only by its guard and the offset statement (lg = lg + trunc.offset(b)...)",
+   "ok": true,
+   "info": "['(trunc, cliplog)', 'trunc is not None', 'trunc.offset']"
+  },
+  {
+   "name": "setup_wave5: one call behind its guard in main()",
+   "ok": true,
+   "info": "[[\"if a.trunc_off or a.trunc_lifts or a.aux_norm != 'batch' or a.cliplog\", 'def main']]"
+  },
+  {
+   "name": "no other nn_x/w5 module imports cd_arms5 (predict / eval / holdout_eval / stale_pred untouched)",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "common.py / model.py (predict, eval_subset, forward) contain no trunc / aux_norm code",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "model / cd_arms / cd_arms4 / blend / holdout_eval byte-identical to the nn_x/r6 copies",
+   "ok": true,
+   "info": "{'model.py': True, 'cd_arms.py': True, 'cd_arms4.py': True, 'blend.py': True, 'holdout_eval.py': True}"
+  },
+  {
+   "name": "data / common / stale_pred == nn_x/r6 up to string constants and R6 -> W5 (paths, messages only)",
+   "ok": true,
+   "info": "{'data.py': True, 'common.py': True, 'stale_pred.py': True}"
+  },
+  {
+   "name": "exact c (batches per epoch / sum_b sum_f (1-p_f) / 512) == 1.695 +- 0.002 for 3 shuffles; realised multiplier with c = 1.695 within 1 +- 0.002",
+   "ok": true,
+   "info": "c [1.6951, 1.6951, 1.6951], multiplier [1.0, 1.0, 1.0]"
+  },
+  {
+   "name": "pool-eligible (NN p > 0.5) and holdout feeds: offset 0; column rkend>=3: 0",
+   "ok": true,
+   "info": "164118 pool-eligible incl. 30000 holdout"
+  },
+  {
+   "name": "M<50 rows == L[prod M<50] * (1 - p_soft) and M>=50 production rows == L[prod M>=50] * (1 - p_soft) (exact)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "TruncOffset.offset == brute-force per-candidate loop on 19 MiniSplit batches (0 on padding / random-like)",
+   "ok": true,
+   "info": "mismatches 0, non-zero offsets 564"
+  },
+  {
+   "name": "feeds.parquet cand_off == exclusive cumsum of M (the artifact builder used cumsum offsets)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "rkend / rank arrays: int16, one value per train candidate in flat order",
+   "ok": true,
+   "info": "((246745836,), 246745836)"
+  },
+  {
+   "name": "duplicated shown positions are negligible (< 50 feeds, < 1000 rows)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "train_rkend_true.npy == independent recomputation (#later-shown candidates of the same feed; flat-order ties), all 246.7M candidates",
+   "ok": true,
+   "info": "mismatches 0; 11s"
+  },
+  {
+   "name": "rank + rkend == M - 1 for every candidate (train_rank_true.npy consistent)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "exactly one rkend-0 candidate per feed",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "trunc_lift.json production lifts == recomputed from train labels with the NN-rule groups (|d| < 1e-9)",
+   "ok": true,
+   "info": "{'prod_M<50': [1.0038, 0.5449, 2.0131], 'prod_M>=50': [2.8071, -0.195, -0.2199]}"
+  },
+  {
+   "name": "lift table == the analysis numbers (prod M<50 1.00/0.54/2.01, prod M>=50 2.81/-0.20/-0.22)",
+   "ok": true,
+   "info": "{'prod_M<50': [1.0, 0.54, 2.01], 'prod_M>=50': [2.81, -0.2, -0.22]}"
+  },
+  {
+   "name": "load_lifts(): rows prod M<50 / prod M>=50 from the json, random-like row and rkend>=3 column zero",
+   "ok": true,
+   "info": ""
+  }
+ ],
+ "lane_cmds": {
+  "w5_base_s23": "--variant w5_base_s23 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 23",
+  "w5_trunc_s23": "--variant w5_trunc_s23 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 23 --trunc_off 1.0",
+  "w5_auxf_s23": "--variant w5_auxf_s23 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 23 --aux_norm feed",
+  "w5_base_s24": "--variant w5_base_s24 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 24",
+  "w5_trunc_s24": "--variant w5_trunc_s24 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 24 --trunc_off 1.0",
+  "w5_auxf_s24": "--variant w5_auxf_s24 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 24 --aux_norm feed",
+  "w5_cd_m02ref_r101": "--variant w5_cd_m02ref_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1001",
+  "w5_cd_truncp_r101": "--variant w5_cd_truncp_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1001 --trunc_off 1.0",
+  "w5_cd_auxf_r101": "--variant w5_cd_auxf_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1001 --aux_norm feed",
+  "w5_cd_m02ref_r104": "--variant w5_cd_m02ref_r104 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1004",
+  "w5_cd_truncp_r104": "--variant w5_cd_truncp_r104 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1004 --trunc_off 1.0",
+  "w5_cd_auxf_r104": "--variant w5_cd_auxf_r104 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1004 --aux_norm feed"
+ },
+ "auxf": {
+  "c": [
+   1.695069141347527,
+   1.6950691413475272,
+   1.6950691413475272
+  ],
+  "mult": [
+   0.9999592103083937,
+   0.9999592103083935,
+   0.9999592103083935
+  ],
+  "pool_mult": 0.11437533767567443
+ },
+ "trunc_weights": {
+  "M_lt50_mean_w": 0.7673244130988948,
+  "M_lt50_hidden_expl": 350905,
+  "M_lt50_hidden_expl_mean_w": 0.07114362986531031,
+  "prod_M_ge50_mean_w": 0.9720159875108096
+ },
+ "lifts": {
+  "prod_M<50": [
+   1.0037554565532354,
+   0.5448863877598026,
+   2.0131335086865985
+  ],
+  "prod_M>=50": [
+   2.8071185402565026,
+   -0.19501286848362942,
+   -0.21991824984096994
+  ]
+ },
+ "failed": []
+}

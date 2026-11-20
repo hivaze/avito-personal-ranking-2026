@@ -1,0 +1,21 @@
+== A4.1 Pairwise within-feed-z correlation of train-only predictions (mean over pairs; n pairs)
+same data seed, different trunk  (m02 811 pairs)         val 0.9490+-0.0005 (n6)  test 0.9483+-0.0005 (n6)  holdout 0.9523+-0.0004 (n6)
+same data seed, different trunk  (m02 813 pairs)         val 0.9477+-0.0005 (n6)  test 0.9471+-0.0005 (n6)  holdout 0.9516+-0.0006 (n6)
+same data seed, different trunk  (c0 811 pairs)          val 0.9399+-0.0018 (n6)  test 0.9389+-0.0017 (n6)  holdout 0.9428+-0.0019 (n6)
+same data seed, different trunk  (c0 813 pairs)          val 0.9454+-0.0056 (n6)  test 0.9444+-0.0057 (n6)  holdout 0.9488+-0.0050 (n6)
+same data seed, different trunk  (p70k 812 pairs)        val 0.9484+-0.0008 (n6)  test 0.9476+-0.0008 (n6)  holdout 0.9514+-0.0009 (n6)
+diff data seed, different trunk  (m02 811 x 813)         val 0.9473+-0.0003 (n12)  test 0.9467+-0.0003 (n12)  holdout 0.9508+-0.0003 (n12)
+diff data seed, different trunk  (c0 811 x 813)          val 0.9385+-0.0011 (n12)  test 0.9373+-0.0012 (n12)  holdout 0.9418+-0.0010 (n12)
+diff data seed, same trunk       (m02 811 vs 813)        val 0.9816+-0.0007 (n4)  test 0.9815+-0.0007 (n4)  holdout 0.9828+-0.0006 (n4)
+diff data seed, same trunk       (c0 811 vs 813)         val 0.9625+-0.0007 (n4)  test 0.9619+-0.0007 (n4)  holdout 0.9640+-0.0009 (n4)
+diff seed+snapshot, same root    (m02 811 vs p70k 812)   val 0.9728+-0.0024 (n4)  test 0.9725+-0.0025 (n4)  holdout 0.9745+-0.0025 (n4)
+same data seed, same trunk, arm  (m02 vs c0, 811)        val 0.9715+-0.0016 (n4)  test 0.9712+-0.0016 (n4)  holdout 0.9731+-0.0016 (n4)
+independent full runs            (F7 originals)          val 0.9367+-0.0016 (n6)  test 0.9361+-0.0015 (n6)  holdout 0.9392+-0.0013 (n6)
+independent full runs            (v28 lr1 m02 scratch)   val 0.9350+-0.0023 (n6)  test 0.9344+-0.0023 (n6)  holdout 0.9382+-0.0019 (n6)
+
+== A4.2 4-member pools of the SAME four roots: one data seed vs two data seeds (member-equal per-feed z-mean; NDCG paired per feed)
+   m02  val      single-seed pools 0.40013 | seed-mixed pools 0.39990 | mixed - single -0.00023 +- 0.00019 (z -1.2) | mean member 0.39661
+   m02  holdout  single-seed pools 0.32288 | seed-mixed pools 0.32303 | mixed - single +0.00015 +- 0.00011 (z +1.4) | mean member 0.32011
+   c0   val      single-seed pools 0.39900 | seed-mixed pools 0.39900 | mixed - single -0.00000 +- 0.00024 (z -0.0) | mean member 0.39582
+   c0   holdout  single-seed pools 0.32195 | seed-mixed pools 0.32221 | mixed - single +0.00025 +- 0.00013 (z +2.0) | mean member 0.31887
+   (both arms use the same 8 runs; only the grouping differs, so the delta isolates the diversity value of a second data order)

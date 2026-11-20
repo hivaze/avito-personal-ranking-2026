@@ -1,0 +1,268 @@
+[
+ {
+  "section": "b.groups",
+  "name": "YetiRank + group_weight (constant within feed)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7198, pred sd 1.43, trees 40; differs from 'YetiRank' (corr 0.954)",
+  "sec": 1.03
+ },
+ {
+  "section": "b.groups",
+  "name": "YetiRank + per-object weight",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7239, pred sd 1.46, trees 40; differs from 'YetiRank' (corr 1.000)",
+  "sec": 1.11
+ },
+ {
+  "section": "b.groups",
+  "name": "YetiRank:mode=NDCG + group_weight (constant within feed)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7144, pred sd 1.42, trees 40; differs from 'YetiRank:mode=NDCG' (corr 0.938)",
+  "sec": 1.44
+ },
+ {
+  "section": "b.groups",
+  "name": "YetiRank:mode=NDCG + per-object weight",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7137, pred sd 1.39, trees 40; differs from 'YetiRank:mode=NDCG' (corr 1.000)",
+  "sec": 1.43
+ },
+ {
+  "section": "b.groups",
+  "name": "QuerySoftMax + group_weight (constant within feed)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6560, pred sd 0.311, trees 40; differs from 'QuerySoftMax' (corr 0.993)",
+  "sec": 0.18
+ },
+ {
+  "section": "b.groups",
+  "name": "QuerySoftMax + per-object weight",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6611, pred sd 0.312, trees 40; differs from 'QuerySoftMax' (corr 0.993)",
+  "sec": 0.19
+ },
+ {
+  "section": "b.groups",
+  "name": "QueryRMSE + group_weight (constant within feed)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7079, pred sd 0.0637, trees 40; differs from 'QueryRMSE' (corr 0.952)",
+  "sec": 0.34
+ },
+ {
+  "section": "b.groups",
+  "name": "QueryRMSE + per-object weight",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6999, pred sd 0.0633, trees 40; differs from 'QueryRMSE' (corr 0.955)",
+  "sec": 0.17
+ },
+ {
+  "section": "b.groups",
+  "name": "LambdaMart + group_weight (constant within feed)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7197, pred sd 1.41, trees 40; differs from 'LambdaMart' (corr 0.968)",
+  "sec": 0.35
+ },
+ {
+  "section": "b.groups",
+  "name": "LambdaMart + per-object weight",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7207, pred sd 1.36, trees 40; differs from 'LambdaMart' (corr 0.967)",
+  "sec": 0.34
+ },
+ {
+  "section": "b.groups",
+  "name": "StochasticRank:metric=NDCG + group_weight (constant within feed)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7082, pred sd 0.00512, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.982)",
+  "sec": 13.03
+ },
+ {
+  "section": "b.groups",
+  "name": "StochasticRank:metric=NDCG + per-object weight",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7013, pred sd 0.005, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.981)",
+  "sec": 12.97
+ },
+ {
+  "section": "b.groups",
+  "name": "PairLogit + group_weight (constant within feed)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7090, pred sd 1.66, trees 40; differs from 'PairLogit' (corr 0.975)",
+  "sec": 0.29
+ },
+ {
+  "section": "b.groups",
+  "name": "PairLogit + per-object weight",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7198, pred sd 1.68, trees 40; differs from 'PairLogit' (corr 0.980)",
+  "sec": 0.28
+ },
+ {
+  "section": "b.groups",
+  "name": "YetiRankPairwise + group_weight (constant within feed)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6837, pred sd 0.614, trees 40; differs from 'YetiRankPairwise' (corr 0.987)",
+  "sec": 1.41
+ },
+ {
+  "section": "b.groups",
+  "name": "YetiRankPairwise + per-object weight",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6912, pred sd 0.617, trees 40; differs from 'YetiRankPairwise' (corr 1.000)",
+  "sec": 1.39
+ },
+ {
+  "section": "b.groups",
+  "name": "group_weight that varies inside a feed",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/libs/data/target.cpp:145: groupWeight[1] = 1.63172 is not equal to the weight of group's first element (groupWeight[0] = 2.84056)",
+  "sec": 0.01
+ },
+ {
+  "section": "b.groups",
+  "name": "weight and group_weight together",
+  "status": "FAIL",
+  "detail": "CatBoostError: Pool must have either weight or group_weight.",
+  "sec": 0.0
+ },
+ {
+  "section": "b.groups",
+  "name": "YetiRank:use_weights=false + group_weight",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/options/catboost_options.cpp:701: Metric parameter 'use_weights' isn't supported for objective function. If weights are present they will necessarily be used in optimization. It cannot be disabled.",
+  "sec": 0.01
+ },
+ {
+  "section": "b.groups",
+  "name": "YetiRank + subgroup_id",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7239, pred sd 1.46, trees 40 (identical to 'YetiRank')",
+  "sec": 1.04
+ },
+ {
+  "section": "b.groups",
+  "name": "QuerySoftMax + subgroup_id",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.6625, pred sd 0.315, trees 40 (identical to 'QuerySoftMax')",
+  "sec": 0.21
+ },
+ {
+  "section": "b.groups",
+  "name": "PairLogit + subgroup_id",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7070, pred sd 1.68, trees 40 (identical to 'PairLogit')",
+  "sec": 0.32
+ },
+ {
+  "section": "b.groups",
+  "name": "PairLogit + explicit pairs (5180 pairs)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7182, pred sd 1.66, trees 40; differs from 'PairLogit' (corr 0.962)",
+  "sec": 0.24
+ },
+ {
+  "section": "b.groups",
+  "name": "PairLogitPairwise + explicit pairs (5180 pairs)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6690, pred sd 0.652, trees 40; differs from 'PairLogitPairwise' (corr 0.980)",
+  "sec": 0.37
+ },
+ {
+  "section": "b.groups",
+  "name": "YetiRank + explicit pairs (5180 pairs)",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7239, pred sd 1.46, trees 40 (identical to 'YetiRank')",
+  "sec": 1.07
+ },
+ {
+  "section": "b.groups",
+  "name": "QuerySoftMax + explicit pairs (5180 pairs)",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.6625, pred sd 0.315, trees 40 (identical to 'QuerySoftMax')",
+  "sec": 0.2
+ },
+ {
+  "section": "b.groups",
+  "name": "PairLogit + explicit pairs + pairs_weight",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7097, pred sd 1.66, trees 40; differs from 'PairLogit' (corr 0.978)",
+  "sec": 0.44
+ },
+ {
+  "section": "b.groups",
+  "name": "PairLogit with pairs and NO label column",
+  "status": "PASS",
+  "detail": "no label at all, pairs only: trains, eval NDCG 0.7182",
+  "sec": 0.21
+ },
+ {
+  "section": "b.groups",
+  "name": "pair whose members are in different groups",
+  "status": "FAIL",
+  "detail": "CatBoostError: Pair #0 (WinnerId=2,LoserId=409,Weight=1): catboost/libs/data/target.cpp:170: winner id group #0 is not equal to loser id group #5 (group ids are numbered from 0 to group count - 1 according to their appearance in dataset)",
+  "sec": 0.01
+ },
+ {
+  "section": "b.groups",
+  "name": "group ids not contiguous",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/data_types/query.h:68: Error: queryIds should be grouped",
+  "sec": 0.01
+ },
+ {
+  "section": "b.groups",
+  "name": "YetiRank without group_id",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/target/data_providers.cpp:280: Groupwise loss/metrics require nontrivial groups",
+  "sec": 0.02
+ },
+ {
+  "section": "b.groups",
+  "name": "all-negative feeds in train (each loss trains?)",
+  "status": "PASS",
+  "detail": "150 of 600 train feeds all-negative: YetiRank 0.7108, YetiRank:mode=NDCG 0.7169, LambdaMart 0.7165, StochasticRank:metric=NDCG 0.7043, QuerySoftMax 0.6674, PairLogit 0.7115, QueryRMSE 0.7062",
+  "sec": 16.49
+ },
+ {
+  "section": "b.groups",
+  "name": "YetiRank with a constant label over the whole dataset",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/libs/metrics/metric.cpp:7011: All train targets are equal",
+  "sec": 0.02
+ },
+ {
+  "section": "b.groups",
+  "name": "built-in NDCG:type=Base ties = pessimistic (matches the project metric on all-tied scores)",
+  "status": "PASS",
+  "detail": "constant scores: CatBoost NDCG 0.201738 vs pessimistic-tie NDCG 0.201738 (|diff| 5.55e-17)",
+  "sec": 0.0
+ },
+ {
+  "section": "b.groups",
+  "name": "built-in NDCG equals the project metric on scores with partial ties",
+  "status": "PASS",
+  "detail": "CatBoost/project on rounded and continuous scores: 0.276699/0.276699, 0.295043/0.295043, 0.296089/0.296089 | variants: {\"NDCG\": 0.3128, \"NDCG:type=Base\": 0.3128, \"NDCG:type=Exp\": 0.3128, \"NDCG:top=10\": 0.14844, \"NDCG:denominator=Position\": 0.13605, \"NDCG:top=-1;type=Base;denominator=LogPosition\": 0.3128}",
+  "sec": 0.02
+ },
+ {
+  "section": "b.groups",
+  "name": "project evaluator (src/metrics.ndcg_per_feed, read-only import) vs CatBoost NDCG:type=Base",
+  "status": "PASS",
+  "detail": "src/metrics.ndcg_per_feed 0.285803, this script 0.285803, CatBoost 0.285803",
+  "sec": 0.01
+ },
+ {
+  "section": "b.groups",
+  "name": "built-in NDCG on an all-negative feed",
+  "status": "PASS",
+  "detail": "NDCG of a feed with no positive = 1.0 (CatBoost counts it as 1; src/metrics.ndcg_per_feed also returns 1 when IDCG = 0)",
+  "sec": 0.0
+ },
+ {
+  "section": "b.groups",
+  "name": "group size 3000 on CPU (no CPU size limit hit)",
+  "status": "PASS",
+  "detail": "6 feeds of 3000 candidates: YetiRank, YetiRank:mode=NDCG, LambdaMart train on CPU",
+  "sec": 7.34
+ }
+]

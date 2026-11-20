@@ -1,0 +1,196 @@
+== WIDTH-GATE STEP 1 READ-OUT (rule nn_x/w5/logs/B_widthgate_predeclared.txt, 2026-11-14T00:08Z): d192 re-cools (v29 roots 711-715) x arms m02 / drop02 / mup vs the matched d128 m02 re-cools (v30 roots 901-905), CD harness, CDSEED 900 + root, SELECTED checkpoint primary, @last info. GO iff best d192 arm - d128 re-cool >= +0.0008 val AND >= +0.0004 holdout AND no rise in member corr to the base; otherwise CLOSE ranker width.
+== runs: selected step / total | selected val, holdout (in-training eval) | last val, holdout | minutes
+  w11:w11_wg_d128_m02_r901       best  18000/19670 | sel val 0.39498 hold 0.31920 | last val 0.39543 hold 0.31909 | 26 min
+  w11:w11_wg_d128_m02_r902       best  19670/19670 | sel val 0.39544 hold 0.32029 | last val 0.39544 hold 0.32029 | 24 min
+  w11:w11_wg_d128_m02_r903       best  19000/19670 | sel val 0.39636 hold 0.32060 | last val 0.39668 hold 0.32054 | 24 min
+  w11:w11_wg_d128_m02_r904       best  15000/19670 | sel val 0.39520 hold 0.31972 | last val 0.39590 hold 0.31932 | 12 min
+  w11:w11_wg_d128_m02_r905       best  19670/19670 | sel val 0.39544 hold 0.31954 | last val 0.39544 hold 0.31954 | 12 min
+  w11:w11_wg_d192_m02_r711       best  12000/19670 | sel val 0.39423 hold 0.31878 | last val 0.39496 hold 0.31831 | 29 min
+  w11:w11_wg_d192_m02_r712       best  19670/19670 | sel val 0.39541 hold 0.31848 | last val 0.39541 hold 0.31848 | 29 min
+  w11:w11_wg_d192_m02_r713       best  16000/19670 | sel val 0.39374 hold 0.31939 | last val 0.39350 hold 0.31883 | 29 min
+  w11:w11_wg_d192_m02_r714       best  19670/19670 | sel val 0.39542 hold 0.31874 | last val 0.39542 hold 0.31874 | 29 min
+  w11:w11_wg_d192_m02_r715       best  15000/19670 | sel val 0.39427 hold 0.31871 | last val 0.39464 hold 0.31865 | 29 min
+  w11:w11_wg_d192_drop02_r711    best  18000/19670 | sel val 0.39477 hold 0.31978 | last val 0.39457 hold 0.31957 | 29 min
+  w11:w11_wg_d192_drop02_r712    best  19670/19670 | sel val 0.39595 hold 0.31961 | last val 0.39595 hold 0.31961 | 29 min
+  w11:w11_wg_d192_drop02_r713    best  16000/19670 | sel val 0.39616 hold 0.31998 | last val 0.39570 hold 0.31939 | 29 min
+  w11:w11_wg_d192_drop02_r714    best  19670/19670 | sel val 0.39546 hold 0.31994 | last val 0.39546 hold 0.31994 | 29 min
+  w11:w11_wg_d192_drop02_r715    best  19670/19670 | sel val 0.39615 hold 0.31953 | last val 0.39615 hold 0.31953 | 29 min
+  w11:w11_wg_d192_mup_r711       best  12000/19670 | sel val 0.39451 hold 0.31838 | last val 0.39468 hold 0.31803 | 29 min
+  w11:w11_wg_d192_mup_r712       best  19670/19670 | sel val 0.39506 hold 0.31843 | last val 0.39506 hold 0.31843 | 29 min
+  w11:w11_wg_d192_mup_r713       best  16000/19670 | sel val 0.39427 hold 0.31905 | last val 0.39416 hold 0.31853 | 29 min
+  w11:w11_wg_d192_mup_r714       best  19670/19670 | sel val 0.39413 hold 0.31869 | last val 0.39413 hold 0.31869 | 28 min
+  w11:w11_wg_d192_mup_r715       best  15000/19670 | sel val 0.39453 hold 0.31844 | last val 0.39452 hold 0.31836 | 29 min
+
+== d128 m02 re-cools: member corr to the base (F7x z-mean, val): 0.9680 0.9695 0.9705 0.9685 0.9684 (mean 0.9690)
+   (same-recipe different-seed members of the base itself, r6_cd_m02 r101 vs the 7-mean: 0.9767)
+
+== d192 m02 (a) control, no arm flag vs the matched d128 m02 re-cool (B = d192 arm; pairs 711<->901 ... 715<->905); PRIMARY = selected checkpoints
+    VAL  w11_wg_d192_m02_r711 0.39423 vs w11_wg_d128_m02_r901 0.39498: -0.00075
+    VAL  w11_wg_d192_m02_r712 0.39541 vs w11_wg_d128_m02_r902 0.39544: -0.00002
+    VAL  w11_wg_d192_m02_r713 0.39374 vs w11_wg_d128_m02_r903 0.39636: -0.00263
+    VAL  w11_wg_d192_m02_r714 0.39542 vs w11_wg_d128_m02_r904 0.39520: +0.00023
+    VAL  w11_wg_d192_m02_r715 0.39427 vs w11_wg_d128_m02_r905 0.39544: -0.00117
+    HOLD w11_wg_d192_m02_r711 0.31876 vs w11_wg_d128_m02_r901 0.31921: -0.00046
+    HOLD w11_wg_d192_m02_r712 0.31848 vs w11_wg_d128_m02_r902 0.32030: -0.00182
+    HOLD w11_wg_d192_m02_r713 0.31937 vs w11_wg_d128_m02_r903 0.32058: -0.00120
+    HOLD w11_wg_d192_m02_r714 0.31869 vs w11_wg_d128_m02_r904 0.31972: -0.00103
+    HOLD w11_wg_d192_m02_r715 0.31874 vs w11_wg_d128_m02_r905 0.31954: -0.00080
+  [selected (PRIMARY)] VAL  pooled: all -0.00087+-0.00051 (z -1.71)  M<50 -0.00063+-0.00096 (z -0.66)  M>=50 -0.00103+-0.00055 (z -1.87)  Tue -0.00056+-0.00070 (z -0.80)  Thu -0.00120+-0.00074 (z -1.63)  coldpos +0.00067+-0.00100 (z +0.67)  warmpos -0.00149+-0.00068 (z -2.19)
+  [selected (PRIMARY)] HOLD pooled: all -0.00106+-0.00029 (z -3.66)  late20% -0.00066+-0.00064 (z -1.03)  early(Sep6-8) -0.00151+-0.00057 (z -2.64)  late(Sep17-19) -0.00081+-0.00055 (z -1.48)
+  across-root Welch (5 vs 5 member means): val -0.00087 +- 0.00041, holdout -0.00106 +- 0.00029
+  holdout columns (selected): late(Sep17-19) -0.00081+-0.00055  early(Sep6-8) -0.00151+-0.00057  late20% -0.00066
+  val slices (selected): M<50 -0.00063 (z -0.66)  M>=50 -0.00103 (z -1.87)  Tue -0.00056  Thu -0.00120  coldpos +0.00067 (z +0.67)  warmpos -0.00149 (z -2.19)
+    VAL  w11_wg_d192_m02_r711@last 0.39496 vs w11_wg_d128_m02_r901@last 0.39543: -0.00047
+    VAL  w11_wg_d192_m02_r712@last 0.39541 vs w11_wg_d128_m02_r902@last 0.39544: -0.00002
+    VAL  w11_wg_d192_m02_r713@last 0.39350 vs w11_wg_d128_m02_r903@last 0.39668: -0.00318
+    VAL  w11_wg_d192_m02_r714@last 0.39542 vs w11_wg_d128_m02_r904@last 0.39590: -0.00048
+    VAL  w11_wg_d192_m02_r715@last 0.39464 vs w11_wg_d128_m02_r905@last 0.39544: -0.00079
+    HOLD w11_wg_d192_m02_r711@last 0.31832 vs w11_wg_d128_m02_r901@last 0.31909: -0.00077
+    HOLD w11_wg_d192_m02_r712@last 0.31848 vs w11_wg_d128_m02_r902@last 0.32030: -0.00182
+    HOLD w11_wg_d192_m02_r713@last 0.31886 vs w11_wg_d128_m02_r903@last 0.32054: -0.00168
+    HOLD w11_wg_d192_m02_r714@last 0.31869 vs w11_wg_d128_m02_r904@last 0.31932: -0.00063
+    HOLD w11_wg_d192_m02_r715@last 0.31861 vs w11_wg_d128_m02_r905@last 0.31954: -0.00092
+  [last (info)] VAL  pooled: all -0.00099+-0.00051 (z -1.95)  M<50 -0.00110+-0.00095 (z -1.16)  M>=50 -0.00091+-0.00056 (z -1.65)  Tue -0.00077+-0.00070 (z -1.09)  Thu -0.00123+-0.00073 (z -1.68)  coldpos +0.00213+-0.00103 (z +2.08)  warmpos -0.00212+-0.00068 (z -3.13)
+  [last (info)] HOLD pooled: all -0.00116+-0.00029 (z -3.99)  late20% -0.00065+-0.00064 (z -1.02)  early(Sep6-8) -0.00186+-0.00057 (z -3.23)  late(Sep17-19) -0.00093+-0.00055 (z -1.69)
+  ENS VAL 5-member arm vs 5-member ref: all -0.00010+-0.00071 (z -0.14) (ref 0.39939, arm 0.39930)
+  ENS HOLD 5-member arm vs 5-member ref: all +0.00015+-0.00039 (z +0.37) (ref 0.32269, arm 0.32284)
+  member corr to the base (F7x r6_cd_m02_r101-107 z-mean, val, selected): arm 0.9565 0.9590 0.9579 0.9577 0.9581 (mean 0.9578) vs d128 control mean 0.9690: rise -0.0112 +- 0.0006 -> no rise (<= +1 SE)
+  PMIX private-mix pooled delta -0.00101 +- 0.00075 (z -1.34); < -1 SE: YES
+  STALE-VAL pooled delta (private-like inputs): -0.00118 +- 0.00051 (z -2.31); < -1 SE: YES
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00139+-0.00040 (pos 0.460)  warm|mid +0.00043+-0.00017 (pos 0.110)  warm|novel +0.00006+-0.00016 (pos 0.127)  cold|recent +0.00005+-0.00023 (pos 0.219)  cold|mid -0.00010+-0.00009 (pos 0.038)  cold|novel +0.00005+-0.00008 (pos 0.046)  cat#1|w3+ +0.00054+-0.00019 (pos 0.347)  total -0.00091+-0.00051 (pos 1.000)
+  CLIPLOG w11_wg_d128_m02_r901: cooldown clipped 0.000 (median 0.292); pool clipped 0.000 (median 0.246) | aux/main grad norm by Mpad 16:0.00 64:0.03 112:0.07 160:0.12 208:0.24 256:0.18 304:0.41
+  CLIPLOG w11_wg_d192_m02_r711: cooldown clipped 0.000 (median 0.289); pool clipped 0.000 (median 0.239) | aux/main grad norm by Mpad 16:0.00 64:0.03 112:0.06 160:0.10 208:0.20 256:0.21 304:0.23
+  GO clauses: val >= +0.0008 NO; holdout >= +0.0004 NO; no rise in corr to the base OK | standard vetoes (info): pmix >= -1 SE NO; stale-val >= -1 SE NO; no val slice (M<50, M>=50, Tue, Thu) < -2 SE OK
+
+== d192 drop02 (b) --drop_cd 0.2 vs the matched d128 m02 re-cool (B = d192 arm; pairs 711<->901 ... 715<->905); PRIMARY = selected checkpoints
+    VAL  w11_wg_d192_drop02_r711 0.39477 vs w11_wg_d128_m02_r901 0.39498: -0.00021
+    VAL  w11_wg_d192_drop02_r712 0.39595 vs w11_wg_d128_m02_r902 0.39544: +0.00051
+    VAL  w11_wg_d192_drop02_r713 0.39616 vs w11_wg_d128_m02_r903 0.39636: -0.00021
+    VAL  w11_wg_d192_drop02_r714 0.39546 vs w11_wg_d128_m02_r904 0.39520: +0.00026
+    VAL  w11_wg_d192_drop02_r715 0.39615 vs w11_wg_d128_m02_r905 0.39544: +0.00072
+    HOLD w11_wg_d192_drop02_r711 0.31978 vs w11_wg_d128_m02_r901 0.31921: +0.00057
+    HOLD w11_wg_d192_drop02_r712 0.31961 vs w11_wg_d128_m02_r902 0.32030: -0.00069
+    HOLD w11_wg_d192_drop02_r713 0.31998 vs w11_wg_d128_m02_r903 0.32058: -0.00060
+    HOLD w11_wg_d192_drop02_r714 0.31994 vs w11_wg_d128_m02_r904 0.31972: +0.00022
+    HOLD w11_wg_d192_drop02_r715 0.31953 vs w11_wg_d128_m02_r905 0.31954: -0.00000
+  [selected (PRIMARY)] VAL  pooled: all +0.00021+-0.00048 (z +0.45)  M<50 +0.00076+-0.00091 (z +0.84)  M>=50 -0.00017+-0.00052 (z -0.32)  Tue +0.00026+-0.00066 (z +0.39)  Thu +0.00016+-0.00070 (z +0.24)  coldpos -0.00006+-0.00092 (z -0.06)  warmpos +0.00036+-0.00065 (z +0.56)
+  [selected (PRIMARY)] HOLD pooled: all -0.00010+-0.00027 (z -0.37)  late20% -0.00014+-0.00061 (z -0.23)  early(Sep6-8) -0.00064+-0.00054 (z -1.19)  late(Sep17-19) -0.00004+-0.00053 (z -0.07)
+  across-root Welch (5 vs 5 member means): val +0.00021 +- 0.00035, holdout -0.00010 +- 0.00026
+  holdout columns (selected): late(Sep17-19) -0.00004+-0.00053  early(Sep6-8) -0.00064+-0.00054  late20% -0.00014
+  val slices (selected): M<50 +0.00076 (z +0.84)  M>=50 -0.00017 (z -0.32)  Tue +0.00026  Thu +0.00016  coldpos -0.00006 (z -0.06)  warmpos +0.00036 (z +0.56)
+    VAL  w11_wg_d192_drop02_r711@last 0.39457 vs w11_wg_d128_m02_r901@last 0.39543: -0.00086
+    VAL  w11_wg_d192_drop02_r712@last 0.39595 vs w11_wg_d128_m02_r902@last 0.39544: +0.00051
+    VAL  w11_wg_d192_drop02_r713@last 0.39570 vs w11_wg_d128_m02_r903@last 0.39668: -0.00098
+    VAL  w11_wg_d192_drop02_r714@last 0.39546 vs w11_wg_d128_m02_r904@last 0.39590: -0.00044
+    VAL  w11_wg_d192_drop02_r715@last 0.39615 vs w11_wg_d128_m02_r905@last 0.39544: +0.00072
+    HOLD w11_wg_d192_drop02_r711@last 0.31955 vs w11_wg_d128_m02_r901@last 0.31909: +0.00046
+    HOLD w11_wg_d192_drop02_r712@last 0.31961 vs w11_wg_d128_m02_r902@last 0.32030: -0.00069
+    HOLD w11_wg_d192_drop02_r713@last 0.31936 vs w11_wg_d128_m02_r903@last 0.32054: -0.00119
+    HOLD w11_wg_d192_drop02_r714@last 0.31994 vs w11_wg_d128_m02_r904@last 0.31932: +0.00062
+    HOLD w11_wg_d192_drop02_r715@last 0.31953 vs w11_wg_d128_m02_r905@last 0.31954: -0.00000
+  [last (info)] VAL  pooled: all -0.00021+-0.00047 (z -0.44)  M<50 -0.00050+-0.00089 (z -0.56)  M>=50 -0.00001+-0.00051 (z -0.03)  Tue -0.00023+-0.00065 (z -0.36)  Thu -0.00018+-0.00069 (z -0.27)  coldpos -0.00095+-0.00093 (z -1.03)  warmpos +0.00007+-0.00064 (z +0.11)
+  [last (info)] HOLD pooled: all -0.00016+-0.00027 (z -0.58)  late20% -0.00007+-0.00061 (z -0.11)  early(Sep6-8) -0.00053+-0.00054 (z -0.98)  late(Sep17-19) -0.00022+-0.00052 (z -0.42)
+  ENS VAL 5-member arm vs 5-member ref: all -0.00003+-0.00066 (z -0.05) (ref 0.39939, arm 0.39936)
+  ENS HOLD 5-member arm vs 5-member ref: all +0.00006+-0.00037 (z +0.15) (ref 0.32269, arm 0.32275)
+  member corr to the base (F7x r6_cd_m02_r101-107 z-mean, val, selected): arm 0.9653 0.9678 0.9668 0.9671 0.9675 (mean 0.9669) vs d128 control mean 0.9690: rise -0.0021 +- 0.0006 -> no rise (<= +1 SE)
+  PMIX private-mix pooled delta -0.00025 +- 0.00070 (z -0.36); < -1 SE: no
+  STALE-VAL pooled delta (private-like inputs): -0.00031 +- 0.00048 (z -0.64); < -1 SE: no
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00029+-0.00038 (pos 0.460)  warm|mid +0.00045+-0.00016 (pos 0.110)  warm|novel +0.00020+-0.00016 (pos 0.127)  cold|recent -0.00009+-0.00022 (pos 0.219)  cold|mid -0.00012+-0.00008 (pos 0.038)  cold|novel +0.00005+-0.00007 (pos 0.046)  cat#1|w3+ -0.00007+-0.00017 (pos 0.347)  total +0.00020+-0.00048 (pos 1.000)
+  CLIPLOG w11_wg_d128_m02_r901: cooldown clipped 0.000 (median 0.292); pool clipped 0.000 (median 0.246) | aux/main grad norm by Mpad 16:0.00 64:0.03 112:0.07 160:0.12 208:0.24 256:0.18 304:0.41
+  CLIPLOG w11_wg_d192_drop02_r711: cooldown clipped 0.000 (median 0.284); pool clipped 0.000 (median 0.233) | aux/main grad norm by Mpad 16:0.00 64:0.03 112:0.06 160:0.10 208:0.21 256:0.21 304:0.23
+  GO clauses: val >= +0.0008 NO; holdout >= +0.0004 NO; no rise in corr to the base OK | standard vetoes (info): pmix >= -1 SE OK; stale-val >= -1 SE OK; no val slice (M<50, M>=50, Tue, Thu) < -2 SE OK
+
+== d192 mup (c) --mup_base 128 (Muon lr x 0.8165 on the 39 width-growing matrices) vs the matched d128 m02 re-cool (B = d192 arm; pairs 711<->901 ... 715<->905); PRIMARY = selected checkpoints
+    VAL  w11_wg_d192_mup_r711 0.39451 vs w11_wg_d128_m02_r901 0.39498: -0.00048
+    VAL  w11_wg_d192_mup_r712 0.39506 vs w11_wg_d128_m02_r902 0.39544: -0.00038
+    VAL  w11_wg_d192_mup_r713 0.39427 vs w11_wg_d128_m02_r903 0.39636: -0.00209
+    VAL  w11_wg_d192_mup_r714 0.39413 vs w11_wg_d128_m02_r904 0.39520: -0.00107
+    VAL  w11_wg_d192_mup_r715 0.39453 vs w11_wg_d128_m02_r905 0.39544: -0.00090
+    HOLD w11_wg_d192_mup_r711 0.31839 vs w11_wg_d128_m02_r901 0.31921: -0.00082
+    HOLD w11_wg_d192_mup_r712 0.31843 vs w11_wg_d128_m02_r902 0.32030: -0.00186
+    HOLD w11_wg_d192_mup_r713 0.31906 vs w11_wg_d128_m02_r903 0.32058: -0.00152
+    HOLD w11_wg_d192_mup_r714 0.31870 vs w11_wg_d128_m02_r904 0.31972: -0.00102
+    HOLD w11_wg_d192_mup_r715 0.31847 vs w11_wg_d128_m02_r905 0.31954: -0.00106
+  [selected (PRIMARY)] VAL  pooled: all -0.00098+-0.00051 (z -1.93)  M<50 -0.00050+-0.00095 (z -0.53)  M>=50 -0.00132+-0.00056 (z -2.35)  Tue -0.00096+-0.00071 (z -1.35)  Thu -0.00101+-0.00073 (z -1.37)  coldpos +0.00091+-0.00100 (z +0.90)  warmpos -0.00176+-0.00069 (z -2.56)
+  [selected (PRIMARY)] HOLD pooled: all -0.00126+-0.00029 (z -4.31)  late20% -0.00111+-0.00065 (z -1.71)  early(Sep6-8) -0.00188+-0.00058 (z -3.25)  late(Sep17-19) -0.00109+-0.00055 (z -1.97)
+  across-root Welch (5 vs 5 member means): val -0.00098 +- 0.00028, holdout -0.00126 +- 0.00028
+  holdout columns (selected): late(Sep17-19) -0.00109+-0.00055  early(Sep6-8) -0.00188+-0.00058  late20% -0.00111
+  val slices (selected): M<50 -0.00050 (z -0.53)  M>=50 -0.00132 (z -2.35)  Tue -0.00096  Thu -0.00101  coldpos +0.00091 (z +0.90)  warmpos -0.00176 (z -2.56)
+    VAL  w11_wg_d192_mup_r711@last 0.39468 vs w11_wg_d128_m02_r901@last 0.39543: -0.00076
+    VAL  w11_wg_d192_mup_r712@last 0.39506 vs w11_wg_d128_m02_r902@last 0.39544: -0.00038
+    VAL  w11_wg_d192_mup_r713@last 0.39416 vs w11_wg_d128_m02_r903@last 0.39668: -0.00252
+    VAL  w11_wg_d192_mup_r714@last 0.39413 vs w11_wg_d128_m02_r904@last 0.39590: -0.00177
+    VAL  w11_wg_d192_mup_r715@last 0.39452 vs w11_wg_d128_m02_r905@last 0.39544: -0.00092
+    HOLD w11_wg_d192_mup_r711@last 0.31802 vs w11_wg_d128_m02_r901@last 0.31909: -0.00107
+    HOLD w11_wg_d192_mup_r712@last 0.31843 vs w11_wg_d128_m02_r902@last 0.32030: -0.00186
+    HOLD w11_wg_d192_mup_r713@last 0.31854 vs w11_wg_d128_m02_r903@last 0.32054: -0.00200
+    HOLD w11_wg_d192_mup_r714@last 0.31870 vs w11_wg_d128_m02_r904@last 0.31932: -0.00062
+    HOLD w11_wg_d192_mup_r715@last 0.31835 vs w11_wg_d128_m02_r905@last 0.31954: -0.00119
+  [last (info)] VAL  pooled: all -0.00127+-0.00051 (z -2.49)  M<50 -0.00151+-0.00095 (z -1.59)  M>=50 -0.00111+-0.00056 (z -1.96)  Tue -0.00132+-0.00071 (z -1.86)  Thu -0.00121+-0.00073 (z -1.65)  coldpos +0.00208+-0.00103 (z +2.02)  warmpos -0.00254+-0.00068 (z -3.74)
+  [last (info)] HOLD pooled: all -0.00135+-0.00029 (z -4.58)  late20% -0.00111+-0.00066 (z -1.69)  early(Sep6-8) -0.00222+-0.00058 (z -3.85)  late(Sep17-19) -0.00119+-0.00056 (z -2.14)
+  ENS VAL 5-member arm vs 5-member ref: all +0.00018+-0.00071 (z +0.25) (ref 0.39939, arm 0.39957)
+  ENS HOLD 5-member arm vs 5-member ref: all -0.00008+-0.00039 (z -0.19) (ref 0.32269, arm 0.32262)
+  member corr to the base (F7x r6_cd_m02_r101-107 z-mean, val, selected): arm 0.9570 0.9579 0.9569 0.9566 0.9574 (mean 0.9572) vs d128 control mean 0.9690: rise -0.0118 +- 0.0005 -> no rise (<= +1 SE)
+  PMIX private-mix pooled delta -0.00078 +- 0.00076 (z -1.01); < -1 SE: YES
+  STALE-VAL pooled delta (private-like inputs): -0.00110 +- 0.00052 (z -2.12); < -1 SE: YES
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00151+-0.00040 (pos 0.460)  warm|mid +0.00036+-0.00017 (pos 0.110)  warm|novel +0.00011+-0.00016 (pos 0.127)  cold|recent +0.00004+-0.00023 (pos 0.219)  cold|mid -0.00008+-0.00009 (pos 0.038)  cold|novel +0.00006+-0.00008 (pos 0.046)  cat#1|w3+ +0.00059+-0.00019 (pos 0.347)  total -0.00102+-0.00051 (pos 1.000)
+  CLIPLOG w11_wg_d128_m02_r901: cooldown clipped 0.000 (median 0.292); pool clipped 0.000 (median 0.246) | aux/main grad norm by Mpad 16:0.00 64:0.03 112:0.07 160:0.12 208:0.24 256:0.18 304:0.41
+  CLIPLOG w11_wg_d192_mup_r711: cooldown clipped 0.000 (median 0.290); pool clipped 0.000 (median 0.240) | aux/main grad norm by Mpad 16:0.00 64:0.03 112:0.06 160:0.10 208:0.22 256:0.20 304:0.24
+  GO clauses: val >= +0.0008 NO; holdout >= +0.0004 NO; no rise in corr to the base OK | standard vetoes (info): pmix >= -1 SE NO; stale-val >= -1 SE NO; no val slice (M<50, M>=50, Tue, Thu) < -2 SE NO
+
+== d192 drop02 - d192 m02 control, same root (information; selected checkpoints)
+    VAL  w11_wg_d192_drop02_r711 0.39477 vs w11_wg_d192_m02_r711 0.39423: +0.00054
+    VAL  w11_wg_d192_drop02_r712 0.39595 vs w11_wg_d192_m02_r712 0.39541: +0.00053
+    VAL  w11_wg_d192_drop02_r713 0.39616 vs w11_wg_d192_m02_r713 0.39374: +0.00242
+    VAL  w11_wg_d192_drop02_r714 0.39546 vs w11_wg_d192_m02_r714 0.39542: +0.00004
+    VAL  w11_wg_d192_drop02_r715 0.39615 vs w11_wg_d192_m02_r715 0.39427: +0.00189
+    HOLD w11_wg_d192_drop02_r711 0.31978 vs w11_wg_d192_m02_r711 0.31876: +0.00103
+    HOLD w11_wg_d192_drop02_r712 0.31961 vs w11_wg_d192_m02_r712 0.31848: +0.00113
+    HOLD w11_wg_d192_drop02_r713 0.31998 vs w11_wg_d192_m02_r713 0.31937: +0.00061
+    HOLD w11_wg_d192_drop02_r714 0.31994 vs w11_wg_d192_m02_r714 0.31869: +0.00125
+    HOLD w11_wg_d192_drop02_r715 0.31953 vs w11_wg_d192_m02_r715 0.31874: +0.00079
+  [selected] VAL  pooled: all +0.00108+-0.00033 (z +3.26)  M<50 +0.00140+-0.00063 (z +2.23)  M>=50 +0.00087+-0.00036 (z +2.43)  Tue +0.00082+-0.00046 (z +1.80)  Thu +0.00137+-0.00048 (z +2.84)  coldpos -0.00073+-0.00065 (z -1.12)  warmpos +0.00185+-0.00045 (z +4.15)
+  [selected] HOLD pooled: all +0.00096+-0.00019 (z +5.11)  late20% +0.00052+-0.00041 (z +1.25)  early(Sep6-8) +0.00087+-0.00037 (z +2.38)  late(Sep17-19) +0.00077+-0.00035 (z +2.18)
+  same-root corr: 0.9731 0.9873 0.9865 0.9870 0.9807 (mean 0.9829)
+
+== d192 mup - d192 m02 control, same root (information; selected checkpoints)
+    VAL  w11_wg_d192_mup_r711 0.39451 vs w11_wg_d192_m02_r711 0.39423: +0.00027
+    VAL  w11_wg_d192_mup_r712 0.39506 vs w11_wg_d192_m02_r712 0.39541: -0.00036
+    VAL  w11_wg_d192_mup_r713 0.39427 vs w11_wg_d192_m02_r713 0.39374: +0.00054
+    VAL  w11_wg_d192_mup_r714 0.39413 vs w11_wg_d192_m02_r714 0.39542: -0.00130
+    VAL  w11_wg_d192_mup_r715 0.39453 vs w11_wg_d192_m02_r715 0.39427: +0.00027
+    HOLD w11_wg_d192_mup_r711 0.31839 vs w11_wg_d192_m02_r711 0.31876: -0.00036
+    HOLD w11_wg_d192_mup_r712 0.31843 vs w11_wg_d192_m02_r712 0.31848: -0.00005
+    HOLD w11_wg_d192_mup_r713 0.31906 vs w11_wg_d192_m02_r713 0.31937: -0.00031
+    HOLD w11_wg_d192_mup_r714 0.31870 vs w11_wg_d192_m02_r714 0.31869: +0.00001
+    HOLD w11_wg_d192_mup_r715 0.31847 vs w11_wg_d192_m02_r715 0.31874: -0.00027
+  [selected] VAL  pooled: all -0.00012+-0.00018 (z -0.66)  M<50 +0.00013+-0.00034 (z +0.40)  M>=50 -0.00029+-0.00019 (z -1.54)  Tue -0.00040+-0.00025 (z -1.63)  Thu +0.00020+-0.00025 (z +0.79)  coldpos +0.00024+-0.00034 (z +0.70)  warmpos -0.00027+-0.00024 (z -1.13)
+  [selected] HOLD pooled: all -0.00020+-0.00009 (z -2.10)  late20% -0.00045+-0.00021 (z -2.13)  early(Sep6-8) -0.00036+-0.00018 (z -1.99)  late(Sep17-19) -0.00028+-0.00018 (z -1.57)
+  same-root corr: 0.9979 0.9981 0.9979 0.9980 0.9980 (mean 0.9980)
+
+== information: the 12 full-run d128 seeds (selected checkpoints, member means) vs the d192 re-cool arms and the d128 re-cools
+  v30 d128 (6, full 10-ep runs): val 0.39589 +- 0.00027, holdout 0.31993 +- 0.00019 (n 6)
+  w5_e10_base d128 (6, full 10-ep runs): val 0.39648 +- 0.00027, holdout 0.32022 +- 0.00015 (n 6)
+  all full-run d128 (n 12): val 0.39619 +- 0.00020, holdout 0.32008 +- 0.00012
+    d192 m02         - full-run d128: val -0.00157 +- 0.00040, holdout -0.00127 +- 0.00019
+    d192 drop02      - full-run d128: val -0.00049 +- 0.00033, holdout -0.00031 +- 0.00015
+    d192 mup         - full-run d128: val -0.00169 +- 0.00026, holdout -0.00147 +- 0.00017
+    d128 re-cool     - full-run d128: val -0.00070 +- 0.00031, holdout -0.00021 +- 0.00028
+
+== muP effective-lr lines (root 711): wave-11 WIDTH-GATE muP: --mup_base 128 at d 192: Muon lr multiplier sqrt(128/192) = 0.8165 on 39 width-growing matrices (1.843M params); 1.0 on 7 fixed-fan-in m
+  first summary (step, hidden lr, mult, input lr): ('1000', '1.276e-03', '0.8165', '1.563e-03'); last: ('19670', '4.903e-05', '0.8165', '6.005e-05'); 20 summaries
+
+== summary (SELECTED checkpoints, pooled over the 5 root pairs vs the matched d128 re-cool)
+  m02    val -0.00087+-0.00051 (Welch 0.00041; z_feed -1.71) hold -0.00106+-0.00029 (Welch 0.00029) | late -0.00081 early -0.00151 | M<50 -0.00063 M>=50 -0.00103 coldpos +0.00067 warmpos -0.00149 | pmix -0.00101 | pool val -0.00010 hold +0.00015 | stale -0.00118 | corr-to-base 0.9578 (rise -0.0112+-0.0006) | @last val -0.00099 hold -0.00116
+  drop02 val +0.00021+-0.00048 (Welch 0.00035; z_feed +0.45) hold -0.00010+-0.00027 (Welch 0.00026) | late -0.00004 early -0.00064 | M<50 +0.00076 M>=50 -0.00017 coldpos -0.00006 warmpos +0.00036 | pmix -0.00025 | pool val -0.00003 hold +0.00006 | stale -0.00031 | corr-to-base 0.9669 (rise -0.0021+-0.0006) | @last val -0.00021 hold -0.00016
+  mup    val -0.00098+-0.00051 (Welch 0.00028; z_feed -1.93) hold -0.00126+-0.00029 (Welch 0.00028) | late -0.00109 early -0.00188 | M<50 -0.00050 M>=50 -0.00132 coldpos +0.00091 warmpos -0.00176 | pmix -0.00078 | pool val +0.00018 hold -0.00008 | stale -0.00110 | corr-to-base 0.9572 (rise -0.0118+-0.0005) | @last val -0.00127 hold -0.00135
+
+== VERDICT: best d192 arm by pooled val = drop02 ((b) --drop_cd 0.2): val +0.00021 (need >= +0.0008), holdout -0.00010 (need >= +0.0004), corr rise -0.0021 +- 0.0006 (need <= +1 SE) -> CLOSE (ranker width closed for good, incl. BIGPOOL)
+
+== registry-ready one-liners
+  w11_wg_d192_m02_r711-715 ((a) control, no arm flag) vs w11_wg_d128_m02_r901-905 (CD harness, CDSEED 900+root, selected ckpt, WIDTH-GATE rule): val -0.00087 +- 0.00051 (Welch 0.00041), holdout -0.00106 +- 0.00029 (Welch 0.00029), late -0.00081 / early -0.00151, pool val -0.00010 / hold +0.00015, stale -0.00118, corr-to-base 0.9578 vs control 0.9690, @last val -0.00099 / hold -0.00116 -> not best (nn_x/w5/logs/w5_eval_B_widthgate.txt)
+  w11_wg_d192_drop02_r711-715 ((b) --drop_cd 0.2) vs w11_wg_d128_m02_r901-905 (CD harness, CDSEED 900+root, selected ckpt, WIDTH-GATE rule): val +0.00021 +- 0.00048 (Welch 0.00035), holdout -0.00010 +- 0.00027 (Welch 0.00026), late -0.00004 / early -0.00064, pool val -0.00003 / hold +0.00006, stale -0.00031, corr-to-base 0.9669 vs control 0.9690, @last val -0.00021 / hold -0.00016 -> BEST, CLOSE (ranker width closed for good, incl. BIGPOOL) (nn_x/w5/logs/w5_eval_B_widthgate.txt)
+  w11_wg_d192_mup_r711-715 ((c) --mup_base 128 (Muon lr x 0.8165 on the 39 width-growing matrices)) vs w11_wg_d128_m02_r901-905 (CD harness, CDSEED 900+root, selected ckpt, WIDTH-GATE rule): val -0.00098 +- 0.00051 (Welch 0.00028), holdout -0.00126 +- 0.00029 (Welch 0.00028), late -0.00109 / early -0.00188, pool val +0.00018 / hold -0.00008, stale -0.00110, corr-to-base 0.9572 vs control 0.9690, @last val -0.00127 / hold -0.00135 -> not best (nn_x/w5/logs/w5_eval_B_widthgate.txt)

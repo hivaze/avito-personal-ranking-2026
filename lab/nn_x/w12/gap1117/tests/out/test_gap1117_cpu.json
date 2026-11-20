@@ -1,0 +1,23 @@
+{
+ "T1a identity CE_items == CE_cat + within (float32 tol 1e-5, float64 tol 1e-10; 48 batches)": true,
+ "T1b padding scores / categories have no effect": true,
+ "T1c gradcheck (float64) and grad(CE_cat + within) == grad(main CE)": true,
+ "T1d within-part gradient is 0 on single-candidate categories and on padding": true,
+ "T2a add_terms == loss + wcl * reduce(within) + ccl * reduce(CE_cat) (feed / batch norm, fw on / off, KD target)": true,
+ "T2b wcl = ccl = 1 adds exactly one more main loss (feed norm)": true,
+ "T2b wcl = ccl = 1 adds exactly one more main loss (batch norm)": true,
+ "T2c wcl = ccl = 0 (fsw only): the loss object is returned unchanged, decomposition + fsw stats logged": true,
+ "T3a feed_weight: M^a / batch mean, M^a / training mean, x fw; identity object when --fsw 0": true,
+ "T3b main loss with the fsw weight == sum_f w_f [valid] CE_f / max_feeds": true,
+ "T4a frozen copy intact": true,
+ "T4b removed set == the gap1117 statements": true,
+ "T4c train.py minus gap1117 statements == pre-change train.py (AST, docstrings stripped)": true,
+ "T4d `gap` is referenced only by the removed statements": true,
+ "T4e parse(): previous defaults unchanged; new defaults wcl 0, ccl 0, fsw 0, fsw_norm batch": true,
+ "T4f loop: fsw weight right after `fw = ...`, add_terms right after the main loss, both top-level in the step loop (every batch incl. pool); the K9 aux statement never reads fw": true,
+ "T5a DRY of the 144 previous K/L jobs (36 arms x K/L x 951/958) byte-identical to the frozen lane.sh": true,
+ "T5b every previous K/L command parses identically with the old and the new parser; gap guard False in all of them": true,
+ "T5c new arms (+ kw03 / e4 / lr4) == K/L:ref command + exactly their flags; parsed args differ from ref only there": true,
+ "T5d unknown arm still refused": true,
+ "T6 names: lane --variant == fill.sh vname == arm_read8 rc lambda for all 256 jobs of 2 jobs files": true
+}

@@ -1,0 +1,38 @@
+# Cut from lab/nn_x/w25/out/results.txt (112 lines): the verdict block, the last summary table and the noise calibration. The five earlier summary tables are interim prints of the same arms. 'W25' = the transfer of the 2025 winning recipe, 'cb26' = our own tree member, 'trH' = the 30,000-feed holdout, G1..G5 = the new feature groups (G1 linear item-item scorers, G3 click-ratio statistics).
+==== VERDICT (pre-declared rules of plan.txt / study.md s4), Fri Nov 13 03:02:52 UTC 2026 ====
+(a) A0 reproduction: val 0.38201327 = cb26 e3 exactly (best iter 1935, trH 0.30424) -> harness OK.
+    GBDT progress: A2 - A1 = +0.00025 +- 0.00044 val (z 0.6), trH +0.00069 +- 0.00025 -> below +0.0030: NO. Kill rule (d) fired (< +0.0010): ladder stopped
+    (A3/A4/A5/Optuna/seeds not run). A2c (same features, cb26 rows/lr) - A0 = +0.00067 +- 0.00045 val, trH -0.00012 +- 0.00025: NO.
+(b) Ensemble: best arm A2c val 0.38268 < bar 0.3933 (rho 0.858); diagnostic nested mix with G3: +0.00021 +- 0.00024 at w 0.05, holdout -0.00008 -> NOT a member.
+    A2 (XM rows): +0.00017 +- 0.00023, holdout -0.00010 -> NOT a member. -> "GBDT closed with a faithful pipeline"; no subs/ candidate.
+(c) Teaching: no group reaches +0.0050 / z 3. Ablation deltas are all within +-0.002 and confounded by the early-stopping point (best iters 816-2172);
+    every W25 column's warm-beater-cell AUC is 0.41-0.50 (< 0.53 P8 gate) and its nested residual on G3 is <= +0.0006 (1.6 SE) -> nothing to queue for the NN.
+Files: out/w25_{val,test}.npy = A2c_cb26 (rule: full-feature arm with higher trH); features data/{train,val,test}/w25_*.npy (73 columns, 11 excluded by PSI);
+W matrices data/W_*.npy; logs/ (PIDS.txt, build_*.log, A*.log, abl_*.log, ens_*.log, psi_w25*.log, cell_w25.log); out/*.json per arm; out/cell_w25.csv; out/psi_w25.json.
+==== W25 summary 2026-11-13 03:23:09 UTC ====
+arm                  feeds nfeat  iter  min |      val    halfA    halfB      trH |    M<50   M>=50     Tue     Thu   user0 cold_hi
+A0_cb26repro        134118   177  1935   10 | 0.38201 0.38533 0.37870 0.30424 | 0.4972 0.3024 0.3821 0.3819 0.3892 0.3963
+A1_base_xm          485023   177  1634   13 | 0.38077 0.38333 0.37820 0.30237 | 0.4965 0.3008 0.3818 0.3796 0.3906 0.3957
+A1_base_xm_s1       485023   177   889   40 | 0.37991 0.38195 0.37787 0.30033 | 0.4958 0.2999 0.3804 0.3794 0.3898 0.3950
+A2_all_xm           485023   239  2172   88 | 0.38101 0.38362 0.37841 0.30306 | 0.4970 0.3009 0.3820 0.3799 0.3927 0.3964
+A2c_cb26            134118   239  1777   65 | 0.38268 0.38524 0.38013 0.30412 | 0.4984 0.3027 0.3822 0.3832 0.3898 0.3973
+abl_add_G1          485023   192   816   35 | 0.37896 0.38101 0.37692 0.30035 | 0.4941 0.2994 0.3793 0.3786 0.3878 0.3941
+abl_loo_G1          485023   224  1200   52 | 0.38016 0.38215 0.37817 0.30159 | 0.4960 0.3001 0.3808 0.3795 0.3891 0.3952
+abl_loo_G3          485023   213  1025   46 | 0.37988 0.38172 0.37803 0.30093 | 0.4956 0.2999 0.3806 0.3791 0.3902 0.3946
+-- paired deltas (first minus second) --
+A1 - A0 (rows/lr)      val -0.00125 +- 0.00074 (z -1.69) | trH -0.00187 +- 0.00044 (z -4.26) | pmix -0.00113 +- 0.00113 | M<50:-0.0008 M>=50:-0.0016 Tue:-0.0003 Thu:-0.0023 user0:+0.0014 known:-0.0014 | worst slice z -2.52 (cold_mid)
+A1 seed1 - seed0 (NOISE) val -0.00086 +- 0.00045 (z -1.89) | trH -0.00203 +- 0.00027 (z -7.45) | pmix -0.00093 +- 0.00068 | M<50:-0.0007 M>=50:-0.0010 Tue:-0.0014 Thu:-0.0003 user0:-0.0008 known:-0.0009 | worst slice z -2.56 (cold_lo)
+A2 - A1 (G1..G5)       val +0.00025 +- 0.00044 (z +0.56) | trH +0.00069 +- 0.00025 (z +2.74) | pmix +0.00036 +- 0.00067 | M<50:+0.0005 M>=50:+0.0001 Tue:+0.0002 Thu:+0.0003 user0:+0.0022 known:+0.0002 | worst slice z -1.33 (cold_lo)
+A2c - A0 (G1..G5, cb26 rows) val +0.00067 +- 0.00045 (z +1.49) | trH -0.00012 +- 0.00025 (z -0.50) | pmix +0.00116 +- 0.00068 | M<50:+0.0012 M>=50:+0.0003 Tue:+0.0001 Thu:+0.0013 user0:+0.0006 known:+0.0007 | worst slice z +0.18 (Tue)
+A2 - loo_G1 (= G1 on top) val +0.00085 +- 0.00042 (z +2.02) | trH +0.00147 +- 0.00025 (z +5.82) | pmix +0.00095 +- 0.00064 | M<50:+0.0010 M>=50:+0.0008 Tue:+0.0013 Thu:+0.0004 user0:+0.0036 known:+0.0007 | worst slice z +0.36 (cold_lo)
+add_G1 - A1 (= G1 alone) val -0.00180 +- 0.00044 (z -4.09) | trH -0.00202 +- 0.00027 (z -7.43) | pmix -0.00212 +- 0.00069 | M<50:-0.0024 M>=50:-0.0014 Tue:-0.0025 Thu:-0.0011 user0:-0.0028 known:-0.0018 | worst slice z -3.95 (Tue)
+A2 - loo_G3 (= G3 on top) val +0.00114 +- 0.00047 (z +2.42) | trH +0.00213 +- 0.00028 (z +7.66) | pmix +0.00169 +- 0.00072 | M<50:+0.0014 M>=50:+0.0010 Tue:+0.0014 Thu:+0.0008 user0:+0.0025 known:+0.0011 | worst slice z +0.96 (cold_mid)
+-- A2 W25 feature importances (PredictionValuesChange, top 25) --
+   w25_c_coec2:1.787, w25_rdlae_exp05:0.653, w25_grp_t1share:0.628, w25_c_once_bctr1:0.608, w25_it_once_imp1:0.576, w25_c_bctr2:0.346, w25_c_coec1:0.297, w25_rdlae_cnt:0.236, w25_g_coec2:0.217, w25_g_once_bctr1:0.195, w25_rdlae_t1:0.164, w25_ease_bin:0.161, w25_dan_bin_t300:0.14, w25_g_coec1:0.134, w25_it_imp2:0.125, w25_x_g_ucl:0.113, w25_rdlae_bin_z:0.086, w25_dan_t1:0.085, w25_rdlae_bin:0.08, w25_u_bctr2:0.073, w25_dan_cnt:0.07, w25_it_coec2:0.061, w25_dancat_bin:0.061, w25_it_npd:0.06, w25_dant1W_t1:0.056
+   sum of W25 importances 7.9 of 100; top-5 overall [['f5', 8.344], ['pre2_fe_z', 5.083], ['it_hist_et1_luo', 4.454], ['f1_z', 3.796], ['cos_u_gap', 3.303]]
+
+==== NOISE CALIBRATION Fri Nov 13 03:23:21 UTC 2026 ====
+A1 seed 1 (same rows/config as A1 seed 0): val 0.37991 (seed 0: 0.38077), trH 0.30033 (0.30237), best iter 889 (1634).
+Seed-to-seed spread of one arm: -0.00086 val / -0.00204 trH with paired SE 0.0004 / 0.0003 -> the paired SE of a single-run comparison
+understates the arm-level uncertainty ~2-7x. Every W25 ablation delta (A2-A1 +0.0002, A2c-A0 +0.0007, G1-on-top +0.0009, G3-on-top +0.0011,
+G1-alone -0.0018, G2-5-alone -0.0006) lies inside this one-seed spread and tracks the early-stopping iteration (816-2172) rather than the feature set.

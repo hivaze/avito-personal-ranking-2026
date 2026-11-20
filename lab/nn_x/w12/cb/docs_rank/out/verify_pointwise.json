@@ -1,0 +1,163 @@
+[
+ {
+  "section": "p.pointwise",
+  "name": "Logloss via CatBoost(params) with group_id in the pool, eval_metric NDCG:type=Base (binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7250, pred sd 1.22, trees 40",
+  "sec": 0.24
+ },
+ {
+  "section": "p.pointwise",
+  "name": "CrossEntropy via CatBoost(params) with group_id in the pool, eval_metric NDCG:type=Base (binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7250, pred sd 1.22, trees 40",
+  "sec": 0.24
+ },
+ {
+  "section": "p.pointwise",
+  "name": "RMSE via CatBoost(params) with group_id in the pool, eval_metric NDCG:type=Base (binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7238, pred sd 0.063, trees 40",
+  "sec": 0.25
+ },
+ {
+  "section": "p.pointwise",
+  "name": "CrossEntropy <- pointwise prob in (0,1)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7390; within-feed Spearman to teacher 0.801; pred sd 0.736",
+  "sec": 0.65
+ },
+ {
+  "section": "p.pointwise",
+  "name": "CrossEntropy <- soft prob (sums to 1 per feed)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7230; within-feed Spearman to teacher 0.735; pred sd 0.625",
+  "sec": 0.22
+ },
+ {
+  "section": "p.pointwise",
+  "name": "CrossEntropy <- teacher logit (outside [0,1])",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/libs/metrics/metric.cpp:7015: Min target less than 0: -5.19582",
+  "sec": 0.03
+ },
+ {
+  "section": "p.pointwise",
+  "name": "Logloss <- pointwise prob in (0,1), no target_border",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/target/target_converter.cpp:410: Target with classes must contain only 2 unique values for binary classification",
+  "sec": 0.03
+ },
+ {
+  "section": "p.pointwise",
+  "name": "Logloss <- pointwise prob in (0,1), target_border=0.5",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7231; within-feed Spearman to teacher 0.752; pred sd 1.82",
+  "sec": 0.22
+ },
+ {
+  "section": "p.pointwise",
+  "name": "RMSE <- teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7290; within-feed Spearman to teacher 0.805; pred sd 0.83",
+  "sec": 0.22
+ },
+ {
+  "section": "p.pointwise",
+  "name": "RMSE <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7297; within-feed Spearman to teacher 0.804; pred sd 0.81",
+  "sec": 0.23
+ },
+ {
+  "section": "p.pointwise",
+  "name": "RMSE <- pointwise prob in (0,1)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7373; within-feed Spearman to teacher 0.798; pred sd 0.124",
+  "sec": 0.24
+ },
+ {
+  "section": "p.pointwise",
+  "name": "QueryRMSE <- teacher logit (QueryRMSE removes the feed mean itself)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7374; within-feed Spearman to teacher 0.803; pred sd 0.826",
+  "sec": 0.19
+ },
+ {
+  "section": "p.pointwise",
+  "name": "Huber:delta=1.0 <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7390; within-feed Spearman to teacher 0.802; pred sd 0.833",
+  "sec": 0.23
+ },
+ {
+  "section": "p.pointwise",
+  "name": "MAE <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7321; within-feed Spearman to teacher 0.800; pred sd 0.806",
+  "sec": 0.27
+ },
+ {
+  "section": "p.pointwise",
+  "name": "LogCosh <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7376; within-feed Spearman to teacher 0.805; pred sd 0.809",
+  "sec": 0.91
+ },
+ {
+  "section": "p.pointwise",
+  "name": "Logloss + embedding_features",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7532 (without the embedding 0.7250); importance of e0 48.79",
+  "sec": 21.08
+ },
+ {
+  "section": "p.pointwise",
+  "name": "CrossEntropy + embedding_features",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7532 (without the embedding 0.7250); importance of e0 48.79",
+  "sec": 24.36
+ },
+ {
+  "section": "p.pointwise",
+  "name": "RMSE + embedding_features",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7658 (without the embedding 0.7290); importance of e0 59.15",
+  "sec": 22.07
+ },
+ {
+  "section": "p.pointwise",
+  "name": "Logloss (pointwise) + baseline",
+  "status": "PASS",
+  "detail": "eval NDCG it0 0.7703 -> last 0.7727; trees alone 0.7229; baseline+trees 0.7727",
+  "sec": 0.25
+ },
+ {
+  "section": "p.pointwise",
+  "name": "CrossEntropy (pointwise) + baseline",
+  "status": "PASS",
+  "detail": "eval NDCG it0 0.7703 -> last 0.7727; trees alone 0.7229; baseline+trees 0.7727",
+  "sec": 0.21
+ },
+ {
+  "section": "p.pointwise",
+  "name": "RMSE (pointwise) + baseline",
+  "status": "PASS",
+  "detail": "eval NDCG it0 0.7662 -> last 0.5082; trees alone 0.2067; baseline+trees 0.5082",
+  "sec": 0.22
+ },
+ {
+  "section": "p.pointwise",
+  "name": "init_model: RMSE regressor (teacher logit) -> YetiRank on clicks (distil then fine-tune)",
+  "status": "PASS",
+  "detail": "continued from an RMSE regressor on teacher logits: 20 trees, NDCG 0.7149",
+  "sec": 0.33
+ },
+ {
+  "section": "p.pointwise",
+  "name": "python custom objective under CatBoost(params): size of each calc_ders_range call",
+  "status": "PASS",
+  "detail": "calc_ders_range call sizes [342, 347, 411, 1000] of 44411 train rows; n calls 865 [warning: Failed to optimize method \"calc_ders_range\" in the passed object:\nFailed in nopython mode pipeline (step: nopython frontend)\nUntyped global name 'sizes': Cannot]",
+  "sec": 0.38
+ }
+]

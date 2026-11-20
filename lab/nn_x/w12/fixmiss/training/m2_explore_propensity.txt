@@ -1,0 +1,19 @@
+<repo>/lab/nn_x/w12/fixmiss/training/m2_explore_propensity.py:64: RuntimeWarning: invalid value encountered in scalar divide
+  cells.append(f"{o / e:.3f}(n+{int(o)})")
+half.npy int8 (14423,) [0 1]
+T* 0.9967; candidate shares NEW/FAR/NEAR 0.158 0.167 0.674; positive shares 0.066 0.107 0.827
+
+1. O/E by class x tercile of the propensity column (feed-level column repeated on rows)
+  h_nov32r  terciles low/mid/high (rows with the column: 0.91):  NEW 0.766(n+172) 0.920(n+444) 1.074(n+376) | FAR 0.853(n+411) 0.961(n+1093) 1.105(n+843) | NEAR 1.036(n+3595) 1.010(n+7940) 0.981(n+5495)
+  h_ent     terciles low/mid/high (rows with the column: 0.99):  NEW 0.825(n+473) 0.930(n+371) 1.082(n+386) | FAR 0.914(n+435) 0.957(n+789) 1.039(n+1125) | NEAR 1.023(n+6294) 1.011(n+6026) 0.988(n+5855)
+  h_ncat    terciles low/mid/high (rows with the column: 1.00):  NEW 0.871(n+722) 0.973(n+351) 1.050(n+386) | FAR 0.893(n+318) 0.957(n+755) 1.030(n+1276) | NEAR 1.025(n+6052) 1.008(n+5825) 0.991(n+6298)
+  h_topsh   terciles low/mid/high (rows with the column: 0.99):  NEW 1.080(n+411) 0.928(n+382) 0.815(n+437) | FAR 1.040(n+1033) 0.971(n+799) 0.912(n+517) | NEAR 0.988(n+5880) 1.009(n+5990) 1.024(n+6305)
+  past_nnew terciles low/mid/high (rows with the column: 0.13):  NEW nan(n+0) nan(n+0) 1.009(n+176) | FAR nan(n+0) nan(n+0) 1.103(n+435) | NEAR nan(n+0) nan(n+0) 0.985(n+2817)
+
+2. cross-fitted class offsets with propensity slope (fit on one user half, NDCG on the other)
+  h_nov32r coefs half0 [-0.1   -0.063 -0.005  0.051 -0.046] half1 [-0.046  0.021  0.064  0.024 -0.088]
+           cross-fitted NDCG delta: val -0.00004+-0.00015 | pub -0.00020+-0.00019 | priv -0.00021+-0.00024 | M<50 +0.00016+-0.00031 | M>=50 -0.00018+-0.00013
+  h_ent    coefs half0 [-0.08  -0.102  0.04   0.043 -0.082] half1 [-0.018  0.001  0.111 -0.017 -0.094]
+           cross-fitted NDCG delta: val -0.00043+-0.00017 | pub -0.00063+-0.00021 | priv -0.00065+-0.00026 | M<50 -0.00048+-0.00034 | M>=50 -0.00040+-0.00016
+  h_topsh  coefs half0 [-0.089 -0.096 -0.019 -0.056  0.076] half1 [-0.031  0.017 -0.128  0.047  0.082]
+           cross-fitted NDCG delta: val -0.00037+-0.00016 | pub -0.00052+-0.00020 | priv -0.00055+-0.00024 | M<50 -0.00051+-0.00032 | M>=50 -0.00027+-0.00015

@@ -1,0 +1,14 @@
+## 5. Size at the pool level of the final file (step 4)
+
+Shares are label-free [M] (alignment run on val and test, `out_s1.txt`); effects are the 4-pool contrasts of section 3, estimated per fill bucket (1-31 / 32-63 / 64-127 / 128 events) on the holdout and val read sets together and weighted by the segment's bucket shares [D]. Two effects bracket the answer: **N(c) - N(b)**, the worth of the recovered events when shown in slots the model was trained on (an upper-side proxy for a retrained model: it assumes a retrained model uses events at depth 257-384 as well as today's models use events at depth 129-256, and that nothing is lost to train / test differences), and **N(d1) - N(a)**, what today's models get from the extended history without retraining.
+
+| segment | qualifying feeds | design 1: feeds that receive events | design 1: c - b proxy | design 1: d1 - a direct | design 2: feeds that receive events | design 2: c - b proxy | design 2: d1 - a direct |
+|---|---|---|---|---|---|---|---|
+| val | 14.98% | 9.59% | +0.00017 +- 0.00007 | +0.00008 +- 0.00006 | 13.02% | +0.00037 +- 0.00016 | +0.00005 +- 0.00013 |
+| test, public-like days | 15.03% | 9.29% | +0.00017 +- 0.00008 | +0.00009 +- 0.00006 | 12.21% | +0.00040 +- 0.00017 | +0.00007 +- 0.00014 |
+| test, private-like days | 14.05% | 8.15% | +0.00015 +- 0.00007 [95% +0.00001, +0.00028] | +0.00007 +- 0.00005 [-0.00003, +0.00017] | 10.87% | **+0.00035 +- 0.00015 [95% +0.00006, +0.00064]** | **+0.00006 +- 0.00012 [-0.00018, +0.00029]** |
+| test, all | 14.35% | 8.49% | +0.00015 +- 0.00007 | +0.00008 +- 0.00005 | 11.27% | +0.00037 +- 0.00016 | +0.00006 +- 0.00012 |
+
+Sensitivity [D]: with effects from the holdout only the private-like sizes are +0.00009 +- 0.00007 (design 1) and +0.00034 +- 0.00017 (design 2); from val only +0.00025 +- 0.00014 and +0.00033 +- 0.00025. The plain form asked for (mean effect over ALL qualifying feeds, zeros where nothing is recovered, times the 14.05% of private-like days): design 1 +0.00012 +- 0.00008 (holdout effect) / +0.00024 +- 0.00014 (val effect); design 2 +0.00020 +- 0.00013 / +0.00033 +- 0.00026.
+
+Reading: **what is reachable is +0.0002 (events older than the 256th only) to +0.0004 (all old-only events) at pool level on private-like days if a retrained model captures the full proxy, and about +0.0001 +- 0.0001 without retraining.** The review's "+0.0002..+0.0005 if events beyond the cap are worth what events 193-256 are" stands as an upper range; its lower half is the realistic part, because two thirds of the recoverable events are not older than the 256th event and on top of 192 stored events they read zero (192 + 64 line of design 2: +0.0003 +- 0.0007 holdout, -0.0013 +- 0.0016 val). These numbers are for the train-only pool; the fine-tuned half of the final file was not replayed.

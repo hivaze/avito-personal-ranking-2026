@@ -1,0 +1,170 @@
+{
+ "checks": [
+  {
+   "name": "ref_pre_w7 copies intact (md5.txt: train.py, lane.sh, test_w5/hzcd/trunc_lifts/valcd.py, strip_valcd/hzcd.py)",
+   "ok": true,
+   "info": "{'lane.sh.txt': True, 'strip_hzcd.py.txt': True, 'strip_valcd.py.txt': True, 'test_hzcd.py.txt': True, 'test_trunc_lifts.py.txt': True, 'test_valcd.py.txt': True, 'test_w5.py.txt': True, 'train.py.txt': True}"
+  },
+  {
+   "name": "train.py minus the wave-7 statements (exact set) == previous train.py (AST, docstrings stripped)",
+   "ok": true,
+   "info": "removed {'import cd_arms8': 1, 'add_argument --rdrop_cd': 1, 'add_argument --sam_cd': 1, 'rdrop, sam = None, None': 1, 'if a.rdrop_cd > 0': 1, 'if a.sam_cd > 0': 1, 'if rdrop is not None and step >= t_cool': 1, 'if sam is not None and step >= t_cool': 1, 'if rdrop is not None': 1, 'if sam is not None': 1}"
+  },
+  {
+   "name": "parse(): rdrop_cd default 0.0, sam_cd 0.0; every other default == the previous parser",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "lane.sh DRY: all 109 previous jobs print byte-identical commands to the previous lane.sh",
+   "ok": true,
+   "info": "109 commands"
+  },
+  {
+   "name": "lane.sh: B:rdrop:<r> == B:m02ref:<r> + {rdrop_cd 1.0}, B:sam:<r> == + {sam_cd 0.05} (flag appended last), variant w5_cd_<arm>_r<r>, CDSEED 900+r, init v17_pre2s_s<r>@77500, roots 101-104",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "lane.sh refuses A:rdrop / E:sam / root 100 / a 4th field",
+   "ok": true,
+   "info": "{'A:rdrop:23': 1, 'E:sam:951': 1, 'B:rdrop:100': 1, 'B:sam:101:0': 1}"
+  },
+  {
+   "name": "bash -n lane.sh",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "setup_rdrop / setup_sam: one call each, behind `if a.rdrop_cd > 0` / `if a.sam_cd > 0` in main()",
+   "ok": true,
+   "info": "[['if a.rdrop_cd > 0', 'def main']] [['if a.sam_cd > 0', 'def main']]"
+  },
+  {
+   "name": "rdrop.combine / sam.second_pass once each inside their `... is not None and step >= t_cool` loop guards; rdrop.summary / sam.summary once each inside the eval block",
+   "ok": true,
+   "info": "[['if rdrop is not None and step >= t_cool', 'for step, fb', 'def main']] [['if sam is not None and step >= t_cool', 'for step, fb', 'def main']] [['if rdrop is not None', 'if (step + 1) % a.eval_every == 0 or last', 'for step, fb', 'def main'], ['if sam is not None', 'if (step + 1) % a.eval_every == 0 or last', 'for step, fb', 'def main']]"
+  },
+  {
+   "name": "hook positions: rdrop hook right after the aux block and right before the zero_grad loop; sam hook right after loss.backward() and right before clip_grad_norm_",
+   "ok": true,
+   "info": "aux 16 rdrop 17 zero_grad [18] backward [20] sam 21 clip [22]"
+  },
+  {
+   "name": "setup position: `rdrop, sam = None, None` + the two guards right after the valcd setup, before the training loop",
+   "ok": true,
+   "info": "val [54] init [55] rd [56] sam [57] loop [63]"
+  },
+  {
+   "name": "no other nn_x/w5 module imports cd_arms8; cd_arms8 imports only torch and model",
+   "ok": true,
+   "info": "users [] imports ['model', 'torch']"
+  },
+  {
+   "name": "every wave-7 guard is False at the defaults (any step)",
+   "ok": true,
+   "info": "{'a.rdrop_cd > 0': False, 'a.sam_cd > 0': False, 'rdrop is not None and step >= t_cool': False, 'sam is not None and step >= t_cool': False, 'rdrop is not None': False, 'sam is not None': False}"
+  },
+  {
+   "name": "rdrop_cd 0 / sam_cd 0 in every one of the 109 previous DRY commands",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "main_aux_loss == exec of the exact train.py statements on the same tensors (12 configurations, bitwise)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "main_aux_loss returns the main CE separately (== listwise_loss feed-normalised) and loss > main with aux_pos > 0",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "symkl_feed == float64 per-feed reference (max |diff| < 1e-5) and ignores masked logits",
+   "ok": true,
+   "info": "max diff 1.64e-07; KL [2.0734, 3.7096, 0.5939, 1.4943, 0.0881, 1.2549]"
+  },
+  {
+   "name": "symkl_feed of identical logits is exactly 0",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "combine in eval mode (no dropout): returns exactly loss1, KL statistics 0, CLIPLOG main unchanged in value",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "summary reports the mean (0.000000) and resets",
+   "ok": true,
+   "info": "wave-7 RDROP step 12: mean per-feed symKL 0.000000 nats over 5 valid feeds / 1 two-pass steps since the last eval (alpha 1.0, KL term = sum / 512)"
+  },
+  {
+   "name": "combine in train mode (seeded): == 0.5 (L1 + L2) + alpha sum valid symKL / max_feeds recomputed independently (bitwise); KL > 0; CLIPLOG main == 0.5 (CE1 + CE2) + alpha KL; statistics accumulate",
+   "ok": true,
+   "info": "loss1 0.57334 loss2 0.57611 KL term 0.000268 mean per valid feed 0.02748"
+  },
+  {
+   "name": "the combined loss is differentiable (gradients flow to the parameters)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "alpha scales the KL term only (alpha 2.5 vs 1.0)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "rho 0.01: parameters restored bitwise; ||eps|| == rho (1e-5 rel); ratio == rho / ||w||; .grad == the gradient at w + eps of an independent deep copy (bitwise); logged line VALID; loss statistics accumulated",
+   "ok": true,
+   "info": "eps 0.010000 ratio 0.005691 ||g1|| 0.0255 | wave-7 SAM first cooldown step 0: ||g1|| 0.0255, ||eps|| 0.01000 (rho 0.01), ||w|| 1.757, "
+  },
+  {
+   "name": "summary reports the ratio / VALID and the two losses, then resets",
+   "ok": true,
+   "info": "wave-7 SAM step 12: ||eps||/||w|| at the first cooldown step (0) 0.005691 (VALID); mean loss at w 0.5710 vs at w + eps 0.5713 over 1 steps since the last eval (rho 0.01)"
+  },
+  {
+   "name": "g2 differs from g1 at rho 0.01 (the second pass is at a different point)",
+   "ok": true,
+   "info": "max |g2 - g1| 7.838e-04"
+  },
+  {
+   "name": "rho 1e-9: restored bitwise and g2 == g1 to 1e-4 relative",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "an absurd rho (0.05 ||w||, ratio 0.05 > 0.02) is marked INVALID in the log line and sam.valid False; parameters still restored",
+   "ok": true,
+   "info": "wave-7 SAM first cooldown step 3: ||g1|| 0.0255, ||eps|| 0.08786 (rho 0.08786001205444337), ||w|| 1.757, ||eps||/||w|| 0"
+  },
+  {
+   "name": "setup_rdrop refuses alpha 0, both flags, --loss bce, --intent, --val_mix, t_cool >= total",
+   "ok": true,
+   "info": "{'zero': True, 'both': True, 'bce': True, 'intent': True, 'valcd': True, 'tcool': True}"
+  },
+  {
+   "name": "setup_sam refuses rho 0, both flags, --loss bce, --intent, --val_mix, t_cool >= total",
+   "ok": true,
+   "info": "{'zero': True, 'both': True, 'bce': True, 'intent': True, 'valcd': True, 'tcool': True}"
+  },
+  {
+   "name": "positive calls return RDrop(alpha 1.0) / SAM(rho 0.05) and log one line each",
+   "ok": true,
+   "info": "['wave-7 RDROP: from step 0 (of 100) every training step forwards its batch twice ', 'wave-7 SAM: from step 0 (of 100) every training step takes the optimiser step wi']"
+  }
+ ],
+ "dry_new": [
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_rdrop_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1001 --rdrop_cd 1.0",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_sam_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1001 --sam_cd 0.05",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_rdrop_r102 --init <repo>/nn/ckpt/v17_pre2s_s102@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1002 --rdrop_cd 1.0",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_sam_r102 --init <repo>/nn/ckpt/v17_pre2s_s102@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1002 --sam_cd 0.05",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_rdrop_r103 --init <repo>/nn/ckpt/v17_pre2s_s103@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1003 --rdrop_cd 1.0",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_sam_r103 --init <repo>/nn/ckpt/v17_pre2s_s103@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1003 --sam_cd 0.05",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_rdrop_r104 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1004 --rdrop_cd 1.0",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_sam_r104 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1004 --sam_cd 0.05"
+ ],
+ "failed": []
+}

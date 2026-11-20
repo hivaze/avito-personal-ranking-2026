@@ -1,0 +1,36 @@
+# Distilled student of the popularity-free view, teacher = mean of 11 hard-label members.
+# Same as student_popularity_light.toml apart from the view: no popularity input and no exposure
+# input. FD16P20vf holds 4 of these (seeds 951 to 954, listed under [record]) in its pool at
+# weight 0.2, next to the 4 popularity-light students of FD16P20. One run: 99,840 steps.
+
+model = "popularity_free"          # configs/recipes/model_popularity_free.toml: 26 inputs, width 192
+
+[targets]
+teacher = "mean11"                 # entry of [teachers] in configs/paths.toml
+teacher_weight = 0.5               # main target = 0.5 * clicks / n_clicks + 0.5 * softmax(teacher scores)
+position_weight = 0.5              # weight of the production-order loss until the cooldown ...
+position_weight_end = 0.1          # ... then annealed with the learning rate down to this
+position_temperature = 10.0        # its target is softmax(-position / 10)
+
+[schedule]
+epochs = 10                        # 9,984 steps per epoch over the 3,151,208 train feeds
+learning_rate = 2e-3
+weight_decay = 0.02
+warmup_steps = 500
+cooldown_fraction = 0.2            # 1-sqrt decay to 3% of the peak over the last 20% of the steps
+exploration_probability = 0.02     # chance that a cooldown step trains on a batch of random-order feeds
+
+[batches]
+max_candidates = 32768             # padded candidates per batch
+max_feeds = 512
+
+[holdout]
+feeds = 0                          # train on every train feed and keep the last step
+eval_every = 2500                  # steps between two validation scores in the log
+
+[record]
+# The stored runs of this recipe; their checkpoints, logs and prediction files carry these names.
+# The trainer does not read this table.
+members = [
+    "abl_fd10_pfkd05w192_s951", "abl_fd10_pfkd05w192_s952", "abl_fd10_pfkd05w192_s953", "abl_fd10_pfkd05w192_s954",
+]

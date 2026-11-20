@@ -1,0 +1,56 @@
+PRELIST of explorer "new constructions" (round 2, reports/INPUTS_1116/round2/newcons/)
+written 2026-11-16T04:56:50Z, BEFORE any array of these constructions exists and before any cz of them is computed.
+Nothing below was chosen on a label. Read before writing: nx3_step0.md, nx3_common.py, nx3_gates.py, c09_build.py, lens.py, condlib.py, raw_fields.md,
+model_inputs.md (sections 0-1), residual_rows.md (sections 0-1), CRITIC.md (section 0), verify/out/v05_parity_align.txt, reports/feat_clu_.md, reports/LIT_1115 (G1 rows).
+
+WHAT EXISTS ALREADY (not rebuilt): the raw data hold no microcategory / location / price / seller field (raw_fields.md section 1). The only item attributes are
+category_id (52 codes), f1..f5 and the 128-d content vector. Attribute-level collaborative columns on record, all null in the cz lens:
+clu_pmi{256,1024} (cluster -> cluster transition PMI of consecutive events), clu_hcnt / hrw / het1 / hmin {1024,4096} (own-history histogram in the candidate's
+cluster), ICV 1024 / 4096 (LightGBM harness -0.0004 +- 0.0011), neighbour-completed 3-step walk through the 5 nearest warm items (LIT_1115: LR 4.4 z / 11.4 rank on
+cold rows, "weak"). So an attribute walk at <= 4096 clusters would be a rebuild of a null family. The attribute used here is a FINE CONTENT CELL:
+  cell = (existing 4096 spherical k-means cluster of data/clu_work/item_cl_4096_*) x (sub-k-means inside the cluster, k2 = clip(round(n_train_rows / 64), 8, 1024),
+  fitted on train item-table rows only, 8 Lloyd iterations, seed 20261116); about 1.2M cells, about 64 train-table items per cell; label-free; every item-table row
+  of every split is assigned by the same centroids through its own split's content vector; an event without a vector has no cell.
+  Granularity is fixed here and will not be tuned after a read.
+
+COMMON TO ALL SIX (the nx3 view, nn_x/w12/nx3/nx3_common.py): source sequences, dense / sparse members, lag view for train rows (cut' = max(slot - L, 5),
+L = hz2_lag.npy; dense = c9.source_fidx(train, cut'), sparse = the 1/37 sample on slots >= cut', admitted iff timestamp < own timestamp), natural view for val /
+test (dense = all train, sparse = val + test feeds with timestamp < own), stale-val twin (dense = train slots < slot - L', sparse = 1/37 sample + val feeds),
+every sequence of the row's own non-zero user skipped, user 0 never linked, latest CAP = 500 admitted postings, deg = dense posting count floor 1. No label array
+is opened by any build. Built for: the 15,225 holdout feeds that have the lag view, val natural, val stale-val twin, test natural. No full-train build.
+
+THE SIX CONSTRUCTIONS (priority order of the task: a, a, a/c, b, b, c)
+ N1 cw_item  (a: item -> cell -> item smoothing of the walk; covers cold candidates). For candidate c with cell g: over the latest 500 admitted postings of CELL g
+             whose event is not item c, each distinct sequence s adds  sum_{events x of s, cell(x) != g} wd(x) / len(s),  wd(x) = max 0.95^hpos over the row's
+             history occurrences of ITEM x / deg_item(x).  Value = total / (number of distinct sequences + 10).
+ N2 cw_cell  (a: user history -> cell -> sequences -> cell -> candidate; attribute-level RP3 at fine resolution). Same scan; the seed is matched through cells:
+             sum_{events x of s, cell(x) >= 0, cell(x) != g} wdc(cell(x)) / len(s),  wdc(a) = max 0.95^hpos over the row's history events in cell a / deg_cell(a).
+             Value = total / (number of distinct sequences + 10).
+ N3 aud_cell (a + c: audience of the candidate's cell). Over the same distinct admitted sequences of cell g (event not item c): mean cosine between the row's user
+             vector and the sequence owner's user vector (both centred by the mean train user vector, then L2-normalised). Value = sum cos / (n + 5).
+ N4 fwd20    (b: forward-only transition, item level). For candidate c: over the distinct admitted sequences that hold c (latest 500 postings), for every
+             occurrence of c at index p (sequences are newest first) and d = 1..20: x = event at p + d (OLDER than c, i.e. x was followed by c within 20 steps);
+             adds w0(x) / d, w0(x) = max 0.95^hpos of ITEM x in the row's history. Value = total (the directional half of the windowed input seq_cv_invd20).
+             The backward half is computed as a diagnostic only (kernel check against the stored seq_cv_invd20); it is not a construction and gets no cz.
+ N5 rp3_l8   (b: the walk of record seeded with the newest 8 history events only). Kernel of record c9.rp3 unchanged, history weights 0.95^hpos for hpos < 8 and
+             0 for hpos >= 8; value = rp3b05.
+ N6 aud_item (c: audience similarity, item level). Over the distinct admitted sequences that hold item c (latest 500 postings): mean cosine between the row's user
+             vector and the owner's user vector, centred / normalised as in N3. Value = sum cos / (n + 5).
+ Entered forms of every construction, fixed now: z = within-feed z over all candidates (N1, N2, N4, N5: of log1p(K x), K = 1 / median non-zero value on natural
+ val rows; N3, N6: of the raw value), clipped to +-5, 0 on a flat feed; rk = within-feed mid-rank percentile - 0.5 (lens.feed_z / feed_rk). A row without a value is 0.
+
+GATES (form of nn_x/w12/nx3/nx3_gates.py; the train side is the HOLDOUT feeds because no full-train array is built: the critic's population)
+ C3  non-zero share by the 7 listing-age buckets: holdout slots 11-13 vs PRIVATE and vs PUBLIC rows (test feeds with M >= 50), holdout slots 6-8 vs val rows
+     (M >= 50): dZ <= 0.05 and largest bucket (row share >= 0.05) <= 0.10.
+ C4  PSI <= 0.25 of each entered form, holdout has = 1 rows vs val / public / private; bins = 10 val deciles of the non-zero file values + one bin for exact zero.
+ C5  non-zero share on every test day >= 0.5 x val's (largest of val overall / slot 16 / slot 18).
+ cz  score test of condlib.Null with null model = pool score + the lens's control block of the ranker's own inputs + nx3 (nx_rp3_z, nx_rp3_rk: the installed
+     lag-view files on holdout rows, the stale-val twin files on val rows). Witness H = holdout rows, lag view (pool = 16 held-out wide students; 0 on the 14,775
+     feeds without the view). Witness V = val rows with the STALE-VAL TWIN of the column (base TO16; base FILE printed). Natural val is printed, not a gate.
+ Placebo: for every construction 5 within-feed permutations of its z column on each witness (30 per witness, seeds 7000+ / 8000+), sd and max |cz| printed.
+ PASS of a construction = parity C3 + C4 + C5 ok AND the same form (z or rk) has the same sign and |cz| >= 2.5 on BOTH witnesses, AND the placebo block of that
+     witness has max |cz| < 3.0 (if a placebo sd is outside 0.8-1.2 the threshold is scaled by it and that is stated). 12 forms x 2 witnesses are read; under
+     "nothing new" the chance that any form passes both is about 12 x 2 x 0.0062^2 = 0.001.
+ Cold rows: cz of each column set to 0 outside the rows whose item has NO admitted item-level posting in the row's own view (the walk is silent there by
+     construction), on both witnesses; reported, not a gate. Warm-row complement reported too.
+ A PASS here is a candidate for a build of record + a trained arm, nothing more. "Nothing" is an acceptable result.

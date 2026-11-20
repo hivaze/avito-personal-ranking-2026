@@ -1,0 +1,258 @@
+{
+ "checks": [
+  {
+   "name": "cd_lane.sh DRY prints one train.py command per arm",
+   "ok": true,
+   "info": "['aug', 'c0', 'd0', 'd20', 'pp02']"
+  },
+  {
+   "name": "c0: every wave-2 flag at its OFF default",
+   "ok": true,
+   "info": "{'drop_cd': -1.0, 'pool_p': 0.5, 'aug_cand': 0.0, 'aug_hist': 0.0}"
+  },
+  {
+   "name": "d0: differs from c0 only by {'drop_cd': 0.0}",
+   "ok": true,
+   "info": "{'drop_cd': (-1.0, 0.0)}"
+  },
+  {
+   "name": "d20: differs from c0 only by {'drop_cd': 0.2}",
+   "ok": true,
+   "info": "{'drop_cd': (-1.0, 0.2)}"
+  },
+  {
+   "name": "pp02: differs from c0 only by {'pool_p': 0.2}",
+   "ok": true,
+   "info": "{'pool_p': (0.5, 0.2)}"
+  },
+  {
+   "name": "aug: differs from c0 only by {'aug_cand': 0.6, 'aug_hist': 0.15}",
+   "ok": true,
+   "info": "{'aug_cand': (0.0, 0.6), 'aug_hist': (0.0, 0.15)}"
+  },
+  {
+   "name": "CD harness: --init F7 @77500, loss_norm feed, cooldown_frac 1, mix 0.1, holdout 30000, seed 811",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "AST: train.py minus the wave-2 statements == pre-wave-2 train.py (flag-off path unchanged)",
+   "ok": true,
+   "info": "removed guards 6, other ['import cd_arms', 'add_argument --drop_cd', 'add_argument --pool_p', 'add_argument --aug_cand', 'add_argument --aug_hist', 'aug_on = aug_enabled(a.aug_cand, a.aug_hist)', 'assert a.drop_cd < 0 or t_cool < total'], exploration_pool calls 1"
+  },
+  {
+   "name": "every wave-2 guard is False for c0 (also at step == t_cool and on pool steps)",
+   "ok": true,
+   "info": "{'a.pool_p != POOL_P_DEFAULT or aug_on': False, 'aug_on or a.pool_p != POOL_P_DEFAULT': False, 'a.drop_cd >= 0': False, 'aug_on': False, 'is_pool and aug_on': False, 'a.drop_cd >= 0 and step == t_cool': False}"
+  },
+  {
+   "name": "aug arm: augmentation guard True on pool steps, False on regular steps",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "d0 arm: dropout guard fires at step 0 = t_cool (cooldown_frac 1.0 -> right after --init)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "set_dropout / augment_pool_batch: one call each, in the training loop, behind their guards",
+   "ok": true,
+   "info": "{'set_dropout': [['if a.drop_cd >= 0 and step == t_cool', 'for (step, fb)']], 'augment_pool_batch': [['if is_pool and aug_on', 'for (step, fb)']]}"
+  },
+  {
+   "name": "no other nn_x/r6 module (predict / holdout_eval / finetune / common) uses the augmentation",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "pool_p 0.5 == the old expression feeds[prand_np[feeds] > 0.5] (array-equal)",
+   "ok": true,
+   "info": "134118"
+  },
+  {
+   "name": "pool_p 0.5 size == the pool of the c0 runs (logs)",
+   "ok": true,
+   "info": "134118 vs logs [134118]"
+  },
+  {
+   "name": "pool_p 0.2: 197,477 feeds = +47% distinct pool feeds (sol_solvers 2.6 / P3: ~197,500)",
+   "ok": true,
+   "info": "197477 (+47.2%)"
+  },
+  {
+   "name": "pool_p 0.5 pool is a subset of the 0.2 pool; the extra feeds have p in (0.2, 0.5]",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "both pools: M >= 50 only",
+   "ok": true,
+   "info": "(50, 50)"
+  },
+  {
+   "name": "LEAK GUARD: zero holdout feeds in either pool (all 30,000 holdout feeds are pool-eligible by p_random)",
+   "ok": true,
+   "info": "holdout feeds with p > 0.2: 30000"
+  },
+  {
+   "name": "leak guard fires when a holdout feed reaches the candidate feeds",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "augment_pool_batch at OFF values: same object, every tensor unchanged, RNG untouched (pool)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "augment_pool_batch at OFF values: same object, every tensor unchanged, RNG untouched (regular)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "aug_enabled truth table",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flag-off path vs plain model, pool batch, same seed: train logits, loss, all grads identical",
+   "ok": true,
+   "info": "loss 2.980175 vs 2.980175"
+  },
+  {
+   "name": "set_dropout(p=0.1) vs plain model, pool batch, same seed: train logits, loss, all grads identical",
+   "ok": true,
+   "info": "loss 2.980175 vs 2.980175"
+  },
+  {
+   "name": "flag-off path vs plain model, regular batch, same seed: train logits, loss, all grads identical",
+   "ok": true,
+   "info": "loss 2.467453 vs 2.467453"
+  },
+  {
+   "name": "set_dropout(p=0.1) vs plain model, regular batch, same seed: train logits, loss, all grads identical",
+   "ok": true,
+   "info": "loss 2.467453 vs 2.467453"
+  },
+  {
+   "name": "model.py dropout sites: nn.Dropout (Block ff + dr, HistRetrieval.dp, CandRetrieval.dp) and SDPA dropout_p only; no functional / other dropout",
+   "ok": true,
+   "info": "nn.Dropout defs 4, dropout_p 1, other []"
+  },
+  {
+   "name": "F7: 11 nn.Dropout modules + 5 attention modules found; no recurrent dropout",
+   "ok": true,
+   "info": "11 Dropout, 5 Attn, set_dropout returned (11, 5)"
+  },
+  {
+   "name": "drop_cd 0.0: every nn.Dropout p and every Attn attention-probability p == 0.0",
+   "ok": true,
+   "info": "[0.0] / [0.0]"
+  },
+  {
+   "name": "drop_cd 0.0: weights, buffers and cfg unchanged; eval logits bit-identical (predict / holdout paths)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "drop_cd 0.2: every nn.Dropout p and every Attn attention-probability p == 0.2",
+   "ok": true,
+   "info": "[0.2] / [0.2]"
+  },
+  {
+   "name": "drop_cd 0.2: weights, buffers and cfg unchanged; eval logits bit-identical (predict / holdout paths)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "d0: train-mode logits == eval-mode logits (every stochastic site removed, incl. attention probabilities)",
+   "ok": true,
+   "info": "max|d| [0.0, 0.0]"
+  },
+  {
+   "name": "zeroing only nn.Dropout leaves train != eval: the attention-probability site is live (set_dropout covers it)",
+   "ok": true,
+   "info": "max|d| 4.46e-01"
+  },
+  {
+   "name": "d20: measured nn.Dropout rate ~0.2 (fwd hooks over all 11 modules)",
+   "ok": true,
+   "info": "rate 0.2000 over 58887043 elements"
+  },
+  {
+   "name": "d20: train-mode outputs differ from the p=0.1 model at the same seed",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "only cmask, hmask, hemb_ok change (y = y * cmask is unchanged: only negatives are dropped)",
+   "ok": true,
+   "info": "['cmask', 'hemb_ok', 'hmask']"
+  },
+  {
+   "name": "candidate mask only shrinks; history masks only shrink",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "every positive kept; per-feed positive count unchanged; y zero on dropped rows",
+   "ok": true,
+   "info": "94 positives"
+  },
+  {
+   "name": "kept-negative share per feed ~ U(0.6, 1): mean ~0.8, all feeds within [0.45, 1]",
+   "ok": true,
+   "info": "mean 0.820 min 0.590 max 1.000 (63 feeds)"
+  },
+  {
+   "name": "history-event drop rate ~0.15 (hmask and hemb_ok together)",
+   "ok": true,
+   "info": "rate 0.1502"
+  },
+  {
+   "name": "no feed loses every candidate",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "eval: kept-candidate logits independent of the dropped candidates' and events' inputs (exact)",
+   "ok": true,
+   "info": "max|d| 0.00e+00 (1789 dropped candidates, 1452 dropped events perturbed)"
+  },
+  {
+   "name": "train-mode loss identical with the dropped rows perturbed (same seed); loss and grads finite",
+   "ok": true,
+   "info": "loss aug 2.862193 perturbed 2.862193 | unaugmented 2.979555"
+  },
+  {
+   "name": "augmentation changes the training loss (it is active)",
+   "ok": true,
+   "info": ""
+  }
+ ],
+ "cd_lane_cmds": {
+  "c0": "--variant r6_cd_c0_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811",
+  "d0": "--variant r6_cd_d0_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811 --drop_cd 0",
+  "d20": "--variant r6_cd_d20_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811 --drop_cd 0.2",
+  "pp02": "--variant r6_cd_pp02_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811 --pool_p 0.2",
+  "aug": "--variant r6_cd_aug_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811 --aug_cand 0.6 --aug_hist 0.15"
+ },
+ "pool": {
+  "p05": 134118,
+  "p02": 197477,
+  "ratio": 1.4724123533008247
+ },
+ "dropout": {
+  "rate20": 0.20002199804802562,
+  "n_sites": [
+   11,
+   5
+  ]
+ },
+ "aug": {
+  "kept_neg_mean": 0.8198195695877075,
+  "hist_drop": 0.15015511214733124
+ },
+ "failed": []
+}

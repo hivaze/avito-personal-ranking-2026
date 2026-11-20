@@ -1,0 +1,18 @@
+Limits.
+1. No private label exists. Every labelled number is from 14,423 val feeds of two weekdays (Tue, Thu) or from the train holdout. The "forecast" is rule R1, a combination I wrote before reading the new compositions but after reading the six scored pairs; its three val views share one sample, so their agreement is not three confirmations. The only independent sample is public (8,562 feeds, weekend).
+2. pmix-private leans on few feeds: n_eff 6,389; 32.5% of the private weight sits on the 1,213 val feeds with cold share >= 0.45 (largest feed weight 5.95). It over-reads the six public pairs by a factor 1.7 (slope 0.59 ± 0.26).
+3. SVF makes only the train-only branch stale. No fine-tuned prediction exists under stale inputs, so every FINAL-level statement about private assumes the fine-tune half behaves on private rows as it does out of fold on val. The one drift I see label-free is exactly in that half (its cold promotion on private is 1.4 - 2 times its val value).
+4. Stale-val files are the witness / veto agents' CPU re-predictions; I checked them only through the reproduction of W8P20 - W8 (+0.00088 ± 0.00036) and used the veto agent's files for Pw on the strength of its statement that they equal the witness tool to 1.5e-5.
+5. Seed draw: Pd and Pw are 4 members each, W8 / W8b 8 each. Differences between popularity-light compositions at the same weight (W8P20, its W8b twin, W16P20d / x8 / w) are within 1.5 SE and partly seed draw: the 16-base file reads 0.0004 below both of its 8-base twins at weight 0.2 (2 SE) and 0.0002 above them at 0.4.
+6. Multiplicity (all looks): about 30 compositions x 3 references in the witness table; R2: 12 declared looks + 4; R3: 75 rules x 5 compositions (2 declared in block 1, 2 more run in the same pass without a prior declaration, 1 declared in block 4); 4 nested-pick lists; R4: 8 weights x 6 pools x 6 views; 10 slices x 12 pairs x 3 views in T7; the post hoc rows RULEM2040 / RULEM2040w (block 5); the pilot re-read (block 6); the per-branch grid (block 7, 2 x 9 cells). The first witness table was read once with 3 of 4 wide fine-tunes before the 4-of-4 re-run; R2-R6 were read at 4 of 4 only.
+7. The lagged holdout keeps in-period labels, has long feeds only (M >= 50), is read at train-only level and on the 13,424 feeds where its label-free gate holds; I scored the private-like view only (no public-like view for the 12 members I added).
+8. The feed-size rule was prompted by a table read on the full val sample (witness.md 3.4, W8 + Pd), then judged by a nested procedure on other compositions that share members with it: the nested z is optimistic by an amount I cannot compute.
+
+What I did NOT check.
+- No test-side build, no presub gate, no file: every new composition is an in-memory array (`cache/testfin_*.npy` are flat score vectors, not submissions).
+- No GPU run of any kind; nothing on the hz / xd / th re-cools (not finished), on the full-data twins, or on @last checkpoints.
+- Different popularity-light weights in the two branches: only the 3 x 3 information grid T10 (nothing above 1 SE); no nested read.
+- Weights outside 0.1 - 0.4, three-group rules, rules on properties other than M and cold share (history length, user 0, day).
+- A forecast of the private LEVEL of any file (only deltas).
+- Whether the public / private split boundary and the day structure hide something val cannot show (private is 76% weekdays like val, public 0%): the popularity-light contrast is +0.0005 on both weekday val and weekend public, which is all I have.
+- The leak rules for any new input: none was built here; no val or test label entered a model.

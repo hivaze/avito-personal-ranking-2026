@@ -1,0 +1,8 @@
+== val: two independent tree fits of the NN function: corr(stage-1 fit [W16 target, H+T feeds], KL0 r2400 [teacher_mean11 target, 60K xm train feeds]) = 0.9844; each to W16: 0.9086, 0.9087
+   corr(KL0 r2400, K134 r600) 0.9903; corr(K134, X60 cross-fitted teacher) 0.9931; hard-label CatBoost: corr(cb26, w25_A2c) 0.9968; corr(cb26, KL0) 0.9271; corr(cb26, stage-1 fit) 0.9286
+   for scale: one W16 member to the pool of the other 15: 0.9851; member to member 0.9719
+   NN-only parts left by the two fits: corr 0.9243 (1 = both trees miss the SAME part of the NN score)
+== hold: two independent tree fits of the NN function: corr(stage-1 fit [W16 target, V+T feeds], KL0 r2400 [teacher_mean11 target, 60K xm train feeds]) = 0.9674; each to W16: 0.8881, 0.9086
+   corr(KL0 r2400, K134 r600) 0.9906; corr(K134, X60 cross-fitted teacher) 0.9932; hard-label CatBoost: corr(cb26, w25_A2c) 0.9969; corr(cb26, KL0) 0.9282; corr(cb26, stage-1 fit) 0.9177
+   for scale: one W16 member to the pool of the other 15: 0.9858; member to member 0.9737
+   NN-only parts left by the two fits: corr 0.8632 (1 = both trees miss the SAME part of the NN score)

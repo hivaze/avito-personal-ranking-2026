@@ -1,0 +1,38 @@
+AMENDMENTS of the critic to reports/INPUTS_1116/design/RULE_LEDGER.txt (to be merged into the block BEFORE it is copied into the ledger).
+Source of every number: reports/INPUTS_1116/CRITIC.md and reports/INPUTS_1116/critic/out/*.txt. Nothing below was trained; no GPU process was run.
+
+A1  BUNDLE. Replace the 7 inputs by 3:   nx_rp3_z, nx_rp3_rk, has:nx_rp3_z      (arm name nx3; launcher line: NX3=nx_rp3_z,nx_rp3_rk,has:nx_rp3_z)
+      - family T (nx_bt_z, nx_bt_rk, nx_bt_seen) is DROPPED now: it fails G-parity on the critic's advance build (seen share of test-like train rows
+        0.270 against 0.347 private / 0.373 public: dZ 0.095 / 0.098, largest bucket 0.167 / 0.170; val-like 0.361 against 0.440: dZ 0.107, bucket 0.185;
+        PSI of nx_bt_rk train against val 0.48; bars 0.05 / 0.10 / 0.25), and its lag-built z form reads cz +1.17 on the holdout (c03_gates.txt).
+      - nx_p3a_z is DROPPED as a copy: R2 0.95-0.96 with nx_rp3_z + nx_rp3_rk, cz given them -0.60 (holdout lag view) / +0.33 (val) / +0.28 (twin) (c07_dup.txt).
+      - the COMPOSITION clause (nx / nx4 chosen at STEP 0) is deleted: nothing about the bundle is decided after a read that uses labels.
+A2  STEP 0. Gates and bars for W unchanged. Advance read of the critic (c03_gates.txt; sparse members by day, deg as in c09_build): G-code exact
+      (max abs diff 0 on 1,389,971 val rows and on 694,799 holdout rows); G-parity dZ 0.037 (private) / 0.038 (public) / 0.042 (val), largest bucket 0.067-0.070,
+      PSI <= 0.171; G-info lag-built holdout rows +5.02 / +4.43 (z / rank), stale-val twin +6.64 / +4.90.  The official builder repeats all of it on its own files.
+      ADD, reported without a bar (they cannot be met inside the adopted view and are limits of the test, to be printed in the STEP 0 read):
+        J1  P(walk = 0 | seq_cv_invd20 > 0) on lag-view train rows against val / public / private rows   (advance: 0.123 val-like, 0.229 test-like, against 0.002 / 0.002 / 0.003)
+        J2  one-step coefficient of nx_rp3_z given pool + own inputs on lag-view holdout rows against val rows   (advance: 0.030 against 0.056 natural, 0.051 twin)
+      REPLACE "W fails any gate -> NO ARM; the train-stage input family is closed" by
+        "W fails G-code or G-info -> NO ARM, closed.  W fails G-parity only -> NO ARM, recorded as NOT TESTABLE AT PARITY IN 14 DAYS OF DATA (not a closure of the information)."
+A3  STAGE A. 8 members abl_e10_nx3_s951-958 against the 6 stored + 2 fresh controls, clauses as designed, PLUS:
+      ORDER   the harness check (2 fresh controls minus 6 stored) is read and written to the ledger BEFORE any prediction of the arm is opened.
+      VALUE   (part of PASS) the arm's 8 members are re-scored with the two NX value columns permuted within the feed (one permutation per feed for both columns,
+              has kept at 1; write-new copies of nn_x/abl/stale_pred.py for val and of nn_x/abl/holdout_eval.py for the holdout rows, both through the patched feat_path):
+              member-mean NDCG(natural) - NDCG(permuted)  >= 0.5 x (arm - control) on the lag-view holdout feeds  AND  > 0 on val.
+              Fails -> "PASS NOT ATTRIBUTABLE TO THE VALUES" (the has flag is 1 exactly on Sep 12-19, the regime indicator of map l.273): no stage B.
+      REPORT  arm - control on the 14,775 holdout feeds WITHOUT the view (has = 0): expected 0; |z| > 2 is written next to the verdict as a side effect of the arm.
+      REPORT  natural - permuted on val with its paired SE (expected SE about 0.0001-0.0002, judgement): the size the trained members actually take from the values.
+      WORDING of the outcome when PASS is not reached (replaces "CLOSED" in the read tool and in the CLOSURE paragraph):
+              "NOT SHOWN at this power (0.71-0.80 for a member-level +0.001, 0.24-0.29 for +0.0005, 0.09-0.13 for +0.0003; critic/out/c04_rule_null.txt)".
+              It becomes "CLOSED at +0.0005 for this recipe" only if natural - permuted on val is below +0.0005 by 2 of its SEs.
+              In neither case is "new train-stage inputs" closed as a class: the arm holds ONE piece of information (one scalar in two forms).
+      NOTE    the effect quoted after a PASS is biased upward by the selection through the rule (a PASS needs about +0.0007 on val by construction); the estimate of record is stage B's.
+A4  STAGE B. Clauses as designed, PLUS pool level: 8-pool of the new students minus each stored 8-pool (w192, t25w192), mean of the two, pooled z (val, lag-view holdout) >= 1.0.
+      Terminal branches (replace "NOT PASSED after a PASS of A is NOT a closure ... reported with the ratio B / A"):
+        pooled z_B >= 2 and clauses  -> PASS, all-data students.
+        1.6 <= pooled z_B < 2        -> 4 more students, one re-read (as designed).
+        pooled z_B < 1.6             -> STOP. No file, no all-data students, no teacher regeneration unless A had pooled z >= 3 (then its own block, as designed).
+A5  CLOSURE paragraph: delete "for this competition" and "No further input arm is opened on a likelihood read alone"; keep the stated limit.
+A6  FORECAST (critic, before any build of record): P(W passes STEP 0) 0.85; P(PASS at A) 0.15; P(member-level effect >= +0.001 on val) 0.05 (0.03-0.08);
+      P(file-level private gain >= +0.0005) 0.02; central member-level effect on val +0.0003.

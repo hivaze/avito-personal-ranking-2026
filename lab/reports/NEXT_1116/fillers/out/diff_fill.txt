@@ -1,0 +1,20 @@
+1a2,4
+> # fill_f1116.sh (2026-11-16, reports/NEXT_1116/fillers, lane B): write-new copy of nn_x/w12/kd/fill.sh. Changes: (1) the lane script is ${LANE:-reports/NEXT_1116/fillers/lane_f1116.sh}
+> #   (= nn_x/w5/lane.sh + the K / L arms cbs05, auxf); (2) a second, own stop file reports/NEXT_1116/fillers/logs/FILL_STOP_f1116 is honoured IN ADDITION to the shared nn_x/w12/kd/logs/FILL_STOP.
+> #   Nothing else differs (diff against nn_x/w12/kd/fill.sh = 3 header lines + 4 changed lines). Start it only when no other fill.sh instance is polling (two instances do not coordinate their launches).
+6c9
+< R=<repo>; W=$R/nn_x/w5; J=${1:?jobs file}; MAXP=${2:-2}; S=$R/nn_x/w12/kd/logs/FILL_STOP; declare -A last
+---
+> R=<repo>; W=$R/nn_x/w5; J=${1:?jobs file}; MAXP=${2:-2}; S=$R/nn_x/w12/kd/logs/FILL_STOP; S2=$R/reports/NEXT_1116/fillers/logs/FILL_STOP_f1116; declare -A last
+8c11
+< while [ ! -e $S ]; do
+---
+> while [ ! -e $S ] && [ ! -e $S2 ]; do
+11c14
+<     [ -e $S ] && break
+---
+>     { [ -e $S ] || [ -e $S2 ]; } && break
+20c23
+<     (cd $W && W5_GPUS="<ids>" WAIT_MAX_H=1 setsid nohup bash lane.sh $g "$job" >> logs/fill_$(vname $job).log 2>&1 < /dev/null &)
+---
+>     (cd $W && W5_GPUS="<ids>" WAIT_MAX_H=1 setsid nohup bash ${LANE:-$R/reports/NEXT_1116/fillers/lane_f1116.sh} $g "$job" >> logs/fill_$(vname $job).log 2>&1 < /dev/null &)

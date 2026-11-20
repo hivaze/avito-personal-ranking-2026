@@ -1,0 +1,50 @@
+{
+ "checks": [
+  {
+   "name": "G1 --trunc_off 1 (no --trunc_lifts), previous vs new code: identical batch sequence, model logits and loss-input logits (offset), 39 batches",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "G1 previous vs new: identical logged metric lines and TRUNC-PROD line; bit-identical checkpoint",
+   "ok": true,
+   "info": "BEST step 20 val_ndcg 0.39219; train time"
+  },
+  {
+   "name": "G2 --trunc_lifts: same batch sequence as G1 and identical first-batch model logits (same init / data)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "G2 for EVERY training batch: loss-input logits == model logits + brute-force bucket offset (rkend from cand_pos, json table, 1 - p_soft; exact fp32)",
+   "ok": true,
+   "info": "0 mismatching batches"
+  },
+  {
+   "name": "G2 offsets: 0 on every pool / holdout feed; non-zero in every M bucket",
+   "ok": true,
+   "info": "pool 0, per bucket [8299, 5933, 1762, 14697]"
+  },
+  {
+   "name": "G2 log: M-bucket TRUNC-PROD line (json path + md5 + 4 buckets); training changed vs G1",
+   "ok": true,
+   "info": ": a 1.0; M-bucket lifts (--trunc_lifts <repo>/nn_x/w5/trunc_lifts_mbucket.json, md5 9d8b6adce1f8234ba3874d1c70ce9c0a): M1-16 [-1.8223, 0.4426, 1.8225] / M17-32 [0.888, 0.4584, 1.7322] / "
+  }
+ ],
+ "e2e": {
+  "g1_lines": [
+   "step 20/39 loss 4.3239 val_ndcg 0.39219 holdout_ndcg 0.31777 lr 6.46e-04 cd_loss_reg 4.1859 cd_loss_pool 3.8212",
+   "step 39/39 loss 0.0000 val_ndcg 0.39237 holdout_ndcg 0.31759 lr 8.50e-05 cd_loss_reg 2.3719 cd_loss_pool 2.8451",
+   "BEST step 20 val_ndcg 0.39219; train time"
+  ],
+  "g2_lines": [
+   "step 20/39 loss 4.3239 val_ndcg 0.39211 holdout_ndcg 0.31764 lr 6.46e-04 cd_loss_reg 4.1839 cd_loss_pool 3.8209",
+   "step 39/39 loss 0.0000 val_ndcg 0.39211 holdout_ndcg 0.31744 lr 8.50e-05 cd_loss_reg 2.3721 cd_loss_pool 2.8453",
+   "BEST step 20 val_ndcg 0.39211; train time"
+  ],
+  "g2_trunc": [
+   ": a 1.0; M-bucket lifts (--trunc_lifts <repo>/nn_x/w5/trunc_lifts_mbucket.json, md5 9d8b6adce1f8234ba3874d1c70ce9c0a): M1-16 [-1.8223, 0.4426, 1.8225] / M17-32 [0.888, 0.4584, 1.7322] / M33-49 [2.409, -0.4114, -0.4232] / M>=50 [2.8015, -0.1974, -0.2235] (rkend 0/1/2; random-like 0); prod M1-16 671307 feeds, mean (1-p_soft) 0.617; prod M17-32 575235 feeds, mean (1-p_soft) 0.850; prod M33-49 359319 feeds, mean (1-p_soft) 0.916; prod M>=50 1381229 feeds, mean (1-p_soft) 0.972; random-like (0) 134118 feeds, mean (1-p_soft) 0.166; holdout (0) 30000 feeds, mean (1-p_soft) 0.030; non-zero (feed, rkend) offsets 8961270; main listwise logits of training batches only"
+  ]
+ },
+ "failed": []
+}

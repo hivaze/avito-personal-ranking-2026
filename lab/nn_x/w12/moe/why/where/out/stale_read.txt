@@ -1,0 +1,28 @@
+=== W2b stale-val (14,423 val feeds; +- = 1 SE paired per feed); views ['fresh', 'staleval', 'stalepop', 'stalepre2'] ===
+pool levels: fresh | staleval | stalepop | stalepre2
+  ref4 : 0.40134 | 0.39929 | 0.39927 | 0.40144 || change vs fresh: staleval -0.00204+-0.00053 stalepop -0.00207+-0.00053 stalepre2 +0.00010+-0.00007
+  refN : 0.40077 | 0.39917 | 0.39916 | 0.40083 || change vs fresh: staleval -0.00160+-0.00041 stalepop -0.00161+-0.00040 stalepre2 +0.00006+-0.00003
+  A    : 0.40048 | 0.39930 | 0.39930 | 0.40049 || change vs fresh: staleval -0.00118+-0.00054 stalepop -0.00117+-0.00053 stalepre2 +0.00002+-0.00008
+  B    : 0.39990 | 0.39845 | 0.39841 | 0.39994 || change vs fresh: staleval -0.00145+-0.00055 stalepop -0.00149+-0.00054 stalepre2 +0.00004+-0.00008
+  C    : 0.40065 | 0.39957 | 0.39960 | 0.40077 || change vs fresh: staleval -0.00108+-0.00053 stalepop -0.00105+-0.00052 stalepre2 +0.00013+-0.00009
+member mean change vs fresh:
+  r: staleval -0.00131+-0.00036 stalepop -0.00125+-0.00036 stalepre2 +0.00005+-0.00004
+  A: staleval -0.00163+-0.00039 stalepop -0.00159+-0.00039 stalepre2 +0.00007+-0.00005
+  B: staleval -0.00162+-0.00039 stalepop -0.00158+-0.00039 stalepre2 +0.00004+-0.00005
+  C: staleval -0.00152+-0.00037 stalepop -0.00143+-0.00037 stalepre2 +0.00006+-0.00005
+--- arm 4-pool minus refN: fresh | stale views | DiD (stale - fresh) ---
+  A   : fresh -0.00029+-0.00046 | staleval +0.00013+-0.00047 DiD +0.00042+-0.00041 | stalepop +0.00015+-0.00048 DiD +0.00044+-0.00041 | stalepre2 -0.00033+-0.00046 DiD -0.00004+-0.00007
+  B   : fresh -0.00087+-0.00048 | staleval -0.00071+-0.00048 DiD +0.00015+-0.00041 | stalepop -0.00075+-0.00048 DiD +0.00012+-0.00041 | stalepre2 -0.00089+-0.00048 DiD -0.00002+-0.00007
+  C   : fresh -0.00012+-0.00048 | staleval +0.00040+-0.00048 DiD +0.00053+-0.00042 | stalepop +0.00044+-0.00048 DiD +0.00056+-0.00041 | stalepre2 -0.00006+-0.00048 DiD +0.00007+-0.00008
+  mean: fresh -0.00043+-0.00033 | staleval -0.00006+-0.00033 DiD +0.00037+-0.00027 | stalepop -0.00006+-0.00033 DiD +0.00037+-0.00027 | stalepre2 -0.00043+-0.00033 DiD +0.00000+-0.00005
+        by segment: positives all seen (n 8998): fresh -0.00005+-0.00044 stale +0.00019+-0.00043 DiD +0.00025+-0.00035 | no positive seen (n 3454): fresh -0.00185+-0.00072 stale -0.00067+-0.00074 DiD +0.00118+-0.00061 | M<50: DiD +0.00016+-0.00051 M>=50: DiD +0.00051+-0.00030
+--- arm 4-pool minus ref4: fresh | stale views | DiD (stale - fresh) ---
+  A   : fresh -0.00086+-0.00057 | staleval +0.00000+-0.00058 DiD +0.00087+-0.00052 | stalepop +0.00003+-0.00058 DiD +0.00089+-0.00052 | stalepre2 -0.00095+-0.00057 DiD -0.00009+-0.00009
+  B   : fresh -0.00144+-0.00057 | staleval -0.00084+-0.00058 DiD +0.00060+-0.00052 | stalepop -0.00086+-0.00059 DiD +0.00058+-0.00052 | stalepre2 -0.00150+-0.00057 DiD -0.00006+-0.00009
+  C   : fresh -0.00069+-0.00058 | staleval +0.00028+-0.00058 DiD +0.00097+-0.00054 | stalepop +0.00033+-0.00058 DiD +0.00102+-0.00053 | stalepre2 -0.00067+-0.00057 DiD +0.00002+-0.00011
+  mean: fresh -0.00100+-0.00047 | staleval -0.00019+-0.00047 DiD +0.00081+-0.00043 | stalepop -0.00017+-0.00047 DiD +0.00083+-0.00043 | stalepre2 -0.00104+-0.00046 DiD -0.00004+-0.00008
+        by segment: positives all seen (n 8998): fresh -0.00041+-0.00061 stale +0.00076+-0.00062 DiD +0.00117+-0.00056 | no positive seen (n 3454): fresh -0.00383+-0.00103 stale -0.00252+-0.00101 DiD +0.00131+-0.00092 | M<50: DiD +0.00092+-0.00079 M>=50: DiD +0.00074+-0.00047
+member-level DiD (arm member minus same-seed ref member, stale - fresh), mean over 4 seeds:
+  A: staleval -0.00020+-0.00032 stalepop -0.00024+-0.00032 stalepre2 +0.00001+-0.00006
+  B: staleval -0.00019+-0.00031 stalepop -0.00023+-0.00031 stalepre2 -0.00001+-0.00006
+  C: staleval -0.00009+-0.00032 stalepop -0.00008+-0.00032 stalepre2 +0.00000+-0.00007

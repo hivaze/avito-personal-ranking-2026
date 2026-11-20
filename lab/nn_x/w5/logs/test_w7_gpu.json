@@ -1,0 +1,103 @@
+{
+ "checks": [
+  {
+   "name": "G1 flags OFF, previous vs new train.py: identical training-gather sequence (24 steps), one train forward per step, train-mode logits and loss-input logits",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "G1 identical logged metric lines; bit-identical checkpoint and val preds",
+   "ok": true,
+   "info": "BEST step 24 val_ndcg 0.39119; train time"
+  },
+  {
+   "name": "G1 no wave-7 log line in either flags-off run",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "G2 --rdrop_cd 1.0 --drop_cd 0 vs --drop_cd 0: identical gathers; 2 train forwards per step with bitwise-identical logits (pass 1 == pass 2); params unchanged within a step; 2 RDROP lines with symKL 0.000000; pass-1 logits == flags-off logits bitwise at steps 0 and 1 and gradient norms at the 4 optimiser entries of those steps bitwise identical (the two-pass loss reduces exactly to the one-pass loss); first-eval loss identical (later divergence = fp residual of the KL gradient, info)",
+   "ok": true,
+   "info": "KL lines [0.0, 0.0]; first step whose logits differ from flags-off 2; max rel grad-norm diff over 24 steps 9.22e-04; metric lines equal False; checkpoint max |diff| 1.04e-02"
+  },
+  {
+   "name": "G3 --rdrop_cd 1.0 (dropout 0.1) vs flags OFF: identical gathers; 48 forwards (2 per step) whose two passes differ at every step; 48 loss-input logit sets; logged mean symKL in [0.001, 0.05] nats at both evals; params unchanged within a step; checkpoint differs; @last / holdout files written",
+   "ok": true,
+   "info": "KL lines [0.005315, 0.005583]; first-eval loss rdrop 4.4194 vs off 4.4137"
+  },
+  {
+   "name": "G4 --sam_cd 0.05 --drop_cd 0 vs --drop_cd 0: identical gathers; 2 forwards per step; ||params - w|| == 0.05 (1e-3 rel) at every second forward (and != w); parameters bitwise w at the FIRST optimiser entry of every step (restored; the Muon entry follows AdamW's own update); first-step line VALID with ratio < 0.02; 2 SAM summary lines; first-eval loss identical (loss at w); gradient norms at the optimiser differ from flags-off (g2 != g1); checkpoint differs; @last / holdout files written",
+   "ok": true,
+   "info": "eps2 min/max 0.05000/0.05000; ratio 0.000209; restored at first entries 24/24; max rel grad-norm diff vs off 1.22e+00; wave-7 SAM first cooldown step 0: ||g1|| 0.2513, ||eps|| 0.05000 (rho 0.05), ||w|| 239.038, ||eps||/||w|| 0.000209 -> VALID (<= 0.02)"
+  },
+  {
+   "name": "control: --drop_cd 0 flags OFF has 24 forwards and no wave-7 line",
+   "ok": true,
+   "info": ""
+  }
+ ],
+ "e2e_g1": {
+  "off_lines": [
+   "step 12/24 loss 4.4137 val_ndcg 0.39025 holdout_ndcg 0.31703 lr 6.87e-04 cd_loss_reg 4.1957 cd_loss_pool 3.6701",
+   "step 24/24 loss 0.0000 val_ndcg 0.39119 holdout_ndcg 0.31770 lr 1.01e-04 cd_loss_reg 4.3878 cd_loss_pool 2.9858",
+   "BEST step 24 val_ndcg 0.39119; train time"
+  ]
+ },
+ "e2e_g2": {
+  "kl": [
+   0.0,
+   0.0
+  ],
+  "first_div": 2,
+  "gn_rel_max": 0.0009223049343811374,
+  "ck_maxdiff": 0.010383427143096924,
+  "lines_equal": false
+ },
+ "e2e_g3": {
+  "kl": [
+   0.005315,
+   0.005583
+  ],
+  "lines": [
+   "step 12/24 loss 4.4194 val_ndcg 0.39042 holdout_ndcg 0.31738 lr 6.87e-04 cd_loss_reg 4.1993 cd_loss_pool 3.6703",
+   "step 24/24 loss 0.0000 val_ndcg 0.39147 holdout_ndcg 0.31772 lr 1.01e-04 cd_loss_reg 4.3975 cd_loss_pool 2.9931",
+   "BEST step 24 val_ndcg 0.39147; train time"
+  ]
+ },
+ "e2e_g4": {
+  "ratio": 0.000209,
+  "eps2": [
+   0.05000000074505806,
+   0.05000000074505806,
+   0.05000000074505806,
+   0.05000000074505806,
+   0.05000000819563866,
+   0.05000000074505806,
+   0.05000001937150955,
+   0.04999999701976776,
+   0.05000000074505806,
+   0.050000011920928955,
+   0.05000000447034836,
+   0.05000003054738045,
+   0.05000000074505806,
+   0.05000000074505806,
+   0.05000000074505806,
+   0.05000000074505806,
+   0.04999999701976776,
+   0.05000000074505806,
+   0.04999998211860657,
+   0.05000000447034836,
+   0.05000000819563866,
+   0.05000000819563866,
+   0.050000011920928955,
+   0.05000000074505806
+  ],
+  "lines": [
+   "step 12/24 loss 4.4100 val_ndcg 0.39080 holdout_ndcg 0.31726 lr 6.87e-04 cd_loss_reg 4.1916 cd_loss_pool 3.6653",
+   "step 24/24 loss 0.0000 val_ndcg 0.39183 holdout_ndcg 0.31768 lr 1.01e-04 cd_loss_reg 4.3841 cd_loss_pool 2.9836",
+   "BEST step 24 val_ndcg 0.39183; train time"
+  ],
+  "first_line": "wave-7 SAM first cooldown step 0: ||g1|| 0.2513, ||eps|| 0.05000 (rho 0.05), ||w|| 239.038, ||eps||/||w|| 0.000209 -> VALID (<= 0.02)"
+ },
+ "failed": []
+}

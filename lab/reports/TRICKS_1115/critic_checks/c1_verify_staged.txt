@@ -1,0 +1,58 @@
+# pools rebuilt from member files in preds/ (168 member loads x 4 files, 15 s)
+W8: 8 base + 0 popularity-light at 0.0; members that exclude the holdout feeds (name _e10_): 8 of 8
+W8P20: 8 base + 4 popularity-light at 0.2; members that exclude the holdout feeds (name _e10_): 12 of 12
+FD16P20: 16 base + 4 popularity-light at 0.2; members that exclude the holdout feeds (name _e10_): 0 of 20
+ENSA: 32 base + 36 popularity-light at 0.2; members that exclude the holdout feeds (name _e10_): 24 of 68
+ENSB: 32 base + 28 popularity-light at 0.2; members that exclude the holdout feeds (name _e10_): 0 of 60
+
+## stored branch files against own rebuild from members (max abs difference, correlation)
+W8 ft val: max|d| 4.63e-05 corr 1.000000000 finite True
+W8 to val: max|d| 5.99e-05 corr 1.000000000 finite True
+W8 ft test: max|d| 5.08e-05 corr 1.000000000 finite True
+W8 to test: max|d| 5.77e-05 corr 1.000000000 finite True
+W8P20 ft val: max|d| 8.81e-07 corr 1.000000000 finite True
+W8P20 to val: max|d| 7.84e-07 corr 1.000000000 finite True
+W8P20 ft test: max|d| 8.95e-07 corr 1.000000000 finite True
+W8P20 to test: max|d| 9.48e-07 corr 1.000000000 finite True
+FD16P20 ft val: max|d| 9.31e-07 corr 1.000000000 finite True
+FD16P20 to val: max|d| 1.07e-06 corr 1.000000000 finite True
+FD16P20 ft test: max|d| 1.14e-06 corr 1.000000000 finite True
+FD16P20 to test: max|d| 9.49e-07 corr 1.000000000 finite True
+ENSA ft val: max|d| 1.07e-06 corr 1.000000000 finite True
+ENSA to val: max|d| 1.64e-06 corr 1.000000000 finite True
+ENSA ft test: max|d| 1.41e-06 corr 1.000000000 finite True
+ENSA to test: max|d| 1.15e-06 corr 1.000000000 finite True
+ENSB ft val: max|d| 1.08e-06 corr 1.000000000 finite True
+ENSB to val: max|d| 9.38e-07 corr 1.000000000 finite True
+ENSB ft test: max|d| 1.16e-06 corr 1.000000000 finite True
+ENSB to test: max|d| 1.08e-06 corr 1.000000000 finite True
+
+## NDCG implementation check: brute-force loop on 400 random val feeds, max abs difference to the sort implementation 1.11e-16
+feeds 14423 val rows 1389971 | pmix n_eff public 9321 private 6389
+
+## references, final val (own code) and record
+FD16P20: 0.40271 (record 0.40271) | public 0.394892
+W8P20: 0.40214 (record 0.40214) | public 0.3950094
+W8: 0.40165 (record 0.40165) | public 0.394486
+FD16P20 - W8P20: val +0.00058 +- 0.00043 | pmix-public +0.00075 +- 0.00053 | pmix-private +0.00069 +- 0.00064 | paired public SE 0.00056
+
+## staged files: headline numbers re-derived (paired per feed over 14,423 val feeds)
+probe_W8_FTonly_wft100: final val 0.40087
+   vs FD16P20 : val -0.00184 +- 0.00053 (z -3.48) | pmix-public -0.00210 +- 0.00066 (z -3.20) | pmix-private -0.00201 +- 0.00081 (z -2.49) | paired public SE 0.00069 | test corr 0.99512
+   vs W8P20   : val -0.00126 +- 0.00043 (z -2.92) | pmix-public -0.00135 +- 0.00054 (z -2.49) | pmix-private -0.00132 +- 0.00067 (z -1.96) | paired public SE 0.00056 | test corr 0.99756
+   vs W8      : val -0.00078 +- 0.00040 (z -1.92) | pmix-public -0.00072 +- 0.00050 (z -1.45) | pmix-private -0.00053 +- 0.00062 (z -0.86) | paired public SE 0.00052 | test corr 0.99790
+cand_FD16P20_wft060: final val 0.40261
+   vs FD16P20 : val -0.00011 +- 0.00016 (z -0.67) | pmix-public -0.00009 +- 0.00020 (z -0.44) | pmix-private -0.00007 +- 0.00024 (z -0.31) | paired public SE 0.00021 | test corr 0.99992
+   vs W8P20   : val +0.00047 +- 0.00044 (z +1.07) | pmix-public +0.00066 +- 0.00054 (z +1.23) | pmix-private +0.00062 +- 0.00065 (z +0.94) | paired public SE 0.00057 | test corr 0.99743
+cand_ENSAkd_stage: final val 0.40247
+   vs FD16P20 : val -0.00024 +- 0.00028 (z -0.88) | pmix-public -0.00048 +- 0.00034 (z -1.41) | pmix-private -0.00047 +- 0.00041 (z -1.14) | paired public SE 0.00036 | test corr 0.99951
+   vs W8P20   : val +0.00033 +- 0.00036 (z +0.92) | pmix-public +0.00027 +- 0.00044 (z +0.61) | pmix-private +0.00022 +- 0.00053 (z +0.41) | paired public SE 0.00047 | test corr 0.99882
+cand_ENSBkd_stage: final val 0.40216
+   vs FD16P20 : val -0.00056 +- 0.00027 (z -2.10) | pmix-public -0.00081 +- 0.00035 (z -2.28) | pmix-private -0.00084 +- 0.00044 (z -1.91) | paired public SE 0.00034 | test corr 0.99959
+   vs W8P20   : val +0.00002 +- 0.00044 (z +0.04) | pmix-public -0.00006 +- 0.00054 (z -0.10) | pmix-private -0.00015 +- 0.00067 (z -0.23) | paired public SE 0.00057 | test corr 0.99759
+
+## file integrity (parquet read back; order compared with own rebuild of the test scores)
+probe_W8_FTonly_wft100: sha256 1357e4069e230b798846c77d71a7717e4ecc6401aba8aecf93751b2d71c40f10 | rows 2904806 (sample_submission 2904806) | feeds 28595 (test feeds 28595) | duplicate keys 0 | sample rows without a score 0 | rows per feed = M True | NaN/inf 0 | columns+dtypes as subs/cand_FD16P20kd_r4 True | row order = flat test order True | score = permutation 0..M-1 per feed True | rows with the same rank as own rebuild 0.999997 (max rank difference 1) | same top-1 as own rebuild 1.000000 | rows with the same rank as the scored FD16P20 file 0.1757
+cand_FD16P20_wft060: sha256 4a5fc1b84b0c17a21439f6577de16e27e0dce08069a102adb5783ffec48f1493 | rows 2904806 (sample_submission 2904806) | feeds 28595 (test feeds 28595) | duplicate keys 0 | sample rows without a score 0 | rows per feed = M True | NaN/inf 0 | columns+dtypes as subs/cand_FD16P20kd_r4 True | row order = flat test order True | score = permutation 0..M-1 per feed True | rows with the same rank as own rebuild 0.999999 (max rank difference 1) | same top-1 as own rebuild 1.000000 | rows with the same rank as the scored FD16P20 file 0.5946
+cand_ENSAkd_stage: sha256 0ddea3148bb0fa94250fc938eb2f5b8beb358b09fc17af2ecba209197c9724aa | rows 2904806 (sample_submission 2904806) | feeds 28595 (test feeds 28595) | duplicate keys 0 | sample rows without a score 0 | rows per feed = M True | NaN/inf 0 | columns+dtypes as subs/cand_FD16P20kd_r4 True | row order = flat test order True | score = permutation 0..M-1 per feed True | rows with the same rank as own rebuild 0.999997 (max rank difference 1) | same top-1 as own rebuild 1.000000 | rows with the same rank as the scored FD16P20 file 0.3791
+cand_ENSBkd_stage: sha256 1840dfb71c5798a0e95e68a84ac2f92d833add4e02cd61feb54ba448b400c221 | rows 2904806 (sample_submission 2904806) | feeds 28595 (test feeds 28595) | duplicate keys 0 | sample rows without a score 0 | rows per feed = M True | NaN/inf 0 | columns+dtypes as subs/cand_FD16P20kd_r4 True | row order = flat test order True | score = permutation 0..M-1 per feed True | rows with the same rank as own rebuild 0.999997 (max rank difference 1) | same top-1 as own rebuild 1.000000 | rows with the same rank as the scored FD16P20 file 0.4036

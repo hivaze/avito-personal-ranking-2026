@@ -1,0 +1,378 @@
+{
+  "args": {
+    "variant": "w5_fd10_kd05w192_s964",
+    "d": 192,
+    "heads": 4,
+    "blocks": 2,
+    "hist_layers": 1,
+    "drop": 0.1,
+    "no_hist": false,
+    "no_set": false,
+    "no_pos": true,
+    "loss": "softmax",
+    "loss_norm": "feed",
+    "max_hist": 256,
+    "train_feeds": 0,
+    "epochs": 10.0,
+    "lr": 0.002,
+    "wd": 0.02,
+    "warmup": 500,
+    "cand_budget": 32768,
+    "max_feeds": 512,
+    "eval_every": 2500,
+    "seed": 964,
+    "no_test": false,
+    "aux_pos": 0.5,
+    "aux_mode": "listwise",
+    "aux_tau": 10.0,
+    "ff": 2,
+    "sim_bias": 1,
+    "prand_base": -1.0,
+    "only_random": -1.0,
+    "keep": "last",
+    "intent": 0.0,
+    "xt": "cvnd_pre2s",
+    "arch": "tf",
+    "attn_gate": true,
+    "retr_m": 16,
+    "muon": true,
+    "sched": "wsd",
+    "cooldown_frac": 0.2,
+    "cooldown_mix": 0.02,
+    "aux_anneal": 0.1,
+    "id_buckets": 0,
+    "id_drop": 0.5,
+    "id_hist_only": false,
+    "xt_drop": 0.0,
+    "user0": true,
+    "domain": true,
+    "holdout": 30000,
+    "select_on": "holdout",
+    "save_steps": "70000,77500",
+    "init": "",
+    "pos_mode": "both",
+    "time_limit": 0,
+    "attn_drop": -1.0,
+    "retr_prod": false,
+    "retr_uniq": false,
+    "retr_tcnt": false,
+    "cretr_m": 0,
+    "set_sim_bias": false,
+    "typed_cross": false,
+    "drop_cd": -1.0,
+    "kd_file": "<repo>/nn_x/w12/kd/out/teacher_mean11.npy",
+    "kd_w": 0.5,
+    "kd_T": 1.0,
+    "aug_all": false,
+    "xfold": -1,
+    "xfold_unlab": false,
+    "prand2": "",
+    "pool_p": 0.5,
+    "aug_cand": 0.0,
+    "aug_hist": 0.0,
+    "hcap": "",
+    "rec_q": 0.0,
+    "rec_days": 3,
+    "rho_file": "",
+    "rho_keep": 0.7,
+    "trunc_off": 0.0,
+    "trunc_lifts": "",
+    "aux_norm": "batch",
+    "aux_norm_c": 1.695,
+    "cliplog": 50,
+    "save_last": true,
+    "save_holdout": true,
+    "select_min_step": 12000,
+    "hzcd": false,
+    "val_mix": 0.0,
+    "val_fold": -1,
+    "rdrop_cd": 0.0,
+    "sam_cd": 0.0,
+    "holdout_in_train": true
+  },
+  "best_step": 99840,
+  "val_ndcg": 0.3994575130928585,
+  "train_minutes": 219.29051016966503,
+  "history": [
+    {
+      "step": 2500,
+      "loss": 4.166288065910339,
+      "val_ndcg": 0.38843426114356244,
+      "holdout_ndcg": NaN,
+      "minutes": 5.399022920926412
+    },
+    {
+      "step": 5000,
+      "loss": 4.062026734352112,
+      "val_ndcg": 0.3911079460318584,
+      "holdout_ndcg": NaN,
+      "minutes": 10.61059483687083
+    },
+    {
+      "step": 7500,
+      "loss": 4.037784261703491,
+      "val_ndcg": 0.39234237464934413,
+      "holdout_ndcg": NaN,
+      "minutes": 15.83095468680064
+    },
+    {
+      "step": 10000,
+      "loss": 4.325173859596252,
+      "val_ndcg": 0.3928496981378914,
+      "holdout_ndcg": NaN,
+      "minutes": 21.082552524407706
+    },
+    {
+      "step": 12500,
+      "loss": 4.296858282089233,
+      "val_ndcg": 0.3932652057829135,
+      "holdout_ndcg": NaN,
+      "minutes": 26.274863453706107
+    },
+    {
+      "step": 15000,
+      "loss": 3.952169418334961,
+      "val_ndcg": 0.3943177799133118,
+      "holdout_ndcg": NaN,
+      "minutes": 31.478943010171253
+    },
+    {
+      "step": 17500,
+      "loss": 4.215360894203186,
+      "val_ndcg": 0.39316449968873185,
+      "holdout_ndcg": NaN,
+      "minutes": 36.686990356445314
+    },
+    {
+      "step": 20000,
+      "loss": 4.098864874839783,
+      "val_ndcg": 0.3940032222192236,
+      "holdout_ndcg": NaN,
+      "minutes": 41.90775598287583
+    },
+    {
+      "step": 22500,
+      "loss": 4.236263756752014,
+      "val_ndcg": 0.3955752055637195,
+      "holdout_ndcg": NaN,
+      "minutes": 47.09355246623357
+    },
+    {
+      "step": 25000,
+      "loss": 4.270378170013427,
+      "val_ndcg": 0.3942485666685481,
+      "holdout_ndcg": NaN,
+      "minutes": 52.30856149991353
+    },
+    {
+      "step": 27500,
+      "loss": 4.303521194458008,
+      "val_ndcg": 0.3935127967012927,
+      "holdout_ndcg": NaN,
+      "minutes": 57.51188697417577
+    },
+    {
+      "step": 30000,
+      "loss": 4.188676266670227,
+      "val_ndcg": 0.3958396469754025,
+      "holdout_ndcg": NaN,
+      "minutes": 62.73402010997136
+    },
+    {
+      "step": 32500,
+      "loss": 4.165056056976319,
+      "val_ndcg": 0.3953467575724064,
+      "holdout_ndcg": NaN,
+      "minutes": 67.93485627174377
+    },
+    {
+      "step": 35000,
+      "loss": 3.982473306655884,
+      "val_ndcg": 0.39517546124874764,
+      "holdout_ndcg": NaN,
+      "minutes": 73.13188945452372
+    },
+    {
+      "step": 37500,
+      "loss": 4.1274817848205565,
+      "val_ndcg": 0.39376288946984767,
+      "holdout_ndcg": NaN,
+      "minutes": 78.34022958278656
+    },
+    {
+      "step": 40000,
+      "loss": 4.190413198471069,
+      "val_ndcg": 0.3950915372044464,
+      "holdout_ndcg": NaN,
+      "minutes": 83.54966250260671
+    },
+    {
+      "step": 42500,
+      "loss": 4.1802851009368895,
+      "val_ndcg": 0.39527762445711795,
+      "holdout_ndcg": NaN,
+      "minutes": 88.74396047194799
+    },
+    {
+      "step": 45000,
+      "loss": 4.172287621498108,
+      "val_ndcg": 0.3959151314149144,
+      "holdout_ndcg": NaN,
+      "minutes": 93.94102478424708
+    },
+    {
+      "step": 47500,
+      "loss": 4.294780492782593,
+      "val_ndcg": 0.39542898844407365,
+      "holdout_ndcg": NaN,
+      "minutes": 99.15460274616878
+    },
+    {
+      "step": 50000,
+      "loss": 3.9872440576553343,
+      "val_ndcg": 0.3953518235173894,
+      "holdout_ndcg": NaN,
+      "minutes": 104.34797567129135
+    },
+    {
+      "step": 52500,
+      "loss": 4.099448232650757,
+      "val_ndcg": 0.3945016447531975,
+      "holdout_ndcg": NaN,
+      "minutes": 110.22508216698965
+    },
+    {
+      "step": 55000,
+      "loss": 4.172273244857788,
+      "val_ndcg": 0.39398048647923717,
+      "holdout_ndcg": NaN,
+      "minutes": 116.81941430171331
+    },
+    {
+      "step": 57500,
+      "loss": 4.227326874732971,
+      "val_ndcg": 0.39674855363795103,
+      "holdout_ndcg": NaN,
+      "minutes": 123.46130335728327
+    },
+    {
+      "step": 60000,
+      "loss": 4.2636099481582646,
+      "val_ndcg": 0.3951662129433587,
+      "holdout_ndcg": NaN,
+      "minutes": 129.98770219882329
+    },
+    {
+      "step": 62500,
+      "loss": 4.202485909461975,
+      "val_ndcg": 0.395694167349026,
+      "holdout_ndcg": NaN,
+      "minutes": 134.44270609219868
+    },
+    {
+      "step": 65000,
+      "loss": 4.043658394813537,
+      "val_ndcg": 0.3961602231610487,
+      "holdout_ndcg": NaN,
+      "minutes": 139.3676680723826
+    },
+    {
+      "step": 67500,
+      "loss": 4.160391235351563,
+      "val_ndcg": 0.39495253928379437,
+      "holdout_ndcg": NaN,
+      "minutes": 144.52438733975092
+    },
+    {
+      "step": 70000,
+      "loss": 4.304450297355652,
+      "val_ndcg": 0.3942541035043204,
+      "holdout_ndcg": NaN,
+      "minutes": 149.73244230349857
+    },
+    {
+      "step": 72500,
+      "loss": 4.223767218589782,
+      "val_ndcg": 0.39539108792331373,
+      "holdout_ndcg": NaN,
+      "minutes": 154.95219616889955
+    },
+    {
+      "step": 75000,
+      "loss": 4.266202178001404,
+      "val_ndcg": 0.3950509128599487,
+      "holdout_ndcg": NaN,
+      "minutes": 160.14271461963654
+    },
+    {
+      "step": 77500,
+      "loss": 4.317775139808655,
+      "val_ndcg": 0.3963926332754487,
+      "holdout_ndcg": NaN,
+      "minutes": 165.33783675432204
+    },
+    {
+      "step": 80000,
+      "loss": 4.105270533561707,
+      "val_ndcg": 0.3954547399933835,
+      "holdout_ndcg": NaN,
+      "minutes": 170.55040630499522
+    },
+    {
+      "step": 82500,
+      "loss": 3.8253324890136717,
+      "val_ndcg": 0.397517049494319,
+      "holdout_ndcg": NaN,
+      "minutes": 175.77455051740012
+    },
+    {
+      "step": 85000,
+      "loss": 3.494644160270691,
+      "val_ndcg": 0.3969271133740917,
+      "holdout_ndcg": NaN,
+      "minutes": 181.39566425085067
+    },
+    {
+      "step": 87500,
+      "loss": 3.3399860572814943,
+      "val_ndcg": 0.3990411365300962,
+      "holdout_ndcg": NaN,
+      "minutes": 188.04251653750737
+    },
+    {
+      "step": 90000,
+      "loss": 3.09516571521759,
+      "val_ndcg": 0.39780628936685103,
+      "holdout_ndcg": NaN,
+      "minutes": 194.66859928766885
+    },
+    {
+      "step": 92500,
+      "loss": 2.8112950277328492,
+      "val_ndcg": 0.39861196260249954,
+      "holdout_ndcg": NaN,
+      "minutes": 201.29739991426467
+    },
+    {
+      "step": 95000,
+      "loss": 2.7394183349609373,
+      "val_ndcg": 0.3976766685667171,
+      "holdout_ndcg": NaN,
+      "minutes": 207.2744066675504
+    },
+    {
+      "step": 97500,
+      "loss": 2.7391580033302305,
+      "val_ndcg": 0.39870520863427233,
+      "holdout_ndcg": NaN,
+      "minutes": 213.41802738507587
+    },
+    {
+      "step": 99840,
+      "loss": 2.4789620308165854,
+      "val_ndcg": 0.3994575130928585,
+      "holdout_ndcg": NaN,
+      "minutes": 219.29039647579194
+    }
+  ]
+}

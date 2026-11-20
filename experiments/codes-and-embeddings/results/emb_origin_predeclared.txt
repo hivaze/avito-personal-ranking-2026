@@ -1,0 +1,21 @@
+Fri Nov 13 05:22:18 UTC 2026
+PRE-DECLARED FINGERPRINT GATES (ORIGIN topic; written before any computation in nn_x/emb/origin)
+Hypotheses: (a) Avito in-house two-tower (structured content item tower + user tower); (b) public text model
+(MRL-truncated / int8); (c) vision / multimodal; (d) appended attribute blocks.
+T1 quantisation: if mean ||v||^2 over items == 256^2 + 128/12 (+-2) and sd(||v||) within 25% of sqrt(1/12)=0.289,
+   the vectors are float unit vectors x 256 rounded to nearest (global fixed scale, not per-dim calibrated as in
+   sentence-transformers quantize_embeddings, not per-vector absmax). Per-vector absmax is rejected if < 1% of rows hit |127|.
+T2 exact duplicates (full train table, 81.6M rows, 64-bit row hash): a title-only public text model on Avito would give a
+   large share of bit-identical vectors across distinct item_ids (expect >= 5%). Share < 1% => inputs beyond the title.
+   Duplicate groups: if >= 80% are single-category AND their members co-occur in the same feed / have equal posting time
+   far above chance => same-seller reposts (structured inputs incl. seller/location), favouring (a).
+T3 drift (items present in train and val tables): if changed-vector drift directions (unit delta, cos in [0.95,0.9995])
+   have a top-5 PCA share >= 2x the share of matched-cos within-category nearest-neighbour difference directions,
+   drift is low-rank => numeric-input changes (price / seller rating) => (a) or (d), not a static-text model.
+T4 appended blocks: any contiguous block (size 8/16/32/64, aligned) whose norm CV is < 0.5x the median CV of random
+   same-size dim subsets => separately normalised appended block => (d). Also per-dim eta^2(category) bimodality.
+T5 behaviour: within-category Spearman(cos(item, mean user_emb), log popularity) |rho| >= 0.10 => popularity/behaviour
+   signal in the item tower (two-tower training with sampled negatives), favouring (a) over a static text model.
+T6 MRL power check: on a public MRL model (Qwen3-Embedding) cut to 128 dims, prefix-64 top-10 neighbour overlap must
+   exceed random-64 by >= 0.10 for the lead's prefix=random result (0.64 vs 0.64) to count as evidence against MRL.
+T7 category-name test only if reports/CODES_DECODING_1113.md has a medium+ confidence name mapping (evidence only).

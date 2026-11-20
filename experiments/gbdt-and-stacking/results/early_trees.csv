@@ -1,0 +1,11 @@
+library,tag,train_feeds,objective,option,leak_safe_history_counts,val_ndcg,best_iteration,seconds,source
+LightGBM,tr300k_none,300000,lambdarank,pos_mode=none,no,0.36822,251,2262,raw run log (not published)
+LightGBM,tr300k_feat,300000,lambdarank,pos_mode=feat; best position at inference 5,no,0.36764,426,3284,raw run log (not published)
+LightGBM,tr300k_offset,300000,lambdarank,pos_mode=offset,no,0.36749,203,1960,raw run log (not published)
+XGBoost,x300_base,300000,rank:ndcg,sample=uniform,no,0.36774,258,350,raw run log (not published)
+XGBoost,x300_luo,300000,rank:ndcg,sample=uniform,yes,0.36723,1071,742,raw run log (not published)
+XGBoost,rand50,1000000,rank:ndcg,sample=random50,no,0.36807,342,539,raw run log (not published)
+XGBoost,tr1m_ndcg,1000000,rank:ndcg,sample=uniform,no,0.36770,1351,2861,raw run log (not published)
+CatBoost,tr300k_luo,300000,YetiRank,sample=uniform,yes,0.36577,778,1284,raw run log (not published)
+CatBoost,tr500k_pw,500000,YetiRank,sample=pweight,no,0.36855,2070,1854,raw run log (not published)
+CatBoost,tr300k_none,300000,YetiRank,sample=uniform,no,0.36997,,,results/cb26_ana_existing.txt (run log ends in an error after the predictions were saved)

@@ -1,0 +1,113 @@
+# Read-out copied from the raw run log (not published), unchanged below this line.
+feeds of val/test users (non-zero) by split: [{'sid': 0, 'len': 20374}, {'sid': 1, 'len': 13765}, {'sid': 2, 'len': 27416}]
+linked hist rows 12081362 cand rows 5764076
+[val] candidates found in OWN history: 0
+[val] hist matches: later 244, earlier 964, same-timestamp 0
+[test] candidates found in OWN history: 0
+[test] hist matches: later 235, earlier 1842, same-timestamp 0
+
+=== VAL: coverage and target rates ===
+later_hist                               cands=     184 feeds=   110 (0.0076) target_rate=0.9348  n_pos=172
+later_cand                               cands=     123 feeds=    46 (0.0032) target_rate=0.0000  n_pos=0
+earlier_hist                             cands=     635 feeds=   484 (0.0336) target_rate=0.0378  n_pos=24
+earlier_cand                             cands=    2542 feeds=  1224 (0.0849) target_rate=0.0161  n_pos=41
+earlier_cand & earlier target=1          cands=      16 feeds=    16 (0.0011) target_rate=0.0000  n_pos=0
+earlier_cand & earlier target=0          cands=    2526 feeds=  1216 (0.0843) target_rate=0.0162  n_pos=41
+feed has later feed of user              cands=   12927 feeds=   117 (0.0081) target_rate=0.0173  n_pos=224
+feed has earlier feed of user            cands=  431809 feeds=  4394 (0.3047) target_rate=0.0167  n_pos=7221
+base target rate 0.01581543787604202
+
+later_hist by event type (val):
+shape: (6, 3)
+┌─────────────────┬─────┬─────────────┐
+│ later_hist_type ┆ len ┆ target_rate │
+│ ---             ┆ --- ┆ ---         │
+│ i8              ┆ u32 ┆ f64         │
+╞═════════════════╪═════╪═════════════╡
+│ 1               ┆ 147 ┆ 0.965986    │
+│ 2               ┆ 11  ┆ 0.545455    │
+│ 3               ┆ 7   ┆ 0.857143    │
+│ 4               ┆ 14  ┆ 0.928571    │
+│ 5               ┆ 1   ┆ 1.0         │
+│ 6               ┆ 4   ┆ 1.0         │
+└─────────────────┴─────┴─────────────┘
+later_hist by source split:
+shape: (2, 3)
+┌────────────────┬─────┬─────────────┐
+│ later_hist_sid ┆ len ┆ target_rate │
+│ ---            ┆ --- ┆ ---         │
+│ i8             ┆ u32 ┆ f64         │
+╞════════════════╪═════╪═════════════╡
+│ 1              ┆ 38  ┆ 0.973684    │
+│ 2              ┆ 146 ┆ 0.924658    │
+└────────────────┴─────┴─────────────┘
+earlier_cand by source split / earlier target:
+shape: (3, 4)
+┌──────────────────┬────────────────────────┬──────┬─────────────┐
+│ earlier_cand_sid ┆ earlier_cand_maxtarget ┆ len  ┆ target_rate │
+│ ---              ┆ ---                    ┆ ---  ┆ ---         │
+│ i8               ┆ i8                     ┆ u32  ┆ f64         │
+╞══════════════════╪════════════════════════╪══════╪═════════════╡
+│ 0                ┆ 0                      ┆ 2479 ┆ 0.016539    │
+│ 0                ┆ 1                      ┆ 16   ┆ 0.0         │
+│ 1                ┆ 0                      ┆ 47   ┆ 0.0         │
+└──────────────────┴────────────────────────┴──────┴─────────────┘
+earlier_hist by type:
+shape: (8, 3)
+┌───────────────────┬─────┬─────────────┐
+│ earlier_hist_type ┆ len ┆ target_rate │
+│ ---               ┆ --- ┆ ---         │
+│ i8                ┆ u32 ┆ f64         │
+╞═══════════════════╪═════╪═════════════╡
+│ 1                 ┆ 575 ┆ 0.024348    │
+│ 2                 ┆ 26  ┆ 0.192308    │
+│ 3                 ┆ 14  ┆ 0.142857    │
+│ 4                 ┆ 6   ┆ 0.0         │
+│ 5                 ┆ 5   ┆ 0.2         │
+│ 6                 ┆ 6   ┆ 0.166667    │
+│ 7                 ┆ 1   ┆ 1.0         │
+│ 10                ┆ 2   ┆ 0.0         │
+└───────────────────┴─────┴─────────────┘
+
+Val feeds with a later feed of the same user: 117; positives there 224, of which in later history 172
+f1                                                 NDCG=0.3279
+f1 + 10*later_hist                                 NDCG=0.3330  delta=+0.0051 (paired SE 0.0005, t=10.1)
+f1 + 10*later_hist - 10*later_cand                 NDCG=0.3330  delta=+0.0051 (paired SE 0.0005, t=10.1)
+f1 - 10*earlier_cand                               NDCG=0.3278  delta=-0.0001 (paired SE 0.0001, t=-1.0)
+f1 + 10*earlier_cand                               NDCG=0.3272  delta=-0.0007 (paired SE 0.0002, t=-3.0)
+f1 + later_hist - later_cand - earlier_cand        NDCG=0.3329  delta=+0.0050 (paired SE 0.0005, t=9.9)
+affected val feeds (later info): 113  NDCG there f1=0.3156 -> leak=0.9646
+
+=== TEST coverage ===
+later_hist                               cands=     183 feeds=   103 (0.0036); private feeds=46 (0.0023)
+later_cand                               cands=     216 feeds=    55 (0.0019); private feeds=22 (0.0011)
+earlier_hist                             cands=    1199 feeds=   949 (0.0332); private feeds=631 (0.0315)
+earlier_cand                             cands=    3828 feeds=  2064 (0.0722); private feeds=1385 (0.0692)
+feed has later feed of user              cands=   12392 feeds=   108 (0.0038); private feeds=49 (0.0024)
+feed has earlier feed of user            cands=  860173 feeds=  8408 (0.2940); private feeds=5795 (0.2895)
+test later_hist by type:
+shape: (7, 2)
+┌─────────────────┬─────┐
+│ later_hist_type ┆ len │
+│ ---             ┆ --- │
+│ i8              ┆ u32 │
+╞═════════════════╪═════╡
+│ 1               ┆ 165 │
+│ 2               ┆ 5   │
+│ 3               ┆ 2   │
+│ 4               ┆ 5   │
+│ 5               ┆ 3   │
+│ 6               ┆ 2   │
+│ 8               ┆ 1   │
+└─────────────────┴─────┘
+test earlier_cand by split:
+shape: (3, 2)
+┌──────────────────┬──────┐
+│ earlier_cand_sid ┆ len  │
+│ ---              ┆ ---  │
+│ i8               ┆ u32  │
+╞══════════════════╪══════╡
+│ 0                ┆ 3536 │
+│ 1                ┆ 76   │
+│ 2                ┆ 216  │
+└──────────────────┴──────┘

@@ -1,0 +1,99 @@
+w12/moe MoE / DEPTH screen of the w192 KD student -- pre-declared rules and launch (written 2026-11-19 before any screen run)
+
+ARMS (each = lane.sh E:kd05w192 = E_BASE + HYG + --seed s + teacher_mean11 kd_w 0.5 d 192, + the arm flags; trainer lab/nn_x/w12/moe/train.py)
+  kd05w192moeffn  A  --moe_ffn 8 --moe_w 48 --moe_k 2 --moe_scale 2.0 --moe_xdrop 0.1 --moe_eta 0.1   2,714,816 params (+28.1%), active 2,272,448
+  kd05w192moevo   B  --vo_moe 4 --vo_k 2 --vo_eta 0.1                                                  2,720,960 params (+28.4%), active 2,426,048
+  kd05w192b3ff1   C  --blocks 3 --ff 1                                                                 2,270,340 params (+7.1%)
+  references: the stored w5_e10_kd05w192_s951-954 (nn_x/w5/{logs,preds}); seeds 951-954; 98,350 steps, cooldown from step 78,680.
+
+LAUNCH (12 runs, 2 per GPU on some GPUs, the 4 seeds of each arm on 4 different GPUs; each lane runs ONE job under the lane GPU guard)
+  cd <repo>/lab/nn_x/w12/moe
+  for spec in "0 E:kd05w192moeffn:951" "0 E:kd05w192moevo:953" "1 E:kd05w192moeffn:952" "1 E:kd05w192b3ff1:954" \
+              "2 E:kd05w192moeffn:953" "2 E:kd05w192moevo:951" "3 E:kd05w192moeffn:954" "3 E:kd05w192b3ff1:952" \
+              "4 E:kd05w192moevo:952" "4 E:kd05w192b3ff1:953" "5 E:kd05w192moevo:954" "5 E:kd05w192b3ff1:951"; do
+    set -- $spec; nohup bash lane_moe.sh $1 "$2" > logs/lane_g$1_${2//:/_}.out 2>&1 &
+  done
+  (DRY=1 bash lane_moe.sh <gpu> "<job>" prints the command; outputs lab/nn_x/w12/moe/out/{ckpt,logs,preds}/..w5_e10_<arm>_s<seed>.. (the
+   DEFAULT since the 2026-11-19 review: MOE_OUT=moe, through run_redirect.py; the read scripts look there first); PIDs in logs/RUNNING.txt.
+   MOE_OUT=w5 (explicit opt-in only) would write into nn_x/w5 = lab/nn_x/w5, outside the w12/moe write area: do not use it for this screen.)
+
+EARLY STOP (screen_rules.py es <arm>; in-training evals vs the stored reference history at the same seed and step)
+  ES1 one run, any eval after step 10,000: loss non-finite or val_ndcg < 0.385 -> stop that run (by its exact PID); >= 2 seeds -> KILL the arm.
+  ES2 whole arm at step 60,000: mean of the 9 evals at steps 40,000-60,000 of (arm val - reference val) < -0.003 on >= 3 of 4 seeds -> STOP the arm.
+  ES3 flag only (A, B): load entropy < 0.6 or > 25% dead experts in any routed layer for 3 consecutive evals after step 10,000 -> "routing
+      collapsed" (the trainer marks the 'w12/moe step' log line 'ROUTING COLLAPSED (ES3)'); a null with a collapsed router is inconclusive.
+
+READ (CPU, try mode)
+  CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 .venv/bin/python lab/nn_x/w12/moe/arm_read8_moe.py <arm> 951,952,953,954 kd05w192
+  CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 NUMBA_NUM_THREADS=12 .venv/bin/python lab/nn_x/w12/moe/perm8_moe.py <arm> kd05w192 951,952,953,954
+  .venv/bin/python lab/nn_x/w12/moe/screen_rules.py decide <arm>
+  PROMOTE iff 4-pool val delta >= +0.0003 AND 4-pool holdout delta >= 0 AND perm8 p_perm <= 0.2 (observed pooled z in the top 3 of 16).
+    Promotion = all-data build with the fd10 recipe, seeds 951-954; confirms only if its val delta vs w5_fd10_kd05w192_s951-954 >= +0.0003.
+  KILL iff val delta < 0. Otherwise HOLD (val >= +0.0003 and holdout >= 0 but p > 0.2: extending to 955-958 is an owner decision).
+  Always report member deltas, holdout @last, asymptote and the matched-N line (arm_read8_moe.py), and the ES3 status.
+  (arm_read8_moe.py's own 'RULE:' line is the older KD pooled-z rule and is NOT this screen's decision.)
+
+IMPLEMENTATION NOTE (quantile balancer, design definition kept): theta = the (k+1)-th largest biased score. The shift q is exact for an
+  OVERLOADED expert (b -= q alone gives it exactly k/E on the batch) but only partial for an UNDERLOADED one (the margin of a non-selected
+  token is measured to v_(k+1), not to the k-th score it must beat; tests/test_moe_cpu.py T2). In the synthetic low-diversity drifting stream
+  it still takes the load entropy from 0.33 / 0.50 to >= 0.95 within 50 steps (eta 0.1).
+
+REVIEW 2026-11-19 (adversarial review, before any screen run)
+  1. lane_moe.sh now writes to lab/nn_x/w12/moe/out by DEFAULT (MOE_OUT=moe, run_redirect.py); nn_x/w5 output only with an explicit MOE_OUT=w5.
+  2. Balancer re-centring (model_moe.py RoutedFFN / SwitchVO update_bias): after b -= eta q the bias is re-centred per routing group. Routing and
+     q are invariant to a common shift (one-step check: 0 differing selections). Reason: on real data (review smoke, 1M feeds, 3,128 steps,
+     smoke_out/review) the un-centred arm-A biases drifted to about -10 (~ -3.3e-3 / step, ~ -300 projected at 98k) and SwitchVO's
+     'b [lo, hi]' mixed per-head offsets; centred, 'b [lo, hi]' is the real within-group spread. CPU suite 44/44 PASS after the change.
+  3. Watch item (not an ES rule): arm A's within-group bias spread grows (centred: ~0.3-1.3 at step 500, ~2.0-3.3 at step 3,128; router row norms
+     0.58 -> 1.1-1.8): the unbounded sqrt(softplus) affinity lets the router build a token-independent preference that the bias cancels
+     (loads stay balanced, entropy >= 0.99). Arm B (sigmoid) stays near 0 (V ~0.001, O ~0.03). If arm A ends null with a spread >> 5, note it.
+  4. Throughput (review smoke, real batch mix, cliplog 50, alone on GPU N): ref 25.5 / A 22.7 / B 20.5-20.8 steps/s net of evals = 1.00 / 1.12 /
+     1.24 (bench: 1.14 / 1.25; C bench 1.17). Memory per run: ~44 GB allocated at the step peak, 58.3 GB reserved (data load), all arms.
+     The stored references s951-954 ran 2 per GPU and took 194-195 min each (s955, mostly alone, 77.5 min), so 2 per GPU is ~2.5x slower per run
+     and lower total throughput than 1 per GPU. Suggested launch: 6 lanes (some GPUs), two SEQUENTIAL jobs each (~2.7-2.9 h wall, alone ~70-85
+     min per run), every arm with 2 seeds in each wave and its 4 seeds on 4 GPUs:
+       cd <repo>/lab/nn_x/w12/moe
+       for spec in "0 E:kd05w192moeffn:951 E:kd05w192moevo:953" "1 E:kd05w192b3ff1:954 E:kd05w192moeffn:952" \
+                   "2 E:kd05w192moevo:951 E:kd05w192moeffn:953" "3 E:kd05w192moeffn:954 E:kd05w192b3ff1:952" \
+                   "4 E:kd05w192moevo:952 E:kd05w192b3ff1:953" "5 E:kd05w192b3ff1:951 E:kd05w192moevo:954"; do
+         set -- $spec; g=$1; shift; nohup bash lane_moe.sh $g "$*" > logs/lane_g$g.out 2>&1 &
+       done
+     (the 2-per-GPU launch above stays valid: it fits in memory, but expect ~3.6-4.1 h per run.)
+
+OWNER AMENDMENT 2026-11-19T05:48:52Z (before any ES trigger; all evals so far within +-0.0015 of the reference): asked not to stop runs where possible.
+  ES1 / ES2 / ES3 become REPORT-ONLY flags: no run is stopped by them; every run trains to its end. The READ rule is unchanged.
+
+RESULT 2026-11-19T08:11:39Z (all 12 runs rc=0; reads in logs/read_{A,B,C}.txt, perm_*.txt, decide_*.txt, mix_check.txt)
+  A kd05w192moeffn : 4-pool val -0.00086 +- 0.00057 (z -1.51), holdout +0.00020 +- 0.00031, p_perm 0.875 -> KILL. Member val -0.00014 (level);
+                     pool gain over member +0.0014 vs reference +0.0022 (expert students agree more across seeds). Router healthy (min entropy >= 0.78,
+                     no dead experts); watch item: last-block bias spread 4-10 at the end, other blocks ~0.
+  B kd05w192moevo  : 4-pool val -0.00144 +- 0.00057 (z -2.51), holdout +0.00029 +- 0.00032, p_perm 0.875 -> KILL. Router healthy (biases ~0).
+  C kd05w192b3ff1  : 4-pool val -0.00069 +- 0.00058 (z -1.20), holdout +0.00040 +- 0.00034, p_perm 0.5625 -> KILL.
+  Pattern: all three bigger/deeper models lose on val (time-forward, tracks public) and gain a little on holdout (training period).
+  Mix check (secondary, no decision): 8-pool ref951-954 + C951-954 vs ref951-958 val +0.00040 +- 0.00039; at the production size (16 wide,
+  4 t25 members swapped for the arm) A -0.00023, B -0.00042, C -0.00004 +- 0.00028 on val -> no diversity gain at 16. No try file built.
+  Design closed: healthy-router null for routed FFN and routed V/O; depth 7 at equal size null.
+
+EXTENSION RULE 2026-11-19T15:15:19Z (written before any s955-958 arm run; after the why-analysis lab/nn_x/w12/moe/why/ and the lead's re-checks logs/fair_read_lead.txt, fair_all_lead.txt)
+  Findings that motivate it: (1) the screen reference pool s951-954 is rank 1-3 of the 70 4-subsets of s951-958 on val (+0.00057 selected / +0.00061 @last
+  above their mean); (2) holdout selection picked steps 85,000-90,000 for 4 of 12 arm runs while all-data production students keep the LAST step
+  (fd10 best_step 99840). Fair post-hoc read (@last vs the 70-subset mean): A +0.00070 +- 0.00046, C +0.00045 +- 0.00047, B -0.00031 +- 0.00048 on val.
+  Post hoc and 1 of ~37 stored arms; the top of that list is what noise alone gives, so it is a reason to extend, not a pass.
+  Runs: A kd05w192moeffn and C kd05w192b3ff1, seeds 955-958, same lane (lane_moe.sh, same flags, output moe/out), one run per GPU on the GPUs. B is closed.
+  READ (8 seeds, @last checkpoints = the production policy, paired per feed, arm 8-pool s951-958 vs reference 8-pool kd05w192 s951-958, CPU):
+    BUILD an all-data try file iff val delta >= +0.0003 AND holdout delta >= -0.0003; otherwise CLOSE. Secondary only: selected-checkpoint read,
+    seed-half split (951-954 vs 955-958), M<50 / M>=50.
+
+EXTENSION RESULT 2026-11-19T16:4xZ (all 8 runs END rc=0 16:28-16:31Z; no Traceback/Error/Killed in logs/lane_ext_g*.out). Read: read_ext8.py -> logs/read_ext8.txt.
+  A kd05w192moeffn @last 8-pool vs kd05w192 8-pool s951-958: val +0.00006 +- 0.00047 (z +0.13), holdout -0.00004 +- 0.00026 -> CLOSE (val bar +0.0003).
+     secondary: selected val -0.00038 / holdout -0.00001; halves @last val +0.00009 (951-954), +0.00040 (955-958); M>=50 +0.00066, M<50 -0.00081;
+     member mean val +0.00026 holdout -0.00011.
+  C kd05w192b3ff1 @last: val -0.00001 +- 0.00048 (z -0.03), holdout +0.00027 +- 0.00026 (z +1.02) -> CLOSE.
+     secondary: selected val -0.00045 / holdout +0.00026; halves @last val -0.00016, +0.00012; member mean val -0.00006 holdout +0.00004.
+  Diversity check (logs/poolgain8.txt): 8-pool gain minus member mean, arm minus reference, @last: A val -0.00019 +- 0.00041, C +0.00005 +- 0.00042;
+     mean pairwise per-feed z correlation 0.9721 (A) / 0.9696 (C) / 0.9724 (reference). No diversity difference.
+  Reading: the post-hoc fair 4-pool reads (+0.00070, +0.00045) did not replicate; at 8 seeds both arms are level with the reference on val.
+  The 70-subset-mean re-reads of older arms (w224 +0.00092, kdmix +0.00095, gru +0.00077, ps +0.00104) are the same post-hoc kind and are not evidence
+  on their own. No all-data try file. MoE / depth for students CLOSED.
+
+NOTE 2026-11-19T16:47:43Z (lead): the why-analysis listed "an out-of-fold teacher" as untested. It was tested on 14 Nov (cross-fitted teacher, 5 folds, students kx05/kx08) and closed; see docs/07 catalogue and experiments/distillation/README.md. Not a lead.

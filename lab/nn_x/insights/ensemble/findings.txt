@@ -1,0 +1,351 @@
+ENSEMBLE BEHAVIOUR AND THE FT STAGE: findings (nn_x/insights/ensemble; 2026-11-12 17:05-17:55 UTC)
+==================================================================================================================
+Scope: CPU only (OMP/MKL/POLARS 12 threads per process, CUDA_VISIBLE_DEVICES=""), existing preds only, no training, no
+file outside this directory was modified. Every delta is a paired per-feed delta on val (14,423 feeds) as mean +- SE
+unless marked; "holdout" = the 30K train-period random-like holdout (TO only, M>=50). Pools use the lead's spec
+(per-feed z of each member, branch = member mean, final = 0.5 z(FT) + 0.5 z(TO)).
+Reproduction: G3 val 0.40032 / holdout 0.32379, PF7x 0.39974 / 0.32360, M2 0.40094 / 0.32361, Cd 0.39901 / 0.32319, all
+match the registry exactly.
+Families: OLD = F5cd, F6 (cvnd trunks, no pre2s); pre2s = F7, F9, F10, F12; re-cools F7b (c0), F7x, F7x70 (m02);
+NEW from-scratch m02 = V27g (v27_gru_m02 s511/513/515), V28l (v28_lr1_m02 s411-417), V29d (v29_d192_m02 s711-713),
+V30f (v30_f7_m02; only s901 complete at a6 time, s901+s902 at a8 time). F7p = the F7 plateau snapshots @77500 (s101-106)
+with their own n2cpv3 FT (the "no cooldown" end).
+Label-defined slices (coldpos / warmpos / npos) are descriptive only.
+
+------------------------------------------------------------------------------------------------------------------
+0. TL;DR
+------------------------------------------------------------------------------------------------------------------
+1. The premise needs a correction: the FT half did not stop adding because of m02. At pool level it is ~0 for EVERY
+   pre2s-era family, including the c0-cooled F7 (-0.00019 +- 0.00039) and F7b (+0.00019), and for the m02 re-cools
+   (F7x +0.00036, F7x70 +0.00002) and NEW (V27g -0.00021, V28l -0.00005, V29d -0.00010). It still adds for the cvnd-era
+   families (F5cd +0.00096, F6 +0.00151) and for un-cooled pre2s plateau trunks (F7p +0.00094). Two things killed it:
+   pre2s in the trunk and the cooldown. m02 only shrank the member-level number further.
+2. Why the member-level FT gain does not reach the pool. Infinite-member limits (a4_ainf.csv): the FT branch's a_inf
+   is 0.0003-0.0006 BELOW the TO branch's for every pre2s-era set (G3 -0.00042, F7x -0.00049, F7b -0.00057, F7 -0.00032,
+   V28l -0.00050). The final 0.5/0.5 limit equals the TO limit (+0.00005, +0.00005, -0.00003, -0.00007, -0.00009). For
+   the cvnd families FT's limit is above TO's (F5cd +0.00098, F6 +0.00019; final +0.00086 / +0.00102).
+   So on modern trunks the single-member FT gain (+0.0005-0.0010) is variance reduction, which the 20-member pool
+   already provides. FT also homogenises the members: mean pairwise member corr goes 0.945 -> 0.957 (G3, val and test
+   alike), and the pool-over-mean-member gain drops from +0.00440 (TO) to +0.00334 (FT).
+3. The pool-level FT effect is strongly M-dependent and replicates. For G3 it is M<20 -0.0024 +- 0.0011, M20-49 -0.0005,
+   M50-99 +0.0005, M100-199 +0.0007, M200+ +0.0014. Using TO only for M<50 feeds (FT half kept for M>=50) gives:
+   - G3 +0.00054 +- 0.00028, PF7x +0.00063 +- 0.00029, M2 +0.00043, G3+NEW +0.00044;
+   - 11 of 11 pre2s/m02 families >= 0 (mean +0.00027). The single-member V30f datapoints are noise-level: s901
+     +0.00036; s902 -0.00009, fresh, checked after the declaration;
+   - the two cvnd families negative (F5cd -0.00042, F6 -0.00068), which explains why the 11-11 M-split test
+     (sol_ensemble §2.2 S1) did not replicate.
+   A concrete mechanism: n2cpv3 trains with loss_norm 'batch' (cand_budget 8192, max_feeds 128). An M~300 feed then
+   gets ~4.9x the gradient weight of an M<=64 feed, whereas the trunk uses equal per-feed weight. nn_report's K1 note
+   ("neutral in FT because val batches are small and M varies less") is wrong for these settings: the skew is the same
+   4.9x as in the train stage.
+4. The m02 hypothesis is rejected at the vector level, with one partial exception (shift vectors, a3 (3)):
+   - The FT shift s_FT = z(FT pool) - z(TO pool) is a common correction: across families it correlates 0.75-0.94
+     (val and test).
+   - It is ORTHOGONAL to the m02 shift z(F7x TO) - z(F7b TO): r between -0.07 and +0.15.
+   - The one shared component is the cold-item push. FT's mean shift on cold candidates shrinks with cooling and then
+     with m02: F7p +0.063 -> F7 +0.029 -> F7b +0.022 -> F7x +0.013 (warm: -0.025 / -0.012 / -0.009 / -0.005).
+   - At pool level FT still trades warm for cold: G3 coldpos +0.0051, warmpos -0.0017 (label-defined, descriptive).
+5. What FT still uniquely does is small and now mostly history-similarity recalibration:
+   - The FT shift is only 13-22% explained (R2) by the 42 extras.
+   - For the cvnd families its top correlates are the pre_* encoder scores (pre_* group R2 0.11-0.12). For pre2s
+     trunks this falls to 0.03-0.06, because pre2s absorbed it. Within F5/F5cd, the prew-in-trunk members have a
+     smaller member FT gain (+0.0011 / +0.0013 vs +0.0018 / +0.0018).
+   - The FT shift now loads on seq_max_all / seq_top3 / ctx_nd_max (r +0.21-0.26). The production cooldown moves the
+     opposite way (cool(F7-F7p) r -0.17 with the same features).
+   - The transductive channel (items clicked by other users in other val folds) is negligible: 0.4% of val candidates,
+     0.3% of test. Removing the FT shift on them changes the pool by -0.00002.
+6. Blend-level fixes other than the M-split are closed. All evaluated nested over the FT user folds:
+   - global w_ft: G3 +0.00018 +- 0.00022, PF7x +0.00005, M2 -0.00014;
+   - Optuna TPE per-family (FT, TO) weights on G3+NEW: +0.00008 +- 0.00034 (in-fold optimism +0.0004 to +0.0011);
+   - "FT on top of the pool" as a linear listwise residual on the 42 extras over G3: all 8 variants -0.0001 to -0.0005;
+   - transplanting other families' FT shifts: inconsistent signs.
+7. Ensemble behaviour:
+   - Per-feed disagreement is seed noise, not structure. The per-feed oracle over different families equals the
+     oracle over same-family seeds (+0.042 vs +0.045 at k=3, +0.072 vs +0.071 at k=6).
+   - No family wins high-disagreement feeds beyond its average. Per-segment family selection, nested, is <= +0.0009
+     (best H, z 1.96, 1 of 7 variables).
+   - Test disagreement equals val (members 0.0548 vs 0.0553) and public equals private (0.0548 / 0.0548).
+   - Adding any existing family, NEW included, to G3 is <= 0 on val and on holdout (G3+NEW: val -0.00013, holdout
+     -0.00029).
+   - Infinite-member headroom of the current pools is <= +0.0003 (G3 val +0.00013 / holdout -0.00017; M2 +0.00024 /
+     +0.00001; all 55 modern members kn 0.40019 / 0.32344, headroom <= +0.0001). More members of existing recipes
+     cannot move the pool.
+8. FT recipe facts that matter for the ftopt study:
+   - OOF peaks at epoch 1 in every family. The saved EMA-final is below epoch 1 by F5cd 0.00015, F7 0.00021, F7x
+     0.00044, F7b 0.00060, V29d 0.00072, V28l 0.00075. The better-cooled trunks overfit val faster.
+   - Where FT and TO disagree most (top decile), TO is right more often (TO>FT 0.39-0.40 vs FT>TO 0.35-0.36) and the
+     final loses 0.0015-0.0030.
+   - Fine-tuning 3 members of G3 reproduces fine-tuning all 20 (+0.00001 +- 0.00022). k=1: -0.00058; k=2: -0.00027.
+
+------------------------------------------------------------------------------------------------------------------
+1. ENSEMBLE BEHAVIOUR (part 1)
+------------------------------------------------------------------------------------------------------------------
+1.1 Family table (a1_family_table.csv). final = 0.5/0.5 pool of the family; corr = candidate-level z corr.
+    fam    n  memberTO  memberFIN  hold(TO) | poolTO  poolFT  poolFIN  poolHold | FT gain member / pool      | corr FT-TO member / pool val/test
+    F5cd   6  0.39426   0.39543    0.31940  | 0.39702 0.39852 0.39798  0.32279  | +0.00117 / +0.00096+-0.00042 | 0.9850 / 0.9879/0.9887
+    F6     6  0.39294   0.39412    0.31795  | 0.39697 0.39798 0.39848  0.32183  | +0.00118 / +0.00151+-0.00044 | 0.9809 / 0.9871/0.9884
+    F7     7  0.39460   0.39538    0.31911  | 0.39867 0.39823 0.39848  0.32291  | +0.00078 / -0.00019+-0.00039 | 0.9872 / 0.9920/0.9928
+    F9     6  0.39382   0.39489    0.31844  | 0.39820 0.39754 0.39829  0.32213  | +0.00107 / +0.00009          | 0.9844 / 0.9899/0.9913
+    F10    6  0.39481   0.39565    0.31885  | 0.39848 0.39874 0.39881  0.32254  | +0.00085 / +0.00034          | 0.9861 / 0.9901/0.9908
+    F12    7  0.39371   0.39485    0.31843  | 0.39829 0.39873 0.39872  0.32250  | +0.00114 / +0.00043          | 0.9840 / 0.9894/0.9902
+    F7b    7  0.39550   0.39665    0.31864  | 0.39953 0.39935 0.39972  0.32195  | +0.00115 / +0.00019          | 0.9858 / 0.9899/0.9908
+    F7x    7  0.39667   0.39733    0.31999  | 0.40061 0.40027 0.40097  0.32332  | +0.00066 / +0.00036          | 0.9882 / 0.9905/0.9914
+    F7x70  7  0.39621   0.39683    0.32000  | 0.40024 0.39988 0.40026  0.32315  | +0.00062 / +0.00002          | 0.9882 / 0.9911/0.9920
+    V27g   3  0.39624   0.39684    0.31991  | 0.39896 0.39888 0.39875  0.32211  | +0.00061 / -0.00021          | 0.9893 / 0.9914/0.9922
+    V28l   7  0.39485   0.39541    0.31886  | 0.39878 0.39863 0.39873  0.32247  | +0.00056 / -0.00005          | 0.9843 / 0.9892/0.9905
+    V29d   3  0.39552   0.39599    0.31961  | 0.39814 0.39760 0.39804  0.32215  | +0.00047 / -0.00010          | 0.9868 / 0.9899/0.9910
+    F7p    6  0.39218   0.39367    0.31741  | 0.39543 0.39587 0.39637  0.32057  | +0.00150 / +0.00094          | 0.9845 / 0.9905/0.9912
+    POOLS: G3 TO 0.40035 FT 0.39984 FIN 0.40032 (FT gain -0.00003 +- 0.00039; FT-only -0.00052 +- 0.00058)
+           PF7x -0.00010; M2 +0.00009; Cd +0.00024; G3+NEW (33) FIN 0.40019 / hold 0.32350; NEWonly (13) 0.39943 / 0.32326.
+
+1.2 Disagreement structure (a2 (a), a2_dis_deciles.csv).
+    - Mean within-feed disagreement (1 - mean pairwise Pearson of z): G3 members 0.0553 val / 0.0548 test; the 12
+      family pools 0.0133 / 0.0132. The family-level and member-level disagreement correlate 0.86 per feed.
+    - Deciles within M bins (so M is controlled):
+      - G3 NDCG falls with disagreement, 0.446 (d0) to 0.372 (d9).
+      - The pool's gain over the mean member rises, +0.0020 (d0) to +0.0051 (d9).
+      - The family-oracle gap is flat at +0.041 to +0.060.
+      - High-disagreement feeds have fewer cold candidates (luo cold share 0.44 at d0, 0.36 at d9). Disagreement
+        reflects how hard the feed is, not coldness.
+1.3 Who is right (a2 (b), a2_whoisright_*.csv).
+    - By disagreement tercile, each family's NDCG minus the 12-family mean is roughly its overall offset. F7x leads in
+      all terciles (+0.0017 / +0.0026 / +0.0016); F6 is +0.0015 in the low tercile only (1.9 SE, chance among 36 cells).
+    - Win shares in the high tercile range 0.051-0.120 (uniform 0.083). The 3-member families V27g / V29d win most
+      (0.12 / 0.11) because a smaller pool has a noisier per-feed score.
+    - By segment (M, luo cold, user, category-in-history, n_cat, day): F7x / F7x70 are positive almost everywhere.
+      Isolated |t| >= 2 cells (e.g. V28l M100-199 +0.0022, M<20 -0.0029; F9 M20-49 -0.0022) show no consistent
+      pattern across seeds or families.
+1.4 Oracle headroom (a2 (c), a2_segment_oracle.csv).
+    - Per-feed oracle over the 12 family pools: 0.44730, +0.04698 over G3. Almost all of it is noise.
+      - k=3 single members: different families +0.04231 vs same-family seeds +0.04545.
+      - k=6: +0.07183 vs +0.07050.
+      - Structured share ~0 (-0.003 / +0.001).
+    - Per-segment best family (in-sample / nested over the FT user folds), vs G3:
+      | variable      | in-sample | nested             |
+      | M             | +0.00085  | -0.00058           |
+      | luo_cold      | +0.00101  | -0.00003           |
+      | user          | +0.00092  | -0.00068           |
+      | cat_in_hist   | +0.00083  | +0.00041           |
+      | n_cat         | +0.00083  | +0.00012           |
+      | H             | +0.00108  | +0.00086 +- 0.00044 (best of 7: consistent with chance) |
+      | max_cat_share | +0.00085  | +0.00020           |
+      Nothing to route. This agrees with the closed segment/routing weights.
+1.5 Complementarity (a2 (d), a2_pairs.csv, a2_marginal_G3.csv).
+    - Candidate-level corr of the family pools: 0.981-0.996 on val and the same to 3 decimals on test. The
+      F7-lineage block (F7, F7b, F7x, F7x70) is 0.993-0.996. The NEW families sit at 0.982-0.990 vs the rest, the most
+      decorrelated: V27g vs F6 0.981, V29d vs F6 0.981.
+    - Pair gain over the better single family, family-equal pairs:
+      - Every F7x pair is negative on val (-0.0003 to -0.0013), because F7x is the val-strongest. On holdout they are
+        ~0 to +0.0003 (F7x+F7x70 +0.00029, F7x+F10 +0.00024).
+      - NEW pairs look complementary: V27g mean +0.0004 val / +0.0005 holdout; V29d +0.0000 / +0.0006. This is mostly
+        the member-count effect of pairing a 3-member family with a 6-7-member one.
+      - Strength-diversity law on the 66 val pairs: gain = 0.047(1-rho) - 0.59 gap, R2 0.83.
+    - Marginal G3 + family X, member-equal (val | holdout | test corr with G3):
+      - +F5cd +0.00007 | -0.00024 | 0.99952
+      - +F6 -0.00010 | -0.00023
+      - +F7 -0.00066 | -0.00026
+      - +F9 -0.00018 | -0.00020
+      - +F12 -0.00026 | -0.00027
+      - +F7b -0.00032 | -0.00031
+      - +V27g -0.00027 | +0.00002 | 0.99982
+      - +V28l -0.00004 | -0.00029
+      - +V29d -0.00005 | -0.00006 | 0.99981
+      No existing family improves G3 on both. Test correlations of 0.9993-0.9998 mean the picks are nearly the same
+      ranking.
+1.6 Diversity by segment, val vs test (a2 (e), a2_diversity_segments.csv).
+    - Member disagreement is highest in M<20 (0.066), lc<20% (0.071), cih>.95 and H0, but the pool-over-member gain
+      is SMALLEST in M<20 (+0.0017 vs +0.0033-0.0056 elsewhere). Small-feed disagreement does not convert into NDCG.
+    - Test disagreement matches val segment by segment. Exception: lc>=65% feeds are less disagreed-on on test
+      (0.052 vs 0.064).
+    - Public = private (0.0548 / 0.0548 members; 0.0132 / 0.0132 families; FT-TO 0.0076 / 0.0076). Ensemble diversity
+      gives no private-specific lever.
+1.7 Saturation (a8_saturation.csv; a_inf from NDCG(k) = a_inf - b/k over random TO subsets, val | holdout):
+    - Single families have +0.0004 to +0.0009 headroom each: F7x 0.40116 | 0.32378, F10 +0.00085 | +0.00086,
+      V28l +0.00108 | +0.00055.
+    - The pools have none. G3 headroom +0.00013 | -0.00017; M2 +0.00024 | +0.00001; NEW (15) +0.00028 | +0.00015.
+      All 55 modern members together: kn 0.40019 | 0.32344, below G3 on both.
+    - G3's holdout (0.32379) already equals F7x's infinite-member limit (0.32378).
+
+------------------------------------------------------------------------------------------------------------------
+2. WHY THE FT HALF STOPPED ADDING (part 2)
+------------------------------------------------------------------------------------------------------------------
+2.1 Where it stopped. See 1.1: the pool-level FT gain is ~0 for every cooled pre2s-era family (mean ~+0.0001). It is
+    still +0.001 to +0.0015 for the cvnd families and +0.0009 for un-cooled pre2s plateau trunks (F7p). Member-level
+    FT-only gain falls F7p +0.00198 -> F7 +0.00094 -> F7b +0.00073 -> F7x +0.00045 -> V28l +0.00021, but that number
+    is the wrong target (2.2).
+2.2 Variance reduction, not bias reduction (a3 (1), a4 (1)).
+    | set   | corr TO -> FT | ens gain TO -> FT    | FT-shift corr across members | a_inf TO / FT / FIN       |
+    | G3    | 0.9454 -> 0.9571 | +0.00440 -> +0.00334 | 0.660 | 0.40055 / 0.40013 / 0.40061 |
+    | F7x   | 0.9497 -> 0.9581 | +0.00394 -> +0.00314 | 0.734 | 0.40124 / 0.40075 / 0.40129 |
+    | F7b   | 0.9403 -> 0.9559 | +0.00403 -> +0.00311 | 0.620 | 0.40005 / 0.39948 / 0.40002 |
+    | F7    | 0.9406 -> 0.9559 | +0.00407 -> +0.00269 | 0.532 | 0.39907 / 0.39875 / 0.39900 |
+    | V28l  | 0.9372 -> 0.9500 | +0.00393 -> +0.00357 | 0.594 | 0.39979 / 0.39929 / 0.39970 |
+    | F6    | 0.9302 -> 0.9500 | +0.00403 -> +0.00380 | 0.569 | 0.39792 / 0.39811 / 0.39894 |
+    | F5cd  | 0.9470 -> 0.9600 | +0.00276 -> +0.00279 | 0.729 | 0.39805 / 0.39903 / 0.39891 |
+    - The member-level noise term b falls with FT (G3 0.00456 -> 0.00365), so one FT member looks better. The
+      infinite-member value of the FT branch is lower on every modern set, and averaging 0.5/0.5 returns exactly the TO
+      limit. The FT branch at pool level behaves like a weaker (by ~0.0005), 0.991-correlated member. The pairwise law
+      predicts its contribution: 0.019 x 0.009 - 0.38 x 0.0005 ~ -0.00002, observed -0.00003.
+    - Test behaves the same: the corr TO -> FT increase is identical on test (0.9447 -> 0.9575 for G3).
+2.3 The M-dependence (a3 (2) M rows, a6_mbin.csv). G3 per M bin, x1e4:
+    | M bin    | member FT gain | pool FT gain     | ens gain TO | ens gain FT | FT-only pool |
+    | M<20     | +5.9           | -24.3 +- 10.8    | +46.9       | +15.0       | -31.5        |
+    | M20-49   | -1.5           | -4.6 +- 8.5      | +58.7       | +39.4       | -29.0        |
+    | M50-99   | +10.3          | +5.4             | +43.5       | +38.4       | +8.5         |
+    | M100-199 | +15.2          | +7.3             | +41.3       | +35.7       | +16.4        |
+    | M200+    | +5.4           | +14.4            | +24.0       | +34.9       | +11.2        |
+    - In small feeds FT erases most of the ensemble gain (M<20: +0.0047 -> +0.0015) without adding bias reduction.
+    - M>=50 pool FT gain: G3 +0.00085, F7x +0.00084, V28l +0.0008, F9 +0.0011, F12 +0.0010.
+    - M<50: G3 -0.0013, V28l -0.0013, F9 -0.0014.
+    - The FT loss weighting favours large feeds (4.9x; see TL;DR 3), consistent with the sign pattern. A member-level
+      K1 FT A/B on an old base (nn_report) was neutral. A pool-level test on modern trunks has never been run.
+2.4 Other segments (a3_ftgain_segments.csv, pool level, G3 x1e4):
+    - user0 +48.0* (n 658)
+    - luo cold share: lc>=65% +50.8 (n 325, ns); other bins -7 to +2
+    - category regime: cih<=.5 +19.8, cih.5-.8 +8.8, cih.8-.95 -4.4, cih>.95 -2.8; n_cat ncat13+ +8.9,
+      ncat5-8 -13.0 (all ns)
+    - day: Tue +3.9, Thu -4.9
+    - label-defined: coldpos +51.4*, somecold +21.7*, warmpos -16.6* (the same sign pattern in all 14 sets)
+    - The old families gain everywhere (F6 +5 to +43 in every cat / H bin). The modern ones only redistribute.
+2.5 Did m02 capture what FT used to add? (a3 (3), a3_shift_stats.csv). Shift-vector correlations, val (test within 0.01):
+    | pair                      | corr          |
+    | ft_* vs ft_* (8 sets)     | 0.75 to 0.97 (ft_G3 vs ft_F7x 0.972) |
+    | m02(F7x-F7b) vs ft_F7     | +0.005        |
+    | m02 vs ft_F7b             | +0.137        |
+    | m02 vs ft_F7x             | -0.069        |
+    | m02 vs ft_G3              | -0.023        |
+    | cool(F7-F7p) vs ft_F7     | -0.189        |
+    | cool vs ft_F7p            | +0.223        |
+    | recool(F7b-F7) vs ft_*    | -0.29 to 0.00 |
+    - m02 does not reproduce the FT correction. Its direction is new information: m02 moves positives up, mean z of
+      positives +0.0032. Every FT shift moves held-out positives slightly DOWN on average (-0.002 to -0.007), and only
+      the top-rank reshuffle on cold-positive feeds pays.
+    - What cooling and m02 did absorb is the cold push. Mean FT shift on cold vs warm candidates:
+      F7p +0.063 / -0.025 -> F7 +0.029 / -0.012 -> F7b +0.022 / -0.009 -> F7x +0.013 / -0.005.
+      The cooldown alone pushes cold +0.044; m02 adds +0.011.
+2.6 What FT still adds uniquely (a3 (4), (5)).
+    - R2 of s_FT on the 42 extras (within-feed z): F5cd 0.21, F6 0.22, F7p 0.16, F7 0.20, F7b 0.13, F7x 0.14,
+      V28l 0.15, G3 0.19.
+    - pre_* group R2 by set: F5cd 0.117, F6 0.108, F7 0.061, F7b 0.035, F7x 0.027, V28l 0.037. The pre-encoder channel
+      that powered the FT half is now in the trunk (pre2s).
+    - Trunk-input check (a4 (5)), member FT-only gain:
+      - F5cd without prew +0.00184 vs with prew +0.00109;
+      - F5 v12_all +0.00183 vs v12_allprew +0.00132;
+      - each difference ~1 SE (n 3 vs 3), same sign twice.
+    - Top correlates now: seq_max_all +0.21 to +0.26, seq_top3, ctx_nd_max, ctx_nd_knn_h_dev / knn_u_dev. Exploration
+      labels favour candidates similar to the user's history more than the production cooldown does: the cool(F7-F7p)
+      shift correlates -0.17 / -0.16 with the same features.
+    - The val-period item channel is negligible:
+      - Val candidates whose item was shown in another fold: 16.2%. Clicked in another fold: 0.4%.
+      - Test: item shown in val 12.7%, clicked in val 0.3% (public 0.4%, private 0.3%).
+      - FT raises clicked-other-fold items (+0.03 to +0.04 z). Removing the shift there changes the pool by -0.00002
+        (F7, F6 alike). LUO-popularity features explain only 3-6% of the shift.
+2.7 FT epochs and disagreement (a1_ftcurves.csv, a7_ft_disagree.csv).
+    - OOF gain over epoch 0, mean per family (ep1 | ep4 | EMA-final):
+      | family | ep1     | ep4     | EMA-final |
+      | F5cd   | +0.0016 | +0.0014 | +0.0015   |
+      | F7     | +0.0012 | +0.0009 | +0.0009   |
+      | F7b    | +0.0013 | +0.0006 | +0.0007   |
+      | F7x    | +0.0009 | +0.0004 | +0.0005   |
+      | V28l   | +0.0010 | +0.0002 | +0.0002   |
+      | V29d   | +0.0012 | +0.0004 | +0.0005   |
+      | F7p    | +0.0020 | +0.0019 | +0.0020   |
+      F7p does not decay. Well-cooled trunks start overfitting val labels after epoch 1.
+    - G3 FT-TO disagreement deciles: top decile final - TO -0.00155 +- 0.00148, TO>FT 0.389 vs FT>TO 0.359. Same for
+      F7x (-0.00296), and for F6 (-0.00154) even though F6's FT helps overall.
+    - FT moves test less than val (FT-TO disagreement 0.0076 vs 0.0084; rms shift 0.127 vs 0.133), equally on public and
+      private.
+
+------------------------------------------------------------------------------------------------------------------
+3. WHAT COULD MAKE FT USEFUL AGAIN (part 3)
+------------------------------------------------------------------------------------------------------------------
+3.1 Tested on CPU here (all nested over the exact FT user folds, u0 singletons):
+    | test                                                | result                                                        |
+    | global w_ft grid 0..1                               | G3 +0.00018 +- 0.00022 (picks 0.3, 0.6, 0.3, 0.3, 0.3); PF7x +0.00005; M2 -0.00014; G3+NEW +0.00036 +- 0.00029; Cd +0.00003 (prefers 0.6-0.7, old families) |
+    | M-split: w_ft = 0 for M<50, 0.5 for M>=50           | G3 +0.00054 +- 0.00028 (nested +0.00035); PF7x +0.00063 +- 0.00029 (nested same); M2 +0.00043; G3+NEW +0.00044; 11/11 modern families >= 0; leave-family-out positive for all 11 modern families, negative for F5cd/F6 |
+    | Optuna TPE, 13 weights (per-family FT/TO + w_ft), G3+NEW, 60 trials per outer fold | nested +0.00008 +- 0.00034 vs equal (inner optimism +0.0004..+0.0011 per fold) |
+    | FT branch from k of 20 G3 members                   | k=1 -0.00058, k=2 -0.00027, k=3 +0.00001, k=5 -0.00007, k=10 +0.00001, k=14 +0.00007 (+- 0.0001-0.0002) |
+    | FT branch from one family (post hoc)                | F7x FT only +0.00042 +- 0.00029; F7x70 +0.00015; F10 -0.00065 (not a rule) |
+    | "FT on top of the pool", linear listwise residual on extras (+cold flag), L2 by inner CV | G3fin: all42 -0.00050, ctx_seq -0.00043, luo -0.00026, pre_* -0.00022; G3 TO base: -0.00047 / -0.00027 / -0.00013 / -0.00020 (every variant trades coldpos +0.002..+0.007 for warmpos -0.001..-0.0025) |
+    | transplant: TO pool + lambda * s_FT(other family)   | no consistent sign: G3 + ft_F7 +0.00051 +- 0.00038; G3 + ft_G3 +0.00033; F7x + ft_F7b -0.00111; F7 + any FT shift <= 0 |
+3.2 Reading:
+    - Output-space recombination of the existing FT predictions is exhausted. The single exception is the M-split,
+      which removes FT where it demonstrably hurts (small feeds). It is the learned mechanism behind nnstack
+      g3_gate_nofam (+0.00044, M<50 +0.00106).
+    - A real gain needs an FT whose infinite-member limit beats TO's. That requires (i) less over-fitting (ep1
+      > EMA-final), (ii) a loss that does not neglect small feeds, and (iii) keeping member diversity.
+    - FT on top of the pool cannot help in linear form. A distilled-pool NN FT is not recommended: FT's limit is below
+      TO's on every modern trunk.
+    - Fine-tuning only 3-5 members per pool is enough for the FT half as it is (saves ~75% of FT GPU time).
+
+------------------------------------------------------------------------------------------------------------------
+4. PROPOSED EXPERIMENTS (also in the structured output)
+------------------------------------------------------------------------------------------------------------------
+E1 [CPU, now] M-split blend: final = TO-only for M<50, 0.5/0.5 for M>=50.
+   - Pre-declare it now (this file is the declaration, written 17:50 UTC). Confirm on the members a6 did NOT use:
+     V30f s902-906, V27g s512/514/516/517/518, V29d s714/715 (a9_fresh_msplit.py).
+   - It is a POOL-level effect: FT hurts M<50 through lost diversity. Single members are the wrong unit; their expected
+     delta is ~0 and their SE is 0.0003. Pass iff the M-split delta of the pool of all fresh members (>= 6) > 0 AND the
+     candidate-pool delta > +1 SE. There is no M>=50 change by construction.
+   - First fresh datapoint (single member, 17:52): v30_f7_m02_s902 -0.00009 +- 0.00033, uninformative as stated.
+   - Expected +0.0003..+0.0006 val. Test M<50 share is 0.390 (public 0.387, private 0.392) vs val 0.409.
+   - Kill: the fresh-member POOL delta <= 0.
+   - Prior tests: sol_ensemble §2.2 S1 (11-11, F5-era; rejected, did not replicate on F5cd/V13); nnstack g3_wft_b3
+     (learned nothing); g3_gate_nofam (+0.00044).
+E2 [GPU, FT only] FT --loss_norm feed (and idcg) on 7 members of one modern family (F7x r101-107 or V28l), judged at
+   POOL level vs the standard n2cpv3 FT of the same members.
+   - Readout: pool delta, M<50 / M>=50, FT a_inf vs TO a_inf.
+   - Pass: pool delta > +1 SE, M<50 >= 0, and it beats the E1 M-split.
+   - Cost: ~7 FT runs on one GPU lane.
+   - Prior test: nn_report K1 FT A/B (member level, old base, +-0.0002). Its rationale for neutrality is wrong (4.9x
+     skew).
+E3 [GPU, part of the ftopt Optuna study] FT epochs 1-2 / lr 1e-5..5e-5 / EMA start / extras subset {n2c_pre_v3,
+   ctx+seq only, none} / loss_norm / member-specific FT seed / freeze-trunk.
+   - The objective must be POOL-level, with an M split, not member OOF. The ep1 - EMA-final gap is 0.0004-0.0007 on
+     m02 / lr1 / d192 trunks.
+   - Prior test: "shorter FT CLOSED at mix level +-0.0004" (REVIEW_SYNTHESIS OVERFIT-4; r6_recap §3.7) on families
+     whose decay was 2-3x smaller.
+   - Note: finetune.py seeds torch / rng with 1000k+s for EVERY member, so all members share the extras-branch first
+     layer init and the batch order. This is cheap to vary and may cut part of the FT-induced correlation.
+E4 [GPU saving] Fine-tune only 3-5 members per pool (spread over families); spend the saved FT time on trunks / arms.
+   - Evidence: k=3 matches k=20 within +-0.0002.
+   - Kill: on the next pool, FT(k=5) vs FT(all) < -1 SE.
+E5 [planning] Treat from-scratch m02 trunks (D2) as REPLACEMENTS for re-cooled members (removing the procedural val
+   excess), not as additions.
+   - Evidence: G3 + NEW < G3 on val and holdout; pool headroom <= +0.0003; ALL55 below G3.
+   - Decide5 N1 (G3+NEW) is expected to be <= G3 on existing members.
+   - Alternative: a pool of from-scratch m02 members only, once >= 12 exist, judged by S = min(V, V-D) with D ~ 0 for
+     non-re-cooled members.
+E6 [GPU, low priority] Diversity-preserving FT: freeze the trunk (extras branch + head only) or FT with member-specific
+   extras subsets / seeds, judged at pool level.
+   - Evidence: FT raises member corr +0.010 to +0.017 and costs 0.0005-0.0015 of ensemble gain.
+   - Prior test: LP-FT closed at member level (-0.00014, nnx_VERDICT §5); never tested at pool level.
+
+------------------------------------------------------------------------------------------------------------------
+5. CAVEATS
+------------------------------------------------------------------------------------------------------------------
+- All FT numbers are val OOF. On test the FT half is a 5-fold mean and moves test less than val. There is no holdout FT,
+  so FT conclusions rest on val alone (paired SE ~0.0003-0.0004 at pool level).
+- The cross-family replications (M-split 11/11, a_inf 5/5) are robustness across trunks on the SAME val feeds, not
+  independent samples. The pool-level SE (~0.00028) is the honest uncertainty. E1 therefore needs the fresh-member
+  confirmation.
+- The a_inf extrapolation assumes the 1/k law. Mixed pools (G3, ALL55) fit it less well, so their headroom figures are
+  approximate (+-0.0002).
+- Re-cooled members carry a procedural val-over-holdout excess (~+0.001, CDSEED-813). Val levels of F7x / F7x70 / G3
+  are flattered; this does not affect the FT-vs-TO comparisons, which are within-member.
+- V30f had 1 member at the a6 run (2 at a8). Proper V30 numbers need s903-906.
+
+------------------------------------------------------------------------------------------------------------------
+6. FILES (all in <repo>/nn_x/insights/ensemble)
+------------------------------------------------------------------------------------------------------------------
+lib.py (pool spec, segments, user folds; caches per-member z in the session scratchpad)
+a1_family_table.{py,log,csv}, a1_ftcurves.csv        family / pool TO-FT-final, FT epoch curves
+a2_disagreement.{py,log} + a2_*.csv                  disagreement, who-is-right, oracles, pair matrix, marginal-to-G3
+a3_ft_decomp.{py,log} + a3_*.csv                     diversity accounting, FT gain by segment, shift vectors,
+                                                     transplant, extras regression, transductive items
+a4_ft_alternatives.{py,log} + a4_*.csv               a_inf decomposition, fewer-member FT, w_ft, Optuna nested, trunk inputs
+a5_linear_residual.py, a5_*.log, a5_linear_residual_*.csv   linear listwise residual on FT extras over G3 (nested)
+a6_msplit.{py,log} + a6_*.csv                        per-M decomposition, M-split blend, leave-family-out, test shift size
+a7_ft_disagree.{py,log,csv}                          FT-vs-TO disagreement deciles
+a8_saturation.{py,log,csv}                           infinite-member headroom on val and holdout
+a9_fresh_msplit.py, a9_fresh_msplit_s902.log         pre-declared fresh-member confirmation of the M-split (E1)

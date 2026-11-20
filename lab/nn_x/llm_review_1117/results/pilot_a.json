@@ -1,0 +1,962 @@
+{
+ "studies": [
+  {
+   "patterns": [
+    {
+     "name": "Recently engaged category stuck below rank 10 (category hedge)",
+     "signal": "A category with contact/contact1/order/lead events (or 10+ actions) among the newest ~15 history events (cathist @<=15, a>=3), whose best-ranked candidate sits below rank 10 while other categories fill the top 10. Fires in 7 feeds: S0-00 (Services, r28), S0-02 (Services, r51), S0-03 (Household appliances, r52), S0-08 (Games, r30), S0-11 (Services, r20), S0-14 (Tableware, r23), S0-17 (Tickets and travel, r15).",
+     "action": "Move only that category's best-ranked item to about rank 5, not rank 1. Rank 5 breaks even at about 6% per item. Evidence is too thin to apply (see net_effect_guess).",
+     "support_feeds": [
+      "S0-17"
+     ],
+     "counter_feeds": [
+      "S0-00",
+      "S0-02",
+      "S0-03",
+      "S0-11",
+      "S0-08",
+      "S0-14"
+     ],
+     "net_effect_guess": "1 hit in 7 firings (14%; plausible range about 1-58%) against a 6% break-even. The hit is S0-17, where the moved item is the positive (r15 to r5, +0.084 feed NDCG). A wrong move costs 0 to 0.015: S0-11 -0.0145, S0-03 -0.001, the other four 0. Net about +0.068 over 20 feeds, or +0.003 per feed. In S0-08 (positive is the 5th-best Games item, r66) and S0-14 (2nd-best Tableware, r49) the category was right but the item wrong, and promoting 2-5 items per category dilutes below break-even. The rule was shaped after seeing S0-17, so treat it as a hypothesis. It needs pooled replication on the other study files, roughly 10 or more hits."
+    },
+    {
+     "name": "In-category re-ordering by ucos / f1 / h10 / pop / f5",
+     "signal": "The positive is a same-category mate of many model-top items (10 of the 15 miss feeds: S0-00, 02, 03, 04, 06, 08, 14, 15, 17b, 18) and sits in the model's 20-60 same-category items. Check whether any column singles it out versus its category mates.",
+     "action": "No usable edit. The positive is median or worse on cosines in S0-02 (below its category mates on ucos, h10, f1 and f4) and S0-06 (below on ucos, h10 and hmax). It is mid-pack in S0-03, 04, 14, 17b and 18. It is top-quartile only in S0-08 (ucos, f1) and S0-15 (highest f1 of its category, but already r8).",
+     "support_feeds": [
+      "S0-08",
+      "S0-15"
+     ],
+     "counter_feeds": [
+      "S0-02",
+      "S0-03",
+      "S0-04",
+      "S0-06",
+      "S0-14",
+      "S0-17",
+      "S0-18",
+      "S0-00"
+     ],
+     "net_effect_guess": "About 0. Any single-column re-sort would be right in 2 of 10 feeds and hurt in at least 2 (S0-02, S0-06). Consistent with the primer: the clicked item often loses to its mates on every column."
+    },
+    {
+     "name": "Old high-intent category (exploration promote)",
+     "signal": "A candidate whose category appears in history only through old lead/orderstep/contact/order events (newest index 140 or later), or has no cathist, with hmax at that old index and low h10 (about .35-.55). The three positives are Water transport (S0-12, hmax .83 @170:orderstep, h10 .50), Phones (S0-13, .76 @180:lead, h10 .40) and Motorcycles (S0-16, .94 @165:lead, h10 .50).",
+     "action": "Promote one item per such category to about rank 10-20. Not recommended.",
+     "support_feeds": [
+      "S0-12",
+      "S0-13",
+      "S0-16"
+     ],
+     "counter_feeds": [
+      "S0-02",
+      "S0-04",
+      "S0-06",
+      "S0-07",
+      "S0-08",
+      "S0-14",
+      "S0-15",
+      "S0-17",
+      "S0-18"
+     ],
+     "net_effect_guess": "Counting by eye, about 300 candidates in old-action categories across the 20 feeds (e.g. Apartments and Vacancies in S0-02, Watches in S0-06, Phones in S0-08, Clothing in S0-17, Beauty in S0-18, Bicycles in S0-14) contain 3 positives, about 1.0%. The average candidate is 1.6%. No lift, so rank 20 (2.9%) is already generous. The class was defined from the 3 positives, so even that count flatters it."
+    },
+    {
+     "name": "Demote old near-duplicates in the model top 10",
+     "signal": "hmax >= .98 at history index >= 25 (a re-post of something viewed long ago) ranked in the top 10. About 19 instances: S0-18 r1, 2, 3, 6, 7, 9 and 10; S0-12 r4, 6 and 10; S0-14 r1 and 9; S0-15 r2 and 3; S0-16 r1 and 2; S0-17 r1; S0-07 r6; S0-08 r4.",
+     "action": "Move them down to rank 15-30. All 19 are negatives and none of the 21 positives has hmax >= .98 at index >= 25 (the two nearest are .96@52 in S0-11 and .97@36 in S0-17).",
+     "support_feeds": [
+      "S0-18",
+      "S0-15",
+      "S0-12",
+      "S0-16",
+      "S0-14",
+      "S0-17"
+     ],
+     "counter_feeds": [
+      "S0-11",
+      "S0-17"
+     ],
+     "net_effect_guess": "Gain at best +0.001 to +0.004 per feed. Demoting 10 items below the S0-18 positive lifts it r28 to r18 (+0.03). S0-15 lifts r8 to r6 (+0.04). S0-16 gains +0.004. Demotion only shifts the positive by a few ranks. A demoted positive would lose 0.3-0.6, and the rate at top-10 slots is 6-13%, so the expected cost is about -0.03 per demoted item against a gain of about +0.002. Observing 0 of 19 is not significant (p about 0.25). The two near misses just under the threshold (S0-11, S0-17a) are positives."
+    },
+    {
+     "name": "Cold and fresh listing promote (pop=0, exp=0, low f4)",
+     "signal": "pop=0 and exp=0 with f4 below about .3. Positives with this profile: S0-00 (r97), S0-06 (r25, f4 .08), S0-07 (r5), S0-15 (r8).",
+     "action": "Promote cold or fresh items. Not recommended.",
+     "support_feeds": [
+      "S0-00",
+      "S0-06",
+      "S0-07",
+      "S0-15"
+     ],
+     "counter_feeds": [
+      "S0-01",
+      "S0-02",
+      "S0-03",
+      "S0-04",
+      "S0-08",
+      "S0-10",
+      "S0-12",
+      "S0-13",
+      "S0-14",
+      "S0-16",
+      "S0-17",
+      "S0-18"
+     ],
+     "net_effect_guess": "4 of 21 positives (19%) against roughly 25-30% of candidates being cold, so about 0.7x. Cold items fill much of the lower half of every feed (S0-07 has about 70 of 238). Positives with f4 <= .10: 1 of 21 (S0-06) against about 10% of candidates, matching the primer's 0.46x for the freshest tenth. Negative expected value."
+    },
+    {
+     "name": "Non-home or zero region (f2 <= .10)",
+     "signal": "f2 at .00-.10 while the home value is much higher. 7 of 21 positives: S0-02 (.00), S0-03 (.10), S0-05 (.00, already r1), S0-06 (.00), S0-08 (.08), S0-15 (.00), S0-16 (.00).",
+     "action": "Promote f2~0 items. Not recommended.",
+     "support_feeds": [
+      "S0-02",
+      "S0-03",
+      "S0-06",
+      "S0-08",
+      "S0-15",
+      "S0-16"
+     ],
+     "counter_feeds": [
+      "S0-00",
+      "S0-04",
+      "S0-07",
+      "S0-09",
+      "S0-10",
+      "S0-12",
+      "S0-13",
+      "S0-14",
+      "S0-17",
+      "S0-18",
+      "S0-19"
+     ],
+     "net_effect_guess": "7 of 21 (33%) against roughly 20% of candidates (eyeballed per feed), a 1.65x lift with P about 0.17, so not significant. The model already sees f2. Promoting all f2<=.10 items means about 20% of each feed, far below the 6% per-item bar at any rank worth moving to."
+    },
+    {
+     "name": "Old but high-engagement listing (f4 >= .67 and f5 >= .75)",
+     "signal": "Old listing with a high unsmoothed engagement rate. Positives: S0-03 (.67/.97), S0-08 (.98/.76), S0-17a (.91/.92), S0-18 (.97/.92). All four are in miss feeds.",
+     "action": "Promote such items. Not recommended.",
+     "support_feeds": [
+      "S0-03",
+      "S0-08",
+      "S0-17",
+      "S0-18"
+     ],
+     "counter_feeds": [
+      "S0-02",
+      "S0-04",
+      "S0-06",
+      "S0-12",
+      "S0-13",
+      "S0-14",
+      "S0-15",
+      "S0-16"
+     ],
+     "net_effect_guess": "4 of 21 positives (19%) against a base of about 7-13% of candidates (S0-18 about 7%, S0-17 about 7%, S0-08 about 8%, S0-03 about 13%). The lift is 1.5-2.5x and not significant (P about 0.2). The class holds 10-20 items per large feed, so about 1% per item above base would be needed to reach the 6% bar, and the data do not show that. The model has both columns."
+    }
+   ],
+   "cautions": [
+    "Promoting the highest-ucos candidate below rank 5 hit 0 of 15 miss feeds (S0-00 r7 .61, S0-02 r8 .65, S0-06 r2/r5 .68-.69, S0-08 r64 Games .66 versus the positive r66 at .57, S0-13/S0-14/S0-17 similar). The positives' ucos is mid-pack or low (S0-12 .43, S0-13 .44, S0-16 .43).",
+    "Promoting items that nearly duplicate the newest contact/order event inside the user's main category is wrong. S0-14: 6 Tableware candidates with hmax @0/5 contact1, and the positive's nearest neighbour is a view at @129. S0-08: about 10 Games candidates with hmax @2:order or @16:contact, positive hmax @12:view. S0-07: about 10 Kids goods @2:order items fill the top, and the positive is Collectibles with a view @28.",
+    "Demoting low-affinity categories further would erase the exploration hits. 6 of 21 positives have f3 below .25 (S0-00 .24, S0-11 .21, S0-12 .19, S0-13 .12, S0-16 .18, S0-17b .32), and 4-5 sit in categories absent from the recent 32 events. The model's low rank for these is correct on average.",
+    "Promoting the category's first item is not enough when the category is right. S0-08 (positive is the 5th Games item, r66), S0-14 (2nd Tableware, r49) and S0-06 (6th Office equipment, r25) all had the right category and the wrong item.",
+    "Overriding a large rank-1 z gap in either direction. S0-10 has r1 at +3.34 versus +1.13 and it is a negative, while S0-09 has r1 at +1.76 versus +0.34 and it is the positive. The gap carries no sign.",
+    "Demoting hub listings (pop >= 100). By eye there are about 113 such candidates across the feeds and 0 of 21 positives, but the expectation is only about 1.0, so P(0) is about 36%. Nothing here supports it.",
+    "Demoting top-10 negatives by any rule yields tiny gain (+0.002 to +0.03 per feed) because only promotions move a positive far up. Risk is asymmetric: a mistakenly demoted top-10 positive loses 0.3-1.0.",
+    "Treating small feeds, guests or short histories as fixable. S0-01 (r3), S0-05 (r1), S0-09 (r1) and S0-19 (r1) are already near-optimal, and S0-10 (32 candidates, all Vacancies) and S0-11 (25 candidates) have no distinguishing columns.",
+    "Tuning any rule on the post-hoc class. The hedge, old-intent and demotion classes were all shaped after looking at the positives, so their apparent support is optimistic."
+   ],
+   "misses_total": 15,
+   "misses_explainable": 1,
+   "verdict": "No blind edit I could verify beats FD16P20 on these 20 feeds. 15 of 20 feeds have their best positive below rank 5. They split into about 10 same-category positives (the model's 20-60 same-category mates sit above it, and no column singles it out) and about 5 exploration positives in categories absent from recent history (S0-00, S0-11, S0-12, S0-13, S0-16). Only 1 miss, S0-17 (r15, the best Tickets-and-travel item for a user with 58 actions in that category, newest event at index 11), is plausibly fixable from the card, via the category hedge. That rule fired 7 times with 1 hit and was built after seeing S0-17. The 3 positives in old lead/orderstep categories are about 1% of roughly 300 such candidates, below the 1.6% average. Cold/fresh, f2~0 and old-but-engaged candidates all lack a lift above noise. Rank 1 needs about 13% likelihood, rank 5 about 6%, and none of the tested signals reaches either. Demotions are cheap but nearly worthless (+0.002 to +0.03 per feed). I recommend no edits from this file alone. If anything is tested, use only the hedge, at rank 5-6, and pool its hit counts across all study files (about 10 or more hits needed) before acting."
+  },
+  {
+   "patterns": [
+    {
+     "name": "P1 deep near-copy of an OLD view, with the feed's highest ucos",
+     "signal": "Candidate at model rank >20 with ucos >= .64, hmax >= .96 pointing at an old history item (idx >= 10, view), and low h10 (<= .30, so it is NOT similar to the newest events). On this file it fires on 7 items with ucos >= .64 and hmax >= .96 at rank >20: S1-15 r53 (.65/.98@16, h10 .27, positive), r66 (.65/.97@16, h10 .28, positive), r77 (.64/.96@16, h10 .30, negative); S1-04 r23, r26, r30, r41 (ucos .66-.67, hmax .96-.98@11, h10 .69-.72, all negative). Without the h10 condition the pooled hit rate is 2/7 (29%). With h10 <= .30 only S1-15 fires (2/3), which is a single feed.",
+     "action": "Move these items to about rank 3-5, but only if other study files confirm it. On this file alone, do not apply it.",
+     "support_feeds": [
+      "S1-15"
+     ],
+     "counter_feeds": [
+      "S1-04",
+      "S1-05 (r23: .65/.95@13, h10 .85, borderline negative)",
+      "S1-15 r77 (negative inside the same cluster)"
+     ],
+     "net_effect_guess": "In-sample about +0.36 on S1-15 (NDCG .208 to about .57) and about -0.003 on S1-04, so about +0.018 over the 20 feeds. That is one post-hoc feed with a rule fitted to it, so the out-of-sample expectation is about 0 (95% CI for 2/7 is roughly 4-71%). The h10 refinement was found only after seeing S1-04. Needs at least 2 more feeds in other files before use."
+    },
+    {
+     "name": "P2 fresh, engaged, cold deep item",
+     "signal": "Rank >20, f4 <= .10 (freshest decile), f5 >= .20 (some engagement), usually exp 0-1. Positives: S1-04 r90 (f4 .08, f5 .25, exp 0) and S1-19 r84 (f4 .03, f5 .91, exp 0). Negatives with the same signature: about 8 in S1-04 (r117, r147, r171, r177, r197 and others), about 5 in S1-13 (r55, r90, r122, r126, r145), about 3 in S1-14, 2 in S1-00 (r23, r40), 2 in S1-15, 2 in S1-19 (r79, r80, a near-twin of the positive r84), and 1 each in S1-05 and S1-18. Overall about 2 of 28-31 matches (about 7%).",
+     "action": "Would move them from deep ranks to about 5-10. Do not apply.",
+     "support_feeds": [
+      "S1-04",
+      "S1-19"
+     ],
+     "counter_feeds": [
+      "S1-13",
+      "S1-14",
+      "S1-00",
+      "S1-15",
+      "S1-05",
+      "S1-18",
+      "S1-04 (the other negatives)",
+      "S1-19 (r79, r80)"
+     ],
+     "net_effect_guess": "About 7% is at the 6% break-even for moving rank 40 to rank 5-10, with 2 events and a post-hoc signature. The primer says the freshest decile is clicked 0.46x average, which contradicts the sign. Expected effect is about 0 or negative."
+    },
+    {
+     "name": "P3 highest-ucos item of the feed or of the dominant category block",
+     "signal": "The single item with the maximum ucos in the feed is positive in only 2/20 feeds: S1-06 (r10, ucos .65, the Parts block max) and S1-15 (r53 and r66 tie at .65). It is negative in the other 18: S1-00 r21, S1-01 r3, S1-02 r3, S1-03 r10, S1-04 r28 (.69), S1-05 r14, S1-07 r2, S1-08 r2, S1-09 r1, S1-10 r11, S1-11 r31, S1-12 r6, S1-13 r6 (.69), S1-14 r1, S1-16 r1, S1-17 r9 (.68), S1-18 r19, S1-19 r13. Among the dominant-category blocks it is 1 of about 15. In the other 9 positives from large blocks (S1-05, 12, 13, 14, 18, 19, 03, 02, 09) the positive's ucos is mid-pack or only 4th-7th in the block.",
+     "action": "Promote the max-ucos item to rank 1-2. Do not apply.",
+     "support_feeds": [
+      "S1-06",
+      "S1-15"
+     ],
+     "counter_feeds": [
+      "S1-00",
+      "S1-01",
+      "S1-02",
+      "S1-03",
+      "S1-04",
+      "S1-05",
+      "S1-07",
+      "S1-08",
+      "S1-09",
+      "S1-10",
+      "S1-11",
+      "S1-12",
+      "S1-13",
+      "S1-14",
+      "S1-16",
+      "S1-17",
+      "S1-18",
+      "S1-19"
+     ],
+     "net_effect_guess": "About 10% per feed is below the 13% bar for rank 1, and the model's own rank 1 already uses ucos. Net is slightly negative."
+    },
+    {
+     "name": "P4 history-category quota (diversify into the user's top-3 history categories)",
+     "signal": "One of the user's top-3 history categories by v+a has no candidate in the model's top 5. Fires in about 13 feeds on about 17 inserted items (best candidate of the missing category): S1-02 Vacancies r12, S1-03 Services r22, S1-04 Repair r11, S1-09 Services r13, S1-10 Household appliances r18, S1-11 Phones r15 and A/V r13, S1-14 Services r55, S1-15 Services r32, S1-16 A/V r12 and Water transport r20, S1-17 Services r6, Business equipment r21 and Garages r38, S1-18 Kids goods r32, S1-19 Office equipment r8 and Cars r14. Zero of these items are positive. The positives in those categories are never the category's best-ranked item (S1-16 A/V r78 and Water r113, S1-15 Services r53 and r66).",
+     "action": "Insert the best candidate of each missing history category at about rank 3. Do not apply.",
+     "support_feeds": [],
+     "counter_feeds": [
+      "S1-02",
+      "S1-03",
+      "S1-04",
+      "S1-09",
+      "S1-10",
+      "S1-11",
+      "S1-14",
+      "S1-15",
+      "S1-16",
+      "S1-17",
+      "S1-18",
+      "S1-19"
+     ],
+     "net_effect_guess": "Gain 0 on every feed. Cost about -0.003 to -0.03 per firing feed (S1-11 would fall from .315 to about .29), so net is negative. One would have to go to the 4th history category to catch S1-00's Household appliances r41, which is worth about +0.10 on that one feed."
+    },
+    {
+     "name": "P5 promote near-copies of the newest 3 history events",
+     "signal": "hmax >= .90 pointing at history idx 0-2 (view), excluding S1-06 where everything is idx 0. About 24 matches and no positive: S1-00 r24, S1-02 r2 and r4, S1-05 r7, S1-11 r7, S1-13 r2, r3, r13, r17, r38, r47, S1-14 r35, r53, r71, r73, r130, S1-16 r13, r38, r51, S1-17 r9 (.99@0, h10 .99), S1-19 r2, r9, r12, r22. The two positives that are close to the newest events (S1-05 r21 .80@0, S1-13 r9 .85@1) are well below .90 and have close rivals with higher hmax (S1-05 r19 and r38 at .84@0). In S1-12 the positive (hmax .93, h10 .88) is among the least duplicative of about 38 Dogs, and about 20 of those at .97-1.00 are ranked ahead of it.",
+     "action": "Promote near-copies of the newest events. Do not apply.",
+     "support_feeds": [],
+     "counter_feeds": [
+      "S1-13",
+      "S1-14",
+      "S1-19",
+      "S1-16",
+      "S1-02",
+      "S1-17",
+      "S1-00",
+      "S1-05",
+      "S1-11",
+      "S1-12"
+     ],
+     "net_effect_guess": "The model already has these high. A blind promotion adds only negatives (0/24), so the effect is negative."
+    },
+    {
+     "name": "P6 same-category pairwise swap by column dominance",
+     "signal": "In one category, a lower-ranked candidate beats a higher-ranked one on f2 (home), f4, ucos and h10 but loses on f5 and pop. Only S1-07 r9 over r6 (Cars: H vs 0.00, f4 .15 vs .88, ucos .50 vs .44, h10 .84 vs .62) matches cleanly. In the big same-category blocks the positive does not dominate its neighbours: S1-12 r19 has lower ucos (.54) and h10 than most of the Dogs ahead of it, S1-14 r22 has a mid-pack signature, and S1-02 r19 (ucos .48) is below r2, r4 and r16.",
+     "action": "Swap dominated pairs. A swap helps only on S1-07, where it is rank 9 to 6 and worth about +0.055.",
+     "support_feeds": [
+      "S1-07"
+     ],
+     "counter_feeds": [
+      "S1-12",
+      "S1-14",
+      "S1-02",
+      "S1-13",
+      "S1-18"
+     ],
+     "net_effect_guess": "About +0.003 over the 20 feeds in-sample, which is noise. Reordering inside a category block is hopeless, in line with the primer."
+    }
+   ],
+   "cautions": [
+    "Promoting near-duplicates of the newest 3 events (hmax >= .90 at idx 0-2) would have been wrong: 0 of about 24 matches are positive. S1-17 r9 (.99@0, h10 .99) is negative, while the positive r11 is only .88@162. The S1-12 positive is among the least duplicative Dogs.",
+    "Promoting the deep Services near-copy block of S1-04 (r23, r26, r30, r41: ucos .66-.67, hmax .96-.98@11) would have been wrong: all negative. Same for the deep high-ucos items of S1-06 (r63, r67, r72, r94, r112 at ucos .64-.66), all negative.",
+    "Demoting S1-04's lone rank-1 outlier (Cars, z 3.04 vs 1.70 next, user has only 2 Cars views, last at idx 16) is right for that item. But both positives (r67 and r90) are Cars too, so down-weighting the 'odd' category would also be wrong. No column separates r67 and r90 from the other 35 Cars candidates.",
+    "Rank-1 demotion rules cannot be evaluated on this file. 19 of 20 feeds have a negative at rank 1 by construction, because only S1-08 has a positive within rank 5 (at r4), so any 'demote rank 1' rule looks perfect here. Do not trust the sample for that.",
+    "Cold or new listings (exp <= 1 and pop <= 2) are NOT enriched among positives: only about 3 of 26 positives (S1-04 r90, S1-05 r21, S1-06 r10) against an estimated 25-35% of candidates in those feeds. Moving cold items up is wrong. The model is right to rank them low, except for P2's rare fresh and engaged subset, which is noise.",
+    "Category-quota or diversification edits (P4) produce 0 hits in about 17 insertions. S1-16 is the tempting case: A/V is the user's largest history category (43v/52a, newest idx 1) and its first candidate is at r12. The A/V positive is at r78 with ucos .37 and f3 .31, and seven A/V items ahead of it (r12, r16, r28, r30, r49, r60, r72) are all negative.",
+    "Order-type near-copies (hmax pointing at order or orderstep) are not enriched: only 2 positives (S1-10 r27, S1-16 r113) among about 100 such candidates (S1-00, 05, 09, 10, 11, 13, 15, 16, 18). That is about 2% against a base rate of about 1.6%.",
+    "Within-block reordering inside single-category feeds (S1-12 Dogs r19, S1-13 Clothing r9, S1-14 Cars r22, S1-18 Kids clothing r20, S1-05 Clothing r21, S1-03 Parts r12, S1-02 Furniture r19, S1-19 Parts r17) has no column that singles out the positive. f4 <= .40 in 6 of 10 is about the base rate. High pop appears in only 3 of 10. ucos is mid-pack in most.",
+    "Regional affinity f2 does not separate positives: 12 of 26 are non-home, which is about the candidate share. In S1-09 the positive has f2 .98, above the home value .81, but that is one feed.",
+    "Tiny feeds (S1-01 with 12 candidates, S1-08 with 6): 'promote the first candidate outside the dominant history category' would fix S1-08 (r4 Kids clothing, +0.57) but not S1-01, where the first outsider r9 Games is negative and the positive is the next one, r10 PC components. In S1-09 the first outsider r13 is also negative. It is a 1-in-3 pattern at best.",
+    "The sample is small (20 feeds, 26 positives) and about 15 signatures were tried. Any rule with fewer than 3 independent supporting feeds is at the noise level. This applies to P1 and P2."
+   ],
+   "misses_total": 19,
+   "misses_explainable": 2,
+   "verdict": "No blind edit beats FD16P20 on this file. 19 of the 20 feeds have their best positive below rank 5. Only S1-08 has it within the top 5, at r4. The positives sit at best ranks 6-10 in 6 feeds, 11-20 in 6, 21-50 in 4 and above 50 in 3. Only two misses look explainable from the card, and both only with post-hoc, single-feed rules. S1-15's two positives at r53 and r66 are old-view near-copies with the feed's top ucos (.65, h10 .27-.30). S1-06's positive at r10 is the feed's max-ucos item. Each rule is contradicted elsewhere: S1-04 has 4 deep high-ucos near-copies, all negative, and max-ucos is negative in 18 of 20 feeds. The other 17 misses are exploration or noise: positives in lower-history categories (S1-00, S1-01, S1-07, S1-11, S1-16), or buried inside a large single-category block with no distinguishing column (S1-12, 13, 14, 18, 19, 05, 03, 02, 04). Candidate rules tested were near-copy of the newest events, history-category quota, max ucos, fresh and engaged, cold listings, order-type copies, region, and same-category swaps. None reaches the bars of 13% for a rank-1 move or about 6% for moving a deep item to rank 5-10 with 3 or more supporting feeds. Several fire only on negatives (0 of 24 for newest-event copies, 0 of about 17 for the quota). The only items worth pooling with other files' labelled feeds are P1, 2 hits of 7 matches, and P2, 2 of about 30. Both are post-hoc and each rests on 1-2 feeds. Conclusion: leave the model's order untouched."
+  },
+  {
+   "patterns": [
+    {
+     "name": "Category-first of a low-history category, lower half",
+     "signal": "Candidate is the model's best-ranked item of its category in this feed; model rank > 10; the category has <= 12 history events (v+a) or '-' in cathist (singleton and pair categories included). Visible from the cathist column plus counting categories in the candidate list.",
+     "action": "Insert these category-firsts, in model order, at ranks 11-30 (never into ranks 1-10). In-sample moves: S2-00 Watches r13->11, S2-02 Audio r191->~27, S2-07 Parts r22->11, S2-14 Land plots r93->~15, S2-15 Rooms r31->~12.",
+     "support_feeds": [
+      "S2-00",
+      "S2-02",
+      "S2-07",
+      "S2-14",
+      "S2-15"
+     ],
+     "counter_feeds": [
+      "S2-01",
+      "S2-03",
+      "S2-04",
+      "S2-05",
+      "S2-06",
+      "S2-08",
+      "S2-09",
+      "S2-10",
+      "S2-12",
+      "S2-13",
+      "S2-16",
+      "S2-18",
+      "S2-19"
+     ],
+     "net_effect_guess": "About 6 positives (S2-00, 02, 07, 11, 14, 15) against about 170 firing negatives: roughly 3.4% per promoted item, inflated by selection. In-sample gain is +0.32 summed over 5 feeds and cost is -0.14 over 13 feeds, so about +0.009 per feed on this biased file. Unbiased expectation is about 0 +/- 0.01, because the same slots hold 2.9% (ranks 11-20) and 1.6% (21-50) items today. Near-misses where the positive is the 3rd-6th item of its category, not the first: S2-03, 05, 08, 09, 10, 18. Worth an offline test on all 13.7k labelled feeds, not a hand edit."
+    },
+    {
+     "name": "Small-category dilution (category has <= 10 candidates in the feed)",
+     "signal": "Count of candidates sharing the candidate's category within the feed. Positives concentrate in small categories: 15 of 23 positives are in categories with <= 10 candidates, which hold about 28% of candidates. Per-candidate positive rate is about 3.5% for size <= 2 (6/~172), 1.7% for size 3-10 (9/~520), 0.5% for size 11-30 (3/~650) and 0.45% for size > 30 (5/~1100). At ranks > 10 only: 3.8%, 1.9%, 0.55%, 0.5%.",
+     "action": "Add a score bonus that falls with category count (pointwise models cannot see that a block of 60 same-category items dilutes each item's chance). By hand, at most promote whole categories of size <= 3 to ranks ~11-20.",
+     "support_feeds": [
+      "S2-00",
+      "S2-02",
+      "S2-03",
+      "S2-04",
+      "S2-05",
+      "S2-06",
+      "S2-07",
+      "S2-08",
+      "S2-10",
+      "S2-11",
+      "S2-14",
+      "S2-15",
+      "S2-17"
+     ],
+     "counter_feeds": [
+      "S2-01",
+      "S2-09",
+      "S2-12",
+      "S2-13",
+      "S2-16",
+      "S2-18",
+      "S2-19"
+     ],
+     "net_effect_guess": "The enrichment is 2-4x but absolute p stays at 2-4% (after correcting for selection, about 2%). That is below the 6% needed for rank 5 and 13% for rank 1, and about equal to the 2.9% slot rate at ranks 11-20. Expected net is 0 to +0.003. Selection also confounds it: a miss is by construction not in the dominant big category. The hit feeds, where the positive sits in a big category, are almost absent from this file. Test offline with a log(category count) feature."
+    },
+    {
+     "name": "Top-recent category item buried by region (f2 near 0), small feed",
+     "signal": "Feed has <= 45 candidates; candidate is in a user category with newest history index <= 10 and >= 15 history events; its f2 <= 0.06 and it is not the home region; model rank is in the lower half. Examples: S2-06 Kids goods r18 (f2 .06, last Kids goods, 29v12a@3), S2-08 Watches r15 (f2 .00, 13v7a@7), S2-19 Plants r17 (f2 .00, 38v31a@1).",
+     "action": "Move to rank 3-5. Gains: S2-06 +0.20, S2-08 about +0.18, S2-19 +0.26.",
+     "support_feeds": [
+      "S2-06",
+      "S2-08",
+      "S2-19"
+     ],
+     "counter_feeds": [
+      "S2-07",
+      "S2-01",
+      "S2-02",
+      "S2-05",
+      "S2-09",
+      "S2-11",
+      "S2-12",
+      "S2-14",
+      "S2-15",
+      "S2-16"
+     ],
+     "net_effect_guess": "3 positives against about 10 negatives in small feeds (S2-06 r11, S2-08 r18 and r30, S2-07 r12, r13, r20, r21), and 0 positives against about 35 negatives in large feeds (S2-16 alone about 12). The thresholds were fitted after seeing these three positives. In-sample the rule is +0.6 over 3 feeds (+0.03 per feed over the file). A fair hit rate is probably 3-6%, which is below the rank-3 slot rate of 7.7%. Probably negative on unbiased feeds."
+    },
+    {
+     "name": "Break up a homogeneous top block",
+     "signal": ">= 14 of the model's top 20 come from one category (S2-03: top 14 all Household appliances, S2-05: 17 of top 22 Kids clothing, S2-09: 34 of top 35 Parts and accessories), and the user has other recent categories further down.",
+     "action": "Interleave the best 2 items of the next category at ranks 3-5.",
+     "support_feeds": [
+      "S2-03"
+     ],
+     "counter_feeds": [
+      "S2-05",
+      "S2-09"
+     ],
+     "net_effect_guess": "Helps one feed: in S2-03 the Rooms positive is r16 and the first Rooms item r15 is a negative, so the pair at rank 3-4 gives +0.25. In S2-05 and S2-09 the next-category items (Business equipment r36, Repair r42, Sports r48, Services r51; Books r77) are all negatives, and the positives are 4th-6th within their categories, so nothing is gained. The cost of pushing the model's top 3-5 down cannot be measured here because the file has almost no hit feeds. About 0."
+    }
+   ],
+   "cautions": [
+    "Promoting near-duplicates (hmax >= .97) of the newest 3 history events: at least 15 negatives at rank > 10 (S2-09 r22, r27, r30, r44; S2-16 r32, r114, r125, r159, r167; S2-18 r22, r78; S2-14 and others) and 0 positives. The only positive anchored to the newest event is S2-01 r29 at hmax .93@0:fav, and S2-14 r93 at .73. The model already ranks these items high.",
+    "Promoting the best item of a recent category (newest index <= 10) that the model left outside its top 10: 0 positives against about 20 negatives (S2-00 Clothing r16, Furniture r19, Parts r24; S2-06 Food r13; S2-07 Services r11; S2-08 Furniture r20; S2-12 Repair r24, Plants r80; S2-13 Birds r51; S2-14 Services r14; S2-15 Vacancies r17; S2-16 Cars r32; S2-18 Vacancies r22, Apartments r23, Commercial r49, Phones r40; S2-19 Pet supplies r16).",
+    "Re-promoting the user's largest-volume category after the model buried it: S2-13 Furniture (1 positive in about 65 candidates), S2-16 Repair (1 in 57), S2-01 Vacancies (1 in 47). That is 1-2% per candidate, no better than the slot rate.",
+    "Sorting the near-tie zone by f3: it would have helped S2-06 and S2-19 but demotes the positives in S2-08 (Watches f3 .29), S2-10 (Services .07), S2-11 (Food .24), S2-15 (Rooms .09), S2-12 and S2-16 (Repair .42 and .28). Net negative.",
+    "The f4, f5 and ucos skews are not usable. Positives skew old (mean f4 .64 vs ~.50; 14 of 23 above .70 vs ~30% of candidates; only 1 of 23 below .10). But f4 > .7 fires on about a third of all candidates, so a 2x enrichment is still about 1-2% per item. f5 >= .9 is 4 of 23 positives vs ~10% of candidates. ucos of positives sits mid-pack (high in S2-08, 10a, 11a, 14; low in S2-05, 07, 19). All of these are already on the card the model reads.",
+    "Old near-duplicate of a contact1 or contact event (re-contact intent): looks like a signal in S2-03 (Rooms .99@171:contact1), S2-09 (Services .82@126:contact1, both positives) and S2-16 (Repair .97@35:contact1). The same signal fires on well over 100 negatives (S2-01 about 25, S2-12 about 25, S2-03 about 10, S2-16 about 14, S2-09 about 12, S2-05), so it is about 1.6%. The S2-09 cluster (2 positives among about 16 Services at @126:contact1) is only visible in hindsight.",
+    "Cluster-mates of a positive are positives in the two-positive feeds S2-09 (both Services, same anchor) and S2-11 (both Food, the only two Food items), but S2-10 has different categories. A reviewer cannot pick the right cluster blind; the S2-09 neighbours (Kids goods @52:fav, Cars @143:fav, about 25 candidates each) had no positives.",
+    "Near-miss trap: the first item of a category was the positive in 7 of 23 cases (S2-00, 02, 07, 11a, 14, 15, 17). In S2-05 (Books first r77, positive 4th), S2-08, S2-09, S2-10, S2-18 the first item is a negative and the positive is the 3rd-6th, so promoting only the category-first would have been wrong.",
+    "Selection warning: 19 of 20 feeds are misses and the model's top-5 slots hold 1 positive in about 100, versus about 8% on average. Any demotion of the model's top block would look excellent here, but this file cannot validate demotions. Positives at rank > 10 are 21 of 23 here vs about 58% overall, so every p estimate above is inflated by roughly 1.5x."
+   ],
+   "misses_total": 19,
+   "misses_explainable": 3,
+   "verdict": "No blind edit clearly beats the model. In 19 of 20 feeds the best positive is below rank 5, but only 3 (S2-06, S2-08, S2-19) have a card-visible story: a top-recent-category item pushed down only by non-home f2. That rule was fitted after seeing those three positives, and the same signal fires on about 45 negatives across the file. About 8 feeds could be partly fixed by a statistical category-level prior (category-first or small category), but the best such pattern reaches about 3-4% per item in this selection-inflated sample (about 2% after correction). That is below the roughly 6% needed to enter the top 5 and the 13% needed for rank 1, and about equal to the rate of the ranks 11-30 slots it would occupy. Most positives (about 10 of 23) are exploration in categories absent or ancient in the history, with ucos, hmax, f4 and f5 looking like random draws from the candidate pool. The cleanest in-sample result is a net gain of about +0.009 NDCG per feed for category-first promotion to ranks 11-30, which is expected to be about 0 +/- 0.01 on unbiased feeds. Recommendation: do not hand-edit single items. Instead run an offline test on all 13.7k labelled feeds of (a) a log(category count) score term and (b) category-first insertion at ranks 11-30. Treat anything that moves an item into ranks 1-5 as unsupported, since nothing here clears the 6-13% bar.\""
+  },
+  {
+   "patterns": [
+    {
+     "name": "P1 In-block ucos+h10 outlier promotion (narrow)",
+     "signal": "Same-category block of 8+ candidates. One item has ucos AND h10 both in the block's top ~15% (about +.12 ucos and +.2 h10 over the block median) and f2=H. It is ranked below 10+ same-category items with clearly lower ucos and h10. Its hmax points to an old event (idx 50+), not a recent one.",
+     "action": "Move it to about the 3rd-5th slot of its block, roughly rank 8-12 of the feed. Do not re-sort the whole block.",
+     "support_feeds": [
+      "S3-10 (pos r62 Clothing: ucos .53, h10 .54, f2 H. The 17 Clothing items above it have ucos .29-.42 and h10 .24-.39. 4 outliers (r57, r58, r62, r77), 1 positive. Moving it to about r12 gives +0.12 on that feed.)",
+      "S3-00 (weak: pos r6 Games has the 2nd-best ucos .62 and 3rd-best h10 .91 in its block. Block re-sort puts it at r3, +0.14.)"
+     ],
+     "counter_feeds": [
+      "S3-12 (5+ Musical outliers at r47-r64 with ucos .62-.65 and h10 .93-.96, all negative; the positive is Games r170)",
+      "S3-09 (outliers r100-r105 negative; the r1 positive has the block's LOWEST ucos .46)",
+      "S3-07 (r45 ucos .55 / h10 .97 negative; the positive has low ucos .46 / h10 .66)",
+      "S3-19 (several outliers negative; the positive is typical)",
+      "Full-block re-sort by ucos+h10 would hurt S3-02 (positives r1,r3 go to ~r2,r7, feed NDCG .92 to ~.59), S3-06 (r1 positive drops to ~r3), S3-13 (r1 to r2) and S3-03 (r25 to ~r40)"
+     ],
+     "net_effect_guess": "About 0. The narrow version fires on roughly 22 candidates in this file with 1 positive (about 4.5%), which is below the bar for rank 6-10 (4.4%) and well below the 13% rank-1 bar. In-sample gain from S3-10 and S3-00 is about +0.013 per feed. Expect no gain out of sample, because the model already uses ucos and h10."
+    },
+    {
+     "name": "P2 Newest-event category block to the top",
+     "signal": "The category whose cathist is @0 (the newest event) with 15+ views plus actions, and whose best candidate is not in rank 1-3.",
+     "action": "Move that category's candidates above all other categories, keeping their internal order.",
+     "support_feeds": [
+      "S3-03 (pos r25 Furniture, @0 17v16a, becomes about r4; the r39 positive drops to about r57; net about +0.11)",
+      "S3-19 (pos r38 Kids clothing @0 becomes about r13, +0.08)",
+      "S3-00 (Games @0 pushed above the Services items, pos r6 to r4, +0.075)",
+      "S3-04, S3-07, S3-08 (+0.01 to +0.02 each, all deep in-block positives)"
+     ],
+     "counter_feeds": [
+      "S3-01 (Cars @0: 6 negatives jump above the r2 Clothing positive, r2 to r8, -0.32)",
+      "S3-14 (Furniture @0, 6 candidates; pos Clothing r5 to about r9, -0.09)",
+      "S3-18 (Cars @0, about 48 items; pos Repair r27 to about r68, -0.04)",
+      "S3-15 (Houses @0, 3 extra negatives jump over the positive, -0.03)",
+      "S3-10 (Services @0, 9 candidates, 0 positives; pos is Clothing)",
+      "S3-11 (Services @0, 0 positives; pos is Houses)",
+      "S3-12 (Musical @0, about 65 candidates, 0 positives; pos is Games)",
+      "S3-16 (Food @0, 0 positives)"
+     ],
+     "net_effect_guess": "Negative. The newest category holds the positive in 9 of 20 feeds, but the model already ranks it near the top there. Gains sum to about +0.31 and losses to about -0.49 over 20 feeds, so about -0.009 per feed. S3-01 alone cancels S3-03, S3-19 and S3-00 together."
+    },
+    {
+     "name": "P3 Demote Services candidates sitting in the top 10",
+     "signal": "Category = Services (history is contact-heavy, 23-67 contact actions) with a candidate at feed rank 1-10. These candidates usually have hmax .95-.99 to old contact events.",
+     "action": "Push it down about 15 ranks.",
+     "support_feeds": [
+      "S3-00 (r1, r5 and r10 are Services; demoting r1 and r5 moves pos r6 to r4, +0.075)",
+      "S3-11 (r1, r2 Services; pos r11 moves to r9, +0.022)",
+      "S3-03 (r4, r12-r15 Services; pos r25 to r20, about +0.012)",
+      "S3-10, S3-02, S3-16 (negatives only, no gain)"
+     ],
+     "counter_feeds": [],
+     "net_effect_guess": "About +0.000 to +0.002 per feed after shrinkage. In-sample it is +0.0055 per feed (sum about +0.11 over 20 feeds). Evidence is weak. 11 Services candidates sit in the top 10 and 25 in the top 20, with 0 positives. Rank-based calibration expects 0.8 and 1.2, so P(0) is about .45 and .30. Services is the newest category in S3-10 and S3-11, which contradicts P2. Needs pooling across all 20+ study files before use."
+    },
+    {
+     "name": "P4 Demote top-10 items with very low ucos",
+     "signal": "ucos <= .40 and at least .12 below the median ucos of the feed's top 10 (for example S3-14 r2 ucos .25, S3-12 r7 .28, S3-05 r5 .33, S3-17 r1 .37).",
+     "action": "Move down about 10-15 ranks.",
+     "support_feeds": [
+      "S3-05 (r4 and r5 ucos .38 and .33; demoting both moves pos r6 to r4, +0.075)",
+      "S3-14 (r2 ucos .25 with pop 229, exp 646; pos r5 to r4, +0.044)",
+      "S3-11 (r5 ucos .39, +0.01)",
+      "S3-00 r10, S3-03 r6, S3-08 r9, S3-12 r7, S3-16 r8, S3-17 r1 (negatives, no gain)"
+     ],
+     "counter_feeds": [],
+     "net_effect_guess": "About +0.000 to +0.002 per feed after shrinkage (+0.0065 in-sample). 11 items fire in the top 10 and none is positive (rank-based expectation 0.67, so P(0) is about .5). Both positives with ucos <= .40 (S3-08 r164, S3-16 r30) are far below rank 10, so the rule never hits a positive. It is safe but nearly worthless: each demotion moves a positive up only 1-2 places."
+    },
+    {
+     "name": "P5 Exploration slot: promote the best-ucos cold-category candidate",
+     "signal": "cathist '-' (category absent from the history top list), highest ucos among such candidates, f2 H or high.",
+     "action": "Insert it at about rank 8-10.",
+     "support_feeds": [
+      "S3-03 (pos r39 Household appliances is cold-category, but the best-ucos cold pick is Rooms r44, ucos .60, negative)",
+      "S3-15 (pos r9 Repair is cold-category, but the best-ucos pick is Parts r18, ucos .52, negative)",
+      "S3-17 (pos r26 Vacancies is cold-category, but the best-ucos pick is its twin r27, negative)"
+     ],
+     "counter_feeds": [
+      "The signal fires in all 20 feeds and hits a positive in 0. About 300 candidates (+-15%) in the file are cold-category, and 3 are positive (about 1%, below the 1.6% average). The best-ucos cold pick is a negative in S3-00, 01, 02, 05, 06, 07, 08, 09, 10, 12, 16, 18, 19 and others."
+     ],
+     "net_effect_guess": "Negative. Each inserted item costs about 0.01 NDCG in expectation and gains nothing, because the rate is about 1% against a 4.4% bar. This agrees with the primer: exploration cannot be detected from the card."
+    },
+    {
+     "name": "P6 Promote no-data new listings in the user's top category",
+     "signal": "f5 <= .1, pop = 0, exp = 0 (often f4 <= .2) in a category with f3 >= .4.",
+     "action": "Promote to about the top 10-30.",
+     "support_feeds": [
+      "S3-08 (pos r164, f5 .08, f4 .18)",
+      "S3-12 (pos r170, f5 .04, f4 .09)",
+      "S3-03 (pos r39, f5 .04, f4 .17)",
+      "S3-05 (pos r6 of 7, f5 .02, f4 .15)",
+      "S3-06 (pos r1, already first, no gain)"
+     ],
+     "counter_feeds": [
+      "S3-04 (about 40 such candidates, 0 positives)",
+      "S3-09 (about 28, 0 positives)",
+      "S3-18 (about 30, 0 positives)",
+      "S3-19 (about 30, 0 positives)",
+      "S3-07 (about 12, 0 positives; the pos has f5 .29)",
+      "S3-10 (about 8, 0 positives)",
+      "S3-00 (4 at r20-r23, 0 positives)"
+     ],
+     "net_effect_guess": "Negative. 5 of 31 positives (16%) are no-data listings, but such candidates are about 255 of roughly 3,000 (about 2.0%, close to the 1.6% average). Even the ~150 of them ranked 100+ show about 1.3%. That is far below the 4.4% needed at rank 6-10. The 9 of 31 positives with pop=0 and exp=0 (29%) match a base rate of about 25-35%."
+    }
+   ],
+   "cautions": [
+    "Promoting hmax >= .99 near-duplicates: about 23 such candidates in the file (S3-03 r1 1.00@6:view, S3-18 r64 1.00, S3-08 r88 1.00, S3-00 r3/r13/r15/r16/r17, S3-10 r9/r72, S3-15 r5/r6, S3-16 r9 and others), 0 positives. The highest hmax of any positive in the file is .97. The primer's 2.8x lift is about 4.5%, under the 13% bar for rank 1.",
+    "Swapping a rank-1 negative with a same-category sibling that has higher ucos and h10: in S3-01 the positive r2 beats r1 on ucos (.55 vs .49) and h10 (.89 vs .78), but r4 (ucos .57, h10 .93, near-duplicate of the idx-2 view) beats both and is negative. A ucos+h10 re-sort leaves the positive at r2, so the flip is not a rule.",
+    "Re-sorting whole category blocks by similarity: it breaks S3-02 (NDCG .92 to ~.59), S3-06 (1.0 to ~.5), S3-13 (1.0 to .63) and S3-09 (the r1 positive has the block's lowest ucos .46).",
+    "Demoting high-pop items (pop >= 100, exp >= 100) as noise: about 18 in the top 15 with 1 positive (S3-01 r2, pop 165/exp 385, 5.5%, equal to base). Demoting that item would have cost -0.37. The only pure-negative case is S3-14 r2 (ucos .25).",
+    "Demoting 'spurious' f5 >= .9 with exp <= 3: 7 items in the top 10, 1 positive (S3-13 r1, f5 .97, exp 2). f5 does not separate positives; positives have f5 from .02 to .98.",
+    "Using region f2 (home = H): positives often have f2 near 0. S3-02 positives have f2 .02 and .00 while the home-region items are negatives. S3-04 positives have f2 .00-.05. 6 of 7 S3-09 positives are H but about 60% of that feed is H.",
+    "Promoting or demoting fresh listings by f4: 6 of 31 positives (19%) have f4 <= .2, and 5 of them are model misses. That is selection, since misses are where the model ranked low. Among about 12 fresh items (f4 <= .11) in feed top 10s, 1 is positive (S3-06 r1), about 8%, near base.",
+    "Demoting old-event near-duplicates (hmax >= .95 at idx >= 40, h10 <= .5) in the top 10: 6 items, 0 positives (S3-08 r7/r8, S3-17 r2/r7, S3-15 r5, S3-19 r8). The gain is only 1-2 ranks for the positives below, about +0.01 on the 2-3 feeds affected.",
+    "Realty family (Apartments, Houses and dachas, Commercial property) demotion looks good only by luck: 14 top-10 items with 0 positives, but the largest gain (S3-15, +0.2) comes from demoting Houses and dachas, the user's own newest and top category there. Do not use.",
+    "Do not trust the statistics from this file alone: 13 of 20 feeds are misses and every pattern above was found after seeing the labels."
+   ],
+   "misses_total": 13,
+   "misses_explainable": 3,
+   "verdict": "No blind edit I can defend beats the model on this file. The 13 misses are S3-00, 03, 05, 07, 08, 10, 11, 12, 15, 16, 17, 18 and 19, with best-positive ranks 6, 25, 6, 74, 164, 62, 11, 170, 9, 30, 26, 27 and 38.\n\nOnly 3 look explainable from the card, and each is a one-off:\n- S3-10 (r62): four Clothing items with the block's top ucos, h10 and f2 H sit at r57-r77, below 17 low-similarity Clothing items.\n- S3-05 (r6 of 7): the positive Kids clothing item beats the r2 Kids clothing item on ucos, f2 and f4.\n- S3-00 (r6): the positive is the user's newest category, ordered x4, ranked below Services items whose f5 is .97-.98 at exp 0. This one is borderline, since the best move only reaches r3-r4.\n\nThe other 10 misses are deep in-block positives (S3-07, 08, 12, 18, 19, 16), cold-category or exploratory picks (S3-03 r39, S3-15, S3-17), or look like their negative neighbours on every column (S3-11).\n\nEvery promote rule I tried either fires on far more negatives than positives (cold-category, no-data, near-duplicate, ucos-outlier, newest-category) or is net negative on this file (P2 about -0.009 per feed). The only edits that never touched a positive were two top-10 demotions, Services candidates and ucos <= .40 (P3, P4). They are worth +0.000 to +0.002 per feed after shrinkage (+0.0055 and +0.0065 in-sample), and their evidence is 0 positives in 11 firing items each against about 0.7-0.8 expected. If anything is worth testing, pool those two demotions across all study files, which needs about 200 or more firing items before trusting them. The best use of the model is to keep its order."
+  },
+  {
+   "patterns": [
+    {
+     "name": "cold-listing demotion (f5 at the .02 floor, usually pop=0/exp=0)",
+     "signal": "Candidate in model top ~20 with f5 <= .05 (the .02 floor = no engagement data; in every case seen it also had pop 0/exp 0 or exp <=3). 26 such items sit in the top 20 across the 20 feeds, 0 are positive. 0 of 34 positives have f5 <= .10 (lowest positive f5 = .14), although ~15% of all candidates do (null expectation ~5 positives, p about .01, but threshold chosen post hoc). Top-20 firings: S4-00 r2,r5,r10,r12; S4-08 r5,r10,r14,r15,r16,r18,r19; S4-09 r5,r8; S4-03 r3,r8; S4-01 r13,r15; S4-11 r1; S4-14 r5; S4-02 r2; S4-07 r19; S4-17 r17; S4-04 r9; S4-05 r20; S4-16 r9; S4-19 r19.",
+     "action": "Demote these items about 10-15 places (or below rank ~30). Never promote on f5 (positives with f5 >= .8 are only 12/34, about 1.6x lift, which the model already uses).",
+     "support_feeds": [
+      "S4-00 (r7->5, +.054)",
+      "S4-08 (r21->14, +.032)",
+      "S4-14 (r6->5, +.031)",
+      "S4-03 (+.020)",
+      "S4-11 (+.020)",
+      "S4-09 (+.013)",
+      "S4-07 (+.003)",
+      "S4-02 (+.002)",
+      "S4-17 (+.003)"
+     ],
+     "counter_feeds": [],
+     "net_effect_guess": "Sum +0.18 over 20 feeds = +0.009 NDCG/feed on this miss-enriched sample (about +0.007 on all feeds if it holds), no feed hurt. Under the null the 26 top-20 firings would hold about 1.5 positives, so P(0) is about 22%: weak evidence. Out-of-sample expectation +0.001..0.003. Also overlaps with the fresh-listing pattern, so do not add the two gains."
+    },
+    {
+     "name": "fresh-listing demotion (f4 <= .12 in model top 10)",
+     "signal": "Candidate in top 10 with f4 <= .12 (newest tenth). 10 firings, 0 positives: S4-00 r2 (.02); S4-01 r3 (.10); S4-02 r1 (.09), r2 (.08); S4-03 r1 (.06), r3 (.05), r8 (.08); S4-05 r3 (.11); S4-07 r3 (.10); S4-09 r8 (.12). 0 of 34 positives have f4 < .15 (lowest f4 among positives is .15 = S4-03 r14), versus about 1.6 expected under the primer's 0.46x. Items are usually also f5 floor / pop 0 (S4-00 r2, S4-03 r3, r8).",
+     "action": "Demote about 8-10 places; combine with the cold-listing rule (union) rather than stacking.",
+     "support_feeds": [
+      "S4-03 (+.032, three demotions)",
+      "S4-05 (+.031)",
+      "S4-00 (+.023)",
+      "S4-01 (+.017)",
+      "S4-09 (+.005)",
+      "S4-02 (+.002)",
+      "S4-07 (+.003)"
+     ],
+     "counter_feeds": [
+      "S4-03 (the nearest miss: positive r14 has f4 .15; a threshold of .15-.20 would hit it and S4-09 positives at .29-.43 would stay safe)"
+     ],
+     "net_effect_guess": "+0.0057/feed on this sample (sum +0.11), mostly the same items as the cold-listing rule. Statistically indistinguishable from the model, which already has f4 and the 0.46x effect."
+    },
+    {
+     "name": "stale tiny-category demotion (1-4 history events in the category, newest index >= 15, but NOT absent from history)",
+     "signal": "Candidate in model top ~12 whose category has v+a <= 4 in the user's history, with @k >= 15, in a feed where the user has a dominant category with >= 20 events. Typically near-clones of one old view (hmax .95+, h10 <= .3). 17 firings, 0 positives, and 0 of 34 positives are in such a category. Firings: S4-05 r4,r5,r7,r8,r12 (Garages 1v0a@17 x4, Kids goods 0v1a@223); S4-12 r4,r7,r9,r10; S4-00 r8,r9 (Watches 3v0a@63); S4-06 r11,r12; S4-04 r7; S4-11 r1 (Sports 0v1a@186); S4-14 r1 (Services 3v1a@31, z +2.21); S4-19 r5 (Food 0v1a@54).",
+     "action": "Demote below the top ~15. Strictly exclude categories with NO history at all: those are the exploration positives S4-01 r11 (Food), S4-02 r41 (CVs), S4-11 r21 (Services), S4-19 r8 (Dogs) = 4/34 positives.",
+     "support_feeds": [
+      "S4-05 (r6->4, +.075)",
+      "S4-14 (r6->5, +.031)",
+      "S4-12 (r5->4, +.027)",
+      "S4-11 (+.020)",
+      "S4-19 (r8->7, +.018)",
+      "S4-06 (+.005)"
+     ],
+     "counter_feeds": [
+      "Loose variant that also demotes absent-category items would hurt S4-01 (r11 Food positive), S4-02 (r41 CVs), S4-11 (r21 Services), S4-19 (r8 Dogs)",
+      "S4-12 r5 Garages 1v0a@8 is a positive singleton but recent (@8 < 15), so the strict rule spares it, a fragile boundary"
+     ],
+     "net_effect_guess": "+0.0089/feed on this sample (sum +0.18), 6 feeds improved, none hurt with the strict definition. Under the null the 17 firings hold about 0.9 positives, so P(0) is about 40%: no statistical support, only absence of counterexamples. The boundary between stale-singleton and absent category is easy to blur and would flip the sign. Expect +0..0.003."
+    },
+    {
+     "name": "recent near-duplicate promotion for items the model ranks >= 6 (hmax >= .93 at idx <= 3, h10 >= .93)",
+     "signal": "Candidate ranked 6 or lower with hmax >= .93 to one of the newest 4 history events. Firings (rank>=6): S4-03 r14*, r29; S4-06 r14, r23, r25*, r26; S4-09 r7, r11, r34; S4-17 r15 = 10 firings, 2 positives (20%, 95% CI about 3-56%); looser (hmax >= .90 @<=3) 14 firings, 2 positives. All positives with this signature: 5/34 (15%) vs 8% of candidates, the ~2x the primer says the model already knows. Adding ucos >= .55 gives 8 firings, 2 positives, but that is tuned on the two hits.",
+     "action": "Insert at rank ~5 (not rank 1; the 13% bar is not cleared with confidence).",
+     "support_feeds": [
+      "S4-06 (r25->~7, +.12)",
+      "S4-03 (r14->5, +.023 net)"
+     ],
+     "counter_feeds": [
+      "S4-09 (r7, r11, r34 all negative, -.005)",
+      "S4-17 (r15 negative)",
+      "S4-03 (r29 .97@0 negative)",
+      "S4-06 (r14, r23, r26 negative)",
+      "S4-07 (r11 .92@0, r25 at the loose threshold)",
+      "S4-11 (r31 .90@0 at the loose threshold)"
+     ],
+     "net_effect_guess": "+0.007/feed on this sample, carried almost entirely by S4-06. P(>=2 hits in 10 at a 6% base) = 12%. Hit rate about 14-20% vs the ~6-8% needed at rank 5: marginally positive, not significant. Do not use for rank 1."
+    },
+    {
+     "name": "old near-duplicate demotion (hmax >= .95 at idx >= 25 with h10 <= .35)",
+     "signal": "Stale clone of one old event, not similar to the newest 10. Only fires in 2 feeds: S4-05 r1 (Cats .99@56, h10 .27, z +2.11), r5, r8, r12 (Garages .98@17, h10 .21-.22), r4 (.89@17, h10 .28); S4-09 r16, r20, r22, r27, r30 (Cars .95-.99@71-138, h10 .32-.34). 0 positives among about 10 firings in top 30; no positive has h10 <= .45 (lowest .47 S4-19).",
+     "action": "Demote about 10 places.",
+     "support_feeds": [
+      "S4-05 (+.075..+.144)",
+      "S4-09 (+.0085)"
+     ],
+     "counter_feeds": [
+      "S4-07 (positive r20: hmax .96@29, h10 .58, same signature at a looser h10 threshold)",
+      "S4-15 (positive r2: hmax .96@22, h10 .50 at a looser threshold)"
+     ],
+     "net_effect_guess": "About +0.004/feed but from 2 feeds only; threshold tuned on S4-05; two positives show the same idea fails at h10 .5-.6. Not recommended."
+    },
+    {
+     "name": "high-popularity demotion (pop >= 100 in model top 20)",
+     "signal": "31 top-20 items with pop >= 100 across feeds (S4-02 x7, S4-06 x7, S4-07 x4, S4-18 x3, S4-05 x2, S4-11 x2, S4-17 x2, S4-00, S4-01, S4-09, S4-12 x1 each). Only 1 positive: S4-01 r8 (pop 297, exp 272). Whole-file: 1 positive among about 82 candidates with pop >= 100 (1.2% vs 2.85% average), but in the top 20 that is 1/31 = 3.2% vs about 4.7% expected, so not significant.",
+     "action": "Demote; the primer says pop carries some positive signal, so this goes against it.",
+     "support_feeds": [
+      "S4-12 (r2 pop 163 exp 996 above both positives, +.107)",
+      "S4-06 (+.023)",
+      "S4-11 (+.022)",
+      "S4-05 (+.031)",
+      "S4-18 (+.018)",
+      "S4-07 (+.017)",
+      "S4-02 (+.01)",
+      "S4-09 (+.004)"
+     ],
+     "counter_feeds": [
+      "S4-01 (positive r8 pop 297 would be pushed from 8 to about 40: -.074)"
+     ],
+     "net_effect_guess": "+0.008/feed on paper but about 60% of it is one feed (S4-12); without it +0.003. Treat as noise."
+    },
+    {
+     "name": "promote the feed's highest-ucos candidate to rank 3",
+     "signal": "Single highest ucos in the feed when the model ranks it >5. Positive top-ucos items: S4-11 r21 (.60), S4-12 r3, S4-13 r1 (both already top 3); S4-06 and S4-09 positives are tied-3rd. Firings with model rank > 5: S4-03 r19, S4-06 r23, S4-07 r10, S4-08 r11, S4-11 r21*, S4-17 r7, S4-18 r5 = 7 firings, 1 positive (14%, CI 0.4-58%).",
+     "action": "Move to rank 3.",
+     "support_feeds": [
+      "S4-11 (+.13)"
+     ],
+     "counter_feeds": [
+      "S4-03 (r19, -.007)",
+      "S4-06 (r23)",
+      "S4-07 (r10; the positive r20 has ucos .43)",
+      "S4-08 (r11; positive ucos .46)",
+      "S4-17 (r7)",
+      "S4-18 (r5)",
+      "S4-15 (positive ucos .42)",
+      "S4-19 (positive ucos .43)"
+     ],
+     "net_effect_guess": "+0.006/feed, entirely one feed. Not usable."
+    },
+    {
+     "name": "home-region (f2 = H) preference",
+     "signal": "Positives with f2 = H: 12/34 (35%) versus about 45% of candidates being H. Within-category contrast: S4-00 positive is H with 3 non-H clothing items above it; S4-03 positives are 8/9 non-H (H clothing 0/12); S4-09 positives all have f2 <= .05; S4-05, S4-08, S4-14 positives have f2 = .00.",
+     "action": "Do not promote H or non-H.",
+     "support_feeds": [
+      "S4-00 (one feed: r7 H over r3,r4,r5 non-H)",
+      "S4-04",
+      "S4-06",
+      "S4-07",
+      "S4-17"
+     ],
+     "counter_feeds": [
+      "S4-03",
+      "S4-05",
+      "S4-08",
+      "S4-09",
+      "S4-14",
+      "S4-02"
+     ],
+     "net_effect_guess": "About 0, direction flips between feeds."
+    },
+    {
+     "name": "category diversification (best item of each category up front)",
+     "signal": "Positive is the first-of-its-category item in 6/34 cases (about 18%) vs about 8% of candidates, which looks like a 2x lift but is largely because the model already places category leaders high.",
+     "action": "Re-rank so the first item of every category comes first.",
+     "support_feeds": [
+      "S4-02 (CVs, +.17)",
+      "S4-01 (+.082)",
+      "S4-19 (+.041)",
+      "S4-05 (+.031)"
+     ],
+     "counter_feeds": [
+      "S4-10 (-.275)",
+      "S4-04 (-.199)",
+      "S4-12 (-.108)",
+      "S4-14 (-.067)",
+      "S4-00 (-.044)",
+      "S4-03 (-.034)",
+      "S4-11 (-.032)",
+      "S4-08 (-.032)",
+      "S4-07 (-.026)",
+      "S4-18",
+      "S4-16",
+      "S4-06",
+      "S4-09",
+      "S4-17"
+     ],
+     "net_effect_guess": "-0.028 NDCG/feed (sum -0.56): clearly harmful. For single-positive feeds expected DCG is maximised by sorting marginal probabilities, so diversification cannot help."
+    },
+    {
+     "name": "largest-category (by v+a events) first",
+     "signal": "Best positive is in the user's largest category in only 8/20 feeds (S4-00, 03, 07, 08, 09, 14, 17, 18); in 12 it is not (S4-01, 02, 04, 05, 06, 10, 11, 12, 13, 15, 16, 19), several in the newest-event category instead.",
+     "action": "Do not push the biggest category over the newest / second category.",
+     "support_feeds": [
+      "S4-17 (+.026)",
+      "S4-18 (+.07)",
+      "S4-09 (+.0085)",
+      "S4-03 (+.06 net)"
+     ],
+     "counter_feeds": [
+      "S4-13 (hit feed, P&A pos at r1, Cars 101 events)",
+      "S4-01",
+      "S4-04",
+      "S4-05",
+      "S4-06",
+      "S4-11",
+      "S4-12",
+      "S4-15",
+      "S4-16",
+      "S4-19"
+     ],
+     "net_effect_guess": "Negative; also the model's own category blocks already encode this."
+    }
+   ],
+   "cautions": [
+    "Promoting home-region (f2 = H) items: positives are H in 35% of cases vs about 45% of candidates; S4-03 positives are 8/9 non-H and S4-09 positives sit at the low f2 values.",
+    "Demoting ALL categories absent from history: 4/34 positives (S4-01 r11 Food, S4-02 r41 CVs, S4-11 r21 Services, S4-19 r8 Dogs) are exactly those; the stale-singleton rule only works if absent categories are spared.",
+    "Demoting items whose hmax is an order/orderstep/contact event ('already bought something similar'): 22 top-20 firings (S4-08 x9, S4-02 x5, S4-09, S4-15, ...) hold 1 positive (S4-09 r17 hmax .97@184:order) = 4.5%, equal to the base rate.",
+    "Demoting old-but-moderate near-duplicates (hmax .95+ at idx >= 22, h10 .5-.6): S4-07 r20 and S4-15 r2 are positives with exactly that signature.",
+    "Demoting the model's rank-1 on a large z-gap or because it is a 1.00 duplicate (S4-03 Cats r1/r2): the same cluster contains positive r18; rank-1 is negative in 19/20 feeds here only because the sample is miss-enriched (13% in the full set).",
+    "Demoting high-pop items: only positive with pop >= 100 is S4-01 r8 (pop 297), a -0.074 hit; gains elsewhere are tiny except one feed (S4-12 r2).",
+    "Promoting by ucos or f5: positives in S4-07, S4-08, S4-15, S4-19 have low ucos (.42-.46); positives in S4-04, 05, 09, 11, 12, 18 have f5 .14-.24.",
+    "Category-sibling semantics (CVs next to Vacancies): S4-02 CVs is 1/1 but S4-01 Shift gigs (r91, r92, r95, hmax .91, h10 .83) are 0/3; real-estate siblings in S4-02 are about 0/25.",
+    "De-duplication or diversification of twin listings (S4-02 r1/r2, S4-03 Cats): multi-positive feeds (S4-03: 8/9 positives in one category, S4-09: 3/3 in one near-clone cluster) are exactly where it hurts; a single-positive feed gains nothing in expectation.",
+    "Kids clothing is 0/35 candidates in S4-03/04/05 although the history is Kids-clothing-heavy (positives are in 'Clothing and shoes'): tempting to push Kids clothing down, but the model already ranks it low except S4-03 r5 and S4-05 r2 (S4-05 r2 is a legitimately newest-category item), and 0/35 vs ~1 expected is not evidence.",
+    "Any rule evaluated only on this file is biased: 15/20 feeds are misses (75% vs 60% overall), so any demotion of items above the lone positive looks like a gain. Five hit feeds (S4-04, 10, 12, 13, 15) are the only guard and no pattern fires on their positives."
+   ],
+   "misses_total": 15,
+   "misses_explainable": 4,
+   "verdict": "No blind edit robustly beats FD16P20 on this file. There are 34 positives in 1,192 candidates over 20 feeds; 15 feeds are misses and 5 are hits (S4-04, 10, 12, 13, 15). Most misses are within-category lotteries that no column resolves. Examples are S4-07 (Cars r20 of 38), S4-08 (P&A r21), S4-17 (Cars r38), S4-09 (three Games positives at r17, r18, r29), S4-03 (nine positives among about 50 clothing items) and S4-02 (CVs r41, an exploration positive).\n\nThree narrow, label-free demotion rules have zero counterexamples among the 34 positives:\n- **Cold listings:** f5 at the .02 floor, usually with pop 0 and exp 0. The model puts 26 of these in the top 20, and none is positive.\n- **Fresh listings:** f4 <= .12 in the top 10. There are 10 firings, none positive; the lowest positive f4 is .15.\n- **Stale one-event categories:** 1-4 history events, newest index >= 15, but not absent from history. There are 17 firings in the top 12, none positive.\n\nOn this file they sum to about +0.009 and +0.009 NDCG per feed (partly overlapping), mostly from S4-00, 05, 08, 11, 12 and 14. That is probably inflated by the miss-enriched sample, and the thresholds were set after looking at the data. Each firing set would contain about 1 positive under the model's own rank rates, so their absence of positives is not significant (P(0) is roughly 20-40%).\n\nRealistic out-of-sample value is +0.001 to +0.003 at best, which is below what the public leaderboard resolves. The 4 misses a post-hoc rule fixes to rank <= 5 (S4-00, 05, 11, 14) are all small feeds fixed by demoting 1-2 junk items above the positive.\n\nEverything else tested nets to zero or worse:\n- Recent near-duplicate promotion is 2 hits in 10-14 firings, which is the known effect the model already uses.\n- Old near-duplicate demotion fires in only 2 feeds and has two positive counterexamples at looser thresholds.\n- Promoting the highest-ucos item is 1 hit in 7 firings.\n- Demoting high-pop items is carried by one feed and has the S4-01 counterexample.\n- Home-region preference flips sign between feeds.\n- Category diversification costs about -0.028 per feed, and 'biggest category first' is wrong in 12 of 20 feeds.\n\nThe only sensible use of the three demotion rules is as a post-hoc feature ablation on the full validation set, not as a human edit. Top-1 and top-3 edits are not supported anywhere in this file."
+  }
+ ],
+ "guide": "FEED REVIEW GUIDE (FD16P20)\n\n1. STANCE\nThe model's order is the default. It already reads every column on the card and much more. Five analysts studied 100 labelled feeds. None found an edit that clearly beats the model, and every rule they proposed was fitted after seeing the answers. Default = NO EDIT. Expect to edit about 10% of feeds (hard ceiling 15%), nearly all by rule R1, and to move at most 3 items in any feed. If you edit more than that, you are over-editing.\n\n2. BREAK-EVEN\n- Promoting a negative to rank 1 pays only if you believe it is at least 13% likely to be positive. A negative pushed in front of a rank-1 positive costs 0.37.\n- Moving an item from about rank 40 to rank 5 needs at least 6%. Moving into ranks 6-10 needs about 4.4%. A typical item at ranks 21-50 is 1.6%.\n- No signal tested reached 6%.\n- Demotions are safe but almost worthless (+0.002 to +0.004 NDCG per feed). A wrongly demoted positive costs 0.1-0.4.\n\n3. THE ONLY RULE YOU MAY APPLY\nR1, old re-post demotion (confidence LOW)\n- Fires when a candidate at model rank 2-10 has hmax >= .98 with \"@k\" where k >= 25 (a near-twin of something viewed long ago), and h10 <= .60.\n- Edit: move it down to about rank 15-20 and keep everything else in order. Never touch rank 1. Move at most 3 items.\n- Evidence: about 30 such top-10 items across three independent files, none positive. About 2 positives would be expected, so P(0) is about 12%. Two of those files used looser thresholds.\n- Counter-signs: four positives sit just under the cutoff (hmax .96-.97 at index 22-52). Do not loosen .98 or 25.\n- Gain is small: each demoted negative lifts every lower positive by one rank.\n\n4. CONFIDENCE SCALE\n- HIGH (you would bet at least 13%): rank 1-2 promotion allowed. No rule here reaches this, so do not claim HIGH.\n- MEDIUM (6-13%): promote ONE item to rank 4-6, never above 3.\n  - Allowed only if you can name a mechanism the model plausibly misses, cite the exact columns, and the idea is not in the cautions.\n  - Expect this in fewer than 1 feed in 30.\n- LOW (under 6%): demotions only, by at most about 10 ranks and never below about rank 20. No promotions into the top 10. R1 lives here.\n- NONE: no edit. Choose this whenever you hesitate.\nLog every edit as: feed, item rank -> new rank, rule, confidence.\n\n5. CAUTIONS: DO NOT TOUCH\n- Near-copies of the newest events (hmax >= .90 at @0-3, even 1.00):\n  - Promoting them hit about 2 of 70 firings. The model already ranks them high.\n  - Demoting them contradicts the 2.8x recent-duplicate lift. Leave them.\n- Category hedging, quotas, diversification, \"newest-category block to the top\", \"best item of each recent category\":\n  - 0 of about 37 insertions in two files and 1 of 7 in a third.\n  - Diversification cost -0.028 NDCG per feed. Newest-block-first cost -0.009 per feed, and one feed lost 0.32.\n  - Even when the category is right, the clicked item is usually the 3rd-6th of that category, not the first.\n- Single-column promotion (highest ucos, f1, f4, f5, pop) or any re-sort inside a category block:\n  - Highest ucos was positive in 0 of 15 miss feeds, 1 of 7 firings and 2 of 20 feeds.\n  - The clicked item often loses to its category mates on every column. A block re-sort dropped one feed from .92 to .59.\n- Exploration promotion (category absent from history, or touched only by old lead/order/contact events):\n  - About 1% (3 positives in about 300 candidates), below the 1.6% average. The card cannot tell you which feed is exploratory.\n- Cold or fresh listings (pop 0 / exp 0, f4 <= .12, f5 at the .02 floor): neither promote nor demote.\n  - Positives with this profile occur at ranks 1, 5, 6, 8 and 10, and deep.\n  - One file showed 0 of 26 in the top 20, and other files contradicted it.\n- Do not demote by any of these:\n  - Region f2. Positives are non-home about as often as candidates.\n  - pop >= 100. Positives exist at pop 165 and 297.\n  - f5 >= .9.\n  - Services or real-estate family.\n  - Small category history. Exploration positives sit in absent or ancient categories (4-5 of 21, about 10 of 23, 4 of 34).\n- Low-ucos demotion (ucos <= .40 in the top 10): 0 of 11 in a single file, P(0) about 50%. Not enough support.\n- Rank-1 z-gap carries no sign: a big gap was negative in one feed and positive in another. Rank 1 is negative in 87% of feeds anyway, so a wrong-looking rank 1 is not evidence.\n- Near-copies of mid-age events (@10-24, low h10): positives and negatives both occur (two positives at .97-.98@16 against four negatives at .96-.98@11). Leave them.\n- Tiny feeds (under 30 candidates), guests and short histories: leave. They are already near-optimal or have no distinguishing column.\n- Selection bias: half the studied feeds were chosen because the model missed, so \"demote the top block\" ideas looked better there than they will on random feeds. Treat every rule, R1 included, as a hypothesis.\n\n6. PROCEDURE\nScan ranks 2-10 for R1. If nothing fires cleanly, or any caution applies, write NO EDIT and move on.",
+ "dry": [
+  {
+   "feeds": [
+    {
+     "feed": "E00-00",
+     "moves": [],
+     "confidence": "none",
+     "reason": "R1 does not fire: every rank 2-10 item has h10 >= .94, hmax mostly near-copies of recent events. No edit."
+    },
+    {
+     "feed": "E00-01",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Tiny feed (21 candidates); no rank 2-10 item has hmax >= .98 anyway. No edit."
+    },
+    {
+     "feed": "E00-02",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Rank 6 Cars is .97@116, h10 .30, just under the .98 cutoff. Other .98 items have h10 >= .83. No edit."
+    },
+    {
+     "feed": "E00-03",
+     "moves": [],
+     "confidence": "none",
+     "reason": "No rank 2-10 item has hmax >= .98 (max .95). R1 does not fire. No edit."
+    },
+    {
+     "feed": "E00-04",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Guest feed; the .98 items at r2 and r6 are @19/@18 lead with h10 >= .82, so R1 fails. No edit."
+    },
+    {
+     "feed": "E00-05",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Tiny feed (27 candidates); r8 .99@92 has h10 .69, above .60. No edit."
+    },
+    {
+     "feed": "E00-06",
+     "moves": [],
+     "confidence": "none",
+     "reason": "r2 .99@17 is mid-age with h10 .79; others are .97 or recent. R1 does not fire. No edit."
+    },
+    {
+     "feed": "E00-07",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Rank 5 Apartments .97@109, h10 .41, is under the .98 cutoff. No rank 2-10 item reaches .98. No edit."
+    },
+    {
+     "feed": "E00-08",
+     "moves": [],
+     "confidence": "none",
+     "reason": "No rank 2-10 item has hmax above .90. R1 does not fire. No edit."
+    },
+    {
+     "feed": "E00-09",
+     "moves": [],
+     "confidence": "none",
+     "reason": "r7 Food .99@37 has h10 .76, above .60; the other rank 2-10 items are below .98. No edit."
+    },
+    {
+     "feed": "E00-10",
+     "moves": [
+      {
+       "from_rank": 4,
+       "to_rank": 16
+      }
+     ],
+     "confidence": "low",
+     "reason": "R1: r4 Houses and dachas hmax .99@73:view, h10 .58, f2 .22, f4 .86. Old re-post, demote to about rank 16. r3 (.99@106) has h10 .70, so it is not touched."
+    },
+    {
+     "feed": "E00-11",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Tiny feed (20 candidates); no rank 2-10 item has hmax >= .98. No edit."
+    },
+    {
+     "feed": "E00-12",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Tiny feed (23 candidates). r2 Plants .98@219 h10 .33 would fire R1, but tiny feeds are left alone. No edit."
+    },
+    {
+     "feed": "E00-13",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Rank 2-10 items with hmax >= .98 (r3, r5, r10) all have h10 >= .84. R1 does not fire. No edit."
+    },
+    {
+     "feed": "E00-14",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Large Vacancies block; the hmax >= .98 items in ranks 2-10 all have h10 >= .96 (near-copies of recent contacts). No edit."
+    }
+   ],
+   "batch_notes": "Read the primer and all 1566 lines of batch_00. Only one edit, E00-10 (R1, low confidence), which is 1 of 15 feeds (6.7%). E00-12 r2 technically met R1 but was skipped because the feed has 23 candidates. E00-02 r6 and E00-07 r5 sit just under the .98 cutoff and were left alone."
+  },
+  {
+   "feeds": [
+    {
+     "feed": "E01-00",
+     "moves": [],
+     "confidence": "none",
+     "reason": "No R1: ranks 2-10 hmax<=.98 only at @1 (r2); r5 .97@10. No old twin with low h10."
+    },
+    {
+     "feed": "E01-01",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Old twins r3, r6, r9, r10 (hmax .98-1.00 at @43-82) all have h10 .74-.85, far above .60, so R1 does not fire."
+    },
+    {
+     "feed": "E01-02",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Tiny feed (24 candidates), single-category history; no R1 case. Leave as is."
+    },
+    {
+     "feed": "E01-03",
+     "moves": [],
+     "confidence": "none",
+     "reason": "r3, r5 are near-copies of @0; r8 .99@47 has h10 .73, above .60. R1 does not fire."
+    },
+    {
+     "feed": "E01-04",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Tiny feed (7 candidates); nothing to change."
+    },
+    {
+     "feed": "E01-05",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Tiny feed (5 candidates); nothing to change."
+    },
+    {
+     "feed": "E01-06",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Old twins r2, r5, r9, r10 have h10 .73-.95; r7 .98@74 has h10 .62, just over .60. No clean R1 firing."
+    },
+    {
+     "feed": "E01-07",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Tiny feed (24 candidates); top-10 hmax all below .98 anyway."
+    },
+    {
+     "feed": "E01-08",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Vacancies-only history. Old twins r3, r4, r5, r7, r8 have h10 .95-.99, so R1 does not fire."
+    },
+    {
+     "feed": "E01-09",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Tiny feed (10 candidates); nothing to change."
+    },
+    {
+     "feed": "E01-10",
+     "moves": [],
+     "confidence": "none",
+     "reason": "r2 .99@117:fav has h10 .64, above .60 (and rank 2 on weak evidence). R1 does not fire; r10 is @1."
+    },
+    {
+     "feed": "E01-11",
+     "moves": [],
+     "confidence": "none",
+     "reason": "No rank 2-10 item has hmax>=.98; r1 is the only .98@20 and rank 1 is never touched."
+    },
+    {
+     "feed": "E01-12",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Tiny feed (7 candidates); nothing to change."
+    },
+    {
+     "feed": "E01-13",
+     "moves": [],
+     "confidence": "none",
+     "reason": "No rank 2-10 item has hmax>=.98; the maximum is .95@42 (r2). R1 cannot fire."
+    },
+    {
+     "feed": "E01-14",
+     "moves": [],
+     "confidence": "none",
+     "reason": "Only r3 .98@42 reaches .98, but its h10 is .89, above .60. R1 does not fire."
+    }
+   ],
+   "batch_notes": "I read the primer and all 1432 lines of the batch. I applied R1 (hmax >= .98 at @k with k >= 25, h10 <= .60, ranks 2-10) strictly. No feed fires it. Near misses were r7 in E01-06 (h10 .62) and r2 in E01-10 (h10 .64), and I did not loosen the .60 threshold. Feeds E01-02, 04, 05, 07, 09 and 12 are tiny (under 30 candidates), so I left them. All 15 feeds are NO EDIT, with 0 edits against the guide's expected 10%."
+  }
+ ],
+ "editPromptTemplate": "You are a careful reviewer of a recommender's ranking. Read the primer /tmp/scratchpad/llmfix/primer.txt in full, then the batch file <FILE> (0 lines, 1 feeds: <FEEDS>) in full.\n\nRules for this task:\n- Use ONLY the Read tool, and ONLY on the files named in this prompt. Do not run any command, do not list folders, do not open any other file: other files in this area hold the labels of the blind feeds, and opening them would invalidate the experiment. No GPU or CPU jobs.\n- The Read tool returns at most 2000 lines per call: read long files in chunks with offset/limit until you have seen every line.\n- Context: this is the Avito ML Cup 2026 personal-ranking task. Our model FD16P20 scores 0.4027 NDCG on validation and 0.394892 on the public leaderboard (best public file of ours 0.3950094). We are testing whether careful feed-by-feed human-style review can improve its ranking.\n\nThe feeds are UNLABELLED validation feeds in the model's order. For each feed decide whether to change the order, following this guide written from a study of labelled feeds:\n----- GUIDE -----\nFEED REVIEW GUIDE (FD16P20)\n\n1. STANCE\nThe model's order is the default. It already reads every column on the card and much more. Five analysts studied 100 labelled feeds. None found an edit that clearly beats the model, and every rule they proposed was fitted after seeing the answers. Default = NO EDIT. Expect to edit about 10% of feeds (hard ceiling 15%), nearly all by rule R1, and to move at most 3 items in any feed. If you edit more than that, you are over-editing.\n\n2. BREAK-EVEN\n- Promoting a negative to rank 1 pays only if you believe it is at least 13% likely to be positive. A negative pushed in front of a rank-1 positive costs 0.37.\n- Moving an item from about rank 40 to rank 5 needs at least 6%. Moving into ranks 6-10 needs about 4.4%. A typical item at ranks 21-50 is 1.6%.\n- No signal tested reached 6%.\n- Demotions are safe but almost worthless (+0.002 to +0.004 NDCG per feed). A wrongly demoted positive costs 0.1-0.4.\n\n3. THE ONLY RULE YOU MAY APPLY\nR1, old re-post demotion (confidence LOW)\n- Fires when a candidate at model rank 2-10 has hmax >= .98 with \"@k\" where k >= 25 (a near-twin of something viewed long ago), and h10 <= .60.\n- Edit: move it down to about rank 15-20 and keep everything else in order. Never touch rank 1. Move at most 3 items.\n- Evidence: about 30 such top-10 items across three independent files, none positive. About 2 positives would be expected, so P(0) is about 12%. Two of those files used looser thresholds.\n- Counter-signs: four positives sit just under the cutoff (hmax .96-.97 at index 22-52). Do not loosen .98 or 25.\n- Gain is small: each demoted negative lifts every lower positive by one rank.\n\n4. CONFIDENCE SCALE\n- HIGH (you would bet at least 13%): rank 1-2 promotion allowed. No rule here reaches this, so do not claim HIGH.\n- MEDIUM (6-13%): promote ONE item to rank 4-6, never above 3.\n  - Allowed only if you can name a mechanism the model plausibly misses, cite the exact columns, and the idea is not in the cautions.\n  - Expect this in fewer than 1 feed in 30.\n- LOW (under 6%): demotions only, by at most about 10 ranks and never below about rank 20. No promotions into the top 10. R1 lives here.\n- NONE: no edit. Choose this whenever you hesitate.\nLog every edit as: feed, item rank -> new rank, rule, confidence.\n\n5. CAUTIONS: DO NOT TOUCH\n- Near-copies of the newest events (hmax >= .90 at @0-3, even 1.00):\n  - Promoting them hit about 2 of 70 firings. The model already ranks them high.\n  - Demoting them contradicts the 2.8x recent-duplicate lift. Leave them.\n- Category hedging, quotas, diversification, \"newest-category block to the top\", \"best item of each recent category\":\n  - 0 of about 37 insertions in two files and 1 of 7 in a third.\n  - Diversification cost -0.028 NDCG per feed. Newest-block-first cost -0.009 per feed, and one feed lost 0.32.\n  - Even when the category is right, the clicked item is usually the 3rd-6th of that category, not the first.\n- Single-column promotion (highest ucos, f1, f4, f5, pop) or any re-sort inside a category block:\n  - Highest ucos was positive in 0 of 15 miss feeds, 1 of 7 firings and 2 of 20 feeds.\n  - The clicked item often loses to its category mates on every column. A block re-sort dropped one feed from .92 to .59.\n- Exploration promotion (category absent from history, or touched only by old lead/order/contact events):\n  - About 1% (3 positives in about 300 candidates), below the 1.6% average. The card cannot tell you which feed is exploratory.\n- Cold or fresh listings (pop 0 / exp 0, f4 <= .12, f5 at the .02 floor): neither promote nor demote.\n  - Positives with this profile occur at ranks <ids>, 8 and 10, and deep.\n  - One file showed 0 of 26 in the top 20, and other files contradicted it.\n- Do not demote by any of these:\n  - Region f2. Positives are non-home about as often as candidates.\n  - pop >= 100. Positives exist at pop 165 and 297.\n  - f5 >= .9.\n  - Services or real-estate family.\n  - Small category history. Exploration positives sit in absent or ancient categories (4-5 of 21, about 10 of 23, 4 of 34).\n- Low-ucos demotion (ucos <= .40 in the top 10): 0 of 11 in a single file, P(0) about 50%. Not enough support.\n- Rank-1 z-gap carries no sign: a big gap was negative in one feed and positive in another. Rank 1 is negative in 87% of feeds anyway, so a wrong-looking rank 1 is not evidence.\n- Near-copies of mid-age events (@10-24, low h10): positives and negatives both occur (two positives at .97-.98@16 against four negatives at .96-.98@11). Leave them.\n- Tiny feeds (under 30 candidates), guests and short histories: leave. They are already near-optimal or have no distinguishing column.\n- Selection bias: half the studied feeds were chosen because the model missed, so \"demote the top block\" ideas looked better there than they will on random feeds. Treat every rule, R1 included, as a hypothesis.\n\n6. PROCEDURE\nScan ranks 2-10 for R1. If nothing fires cleanly, or any caution applies, write NO EDIT and move on.\n----- END GUIDE -----\n\nOutput one entry per feed (all 1, in order). \"moves\" lists items to relocate: from_rank is the item's rank on the card (r12 -> 12), to_rank its new position (1 = top). Moves are applied in increasing to_rank order to the model's list; every other item keeps its relative order. Use an empty list for no change (confidence \"none\"). Keep each reason under 30 words, naming the card evidence."
+}

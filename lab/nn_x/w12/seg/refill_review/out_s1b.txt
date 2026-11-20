@@ -1,0 +1,18 @@
+## (i) order test, study's T events, 300 feeds per set (rng 4242); common keys = unique in both AND stored at index >= 200 / >= 128
+   holdout, stored index >= 200: feeds 218, T events 10510, with >= 1 such common event deeper in the source snapshot 9 = 0.09% (1 feeds); share of (event, common key) pairs out of order 0.002%
+   holdout, stored index >= 128: feeds 218, T events 10768, with >= 1 such common event deeper in the source snapshot 179 = 1.66% (4 feeds); share of (event, common key) pairs out of order 0.022%
+   holdout, stored index >= 0: feeds 218, T events 10768, with >= 1 such common event deeper in the source snapshot 357 = 3.32% (7 feeds); share of (event, common key) pairs out of order 0.031%
+   val, stored index >= 200: feeds 197, T events 8707, with >= 1 such common event deeper in the source snapshot 118 = 1.36% (3 feeds); share of (event, common key) pairs out of order 0.174%
+   val, stored index >= 128: feeds 197, T events 8851, with >= 1 such common event deeper in the source snapshot 276 = 3.12% (6 feeds); share of (event, common key) pairs out of order 0.131%
+   val, stored index >= 0: feeds 197, T events 8851, with >= 1 such common event deeper in the source snapshot 796 = 8.99% (13 feeds); share of (event, common key) pairs out of order 0.189%
+   test, stored index >= 200: feeds 175, T events 7882, with >= 1 such common event deeper in the source snapshot 182 = 2.31% (7 feeds); share of (event, common key) pairs out of order 0.119%
+   test, stored index >= 128: feeds 175, T events 8042, with >= 1 such common event deeper in the source snapshot 292 = 3.63% (9 feeds); share of (event, common key) pairs out of order 0.099%
+   test, stored index >= 0: feeds 175, T events 8042, with >= 1 such common event deeper in the source snapshot 353 = 4.39% (13 feeds); share of (event, common key) pairs out of order 0.097%
+
+## (ii) train feeds (capped, user_id != 0): share with a strictly earlier TRAIN snapshot at a gap >= L days, by train day
+   gap >=  0 d (to the user's FIRST train snapshot): 11.58% of train feeds; by day: d0:1.9 d1:4.4 d2:6.7 d3:8.9 d4:10.8 d5:12.5 d6:14.0 d7:14.8 d8:15.8 d11:16.5 d12:17.9 d13:18.8
+   gap >=  3 d (to the user's FIRST train snapshot): 7.05% of train feeds; by day: d0:0.0 d1:0.0 d2:0.0 d3:1.4 d4:4.0 d5:6.4 d6:8.6 d7:10.2 d8:11.9 d11:15.1 d12:15.9 d13:15.6
+   gap >=  7 d (to the user's FIRST train snapshot): 3.13% of train feeds; by day: d0:0.0 d1:0.0 d2:0.0 d3:0.0 d4:0.0 d5:0.0 d6:0.0 d7:1.4 d8:4.0 d11:9.7 d12:11.5 d13:12.6
+   gap >= 10 d (to the user's FIRST train snapshot): 1.39% of train feeds; by day: d0:0.0 d1:0.0 d2:0.0 d3:0.0 d4:0.0 d5:0.0 d6:0.0 d7:0.0 d8:0.0 d11:3.7 d12:6.0 d13:7.9
+   val: gap >= 0 d: 14.98% | gap >= 3 d: 14.82% | gap >= 7 d: 12.77% | gap >= 10 d: 11.10%
+   test: gap >= 0 d: 14.35% | gap >= 3 d: 14.29% | gap >= 7 d: 14.19% | gap >= 10 d: 12.96%

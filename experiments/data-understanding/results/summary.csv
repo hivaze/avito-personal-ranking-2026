@@ -1,0 +1,33 @@
+finding,split_or_witness,value,uncertainty,source
+"adversarial AUC, feed level, val vs test",val + test feeds,0.5239,,results/shift_s04_adversarial.txt
+"adversarial AUC, feed level, train vs val","30,000 late train feeds + val",0.9254,,results/shift_s04_adversarial.txt
+"adversarial AUC, feed level, val vs test, with train-overlap features",val + test feeds,0.9090,,results/shift_s04_adversarial.txt
+"adversarial AUC, feed level, public vs private",test feeds,0.5115,,results/shift_s04_adversarial.txt
+"adversarial AUC, feed level, public vs private, with train-overlap features",test feeds,0.6571,,results/shift_s04_adversarial.txt
+public/private boundary timestamp,test,1790497920 (2026-09-27 11:32 Moscow time),18 feeds share the boundary tick,results/shift_s05_public_private.txt
+public feeds (timestamp below the boundary),test,8562 (29.94%),,results/shift_s05_public_private.txt
+weekend share of feeds,public / private / val,100.0% / 24.2% / 0.0%,,results/shift_s05_public_private.txt
+candidate rows whose item was a train candidate,public / private,56.41% / 52.68%,,results/shift_s05_public_private.txt
+"candidate rows whose item was a train candidate, by day","val day 1, val day 2, test days 1-4",69.12% / 61.39% / 56.92% / 54.65% / 52.86% / 51.38%,,results/shift_s03b_coverage_decay.txt
+"f1 alone, pessimistic ties",val,0.3279,,results/shift_s03b_coverage_decay.txt
+"f1 alone, random tie-break",val,0.3364,,results/shift_s03b_coverage_decay.txt
+"f1 alone, same feed sizes as public / private (re-weighted val)",val re-weighted,0.3285 / 0.3312,,results/shift_s05_public_private.txt
+positive rate of the lowest f4 decile relative to the split mean,train sample / val,1.22 / 0.46,,results/shift_s07_relation_desc.txt
+production order alone as the score,"train sample (60,000 feeds)",0.3634,,results/shift_s07_relation_desc.txt
+positive rate at display positions 0-9 and in the last bucket,train sample,6.26% / 0.99%,,results/shift_s07_relation_desc.txt
+expected NDCG of a random order,val,0.2890,,results/emb_val_signals.csv
+"recency-weighted history similarity (half-life 5 events), minus f1",val,0.3492 (+0.0126),0.0017,results/emb_val_signals.csv
+"dot product of user vector and item vector, minus f1",val,0.3432 (+0.0066),0.0017,results/emb_val_signals.csv
+"mean cosine to the whole history, minus f1",val,0.3294 (-0.0072),0.0018,results/emb_val_signals.csv
+"small attention scorer fitted on train, minus the user dot product",val,0.3584 (+0.0152),0.0014,results/emb_06c_history_attention.txt
+LightGBM fitted on train: f1..f5 + category,val,0.3303,,results/emb_05_lgb_lift.txt
+LightGBM fitted on train: plus all 39 embedding features,val,0.3651 (+0.0348),0.0016,results/emb_05_lgb_lift.txt
+"ALS profile, first version (128 factors, exponential decay 5)",val,0.3310,lift over random +0.0420 +- 0.0015,results/collab_als_first_version_profiles.txt
+"ALS, leak-free version (64 factors, last 20 items)",val,0.3262,lift over random +0.0372 +- 0.0014,results/collab_als_clean.txt
+LightGBM 5-fold on val: f1..f5 + category + M,val out-of-fold,0.3368,,results/collab_07c_lgb_group_ablation.txt
+LightGBM 5-fold on val: all groups with the first ALS,val out-of-fold,0.3537 (+0.0169),0.0016,results/collab_07c_lgb_group_ablation.txt
+"rank blend f1 + co-visitation, against f1 with pessimistic ties",val,+0.0125,,results/synthesis_v5_fair_blend.txt
+"rank blend f1 + co-visitation, against f1 with a random tie-break",val,+0.0041,0.0008,results/synthesis_v5_fair_blend.txt
+test feeds with a later feed of the same logged-in user,test (public / private),108 (59 / 49),,results/synthesis_v2_leak.txt
+same count when the pooled user id 0 is treated as one user,test,334 feeds flagged,,results/synthesis_v2_leak.txt
+positive rate of val candidates found in the same user's later history,"val, logged-in users, val + test sources",0.935,184 rows in 110 feeds,results/synthesis_v2_leak.txt

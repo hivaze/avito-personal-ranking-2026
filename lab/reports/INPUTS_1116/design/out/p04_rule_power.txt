@@ -1,0 +1,85 @@
+
+######## SE inflation x1.0 (1.0 = null SE from the seed variance; 1.17 = what stored contrasts between different input views ran above it: 0.00059 vs 0.00051 val, 0.00036 vs 0.00030 holdout, out/p01_power.txt c2 vs a) ########
+== Stage A: hard labels, 8 + 8 members. SE member mean: val 0.00036, private mix 0.00052 [out/p01_power.txt (a), k = 8]; holdout clause on the 15,225 holdout feeds of Sep 12-19 (the feeds where the lag view exists): 0.00021 x sqrt(30000 / 15225) = 0.00029 ==
+true member-level effect on val | effect at the private mix | effect on the holdout | P(PASS first read) | P(PASS incl. replicate) | P(replicate band)
++0.0000 | same on all three | 0.014 | 0.017 | 0.029
++0.0000 | private x0.5, holdout x0.7 | 0.014 | 0.017 | 0.029
++0.0000 | private x0.5, holdout x0.4 | 0.014 | 0.017 | 0.029
++0.0003 | same on all three | 0.168 | 0.212 | 0.130
++0.0003 | private x0.5, holdout x0.7 | 0.122 | 0.155 | 0.115
++0.0003 | private x0.5, holdout x0.4 | 0.083 | 0.106 | 0.095
++0.0005 | same on all three | 0.429 | 0.501 | 0.134
++0.0005 | private x0.5, holdout x0.7 | 0.308 | 0.374 | 0.146
++0.0005 | private x0.5, holdout x0.4 | 0.190 | 0.236 | 0.134
++0.0010 | same on all three | 0.935 | 0.939 | 0.005
++0.0010 | private x0.5, holdout x0.7 | 0.841 | 0.860 | 0.026
++0.0010 | private x0.5, holdout x0.4 | 0.574 | 0.610 | 0.066
++0.0020 | same on all three | 1.000 | 1.000 | 0.000
++0.0020 | private x0.5, holdout x0.7 | 0.998 | 0.998 | 0.000
++0.0020 | private x0.5, holdout x0.4 | 0.946 | 0.946 | 0.000
+
+== Stage B: distilled wide students, 8 with the bundle vs the 16 stored. SE member mean: val 0.00026, private mix 0.00037 [0.866 x the k = 8 values of (a)], holdout subset 0.00021 ==
+hard-label effect | attenuation by the blind teacher | P(PASS first read) | P(PASS incl. replicate)
++0.0000 | 1.0 | 0.014 | 0.017   (private x0.5, holdout x0.7)
++0.0000 | 0.5 | 0.014 | 0.017   (private x0.5, holdout x0.7)
++0.0005 | 1.0 | 0.542 | 0.608   (private x0.5, holdout x0.7)
++0.0005 | 0.5 | 0.156 | 0.198   (private x0.5, holdout x0.7)
++0.0010 | 1.0 | 0.970 | 0.971   (private x0.5, holdout x0.7)
++0.0010 | 0.5 | 0.543 | 0.609   (private x0.5, holdout x0.7)
++0.0020 | 1.0 | 1.000 | 1.000   (private x0.5, holdout x0.7)
++0.0020 | 0.5 | 0.970 | 0.971   (private x0.5, holdout x0.7)
+
+== smallest true effect with power 0.8 (first read, effect equal on the witnesses used) ==
+Stage A, val alone at 2 SE: 0.00102; holdout subset alone at 2 SE: 0.00082; private mix alone at 2 SE: 0.00148
+Stage A, full rule, same effect on val and holdout: 0.00078
+Stage A, full rule, holdout effect x0.7, private x0.5: 0.00094
+Stage A, full rule, holdout effect x0.4, private x0.5: 0.00142
+Stage A, power 0.5 instead of 0.8, holdout x0.7, private x0.5: 0.00066
+Stage B, full rule, holdout effect x0.7, private x0.5 (effect = what the student keeps): 0.00068
+
+######## SE inflation x1.17 (1.0 = null SE from the seed variance; 1.17 = what stored contrasts between different input views ran above it: 0.00059 vs 0.00051 val, 0.00036 vs 0.00030 holdout, out/p01_power.txt c2 vs a) ########
+== Stage A: hard labels, 8 + 8 members. SE member mean: val 0.00036, private mix 0.00052 [out/p01_power.txt (a), k = 8]; holdout clause on the 15,225 holdout feeds of Sep 12-19 (the feeds where the lag view exists): 0.00021 x sqrt(30000 / 15225) = 0.00029 ==
+true member-level effect on val | effect at the private mix | effect on the holdout | P(PASS first read) | P(PASS incl. replicate) | P(replicate band)
++0.0000 | same on all three | 0.013 | 0.017 | 0.030
++0.0000 | private x0.5, holdout x0.7 | 0.014 | 0.017 | 0.030
++0.0000 | private x0.5, holdout x0.4 | 0.014 | 0.017 | 0.030
++0.0003 | same on all three | 0.127 | 0.162 | 0.118
++0.0003 | private x0.5, holdout x0.7 | 0.094 | 0.121 | 0.102
++0.0003 | private x0.5, holdout x0.4 | 0.067 | 0.086 | 0.085
++0.0005 | same on all three | 0.324 | 0.391 | 0.145
++0.0005 | private x0.5, holdout x0.7 | 0.228 | 0.284 | 0.143
++0.0005 | private x0.5, holdout x0.4 | 0.145 | 0.183 | 0.123
++0.0010 | same on all three | 0.859 | 0.875 | 0.021
++0.0010 | private x0.5, holdout x0.7 | 0.724 | 0.765 | 0.060
++0.0010 | private x0.5, holdout x0.4 | 0.466 | 0.515 | 0.102
++0.0020 | same on all three | 0.999 | 0.999 | 0.000
++0.0020 | private x0.5, holdout x0.7 | 0.993 | 0.993 | 0.000
++0.0020 | private x0.5, holdout x0.4 | 0.892 | 0.892 | 0.001
+
+== Stage B: distilled wide students, 8 with the bundle vs the 16 stored. SE member mean: val 0.00026, private mix 0.00037 [0.866 x the k = 8 values of (a)], holdout subset 0.00021 ==
+hard-label effect | attenuation by the blind teacher | P(PASS first read) | P(PASS incl. replicate)
++0.0000 | 1.0 | 0.014 | 0.017   (private x0.5, holdout x0.7)
++0.0000 | 0.5 | 0.014 | 0.017   (private x0.5, holdout x0.7)
++0.0005 | 1.0 | 0.418 | 0.489   (private x0.5, holdout x0.7)
++0.0005 | 0.5 | 0.118 | 0.151   (private x0.5, holdout x0.7)
++0.0010 | 1.0 | 0.926 | 0.931   (private x0.5, holdout x0.7)
++0.0010 | 0.5 | 0.417 | 0.488   (private x0.5, holdout x0.7)
++0.0020 | 1.0 | 1.000 | 1.000   (private x0.5, holdout x0.7)
++0.0020 | 0.5 | 0.925 | 0.931   (private x0.5, holdout x0.7)
+
+== smallest true effect with power 0.8 (first read, effect equal on the witnesses used) ==
+Stage A, val alone at 2 SE: 0.00120; holdout subset alone at 2 SE: 0.00096; private mix alone at 2 SE: 0.00173
+Stage A, full rule, same effect on val and holdout: 0.00092
+Stage A, full rule, holdout effect x0.7, private x0.5: 0.00110
+Stage A, full rule, holdout effect x0.4, private x0.5: 0.00166
+Stage A, power 0.5 instead of 0.8, holdout x0.7, private x0.5: 0.00077
+Stage B, full rule, holdout effect x0.7, private x0.5 (effect = what the student keeps): 0.00080
+
+== Stage F: fine-tune extras, 8 all-data wide members, arm vs stored control, FILE form 0.5 z(FT) + 0.5 z(TO) ==
+record (ledger 2026-11-16T02:38Z, Q4 MIXFT, same layout): file-level SE val 0.00022, private mix 0.00035, val M<50 0.00040
+rule F: private-mix z >= +1.5 AND val z >= +1.0 AND val M<50 z >= -1.0. corr(val, private) 0.7; M<50 treated as independent of the two
+true file-level effect +0.0000: P(PASS) 0.038 | variant val z >= 2.0, private z >= 1.0: 0.016
+true file-level effect +0.0002: P(PASS) 0.146 | variant val z >= 2.0, private z >= 1.0: 0.104
+true file-level effect +0.0003: P(PASS) 0.236 | variant val z >= 2.0, private z >= 1.0: 0.207
+true file-level effect +0.0005: P(PASS) 0.462 | variant val z >= 2.0, private z >= 1.0: 0.509
+true file-level effect +0.0010: P(PASS) 0.912 | variant val z >= 2.0, private z >= 1.0: 0.966

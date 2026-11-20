@@ -1,0 +1,26 @@
+FD16P20            b1 True | final val stored 0.40271 record 0.40271 b2 True | file rows != rank of stored branches 0 b3 True | members 16+4 files missing 0 bad 0 c1 True | rebuilt-vs-stored max|d| 0.0 exact True val from members 0.40271 c2 True | differ from harness copy 0 no harness copy 0
+FD8P20             b1 True | final val stored 0.40240 record 0.40240 b2 True | file rows != rank of stored branches 0 b3 True | members 8+4 files missing 0 bad 0 c1 True | rebuilt-vs-stored max|d| 0.0 exact True val from members 0.40240 c2 True | differ from harness copy 0 no harness copy 0
+FD16P20vf          b1 True | final val stored 0.40286 record 0.40286 b2 True | file rows != rank of stored branches 0 b3 True | members 16+8 files missing 0 bad 0 c1 True | rebuilt-vs-stored max|d| 0.0 exact True val from members 0.40286 c2 True | differ from harness copy 0 no harness copy 0
+FD16P20@m0.2_0.4   b1 True | final val stored 0.40298 record 0.40298 b2 True | file rows != rank of stored branches 0 b3 True | members 16+4 files missing 0 bad 0 c1 True | rebuilt-vs-stored max|d| 0.0 exact True val from members 0.40298 c2 True | differ from harness copy 0 no harness copy 0
+W8P20              b1 True | final val stored 0.40214 record 0.40214 b2 True | file rows != rank of stored branches 0 b3 True | members 8+4 files missing 0 bad 0 c1 True | rebuilt-vs-stored max|d| 0.0 exact True val from members 0.40214 c2 True | differ from harness copy 0 no harness copy 0
+W16                b1 True | final val stored 0.40158 record 0.40158 b2 True | file rows != rank of stored branches 0 b3 True | members 16+0 files missing 0 bad 0 c1 True | rebuilt-vs-stored max|d| 0.0 exact True val from members 0.40158 c2 True | differ from harness copy 0 no harness copy 0
+W8                 b1 True | final val stored 0.40165 record 0.40165 b2 True | file rows != rank of stored branches 0 b3 True | members 8+0 files missing 0 bad 0 c1 True | rebuilt-vs-stored max|d| 0.0 exact True val from members 0.40165 c2 True | differ from harness copy 0 no harness copy 0
+
+(e) test-score correlation from the stored branch files (final = 0.5 z(FT) + 0.5 z(TO)):
+  FD16P20|W8P20                pooled Pearson 0.9975 | feed-mean Pearson 0.9974 | feed-mean Spearman 0.9936 (p5 0.9824) | same top-1 89.7% of feeds
+  FD16P20|FD8P20               pooled Pearson 0.9994 | feed-mean Pearson 0.9994 | feed-mean Spearman 0.9975 (p5 0.9930) | same top-1 94.7% of feeds
+  all pairs, pooled Pearson: FD16P20|FD8P20 0.9994 ; FD16P20|FD16P20vf 0.9999 ; FD16P20|FD16P20@m0.2_0.4 0.9995 ; FD16P20|W8P20 0.9975 ; FD16P20|W16 0.9976 ; FD16P20|W8 0.9967 ; FD8P20|FD16P20vf 0.9993 ; FD8P20|FD16P20@m0.2_0.4 0.9989 ; FD8P20|W8P20 0.9970 ; FD8P20|W16 0.9970 ; FD8P20|W8 0.9961 ; FD16P20vf|FD16P20@m0.2_0.4 0.9993 ; FD16P20vf|W8P20 0.9976 ; FD16P20vf|W16 0.9977 ; FD16P20vf|W8 0.9968 ; FD16P20@m0.2_0.4|W8P20 0.9971 ; FD16P20@m0.2_0.4|W16 0.9965 ; FD16P20@m0.2_0.4|W8 0.9956 ; W8P20|W16 0.9988 ; W8P20|W8 0.9994 ; W16|W8 0.9990
+paired val deltas (per-feed NDCG, 14,423 val feeds; +- paired SE; [paired public SE = sd / sqrt(8562)]):
+  FD8P20 - FD16P20                 -0.00032 +- 0.00030  [0.00039]
+  FD16P20vf - FD16P20              +0.00015 +- 0.00020  [0.00026]
+  FD16P20@m0.2_0.4 - FD16P20       +0.00026 +- 0.00021  [0.00028]
+  W8P20 - FD16P20                  -0.00058 +- 0.00043  [0.00056]
+  W16 - FD16P20                    -0.00113 +- 0.00043  [0.00056]
+  W8 - FD16P20                     -0.00106 +- 0.00047  [0.00061]
+  FD16P20 - W8P20                  +0.00058 +- 0.00043  [0.00056]
+  FD8P20 - W8P20                   +0.00026 +- 0.00046  [0.00060]
+  FD16P20vf - W8P20                +0.00072 +- 0.00044  [0.00057]
+  FD16P20@m0.2_0.4 - W8P20         +0.00084 +- 0.00046  [0.00059]
+  W16 - W8P20                      -0.00056 +- 0.00038  [0.00050]
+  W8 - W8P20                       -0.00049 +- 0.00031  [0.00041]
+written <repo>/nn_x/w12/freeze/out/b_branches.json

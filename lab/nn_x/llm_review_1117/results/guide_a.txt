@@ -1,0 +1,58 @@
+FEED REVIEW GUIDE (FD16P20)
+
+1. STANCE
+The model's order is the default. It already reads every column on the card and much more. Five analysts studied 100 labelled feeds. None found an edit that clearly beats the model, and every rule they proposed was fitted after seeing the answers. Default = NO EDIT. Expect to edit about 10% of feeds (hard ceiling 15%), nearly all by rule R1, and to move at most 3 items in any feed. If you edit more than that, you are over-editing.
+
+2. BREAK-EVEN
+- Promoting a negative to rank 1 pays only if you believe it is at least 13% likely to be positive. A negative pushed in front of a rank-1 positive costs 0.37.
+- Moving an item from about rank 40 to rank 5 needs at least 6%. Moving into ranks 6-10 needs about 4.4%. A typical item at ranks 21-50 is 1.6%.
+- No signal tested reached 6%.
+- Demotions are safe but almost worthless (+0.002 to +0.004 NDCG per feed). A wrongly demoted positive costs 0.1-0.4.
+
+3. THE ONLY RULE YOU MAY APPLY
+R1, old re-post demotion (confidence LOW)
+- Fires when a candidate at model rank 2-10 has hmax >= .98 with "@k" where k >= 25 (a near-twin of something viewed long ago), and h10 <= .60.
+- Edit: move it down to about rank 15-20 and keep everything else in order. Never touch rank 1. Move at most 3 items.
+- Evidence: about 30 such top-10 items across three independent files, none positive. About 2 positives would be expected, so P(0) is about 12%. Two of those files used looser thresholds.
+- Counter-signs: four positives sit just under the cutoff (hmax .96-.97 at index 22-52). Do not loosen .98 or 25.
+- Gain is small: each demoted negative lifts every lower positive by one rank.
+
+4. CONFIDENCE SCALE
+- HIGH (you would bet at least 13%): rank 1-2 promotion allowed. No rule here reaches this, so do not claim HIGH.
+- MEDIUM (6-13%): promote ONE item to rank 4-6, never above 3.
+  - Allowed only if you can name a mechanism the model plausibly misses, cite the exact columns, and the idea is not in the cautions.
+  - Expect this in fewer than 1 feed in 30.
+- LOW (under 6%): demotions only, by at most about 10 ranks and never below about rank 20. No promotions into the top 10. R1 lives here.
+- NONE: no edit. Choose this whenever you hesitate.
+Log every edit as: feed, item rank -> new rank, rule, confidence.
+
+5. CAUTIONS: DO NOT TOUCH
+- Near-copies of the newest events (hmax >= .90 at @0-3, even 1.00):
+  - Promoting them hit about 2 of 70 firings. The model already ranks them high.
+  - Demoting them contradicts the 2.8x recent-duplicate lift. Leave them.
+- Category hedging, quotas, diversification, "newest-category block to the top", "best item of each recent category":
+  - 0 of about 37 insertions in two files and 1 of 7 in a third.
+  - Diversification cost -0.028 NDCG per feed. Newest-block-first cost -0.009 per feed, and one feed lost 0.32.
+  - Even when the category is right, the clicked item is usually the 3rd-6th of that category, not the first.
+- Single-column promotion (highest ucos, f1, f4, f5, pop) or any re-sort inside a category block:
+  - Highest ucos was positive in 0 of 15 miss feeds, 1 of 7 firings and 2 of 20 feeds.
+  - The clicked item often loses to its category mates on every column. A block re-sort dropped one feed from .92 to .59.
+- Exploration promotion (category absent from history, or touched only by old lead/order/contact events):
+  - About 1% (3 positives in about 300 candidates), below the 1.6% average. The card cannot tell you which feed is exploratory.
+- Cold or fresh listings (pop 0 / exp 0, f4 <= .12, f5 at the .02 floor): neither promote nor demote.
+  - Positives with this profile occur at ranks 1, 5, 6, 8 and 10, and deep.
+  - One file showed 0 of 26 in the top 20, and other files contradicted it.
+- Do not demote by any of these:
+  - Region f2. Positives are non-home about as often as candidates.
+  - pop >= 100. Positives exist at pop 165 and 297.
+  - f5 >= .9.
+  - Services or real-estate family.
+  - Small category history. Exploration positives sit in absent or ancient categories (4-5 of 21, about 10 of 23, 4 of 34).
+- Low-ucos demotion (ucos <= .40 in the top 10): 0 of 11 in a single file, P(0) about 50%. Not enough support.
+- Rank-1 z-gap carries no sign: a big gap was negative in one feed and positive in another. Rank 1 is negative in 87% of feeds anyway, so a wrong-looking rank 1 is not evidence.
+- Near-copies of mid-age events (@10-24, low h10): positives and negatives both occur (two positives at .97-.98@16 against four negatives at .96-.98@11). Leave them.
+- Tiny feeds (under 30 candidates), guests and short histories: leave. They are already near-optimal or have no distinguishing column.
+- Selection bias: half the studied feeds were chosen because the model missed, so "demote the top block" ideas looked better there than they will on random feeds. Treat every rule, R1 included, as a hypothesis.
+
+6. PROCEDURE
+Scan ranks 2-10 for R1. If nothing fires cleanly, or any caution applies, write NO EDIT and move on.

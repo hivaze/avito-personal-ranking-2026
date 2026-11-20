@@ -1,0 +1,32 @@
+## 1. What was run, and three facts that differ from the brief
+
+Directory `nn_x/w12/seg/refill/` (scripts, outputs `out_*.txt`, `DECLARATION.txt` with its blocks stamped before the first labelled number, `PROGRESS.md`). The rule is the block of 2026-11-15T17:41:25Z in `nn_x/w5/logs/E_kd_predeclared.txt`, unchanged.
+
+**Members (held-out; `args.holdout = 30000` in each checkpoint, so none trained on the holdout feeds):** distilled wide students `w5_e10_kd05w192_s951`, `w5_e10_kd05t25w192_s951` (d192); hard-label members `w5_e10_base_s951`, `w5_e10_base_s952` (d128). Pool = member-equal mean of per-feed score z (`nn_x/w5/blend.py`; the project pools score z, not rank z). Inference only, fp32, one process on GPU N under the lane lock (launched 18:01:24Z with 3 compute processes and 88.7 GB free on the card; 9.8 minutes; 20 passes x 4 members x 2 sets). Own subset loader (`s2_replay.py`) that mirrors `SplitData.gather`; pass (a) reproduces the stored predictions of every member on both sets (flat correlation 0.999997-1.000000; the stored ones are bf16) [M].
+
+**Facts found before any labelled number (all in DECLARATION block 0):**
+
+1. **The members do use a positional code for history events.** `--no_pos` switches off the display-position tower only. Every history token gets `rec = nn.Embedding(256, d)` added (trained, row norm 2.4-3.0 in all four members), and the retrieval values carry a log2 bucket of the event's position. Other order / length inputs: max cosine over the newest 8 and 32 events, recency of the newest same-category event, log(1 + H), category count / H, user_id-0 flag x log(1 + H) (zero here). Consequences: pass (c) shows old events with the position code of slots 129-256, as the rule intends; pass (d) cannot run as is (position 256 does not exist) and needed a declared convention.
+2. **A history is not a shifted log** (per-type caps, section 2), so "the events beyond the cap" are two different things: events older than the stored 256th (T, few) and events the per-type caps removed (the rest of U, many).
+3. **The decision sample is small**: 3,235 qualifying holdout feeds.
+
+**Designs (both declared before any labelled number).** Design 1 = the rule's passes with T (literal). Design 2 = the same passes with U, declared because design 1 cannot fill the slots (median 29 events) and because U is what an extended-history arm would actually feed.
+
+**Passes** (the model sees the listed events as its history; every in-model history input follows them, exactly as the loader's `max_hist` does):
+
+| pass | history shown |
+|---|---|
+| a | the stored 256 events |
+| b | the newest 128 (H = 128) |
+| c | the newest 128 + the first n = min(recovered, 128) recovered events in slots 129..128+n (H = 128 + n) |
+| am | the stored newest 128 + n events (length-matched stored reference; = a when n = 128) |
+| e (placebo) | the newest 128 + n recovered events of another user's read-set feed (same set, H = 256, at least n recovered events, fixed seed) |
+| b192 / c192 | the newest 192 / the newest 192 + min(recovered, 64) recovered events (the review's second line) |
+| g (calibration) | the newest 128 + the stored events 193-256 shown in slots 129-192 (H = 192), read against b192 |
+| d1 | stored 256 + n recovered events as 256 + n tokens; `rec` index held at 255 beyond position 255; every in-model dense input held at its pass-(a) value |
+| d2 | as d1, dense inputs recomputed over all events with H held at 256 |
+| dP | d1 with the other user's events |
+
+**Inputs that depend on the history and were NOT recomputed in any pass** (so every effect is a lower bound in magnitude, as in the review's truncation replay): the precomputed xt columns `seq_cv_invd20 / pop / norm` (co-visitation with the feed's history), `ctx_nd_*` (10, in-feed context against the history and the user embedding), `ctx_hn_*` (6, competition for the last 32 history items), `ctx_hs_*` (4), `pre2_fe_z / new_z / fe_s / new_s / hmax32` (trajectory-encoder scores over the history): up to 28 of the 34 columns were computed on the stored 256 events and stay as stored. The 5 `it_hist_*_luo` popularity columns do not depend on the feed's own history. The organisers' user embedding is unchanged too.
+
+**Statistics.** Per-feed NDCG by `src/metrics.py`; differences paired per feed; SE cluster-robust by user; ratios with a 2,000-draw user bootstrap. rho = [N(c) - N(b)] / [N(a) - N(b)] (the rule). Because most feeds cannot fill 128 slots I also declared: ceiling = [N(am) - N(b)] / [N(a) - N(b)] (the rho that perfect events of the same count would give) and the length-matched share rho_m = [N(c) - N(b)] / [N(am) - N(b)]. Verdict line = design 1, literal rho on the holdout, sign on val.

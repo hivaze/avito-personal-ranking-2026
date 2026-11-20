@@ -1,0 +1,39 @@
+== ENCODER-DOSE (C) K/V PROBE read-out (ledger section 10.C, pre-declared 2026-11-14T00:03:07Z): abl_kv64_s23/24 vs abl_base_s23/24; LAST checkpoints primary; frozen section-4 machinery. GO only if val >= +0.0015 AND holdout > 0 AND stale-val >= -1 SE AND pmix >= -1 SE
+== runs: selected step / total | selected val, holdout (in-training eval) | last val, holdout | minutes
+  abl:abl_base_s23               best  19000/19670 | sel val 0.39348 hold 0.31756 | last val 0.39364 hold 0.31754 | 37 min
+  abl:abl_base_s24               best  19670/19670 | sel val 0.39348 hold 0.31754 | last val 0.39348 hold 0.31754 | 37 min
+  abl:abl_kv64_s23               best  19670/19670 | sel val 0.39316 hold 0.31767 | last val 0.39316 hold 0.31767 | 27 min
+  abl:abl_kv64_s24               best  19670/19670 | sel val 0.39382 hold 0.31749 | last val 0.39382 hold 0.31749 | 27 min
+
+== kv64 (SCALE-UP: frozen pre2 encoder (ckpt_w1r_v3, ID-zeroed) 64-d PCA states of every history event as a zero-init gated K/V adapter in the 2 cross blocks (--kv64 1)) vs base (B = arm, delta = arm - base)
+    VAL  abl_kv64_s23@last 0.39316 vs abl_base_s23@last 0.39364: -0.00048
+    VAL  abl_kv64_s24@last 0.39382 vs abl_base_s24@last 0.39348: +0.00034
+    HOLD abl_kv64_s23@last 0.31767 vs abl_base_s23@last 0.31754: +0.00013
+    HOLD abl_kv64_s24@last 0.31750 vs abl_base_s24@last 0.31753: -0.00003
+  [last] VAL  pooled: all -0.00007+-0.00047 (z -0.16)  M<50 +0.00037+-0.00089 (z +0.42)  M>=50 -0.00038+-0.00050 (z -0.77)  Tue +0.00020+-0.00065 (z +0.31)  Thu -0.00038+-0.00067 (z -0.56)  coldpos -0.00053+-0.00096 (z -0.56)  warmpos +0.00005+-0.00062 (z +0.09)
+  [last] HOLD pooled: all +0.00005+-0.00028 (z +0.17)  late20% -0.00052+-0.00057 (z -0.91)
+  [last] val SE_cal 0.00053 (z_cal -0.14)
+  [last] hold SE_cal 0.00030 (z_cal +0.16)
+    VAL  abl_kv64_s23 0.39316 vs abl_base_s23 0.39348: -0.00032
+    VAL  abl_kv64_s24 0.39382 vs abl_base_s24 0.39348: +0.00034
+    HOLD abl_kv64_s23 0.31767 vs abl_base_s23 0.31756: +0.00011
+    HOLD abl_kv64_s24 0.31750 vs abl_base_s24 0.31753: -0.00003
+  [selected (info)] VAL  pooled: all +0.00001+-0.00048 (z +0.02)  M<50 +0.00032+-0.00089 (z +0.36)  M>=50 -0.00021+-0.00052 (z -0.40)  Tue +0.00020+-0.00067 (z +0.30)  Thu -0.00021+-0.00068 (z -0.30)  coldpos +0.00146+-0.00096 (z +1.53)  warmpos -0.00067+-0.00064 (z -1.05)
+  [selected (info)] HOLD pooled: all +0.00004+-0.00028 (z +0.14)  late20% -0.00050+-0.00057 (z -0.88)
+  MINUTES base [37.1, 37.5] arm [27.3, 27.0] -> ratio 0.73
+  PMIX private-mix pooled delta -0.00030 +- 0.00071 (z -0.42); < -1 SE: no
+  STALE-VAL pooled delta (private-like inputs): -0.00061 +- 0.00047 (z -1.28); < -1 SE: YES
+  PRIVATE TRADE (stale-val delta - val delta): -0.00053 (arm loses MORE than the base under the private-like coverage shift)
+  stale-val (selected checkpoints, info):
+  STALE-VAL pooled delta (private-like inputs): -0.00054 +- 0.00048 (z -1.14); < -1 SE: YES
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent +0.00042+-0.00037 (pos 0.460)  warm|mid -0.00026+-0.00015 (pos 0.110)  warm|novel -0.00019+-0.00015 (pos 0.127)  cold|recent -0.00016+-0.00023 (pos 0.219)  cold|mid +0.00010+-0.00008 (pos 0.038)  cold|novel -0.00005+-0.00007 (pos 0.046)  cat#1|w3+ +0.00022+-0.00017 (pos 0.347)  total -0.00015+-0.00047 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_kv64_s23: warmup clipped 0.128 (median 0.437); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.257) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.43 208:0.54 256:0.64 304:1.42
+  CLIPLOG abl_kv64_s24: warmup clipped 0.146 (median 0.422); plateau clipped 0.000 (median 0.320); cooldown clipped 0.000 (median 0.301); pool clipped 0.000 (median 0.241) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.39 208:0.60 256:0.75 304:1.22
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> kv64: val -0.00007 (SE_cal 0.00053, z_cal -0.14; seeds -0.00048 +0.00034), holdout +0.00005 (z_cal +0.16; seeds +0.00013 -0.00003) -> FAIL
+
+== PRE-DECLARED RULE (ledger 10.C): val >= +0.0015: NO; holdout > 0: OK; pmix >= -1 SE: OK; stale-val >= -1 SE: NO
+  ==> VERDICT (C): NO-GO (val -0.00007 +- 0.00053, holdout +0.00005 +- 0.00030, pmix -0.00030 +- 0.00071)

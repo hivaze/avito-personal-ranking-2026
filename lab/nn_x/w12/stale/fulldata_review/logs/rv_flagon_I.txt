@@ -1,0 +1,31 @@
+  [PASS] flag-off run: 0 holdout feeds in any training batch 
+  [PASS] flag-off run: every step == my recomputed regular batch or a pool batch (steps 74, expected 74)
+  [PASS] (c) steps: flag-on 75 == my recomputed count with the holdout 75; without 74 
+  [PASS] flag-on: every non-regular step is at/after the cooldown start and holds only p_random > 0.5 feeds of the feed list (regular 45, pool 30, t_cool 0)
+  [PASS] (a) holdout feeds of the 20,000 subsample: 194; in the regular batches of the flag-on run: 118 
+  [PASS] (d) the non-holdout feeds of the flag-on feed list == the flag-off feed list 
+     pool batches 30: 1886 feed-occurrences, 363 of them holdout feeds (19.2%); pool share of holdout 19.4%
+  [PASS] (e) holdout feeds are drawn in pool batches 
+  [PASS] (b) target of 481 holdout feed-occurrences == 0.5 y/sum(y) + 0.5 softmax(teacher file rows) max abs diff 6.4e-08 (other feeds 6.0e-08)
+  [PASS] (d) every eval line shows holdout_ndcg nan and has its own IN-SAMPLE line (3 evals)
+  [PASS] (d) BEST step == total steps BEST step 75
+  [PASS] (d) kept checkpoint bit-identical to @last; args keep == 'last' and holdout_in_train True ['w5_smoke_lcd_ref_s953.pt', 'w5_smoke_lcd_ref_s953@last.pt']
+  [PASS] (d) holdout dir holds only *holdoutINSAMPLE* files (no out-of-sample name, no holdout_meta / holdout_y) ['nn_w5_smoke_lcd_ref_s953@last_holdoutINSAMPLE.npy', 'nn_w5_smoke_lcd_ref_s953_holdoutINSAMPLE.npy']
+  [PASS] val / test prediction files of the kept and @last checkpoints ['nn_w5_smoke_lcd_ref_s953@last_trainonly_test.npy', 'nn_w5_smoke_lcd_ref_s953@last_trainonly_val.npy', 'nn_w5_smoke_lcd_ref_s953_trainonly_test.npy', 'nn_w5_smoke_lcd_ref_s953_trainonly_val.npy']
+  [PASS] fulldata json present 
+     fulldata.json: {'kept_step': 75, 'total_steps': 75, 'n_holdout_feeds_in_training': 194, 'n_training_feeds': 20000, 'pool_holdout_feeds': 194, 'holdout_feeds_per_epoch': 194, 'steps': {'steps_per_epoch': 75, 'steps_per_epoch_without_holdout': 74, 'total': 75}}
+     LOG: FULLDATA --holdout_in_train: the 30000 holdout feeds stay identified but are NOT removed from training; checkpoint = LAST step (a.keep 'best' -> 'last', --select_on 'holdout' ignored); their NDCG is IN-SAMPLE and never used
+     LOG: holdout: 30000 random-like train feeds excluded from training
+     LOG: FULLDATA: 194 holdout feeds (29886 candidates) put back: training feeds 19806 -> 20000
+     LOG: train feeds 20000, steps/epoch 75, total steps 75
+     LOG: FULLDATA: each epoch holds every training feed once, 194 of them holdout feeds; steps/epoch 75 (the same feeds without the holdout: 74), total steps 75
+     LOG: FULLDATA: cooldown exploration pool 998 feeds, of which 194 holdout feeds (IN the pool)
+     LOG: cooldown mix: p=0.3 from step 0, exploration pool 998 feeds
+     LOG: FULLDATA step 25: holdout IN-SAMPLE ndcg 0.17153 (these feeds are trained on: not a generalisation estimate, never used for selection; the holdout_ndcg field of the next line is nan on purpose)
+     LOG: FULLDATA step 50: holdout IN-SAMPLE ndcg 0.17160 (these feeds are trained on: not a generalisation estimate, never used for selection; the holdout_ndcg field of the next line is nan on purpose)
+     LOG: FULLDATA step 75: holdout IN-SAMPLE ndcg 0.17152 (these feeds are trained on: not a generalisation estimate, never used for selection; the holdout_ndcg field of the next line is nan on purpose)
+     LOG: FULLDATA saved holdout preds of the last checkpoint (4630966,) -> nn_w5_smoke_lcd_ref_s953@last_holdoutINSAMPLE.npy (IN-SAMPLE NDCG 0.17152)
+     LOG: BEST step 75 val_ndcg 0.21350; train time T min
+     LOG: FULLDATA saved holdout preds of the kept (= LAST) checkpoint (4630966,) -> nn_w5_smoke_lcd_ref_s953_holdoutINSAMPLE.npy (IN-SAMPLE NDCG 0.17152)
+     LOG: FULLDATA summary -> w5_smoke_lcd_ref_s953_fulldata.json (kept step 75 = last; 194 holdout feeds trained on)
+ALL PASS

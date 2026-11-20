@@ -1,0 +1,119 @@
+{
+ "checks": [
+  {
+   "name": "regular batch (B 64): batch norm == r6 statement (bitwise) == weighted mean; feed norm == 1.695 * sum / 512",
+   "ok": true,
+   "info": "aux batch 2.27763 feed 0.47904 (ratio 0.210 = 1.695 * sum(1-p) / 512 = 0.210)"
+  },
+  {
+   "name": "pool batch (B 63): batch norm == r6 statement (bitwise) == weighted mean; feed norm == 1.695 * sum / 512",
+   "ok": true,
+   "info": "aux batch 2.52064 feed 0.02929 (ratio 0.012 = 1.695 * sum(1-p) / 512 = 0.012)"
+  },
+  {
+   "name": "M<50 batch (B 64): batch norm == r6 statement (bitwise) == weighted mean; feed norm == 1.695 * sum / 512",
+   "ok": true,
+   "info": "aux batch 1.43254 feed 0.30352 (ratio 0.212 = 1.695 * sum(1-p) / 512 = 0.212)"
+  },
+  {
+   "name": "flags OFF vs frozen r6: identical training-batch sequence (incl. pool steps)",
+   "ok": true,
+   "info": "39 batches"
+  },
+  {
+   "name": "flags OFF vs frozen r6: identical train-mode model logits and loss-input logits (no offset)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flags OFF vs frozen r6: identical logged loss / val / holdout / BEST lines",
+   "ok": true,
+   "info": "BEST step 20 val_ndcg 0.39150; train time"
+  },
+  {
+   "name": "flags OFF vs frozen r6: bit-identical checkpoint and val preds",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "hygiene/CLIPLOG run vs flags OFF: identical batches, model logits, logged lines, checkpoint, val preds",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "hygiene run: @last checkpoint (step 39) + its val and holdout preds written",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "--save_holdout preds == holdout_eval.py preds of the same checkpoint (bitwise, same kernel settings)",
+   "ok": true,
+   "info": "max|d| 0.00e+00; w5_t5e2e_new_hyg         holdout NDCG 0.31779"
+  },
+  {
+   "name": "CLIPLOG arrays: 39 finite pre-clip norms, main/aux split at steps 0/10/20/30, summary json",
+   "ok": true,
+   "info": "gn median 0.289 max 0.602; split [[0.255, 0.044], [0.48, 0.007], [0.242, 0.014], [0.264, 0.012]]"
+  },
+  {
+   "name": "arms ON: same training-batch sequence as flags OFF (arms share the data order)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "arms ON: for EVERY training batch, logits into the main listwise loss == model logits + brute-force offset a * L[group, rkend] * (1 - p_soft) (exact, fp32)",
+   "ok": true,
+   "info": "0 mismatching batches"
+  },
+  {
+   "name": "arms ON: offsets non-zero on production feeds, zero on every random-like (pool) feed",
+   "ok": true,
+   "info": "non-zero production cells 30605, random-like 0 (1431 random-like feed rows)"
+  },
+  {
+   "name": "arms ON: selection only at step >= 39 (best_step 39); @last checkpoint == selected checkpoint (bitwise)",
+   "ok": true,
+   "info": "39"
+  },
+  {
+   "name": "arms ON: @last val / test / holdout preds == the selected checkpoint's (same weights)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "arms ON: setup log lines (TRUNC-PROD, AUXF multiplier, CLIPLOG, selection, LAST checkpoint)",
+   "ok": true,
+   "info": "['wave-5 TRUNC-PROD: a 1.0; lifts prod M<50 [1.0038, 0.5449, 2.0131] / prod M>=50 [2.8071, -0.195, -0.2199] (rkend 0/1/2; random-like 0); prod M<50 1605861 feeds, mean (1-p_soft) 0.767; prod M>=50 1381229 feeds, mean (1-p_soft) 0.972; random-like (0) 134118 feeds, mean (1-p_soft) 0.166; holdout (0) 30000 feeds, mean (1-p_soft) 0.030; non-zero (feed, rkend) offsets 8961270; main listwise logits of training batches only; 1s', \"wave-5 AUXF: K9 aux = aux_w(step) * 1.695 * sum_f (1-p_f) CE_aux_f / 512 (was / sum_f (1-p_f)); this run's first-epoch regular batches: epoch-mean aux multiplier 0.9985 (exact constant for them 1.6976); pool batches get their production mass\", 'wave-5 CLIPLOG: pre-clip grad norm every step, main/aux split every 10 steps (autograd.grad, no effect on training)']"
+  },
+  {
+   "name": "arms ON changes training (checkpoint differs from flags OFF)",
+   "ok": true,
+   "info": ""
+  }
+ ],
+ "e2e": {
+  "off_lines": [
+   "step 20/39 loss 4.4137 val_ndcg 0.39150 holdout_ndcg 0.31773 lr 6.46e-04 cd_loss_reg 4.3933 cd_loss_pool 3.8214",
+   "step 39/39 loss 0.0000 val_ndcg 0.39181 holdout_ndcg 0.31767 lr 8.50e-05 cd_loss_reg 2.4591 cd_loss_pool 2.8444",
+   "BEST step 20 val_ndcg 0.39150; train time"
+  ],
+  "on_lines": [
+   "step 20/39 loss 3.7932 val_ndcg 0.39195 holdout_ndcg 0.31769 lr 6.46e-04 cd_loss_reg 4.4241 cd_loss_pool 2.0916",
+   "step 39/39 loss 0.0000 val_ndcg 0.39223 holdout_ndcg 0.31760 lr 8.50e-05 cd_loss_reg 2.0682 cd_loss_pool 2.1302",
+   "BEST step 39 val_ndcg 0.39223; train time"
+  ],
+  "w5_lines": [
+   "wave-5 TRUNC-PROD: a 1.0; lifts prod M<50 [1.0038, 0.5449, 2.0131] / prod M>=50 [2.8071, -0.195, -0.2199] (rkend 0/1/2; random-like 0); prod M<50 1605861 feeds, mean (1-p_soft) 0.767; prod M>=50 1381229 feeds, mean (1-p_soft) 0.972; random-like (0) 134118 feeds, mean (1-p_soft) 0.166; holdout (0) 30000 feeds, mean (1-p_soft) 0.030; non-zero (feed, rkend) offsets 8961270; main listwise logits of training batches only; 1s",
+   "wave-5 AUXF: K9 aux = aux_w(step) * 1.695 * sum_f (1-p_f) CE_aux_f / 512 (was / sum_f (1-p_f)); this run's first-epoch regular batches: epoch-mean aux multiplier 0.9985 (exact constant for them 1.6976); pool batches get their production mass",
+   "wave-5 CLIPLOG: pre-clip grad norm every step, main/aux split every 10 steps (autograd.grad, no effect on training)",
+   "wave-5 selection: checkpoint chosen only among evals at step >= 39",
+   "wave-5 CLIPLOG (pre-clip grad norm, clip 1.0): cooldown n 20 clipped 0.000 median 0.303 p90 0.461; pool n 1 clipped 0.000 median 0.313 p90 0.313; aux/main grad-norm ratio (median of last 2 splits) 0.078",
+   "wave-5 CLIPLOG (pre-clip grad norm, clip 1.0): cooldown n 39 clipped 0.000 median 0.276 p90 0.452; pool n 4 clipped 0.000 median 0.276 p90 0.315; aux/main grad-norm ratio (median of last 4 splits) 0.031",
+   "wave-5 CLIPLOG final: {'cooldown': {'n': 39, 'clipped_share': 0.0, 'median': 0.2763448655605316, 'p90': 0.4523051977157593, 'max': 0.6020449995994568}, 'pool': {'n': 4, 'clipped_share': 0.0, 'median': 0.2760544419288635, 'p90': 0.31522029638290405, 'max': 0.31632286310195923}}; by Mpad (median main / aux grad norm): {32: {'n': 1, 'main': 0.5060207843780518, 'aux': 0.012151927687227726, 'aux_over_main': 0.02401468094272771}, 112: {'n': 2, 'main': 0.25639262795448303, 'aux': 0.006605658680200577, 'aux_over_main': 0.024827489886691048}, 128: {'n': 1, 'main': 0.2551540434360504, 'aux': 0.033561646938323975, 'aux_over_main': 0.13153484258514433}}; no plateau steps",
+   "wave-5 LAST checkpoint (step 39) saved as w5_t5e2e_new_on@last: val_ndcg 0.39223 holdout_ndcg 0.31760",
+   "wave-5 saved holdout preds of the selected checkpoint (4630966,) (holdout NDCG 0.31760)",
+   "wave-5 saved last-checkpoint test preds (2904806,)"
+  ]
+ },
+ "failed": []
+}

@@ -1,0 +1,51 @@
+{
+ "description": "The two files selected for the private leaderboard, and the files that were picks 1 and 2 before them. Read by the public-progress, val-vs-public, near-copies-noise and ensemble figures.",
+ "decided_utc": "2026-11-19T03:32Z",
+ "picks": [
+  {
+   "pick": 1,
+   "short_id": "FD16P20@m0.4_0.2",
+   "file": "cand_FD16P20_m04_02kd_r4.parquet",
+   "sha256": "3cf6faccbad1357ae1a1b11999fef8168835d77407684832c7578c832c6e71b3",
+   "public_ndcg": 0.3952092,
+   "val_ndcg": 0.40293,
+   "members_train_on": "all train feeds",
+   "members": "the 20 members of FD16P20: 16 full-view and 4 popularity-light students, width 192",
+   "mix": "popularity-light weight 0.4 on feeds of fewer than 50 candidates, 0.2 on the others, in both branches",
+   "picked_utc": "2026-11-18T02:33Z"
+  },
+  {
+   "pick": 2,
+   "short_id": "FDX16P20:ps",
+   "file": "cand_FDX16P20_pskd_r4.parquet",
+   "sha256": "8235c55cb35931129a845ce6825a94913f81bebb51824f84bced6eadfb1571db",
+   "public_ndcg": 0.39526061,
+   "val_ndcg": 0.40286,
+   "members_train_on": "all train feeds",
+   "members": "16 full-view students of width 192 trained on all train feeds plus pseudo-feeds built from user histories (lab trainer lab/nn_x/w12/pseudokd/train_full_pk.py; the package trainer has no pseudo-feed option), and the 4 popularity-light students of FD16P20",
+   "mix": "popularity-light weight 0.2 on every feed",
+   "picked_utc": "2026-11-19T03:32Z"
+  }
+ ],
+ "earlier_pick_1": {
+  "short_id": "FD16P20",
+  "file": "cand_FD16P20kd_r4.parquet",
+  "sha256": "14adc19ac794e3977cc0275a0c15d2c76e55c5dcdeec911dc47a8193128626a8",
+  "public_ndcg": 0.394892,
+  "val_ndcg": 0.40271,
+  "pick_1_until": "2026-11-18"
+ },
+ "earlier_pick_2": {
+  "short_id": "W8P20",
+  "file": "cand_W8P20kd_r3.parquet",
+  "sha256": "406e5705cef75d264118eeb20102ab963cedf6d00b0b7c6be7c2f1b1361a4d78",
+  "public_ndcg": 0.3950094,
+  "val_ndcg": 0.40214,
+  "members_train_on": "hold out 30,000 train feeds",
+  "pick_2_from": "2026-11-18",
+  "pick_2_until": "2026-11-19"
+ },
+ "reasoning": "FD16P20@m0.4_0.2 and FDX16P20:ps are tied on public (0.3952092 and 0.39526061). The two candidates for pick 2, W8P20 and FDX16P20:ps, had about equal better-of-two value (about +0.0001 each); FDX16P20:ps has the higher expected level (validation +0.0007 and public +0.00025 over W8P20) and 16 full-view students from separate runs, so it replaced W8P20 on 19 November. Both picks now meet the all-data rule. Pick 1 is unchanged: its public edge over FD16P20 is the best of several tries, and the expected private difference is about +0.00005.",
+ "freeze": "2026-12-07; selection window 2026-12-08 21:00 to 2026-12-09 09:00 UTC",
+ "source": "decision ledger, blocks 2026-11-18T02:33:28Z, 2026-11-19T03:31:53Z and 2026-11-19T03:32:47Z (not published); sha256 checked against the submission files (not published) on 2026-11-19"
+}

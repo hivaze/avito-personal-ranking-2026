@@ -1,0 +1,121 @@
+DECLARATION of arm hz2n (builder). Every criterion below is written BEFORE the number it judges is computed.
+Start of the builder session: 2026-11-15T07:12:44Z (first command). This block written: 2026-11-15T07:16:12Z. Nothing has been computed yet
+(only project files read: cd_arms6b.py, test_cd_arms6b.py, stale_pred.py, CPU2_stale_replay_pre2s_and_arms.py::build_pre2both,
+hz2_review.md, pretrain/assemble*.py, nn_x/abl/encdose/build_pre2noid.py, hz2_review/pre2_tell.py + its log, prechecks_abc.json).
+
+D0. DEFINITIONS (fixed now)
+ view it_hist_all (RAW counter, not the log1p / fp16 model scale):
+   (a) feats_n  : V = nn_x/w12/stale/hz2/feats/train/it_hist_hz_all.npy,   keep = nn_x/w12/stale/hz2/feats/train/hz2_keep_rows.npy
+   (b) feats_Ln : V = nn_x/w12/stale/hz2/feats_L/train/it_hist_hz_all.npy, keep = nn_x/w12/stale/hz2/feats_L/train/hz2_keep_rows.npy
+   (c) feats_hn : V = data/feats_new/train/it_hist_hz_all.npy,             no keep mask (keep = all False)
+   stored counter S = nn/feat_cache/train/it_hist_all_luo.npy (the file attach_xt reads).
+   effective view counter as trained = where(keep, S, V).
+ newly cold row:  nc = (V == 0) & (S > 0) & ~keep        (the witness's rule (bluo == 0) & (luo > 0), plus the keep-mask semantics of cd_arms6b)
+ new files in <dir>/train/ (float32, 246,745,836 rows):
+   pre2_hz_fe.npy     = where(nc, pre2_fe_noid, pre2_fe)                      (not a model input under cvnd_pre2s; source of the has: flag)
+   pre2_hz_fe_s.npy   = where(nc, float32((pre2_fe_noid + 20) / 6), stored pre2_fe_s)       -> model input pre2_fe_s
+   pre2_hz_fe_z.npy   = per window k, per config c in (v3, v4): mixed_c = where(nc, aligned fe_noid_c, aligned fe_c) (assemble_train alignment,
+                        wtag w{k}r_{c}, rtag {c}t2), z_c = src/stack_val.feed_rank_z(off, M, mixed_c)[:, 1]; z' = mean_c z_c
+                        (= build_pre2both, which does the same with the val alignment). Feeds WITHOUT any nc row: the stored pre2_fe_z, bit for bit.
+                        Feeds WITH an nc row: z' on EVERY row of the feed (the witness re-standardises the whole feed) -> model input pre2_fe_z
+   pre2_hz_fe_has.npy = float32(~isnan(pre2_hz_fe))                           -> model input has:pre2_fe (0/1; passes attach_xt's has: branch value-identically
+                        through xt_transform's clip(+-10) branch)
+ NOTE on "every other row keeps the stored value bit for bit" (task item 2): this holds for the score (pre2_hz_fe), pre2_hz_fe_s and the has flag on every
+ non-nc row. For pre2_hz_fe_z it CANNOT hold on the other rows of a feed that contains an nc row, because the witness (build_pre2both) recomputes the
+ within-feed z over the mixed scores; witness parity (P2) is the governing requirement. So P3 is declared in two parts (P3a / P3b) below.
+ NOT emulated (as in the witness, CPU2 docstring l.17): pre2_new_z, pre2_new_s, pre2_hmax32 stay at stored values. Measured under G4, not fixed.
+
+D1. PROOFS (pass / fail)
+ P0 (builder self-check, train): the per-config arithmetic WITHOUT any override reproduces stored data/feats/train/pre2_fe.npy, pre2_fe_noid.npy, pre2_fe_z.npy
+     on all window rows: PASS iff max|d| <= 1e-6 for each (expected exactly 0); NaN mask identical.
+ P1 identity: cd_arms6c vs cd_arms6b with (i) HZCD_DIR unset (data/feats_new), (ii) HZCD_DIR = nn_x/w12/stale/hz2/feats + HZ2_KEEP: identical luo_cols list,
+     bit-identical load_hz tensor, bit-identical gathered batches (every key) on >= 2,000 random train feeds, identical hz_stats; AST: every def of 6b
+     not in the declared changed set is AST-identical. PASS iff all hold; any differing bit = FAIL. Textual diff attached (cd_arms6c_vs_cd_arms6b.diff).
+ P2 witness parity: my row-wise function, run on VAL rows with nc = (nn_x/r6/stale_cf/both_it_hist_all_luo.npy == 0) & (val it_hist_all_luo > 0), val alignment
+     (tags v3At2 / v4At2 -> v3t2 / v4t2), no keep: max|d| vs solvers/out/stale/cf/pre2both_{pre2_fe,pre2_fe_z,pre2_fe_s}.npy <= 1e-6 each. PASS iff all three.
+     Also reported: has flag vs ~isnan(pre2both_pre2_fe) (must be equal on every row), nc vs solvers/out/stale/cf/newly_cold.npy (must be equal).
+ P3a unchanged rows: on every row with nc == False (keep rows included): pre2_hz_fe == stored pre2_fe, pre2_hz_fe_s == stored pre2_fe_s, pre2_hz_fe_has ==
+     stored has (~isnan(pre2_fe)), all BITWISE (NaN pattern included), over all 246,745,836 rows, each of the 3 views. PASS iff 0 differing rows.
+ P3b pre2_hz_fe_z: bitwise equal to stored pre2_fe_z on every row of every feed without an nc row (keep rows included: a keep row is never nc);
+     0 differing rows = PASS. Reported (no bar): in feeds with an nc row, mean |z' - z| on the non-nc rows (witness on val: 0.0057 [D prechecks_abc.json]).
+ P3c keep rows: every keep row has all four new files bitwise equal to stored OR is read from stored by apply_keep anyway; PASS iff the gathered batch on keep
+     rows equals the stored xt in all swapped columns (the 6b semantics, tested on sample feeds of Sep 6-8).
+ P4 end to end, CPU: for each of the three new directories, setup_hzcd of cd_arms6c (through the real nn_x/w5/train.py code path on the CPU smoke harness, or
+     if the harness cannot run --hzcd on CPU, through MiniSplit + setup_hzcd directly, stated plainly) logs the swap with the encoder columns named; a gathered
+     batch shows on nc rows xt[pre2_fe_s] == fp16(clip((noid+20)/6)) and xt[pre2_fe_z] == fp16(clip(z', +-5)), on non-swapped columns the plain gather;
+     flag off (--hzcd absent): batches identical to the plain gather / identical log+checkpoint for cd_arms6b import vs cd_arms6c import. PASS iff all hold.
+
+D2. LABEL-FREE GATE (no label of any split is opened by any script of this arm; the scripts never read cand_target)
+ Populations: train rows of ALL feeds (all 246,745,836 rows, no sampling), day groups "all days" and "days >= Sep 13" (MSK day slot >= 7, slot = MSK day - 20702);
+ targets: val rows, public test rows (feed ts < 1790497920), private test rows (>= 1790497920), all feeds (no M filter). Secondary population for comparison with
+ the review's +0.21: trPool private-like days >= Sep 13 (its definition, hz2_review/pre2_tell.py) for view (a).
+ G1 = P(pre2 ID contribution != 0 | effective view counter == 0).  before: ID contribution = stored pre2_id_contrib (NaN -> 0).
+      after: a row counts as "still carrying the ID contribution" iff stored pre2_id_contrib != 0 AND the NEW pre2_hz_fe value read back from the written file is
+      not the no-ID score (pre2_hz_fe != pre2_fe_noid).  PASS iff after == 0 exactly (count 0) for each view and day group; targets val / public / private must
+      measure 0 as built (else the gate's premise is void and I say so).
+ G2 = standardised mean difference of the model input pre2_fe_s between view-cold train rows (effective view counter == 0, has:pre2_fe == 1) and the cold rows
+      of each target (it_hist_all_luo == 0), in units of the target's all-row SD of pre2_fe_s; before (stored) and after (new file).
+      (i) on the rows the view made cold AND that carry the ID contribution (the review's +0.210 population): PASS iff |SMD_after| < |SMD_before| / 2 vs private;
+      (ii) on all view-cold rows: reported; PASS iff |SMD_after| <= |SMD_before| vs private (direction only). Public / val: reported, same rule, no veto.
+      Also reported without a bar: the same for pre2_fe_z (clipped +-5).
+ G3 = share of train rows changed (bitwise, per new file) and share of train feeds with >= 1 changed row; all days and >= Sep 13. No bar; consistency check:
+      rows changed in pre2_hz_fe_s == number of nc rows with a finite score (+- rows where noid == fe bitwise, reported).
+ G4 = reported, no bar, nothing fixed: on view-cold rows (i) share whose NEW-head score still carries an item-ID contribution (raw new != raw new_noid in the
+      window score files) and likewise hmax32 (hmax32 != hmax32_noid), against the same on cold val / test rows if the val / test raw files exist;
+      (ii) P(seq_cv_pop > 0 | effective view counter == 0) and P(xp_imp_c50 > 0 | ...) under each view (for (c) these inputs are stored values) vs val / public /
+      private; (iii) anything else noticed. Stated plainly as repaired / not repaired.
+ Reason NOT to train a view (to be written in READY.txt): any FAIL of P0-P4 for that view, or G1 after != 0, or G2(i) FAIL.
+
+ADDENDUM 1, written 2026-11-15T07:20:59Z (after P2 = PASS bitwise and after the train build log, BEFORE any gate number and before any offset measurement).
+ Observation from logs/build_train.log [M]: mean(pre2_hz_fe - pre2_fe) on nc rows = -0.73 / -0.65 / -0.55 (windows 1 / 2 / 3, view a). The review's mean ID
+ contribution on ID-carrying cold rows is +0.86 on 30-42% of nc rows, which explains only about -0.3. Train calibration of the two keys differs
+ (window 1: v3_fe 1.1275 x + 1.801 vs v3_fe_noid 1.133 x + 1.5009), so I SUSPECT that on train rows the stored pre2_fe_noid sits below pre2_fe even where
+ the item-ID contribution is exactly 0 (on val the witness measured max |fe - noid| = 0.009 on such rows [D prechecks_abc.json]). If true, the as-asked
+ construction moves the encoder score of nc rows WITHOUT any ID contribution too, which no test row and no witness row does.
+ G4(iii) declared now: offset_k = mean(pre2_fe_noid - pre2_fe | pre2_id_contrib == 0, window k rows), same on val and test.
+ RULE: if |offset_k| > 0.05 on the pre2_fe scale in any window, I build a SECOND family, clearly named and NOT a replacement of the as-asked files:
+   feats_nP / feats_LnP / feats_hnP ("P" = no-ID score on the fe alignment): per config, on nc rows the aligned score is where(raw_noid > -2, a_fe * raw_noid + b_fe,
+   raw_noid) (the fe key's own affine map applied to the raw no-ID score; equals the stored fe_c bit for bit where raw fe == raw noid), config mean, fs = (fe2 + 20) / 6,
+   z rebuilt per config exactly as above. Everything else identical (same nc, same keep semantics, same file names, same module).
+   On val this P construction is NOT the witness to 1e-6 (reported: max|d| vs the witness files); it is the witness's INTENT carried to the train calibration.
+ G2 for the P family: same rules as declared. Extra comparison rule, fixed now: per view, the family whose |SMD_after| vs PRIVATE cold rows on ALL view-cold
+   rows (G2 ii) is smaller is named "closer to test" ; if the as-asked family FAILS G2(ii) (|SMD_after| > |SMD_before|) and the P family passes it, READY.txt
+   recommends the P family and says so plainly, leaving the as-asked directories in place. No labelled number is involved in this choice.
+ has: flag: build log shows 0 rows of 246,745,836 with a changed has flag in views a / b (c pending). If 0 in all three, pre2_hz_fe_has.npy goes to <dir>/aux/
+   (not swapped: a provably identical column would cost 0.46 GB of GPU memory per run); cd_arms6c keeps the optional has: hook.
+
+ADDENDUM 2, written 2026-11-15T07:30:08Z (after the gate of the as-asked and P families; BEFORE any number of the F family exists).
+ Finding that triggers it [M, logs/gate_full.log, G4(i)]: the second encoder head is affected in the same way and on the same rows. P(raw NEW-head score != raw
+ NEW-head no-ID score | effective view counter == 0) = 0.2357 (view a, all days) / 0.3020 (days >= Sep 13) / 0.1104 (view c), equal to G1-before of the fe head,
+ and exactly 0 on cold val / public / private rows. The model inputs pre2_new_z and pre2_new_s are built from that head. The as-asked change (= the witness
+ scenario both_pre2both) does not touch them; the project's own sensitivity scenario both_pre2full does (CPU2::build_pre2full).
+ DECLARED EXTENSION "F" (full: both heads), NOT a replacement of the as-asked files:
+   directories feats_nF / feats_LnF / feats_hnF = the as-asked fe-head files (symlinks to feats_n / feats_Ln / feats_hn: pre2_hz_fe*.npy) + new files
+   pre2_hz_new.npy, pre2_hz_new_s.npy, pre2_hz_new_z.npy built on the same nc rows exactly as build_pre2full builds them on val: per config the NEW key's own
+   affine map applied to the raw no-ID score (new_noid), config mean, s = (x + 20) / 6, z = mean over configs of the within-feed z of the mixed scores;
+   feeds without an nc row keep the stored pre2_new_z; non-nc rows keep the stored pre2_new / pre2_new_s bit for bit.
+   cd_arms6c gets the optional names pre2_new / pre2_new_z / pre2_new_s -> pre2_hz_new / pre2_hz_new_z / pre2_hz_new_s (swapped only if the file exists; the fe
+   group and the new group are each all-or-nothing). pre2_hmax32 is NOT touched: P(hmax32 != hmax32_noid | cold) is 0.98-0.99 on cold val / test rows and on
+   view-cold train rows of days >= Sep 9 alike, so it is no train-only combination by this reading.
+ PROOFS for F (pass / fail, fixed now):
+   P0n: without override the arithmetic reproduces stored pre2_new, pre2_new_z on all window rows: max|d| <= 1e-6 each; stored pre2_new_s vs (pre2_new + 20) / 6 reported.
+   P2n: on VAL rows with the witness nc, max|d| vs solvers/out/stale/cf/pre2full_{pre2_new,pre2_new_z,pre2_new_s}.npy <= 1e-6 each.
+   P3n: as P3a / P3b for the three new-head files, all 246,745,836 rows, 0 differing rows.
+   P1 / P4b re-run on the extended module (the identity with cd_arms6b must still hold bit for bit when no encoder file is present).
+ GATE for F: G1n = P(NEW-head ID contribution | view cold) before / after (after: rows with a new-head ID contribution whose pre2_hz_new is bitwise the stored
+   pre2_new; target 0 up to coincidences, count reported); G2n = SMD of pre2_new_s on view-cold rows vs private / public cold rows, before / after, same rules
+   as G2 (reported on the all-feeds population and on the review population; the latter is the one exchangeable with test feeds, see the G2 note in the report).
+ Which family to train is the lead's choice; READY.txt states what each one repairs. My reading rule, fixed now: "as asked" answers the task and equals the
+ stale-val witness bit for bit; "F" is the only family in which no encoder-score input carries an item-ID contribution on a view-cold row (the test condition).
+
+ADDENDUM 3, written 2026-11-15T07:34:36Z (after gate_g4_extra.json; BEFORE the files below exist).
+ Finding [M, gate_g4_extra.json]: on val / public / private rows, it_hist_all == 0 implies seq_cv_invd20 == seq_cv_pop == seq_cv_norm == 0 (P = 0.0 exactly on
+ 527,423 / 379,250 / 919,809 cold rows). Views a / b keep this (0.0). View c (half-dose hz, which swaps only the five it_hist columns) breaks it:
+ P(seq_cv_pop > 0 | view cold) = 0.097 (0.227 on the rows it makes cold), P(seq_cv_invd20 > 0 | view cold) = 0.0097. This is a train-only combination of
+ the arm hz as trained ("cold counter + warm co-visitation popularity"); the task's change does not repair it.
+ DECLARED EXTENSION, view c only, NOT a replacement: directory feats_hnFS = feats_hnF (both encoder heads) + seq_cv_hz_invd20.npy / seq_cv_hz_pop.npy /
+ seq_cv_hz_norm.npy = where(view it_hist_all == 0, 0, stored value) (data/feats_new/train/it_hist_hz_all.npy as the view counter; rows with a stored counter
+ of 0 already have 0). cd_arms6b / 6c pick these names up by file existence (EXTRA_TO_HZ), no module change. xp_imp_c50 is NOT touched (P(> 0 | cold) is
+ 0.18-0.31 on targets: not an impossible combination; its level under view c, 0.40, is reported).
+ CHECKS (pass / fail): (S1) every row with view counter > 0 keeps the stored bits in the three files; (S2) P(x > 0 | view cold) == 0 for the three inputs from
+ the written files; (S3) P4b / P4a loader checks include the directory (12 swapped columns for the W8 preset).

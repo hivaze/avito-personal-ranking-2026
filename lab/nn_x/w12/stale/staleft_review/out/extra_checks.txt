@@ -1,0 +1,34 @@
+=== 1a. completeness: feeds whose prediction is constant (all equal, e.g. all zero) per file ===
+96 val files of the 8 W8 members checked: 0 constant feeds in total; all finite, all of length 1389971
+epoch-0 (untrained) fresh predictions p0 vs p10 vs p05, member s951 kd05w192: max|d| 0.00e+00 / 0.00e+00 (same start, same folds)
+epoch-0 stale predictions p0 vs p10: max|d| 0.00e+00; fresh vs stale differ on 1.000 of rows
+
+=== 1b. identity run (--stale_train 0 --seeds 3 --only_folds 0) against the stored 3-seed file, fold-0 feeds ===
+w5_e10_kd05w192_s951: fold-0 feeds 2885; per-feed corr 0.999999; NDCG mine - stored +0.000303 +- 0.000203; top-1 differs 0.0028
+abl_e10_pop1kd05t25_s951: fold-0 feeds 2885; per-feed corr 0.999999; NDCG mine - stored -0.000036 +- 0.000057; top-1 differs 0.0007
+
+=== 2. where the P=1.0 delta sits: by feed cold share (eda/errors/segments/feed_table.parquet), final file, paired vs the P=0 control ===
+p10 W8 form   fresh: cold 0-15% (n 1370): +0.00040 +- 0.00086 (z +0.47) | cold 15-30% (n 6763): +0.00018 +- 0.00035 (z +0.52) | cold 30-45% (n 5077): +0.00034 +- 0.00046 (z +0.74) | cold 45-100% (n 1213): -0.00024 +- 0.00096 (z -0.25)
+p10 W8 form   stale: cold 0-15% (n 1370): +0.00053 +- 0.00099 (z +0.54) | cold 15-30% (n 6763): +0.00063 +- 0.00039 (z +1.61) | cold 30-45% (n 5077): +0.00089 +- 0.00046 (z +1.92) | cold 45-100% (n 1213): -0.00140 +- 0.00116 (z -1.20)
+p10 W8P20 form fresh: cold 0-15% (n 1370): -0.00005 +- 0.00088 (z -0.06) | cold 15-30% (n 6763): -0.00002 +- 0.00035 (z -0.06) | cold 30-45% (n 5077): +0.00013 +- 0.00038 (z +0.33) | cold 45-100% (n 1213): -0.00023 +- 0.00116 (z -0.20)
+p10 W8P20 form stale: cold 0-15% (n 1370): +0.00042 +- 0.00072 (z +0.58) | cold 15-30% (n 6763): +0.00038 +- 0.00030 (z +1.26) | cold 30-45% (n 5077): +0.00022 +- 0.00042 (z +0.53) | cold 45-100% (n 1213): -0.00179 +- 0.00110 (z -1.63)
+p05 W8 form   fresh: cold 0-15% (n 1370): -0.00019 +- 0.00061 (z -0.31) | cold 15-30% (n 6763): -0.00006 +- 0.00027 (z -0.24) | cold 30-45% (n 5077): +0.00014 +- 0.00033 (z +0.40) | cold 45-100% (n 1213): -0.00051 +- 0.00069 (z -0.74)
+p05 W8 form   stale: cold 0-15% (n 1370): +0.00011 +- 0.00078 (z +0.14) | cold 15-30% (n 6763): +0.00041 +- 0.00029 (z +1.42) | cold 30-45% (n 5077): +0.00056 +- 0.00036 (z +1.57) | cold 45-100% (n 1213): -0.00088 +- 0.00099 (z -0.89)
+p05 W8P20 form fresh: cold 0-15% (n 1370): -0.00056 +- 0.00066 (z -0.85) | cold 15-30% (n 6763): -0.00004 +- 0.00024 (z -0.15) | cold 30-45% (n 5077): -0.00011 +- 0.00030 (z -0.37) | cold 45-100% (n 1213): -0.00064 +- 0.00096 (z -0.67)
+p05 W8P20 form stale: cold 0-15% (n 1370): +0.00081 +- 0.00058 (z +1.40) | cold 15-30% (n 6763): +0.00018 +- 0.00025 (z +0.73) | cold 30-45% (n 5077): +0.00035 +- 0.00034 (z +1.01) | cold 45-100% (n 1213): -0.00108 +- 0.00094 (z -1.15)
+
+=== 3. member-set sensitivity of the P=1.0 pool statistic (final file; fresh | stale-val | stale at pmix-private) ===
+pilot s951-952 (4)          : fresh -0.00017 +- 0.00025 (z -0.69) | stale +0.00042 +- 0.00024 (z +1.77) | stale pmix-priv +0.00048 +- 0.00033 (z +1.46) | stale pmix-pub +0.00047 +- 0.00028 (z +1.69)
+replication s953-954 (4)    : fresh -0.00005 +- 0.00025 (z -0.21) | stale +0.00024 +- 0.00028 (z +0.85) | stale pmix-priv +0.00024 +- 0.00047 (z +0.51) | stale pmix-pub +0.00022 +- 0.00038 (z +0.59)
+arch kd05w192 (4)           : fresh +0.00019 +- 0.00027 (z +0.71) | stale +0.00011 +- 0.00027 (z +0.39) | stale pmix-priv -0.00048 +- 0.00044 (z -1.10) | stale pmix-pub -0.00027 +- 0.00035 (z -0.75)
+arch kd05t25w192 (4)        : fresh -0.00010 +- 0.00026 (z -0.40) | stale -0.00013 +- 0.00027 (z -0.48) | stale pmix-priv -0.00036 +- 0.00043 (z -0.82) | stale pmix-pub -0.00023 +- 0.00035 (z -0.66)
+odd seeds s951,s953 (4)     : fresh -0.00028 +- 0.00025 (z -1.11) | stale +0.00027 +- 0.00027 (z +1.00) | stale pmix-priv +0.00022 +- 0.00041 (z +0.55) | stale pmix-pub +0.00023 +- 0.00033 (z +0.70)
+even seeds s952,s954 (4)    : fresh +0.00011 +- 0.00026 (z +0.44) | stale -0.00005 +- 0.00029 (z -0.17) | stale pmix-priv -0.00027 +- 0.00041 (z -0.66) | stale pmix-pub -0.00020 +- 0.00035 (z -0.59)
+s951,s954 (4)               : fresh +0.00008 +- 0.00023 (z +0.36) | stale -0.00008 +- 0.00026 (z -0.29) | stale pmix-priv -0.00041 +- 0.00041 (z -1.01) | stale pmix-pub -0.00026 +- 0.00033 (z -0.80)
+s952,s953 (4)               : fresh +0.00003 +- 0.00026 (z +0.11) | stale -0.00026 +- 0.00028 (z -0.92) | stale pmix-priv -0.00053 +- 0.00043 (z -1.25) | stale pmix-pub -0.00037 +- 0.00035 (z -1.08)
+leave out s951 (6)          : fresh +0.00009 +- 0.00025 (z +0.36) | stale -0.00004 +- 0.00027 (z -0.16) | stale pmix-priv -0.00013 +- 0.00045 (z -0.29) | stale pmix-pub -0.00008 +- 0.00036 (z -0.22)
+leave out s952 (6)          : fresh +0.00004 +- 0.00026 (z +0.14) | stale +0.00062 +- 0.00028 (z +2.19) | stale pmix-priv +0.00046 +- 0.00045 (z +1.04) | stale pmix-pub +0.00054 +- 0.00036 (z +1.49)
+leave out s953 (6)          : fresh +0.00013 +- 0.00026 (z +0.51) | stale +0.00034 +- 0.00027 (z +1.27) | stale pmix-priv -0.00002 +- 0.00043 (z -0.05) | stale pmix-pub +0.00009 +- 0.00035 (z +0.26)
+leave out s954 (6)          : fresh +0.00037 +- 0.00027 (z +1.38) | stale +0.00054 +- 0.00028 (z +1.97) | stale pmix-priv +0.00019 +- 0.00044 (z +0.43) | stale pmix-pub +0.00038 +- 0.00035 (z +1.06)
+W8 (8)                      : fresh +0.00022 +- 0.00026 (z +0.87) | stale +0.00054 +- 0.00028 (z +1.93) | stale pmix-priv -0.00006 +- 0.00044 (z -0.13) | stale pmix-pub +0.00024 +- 0.00036 (z +0.69)
+spread over the 8 four-member pools: fresh min -0.00028 max +0.00019 SD 0.00016; stale min -0.00026 max +0.00042 SD 0.00023

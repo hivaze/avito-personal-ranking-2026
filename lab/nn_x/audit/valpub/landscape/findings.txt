@@ -1,0 +1,327 @@
+SOLUTION LANDSCAPE: VAL <-> PUBLIC <-> HOLDOUT RELATIONS OF THE CURRENT POOLS, AND WHAT IS BEST SUPPORTED FOR PRIVATE
+nn_x/audit/valpub/landscape, written 2026-11-13 (CPU only, 12 threads; no process touched; new files only under this directory).
+Scripts: lib.py (pool builders, descriptors, holdout), s0_check.py (builder verification), s1_matrix.py, s2_pairs_slices.py,
+s3_transfer.py, s4_testside.py, s5_extras.py; logs and CSVs in out/. Every number below is in out/s*.log.
+Conventions. G3 = cand_G_F10F7xF7x70_memeq (val 0.40032, holdout 0.32379, public 0.392820) is the reference for every delta.
+"d" = paired per-feed NDCG delta vs G3 (14,423 val feeds), +- = SE of the mean (iid; user clustering is 1.00, nn_x/pubdiag/noise).
+pubM / privM = val d reweighted to the public / private feed-size mix (src/calib); pubMC / privMC = M x cold-share reweighting
+(src/pmix). SE_pub = expected paired public SE sqrt(Var_pubM(d)/8,562); SE_tot = sqrt(SE_pub^2 + SE_val^2). Public deltas are exact
+on the 8,562 public feeds; the public scores are context for this analysis (the user asked for it) and nothing here was selected
+on them. Holdout = 30K random-like train-period feeds (Sep 6-19, 32% weekend), TRAIN-ONLY members only, so it is a TO-half sample.
+Builders were verified (out/s0_check.log): member-equal rebuild of G3 = ens_G3_final at corr 1.0000000; all 7 scored pools and the
+5 recorded holdouts reproduce to 1e-5; the old-generation val recipes v10 / v5 reproduce 0.39401 / 0.38692 (recorded 0.39399 / 0.38690).
+
+=====================================================================================================================================
+0. BOTTOM LINE
+=====================================================================================================================================
+B1. The val LEVEL is interpreted correctly; the val DIFFERENCES between our pools are not. M-reweighted val predicts the public level
+    of the 7 modern files to +0.00053 +- 0.00076 (sd over files, s1 1d): the -0.0075 val->public offset is feed-size composition. But
+    the between-pool val deltas (spread 0.0020 on val) collapsed to a 0.0007 public spread, and the fitted val->public transfer factor
+    of the deltas is b = +0.05 +- 0.32 (95% CI -0.58..+0.67); 1:1 transfer is rejected, LR p = 0.002-0.005, with G3 or PF7x as the
+    reference (s5 b). Kendall tau(val order, public order) over the 7 pools = +0.05.
+B2. The holdout deltas vs G3 (TO members, train period, no val labels, no fitted parameter) match the public deltas: chi2 1.2 on 6 df
+    (p 0.98), LOO rmse 0.00023 with a common offset; val 1:1 gives chi2 10.6 (p 0.10). The null "all 7 pools equal on public" also fits
+    (chi2 2.9, p 0.82): public cannot tell "holdout is right" from "nothing differs", but both say val overstated. tau(holdout, public)
+    = +0.28, tau(val, holdout) = +0.55 (s3 3d).
+B3. No label-free feed-type composition explains the shortfalls. Post-stratifying the val deltas by M, hour, cold share, LUO cold
+    share, user type, H, category regime moves every expectation by < 0.0004 and mostly AWAY from the realised values (s3 3a): public is
+    43% night/morning feeds (h00-09; val 28%, private 21%) where Cd/Pall lose MOST on val (-0.0043 / -0.0035 in h00-05), so hour
+    reweighting predicts a bigger public deficit for them, not the smaller one observed; M2's and S2's val edges sit in cold30-45%
+    (+0.0015 +- 0.0006) and all-cold-positive feeds (+0.0029 / +0.0025 +- 0.0009), which are MORE common on public (52% / est. 27%) and
+    private, so M x cold reweighting raises their expectation (+0.00076 / +0.00061) while public read -0.00039 / -0.00035. The only
+    contrast whose composition pushes the right way is TO-only (FT half removed): privMC -0.00060, public -0.00047.
+B4. What the shortfall looks like instead: (i) val-selection optimism of the right size (the val-best of 10-50 near-copies is optimistic
+    by 0.0005-0.0008 at SE_val 0.0003; M2's shortfall is -0.0010 +- 0.0006, S2's -0.0009 +- 0.0004; s5 e); (ii) G3's edge over every
+    other pool is larger on Tue than on Thu (Thu-Tue of d: +0.0005..+0.0017 for Cd, Pall, PF7x, M2, TOonly, N1, NEW12, F10only; each
+    <= 1.7 SE, s3 3e), i.e. part of what val rewards in G3-type (re-cool) pools is Tue-specific; (iii) the holdout sees only ~1/3 of the
+    val spread (val M2-Cd +0.0019, holdout +0.0004, public +0.0004). (i)-(iii) are not separable on 6 points; all three say the same
+    thing for the pick.
+B5. Label-free, the pools are indistinguishable on private: every pool's disagreement with G3 (1 - within-feed corr, top-1 disagreement)
+    is identical on val, public and private (ratios 0.99-1.01 overall, 0.9-1.15 inside every feed type with n >= 300; flat across the
+    four test days), and every pool promotes cold candidates into its top-5 by the same +0.077 from val to private (label-free
+    expectation of the cold-positive share: +0.064). No pool is an outlier on cold-heavy, late-hour or Mon/Tue feeds (s4).
+B6. BEST SUPPORTED FOR PRIVATE: G3. It is holdout-best (every other pool is -0.00003..-0.00125 on the holdout), public-best (by
+    +0.0001 over PF7x, inside noise), within 0.0006 of the val-best, and on the holdout's private-like feeds (Sun >= 12h, Mon, Tue; n
+    11,169) the m02-heavy challengers are relatively WORSE than on its public-like feeds (M2 -0.00063 +- 0.00049, U3 -0.00053 +-
+    0.00042, U1 -0.00043 +- 0.00034; the no-m02 pools +0.0003..+0.0008 +- 0.0007; s5 d) - a weak, correlated pattern, but it points
+    away from M2/U1/U3, not toward them. Pick 2: Pall is dominated by PF7x on all three labelled samples (val -0.00078 +- 0.00023,
+    holdout -0.00025 +- 0.00013, public -0.00029 at paired SE ~0.0003); PF7x is the second pool on holdout and public and the least
+    G3-correlated non-dominated pool (0.9978).
+B7. What public actually rewarded: nothing resolvable. The 7 modern files span 0.00074 at paired SEs 0.00035-0.00062; G3 > PF7x > S2 ~
+    Pall ~ M2 > TO-only > Cd, with G3 - Cd = +0.00074 (z 1.2) the largest contrast. The only structural reading that survives is
+    negative: the kind of difference val rewarded (more re-cool / m02 members, val-trained recombination, FT-half gating) bought nothing
+    on public, and the one component val priced at zero (the val-fine-tuned half, final - to-half = -0.00003 +- 0.00039 inside G3)
+    read +0.00047 on public (z 0.9) with a composition reason to be worth more on private (B3, section 3c).
+
+=====================================================================================================================================
+1. THE MATRIX (out/s1_matrix.log, out/s1_matrix.csv, out/s1_deltas_vs_G3.csv)
+=====================================================================================================================================
+pool     n  recool m02   val     ft-half to-half  pubM    privM   pubMC   privMC  hold    public   families
+Cd      19  0.00  0.00  0.39901 0.39889 0.39877 0.39094 0.39355 0.39607 0.40173 0.32319 0.39208  F5cd(6)+F6(6)+F7(7)
+Pall    38  0.00  0.00  0.39896 0.39871 0.39917 0.39088 0.39350 0.39605 0.40165 0.32335 0.39244  F5cd+F6+F7+F9(6)+F10(6)+F12(7)
+PF7x    38  0.18  0.18  0.39974 0.39921 0.39984 0.39167 0.39429 0.39657 0.40209 0.32360 0.39272  F5cd+F6+F7x(7)+F9+F10+F12
+G3      20  0.70  0.70  0.40032 0.39984 0.40035 0.39227 0.39487 0.39705 0.40249 0.32379 0.39282  F10(6)+F7x(7)+F7x70(7)
+M2      14  1.00  1.00  0.40094 0.40009 0.40085 0.39286 0.39547 0.39781 0.40322 0.32361 0.39243  F7x(7)+F7x70(7)
+S2      20  0.70  0.70  0.40088    -       -     0.39278 0.39540 0.39766 0.40310    -    0.39247  neural gate stacker on G3
+TOonly  20  0.70  0.70  0.40035    -    0.40035 0.39220 0.39484 0.39675 0.40189 0.32379 0.39235  G3 train-only half
+N1      32  0.44  0.81  0.40007 0.39964 0.40013 0.39199 0.39462 0.39700 0.40248 0.32363    -     G3 + NEW12(12)
+U1      24  0.58  0.75  0.40035 0.39994 0.40032 0.39229 0.39491 0.39704 0.40238 0.32376    -     G3 + W5base(4)
+U3      30  0.47  0.80  0.40066 0.39995 0.40033 0.39258 0.39520 0.39754 0.40307 0.32375    -     U1 + v30(6)
+S1      38  0.18  0.18  0.40046 0.39956 0.40022 0.39238 0.39500 0.39718 0.40254    -        -     hfit P11 W1to (PF7x families)
+PoP3    52  0.27  0.27  0.40059    -       -     0.39251 0.39513 0.39738 0.40279    -        -     pool of pools
+NEW12   12  0.00  1.00  0.39955 0.39961 0.39945 0.39150 0.39412 0.39646 0.40194 0.32323    -     from-scratch m02 (4 archs)
+F10only  6  0.00  0.00  0.39881 0.39874 0.39848 0.39067 0.39333 0.39574 0.40147 0.32254    -     F10(6)
+v10      -    -     -   0.39401    -       -     0.38598 0.38861 0.39054 0.39596    -    0.38786  nn_final4 mix (old gen)
+v5       -    -     -   0.38692    -       -     0.37896 0.38153 0.38354 0.38931    -    0.38020  nn_final2 + residual stacker
+
+Deltas vs G3 (paired):
+pool      val d    SE_val  pubM d   privM d  pubMC d  privMC d hold d   SE_h    public d SE_pub  resid    z
+Cd      -0.00131  0.00049 -0.00133 -0.00132 -0.00098 -0.00076 -0.00060 0.00027 -0.00074 0.00062 +0.00059 +0.7
+Pall    -0.00136  0.00043 -0.00138 -0.00137 -0.00100 -0.00083 -0.00045 0.00025 -0.00038 0.00055 +0.00100 +1.4
+PF7x    -0.00058  0.00039 -0.00060 -0.00058 -0.00048 -0.00040 -0.00020 0.00022 -0.00010 0.00050 +0.00050 +0.8
+M2      +0.00062  0.00034 +0.00059 +0.00060 +0.00076 +0.00073 -0.00018 0.00019 -0.00039 0.00043 -0.00098 -1.8
+S2      +0.00056  0.00028 +0.00052 +0.00053 +0.00061 +0.00062    n/a     n/a   -0.00035 0.00035 -0.00086 -1.9
+TOonly  +0.00003  0.00039 -0.00007 -0.00003 -0.00030 -0.00060  0 (same)   -    -0.00047 0.00050 -0.00040 -0.6
+N1      -0.00025  0.00028 -0.00028 -0.00026 -0.00005 -0.00000 -0.00017 0.00016    -     0.00036
+U1      +0.00003  0.00020 +0.00003 +0.00004 -0.00001 -0.00010 -0.00003 0.00013    -     0.00025
+U3      +0.00034  0.00028 +0.00031 +0.00033 +0.00049 +0.00058 -0.00005 0.00015    -     0.00035
+S1      +0.00013  0.00034 +0.00011 +0.00013 +0.00013 +0.00006    n/a     n/a      -     0.00043
+PoP3    +0.00027  0.00022 +0.00024 +0.00026 +0.00033 +0.00030    n/a     n/a      -     0.00028
+NEW12   -0.00077  0.00049 -0.00077 -0.00076 -0.00058 -0.00055 -0.00057 0.00028    -     0.00062
+F10only -0.00151  0.00049 -0.00160 -0.00154 -0.00131 -0.00101 -0.00125 0.00029    -     0.00063
+Readings. (a) Every pool is at or below G3 on the holdout; the two that tie it (U1 -0.00003, U3 -0.00005) are G3 plus more m02
+members (saturation, CURRENT_STATUS 23:39). (b) Every scored pool is below G3 on public. (c) The FT half (val-label fine-tune) adds
+~0 on val INSIDE every pool (final - to-half: G3 -0.00003 +- 0.00039, M2 +0.00009, Cd +0.00024, Pall -0.00021, U3 +0.00033, all
++- 0.0004; s1 1c): the val differences between pools are carried entirely by the TO halves (to-half vs G3's to-half: Cd -0.00158,
+Pall -0.00118, PF7x -0.00051, M2 +0.00050, F10only -0.00188, NEW12 -0.00090). (d) Re-cool share and val delta are collinear
+(corr +0.96 over the 6 scored contrasts; s3 3d), as critique2 found; the holdout delta is also collinear with the val delta (+0.83)
+but at 1/3 the scale.
+Level calibration (s1 1d): public = a + c * val over 11 scored files gives c 0.964 (resid sd 0.00079); the slope is carried by the
+0.02 spread of the old generations. Over the 7 modern files alone c = 0.10 +- 0.13 (val) / 0.11 +- 0.13 (pubM): inside the modern
+cluster the public score does not track val. Against pubM the modern files sit at +0.00053 +- 0.00076 (slope-1 offset), i.e. the
+M-mix reweighting predicts the public LEVEL of every modern file to ~1 SE_pub; the old files' LOO residuals are -0.0016..+0.0012.
+
+=====================================================================================================================================
+2. HOW THE POOLS DIFFER: CORRELATION, COMPOSITION, FEED TYPES (out/s2_pairs_slices.log, s2_corr.npz, s2_composition.csv, s2_slices.csv)
+=====================================================================================================================================
+2a. Within-feed correlation with G3 (mean per-feed Pearson of z; identical on val / public / private to 3 decimals):
+    U1 0.9998, PoP3 0.9997, U3/N1 0.9993-0.9994, M2 0.9990, S1 0.9988, TOonly 0.9979-0.9981, PF7x 0.9978, Pall 0.9971, Cd 0.9957,
+    NEW12 0.9953, F10only 0.9946; S2 0.962 by Pearson because its stored scores are ranks (Spearman 0.997, top-1 agreement 0.967,
+    among the highest, next to U1 0.970 and PoP3 0.965-0.969; s5 a). Old generations: v10 0.930, v5 0.880, v4 0.864, v3 0.855 (public and private alike). Top-1 agreement
+    with G3 on private: U1 0.969, PoP3 0.969, S2 0.968, U3 0.954, N1 0.950, M2 0.938, S1 0.934, PF7x 0.909, TOonly 0.907, Pall 0.894,
+    Cd 0.874, NEW12 0.868, F10only 0.853, v10 0.633, v5 0.475, v3 0.389.
+    The private/public ratio of the disagreement with G3 is 0.987-1.007 for every pool: whatever reorders the pools between public
+    and private, it is not a change in how much they disagree.
+2b. Composition (label-free; val | public | private; full table in the log). Nearly identical across the three samples: M (6 bins
+    within 0.87-1.16x), H, user type, n_cat, max_cat_share, cand_cat_in_hist, top category (all within 0.85-1.17x). Different:
+      hour   h00-05 .092|.161|.073  h06-09 .190|.274|.139  h10-13 .235|.204|.191  h14-17 .232|.180|.227  h18-23 .251|.181|.369
+      cold   <15% .097|.019|.011   15-30% .476|.247|.153   30-45% .344|.522|.511   >=45% .083|.213|.324
+      luo    <20% .062|.026|.017   20-35% .349|.220|.150   35-50% .452|.516|.507   50-65% .114|.198|.267   >=65% .023|.039|.058
+      weekend 0 | 1.00 | 0.24
+    So public over-represents night/morning feeds (val 28%, public 43%, private 21%) and private over-represents evening feeds
+    (18-23h: 25% / 18% / 37%) and the coldest feeds (cold >= 45%: 8% / 21% / 32%). Public is between val and private on cold,
+    but on hour it is on the opposite side of val from private.
+2c. Where the val deltas vs G3 sit (scored pools; +- SE; full tables for 16 slicings and all 13 pools in the log / CSV):
+    - Cd / Pall (no m02 at all): lose most at night (h00-05 -0.0043 +- 0.0016 / -0.0035 +- 0.0014), on cold15-30% feeds (-0.0021 /
+      -0.0019 +- 0.0007), on new users (tr0 -0.0019 / -0.0015 +- 0.0006), on H256 (-0.0020 / -0.0020 +- 0.0009), cat2 (-0.0020 /
+      -0.0021 +- 0.0010), in feeds with 3 positives (-0.0028 / -0.0032 +- 0.0013); they are at or above G3 on cold >= 45% (+0.0011 /
+      -0.0001 +- 0.002) and on 6+ positives.
+    - PF7x: a diluted Cd (-0.0020 at h00-05, -0.0012 on cold15-30%, -0.0015 on H256, +0.0015 on cold<15%).
+    - M2: edge on cold30-45% (+0.0015 +- 0.0006), H64-191 (+0.0014 +- 0.0006), tr0 (+0.0010 +- 0.0004), all-cold-positive feeds
+      (+0.0029 +- 0.0009), single-positive feeds (+0.0008 +- 0.0004), cat13 (+0.0013), cat_other (+0.0015), Thu (+0.0011 +- 0.0005)
+      vs Tue (+0.0002 +- 0.0004); nothing on cold15-30% (-0.0000) or warm positives (+0.0001 +- 0.0004).
+    - S2 (gate stacker on G3): cat13 (+0.0020 +- 0.0008), h14-23 (+0.0010..+0.0013 +- 0.0006), all-cold-positive (+0.0025 +- 0.0007),
+      M5-10 (+0.0025 +- 0.0020); ~0 on warm positives.
+    - TO-only (FT half removed): -0.0051 +- 0.0012 on all-cold-positive feeds, -0.0022 +- 0.0008 on mixed, +0.0017 +- 0.0005 on
+      warm-positive feeds; +0.0018 on M11-25 and +0.0012 on M26-50 vs -0.0015 on M201-300; +0.0013 at h18-23 vs -0.0011 at h06-13.
+      The FT half is a cold-positive promoter whose val value nets to zero because it costs warm positives.
+    - Unscored: U1 is G3 +- 0.0007 in every slice; U3 +0.0020 +- 0.0007 on all-cold-positive, +0.0014 at h06-09; N1 -0.0009 on
+      cold15-30%, +0.0014 on all-cold-positive, Tue -0.0008 / Thu +0.0004; NEW12 and F10only are below G3 almost everywhere
+      (F10only -0.0030 +- 0.0008 on M201-300, -0.0033 at h06-09, -0.0034 on all-cold-positive).
+    - By the rank of the positive under G3 (label-defined): every alternative pool is BELOW G3 on the 12.8% of feeds where G3 has the
+      positive at rank 1 (Cd -0.031, Pall -0.025, PF7x -0.020, TOonly -0.017, M2 -0.013, S2 -0.009, U3 -0.009, N1 -0.012, U1 -0.005)
+      and above it everywhere else (+0.0005..+0.006): this is what "near-copy with noise" looks like, not a mechanism.
+2d. Over/under-representation that matters for the contrasts: the slices where the val deltas are large (h00-05, cold15-30%, tr0,
+    all-cold-positive) are exactly the ones whose public weight differs from val (h00-05 x1.75, cold15-30% x0.52) - but in the
+    direction that should have made Cd/Pall/PF7x WORSE on public and M2/S2 BETTER (section 3).
+
+=====================================================================================================================================
+3. TRANSFER: WHAT PUBLIC SHOULD HAVE SHOWN VS WHAT IT SHOWED (out/s3_transfer.log)
+=====================================================================================================================================
+3a. Post-stratified 1:1 expectations of the public delta (val d | pubM | pubMC | ps:hour | ps:cold | ps:luo | ps:user ... | realised):
+    Cd     -0.00131 | -0.00133 | -0.00098 | -0.00159 | -0.00096 | -0.00143 | -0.00131 | realised -0.00074  (resid vs pubM +0.00059, z +0.7)
+    Pall   -0.00136 | -0.00138 | -0.00100 | -0.00163 | -0.00102 | -0.00126 | -0.00134 | realised -0.00038  (+0.00100, z +1.4)
+    PF7x   -0.00058 | -0.00060 | -0.00048 | -0.00075 | -0.00047 | -0.00074 | -0.00057 | realised -0.00010  (+0.00050, z +0.8)
+    M2     +0.00062 | +0.00059 | +0.00076 | +0.00050 | +0.00087 | +0.00072 | +0.00062 | realised -0.00039  (-0.00098, z -1.8)
+    S2     +0.00056 | +0.00052 | +0.00061 | +0.00037 | +0.00068 | +0.00052 | +0.00057 | realised -0.00035  (-0.00086, z -1.9)
+    TOonly +0.00003 | -0.00007 | -0.00030 | -0.00021 | -0.00013 | -0.00012 | +0.00006 | realised -0.00047  (-0.00040, z -0.6)
+    No single label-free composition variable moves an expectation by more than 0.0004, and for 5 of 6 contrasts the move is away
+    from the realised value. M, H, user, category variables move nothing (their mixes are equal across samples).
+3b. Leave-one-slice-out (which feed type would have to transfer at ZERO for 1:1 elsewhere to match public): for M2 only the
+    cold30-45% slice (52% of public; M2's entire val edge, +0.0015 +- 0.0006 there) qualifies (expectation +0.00008 vs realised
+    -0.00039); for S2 no single slice qualifies; for Cd / Pall / PF7x almost every slice qualifies because their realised values are
+    within ~1 SE_tot of most expectations (low power). Reading: M2's public shortfall is consistent with "its cold30-45% edge is
+    val-only", but a uniform shrinkage of all its slices fits equally (B4); the two cannot be separated on one point.
+3c. Label-defined feed types (val only). The cold-positive mix shifts toward cold on test (p3's label-free estimate: all-cold /
+    mixed / warm = .237/.131/.632 val -> .270/.147/.584 public -> .291/.150/.559 private). Reweighting the val deltas to that mix:
+    Cd -0.00141 / -0.00143, Pall -0.00145 / -0.00147, PF7x -0.00060 / -0.00060, M2 +0.00089 / +0.00095, S2 +0.00080 / +0.00085,
+    TOonly -0.00073 / -0.00089 (public / private). Again every expectation except TO-only's moves away from the public reading.
+    The FT half's cold-positive value is the one val-derived component with a composition reason to be worth MORE on private than
+    on val (-0.00089 for removing it under the private mix vs -0.00045 on val); public read -0.00047 for removing it.
+3d. Pre-specified transfer models on the 6 scored contrasts (chi2 | df | p | LOO rmse):
+    H0 all pools = G3 on public ........................ 2.88 | 6 | 0.82
+    H1 1:1 (pubM) ...................................... 10.61 | 6 | 0.10
+    H1c 1:1 (M x cold) ................................. 10.43 | 6 | 0.11
+    H1h 1:1 (hour post-stratified) ..................... 10.82 | 6 | 0.09
+    H1 + common offset (c = -0.00026 +- 0.00024) ....... 9.45 | 5 | 0.09 | 0.00094
+    H2 k x pubM, k = +0.12 +- 0.31 ..................... 2.73 | 5 | 0.74 | 0.00050
+    H3 a + b x pubM, a -0.00037 +- 0.00024, b +0.05 +- 0.32  0.41 | 4 | 0.98 | 0.00025
+    H4 pubM + beta (recool share - .7), beta -0.00135 +- 0.00060  5.60 | 5 | 0.35 | 0.00052
+    H5 holdout d (no parameter) ........................ 1.19 | 6 | 0.98
+    H5 + common offset (c = -0.00019 +- 0.00024) ....... 0.59 | 5 | 0.99 | 0.00023
+    H6 0.5 pubM + 0.5 holdout .......................... 4.22 | 6 | 0.65
+    H7 TO-half val d only (S2 excluded) ................ 6.04 | 5 | 0.30
+    Likelihood-ratio tests of 1:1 (s5 b): k = 1 vs free k: dchi2 7.9, p 0.005; b = 1 vs free b with offset (reference-free): dchi2
+    9.0, p 0.003; with PF7x as reference: p 0.002 / 0.002, b = +0.11 +- 0.29. The re-cool model H4 fits worse than plain shrinkage and
+    is collinear with it (corr(share, pubM d) = 0.96; critique2 N3), so the 6 points do not identify a re-cool-specific effect.
+    What 6 points can support: (1) "val deltas transfer 1:1" is rejected at p ~0.003-0.005 (robust to the reference); (2) the
+    transfer factor is 0.05-0.14 with a 95% CI that reaches +0.67, so "val deltas transfer at half strength" is NOT excluded;
+    (3) H0, H3 and H5 are statistically indistinguishable (chi2 0.4-2.9); (4) H3's fit (chi2 0.41 on 4 df) is suspiciously good,
+    i.e. the public SEs may be slightly over-estimated or the 6 residuals share G3's own public draw (the intercept absorbs it:
+    a = -0.00037 +- 0.00024 says the others sit 0.0004 below G3 beyond what val says - G3 at +1.5 SE luck, or genuinely better).
+3e. Forward evidence inside the labelled samples (delta vs G3; +- SE).
+    Val Tue -> Thu (Thu - Tue): Cd +0.00061 +- 0.00098, Pall +0.00050 +- 0.00086, PF7x +0.00055 +- 0.00079, M2 +0.00089 +- 0.00068,
+    S2 +0.00024 +- 0.00055, TOonly +0.00088 +- 0.00078, N1 +0.00119 +- 0.00056, NEW12 +0.00136 +- 0.00099, F10only +0.00170 +-
+    0.00099, U1 -0.00021 +- 0.00040, U3 +0.00014, S1 +0.00018, PoP3 +0.00007. G3's edge over every pool that differs from it in
+    families is larger on Tue (3 days after the last train day) than on Thu (5 days); the pools that are G3 plus more of the same
+    (U1/U3/PoP3/S1) show no day effect. Each entry is <= 1.7 SE and the entries share members; it is a direction, not a result.
+    Holdout weekday -> weekend: M2 +0.00078 +- 0.00038, U1 +0.00049 +- 0.00026, U3 +0.00044 +- 0.00032, N1 +0.00040 +- 0.00035,
+    Pall -0.00077 +- 0.00054, F10only -0.00084 +- 0.00064 (m02-heavy pools relatively better on holdout weekends; the all-weekend
+    public read the opposite for M2). Holdout private-like (Sun >= 12h, Mon, Tue) minus public-like (Sat, Sun < 12h): M2 -0.00063 +-
+    0.00049, U3 -0.00053 +- 0.00042, U1 -0.00043 +- 0.00034, N1 -0.00031 +- 0.00047, PF7x +0.00031 +- 0.00062, Cd +0.00061 +-
+    0.00077, Pall +0.00076 +- 0.00070, F10only +0.00062 +- 0.00082 (s5 d). The holdout's by-day deltas swing +-0.0015 with SE 0.0009
+    (nn_x/pubdiag/shift p1), so these subset contrasts are at the noise level; they are reported because they all lean the same way
+    (against the m02-heavy challengers on private-like feeds) and against nothing else.
+
+=====================================================================================================================================
+4. TEST-SIDE, LABEL-FREE (out/s4_testside.log, s4_disagreement.csv)
+=====================================================================================================================================
+4a. Disagreement with G3 by feed type, private/val ratio within the same type: 0.95-1.15 for every pool in every cold-share, LUO,
+    hour, M, user, H and weekday slice with n >= 300, with one exception shared by ALL pools: on luo >= 65% feeds (2.3% of val, 5.8% of
+    private) every pool agrees with G3 more on test than on val (ratios 0.62-0.87; the slice is tiny on val). TO-only is the only
+    pool whose disagreement with G3 is systematically lower on test than on val (0.83-0.93 in most slices): the FT half's
+    contribution to the G3 ranking is slightly smaller on test feeds than on val feeds (expected: the FT models were tuned on val
+    feeds). No pool is an outlier on cold-heavy, late-hour, Mon/Tue or weekend feeds.
+4b. By test day (Sat 26 / Sun 27 / Mon 28 / Tue 29): disagreement with G3 is flat for every pool (e.g. Cd 4.25/4.26/4.33/4.16 x1e-3,
+    M2 1.00/0.99/1.02/0.99, TOonly 1.90/1.89/1.90/1.91, NEW12 4.61/4.67/4.70/4.56, v10 70.3/69.7/70.8/69.9). Nothing goes stale
+    differently across the test window at the resolution of this diagnostic.
+4c. Cold promotion: cold candidates (it_hist_all_luo == 0) are 38.1% of val, 42.9% of public, 45.9% of private candidates; the
+    label-free expectation of the share of feeds whose best positive is cold rises 0.283 -> 0.323 -> 0.347. Every pool raises the
+    cold share of its top-5 from 0.228 (val) to 0.272 (public) to 0.305 (private), +0.077 (expectation +0.064); TO-only is the lowest
+    promoter (0.216 -> 0.289, +0.073) and S2 / M2 the highest (0.231 -> 0.308). The cold-vs-warm z gap narrows identically for all
+    pools (-0.58 val -> -0.52 private); S2 (-0.49) and M2 (-0.51) discount cold items least, TO-only (-0.54) and F10only (-0.53) most.
+    Old generations: v3 over-promotes cold on test (top-1 cold 0.32 private vs 0.29 for the modern pools).
+    Reading: on the private axis that differs most from val (cold share), the modern pools behave as one; the FT half is what gives
+    G3 its cold promotion (4c, 2c), and it does not switch off on private.
+
+=====================================================================================================================================
+5. INTERPRETATION: WHAT VAL MEASURES, WHAT WE MAY HAVE BEEN MISREADING
+=====================================================================================================================================
+5a. Val's level and its composition-driven slices are reliable: M-reweighted val predicts public to +0.0005 +- 0.0008 for every
+    modern file, the old files to +-0.0016, and the label-free marginals of val / public / private match except hour, cold share and
+    weekend (section 2b, reports/eda_shift_overlap.md). Nothing here suggests val is the wrong population.
+5b. Val's between-pool deltas among near-copies (within-feed corr >= 0.995, |d| <= 0.002) are not reliable as point estimates:
+    they transferred to public at 0.05-0.14 (CI up to 0.67) and are rejected at 1:1 (p 0.003-0.005). Three mechanisms of about the
+    right size are visible and not separable: val-selection optimism (0.0005-0.0008 for the val-best of 10-50 pools), a Tue-heavy
+    component of G3-type pools' val edge (+0.0005..+0.0017 Thu-Tue, <= 1.7 SE), and the fact that val-period re-cooled / m02 trunks
+    (70-100% of G3 / M2 / S2 / TOonly) gain on val what the train-period holdout sees at 1/3 strength. Public is not "noisier than
+    expected" (the noise model held: residuals chi2 4.8 / 3 on the first 3 points, nn_x/pubdiag/noise); it is that the val
+    differences were mostly not there to transfer.
+5c. The one val component we priced at zero is the one with the clearest forward signal: the FT half (val-label fine-tune, 0.5
+    weight). Inside every pool its val value is 0 +- 0.0004 because it trades warm positives (-0.0017) for cold positives (+0.0051
+    on all-cold-positive feeds); public read +0.00047 (z 0.9) for keeping it; private is colder (privMC +0.0006 for keeping it, 3c);
+    label-free it is the component that promotes cold candidates (4c). This does not license changing w_ft (the val curve is flat
+    within +-0.0005, the holdout cannot evaluate FT, and w_ft was closed three times, critique2 R6); it does say that the FT half is
+    not the part of G3 at risk on private.
+5d. Does a better solution follow from re-reading val? Not a new pool: every candidate we can build is within 0.0007 of G3 on val,
+    within 0.0003 on the holdout and within 0.0007 on public, and label-free they are the same ranking on private (4a-4c). The
+    reinterpretation changes the DECISION RULE, not the candidates: val should gate (leak/overfit checks, level, slice vetoes), and
+    the ranking among gated near-copies should come from the samples that are not val-selected and matched public - the holdout
+    and the public readout itself (section 6). It also closes the door on re-litigating M2 / S2 / U3-type candidates on val alone.
+5e. What would change this picture: a public reading of a pool that is >= 0.001 above G3 on val AND >= +1 SE on the holdout (none
+    exists; U1/U3 tie G3 on the holdout), or two of the pre-registered probes in 6c landing on the 1:1 predictions.
+
+=====================================================================================================================================
+6. PICK FOR PRIVATE, AND A PRE-REGISTERED RULE FOR FUTURE USE
+=====================================================================================================================================
+6a. Best supported for PRIVATE: G3 (B6). Ordered evidence: holdout (30K, labelled, no val, no public): G3 first, every other pool
+    -0.00003..-0.00125; public (8.5K, exact): G3 first by +0.0001..+0.0007; val: G3 within 0.0006 of the top; label-free private:
+    no pool separates from G3 beyond what it does on val/public; holdout private-like subset: m02-heavy challengers -0.0003..-0.0006
+    (<= 1.3 SE) relative to public-like. The pools with higher val (M2 +0.0006, S2 +0.0006, U3 +0.0003) are holdout <= G3 and public
+    < G3. The pools that could plausibly beat G3 on private are U1 / PoP3 (G3 + more of the same; holdout tie, val +0.0000 / +0.0003,
+    corr 0.9998 / 0.9997 with G3): a coin-flip of < 0.0003 either way, not worth a switch.
+6b. Pick 2 (hedge): PF7x dominates Pall on all three samples (val +0.00078 +- 0.00023, holdout +0.00025 +- 0.00013, public +0.00029
+    at paired SE ~0.0003) and is the second pool on holdout and public. Pall's rationale ("no re-cool in case re-cool is val-only")
+    is now tested by two non-val samples (holdout: PF7x > Pall; public: PF7x > Pall) and did not hold. Correlation with G3 is 0.9978
+    (PF7x) vs 0.9971 (Pall): the hedge value is the same. The current pick 2 (Pall) therefore costs ~0.0003 on every sample for no
+    measured hedge; the decision is the lead's, this is the evidence.
+6c. PRE-REGISTERED RULE (stated now for FUTURE use; it was motivated by the same 6 public points it fits, so it is validated only by
+    readings made after this file, never by refitting it):
+    R1 eligibility (val as a gate, unchanged): presub PASS; val d vs G3 >= -1 SE_val; no label-free val slice (M, hour, cold share,
+       user) below -2 SE; privMC d >= -1 SE.
+    R2 score among eligible pools: S = 0.5 H + 0.5 P, H = paired holdout delta vs the incumbent (TO members), P = exact public delta
+       vs the incumbent; SE_S = 0.5 sqrt(SE_H^2 + SE_pub^2) (typically 0.00015-0.00035). Val does not enter S.
+    R3 switch: replace the incumbent only if S > +2 SE_S; otherwise it stays. Pick 2 = the eligible, non-dominated pool with the
+       lowest test correlation with pick 1.
+    R4 predictions (fitted on the 6 scored contrasts; public delta vs G3 the models expect if these files are ever submitted;
+       SE_pub in brackets): H1 1:1 | H3 shrinkage (-0.00037 + 0.05 pubM) | H5o holdout - 0.00019
+         N1      -0.00028 | -0.00039 | -0.00035  (0.00036)   separation < 0.3 SE: unreadable
+         U1      +0.00003 | -0.00037 | -0.00022  (0.00025)   H1 vs H3 1.6 SE
+         U3      +0.00031 | -0.00036 | -0.00023  (0.00035)   H1 vs H3 1.9 SE, H1 vs H5o 1.6 SE
+         PoP3    +0.00024 | -0.00036 |    n/a    (0.00028)   H1 vs H3 2.2 SE
+         S1      +0.00011 | -0.00037 |    n/a    (0.00043)   1.1 SE
+         NEW12   -0.00077 | -0.00041 | -0.00075  (0.00062)   0.6 SE
+         F10only -0.00160 | -0.00045 | -0.00144  (0.00063)   H1 vs H3 1.8 SE, H3 vs H5o 1.6 SE
+       The two readable probes are PoP3 or U3 (does a val edge of +0.0003 over G3 show at all?) and F10only (does a val deficit of
+       -0.0016 show in full?). Together they separate H1 from H3 by ~2.5-2.9 SE and H1 from H5o by ~1.6 SE. None of them is a
+       pick candidate (U3 / PoP3 are G3-tie or worse on the holdout; F10only is -0.00125 on it), so these would be diagnostic
+       submissions only, to be spent only if the lead wants the val-vs-holdout question settled before Dec 7; by critique2's
+       standard (>= 2 SE readability per submission) PoP3 qualifies alone, F10only nearly, U3 not quite.
+6d. What this rule would have done on the 7 scored pools: eligibility passes all; S vs G3: PF7x -0.00015, Pall -0.00042, Cd
+    -0.00067, M2 -0.00029, TOonly -0.00024, S2 (H = -0.00006 recorded) -0.00021; no switch; pick 2 = PF7x. The same as the
+    holdout-led decide6/decide8 rule the project already uses, minus the val tie-break, plus public as the second half of S.
+
+=====================================================================================================================================
+7. LIMITS OF THIS ANALYSIS
+=====================================================================================================================================
+- 7 modern public points, 6 contrasts, SE_tot 0.0004-0.0008 each, all sharing G3's own public draw: a 1:1-vs-shrinkage distinction
+  at p ~0.005 is the only inferential result; the transfer factor itself is known to +-0.3; H0 / H3 / H5 are not distinguishable.
+- Composition reweighting (pubM / pubMC / post-stratification) assumes the within-type val delta is the within-type test delta; it
+  cannot see a mechanism that is val-period-specific inside a type (which is exactly what the shortfalls suggest).
+- The holdout is train-period, TO-only, production-traffic-like (random-like filter), and its by-day contrasts swing +-0.0015: it
+  is the right sample for "no val labels", not for "the test period". Its agreement with public (chi2 1.2 / 6) is one sample's worth.
+- The label-defined slices (npos, pos_cold, g3_pos_rank) cannot be weighted to test; the pos_cold counterfactual uses p3's
+  label-free estimate of the test cold-positive mix.
+- S1 was rebuilt as 0.5 z(ft) + 0.5 z(to) of the stored hfit arrays (val 0.40046); the submitted cand_S1 file may weight the halves
+  differently (its recorded val, +0.00054 vs member-equal PF7x, is not reproduced exactly). PoP3's member list is the union (52) and
+  its re-cool share is nominal. Old generations: test arrays are exact (from the submission files); val arrays were rebuilt from the
+  recorded recipes for v10 / v5 only (match to 2e-5); v3 / v4 use recorded val numbers.
+
+=====================================================================================================================================
+8. FILES
+=====================================================================================================================================
+nn_x/audit/valpub/landscape/findings.txt        this file
+nn_x/audit/valpub/landscape/lib.py              pool builders (verified), descriptors, slicings, holdout access
+nn_x/audit/valpub/landscape/s0_check.py         + out/s0_check.log       builder verification vs stored arrays and recorded numbers
+nn_x/audit/valpub/landscape/s1_matrix.py        + out/s1_matrix.log, out/s1_matrix.csv, out/s1_deltas_vs_G3.csv
+nn_x/audit/valpub/landscape/s2_pairs_slices.py  + out/s2_pairs_slices.log, out/s2_corr.npz, out/s2_composition.csv, out/s2_slices.csv
+nn_x/audit/valpub/landscape/s3_transfer.py      + out/s3_transfer.log    decomposition, transfer models, forward evidence
+nn_x/audit/valpub/landscape/s4_testside.py      + out/s4_testside.log, out/s4_disagreement.csv
+nn_x/audit/valpub/landscape/s5_extras.py        + out/s5_extras.log      Spearman, LR tests, pre-registered predictions, holdout subsets
+out/score_<pool>_{val,test}.npy, out/z_<pool>_{val,test}.npy, out/nd_<pool>_{val,holdout}.npy   caches (rebuildable)
+Inputs read: preds/ens_*, preds/nnstk_g3gate3r_*, preds/agg_S3_PoP3_*, preds/ens_hfitP11W1to_*, nn_x/audit/publicprobe/out/cand_*,
+preds/nn_<member>_* and preds/holdout/*, nn_x/w5/preds (W5base), subs/sub_v{3,4,5,10}*.parquet, preds_quarantine/stk2_res2_r3_val.npy,
+eda/errors/segments/{feed_table,test_segments}.parquet, nn_x/pubdiag/shift/{desc_val,desc_test}.parquet + shiftlib.py,
+data/feats/{val,test}/it_hist_all_luo.npy, src/{calib,pmix,metrics,stack_val,common}.py. Prior work cited: nn_x/pubdiag/noise,
+nn_x/pubdiag/shift (p1, p3, p6), nn_x/audit/critique2/critique2.txt (N3, R3, R7), nn_x/audit/publicprobe/findings.txt,
+reports/eda_shift_overlap.md, reports/CURRENT_STATUS.md (18:53, 22:54, 23:39, 23:46 entries).

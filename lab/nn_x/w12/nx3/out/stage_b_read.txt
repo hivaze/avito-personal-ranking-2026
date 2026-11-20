@@ -1,0 +1,74 @@
+=== nx3 STAGE B READ (one look; computed 2026-11-16T11:01:31Z by nn_x/w12/nx3/nx3_read_b.py read; Reader / statistics imported from nx3_read_a.py md5 00c572d4cb0accc9758f4109d561c4d0) ===
+ARM  (8): abl_e10_nx3kd05w192_s951 .. abl_e10_nx3kd05w192_s958   (wide distilled students WITH the bundle, old teacher teacher_mean11)
+REF  (16): REF1 w5_e10_kd05w192_s951 .. w5_e10_kd05w192_s958 (8; same teacher) + REF2 w5_e10_kd05t25w192_s951 .. w5_e10_kd05t25w192_s958 (8; teacher_mean25) = the stored wide students
+STAGE A on record (<repo>/nn_x/w12/nx3/out/stage_a_read.txt): pooled z +0.59; VERDICT: NOT SHOWN at this power (0.71-0.80 for a member-level +0.001, 0.24-0.29 for +0.0005, 0.09-0.13 for +0.0003; critic/out/c04_rule_null.txt). natural - permuted on val + 2 SE = +0.00247 >= +0.0005 -> not closed at +0.0005. "New train-stage inputs" is not closed a
+HARNESS CHECK of stage A on record (the arm of B is trained in nn_x/abl, the references in nn_x/w5): == HARNESS DECISION (selected checkpoints, member level): z_val -0.21, z_holdout(30,000 feeds) -0.49; bar |z| <= 2 on both | -> HARNESS OK: the fresh controls sit with the stored ones; the control set of the read is the 6 stored w5_e10_base_s951-956 + the 2 fresh abl_e10_base_s957, s958. | HARNESS_VERDICT=OK
+== selected checkpoints: member level, the 8 new students against the 16 stored students (the pool column of these lines is 8 v 16: information only)
+  val                                    n  14423 | member +0.00005 +- 0.00029 (z +0.19; per-feed SE 0.00029, seed SE 0.00024; 5/8 arm members above the control mean) | pool +0.00008 +- 0.00048 (z +0.17)
+  val, private mix                       n  14423 | member +0.00069 +- 0.00043 (z +1.59; per-feed SE 0.00043, seed SE 0.00039; 7/8 arm members above the control mean) | pool -0.00000 +- 0.00072 (z -0.00)
+  val, public mix                        n  14423 | member +0.00043 +- 0.00036 (z +1.20; per-feed SE 0.00036, seed SE 0.00029; 7/8 arm members above the control mean) | pool -0.00007 +- 0.00059 (z -0.11)
+  val M>=50                              n   8530 | member +0.00001 +- 0.00032 (z +0.03; per-feed SE 0.00032, seed SE 0.00027; 3/8 arm members above the control mean) | pool -0.00031 +- 0.00051 (z -0.61)
+  val M<50                               n   5893 | member +0.00012 +- 0.00053 (z +0.22; per-feed SE 0.00053, seed SE 0.00038; 4/8 arm members above the control mean) | pool +0.00065 +- 0.00090 (z +0.72)
+  holdout, all 30,000 feeds              n  30000 | member -0.00004 +- 0.00016 (z -0.24; per-feed SE 0.00016, seed SE 0.00016; 4/8 arm members above the control mean) | pool -0.00054 +- 0.00026 (z -2.10)
+  holdout, lag-view feeds (Sep 12-19)    n  15225 | member +0.00016 +- 0.00024 (z +0.68; per-feed SE 0.00023, seed SE 0.00024; 6/8 arm members above the control mean) | pool -0.00032 +- 0.00037 (z -0.86)
+  holdout, Sep 12-14 (val-like lag)      n   6946 | member +0.00003 +- 0.00035 (z +0.09; per-feed SE 0.00035, seed SE 0.00030; 3/8 arm members above the control mean) | pool -0.00046 +- 0.00056 (z -0.82)
+  holdout, Sep 17-19 (test-like lag)     n   8279 | member +0.00027 +- 0.00031 (z +0.88; per-feed SE 0.00031, seed SE 0.00029; 5/8 arm members above the control mean) | pool -0.00020 +- 0.00050 (z -0.40)
+  holdout, feeds WITHOUT the view (Sep 6-11) n  14775 | member -0.00025 +- 0.00022 (z -1.12; per-feed SE 0.00022, seed SE 0.00021; 2/8 arm members above the control mean) | pool -0.00077 +- 0.00035 (z -2.18)
+   by reference arm (information; member level and the EQUAL-SIZE pool contrast 8 v 8):
+  val, vs REF1 w192 (same teacher)       n  14423 | member +0.00036 +- 0.00032 (z +1.13; per-feed SE 0.00032, seed SE 0.00026; 6/8 arm members above the control mean) | pool +0.00041 +- 0.00049 (z +0.84)
+  lag-view holdout, vs REF1 w192 (same teacher) n  15225 | member +0.00021 +- 0.00027 (z +0.78; per-feed SE 0.00025, seed SE 0.00027; 6/8 arm members above the control mean) | pool -0.00003 +- 0.00038 (z -0.07)
+  val, vs REF2 t25w192                   n  14423 | member -0.00025 +- 0.00034 (z -0.73; per-feed SE 0.00034, seed SE 0.00025; 3/8 arm members above the control mean) | pool -0.00002 +- 0.00051 (z -0.04)
+  lag-view holdout, vs REF2 t25w192      n  15225 | member +0.00012 +- 0.00028 (z +0.42; per-feed SE 0.00028, seed SE 0.00026; 6/8 arm members above the control mean) | pool +0.00036 +- 0.00041 (z +0.90)
+   A4 pool level (8-pool of the new students minus each stored 8-pool, mean of the two; paired per-feed SE):
+     val                                n  14423 | +0.00020 +- 0.00044 (z +0.44)
+     lag-view holdout (Sep 12-19)       n  15225 | +0.00017 +- 0.00035 (z +0.49)
+     val, private mix                   n  14423 | +0.00021 +- 0.00067 (z +0.32)
+     pooled z (val, lag-view holdout) = +0.66
+== last step: member level, the 8 new students against the 16 stored students (the pool column of these lines is 8 v 16: information only)
+  val                                    n  14423 | member +0.00010 +- 0.00029 (z +0.35; per-feed SE 0.00029, seed SE 0.00026; 4/8 arm members above the control mean) | pool -0.00011 +- 0.00047 (z -0.23)
+  val, private mix                       n  14423 | member +0.00057 +- 0.00045 (z +1.25; per-feed SE 0.00044, seed SE 0.00045; 5/8 arm members above the control mean) | pool -0.00045 +- 0.00072 (z -0.62)
+  val, public mix                        n  14423 | member +0.00038 +- 0.00036 (z +1.04; per-feed SE 0.00036, seed SE 0.00035; 6/8 arm members above the control mean) | pool -0.00048 +- 0.00059 (z -0.81)
+  val M>=50                              n   8530 | member +0.00001 +- 0.00033 (z +0.04; per-feed SE 0.00032, seed SE 0.00033; 4/8 arm members above the control mean) | pool -0.00065 +- 0.00051 (z -1.28)
+  val M<50                               n   5893 | member +0.00022 +- 0.00054 (z +0.42; per-feed SE 0.00054, seed SE 0.00037; 4/8 arm members above the control mean) | pool +0.00066 +- 0.00090 (z +0.74)
+  holdout, all 30,000 feeds              n  30000 | member -0.00001 +- 0.00019 (z -0.03; per-feed SE 0.00016, seed SE 0.00019; 4/8 arm members above the control mean) | pool -0.00038 +- 0.00026 (z -1.48)
+  holdout, lag-view feeds (Sep 12-19)    n  15225 | member +0.00014 +- 0.00025 (z +0.55; per-feed SE 0.00023, seed SE 0.00025; 6/8 arm members above the control mean) | pool -0.00018 +- 0.00037 (z -0.48)
+  holdout, Sep 12-14 (val-like lag)      n   6946 | member -0.00017 +- 0.00037 (z -0.46; per-feed SE 0.00035, seed SE 0.00037; 4/8 arm members above the control mean) | pool -0.00058 +- 0.00056 (z -1.03)
+  holdout, Sep 17-19 (test-like lag)     n   8279 | member +0.00039 +- 0.00031 (z +1.26; per-feed SE 0.00031, seed SE 0.00026; 5/8 arm members above the control mean) | pool +0.00016 +- 0.00049 (z +0.32)
+  holdout, feeds WITHOUT the view (Sep 6-11) n  14775 | member -0.00015 +- 0.00025 (z -0.62; per-feed SE 0.00022, seed SE 0.00025; 5/8 arm members above the control mean) | pool -0.00058 +- 0.00035 (z -1.66)
+   by reference arm (information; member level and the EQUAL-SIZE pool contrast 8 v 8):
+  val, vs REF1 w192 (same teacher)       n  14423 | member +0.00040 +- 0.00032 (z +1.25; per-feed SE 0.00032, seed SE 0.00027; 6/8 arm members above the control mean) | pool +0.00046 +- 0.00049 (z +0.92)
+  lag-view holdout, vs REF1 w192 (same teacher) n  15225 | member +0.00014 +- 0.00027 (z +0.50; per-feed SE 0.00025, seed SE 0.00027; 6/8 arm members above the control mean) | pool +0.00020 +- 0.00038 (z +0.54)
+  val, vs REF2 t25w192                   n  14423 | member -0.00020 +- 0.00034 (z -0.58; per-feed SE 0.00034, seed SE 0.00027; 3/8 arm members above the control mean) | pool -0.00022 +- 0.00051 (z -0.44)
+  lag-view holdout, vs REF2 t25w192      n  15225 | member +0.00014 +- 0.00028 (z +0.49; per-feed SE 0.00028, seed SE 0.00027; 6/8 arm members above the control mean) | pool +0.00041 +- 0.00041 (z +1.00)
+   A4 pool level (8-pool of the new students minus each stored 8-pool, mean of the two; paired per-feed SE):
+     val                                n  14423 | +0.00012 +- 0.00044 (z +0.26)
+     lag-view holdout (Sep 12-19)       n  15225 | +0.00031 +- 0.00034 (z +0.89)
+     val, private mix                   n  14423 | -0.00002 +- 0.00067 (z -0.02)
+     pooled z (val, lag-view holdout) = +0.82
+== stale-val, scenario SVL (both_pre2lt3); the new students read nx_rp3_z / nx_rp3_rk from their stale-val twins (<repo>/nn_x/w12/nx3/rescore/svl)
+  stale-val, selected (the clause)       n  14423 | member +0.00003 +- 0.00029 (z +0.10; per-feed SE 0.00029, seed SE 0.00018; 4/8 arm members above the control mean) | pool +0.00005 +- 0.00047 (z +0.11)
+     levels, member mean: arm natural 0.39938 -> stale 0.39799 (-0.00139); reference natural 0.39932 -> stale 0.39796 (-0.00136)
+  stale-val, last step (information)     n  14423 | member +0.00008 +- 0.00029 (z +0.27; per-feed SE 0.00029, seed SE 0.00022; 4/8 arm members above the control mean) | pool +0.00003 +- 0.00047 (z +0.06)
+     levels, member mean: arm natural 0.39931 -> stale 0.39792 (-0.00138); reference natural 0.39921 -> stale 0.39785 (-0.00136)
+== VALUE report (A3's construction; not a clause of B): the 8 new students re-scored with nx_rp3_z and nx_rp3_rk permuted within the feed (<repo>/nn_x/w12/nx3/rescore/perm)
+  check, val: re-scored natural vs the stored predictions of the trainer, member NDCG: max |difference| 0.00e+00 (per feed: max 0.00e+00)
+  check, hold: re-scored natural vs the stored predictions of the trainer, member NDCG: max |difference| 0.00e+00 (per feed: max 0.00e+00)
+  val                                    n  14423 | natural - permuted +0.00082 +- 0.00021 (paired per-feed SE; z +3.99; seed-level SE 0.00007; 8/8 members > 0)
+  holdout, lag-view feeds (Sep 12-19)    n  15225 | natural - permuted +0.00060 +- 0.00016 (paired per-feed SE; z +3.73; seed-level SE 0.00008; 8/8 members > 0)
+  check: on the 14,775 holdout feeds without the view the permutation is a no-op: max |natural - permuted| per feed = 0.00e+00
+
+=== nx3 STAGE B: FINAL BLOCK (rule block 2026-11-16T03:45:41Z, STAGE B as amended by A4; A7.2 / A7.3 / A7.5; selected checkpoints, member level against the 16 stored students unless stated) ===
+ ARM abl_e10_nx3kd05w192_s951 .. abl_e10_nx3kd05w192_s958 (8)   REF w5_e10_kd05w192:951-958 + w5_e10_kd05t25w192:951-958 (16)   stage A: NOT (pooled z +0.59)
+ B1 val                       z >= +1.0            : member +0.00005 +- 0.00029, z +0.19  -> FAIL
+ B2 lag-view holdout (15,225) z >= +1.0            : member +0.00016 +- 0.00024, z +0.68  -> FAIL
+ B3 pooled z_B = (z_val + z_holdout) / sqrt(2) >= 2.0: +0.62  -> FAIL   [bands (A4): >= 2 with every clause PASS | [1.6, 2) 4 more students | < 1.6 STOP]
+ B4 private mix (src/pmix.py) member z >= -1.0     : member +0.00069 +- 0.00043, z +1.59  -> ok
+ B5 pool minus pool >= 0 on val AND lag-view holdout (new 8-pool minus each stored 8-pool, mean of the two): val +0.00020 +- 0.00044, holdout +0.00017 +- 0.00035  -> ok   [8 v 16 pool, information: val +0.00008 +- 0.00048, holdout -0.00032 +- 0.00037]
+ B6 last step, lag-view holdout, member delta >= 0  : +0.00014 +- 0.00025  -> ok
+ B7 stale-val (SVL + NX twins) member delta >= -1 SE: +0.00003 +- 0.00029 (z +0.10)  -> ok   [last step, information: +0.00008 +- 0.00029]
+ B8 (A4) pool level, pooled z (val, lag-view holdout) >= 1.0: z_val +0.44, z_holdout +0.49, pooled +0.66  -> FAIL
+ BAND (A4): pooled z_B in [1.6, 2.0): no; designer's side conditions z_val >= 0 and z_holdout >= 0: hold
+ REPORT R1 arm - reference on the 14,775 holdout feeds WITHOUT the view (expected 0): member -0.00025 +- 0.00022, z -1.12  -> |z| <= 2: no side effect shown
+ REPORT VALUE (not a clause of B): natural - permuted, lag-view holdout +0.00060 +- 0.00016 against 0.5 x (arm - reference) = +0.00008 [at or above]; val +0.00082 +- 0.00021 [> 0] = the size the students take from the values
+ LIMITS ON RECORD (rulings R1, R2; quoted with every read): J0 train feed mix (all has = 1 train rows: C4 PSI of nx_rp3_z 0.127 / 0.260 / 0.346 against val / public / private; the pool-feed reading of BUILD_SPEC binds); J1 P(walk = 0 | seq_cv_invd20 > 0) 0.122 / 0.228 on lag-view rows against 0.0004-0.0005 on val / test rows; J2 one-step coefficient 0.030 on lag-view holdout rows against 0.055 (val); J3 the lag view is fresher than its reference rows in distribution; J4 the clamp at 6 saturates 1.4-1.8% of rows.
+ VERDICT: DESCRIPTIVE RECORD (A7.3: stage A is not a PASS [NOT]; this is not a second test and no file becomes a pick candidate from it). By the clauses of B it would read: clauses failing ['B1', 'B2', 'B3', 'B8'] (pooled z_B +0.62). Replication block (pooled z_B >= 3.0 AND A's pooled z >= 0; A pooled z +0.59): condition not met -> none.

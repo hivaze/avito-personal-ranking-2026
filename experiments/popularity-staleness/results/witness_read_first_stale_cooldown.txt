@@ -1,0 +1,84 @@
+=== witness READ of arm hzcd vs m02ref re-cools, 2026-11-15T03:42:45Z ===
+complete (hzcd, m02ref) snapshot pairs (both json): 4 of 16: ['101', '102', '103', '104']
+not complete: []
+DECISION PAIRS (complete + stored val / holdout + CPU stale-val of the SELECTED checkpoints on both sides): 4: ['101', '102', '103', '104']
+
+
+################ SELECTED checkpoints (decision) ################
+
+== SELECTED: hzcd 4-pool vs m02ref 4-pool, paired by snapshot
+   levels: A_val 0.40048 | B_val 0.39969 | A_stale 0.39911 | B_stale 0.39834 | A_hold 0.32254 | B_hold 0.32265
+   val              +0.00079 +- 0.00051  (z +1.54; n 14423)
+   val_M>=50        +0.00013 +- 0.00054  (z +0.24; n 8530)
+   val_M<50         +0.00175 +- 0.00098  (z +1.79; n 5893)
+   pmix_pub         +0.00089 +- 0.00063  (z +1.43; n 14423)
+   pmix_priv        +0.00105 +- 0.00076  (z +1.39; n 14423)
+   coldpos          +0.00348 +- 0.00106  (z +3.29; n 3422)
+   warmpos          -0.00028 +- 0.00068  (z -0.41; n 9118)
+   stale            +0.00078 +- 0.00054  (z +1.43; n 14423)
+   stale_M>=50      +0.00024 +- 0.00057  (z +0.42; n 8530)
+   stale_M<50       +0.00155 +- 0.00104  (z +1.49; n 5893)
+   stale_pmix_priv  +0.00039 +- 0.00080  (z +0.49; n 14423)
+   stale_coldpos    -0.00226 +- 0.00110  (z -2.04; n 3422)
+   stale_warmpos    +0.00218 +- 0.00072  (z +3.03; n 9118)
+   SV2              +0.00078 +- 0.00045  (z +1.74; n 14423)
+   stale-val        -0.00001 +- 0.00054  (z -0.03; n 14423)
+   hold             -0.00011 +- 0.00028  (z -0.40; n 30000)
+   hold_subset      +0.00061 +- 0.00039  (z +1.54; n 13424)
+   HOLD-SHORT       -0.00019 +- 0.00026  (z -0.75; n 30000)
+   LAGGED HOLDOUT: no pair of this table has lagged predictions on both sides (not scored)
+
+RULE hz on 4 pairs: val delta >= 0 [True: +0.00079 +- 0.00051]; stale-val delta >= +2 SE [False: +0.00078 +- 0.00054 = +1.43 SE]; val M<50 >= -1 SE [True: +0.00175 +- 0.00098 = +1.79 SE]
+VERDICT (4 of 16 pairs; fewer than 8 pairs: NOT a decision read): no pass (neither PASS nor the closing clause)
+
+   per snapshot (single re-cool member, hzcd - m02ref): val | stale | hold
+      cd s101: -0.00028 +- 0.00071 | +0.00037 +- 0.00075 | -0.00026 +- 0.00040
+      cd s102: -0.00085 +- 0.00064 | +0.00084 +- 0.00068 | -0.00081 +- 0.00036
+      cd s103: -0.00000 +- 0.00057 | +0.00110 +- 0.00062 | -0.00017 +- 0.00033
+      cd s104: +0.00095 +- 0.00060 | +0.00097 +- 0.00063 | -0.00062 +- 0.00034
+      positive in 1 (val) / 4 (stale) / 0 (hold) of 4 snapshots
+
+== [0.8 z(hzcd 4-pool) + 0.2 z(pop1kd x4)] vs [0.8 z(m02ref 4-pool) + 0.2 z(pop1kd x4)]  (pop1kd members: selected checkpoints)
+   levels: A_val 0.40055 | B_val 0.40071 | A_stale 0.40019 | B_stale 0.39964 | A_hold 0.32250 | B_hold 0.32305
+   val              -0.00016 +- 0.00044  (z -0.36; n 14423)
+   val_M>=50        -0.00018 +- 0.00045  (z -0.41; n 8530)
+   val_M<50         -0.00012 +- 0.00084  (z -0.14; n 5893)
+   pmix_pub         -0.00013 +- 0.00054  (z -0.23; n 14423)
+   pmix_priv        -0.00010 +- 0.00066  (z -0.15; n 14423)
+   coldpos          +0.00210 +- 0.00087  (z +2.40; n 3422)
+   warmpos          -0.00114 +- 0.00058  (z -1.96; n 9118)
+   stale            +0.00055 +- 0.00048  (z +1.15; n 14423)
+   stale_M>=50      +0.00080 +- 0.00052  (z +1.53; n 8530)
+   stale_M<50       +0.00019 +- 0.00090  (z +0.21; n 5893)
+   stale_pmix_priv  +0.00024 +- 0.00071  (z +0.33; n 14423)
+   stale_coldpos    -0.00221 +- 0.00099  (z -2.22; n 3422)
+   stale_warmpos    +0.00177 +- 0.00064  (z +2.78; n 9118)
+   SV2              +0.00020 +- 0.00039  (z +0.51; n 14423)
+   stale-val        +0.00071 +- 0.00049  (z +1.44; n 14423)
+   hold             -0.00055 +- 0.00024  (z -2.27; n 30000)
+   hold_subset      +0.00012 +- 0.00036  (z +0.34; n 13424)
+   HOLD-SHORT       -0.00052 +- 0.00023  (z -2.32; n 30000)
+   value of the pop1kd admixture (w 0.2) on the hzcd pool: val +0.00008 +- 0.00034, stale-val +0.00107 +- 0.00034, holdout -0.00004 +- 0.00023
+   value of the pop1kd admixture (w 0.2) on the m02ref pool: val +0.00103 +- 0.00038, stale-val +0.00130 +- 0.00035, holdout +0.00040 +- 0.00024
+   add or substitute (DECLARATION block 1 (4)): share of the plain hzcd - m02ref delta kept on top of the admixture: val -0.20, stale-val 0.71 -> MIXED
+
+
+################ @last checkpoints (reported, no decision) ################
+of the 4 decision pairs: 4 have stored @last val / holdout files, 0 have CPU @last stale-val on both sides []
+
+== @last, stored-file witnesses only (no CPU stale-val for some pairs): hzcd 4-pool vs m02ref 4-pool, paired by snapshot
+   levels: A_val 0.40009 | B_val 0.39959 | A_hold 0.32220 | B_hold 0.32287
+   val              +0.00050 +- 0.00047  (z +1.06; n 14423)
+   val_M>=50        -0.00044 +- 0.00051  (z -0.86; n 8530)
+   val_M<50         +0.00186 +- 0.00090  (z +2.07; n 5893)
+   pmix_pub         +0.00042 +- 0.00059  (z +0.71; n 14423)
+   pmix_priv        +0.00048 +- 0.00072  (z +0.67; n 14423)
+   coldpos          +0.00452 +- 0.00102  (z +4.44; n 3422)
+   warmpos          -0.00086 +- 0.00062  (z -1.37; n 9118)
+   hold             -0.00067 +- 0.00027  (z -2.52; n 30000)
+   hold_subset      -0.00042 +- 0.00038  (z -1.12; n 13424)
+   HOLD-SHORT       -0.00076 +- 0.00024  (z -3.15; n 30000)
+   LAGGED HOLDOUT: no pair of this table has lagged predictions on both sides (not scored)
+
+
+################ harness nulls on the same snapshots (information) ################

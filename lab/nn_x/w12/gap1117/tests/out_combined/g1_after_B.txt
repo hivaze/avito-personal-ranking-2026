@@ -1,0 +1,17 @@
+==== 2026-11-17T03:51:04Z test_gap1117_gpu.py ['g1']
+G1 args: --init <repo>/nn_x/w5/ckpt/w5_e10_kd05w192_s951@77500.pt --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --loss_norm feed --holdout 30000 --select_on holdout --save_last --save_holdout --seed 1951 --kd_file <repo>/nn_x/w12/kd/out/teacher_mean11.npy --kd_w 0.5 --variant w5_g1117_off --train_feeds 20000 --epochs 1 --eval_every 1000 --select_min_step 10 --cliplog 10 --cooldown_mix 0.3 --no_test
+2026-11-17T03:51:08Z GPU N: 0 compute processes, [n] MiB free -> launch
+   started g1_old pid 2032408
+2026-11-17T03:52:08Z GPU N: 1 compute processes, [n] MiB free -> launch
+   started g1_new pid 2033347
+[PASS] G1a both deterministic runs finished rc 0 0
+[PASS] G1b identical training gathers (74 steps)
+[PASS] G1c per-step loss values bitwise identical (74 steps, loss[0] 1.776504, loss[-1] 1.693779)
+[PASS] G1d loss-input logits bitwise identical (1335776 values)
+[PASS] G1e optimiser-entry gradient norms bitwise identical 
+[PASS] G1f log lines identical (args line and timings removed) (17 lines)
+[PASS] G1g selected and @last checkpoints bitwise identical (state_dict) 
+[PASS] G1h val / holdout prediction files bitwise identical (6 files: ['preds/holdout/holdout_meta.npy', 'preds/holdout/holdout_y.npy', 'preds/holdout/nn_w5_g1117_off@last_holdout.npy', 'preds/holdout/nn_w5_g1117_off_holdout.npy', 'preds/nn_w5_g1117_off@last_trainonly_val.npy', 'preds/nn_w5_g1117_off_trainonly_val.npy'])
+[PASS] G1i flags off: add_terms never called 
+SUMMARY: 9/9 PASS
+exit 0

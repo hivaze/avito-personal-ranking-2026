@@ -1,0 +1,207 @@
+{
+ "t0": {
+  "train_removed": [
+   "rename import model_moe -> model",
+   "stmt from moe_arms import moe_kwargs, setup_moe",
+   "stmt p.add_argument('--moe_ffn', type=int, default=0, help='w12/moe arm A: E > 0 routed experts added to the dense ",
+   "stmt p.add_argument('--moe_w', type=int, default=48, help='w12/moe arm A: hidden width of each routed expert')",
+   "stmt p.add_argument('--moe_k', type=int, default=2, help='w12/moe arm A: experts selected per token')",
+   "stmt p.add_argument('--moe_scale', type=float, default=2.0, help='w12/moe arm A: routed scale (gates renormalised o",
+   "stmt p.add_argument('--moe_xdrop', type=float, default=0.1, help='w12/moe arm A: expert dropout on the selected gat",
+   "stmt p.add_argument('--moe_eta', type=float, default=0.1, help='w12/moe arm A: quantile-balancer step')",
+   "stmt p.add_argument('--vo_moe', type=int, default=0, help='w12/moe arm B: E > 0 routed value / output experts per h",
+   "stmt p.add_argument('--vo_k', type=int, default=2, help='w12/moe arm B: experts selected per head and token')",
+   "stmt p.add_argument('--vo_eta', type=float, default=0.1, help='w12/moe arm B: quantile-balancer step')",
+   "stmt assert not moe_kwargs(a), 'w12/moe: arm flags have no effect with --init (architecture comes from the checkpoi",
+   "kw **moe_kwargs(a)",
+   "stmt moe = None",
+   "stmt moe = setup_moe(a, model, muon_names, log)",
+   "stmt if model.moe_on:",
+   "stmt decay, no_decay = moe.adamw_groups(rest)",
+   "stmt if moe is not None:",
+   "stmt opts.append(moe.optimizer(a))",
+   "stmt if moe is not None:",
+   "stmt moe.update_bias()",
+   "stmt if moe is not None:",
+   "stmt log(moe.summary(step + 1))",
+   "stmt if moe is not None:",
+   "stmt hist[-1]['moe'] = getattr(moe, 'diag', None)",
+   "stmt if moe is not None:"
+  ],
+  "model_removed": [
+   "stmt MOE_PRIME = 155003",
+   "def quantile_shift",
+   "def RouteSite",
+   "def RoutedFFN",
+   "def SwitchVO",
+   "stmt self.vo = None",
+   "args ['qmask']",
+   "stmt return self._forward_moe_vo(x, ctx, kmask, bias, qmask)",
+   "stmt if self.vo is not None:",
+   "def _forward_moe_vo",
+   "stmt self.moe = None",
+   "args ['tmask']",
+   "stmt return self._forward_moe(x, kmask, ctx, bias, tmask)",
+   "stmt if self.moe is not None or self.attn.vo is not None:",
+   "def _forward_moe",
+   "args ['moe_ffn', 'moe_w', 'moe_k', 'moe_scale', 'moe_xdrop', 'moe_eta', 'vo_moe', 'vo_k', 'vo_eta']",
+   "stmt self.moe_on = bool(moe_ffn or vo_moe)",
+   "stmt self.cfg.update(moe_ffn=moe_ffn, moe_w=moe_w, moe_k=moe_k, moe_scale=moe_scale, moe_xdrop=moe_xdrop, moe_eta=m",
+   "stmt if moe_ffn:",
+   "stmt self.cfg.update(vo_moe=vo_moe, vo_k=vo_k, vo_eta=vo_eta)",
+   "stmt if vo_moe:",
+   "stmt assert use_hist and use_set and (arch == 'tf') and (not typed_cross), 'w12/moe arms: tf history encoder, cross",
+   "stmt assert not vo_moe or (split_kv and sim_bias != 2), '--vo_moe: split k/v projections (--muon) and sim_bias 0 / ",
+   "stmt blk.moe = RoutedFFN(d, moe_ffn, moe_w, moe_k, moe_scale, drop, moe_xdrop, moe_eta)",
+   "stmt for blk in (self.cross[i], self.sets[i]):",
+   "stmt if moe_ffn:",
+   "stmt self.cross[i].attn.vo = SwitchVO(d, heads, vo_moe, vo_k, vo_eta)",
+   "stmt if vo_moe:",
+   "stmt for i in range(blocks):",
+   "stmt with extra_init(offset=MOE_PRIME):",
+   "stmt if self.moe_on:",
+   "def moe_modules",
+   "stmt c = crosses[i](c, km, ctx, sbias, tmask=cmask)",
+   "stmt c = self.sets[i](c, cmask, tmask=cmask) if sset is None else self.sets[i](c, cmask, bias=sset, tmask=cmask)",
+   "stmt if self.use_set:",
+   "stmt if self.moe_on:"
+  ]
+ },
+ "t1_e2e": {
+  "lines": [
+   "step 10/50 loss 4.5385 val_ndcg 0.32013 holdout_ndcg 0.32598 lr 2.00e-03",
+   "step 20/50 loss 0.0000 val_ndcg 0.31576 holdout_ndcg 0.35734 lr 2.00e-03",
+   "step 30/50 loss 0.0000 val_ndcg 0.33455 holdout_ndcg 0.35634 lr 1.22e-03 cd_loss_reg 0.0000 cd_loss_pool 3.0666",
+   "step 40/50 loss 0.0000 val_ndcg 0.35082 holdout_ndcg 0.35256 lr 5.48e-04 cd_loss_reg 3.4116 cd_loss_pool 1.7763",
+   "step 50/50 loss 0.0000 val_ndcg 0.35981 holdout_ndcg 0.35052 lr 9.92e-05 cd_loss_reg 2.1400 cd_loss_pool 1.5759",
+   "BEST step 20 val_ndcg 0.31576; train time"
+  ],
+  "steps": 50
+ },
+ "balancer_ffn": {
+  "eta01": [
+   0.3333,
+   0.6321,
+   0.9871,
+   0.9984,
+   0.9987,
+   0.9986,
+   0.9984,
+   0.9996,
+   0.9991,
+   0.9994,
+   0.9988,
+   0.9994,
+   0.9988
+  ],
+  "eta0": [
+   0.3333,
+   0.3333,
+   0.3333,
+   0.3333,
+   0.3333,
+   0.3333,
+   0.3333,
+   0.3333,
+   0.3333,
+   0.3333,
+   0.3333,
+   0.3333,
+   0.3333
+  ]
+ },
+ "balancer_V": {
+  "eta01": [
+   0.5,
+   0.6102,
+   0.9497,
+   0.9973,
+   0.9996,
+   0.9993,
+   0.9988,
+   0.9995,
+   0.9991,
+   0.9994,
+   0.9996,
+   0.9988,
+   0.9989
+  ],
+  "eta0": [
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5
+  ]
+ },
+ "balancer_O": {
+  "eta01": [
+   0.5,
+   0.5049,
+   0.962,
+   0.9976,
+   0.9991,
+   0.9995,
+   0.9981,
+   0.9991,
+   0.9989,
+   0.9991,
+   0.9994,
+   0.9993,
+   0.9989
+  ],
+  "eta0": [
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5
+  ]
+ },
+ "t3_A": {
+  "loss_first": 4.541984558105469,
+  "loss_last10": 2.679500234127045,
+  "ents": [
+   0.9707943797111511,
+   0.9660853743553162,
+   0.977415919303894,
+   0.9757845997810364,
+   0.9881253838539124
+  ],
+  "lines": [
+   "w12/moe step 50: min load entropy 0.988, max dead share 0.00 | cross.0.moe:ffn ent 0.999 maxmin 1.27 dead 0.00 b [-0.091,+0.104] rms 0.144 | cross.1.moe:ffn ent 0.994 maxmin 1.60 dead 0.00 b [-0.271,+0.137] rms 0.136 | sets.0.moe:ffn ent 0.988 maxmin 1.96 dead 0.00 b [-0.159,+0.155] rms 0.136 | sets.1.moe:ffn ent 0.998 maxmin 1.43 dead 0.00 b [-0.198,+0.163] rms 0.126"
+  ]
+ },
+ "t3_B": {
+  "loss_first": 4.538501739501953,
+  "loss_last10": 2.6739010334014894,
+  "ents": [
+   0.9470973014831543,
+   0.9722742438316345,
+   0.9799352884292603,
+   0.9741873741149902,
+   0.9895585775375366
+  ],
+  "lines": [
+   "w12/moe step 50: min load entropy 0.990, max dead share 0.00 | cross.0.vo:V ent 0.991 maxmin 1.48 dead 0.00 b [-0.139,+0.108] rms 0.368 | cross.0.vo:O ent 0.990 maxmin 1.58 dead 0.00 b [-0.039,+0.077] rms 0.205 | cross.1.vo:V ent 0.997 maxmin 1.26 dead 0.00 b [-0.094,+0.099] rms 0.392 | cross.1.vo:O ent 0.995 maxmin 1.38 dead 0.00 b [-0.199,+0.114] rms 0.191"
+  ]
+ },
+ "fails": [],
+ "n_checks": 44
+}

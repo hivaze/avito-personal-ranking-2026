@@ -1,0 +1,296 @@
+ADVERSARIAL CRITIQUE of reports/VAL_PUBLIC_1113.md and the three analyses (calib, landscape, semantics)
+Written 2026-11-13. CPU only (12 threads), no process touched, new files only under nn_x/audit/valpub/critique/
+(this file, k1_recompute.py, k2_rule_loo.py, k3_misc.py, out/*.log|json|npy). Own code throughout; the three analyses'
+libraries were read but not imported. Conventions as in the report: G3 = cand_G_F10F7xF7x70_memeq is the reference, d = paired
+per-feed NDCG delta vs G3, ± = paired SE; public = 8,562 test feeds with ts < 1790497920; holdout = 30K train-period M>=50 feeds
+scored by the train-only (TO) pools. Public scores are data for this analysis (the user asked for it).
+
+=====================================================================================================================
+0. VERDICT IN SIX LINES
+=====================================================================================================================
+1. Every headline number reproduces (val/holdout of all 7 pools to 4e-6; k_v 0.14 ± 0.34; holdout->public chi2 0.27/4;
+   half-split P 0.011-0.018; PF7x > Pall on val/holdout/public). The picks (G3; PF7x as pick 2) are the best-supported ones and
+   this critique does not change them. What it changes is how much the evidence supports the STORY and the RULE.
+2. The report overstates the rejection of 1:1 transfer: the quoted "LR p 0.002-0.005" ignores the covariance of the 6 contrasts
+   through G3's own public draw (error correlations 0.13-0.85). With the full covariance 1:1 is an acceptable model by goodness
+   of fit (chi2 8.2/6, p 0.22), k=1 is 2.5 SE from the fit (LR p 0.013), and "1:1 + a common G3 offset" is accepted at p 0.27.
+   Dropping the two val-selected pools (M2, S2) leaves k_v = 0.35 ± 0.41: 1:1 is then 1.6 SE away, i.e. not rejected. The
+   "val does not transfer" finding and the "val selection explains it" finding are the SAME two data points read twice.
+3. The holdout is not "selection-free". Every member's checkpoint was selected on it (select_on: 'holdout' in every family's
+   training args; CURRENT_STATUS 34, 281), and G3 itself was built at 13:55 on 11-12 as "the holdout-best" of the decide4
+   interim pools. The report applies winner's-curse arithmetic to the val maxima (M2, S2) but not to the holdout maximum (G3),
+   whose holdout edge over M2 / PF7x (+0.00018 ± 0.00019 / +0.00020 ± 0.00022) is inside that margin (+0.0002..+0.0003 for K 5-8).
+   The mechanism in calib B3 ("m02 members whose checkpoints were picked on val") is refuted; what survives is pool-level selection.
+4. "The holdout is the lens that transfers" is one data point (M2) better than "0.3 x val": chi2 0.27 vs 1.5 on 4 df (both
+   accepted; zero gives 1.75); LOO sum z^2 0.18 vs 1.84, of which 1.3 is M2; without M2 the two are indistinguishable (0.17 vs
+   0.56 on 3 df; k_v on Cd/Pall/PF7x 0.39 ± 0.41) and the absolute-level LOO rmse is 0.00019 vs 0.00029. Kendall tau with
+   public over the 5 TO pools is 0.60 vs 0.20, P(tau >= 0.6 | random) 0.12; only 2 of the 10 pairs are >= 1 SE from 0 on public.
+5. The pre-registered rule has NO demonstrated out-of-sample skill. In the LOO over the 7 scored pools 7 of 8 folds are
+   uninformative (G3 present -> every holdout-led rule picks G3, which is public-best); in the one informative fold (G3 held out)
+   the rule's E = H + 0.15 V' picks M2 (public rank 4 of 6, -0.00029 vs the public-best PF7x), because the holdout ties M2 and
+   PF7x (+0.00002 ± 0.00027) and the val tie-break goes the way public contradicted. Its verification clause (2.5 SE) can only
+   fire on |P - H| >= 0.0012-0.0017, 5-25x the observed disagreements; its switch bar (~+0.0005 on the holdout) is ~10x the
+   spread of every near-copy built so far. The rule is "G3 stays", which is defensible, but it is a freeze, not a validated rule.
+6. Several secondary numbers are presented with more precision than they carry: the combined private estimate for TOonly
+   (-0.00001 ± 0.00010) is an artefact of giving an uninformative lens (holdout d = 0 ± 0 by construction) 90% of the weight;
+   the P(beats G3) probabilities carry no model or selection term; the "6 later files missed by -0.00125 on average" is one
+   independent reading, not six; the M2 holdout weekday/weekend split is cited in two opposite directions by two analyses.
+
+=====================================================================================================================
+1. THE FIVE MOST DECISION-RELEVANT NUMBERS, RECOMPUTED (k1_recompute.py -> out/k1_recompute.log)
+=====================================================================================================================
+N1. Within-generation transfer factor and the rejection of 1:1 (report TL;DR 1, section 1.2; calib B1, landscape B2, semantics 5).
+    REPRODUCES; THE P-VALUE IS OVERSTATED; THE RESULT RESTS ON M2 AND S2.
+    - Per-feed val NDCG of the 7 pools rebuilt from preds/ (0.5 z(ft) + 0.5 z(to); S2 and TOonly from their final arrays): means
+      match the recorded values to <= 4e-6. Contrasts vs G3 (val d | public d | SE_tot with full cov): Cd -0.00131 | -0.00074 |
+      0.00079; Pall -0.00136 | -0.00038 | 0.00070; PF7x -0.00058 | -0.00010 | 0.00064; M2 +0.00062 | -0.00039 | 0.00055;
+      S2 +0.00056 | -0.00035 | 0.00044; TOonly +0.00003 | -0.00047 | 0.00063.
+    - Error correlations between contrasts (public + val sampling, shared G3): Cd/Pall/PF7x 0.68-0.85 among themselves, M2/S2
+      0.62, cross 0.13-0.27. Ignoring them is not innocuous.
+    - GLS with the full covariance: k_v = +0.142 ± 0.344 (calib: 0.16 ± 0.34), 95% CI [-0.53, +0.82]. chi2(1:1) = 8.24 on 6 df,
+      p 0.22. LR k=1 vs free: dchi2 6.21, p 0.013 (z 2.49). With a free intercept: b = 0.19 ± 0.35, LR p 0.021; "1:1 + offset"
+      chi2 6.42/5, p 0.27. With the DIAGONAL covariance (landscape s5 b, semantics s04): k = 0.09 ± 0.31, LR p 0.004, which is the
+      "p 0.002-0.005" the report quotes. Correction: 1:1 transfer is excluded at ~2.5 SE (p ~0.01-0.02), and as a goodness-of-fit
+      model it is not rejected at all (p 0.22-0.27).
+    - Leave-one-contrast-out k_v: 0.03-0.20, (1-k)/se 2.2-2.6: no single pool carries it. Leave-TWO-out: drop M2+S2 -> k_v 0.35 ±
+      0.41 (1-k)/se 1.59, chi2(1:1) 3.58/4; drop M2+S2+TOonly -> 0.39 ± 0.41 (1.50). Drop Cd+Pall -> -0.32 ± 0.55. So the
+      non-transfer verdict is carried by the two pools the report classes as val-selected; for the un-selected pools the transfer
+      factor is simply unmeasured (0 and 1 both inside). This is consistent with the selection story, but it means TL;DR items 1
+      ("val differences do not transfer") and 2 ("the misreading was selection") are one observation, not two.
+    - Half-split null (own implementation): realised diagonal-WLS slope b = +0.092; null A (two random halves, 1000 draws) mean 0.80
+      sd 0.44, P(b <= 0.09) = 0.011; null B (public-sized M-weighted draw of 8,562 vs the complement) mean 0.72 sd 0.39, P = 0.018;
+      parametric GLS one-sided p 0.006. CONFIRMS semantics 4E (0.015). Caveat the report does not state: all three nulls assume the
+      public per-feed delta variance equals val's (M-reweighted), and they reject "same pools, same population"; they do not say
+      whether the cause is selection on val or a label-conditional difference between the val days and the public days.
+    - Dispersion of the 7 public scores around their mean: chi2 3.06/6 (reproduces semantics 5A): "all 7 equal on public" is not
+      rejected.
+
+N2. "The holdout predicts public with no free parameter" (TL;DR 3; calib B2; landscape H5). NUMBER REPRODUCES; THE COMPARISON
+    IS NOT INFORMATIVE AND THE HOLDOUT IS NOT SELECTION-FREE.
+    - Holdout per-feed NDCG rebuilt from preds/holdout for the 5 TO pools: 0.32319 / 0.32335 / 0.32360 / 0.32379 / 0.32361 = recorded.
+      Deltas vs G3: Cd -0.00060 ± 0.00027, Pall -0.00045 ± 0.00025, PF7x -0.00020 ± 0.00022, M2 -0.00018 ± 0.00019.
+    - chi2 of fixed predictors of the 4 public deltas (cov = public + val + holdout sampling, full): holdout 0.27 (p 0.99); zero 1.75
+      (p 0.78); 0.15 x val 1.46; 0.3 x val 1.51; 0.5 x val 2.12; 1.0 x val 6.35 (p 0.17); 0.5 holdout + 0.15 val 0.76. Every
+      predictor whose 4 values lie within ±0.0005 of zero is accepted; chi2 differences of 1-2 on 4 df are not evidence. The
+      report's own caveat says this; its TL;DR and rule do not act on it.
+    - LOO out-of-sample z per contrast: holdout (no parameter) -0.17 / +0.09 / +0.15 / -0.36 (sum z^2 0.18); k x val with k fitted
+      on the other three -0.70 / -0.20 / -0.07 / -1.14 (sum 1.84): 1.3 of the 1.66 difference is M2. Without M2: holdout 0.17 vs
+      0.3 x val 0.56 on 3 df; k_v on Cd/Pall/PF7x = 0.39 ± 0.41, k_h = 1.24 ± 1.16. Absolute-level fits public = a + c x: 5 pools
+      LOO rmse holdout 0.00018 vs val 0.00044 (reproduces calib 1c); without M2 0.00019 vs 0.00029; without G3 0.00027 vs 0.00059.
+    - Ordering: Kendall tau(holdout, public) over the 5 TO pools 0.60 vs tau(val, public) 0.20; P(tau >= 0.6 | random order of 5)
+      = 0.12. Pairwise sign agreement with public: holdout 8/10, val 6/10, E 8/10; only 2 of the 10 pairs have public |d| >= 1 SE,
+      so public cannot adjudicate 8 of them in either direction. The report's "tau(holdout, public) +0.28" over 6 includes TOonly
+      (holdout set equal to G3) and S2 (a recorded stacker reading); the 5-pool figure is the honest one and is not significant.
+    - NOT selection-free (the premise of calib B2/B3, landscape B4, semantics 4E, and of R4 of the rule): (a) nn/logs/pipeline7b_
+      v17_pre2s_s101.out and pipeline10_v23_gru_pre2s_s501.out record select_on: 'holdout' for the old families; nn_x/r6/cd_lane.sh,
+      run_final*.sh and nn/run_final*.sh pass --select_on holdout for every r6 / m02 member; CURRENT_STATUS 18 ("checkpoint selected
+      on the 30K random-like train holdout"), 34 ("the holdout ... selected every checkpoint, so it is a selector, not independent
+      evidence"), 281 ("holdout selection inflation is ~0.0002 per member and equal across families"). (b) G3 was built at 13:55 on
+      11-12 as "the holdout-best, 0.32379 (+0.00020)" among the decide4 interim pools (CURRENT_STATUS 233-235; "new compositions
+      ... are all worse", 284), and decide6/decide8 are holdout-led. The holdout is free of VAL labels; it is not free of selection.
+    - Winner's curse on the holdout (k3_misc.py): G3 - M2 +0.00018 ± 0.00019 (z 0.97), G3 - PF7x +0.00020 ± 0.00022 (z 0.88);
+      expected optimism of the holdout-best of K = 5 / 8 near-copies at SE_h 0.0002 = +0.00022..+0.00031. "G3 is holdout-best" is as
+      fragile as "M2 is val-best" was; the report applies the curse to one and not the other.
+
+N3. "The val excess sits in the TO half: members whose checkpoints were picked on val" (TL;DR 2; calib B3, c5 ii). NUMBERS REPRODUCE
+    (val-TO minus holdout: Cd -0.00098 ± 0.00058, Pall -0.00073 ± 0.00052, PF7x -0.00031 ± 0.00046, M2 +0.00068 ± 0.00037); THE
+    MECHANISM IS REFUTED. Checkpoints were selected on the holdout (N2), so the TO halves carry no member-level val selection. The
+    quantity compared is also population-confounded: val-TO (14K exploration feeds, all M) minus holdout (30K train-period M>=50
+    feeds); restricted to M>=50 (semantics 5C) the M2 excess is +0.00036 ± 0.00033 vs -0.00018 ± 0.00019, i.e. +0.00054 ± 0.00038
+    (1.4 SE), and the four pools' excesses are 0.7-1.8 SE each with opposite signs. What survives is POOL-level selection: M2 was the
+    decide4 val front-runner among ~5-10 pools (expected val excess +0.0004..+0.0005 at SE 0.00034), S2 the val-best of ~30 stacker
+    configurations (+0.0006 at SE 0.00028) (CURRENT_STATUS 363: "the chance maximum of ~30"). The observed shortfalls (-0.0010 ±
+    0.00055, -0.0009 ± 0.00044) are consistent with that at ~1 SE. The FT-half conclusion (ft - to within 1 SE) is unaffected.
+    - The "val-selected indicator" of calib 3c marks exactly the two pools with d_val > 0 (corr with d_val 0.81, with [d_val > 0]
+      0.71): it is the shrinkage model re-labelled, defined after the residuals were seen. It cannot be cited as an independent test
+      of the selection story; the winner's-curse arithmetic (which reproduces: K 5 / 10 / 20 / 50 -> +0.00040 / +0.00052 / +0.00064 /
+      +0.00076 at SE 0.00034) is the only forward-looking piece, and it is a magnitude check, not a test.
+    - "Selection, not covariate shift" (TL;DR 2) is a false dichotomy: the 40 reweightings exclude LABEL-FREE composition (confirmed
+      in spirit: every composition-matched weighting leaves M2/S2 at z -1.5..-2.4); they cannot see a label-conditional val-period
+      effect of the m02 members, whose val edge sits in label-defined all-cold-positive feeds (+0.0029 ± 0.0009) and grows from Tue
+      (+0.00019) to Thu (+0.00108) inside val (1.3 SE; pure selection on the val total inflates both days equally in expectation).
+      The honest statement: not label-free composition; pool-level selection is the simplest story and of the right size; a
+      period-specific component is not excluded and the two are not separable on 6 points.
+
+N4. The combined "private" ranking and P(beats G3) (TL;DR 6; calib B6 / 4e). PARTLY REFUTED.
+    - TOonly -0.00001 ± 0.00010: the holdout delta of TOonly vs G3 is 0 with SE 0 by construction (identical TO members); the
+      holdout carries no information about w_ft, yet it dominates the inverse-variance combination. The honest TOonly estimate is
+      the public reading alone, -0.00047 ± 0.00063 (P(beats G3) ~0.23, not 0.47). S2 has the same problem (its "holdout" is a
+      recorded OOS stacker reading, not a TO pool).
+    - For Cd / Pall / PF7x / M2 the combination gives the holdout 0.89 of the weight (recomputed: -0.00061 ± 0.00026, -0.00044 ±
+      0.00024, -0.00019 ± 0.00021, -0.00020 ± 0.00018; P(>0) 0.01 / 0.03 / 0.19 / 0.13; the report's 0.02 / 0.04 / 0.22 / 0.09
+      differ only by its composition correction). These SEs are sampling SEs of a train-period, M>=50, checkpoint-selecting,
+      pool-selecting sample treated as an unbiased estimate of a test-period quantity; adding only the holdout winner's curse for G3
+      (+0.0002..+0.0003) moves P(M2 beats G3) to ~0.3-0.4. The report's own limits section says the realised private order within
+      ±0.0005 is a coin flip; the P(beats G3) table says otherwise and should be dropped or re-labelled "holdout-sampling only".
+
+N5. Pick 2: PF7x vs Pall (TL;DR 6; landscape B9/6b). CONFIRMED: val +0.00078 ± 0.00023, holdout +0.00025 ± 0.00013, public +0.00029
+    (model SE 0.00029, i.e. 1 SE). PF7x is above Pall on all three lenses and is the only non-dominated hedge under the report's
+    R6. One caveat the report understates: the hedge rationale for Pall was "no m02 member in case the m02 edge is val-only"; PF7x
+    carries 7 m02 members (18%), and "correlation with G3 0.9978 vs 0.9971" does not measure protection against that specific
+    failure. The evidence favours PF7x by ~0.0003 on every sample at the cost of some of the hedge property; that trade is the
+    lead's, and the report's recommendation is reasonable.
+
+=====================================================================================================================
+2. THE RULE UNDER LEAVE-ONE-OUT (k2_rule_loo.py -> out/k2_rule_loo.log)
+=====================================================================================================================
+Design: hold one of the 7 scored pools out, apply each rule to the remaining 6 (eligible for pick 1 = pools with a train-only form:
+Cd, Pall, PF7x, G3, M2; S2 is a stacker and TOonly a w_ft variant, ineligible by R4), ask whether the pick is the public-best of
+the 6. V' = M x cold x hour5 private-weighted val mean (n_eff 5,912; no private mass without val support).
+   rule                                   hits / 8 folds   mean public rank   mean gap to the public-best
+   val-best (any pool)                        0 / 8            4.25               -0.00037
+   val-best (eligible only)                   1 / 8            4.00               -0.00033
+   holdout-best (eligible)                    7 / 8            1.38               -0.00004
+   E = H + 0.15 V' (report R4)                7 / 8            1.38               -0.00004
+   H + 0.3 V (semantics R3 form)              1 / 8            4.00               -0.00033
+   0.5 H + 0.5 V (old decide S)               1 / 8            4.00               -0.00033
+   S = 0.5 H + 0.5 P (R5; uses public)        8 / 8            1.00                0
+Reading: the 7 folds with G3 present carry no information (G3 is holdout-best AND public-best, so every holdout-led rule picks it).
+The one informative fold is "G3 held out": the public-best of the rest is PF7x (0.392723); the holdout ties M2 and PF7x (M2 - PF7x
++0.00002 ± 0.00027, z 0.06); the rule's E = H + 0.15 V' breaks the tie toward M2 (V' +0.0012 higher), and public put M2 4th of 6,
+-0.00029 below PF7x. The rule's "7/8" is G3 counted seven times; its out-of-sample skill on the only fold that tests it is 0/1. One
+fold is not a refutation, but it means the retroactive check in the report ("keeps G3 at every decision point") validates nothing
+beyond "G3 was holdout-best and happened to be public-best", which is the very coincidence the rule was written after seeing.
+   - H + 0.3 V (the semantics "0.3 x val" form) is val-dominated in practice: 0.3 x 0.002 val spread = 0.0006 > the 0.0006 holdout
+     spread, so it ranks like val and picks M2 everywhere. The report's R4 says E = H + 0.15 V' is "equivalently" semantics R3; the
+     LOO shows the two forms pick different pools in 7 of 8 folds.
+   - Verification clause R5(a): |P - H| on the 4 scored contrasts is 0.00006-0.00021 against thresholds 2.5 sqrt(SE_pub^2 + SE_h^2)
+     = 0.00117-0.00170 (0.04-0.18 of threshold). It can only declare the lens broken on a disagreement 2-3x larger than any near-copy
+     difference on record; at the 0.0003-0.0007 scale that matters it is vacuous.
+   - Switch bar R4 (E_C > +2 SE_E, SE_E ~ SE_h 0.00023): a near-copy needs ~+0.0005 on the holdout; the best challengers built so far
+     read U1 -0.00003, U2 +0.00002, U3 -0.00005 (decide8). The bar is ~10x the observed spread of this member type: the rule is "G3
+     stays" for every near-copy that can be built, and therefore cannot be tested by near-copies. That is a defensible freeze; it
+     should be called one.
+   - Internal inconsistency: calib section 5 states the pre-public switch as "H_C >= +1 SE_h AND E_C > 0 AND V_C >= -1 SE_v"; the
+     report's unified R4 states "H_C > 0 AND E_C > +2 SE_E". These are not equivalent (1 SE on H vs 2 SE on E).
+   - The weight 0.15 is the fitted k_v on the same 6 points; the report says so. Under its own LOO (N1) that number is 0.03-0.35
+     depending on which pool is dropped; a rule whose constant moves 10x under LOO of its calibration set is not pre-registered in
+     any useful sense; it is a convention.
+
+=====================================================================================================================
+3. REFUTED OR UNSUPPORTED CLAIMS (claim -> why; where recomputed)
+=====================================================================================================================
+R1 "1:1 transfer is excluded at 2.4 SE / LR p 0.002-0.005" (TL;DR 1, section 1.2, landscape B2 / s5 b) -> the p-values ignore the
+   shared-G3 covariance; full-cov LR p 0.013 (k) / 0.021 (a, b); 1:1 as a model has GOF p 0.22, 1:1 + G3 offset p 0.27. (k1 N1)
+R2 "Within the modern generation val differences do not transfer to public" as a statement about all 7 pools -> dropping M2 and S2
+   leaves k_v 0.35 ± 0.41, 1:1 at 1.6 SE; for the un-selected pools the factor is unmeasured. The finding is about M2 and S2. (k1 N1)
+R3 "The val excess sits in the TO half ... members whose checkpoints were picked on val" (TL;DR 2, calib B3) -> every member's
+   checkpoint was selected on the holdout (training args select_on: 'holdout'; CURRENT_STATUS 18/34/281); the val-TO vs holdout
+   comparison is population-confounded (all-M exploration vs M>=50 train-period) and 0.7-1.8 SE per pool. Pool-level selection of
+   M2 / S2 survives; the checkpoint mechanism does not. (N3)
+R4 "The holdout (selection-free, no val labels, no public)" (TL;DR 3, calib B2/4, landscape B4, semantics 4E) -> free of val labels
+   only; it selected every checkpoint and G3 itself (13:55, "the holdout-best"); G3's holdout edge over M2 / PF7x is inside the
+   holdout winner's-curse margin. (N2, k3 c)
+R5 "The holdout is THE lens that transfers; public delta = holdout delta with no free parameter (chi2 0.27, p 0.99)" -> true and
+   uninformative: zero (1.75), 0.15 x val (1.46), 0.3 x val (1.51) are all accepted on the same 4 df; the holdout's LOO advantage is
+   M2 alone; without M2 it is indistinguishable from 0.3 x val; tau 0.6 vs 0.2 on 5 pools has p 0.12. (k1 N2, k3 b)
+R6 "Combined private estimate: TOonly -0.00001 ± 0.00010 ... P(beats G3) 0.47" -> artefact of a 0 ± 0 holdout contrast; honest
+   -0.00047 ± 0.00063. The other P(beats G3) values are holdout-sampling probabilities with no selection or model term. (k1 N5)
+R7 "The misreading was SELECTION, not covariate shift" (TL;DR 2) -> label-free composition is excluded (confirmed); selection vs a
+   label-conditional val-period effect of the m02 members is not separable; the "val-selected indicator" is the two d_val > 0
+   pools re-labelled (corr 0.81 with d_val). (N3)
+R8 "Pre-registered rule ... applied retroactively keeps G3 at every decision point" presented as support -> 7 of 8 LOO folds are
+   G3-trivial; in the one informative fold the rule picks M2 (public 4/6). The verification clause is vacuous at the relevant scale;
+   the switch bar is unreachable by near-copies; calib's and the unified rule's thresholds differ. (k2)
+R9 "the cross-generation slope fitted on the 4 old files + Cd misses the 6 later modern files by -0.00125 on average" (section 1.1,
+   calib 1a) -> reproduces (t -0.1 .. -2.7 per file with prediction SE 0.00075-0.00079), but the 6 files are near-copies sharing one
+   val->public offset: it is one independent reading of "the modern cluster sits ~0.001 below the old-era line", not six. (k3 a)
+R10 "tau(holdout, public) +0.28 vs tau(val, public) +0.05" (section 1.4) -> the holdout vector includes TOonly (set equal to G3) and
+   S2 (recorded stacker reading); over the 5 real TO pools tau is 0.60 vs 0.20, not significant (p 0.12). (k3 b)
+R11 The M2 holdout weekday/weekend split (-0.00043 ± 0.00023 vs +0.00035 ± 0.00030; reproduced, incl. public-like +0.00011 ± 0.00036
+   and private-like -0.00052 ± 0.00033) is cited by calib as "against M2 on private's weekdays" and by semantics as "re-cooled
+   members gain on holdout weekend feeds yet M2 under-performed on the all-weekend public": one 2-SE split used in both directions.
+   It is evidence about neither. (k3 d)
+R12 "The one within-generation component with a forward hint is the FT half (public +0.00047 for keeping it, z 0.9)" (TL;DR 8) ->
+   a z 0.8-0.9 single reading is noise by every bar the report sets elsewhere (>= 2 SE); the composition argument ("worth more under
+   the private cold-positive mix") uses label-defined slices the report itself says cannot be weighted to test. Keep w_ft = 0.5 by
+   default, not because of a hint.
+
+=====================================================================================================================
+4. CONFIRMED (recomputed independently)
+=====================================================================================================================
+C1 Val means of the 7 pools and holdout means of the 5 TO pools reproduce to <= 4e-6 from preds/ and preds/holdout. (k1)
+C2 k_v = 0.14 ± 0.34 with the full covariance (calib 0.16 ± 0.34); 95% CI reaches +0.82; k = 1 is 2.5 SE away. (k1 N1)
+C3 Random half-splits of val: P(b <= realised) = 0.011 (halves) / 0.018 (public-sized M-weighted draw); the val ordering of the 7
+   pools is val-specific beyond sampling noise under "same pools, same population". (k1 N3)
+C4 The 7 public scores are inside sampling noise of each other (chi2 3.06/6); public does not separate the modern pools. (k1 N3)
+C5 Holdout deltas vs G3 agree with the public deltas (chi2 0.27/4), k_h 1.3 ± 1.1; the holdout ordering is not contradicted. (k1 N2)
+C6 Winner's-curse magnitudes for the val maxima: +0.0004..+0.0008 for K 5..50 at SE 0.00028-0.00034; the observed M2/S2 shortfalls
+   (-0.0010 ± 0.00055, -0.0009 ± 0.00044) are of that size. (k1 N4)
+C7 PF7x > Pall on val (+0.00078 ± 0.00023), holdout (+0.00025 ± 0.00013), public (+0.00029, ~1 SE). (k1 N5)
+C8 Cross-generation calibration public = 0.0071 + 0.964 (± 0.033) val over 11 files, resid sd 0.00078. (k3 a)
+C9 No composition reweighting of val reproduces the M2/S2 shortfall: accepted as stated (not recomputed here; the mechanism of the
+   argument is sound and the direction analysis in landscape 3a/3b is the useful part).
+C10 G3 is the best-supported pick 1 and no re-reading of val yields a better candidate: every buildable pool is within 0.0007 of
+   G3 on val, 0.0003 on the holdout, 0.0007 on public. The critique agrees with the conclusion; it disputes the confidence.
+Not recomputed (taken as read): the val-vs-test construction tables (semantics 1), the hour/outage analysis (semantics 2C), the
+label-free test-side disagreement diagnostics (landscape 4), the slice tables (landscape 2c), the FT-half pos_cold decomposition.
+
+=====================================================================================================================
+5. OVERFITTING TO 7 POINTS: WHERE THE REPORT CROSSES THE LINE
+=====================================================================================================================
+F1 Six contrasts carry about two independent facts: (i) the public spread (0.0007) is a third of the val spread (0.002); (ii) the two
+   pools above G3 on val are below it on public. Every model in section 1.3 (generic shrinkage, val-selected indicator, re-cool
+   share, val-holdout discrepancy, holdout 1:1, zero) is fitted to and "accepted" by these two facts. Ranking them by LOO sum z^2
+   on 4-6 points (0.7 vs 3.1 vs 3.7 vs 5.9) and declaring a best one is fitting a story to the residuals; the report says
+   "differences < 2 are not evidence" and then builds R4 on the winner.
+F2 The "val-selected" indicator was defined after the residuals were seen and coincides with the sign of d_val. Any explanation of
+   the form "pools above G3 on val regress" is unfalsifiable on these 6 points because G3 is the reference and the two pools above
+   it are the two that regressed.
+F3 The holdout's "no free parameter, chi2 0.27" is tighter than chance (P 0.05, which the report notes) and is one point (M2) better
+   than a 0.3 x val rule. The report upgrades it from "consistent" to "the lens that transfers" and then gives it 85-90% of the
+   weight in the private estimate and 100% of the switch decision in R4.
+F4 The rule's constants (0.15 = fitted k_v; 2 SE_E; 2.5 SE verification; 0.3 / 0.6 shrink in semantics) are set from the same 6
+   points; the LOO shows no out-of-sample skill (0/1 informative folds) and the 7/8 headline is G3 seven times.
+F5 The "pre-registered predictions for unscored pools" (landscape 6c) use H3 = a + b x pubM fitted with 2 parameters on 6 points; its
+   prediction is "-0.00037 for everyone" (the mean residual), and its intercept IS G3's own public draw. A PoP3 or F10only reading
+   near -0.0004 is therefore equally consistent with "1:1 transfer + G3 lucky by 0.0004" (accepted at p 0.27, N1) as with shrinkage:
+   the probes cannot separate H1-with-offset from H3, so their advertised 2.2 / 1.8 SE readability is between H3 and the WRONG null.
+F6 Private statements ("composition cannot re-order the pools by more than ~0.0005", P(beats G3), "private = public + 0.0026") are
+   derived from val slices and the holdout, which the report itself says are blind to private's cold >= 0.45 tail (33%) and to M<50
+   feeds (39%, holdout) or weekends (val). "± 0.0005" is a statement about the resolution of the lenses, not about private.
+
+=====================================================================================================================
+6. CORRECTIONS TO CARRY INTO THE REPORT
+=====================================================================================================================
+1. TL;DR 1: replace "1:1 excluded at 2.4 SE / LR p 0.002-0.005" by "1:1 is 2.5 SE from the fitted factor (p ~0.013 with the full
+   covariance); as a model 1:1 is not rejected (GOF p 0.22; with a common G3 offset p 0.27); dropping M2 and S2 leaves k_v 0.35 ±
+   0.41". Keep the half-split result (p 0.011-0.018) as the strongest single statement.
+2. TL;DR 2 / section 1.3: delete "members whose checkpoints were picked on val" (checkpoints were selected on the holdout); keep the
+   pool-level winner's curse for M2 (decide4 front-runner) and S2 (max of ~30); state the dichotomy honestly ("not label-free
+   composition; pool-level selection or a val-period-specific component, not separable").
+3. TL;DR 3 / section 1.4: replace "selection-free" by "free of val labels; it selected every checkpoint and G3 itself"; add the
+   holdout winner's curse for G3 (+0.0002..+0.0003 at K 5-8, the size of its edge over M2 / PF7x); state that without M2 the holdout
+   and 0.3 x val are indistinguishable and that tau 0.6 on 5 pools has p 0.12.
+4. Section 2.3: drop the TOonly and S2 rows of the combined private estimate (no holdout information), and either drop the P(beats
+   G3) column or re-label it "holdout + public sampling only; no selection or model uncertainty; realised order within ± 0.0005 is
+   a coin flip (section 4)".
+5. Section 3: present the rule as a FREEZE ("G3 stays unless a candidate beats it by >= 2 SE_h on the holdout AND is not below it on
+   val; public readouts verify the level, never the order"), state that its LOO skill is undemonstrated (0/1 informative folds, M2
+   picked when G3 is held out), reconcile calib's and the unified thresholds, and lower or remove the 2.5 SE "lens broken" clause
+   (it cannot fire at the relevant scale). If a weighted score is kept, 0.5 H + 0.5 x (0.3 V) is as well supported as H + 0.15 V'
+   (chi2 0.76 vs 0.27 on 4 df) and does not treat the holdout as unbiased.
+6. Landscape 6c: state that the unscored-pool probes cannot separate 1:1-with-G3-offset from shrinkage; their value is only "does a
+   +0.0003 val edge show at all", which at SE_pub 0.0003 they cannot answer either. Do not spend submissions on them.
+7. Section 1.6: cite the M2 weekday/weekend holdout split once, as a 2-SE split that says nothing about private, not in two
+   directions.
+8. Remove the FT-half "forward hint" (z 0.9) from the modelling-direction paragraph or label it noise; "keep w_ft = 0.5 because the
+   lever is closed and no lens can resolve it" is the supportable sentence.
+What does NOT change: G3 pick 1 (holdout-best, public-best, val within 0.0006, and no built pool is a measured improvement on any
+lens); PF7x as the better-supported pick 2; stop near-copy recombination; generational changes read at >= 3 SE on val remain the
+modelling direction; select future members/pools on a sample that is not the one read (the project already does this for
+checkpoints via the holdout; the gap is at the POOL level, where decide4 used val-best and decide6/8 use holdout-best with no
+curse correction on either).
+
+=====================================================================================================================
+7. FILES
+=====================================================================================================================
+nn_x/audit/valpub/critique/critique.txt        this file
+nn_x/audit/valpub/critique/k1_recompute.py     N1-N5 recomputation (full-cov GLS, LOO, holdout, half-split nulls, pick 2, combination)
+nn_x/audit/valpub/critique/k2_rule_loo.py      rule leave-one-out, pairwise signs, thresholds
+nn_x/audit/valpub/critique/k3_misc.py          11-point calibration, Kendall taus, holdout winner's curse for G3, M2 weekday split
+nn_x/audit/valpub/critique/out/k1_recompute.{log,json}, k2_rule_loo.log, k3_misc.log, k1_pf*.npy / k2_pf*.npy (per-feed caches)
+Inputs read: preds/ens_*_{ft,to}_val.npy, preds/ens_G3_final_val.npy, preds/ens_G3_toonly_val.npy, preds/nnstk_g3gate3r_val.npy,
+preds/holdout/*, data/flat/{val,test}/feeds.parquet, data/flat/val/cand_target.npy, nn_x/pubdiag/shift/{desc_val,desc_test}.parquet,
+nn_x/pubdiag/shift/p1_holdout_perfeed.npz, nn/logs/pipeline*.out, nn_x/r6/*.sh, nn/*.sh, reports/CURRENT_STATUS.md, and the three
+analyses' findings.txt, scripts and logs.

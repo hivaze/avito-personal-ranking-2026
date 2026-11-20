@@ -1,0 +1,105 @@
+== Part A: held-out 10-epoch members, 4-pools of seeds 951-954
+   HL base        = w5_e10_base_s951-954  (hard labels, d128, 34 inputs)
+   HL xdrop_pop   = abl_e10_xdrop_pop_s951-954  (hard labels, d128, 26 inputs (8 popularity inputs removed))
+   HL pop1        = abl_e10_pop1_s951-954  (hard labels, d128, 26 + xp_imp_c50)
+   HL pop2        = abl_e10_pop2_s951-954  (hard labels, d128, 26 + xp_ctr_c)
+   KD kd05        = w5_e10_kd05_s951-954  (distilled d128, teacher_mean11, 34 inputs)
+   KD kd05t25     = w5_e10_kd05t25_s951-954  (distilled d128, teacher_mean25, 34 inputs)
+   KD kd05w192    = w5_e10_kd05w192_s951-954  (distilled d192, teacher_mean11, 34 inputs)
+   KD pop1 t25    = abl_e10_pop1kd05t25_s951-954  (distilled d128, teacher_mean25, pop1 view)
+   KD pop1 w192   = abl_e10_pop1kd05w192_s951-954  (distilled d192, teacher_mean11, pop1 view)
+
+-- val, SELECTED checkpoints (14423 feeds); arms found: 9 of 9
+   level HL base        member mean 0.39654 (seed sd 0.00084)  4-pool 0.39887
+   level HL xdrop_pop   member mean 0.39403 (seed sd 0.00076)  4-pool 0.39727
+   level HL pop1        member mean 0.39418 (seed sd 0.00179)  4-pool 0.39747
+   level HL pop2        member mean 0.39472 (seed sd 0.00074)  4-pool 0.39760
+   level KD kd05        member mean 0.39911 (seed sd 0.00043)  4-pool 0.40085
+   level KD kd05t25     member mean 0.39957 (seed sd 0.00039)  4-pool 0.40095
+   level KD kd05w192    member mean 0.39918 (seed sd 0.00045)  4-pool 0.40134
+   level KD pop1 t25    member mean 0.39821 (seed sd 0.00047)  4-pool 0.39943
+   level KD pop1 w192   member mean 0.39859 (seed sd 0.00122)  4-pool 0.40000
+   distillation gain, full view d128 (mean11)                     member +0.00257 +- 0.00047   4-pool +0.00198 +- 0.00061 (z +3.3)
+   distillation gain, full view d128 (mean25)                     member +0.00303 +- 0.00049   4-pool +0.00208 +- 0.00064 (z +3.3)
+   distillation gain, pop1 view d128 (mean25)                     member +0.00403 +- 0.00048   4-pool +0.00196 +- 0.00064 (z +3.1)
+   view gap full - pop1, hard labels d128                         member +0.00236 +- 0.00080   4-pool +0.00140 +- 0.00100 (z +1.4)
+   view gap full - pop1, distilled d128 (mean25)                  member +0.00136 +- 0.00071   4-pool +0.00151 +- 0.00086 (z +1.8)
+   view gap full - pop1, distilled d192 (mean11)                  member +0.00059 +- 0.00074   4-pool +0.00134 +- 0.00090 (z +1.5)
+   ONE added column xp_imp_c50, hard labels (pop1 - xdrop_pop)    member +0.00015 +- 0.00059   4-pool +0.00020 +- 0.00077 (z +0.3)
+   ONE added column xp_ctr_c, hard labels (pop2 - xdrop_pop)      member +0.00069 +- 0.00057   4-pool +0.00033 +- 0.00075 (z +0.4)
+   8 popularity inputs, hard labels (base - xdrop_pop)            member +0.00251 +- 0.00081   4-pool +0.00160 +- 0.00102 (z +1.6)
+
+-- val, LAST-step checkpoints (14423 feeds); arms found: 9 of 9
+   level HL base        member mean 0.39624 (seed sd 0.00039)  4-pool 0.39934
+   level HL xdrop_pop   member mean 0.39407 (seed sd 0.00025)  4-pool 0.39789
+   level HL pop1        member mean 0.39449 (seed sd 0.00141)  4-pool 0.39762
+   level HL pop2        member mean 0.39485 (seed sd 0.00063)  4-pool 0.39794
+   level KD kd05        member mean 0.39911 (seed sd 0.00044)  4-pool 0.40076
+   level KD kd05t25     member mean 0.39957 (seed sd 0.00039)  4-pool 0.40095
+   level KD kd05w192    member mean 0.39913 (seed sd 0.00045)  4-pool 0.40138
+   level KD pop1 t25    member mean 0.39833 (seed sd 0.00061)  4-pool 0.39967
+   level KD pop1 w192   member mean 0.39866 (seed sd 0.00088)  4-pool 0.39999
+   distillation gain, full view d128 (mean11)                     member +0.00287 +- 0.00047   4-pool +0.00143 +- 0.00060 (z +2.4)
+   distillation gain, full view d128 (mean25)                     member +0.00333 +- 0.00049   4-pool +0.00161 +- 0.00063 (z +2.6)
+   distillation gain, pop1 view d128 (mean25)                     member +0.00384 +- 0.00049   4-pool +0.00205 +- 0.00065 (z +3.2)
+   view gap full - pop1, hard labels d128                         member +0.00175 +- 0.00081   4-pool +0.00172 +- 0.00103 (z +1.7)
+   view gap full - pop1, distilled d128 (mean25)                  member +0.00124 +- 0.00071   4-pool +0.00128 +- 0.00085 (z +1.5)
+   view gap full - pop1, distilled d192 (mean11)                  member +0.00046 +- 0.00075   4-pool +0.00139 +- 0.00091 (z +1.5)
+   ONE added column xp_imp_c50, hard labels (pop1 - xdrop_pop)    member +0.00041 +- 0.00060   4-pool -0.00027 +- 0.00079 (z -0.3)
+   ONE added column xp_ctr_c, hard labels (pop2 - xdrop_pop)      member +0.00078 +- 0.00058   4-pool +0.00005 +- 0.00077 (z +0.1)
+   8 popularity inputs, hard labels (base - xdrop_pop)            member +0.00217 +- 0.00082   4-pool +0.00145 +- 0.00104 (z +1.4)
+
+-- hold, SELECTED checkpoints (30000 feeds); arms found: 9 of 9
+   level HL base        member mean 0.32029 (seed sd 0.00038)  4-pool 0.32328
+   level HL xdrop_pop   member mean 0.31222 (seed sd 0.00020)  4-pool 0.31476
+   level HL pop1        member mean 0.31406 (seed sd 0.00031)  4-pool 0.31677
+   level HL pop2        member mean 0.31342 (seed sd 0.00052)  4-pool 0.31625
+   level KD kd05        member mean 0.32229 (seed sd 0.00023)  4-pool 0.32349
+   level KD kd05t25     member mean 0.32221 (seed sd 0.00029)  4-pool 0.32317
+   level KD kd05w192    member mean 0.32267 (seed sd 0.00022)  4-pool 0.32408
+   level KD pop1 t25    member mean 0.31625 (seed sd 0.00023)  4-pool 0.31715
+   level KD pop1 w192   member mean 0.31643 (seed sd 0.00029)  4-pool 0.31772
+   distillation gain, full view d128 (mean11)                     member +0.00200 +- 0.00028   4-pool +0.00021 +- 0.00036 (z +0.6)
+   distillation gain, full view d128 (mean25)                     member +0.00192 +- 0.00028   4-pool -0.00011 +- 0.00036 (z -0.3)
+   distillation gain, pop1 view d128 (mean25)                     member +0.00219 +- 0.00029   4-pool +0.00038 +- 0.00037 (z +1.0)
+   view gap full - pop1, hard labels d128                         member +0.00623 +- 0.00053   4-pool +0.00651 +- 0.00064 (z +10.2)
+   view gap full - pop1, distilled d128 (mean25)                  member +0.00596 +- 0.00049   4-pool +0.00603 +- 0.00056 (z +10.7)
+   view gap full - pop1, distilled d192 (mean11)                  member +0.00624 +- 0.00053   4-pool +0.00636 +- 0.00061 (z +10.4)
+   ONE added column xp_imp_c50, hard labels (pop1 - xdrop_pop)    member +0.00184 +- 0.00036   4-pool +0.00201 +- 0.00046 (z +4.4)
+   ONE added column xp_ctr_c, hard labels (pop2 - xdrop_pop)      member +0.00120 +- 0.00034   4-pool +0.00149 +- 0.00044 (z +3.4)
+   8 popularity inputs, hard labels (base - xdrop_pop)            member +0.00807 +- 0.00055   4-pool +0.00852 +- 0.00066 (z +12.9)
+
+-- hold, LAST-step checkpoints (30000 feeds); arms found: 9 of 9
+   level HL base        member mean 0.31993 (seed sd 0.00048)  4-pool 0.32287
+   level HL xdrop_pop   member mean 0.31183 (seed sd 0.00032)  4-pool 0.31463
+   level HL pop1        member mean 0.31379 (seed sd 0.00024)  4-pool 0.31627
+   level HL pop2        member mean 0.31317 (seed sd 0.00048)  4-pool 0.31606
+   level KD kd05        member mean 0.32223 (seed sd 0.00024)  4-pool 0.32342
+   level KD kd05t25     member mean 0.32221 (seed sd 0.00029)  4-pool 0.32317
+   level KD kd05w192    member mean 0.32255 (seed sd 0.00033)  4-pool 0.32403
+   level KD pop1 t25    member mean 0.31616 (seed sd 0.00030)  4-pool 0.31697
+   level KD pop1 w192   member mean 0.31628 (seed sd 0.00034)  4-pool 0.31755
+   distillation gain, full view d128 (mean11)                     member +0.00229 +- 0.00028   4-pool +0.00055 +- 0.00036 (z +1.5)
+   distillation gain, full view d128 (mean25)                     member +0.00228 +- 0.00028   4-pool +0.00030 +- 0.00036 (z +0.8)
+   distillation gain, pop1 view d128 (mean25)                     member +0.00237 +- 0.00028   4-pool +0.00070 +- 0.00037 (z +1.9)
+   view gap full - pop1, hard labels d128                         member +0.00614 +- 0.00054   4-pool +0.00660 +- 0.00065 (z +10.2)
+   view gap full - pop1, distilled d128 (mean25)                  member +0.00605 +- 0.00049   4-pool +0.00621 +- 0.00056 (z +11.1)
+   view gap full - pop1, distilled d192 (mean11)                  member +0.00628 +- 0.00053   4-pool +0.00648 +- 0.00061 (z +10.7)
+   ONE added column xp_imp_c50, hard labels (pop1 - xdrop_pop)    member +0.00197 +- 0.00036   4-pool +0.00164 +- 0.00046 (z +3.6)
+   ONE added column xp_ctr_c, hard labels (pop2 - xdrop_pop)      member +0.00134 +- 0.00035   4-pool +0.00143 +- 0.00045 (z +3.2)
+   8 popularity inputs, hard labels (base - xdrop_pop)            member +0.00811 +- 0.00055   4-pool +0.00824 +- 0.00066 (z +12.5)
+
+== Part B: full-data wide students (d192, teacher_mean11), val only
+   xp_imp_c50 added (pop1 - pf), seeds 951-954                    levels 0.40001 / 0.40027  member +0.00035 +- 0.00052  pool -0.00027 +- 0.00066 (z -0.4)
+   xp_imp_c50 added (pop1 - pf), seeds 955-958                    levels 0.40010 / 0.39923  member +0.00126 +- 0.00052  pool +0.00087 +- 0.00067 (z +1.3)
+   xp_imp_c50 added (pop1 - pf), seeds 951-958 (8-pools)          levels 0.39994 / 0.39955  member +0.00080 +- 0.00042  pool +0.00040 +- 0.00060 (z +0.7)
+   xp_ctr_c added (pop2 - pf), seeds 951-954                      levels 0.39990 / 0.40027  member -0.00017 +- 0.00050  pool -0.00037 +- 0.00065 (z -0.6)
+   xp_ctr_c vs xp_imp_c50 (pop2 - pop1), seeds 951-954            levels 0.39990 / 0.40001  member -0.00051 +- 0.00044  pool -0.00011 +- 0.00060 (z -0.2)
+   A/A of the pf view: pf 955-958 - pf 951-954 (seed-draw noise)  levels 0.39923 / 0.40027  member -0.00068 +- 0.00043  pool -0.00105 +- 0.00056 (z -1.9)
+   A/A of the pop1 view: pop1 955-958 - pop1 951-954              levels 0.40010 / 0.40001  member +0.00024 +- 0.00043  pool +0.00009 +- 0.00055 (z +0.2)
+   A/A of the pop1 view: pop1 959-962 - pop1 951-954              levels 0.40011 / 0.40001  member -0.00045 +- 0.00042  pool +0.00011 +- 0.00056 (z +0.2)
+
+   per-seed val NDCG, full-data wide students:
+   pf    951:0.39841 952:0.39766 953:0.39885 954:0.39792 955:0.39817 956:0.39783 957:0.39670 958:0.39744  mean 0.39787 sd 0.00065
+   pop1  951:0.39793 952:0.39835 953:0.39976 954:0.39818 955:0.39898 956:0.39899 957:0.39894 958:0.39826 959:0.39789 960:0.39872 961:0.39869 962:0.39712  mean 0.39848 sd 0.00068
+   pop2  951:0.39720 952:0.39815 953:0.39753 954:0.39928  mean 0.39804 sd 0.00092

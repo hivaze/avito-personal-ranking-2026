@@ -1,0 +1,10 @@
+stage,name,what_it_does,needs_gpu,hardware_and_run_time,gpu_hours,gpu_hours_of,source
+1,Flatten,raw parquet and embedding tables to flat arrays per split,0,"CPU, 16 s for the train split",,,run log of the flatten step (not published)
+2,Exploration probability,probability that a train feed was shown in random order,0,"CPU, not recorded",,,"lab/eda/labels_position/04b_explore_detect.py, 04g_full_posterior.py, 04h_refit.py"
+3,Candidate inputs,"34 inputs for all splits, 1 exposure count, 42 fine-tune extras",1,"CPU, 31 min + 44 s recorded",5.2,encoder pre-training,run logs of the input builders (not published); encoder hours as stated in the solution notes of the lab (not published); run time of the in-feed context builders not recorded
+4,Teacher rankers,"25 rankers trained on clicks, 10 epochs each, 30,000 feeds held out",1,"1 GPU each, 57 to 209 min",58.0,25 rankers,"run json of the members (not published); sums 30.9 h (the 11) + 27.1 h (the other 14), solution notes of the lab (not published)"
+5,Teacher files,"their logits on 246.7 M train candidates, averaged over 11 and 25",1,"1 GPU, up to 4.6 min per dump",,,file times of the teacher score files (not published); 4 of 10 dumps not timed
+6,Students,"16 full-view + 4 popularity-light, 10 epochs, half clicks, half teacher",1,"1 GPU each, 221 to 259 min",81.8,20 students,run json of the 20 members (65.1 h + 16.7 h; not published)
+7,Fine-tune,each student on the two validation days: 5 folds by user x 3 seeds,1,"1 GPU each, 15 to 22 min",6.6,20 students,fine-tune json of the 20 members (not published)
+8,Ensemble and file,"z-score pools, the pool and branch mixes, rank within feed",0,"CPU, 6 s",,,"timed on 2026-11-15, solution notes of the lab (not published)"
+9,Pre-submission gate,"file validity, reproduction from the pools, input audit, leak probe",0,"CPU, 5 s",,,"timed on 2026-11-15, solution notes of the lab (not published)"

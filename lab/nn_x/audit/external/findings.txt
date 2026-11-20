@@ -1,0 +1,337 @@
+EXTERNAL / CONNECTED DATA AS FEATURES: what happened in Russia and on Avito on Sep 6-29 2026, and what any of it can do
+to WITHIN-FEED ranking. Audit agent, 2026-11-12 ~22:00-23:00 UTC. CPU only (12 threads, no GPU), no existing file edited.
+Directory: <repo>/nn_x/audit/external/ (common_ext.py, e01..e05 .py, out/e01..e05 .log, out/*.npz).
+Conventions: NDCG = the exact competition metric on val (14,423 feeds, G3 = preds/ens_G3_final_val.npy = 0.40032); "nested" = G3
+within-feed z + w * prior with w chosen on 4 user-grouped folds and read on the 5th (w grid -1.5..+1.5, so a negative weight is
+allowed); "±" = paired per-feed SE; holdout = the 30K train-period random-like M>=50 feeds scored by the G3 train-only pool (0.32379),
+the only labelled split with weekends. Label-defined slices are descriptive.
+
+=====================================================================================================================
+0. VERDICT (numbers)
+=====================================================================================================================
+1. Nothing external to the dataset can move the private score by a measurable amount. The whole branch is CLOSED, with the
+   ceiling measured rather than assumed:
+   - the most that ANY category-level time-varying demand series could add to G3 is bounded by the leaky in-sample oracle
+     "val's own same-day category x day x hour-bucket positive rate": +0.00062 ± 0.00036 (z 1.7) with the labels of the test
+     feeds themselves; the honest user-grouped version is +0.00002 ± 0.00018; the same-day category x day rate alone is
+     -0.00010 ± 0.00009 even in-sample (e02 P6). External data cannot beat an oracle built from the target labels.
+   - every label-free calendar x candidate prior fitted on train and read on val or the holdout is within ±0.0003 and
+     |z| < 2, with the two "largest" (+0.00022 ± 0.00012 cat x weekday on val; +0.00007 ± 0.00005 cat x weekend-hour on the
+     holdout) matched by a random-table control (+0.00014 ± 0.00016) and reversed on the other split (cat x weekday on the
+     holdout -0.00015 ± 0.00010). Joint greedy combination of all 9 priors (coordinate ascent on 4 user folds, read on the
+     5th): val -0.00034 ± 0.00021 (z -1.6; in-fold "gains" +0.0004..+0.0007 with sign-flipping weights across folds = noise
+     fitting), holdout (15K-feed subsample) -0.00017 ± 0.00014 (z -1.2); LightGBM lambdarank residual boosted from G3 with
+     the 9 priors + logM + category vs the base residual [logM, category]: +0.00063 ± 0.00041 (z 1.5) and +0.00043 ± 0.00041
+     (z 1.1) on two seeds (vs raw G3 +0.00059 / +0.00036 ± 0.00043). That is the only positive-leaning read in the branch: below
+     2 SE, below the project's MDE (~0.0012 for a blend tweak), of the size the features audit's noise controls and NEW_all
+     family GBM produced (-0.00047..+0.00024; +0.00024 ± 0.00045), and contradicted by the additive joint (-0.00034). Chance.
+   - the extrapolated per-category day TREND (the only "forecast-like" prior) HURTS: val -0.00035 ± 0.00023 (M<50 -0.00101
+     ± 0.00045, z -2.2); within-train week-1 -> week-2 replication -0.00038 ± 0.00017 (z -2.2). Category demand does not trend
+     at a usable size over 1-2 weeks; what looks like a trend is noise plus a production-ranker change (§3.4).
+   - the weekend -> weekday replication inside train (priors fitted on Sep 6-12, read on the week-2 holdout Sep 13-19,
+     38% weekend feeds): cat x weekend +0.00001 ± 0.00018, cat x weekday -0.00003 ± 0.00016, cat x hour +0.00001 ± 0.00010;
+     the same-period (week-2) table on the same feeds -0.00015 ± 0.00012. There is no weekend/weekday interaction to carry
+     from val (weekday-only) to the test days (Sat/Sun/Mon/Tue) or to the 24%-weekend private split.
+2. The category codes CAN be grouped (5 embedding super-groups covering 54 / 22 / 14 / 7 / 3 % of exposure; event-mix
+   profiles separate "contact-heavy, no messaging" from "favourite-heavy" from "messaging-heavy" families, §7) but cannot be
+   named with confidence, and it would not matter: the value of attaching any external per-category series is bounded by
+   item 1 (<= +0.0006 with leaked labels, ~0 without). Not worth a day.
+3. Real external facts of the window (all cited in §1): Duma election voting Sep 18-20 (train ends Sep 19; the main day Sep 20
+   is in no split); CBR key-rate hold at 14% on Sep 11 (train); ruble flat at 85-87/USD, mild weakening Sep 26-29; Moscow
+   weather: cold start Sep 6-8 (coldest night since May on Sep 9), warm "Indian summer" Sep 9-18 (last summer-like day Sep
+   17), autumn from Sep 21 (val and test both post-break), dry anticyclone with the coldest nights of the autumn exactly on
+   Sep 28-29 (private days); heating season from Oct 1; paydays 10th (train, Thu) and 25th (Fri, the day before test);
+   nationwide mobile-internet shutdowns on Sep 25, 28, 29 with Avito on the Mintsifry white list (traffic-level, not
+   ranking-level); Avito's own September items are PR (Avito Auto museum installation from Sep 21, "По Делу" seller
+   conference Sep 30, a clothing-story contest from Sep 28, no sale ("Хватамба" ran in Aug-Sep 2025 and Oct 19 / Nov 2026,
+   not in Sep 2026), no outage, no app release found). Consumer activity: SberIndex real spending +4.3% y/y in September,
+   non-food demand slowing; nothing abrupt.
+   NONE of these are candidate attributes. Inside a feed every candidate shares the timestamp, so a feed-level fact can only
+   act through an interaction with a candidate attribute (category, listing age, popularity, price). The interactions were
+   measured directly from the data (items 1 and 4) and are ~0; the external series would only be a noisier proxy for the
+   same interactions.
+4. What the data says about the interactions themselves (e01, e03):
+   - category x day positive-rate variation in exploration feeds: real between-day relative sd ~10% (excess over binomial,
+     513 cells), but only 4 of the top-25 categories have chi2 p<0.001 over 12 days and the smoothed log-ratios are within
+     ±0.1; in production feeds the relative sd is 3.7% and the biggest per-day deviations coincide with a candidate-mix
+     step on Sep 12 (production-only, §3.4) rather than with the external events;
+   - "event days" are not special: payday Thu Sep 10 chi2 272 / 25 df, CBR Fri Sep 11 152, election Fri 18 514, Sat 19 494,
+     vs ordinary-day controls 70-346 (Mon Sep 7: 329, Tue Sep 8: 346, Thu Sep 17: 331). The election days sit at the top only
+     because the whole last-3-days block (Sep 17-19) deviates together (cat 7, 21, 47 up; 15, 48 down), i.e. the late-window
+     production shift, not voting;
+   - the last-3-days (Sep 17-19) deviation applied to val: +0.00006 ± 0.00014; week-2-minus-week-1 (production) -0.00034
+     ± 0.00016 (z -2.0, M>=50 -0.00053 z -2.9), (random-like) -0.00009 ± 0.00014: the most recent production regime transfers
+     NEGATIVELY to val;
+   - weather contrast inside train (cold Sep 6-8 vs warm Sep 9-18), applied to the cold val days: random-like -0.00014 ±
+     0.00017 (chosen weights mostly negative), production -0.00023 ± 0.00014 (z -1.6), control (Sep 9-11 deviation) -0.00008
+     ± 0.00012. The cold-day category deviations of the two sources correlate at only +0.52 (random-like chi2 62 / 20 df, 2
+     categories p<0.001: cat 15 +0.11, cat 33 +0.13, cat 8 +0.10, cat 48 +0.09 "cold-day" categories) and none of it carries to
+     the cold val days. No weather-sensitive category signal survives;
+   - listing age x weekend: the fresh-listing lift is the same on weekends (<1 h 0.30x; log-ratio weekday -0.013 / weekend
+     +0.027; age x weekend chi2 27.7 / 15 df); nested on the holdout -0.00008 ± 0.00006; age x weekday(7) -0.00005 ± 0.00006;
+   - listing POSTING time (feed ts - age; a genuine candidate-level calendar attribute, resolution 2 h at 1-3 h, 9 h at 1-2 d):
+     listings posted at 04-06 MSK convert 12-26% less, posted on Thu/Fri 4-5% less (chi2 66 / 23 and 47 / 6 df on 3.7M rows),
+     but nested: val -0.00020 ± 0.00011 (hour), -0.00011 ± 0.00014 (weekday); holdout -0.00008 ± 0.00007, -0.00022 ± 0.00006
+     (z -3.7, i.e. the pool already prices it and the prior over-corrects); cat x posted-on-weekend val -0.00041 ± 0.00025,
+     holdout -0.00013 ± 0.00006 (z -2.2).
+5. Public/private composition facts that the calendar DOES change are already in the project's calibration: public is 100%
+   weekend and morning-heavy, private 24% weekend and evening-heavy; mean M by day Sat 103.2 / Sun 104 / Mon 99.6 / Tue 100.0 vs
+   val 96.4; the candidate category mix of every test day is within JS 2.8-4.0 x1e-4 of val (train days are 20-30 x1e-4 away);
+   the listing-age mix is identical across the 4 test days (<1 d share 0.103-0.112; val 0.114). Nothing day-specific to model.
+6. Relation to the 0.3983 leader: external or calendar data cannot explain +0.0056 val-equivalent; the oracle ceiling of the
+   whole family is 10x smaller than that gap even with leaked labels. Whatever #1 has, it is not weather, elections, paydays,
+   Avito promos or market statistics.
+
+=====================================================================================================================
+1. What actually happened, Sep 6-29 2026 (web, fetched this session)
+=====================================================================================================================
+Calendar. Train Sun Sep 6 - Sat Sep 19 (Tue-Wed Sep 15-16 missing: 42 and 0 feeds); val Tue Sep 22 and Thu Sep 24; test Sat Sep 26
+- Tue Sep 29, public = Sat + Sun morning to 11:32 MSK. No public holidays; Sep 1 Day of Knowledge (school year) is before the
+window; Moscow City Day was Sat Sep 5 (the day before train starts); Sep 27 = World Tourism Day / Day of the Kindergarten
+Teacher (Avito posted a camper-van piece for it; no commercial effect). Russian salary practice: advance ~20-25th, salary ~5-10th
+(Labour Code art. 136: at least twice a month); the 25th was Fri Sep 25, the day before the test window; the 10th was Thu Sep 10
+inside train.
+Elections. State Duma (IX convocation) voting Sep 18, 19, 20 2026 (three-day voting, decree of Jun 16 2026 No. 428; CEC
+resolution Jun 17): https://rg.ru/2026/06/17/cik-golosovanie-na-vyborah-v-gosdumu-projdet-18-19-i-20-sentiabria.html ,
+https://iz.ru/2117052/2026-06-17/tcik-rf-utverdil-trekhdnevnye-vybory-v-gosdumu . Train covers voting days 1-2; the main day
+(Sun Sep 20) is in no split; val/test are post-election (first Duma session ~Sep 30). Drone-related incidents during the
+window (Sochi polling stations paused Sep 18; Bryansk bridge Sep 28; https://www.vedomosti.ru/society/news/2026/09/18 ).
+Macro. CBR kept the key rate at 14.00% on Fri Sep 11 2026, the first pause after cuts from 15.5% (Feb) to 14% (Jul); next meeting
+Oct 23: https://www.cbr.ru/press/keypr/?Prev=Y , https://sbercib.ru/publication/reshenie-banka-rossii-po-klyuchevoi-stavke-ot-11-sentyabrya-2026-goda ,
+https://www.e1.ru/text/economics/2026/09/11/76635033/ . Ruble: CBR monthly average 86.57 RUB/USD in September; "stuck at 85" on
+Sep 24, mild weakening Sep 26-30: https://ratestats.com/dollar/2026/09/ , https://www.vbr.ru/novosti/kursy-valyut/2026/09/23/kurs-valut-na-24-sentyabrya-2026/ ,
+https://www.vbr.ru/amp/novosti/kursy-valyut/2026/09/29/dorogaya-neft-bolse-ne-spasaet-rybl--kyrs-valut-na-30-sentyabrya/ . No FX
+shock, no panic-buying trigger. Consumer activity: SberIndex real consumer spending +4.3% y/y in September 2026 (Alfa-Bank 2.9%),
+non-food demand slowing, August +5.9%: https://www.kommersant.ru/doc/8230431 , https://finance.mail.ru/article/chastnoe-potreblenie-nehotya-ostyivaet-69228757/ .
+Weather (Moscow; Fobos / Hydromet press, fetched). Sep 6-8 cool, cold nights (night to Sep 9 the coldest since early May;
+Cheruști +1.8 C on Sep 14; third frost wave in Central Russia Sep 14): https://news.ru/moskva/tretya-volna-zamorozkov-rekordnye-livni-pogoda-v-moskve-do-konca-sentyabrya ,
+https://profile.ru/?p=1899705 . "Indian summer" declared Sep 9-10, warm and dry Sep 15-18 (+17..+21), Sep 17 called the last
+summer-like day: https://msk1.ru/text/autumn/2026/09/10/76634209/ , https://msk1.ru/text/autumn/2026/09/17/76646903/ . Break on the
+weekend Sep 19-20, meteorological autumn from Sep 21 (+11..+16, prolonged rain; Sep 22 max +14): https://msk1.ru/text/autumn/2026/09/21/76653138/ .
+Month to Sep 26: +2.2 C above norm, precipitation 30% below norm; Sep 27 +16..+18 then rain in the evening; Sep 28 anticyclone,
+dry, +15..+17; night to Sep 29 the coldest of the autumn (+4..+6), Sep 29-30 sunny +15..+18; cold front Oct 1; heating season
+Oct 1: https://msk1.ru/text/gorod/2026/09/26/76664667/ , https://www.mentoday.ru/life/news/27-09-2026/sinoptik-rasskazal-o-pogode-v-moskve-na-sleduyushchei-nedele-nas-jdet-rekordnoe-davlenie-i-poholodanie/ ,
+https://www.mentoday.ru/life/news/30-09-2026/teplo-uje-skoro-otopitelnyi-sezon-v-moskve-nachnetsya-1-oktyabrya/ . So: train has
+BOTH a cold spell (Sep 6-8) and a warm spell (Sep 9-18); val and test are both in the cool, post-break regime; the test days are
+dry with the first cold nights. This gives an in-train weather contrast to test (§5).
+Avito itself (t.me/s/avito read back to post 7347, ~mid-September; web). September posts: career consultations at the youth
+forum (Yekaterinburg), MFM-2026 charity sale (resale, donated proceeds), Avito Auto installation at the Moscow Transport Museum
+opened Sep 21, "Вместе для дикой природы" vote until Sep 30, "Заряжено на..." clothing-story contest Sep 28 - Oct 16 (1,000
+bonus points for 50 authors), "По Делу" seller conference Sep 30 (50% cashback on promotion for new entrepreneurs, 50% off
+delivery commission for guests), Avtoteka Audatex/A-Vibe damage diagrams, teen-seller features. No sale in September: the
+"Хватамба" sale ran Aug 11 - mid-Sep 2025 ( https://www.retail.ru/news/avito-rossiyane-potratili-1-8-mlrd-rubley-na-rasprodazhe-khvatamba-12-sentyabrya-2025-269046/ )
+and in 2026 returned on Oct 19 and Nov 6-22 (channel posts 7520, 7533, 7543, 7562). No outage reports in September (the
+10K-complaint outage was Oct 19: https://techora.ru/news/rossiyane-soobshchili-o-sboe-avito-10-2026-10-19 ); no app release found;
+Mediascope monthly audience 60.4M in September ( https://new-retail.ru/novosti/retail/avito_testiruet_funktsiyu_lichnykh_chatov_dlya_obshcheniya_v_prilozhenii/ ).
+Market stats from Avito's own PR for the window: September demand for repair services +24% y/y, construction +15%; new-car
+demand +9.1% m/m in September; winter studded-tyre sales +15% y/y in Q3; outerwear buying "started" (autumn): https://www.retail.ru/news/v-nachale-oseni-spros-na-remontnye-raboty-vyros-na-24--22-oktyabrya-2026-283602/ ,
+https://www.retail.ru/news/avito-prodazhi-novoy-shipovannoy-reziny-v-rossii-vyrosli-na-15-za-god-20-oktyabrya-2026-283492/ . All
+monthly / quarterly, y/y: no daily resolution, no category identity on our side.
+Connectivity. Mobile-internet shutdowns (drone-threat regime, "white lists" since Mar 2026): reported outages on Fri Sep 25
+(Moscow, St Petersburg, other regions), Mon Sep 28 (dozens of regions, most complaints Moscow + region, also SPb, Tyumen,
+Krasnodar, Perm...), Tue Sep 29 (Moscow and Sverdlovsk most). Avito is on the white list of services that stay reachable:
+https://news.ru/society/pochemu-ne-rabotaet-mobilnyj-internet-28-sentyabrya-prichiny-sboi-v-rossii ,
+https://news.ru/society/pochemu-ne-rabotaet-mobilnyj-internet-29-sentyabrya-prichiny-sboi-v-rossii , https://techora.ru/news/sboy-mobilnogo-interneta-v-rossii-svyazali-2026-09-25 .
+This can change WHO is on Avito in a given hour (white-listed app during a shutdown), i.e. feed composition, and may be the
+cause of some of the hour-long logging gaps noted in eda_shift_overlap (test Sep 28 18h, Sep 29 14h), but it is not a candidate
+attribute. The within-test adversarial AUC public vs private on intrinsic features is 0.512 (eda_shift_overlap), so whatever
+composition change there was is invisible at feed level too.
+Sports / news. No sports event of national scale was found for Sep 26-29 (RPL round pages are login/old-season only); the
+news of the window is the election aftermath and drone incidents. Attention events are feed-level in any case.
+Not found: the leaderboard #1 has no public write-up; no Avito ML Cup 2026 solution is indexed.
+
+=====================================================================================================================
+2. Why feed-level facts cannot move NDCG, and what was tested instead
+=====================================================================================================================
+NDCG is computed per feed; adding any function of the feed (timestamp, weather, FX, holiday, outage) to every candidate's score
+leaves the order unchanged. The only way external information enters is through an interaction with a candidate attribute:
+category x time demand (people want tyres when it snows, tutors on Sep 1, heaters when the heating is late), listing age x
+time (fresh listings posted on a weekend), price x payday (no price field exists; f2/f3/f5 are not prices, §7), popularity x
+day (already in the LUO/co-visitation inputs). Because categories are anonymised, the demand curve of each category was
+derived from the data itself (train positives by category x day / weekday / hour, exploration and production separately,
+val by day, test exposure by day) and tested nested on G3. If the data-derived curve adds nothing, an external series for
+the same category can only add noise on top of it.
+
+=====================================================================================================================
+3. Data-derived demand curves (e01; out/e01.log, out/e01_curves.npz)
+=====================================================================================================================
+3.1 Per-day composition (MSK). Train 203-292K feeds/day, mean M 76-81; val Tue 7,542 / Thu 6,878 feeds, mean M 96.5 / 96.2; test
+    Sat 6,050 (M 103.2) + Sun 7,367 (public 2,512 / private 4,855; M 104) + Mon 7,578 (99.6) + Tue 7,600 (100.0). Mean H 173-176
+    on val/test vs 184-187 on train. Overall positive rate by train day is flat: exploration 0.0113-0.0119, production
+    0.0221-0.0232 (no day stands out, including the election days).
+3.2 Category x day positive rate. Exploration (random-like, 9.2M rows, holdout excluded): exposure-weighted sd of the smoothed
+    log-ratio across days 0.062 (top-25 categories), median chi2/df 1.6, 4 of 25 categories p<0.001 over ~11 df; the excess
+    variance decomposition over 513 (category, day) cells with >2000 rows gives a real between-day sd of the rate of 0.00107 on
+    a mean 0.0108, i.e. a relative sd of ~10% (binomial noise explains 58% of the observed cell variance). Production (233M rows):
+    relative sd 3.7%, chi2/df 7-8 on the big categories (everything is significant at this n), exposure-weighted sd 0.025;
+    per-day log-ratios within ±0.07 except cat 48 (sd 0.061: +0.05..+0.07 on weekdays Sep 7-10, -0.06/-0.11 on Sat/Sun, -0.11
+    again on Sat Sep 19 - the one category with a clean weekend pattern, 2.7% of val exposure) and the Sep 17-19 block (cat 7,
+    21, 3, 47 up ~+0.05, cat 15, 48 down ~-0.06), which coincides with the production candidate-mix step (§3.4).
+    Hour(24) x category: exploration exposure-weighted sd 0.093 but only 2 of 25 categories p<0.001; production 0.057, all 25
+    significant (n = 233M): the hour pattern is real but small (a01 of the avito audit already found ±0.1 by hour bucket and
+    -0.00003 nested).
+3.3 Val Tue vs Thu, test days. Per-category positive rate Tue 22 vs Thu 24 (top-15 by rows): no category with |z| > 3, total
+    chi2 35.6 on ~15 df (cat 3 z -2.45 is the largest). Candidate category mix: JS x1e4 vs val = Sat 26 3.99, Sun 27 2.78, Mon 28
+    2.86, Tue 29 2.82, public 3.05, private 1.62 (val Tue vs Thu themselves 0.9 / 1.2; train days 20-30). Largest per-day
+    exposure moves vs val are 0.2-0.8 pp (cat 13 +0.82 pp on Sat, -0.60 pp on Mon; cat 3 -0.63 pp Sat). Listing-age mix by test
+    day: <1 d share 0.103 / 0.106 / 0.112 / 0.110 (val 0.114 / 0.115), >1 m 0.502-0.503 (val 0.50): flat.
+3.4 The Sep 12 production step (Avito-internal). In production feeds the candidate category mix is stable Sep 6-11 (JS x1e4 vs
+    Mon Sep 7: 0.4-1.7) and jumps from Sat Sep 12 (5.6-7.2 through Sep 19; cat 13 +0.7 pp, cat 48 +0.18, cat 3 +0.20); the
+    exploration feeds show no step (4-8 throughout, noise). The per-category production positive rates move with it (3.2).
+    The Sep 15-16 gap in the logs sits inside this period. This is a ranker/blender release or a logging change on Avito's
+    side, not demand; it explains why the "last-3-days" and "trend" priors look significant in production data and transfer
+    negatively (§4). It is recorded here because it is the one Avito event the data does show; the training-recency question it
+    raises (do week-2 production feeds teach a different ranker?) belongs to the training-side audits, not to external data.
+3.5 Event days vs controls (all train rows, per-category log-ratio against the category's other same-weekday-type days,
+    top-25 categories, chi2 on 25 df; exposure-weighted |lr|): payday Thu Sep 10 272 (0.022; cat 13/2/10/26/48 +0.03..+0.07);
+    CBR Fri Sep 11 152 (0.015); election Fri Sep 18 514 (0.030); election Sat Sep 19 494 (0.032); controls: Sun Sep 6 319
+    (0.023), Mon Sep 7 329 (0.024), Tue Sep 8 346 (0.024), Sun Sep 13 130 (0.017), Mon Sep 14 70 (0.012), Thu Sep 17 331 (0.025).
+    Every day is "significant" at n = 20M rows; the event days are not larger than ordinary days except the Sep 17-19 block,
+    which is the production step of 3.4 (Thu Sep 17, a non-event day, shows the same categories moving).
+
+=====================================================================================================================
+4. Nested tests of calendar x category priors on G3 (e02; out/e02.log)
+=====================================================================================================================
+Priors fitted on random-like train feeds (M>=50, p_random>0.9, holdout excluded; 9.2M rows), K=300 smoothing, unless stated.
+Format: OOF delta ± SE (z); slices.
+VAL (Tue/Thu, weekday-only):
+  P1  cat x weekday(7)                      +0.00022 ± 0.00012 (z +1.9); Tue +0.00033, Thu +0.00010; M<50 +0.00029, M>=50 +0.00018
+      control: random cat x weekday table   +0.00014 ± 0.00016 (z +0.9)   <- the same size from pure noise
+      control: category rate prior          -0.00012 ± 0.00022
+  P2  cat x hour24                          -0.00010 ± 0.00011 (z -0.9); chosen w mostly NEGATIVE (-0.02..-0.15)
+  P2b cat x hour bucket(4)                  -0.00018 ± 0.00010 (z -1.9)
+  P3  cat x day linear trend, extrapolated  -0.00035 ± 0.00023 (z -1.5); M<50 -0.00101 ± 0.00045 (z -2.2)
+      to Sep 22/24 (slopes -0.01..-0.08/day, 15 of 52 with |t|>3, exposure-weighted |slope| 0.04/day = 0.4 nats over 10 days)
+  P3b trend, |t|>3 slopes only              -0.00018 ± 0.00013 (z -1.4)
+  P9  production-fitted cat x weekday       -0.00025 ± 0.00012 (z -2.2) (45.6M rows; corr with the exploration table -0.16)
+  P9  production-fitted cat x hour24        -0.00017 ± 0.00015 (z -1.1) (corr with the exploration table +0.06)
+  P5  forward in time, val Tue -> Thu: Tue-fitted category rate on Thu feeds +0.00016 ± 0.00010 (chosen w -0.02, i.e. a tiny
+      NEGATIVE weight); Thu-fitted on Thu (same-day, in-sample) +0.00044 ± 0.00045 at w = -0.75 (negative even in-sample:
+      G3 already over-weights category base rates); mirror Thu -> Tue -0.00094 ± 0.00032 (z -2.9); Tue -> Tue in-sample
+      -0.00106 ± 0.00039. corr(lr_Tue, lr_Thu) over categories with >1000 rows = +0.11: the day-level category deviations
+      of val are noise (sd 0.20 at K=100, consistent with the ~10% real + binomial of 3.2).
+  P5c G3's own per-category act/exp (exp = val-wide P(y | G3 rank)) on Tue applied to Thu: -0.00051 ± 0.00028 (z -1.8);
+      Thu -> Tue -0.00024 ± 0.00024. corr(Tue, Thu) of the act/exp table +0.44, sd 0.10: the pool's category calibration
+      error is partly stable but correcting it does not help NDCG (consistent with INSIGHTS: category choice is
+      information-limited, not calibration-limited).
+  P6  ORACLE CEILING (val's own labels): category rate, user-OOF -0.00049 ± 0.00018 (z -2.6, hurts); category x day rate,
+      user-OOF +0.00002 ± 0.00018; category x day IN-SAMPLE -0.00010 ± 0.00009; category x day x hour-bucket IN-SAMPLE
+      (512 cells, leaky) +0.00062 ± 0.00036 (z +1.7; Thu +0.00111 ± 0.00050). This is the most ANY category-level, same-day
+      demand series can add, with the test labels in hand.
+HOLDOUT (train-period random-like feeds, 32% weekend, G3 train-only pool 0.32379):
+  H-P1 cat x weekday                        -0.00015 ± 0.00010 (z -1.5); weekend +0.00006 ± 0.00016; weekday -0.00025 ± 0.00013
+  H-P2 cat x hour24                         -0.00004 ± 0.00006
+  H-P4 cat x (weekend x hour bucket)        +0.00007 ± 0.00005 (z +1.6); weekend +0.00013 ± 0.00010
+  H-P3 cat x day, same-period in-sample     +0.00002 ± 0.00011 (ceiling on the holdout)
+WITHIN-TRAIN REPLICATION (fit on week 1 Sep 6-12, read on the 13,424 week-2 holdout feeds Sep 13-19, 38% weekend):
+  cat x weekend                             +0.00001 ± 0.00018; weekend feeds +0.00027 ± 0.00041, weekday -0.00015 ± 0.00015
+  cat x weekday(7)                          -0.00003 ± 0.00016
+  cat x hour24                              +0.00001 ± 0.00010
+  cat x day trend extrapolated              -0.00038 ± 0.00017 (z -2.2)
+  category rate (control)                   -0.00017 ± 0.00015
+  week-2 same-period table (ceiling)        -0.00015 ± 0.00012
+Reading: the one positive z ~1.9 on val (P1) is matched by a random table, reverses on the holdout and on the within-train
+replication, and the trend forecast is negative on both. Test-row values of P1/P2/P3 for Sep 26-29 are written to
+out/e02_test_priors.npz for the record; recommendation: do not use them.
+
+=====================================================================================================================
+5. Listing age x calendar, posting time, weather contrast, regime (e03; out/e03.log)
+=====================================================================================================================
+5.1 Age x weekend / weekday (exploration train): the age lift curve (0.30x <1 h ... 1.12x 2-4 w, 1.16x 6-12 m) is the same on
+    weekends (log-ratio weekday vs weekend within ±0.045 per bin; chi2 27.7 / 15 df; age x weekday(7) 125 / 90 df). Holdout
+    nested: age x weekend -0.00008 ± 0.00006; age x weekday -0.00005 ± 0.00006; the age-bin prior alone -0.00020 ± 0.00013
+    (holdout), -0.00014 ± 0.00012 (val). The pool already prices listing age; the calendar does not modulate it.
+5.2 Posting time of the listing (feed ts - age in hours; resolution 2.1 h at 1-3 h, 8.6 h at 1-2 d, 42 h at 1-2 w, so only
+    listings < 2 weeks old are used, 3.7M exploration rows): positive-rate log-ratio by posting hour: 04h -0.12, 05h -0.26, 06h
+    -0.14, 12-13h +0.04..+0.06, 19h +0.05 (chi2 66 / 23 df); by posting weekday Mon +0.03, Tue +0.06, Wed +0.03, Thu -0.04, Fri
+    -0.05, Sat -0.01, Sun -0.01 (chi2 47 / 6 df). Nested: posting hour val -0.00020 ± 0.00011 (z -1.8), holdout -0.00008 ±
+    0.00007; posting weekday val -0.00011 ± 0.00014, holdout -0.00022 ± 0.00006 (z -3.7); cat x posted-on-weekend val
+    -0.00041 ± 0.00025 (z -1.6), holdout -0.00013 ± 0.00006 (z -2.2). A real, small, candidate-level calendar attribute that
+    the pool already captures (through age + popularity + content); adding it as a prior over-corrects.
+5.3 Weather contrast. Per-category log-ratio on the cold days Sep 6-8 vs the category mean: exploration feeds chi2 61.9 / 20
+    df (top-20), 2 categories p<0.001 (cat 15 +0.109, cat 33 +0.131, cat 8 +0.099, cat 48 +0.089 up on cold days; cat 10
+    -0.054, cat 47 -0.044, cat 3 -0.034 down); production feeds chi2 236 but nearly all categories NEGATIVE on Sep 6-8 (-0.02..
+    -0.07; it is the pre-Sep-12 regime, §3.4), corr with the exploration table +0.52. Applied to val (both days are in the
+    cool post-break regime): exploration-fitted -0.00014 ± 0.00017 (chosen w -0.5..+0.15), production-fitted -0.00023 ±
+    0.00014 (z -1.6), control deviation of the warm-peak days Sep 9-11 -0.00008 ± 0.00012. Whatever weather did to category
+    demand in early September does not re-appear on the cold val days at a size NDCG can see.
+5.4 Regime. Week-2-minus-week-1 category deviation (production; cat 7 +0.053, 5 +0.057, 47 +0.051, 18 +0.048, 15 -0.047, 48
+    -0.070; chi2 254 / 20 df) applied to val: -0.00034 ± 0.00016 (z -2.0; Tue -0.00050, M>=50 -0.00053 z -2.9); the same from
+    exploration feeds -0.00009 ± 0.00014; the last-3-days (Sep 17-19) deviation +0.00006 ± 0.00014 (w +0.5 chosen in 4 of 5
+    folds, no OOF gain). The newest production regime is, if anything, anti-aligned with val: "use the most recent demand"
+    is wrong here. Exposure shares week 1 / week 2 / val: cat 13 12.5 / 13.4 / 12.4, cat 48 4.1 / 4.3 / 2.7, cat 2 9.6 / 9.5 /
+    11.2, cat 50 7.7 / 7.8 / 9.0: the val (exploration) mix is closer to NEITHER production week; the production step is a
+    production-only artefact.
+
+=====================================================================================================================
+6. Joint test (e05; out/e05.log)
+=====================================================================================================================
+Nine label-free priors at once (cat x weekday, cat x hour24, cat x weekend-hour, cat day-trend, cold-day deviation, age-bin x
+weekend, posting hour, posting weekday, week-2 deviation; all from random-like train, holdout excluded), combined by greedy
+coordinate ascent on NDCG over 4 user-grouped folds (6 steps, weights ±0.05..±0.3) and read on the 5th:
+  VAL      joint OOF -0.00034 ± 0.00021 (z -1.6); Tue -0.00039, Thu -0.00028; M<50 -0.00045, M>=50 -0.00026.
+           In-fold "gains" +0.00038..+0.00072 with weights that flip sign between folds (cat_x_dow +0.45 in fold 1, absent in
+           folds 2-4; cold_dev -0.45 in folds 3-4, absent before; age_x_wk -0.30 / +0.15 / -0.35): the combiner fits noise.
+  HOLDOUT  (15K-feed subsample, 32% weekend) joint OOF -0.00017 ± 0.00014 (z -1.2); weekend -0.00007 ± 0.00027; weekday
+           -0.00021 ± 0.00017; the same sign-flipping weights (age_x_wk -0.15 / +0.60).
+  LGB      lambdarank residual boosted from G3 (init_score 4*z, 150 rounds, 15 leaves, user-grouped 5-fold) with the 9 priors
+           + logM + category, paired against the base residual [logM, category] on the same harness: seed 0 +0.00063 ± 0.00041
+           (z 1.5), seed 1 +0.00043 ± 0.00041 (z 1.1); vs raw G3 +0.00059 / +0.00036 ± 0.00043 (base residual -0.00004 /
+           -0.00007 vs G3, so the harness reproduces G3). This is the one read above zero. It is below 2 SE, below the
+           project's MDE, inside the noise-control range of the features audit (372 single probes, 0% at z > 2; family GBMs
+           <= +0.00056 ± 0.00031), and the additive version of the same information is negative. Verdict: chance maximum
+           of ~25 reads in this audit; not a lever.
+
+=====================================================================================================================
+7. Can the category codes be mapped to real Avito categories, and would it matter? (e04; out/e04.log, out/e04_profile.npz)
+=====================================================================================================================
+Profiles over val+test candidates (label-free except the val positive rate) and val+test histories:
+- Exposure is concentrated: cat 13 12.5%, 2 11.2%, 50 8.9%, 3 7.4%, 6 5.7%, 7 4.8%, 10 4.1%, 15 3.5%, 11 3.1%, 48 2.7% (top-10 =
+  64%). Hour-of-day and weekend exposure profiles are IDENTICAL across categories (night/morning/day/evening shares within
+  ±0.02 of the base 0.14/0.25/0.30/0.32; weekend share 0.30-0.34 vs base 0.32): the candidate mix does not depend on the hour,
+  so a "jobs = weekday-morning, hobby = weekend" fingerprint is not available (the blender samples categories from the
+  user's interest profile, not from the clock).
+- The history event mix separates three families: (a) contact-heavy, NO messaging, favourites moderate: cat 50 (contact share
+  0.437, msg 0.000, fav 0.07, median age 28 d, 17.5% < 1 d, the lowest positive rate 0.0117), cat 48 (0.272 / 0.000), cat 47
+  (0.338 / 0.023), cat 27 (0.337 / 0.001); (b) favourite-heavy, no messaging: cat 11 (fav 0.312, contact 0.129, median age 79 d,
+  46% > 3 m, only 4.8% < 1 d), cat 10 (fav 0.293), cat 12 (fav 0.229, median age 88 d), cat 2 (fav 0.204, no msg), cat 26 (fav
+  0.164, median age 71 d, 1.8% < 1 d), cat 5 (fav 0.173, 2.9% < 1 d); (c) messaging-heavy with contacts: cat 13 (msg 0.243,
+  contact 0.248), 15 (0.287), 33 (0.313, median age 17 d, 20.5% < 1 d), 32 (0.256), 23 (0.228), 21 (0.218), 3 (0.192), 16, 18, 14.
+  The embedding geometry gives the same split: 5 super-groups at centroid-cosine distance 0.4: {6,7,8,13,14,15,16,19,21,23,24,
+  27,28,32,33,45,47,50} 54% of exposure, {2,3,4,5,26} 22%, {9,10,11,12,25,30,31,48,49,51,52,53} 14%, {17,18,20,22,29,40-44,46}
+  7%, {34-39} 3%; nearest pairs cos 0.82-0.88 (48-53, 29-40, 6-8, 10-11, 11-12, 23-21).
+- A plausible reading (LOW confidence, from Avito's public taxonomy: the messaging-with-chat vertical is "goods" where buyers
+  write in chat; "contact-only, fresh, low rate" fits transport/parts and real estate where buyers call; "favourite-heavy,
+  old listings, no chat" fits apparel/collectibles/hobby where people save items; the 3% isolated group {34-39} with its own
+  centroid could be jobs/services): group (c) = general goods (electronics, home, kids...), cat 13 the largest goods category;
+  (a) cat 50 / 48 / 47 / 27 = transport & parts / real estate type verticals; (b) 2 / 10 / 11 / 12 / 26 / 5 = personal items,
+  hobby, collectibles. The two-tower item vector is attribute + text, and a linear probe recovers the category at 98.5%
+  (eda_embeddings), so finer sub-structure exists, but without a single labelled anchor none of this can be verified; the
+  f2/f3/f5 means differ by category (f3 0.23-0.70) but are not interpretable as price.
+- Worth it? No. Even if every code were named, the series that could be attached (Avito's monthly y/y category stats, Yandex
+  Wordstat weekly, Rosstat monthly) have no daily resolution and would feed the same category x day prior whose ceiling,
+  measured with the TARGET labels themselves, is +0.0006 leaky / 0.0000 honest (§4 P6). The mapping has documentation value
+  for the top-10 report (explaining the model), not LB value.
+
+=====================================================================================================================
+8. Do-not list (external branch) and the one thing to keep
+=====================================================================================================================
+Do not: build weekday/hour/day x category priors (val +0.00022 is a random-table-sized effect, holdout -0.00015, replication
+0.0000); extrapolate category trends to Sep 26-29 (-0.0004 on val and on the week-2 replication); attach weather / FX / key-rate
+/ election / payday / outage series (feed-level; their only channel, category x day, is bounded at +0.0006 with leaked labels);
+posting-time or age x calendar priors (already priced; -0.0002 on the holdout at z -3.7); category-mapping work for LB purposes.
+Keep (documentation only): §1 as the environmental context for the top-10 report; §3.4 (the Sep 12 production candidate-mix
+step) as a data fact for whoever studies training recency; out/e02_test_priors.npz as the record of what the "extrapolated
+demand prior for the test days" would have been.
+The external-data branch does not change the pick, the FT/TO blend or the calibration. The project's public/private
+composition handling (M- and hour-mix calibration, eda_shift_overlap §5) already contains everything the calendar does.
+
+=====================================================================================================================
+9. Files
+=====================================================================================================================
+common_ext.py                     shared helpers (meta with MSK day/dow/hour, nested additive harness with negative weights, holdout pool)
+e01_demand_curves.py / out/e01.log / out/e01_curves.npz   per-day composition, category x day/hour tables (exploration / production / all), mixes, event days
+e02_nested_priors.py / out/e02.log / out/e02_test_priors.npz   nested tests P1-P9 on val and holdout, within-train replication, test-row priors
+e03_age_posting_weather.py / out/e03.log   age x calendar, posting time, weather contrast, regime
+e04_category_profiles.py / out/e04.log / out/e04_profile.npz   category profiles and embedding super-groups
+e05_joint.py / out/e05.log            joint greedy nested combination of 9 priors (val, holdout) + LightGBM residual check

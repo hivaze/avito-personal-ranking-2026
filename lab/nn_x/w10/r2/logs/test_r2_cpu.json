@@ -1,0 +1,58 @@
+{
+ "part": "cpu",
+ "passed": 33,
+ "total": 33,
+ "fails": [],
+ "res": {
+  "c0": {
+   "removed": {
+    "import cd_arms10": 1,
+    "add_argument --xoff": 1,
+    "add_argument --xoff_table": 1,
+    "xoff = None": 1,
+    "if a.xoff > 0": 1,
+    "if xoff is not None": 1
+   },
+   "lane_diff": [
+    "+# nn_x/w10/r2 copy (WAVE 10 arm R2 XOFF, 2026-11-13 ~16:55 UTC): runs from @W (its own logs/ preds/ ckpt/),",
+    "+#   GPUs N 5 only (the R2 agent's grant), stage-A variants w10_<arm>_s<seed> (references abl_base_s23/24 = A_BASE + HYG in nn_x/abl, plus",
+    "+#   w9_base_s23/24 in nn_x/w9/dw3 as a replication), stage-E variants w5_e10_<arm>_s<seed> as in nn_x/w5 (paired vs nn_x/w5's w5_e10_base_s951/952);",
+    "+#   PIDs go to nn_x/w10/r2/RUNNING.txt. Arm r2 (A:r2 | E:r2) = --xoff 0.5 (cd_arms10.py; rule nn_x/w5/logs/E_r2_predeclared.txt).",
+    "-ALLOWED=${W5_GPUS:-\"0 1 2 4\"}",
+    "+ALLOWED=${W5_GPUS:-\"4 5\"}",
+    "-TL=@W/trunc_lifts_mbucket.json",
+    "+TL=<repo>/nn_x/w5/trunc_lifts_mbucket.json",
+    "+    A:r2|E:r2) echo \"--xoff 0.5\" ;;  # wave-10 R2 XOFF (cd_arms10.py)",
+    "-RUN=logs/RUNNING_w5.txt",
+    "+RUN=RUNNING.txt  # nn_x/w10/r2/RUNNING.txt (wrapper PIDs; the REAL python PIDs are recorded there by the agent from /proc)",
+    "-    v=w5_${arm}_s${x}; args=\"$A_BASE $HYG --seed $x $f\"",
+    "+    v=w10_${arm}_s${x}; args=\"$A_BASE $HYG --seed $x $f\"  # nn_x/w10/r2: stage-A variants w10_<arm>_s<seed>",
+    "-    v=${v/w5_/w5_smoke_}; args=\"$args --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10\"",
+    "+    v=${v/#w5_/w5_smoke_}; v=${v/#w10_/w10_smoke_}; args=\"$args --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10\""
+   ]
+  },
+  "c1": {
+   "n_batches": 19,
+   "n_on": 49,
+   "n_off": 191,
+   "md5": "53524aceef738cfb7ebee6d9d6a66566"
+  },
+  "c2": {
+   "a": 0.5,
+   "table_md5": "53524aceef738cfb7ebee6d9d6a66566",
+   "n_train": 3121208,
+   "n_pool": 134118,
+   "pool_share": 0.04296990139715136,
+   "n_pool_rows": 19741607,
+   "mean_offset_rows": -0.018223540857434273,
+   "mean_abs_offset_rows": 0.06221579387784004,
+   "mean_offset_pos": 0.0007407761877402663,
+   "mean_offset_neg": -0.01846235804259777,
+   "max_offset": 0.48457103967666626,
+   "min_offset": -0.08597046136856079,
+   "n_batches": 9835,
+   "share_batches_with_expl": 0.6845958312150483,
+   "mean_expl_feeds_per_batch": 13.636807320793086
+  }
+ }
+}

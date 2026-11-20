@@ -1,0 +1,24 @@
+val: Spearman(stored index, item_id) over 3000 feeds: mean -0.0038, mean|rho| 0.1145, rho>0.9 0.000, rho<-0.9 0.000
+val: Spearman(stored index, emb_idx) over 3000 feeds: mean +0.0002, mean|rho| 0.1130, rho>0.9 0.000, rho<-0.9 0.000
+val: Spearman(stored index, f1) over 3000 feeds: mean +nan, mean|rho| 0.1105, rho>0.9 0.000, rho<-0.9 0.000
+val: Spearman(stored index, category) over 3000 feeds: mean +nan, mean|rho| 0.1162, rho>0.9 0.000, rho<-0.9 0.000
+val: adjacent same-category share 0.2144 (within-feed shuffle of 2000 feeds: 0.2111 vs real on same feeds 0.2106)
+val NDCG score=-index: 0.28860 +- 0.00143
+val NDCG score=+index: 0.28797 +- 0.00142
+val NDCG score=random: 0.28926 +- 0.00145
+val positive rate by relative stored-index decile (base 0.0158): 0.0167 0.0149 0.0163 0.0148 0.0152 0.0162 0.0157 0.0162 0.0155 0.0165
+  M in [5,20): rate by decile 0.1006 0.0833 0.1066 0.0917 0.1021 0.1040 0.1063 0.1082 0.0927 0.1036  chi2 p=0.0887
+  M in [20,50): rate by decile 0.0387 0.0372 0.0412 0.0398 0.0401 0.0414 0.0384 0.0414 0.0404 0.0377  chi2 p=0.751
+  M in [50,100): rate by decile 0.0199 0.0209 0.0212 0.0193 0.0201 0.0205 0.0217 0.0212 0.0194 0.0192  chi2 p=0.536
+  M in [100,200): rate by decile 0.0125 0.0113 0.0129 0.0113 0.0118 0.0116 0.0120 0.0124 0.0117 0.0125  chi2 p=0.403
+  M in [200,301): rate by decile 0.0088 0.0084 0.0081 0.0082 0.0082 0.0088 0.0078 0.0087 0.0086 0.0084  chi2 p=0.579
+val M>=20: positive rate by absolute stored index 0..9: 0.0224 0.0247 0.0200 0.0225 0.0234 0.0183 0.0224 0.0227 0.0216 0.0216
+val M>=20: positive rate by rank-from-end 0..4: 0.0205 0.0199 0.0215 0.0252 0.0218
+val per-M chi-square (M=5..40, 28 values): min p 0.0374, median p 0.514, Fisher combined p 0.524
+val all feeds: P(y | index 0) 0.0377, P(y | last index) 0.0378, base 0.0158
+test: Spearman(stored index, item_id) over 3000 feeds: mean +0.0011, mean|rho| 0.1106, rho>0.9 0.000, rho<-0.9 0.000
+test: Spearman(stored index, emb_idx) over 3000 feeds: mean +0.0057, mean|rho| 0.1110, rho>0.9 0.000, rho<-0.9 0.000
+test: Spearman(stored index, f1) over 3000 feeds: mean +nan, mean|rho| 0.1115, rho>0.9 0.000, rho<-0.9 0.000
+test: Spearman(stored index, category) over 3000 feeds: mean +nan, mean|rho| 0.1120, rho>0.9 0.000, rho<-0.9 0.000
+test: adjacent same-category share 0.2102 (within-feed shuffle of 2000 feeds: 0.2081 vs real on same feeds 0.2080)
+train: Spearman(stored index, pos) over 5000 feeds: mean -0.0006, share == 1: 0.000

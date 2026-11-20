@@ -1,0 +1,54 @@
+AGE-PROD CPU PROXY GATE - pre-declared plan (2026-11-12T21:40:29Z)
+Author: ageprod gate agent. CPU only (12 threads per process), no GPU, no existing file edited; everything new lives in
+nn_x/audit/ageprod/ (scripts ap01..ap03, out/).
+
+HARNESS (identical to the TRUNC fresh-sample replication nn_x/insights/review/r2_trunc_replicate.py)
+- Train sample: U2 = 150K train feeds (seed 2026, disjoint from data_usage's U, natural mix, holdout excluded),
+  nn_x/insights/review/out/gb/U2_{X,meta}. Features: the 53 leak-free GBDT features of 06_gbdt_cache.py.
+- LightGBM lambdarank, truncation level 1000, label_gain [0,1], lr 0.05, 63 leaves, min_data_in_leaf 100,
+  feature/bagging fraction 0.8, lambda_l2 10, max_bin 255, 400 rounds, 12 threads; seeds 11, 12, 13, 14 (the r2 seeds).
+- Readouts: val (data_usage val cache, 14,423 feeds, exact metric) and HO (10K train-period random-like M>=50 holdout
+  feeds) at 100/200/300/400 rounds; per-feed NDCG saved; prediction = f(x), never with an offset.
+- base and tprod1 are RE-RUN by the new script (same seeds/params) so that all arms come from one code path; the
+  re-run is checked against the stored r2 per-feed results (reproduction check, reported).
+
+AGE MARGIN (training-only additive logit offset, init_score, production rows only)
+- age = time since the listing first appeared = age_hours(f4) with data/feats/life_f4_age_knots.npy, EXACTLY as
+  a06/a07/a08: u = f4*64, k = clip(floor(u), 1, 62), linear interpolation between knots[k] and knots[k+1];
+  f4 >= 63/64 - 1e-6 -> NaN -> treated as 1e8 h (last bin), as a08 does.
+- 8 bins (a08 edges, hours): [0,3) [3,12) [12,24) [24,72) [72,336) [336,2160) [2160,8760) [8760,inf).
+- L[b] = log( (rate_prod[b] / base_prod) / (rate_expl[b] / base_expl) ), unweighted positive rates over candidate
+  rows of the FULL train set (holdout feeds excluded): production = cls 0 of data_usage out/train_feeds.parquet
+  (NN p_random <= 0.5, which includes every M<50 feed), exploration-like = cls 1 (p_random > 0.5, M>=50 only).
+  Production lifts are computed per M bucket (M<50, M>=50) against the single M>=50 exploration reference (no
+  exploration reference exists for M<50: the NN rule forces p_random = 0 there). Counts, rates, lifts and SEs are
+  reported (ap01), plus the a08 definition (p>0.9 vs p<0.05, M>=50) and the lifts on the U2 sample as checks.
+- Applied: init[row] += a * L[M bucket of the feed, age bin of the row] for every row of a production (cls 0) feed;
+  0 on exploration-like rows; never at inference (val / HO / stale predictions are f(x)).
+
+ARMS (all four seeds each)
+  base | age1 (a = 1) | tprod1 (r2's truncation offset: per-group rkend 0-2 lifts estimated on U2, production rows
+  only) | tprod1+age1 (sum of both offsets).
+  Secondary, reported, not gating: ageh1 (age offset on M>=50 production rows only), age0.5 (a = 0.5).
+
+PAIRED READOUT
+- Per feed: seed-mean (4 seeds) NDCG per arm; paired delta per feed; SE = sd(delta)/sqrt(n feeds) (as r2b).
+- PRIMARY ROUND = 200 (the round quoted for the r2 replication, +0.0031 val / +0.0020 holdout); 100/300/400 reported.
+- Slices: M<50 / M>=50; Tue (val day 20718) / Thu (20720); mean age of the feed's positives in the c04 buckets
+  (<1d, 1-3d, 3-7d, 7-24d, 24-76d, >76d); youngest positive in the 8 a08 age bins; "any positive < 3 h" vs none.
+- Stale-val replay ('both' coverage of nn_x/r6/stale_pred.py): val features it_hist_{all,et1,et2,et3,et4}_luo and
+  seq_cv_{invd20,pop,norm} replaced by nn_x/r6/stale_cf/both_*.npy; it_hist_all_luo_z recomputed as the within-feed
+  z-score of the replaced raw count (the live file IS that z-score: corr 1.0, max |d| 8e-7). The pre2both half of the
+  scenario does not apply (no pre2_* feature in the GBDT set). Every arm is also read on this stale val.
+
+GATE (binding, declared before any arm is run) - at the PRIMARY round (200), seed-mean paired deltas:
+  PASS iff
+  (i)   age1 - base on val  > +1 SE;
+  (ii)  age1 - base on holdout >= 0;
+  (iii) the gain is not confined to < 3 h positives: age1 - base on the val feeds with NO positive younger than 3 h
+        is > 0 AND its contribution (slice mean delta x slice feed share) is >= 50% of the total val delta;
+  (iv)  tprod1+age1 - tprod1 on val > +1 SE (it must add on top of TRUNC).
+  Advisory (reported with the verdict, not part of PASS/FAIL): stale-val age1 - base >= -1 SE; holdout
+  tprod1+age1 - tprod1 >= -1 SE; the 300-round readout agrees in sign with 200.
+  FAIL otherwise. On PASS the NN spec (bucket edges, lifts, where applied) is written to out/age_lifts_mbucket.json
+  in the style of nn_x/w5/trunc_lifts_mbucket.json; on FAIL the same file is written for the record and marked so.

@@ -1,0 +1,54 @@
+WHERE COULD THE LEADER GET A LOT OF INFORMATION? SYNTHESIS, 18 NOV, AFTER CRITIC (new numbers in critic/c01_checks.log)
+
+Gap: the leader is +0.00305 above us (1.7-2.5 cross-team SE). Ours is the best of 14 near-copies (+0.00041 over their mean), so the leader is ~+0.0035 above our real level. #2 is +0.00207 above us, #3 +0.00127 (past_audits/board_update.log).
+
+1. HYPOTHESES
+
+H-A. Better modelling or use of training data. P 0.64.
+For: the top 8 form a continuum (gaps 0.00008-0.00098). From 13 to 18 Nov four rivals passed 0.3955 and six passed us. Distillation added +0.0010 public in a day. The model is data-limited: 80% of users costs 0.0017 for the pool (docs/07).
+Against: most of 309 ideas were null for the pool; the error is calibrated (all ~660 slices fixed: +0.00035).
+Test: distillation on the unlabelled val+test feeds was never run. Precedent, U20: teacher targets on 624,752 train feeds read +0.00069 ± 0.00057 / −0.00017 ± 0.00032 for the pool, and a feed's own inputs added nothing (+0.00013 ± 0.00076 long, −0.00022 ± 0.00106 short; NEXT_1115/u20wit). A cross-fitted half is 3.4% of that fold: +0.00002 if gains scale linearly, +0.0003 at 13x per feed. EV about +0.0001, P(≥ +0.001) about 0.02.
+
+H-B. Public luck and best-of-K selection. P 0.12.
+For: the leader is 0.5-0.8 SE above #2. With 30-100 near-copies the best file sits +0.0004 (our sd 0.00021) to +0.0013 (sd 0.0005) above its family mean.
+Against: the leader's single entry carries about 0 optimism; ours carries +0.0004.
+Net of optimism on both sides, #2 is +0.0012-0.0020 above our level, #3 +0.0004-0.0013, and #4-#7 are within 1 SE. Private order open.
+
+H-C. An entry linked to the organiser or Avito, with production inputs. P 0.08.
+For: the score has been frozen since 12 Nov over 3 entries.
+Against: six teams on anonymised data are 0.0010-0.0029 below it.
+
+H-D. Heavier use of validation labels. P 0.06.
+For: trees on train+val read +0.0015 ± 0.0007 per seed, but in a 0.371-level GBDT. The fine-tune gave +0.0005 public.
+Against: about 0 for the pool. Val in the cooldown +0.00014, refit −0.00025. EV ≤ +0.0003.
+
+H-E. A small in-file channel shared by many teams. P 0.04.
+For: the forward f5 echo carries information.
+Against: every channel reads ≤ +0.00003 nested on the best file and ≤ +0.00048 on older pools, none passing. Forward forms break our rule.
+
+H-F. Fresh popularity from outside the files (crawled view counters). P 0.03.
+For: the only gap of the right size. The popularity inputs are worth 0.0074 NDCG at 1.75 days old, 0.0023 at 5.69, 0.0009 at 11.23; public is 9.34 days old (docs/02). Category plus posting minute singles out 47% of test items in the data (outside_practice/p01).
+Against: ~2.4M pages behind anti-bot; site-side uniqueness of the key is unmeasured. The counters are cumulative up to the crawl date, so they hold later popularity, not popularity at feed time.
+Rules: grey at best. §10.3 binds us to Avito's confidentiality terms; under §8.6.3 the organiser checks the top 10. It breaks our rule: a counter includes the user's own later view.
+
+Removed by numbers (0.03 together):
+- merge: 1-entry row, the #2/#3 rows stayed, the team count rose;
+- probing: needs extra accounts, a rule break;
+- calendar priors: +0.00002 ± 0.00018;
+- format tricks: ties put negatives first (H6).
+
+2. DO THE PROBES SHOW INFORMATION THE BEST FILE LACKS?
+In likelihood yes, in NDCG no (FD16P20@m0.4_0.2, val 0.40293, nested over user halves):
+- Same-user later snapshots (leak): +0.0248 ± 0.0030 nats per click, +0.00452 ± 0.00047 NDCG on val, 0 on public.
+- Forward f5 echo (leak class): +0.00457 ± 0.00070 nats but −0.00015 ± 0.00038 NDCG. Its content is "f5 flat, so not clicked", at the bottom of the lists.
+- Lost history (legal): +0.00115 ± 0.00040 nats, +0.00000 NDCG. Its 635 rows (24 positives) already rank high: mean relative rank 0.22 against 0.50. Putting them first costs −0.00059 ± 0.00022.
+- Legal as-of channels and other users' later activity: −0.00011 to −0.00038, against placebos of −0.00004 to −0.00024.
++0.003 needs 0.009-0.017 nats per click at the top of the lists. Lost history holds 7-13% of that; the f5 echo holds 28-51%, at the wrong end (data_channels/logs/*_v2.log).
+
+3. BOTTOM LINE AND NEXT STEP
+No channel in the files matches the gap. The leader most likely has a better model, with some luck over #2. #2 and #3 hold a real but smaller edge (+0.0004 to +0.002). Fresh popularity is the only input gap of the right size, and it lies outside the files, is grey under §10.3 and breaks our rule.
+Submissions close 8 Dec 23:59 MSK:
+1. Stop channel hunting.
+2. Optional, on idle GPUs: the cross-fitted transductive screen. Declare the dose (2-5% of cooldown batches) and the 8-seed rule first. Cost: 16 re-cools at ~0.25 GPU-h, fine-tunes, and a val/test loader the trainer lacks. Expect no pass (the rule passes 56% of true +0.0005 effects). An all-data file must stay cross-fitted on test users, or it learns from users' later feeds.
+3. Merge, decided by the owner by 1 Dec: sharing predictions after 2 Dec 12:00 MSK disqualifies (§5.5). Gain over the better pool: +0.0002-0.0004 for an unknown partner (docs/07), up to +0.0008 for an equal one (GLOBAL_RECAP_1113), 0 to +0.0004 if the partner is 0.001 stronger (MERGE_PROTOCOL). The largest expected gain here, if a partner agrees.
+4. Snapshot the board daily with entries per row.

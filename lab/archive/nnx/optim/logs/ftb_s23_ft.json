@@ -1,0 +1,94 @@
+{
+  "args": {
+    "variant": "s2_base_s23",
+    "out": "ftb_s23",
+    "epochs": 6,
+    "lr": 5e-05,
+    "wd": 0.02,
+    "warmup": 30,
+    "cand_budget": 8192,
+    "max_feeds": 128,
+    "loss": "softmax",
+    "loss_norm": "batch",
+    "folds": 5,
+    "seeds": 1,
+    "drop": null,
+    "from_scratch": false,
+    "extra": "it_cand_cnt_train,it_tr_coec,it_tr_coec_rk,it_tr_coec_z,it_tr_coec_gap,it_tr_ctr,it_tr_pos,u_tr_ctr,u_tr_feeds,hour,centrality,it_hist_all_luo,it_hist_all_luo_rk,it_hist_all_luo_z,it_hist_all_luo_gap,it_hist_et1_luo,it_hist_et2_luo,it_hist_et3_luo,it_hist_et4_luo,it_hist_et5_luo,it_hist_et6_luo,it_hist_et7_luo,it_hist_et8_luo,it_hist_et9_luo,it_hist_et10_luo,seq_cv_invd20,seq_cv_invd20_rk,seq_cv_pop,seq_cv_norm,seq_max_all,seq_top3,seq_argmax_hpos,ctx_nd_c80,ctx_nd_c90,ctx_nd_c95,ctx_nd_dupb_f1,ctx_nd_dupb_h,ctx_nd_dupb_u,ctx_nd_hcent,ctx_nd_knn_f1,ctx_nd_knn_h,ctx_nd_knn_h_dev,ctx_nd_knn_u,ctx_nd_knn_u_dev,ctx_nd_max,ctx_nd_mean,ctx_nd_top5h,ctx_nd_top5u,ctx_nd_ucent",
+    "extra_lr_mult": 10.0,
+    "add_random": 0,
+    "pseudo": "",
+    "w_test": 0.3,
+    "pseudo_n": 12000,
+    "pseudo_T": 1.0,
+    "select": "snapshot",
+    "decay": "const",
+    "ema": 0.0,
+    "ema_start": 0.5,
+    "lpft_epochs": 0,
+    "lpft_lr": 0.0005
+  },
+  "oof_by_epoch": [
+    0.3825872120291941,
+    0.3853356146443426,
+    0.38585191536352137,
+    0.38496987154595463,
+    0.38436648353111674,
+    0.38307531579441123,
+    0.3820609108480767
+  ],
+  "best_epoch": 2,
+  "oof_ndcg_best_epoch": 0.38585191536352137,
+  "oof_ndcg_snapshot": 0.3847988495793494,
+  "saved": "snapshot",
+  "fold_curves": [
+    [
+      0.37577115281631085,
+      0.37952104273494514,
+      0.38081911747818104,
+      0.37902942944141726,
+      0.37822740278810596,
+      0.37783893256919815,
+      0.3767102809152625
+    ],
+    [
+      0.37843267351913024,
+      0.38084555391122327,
+      0.3818319992239104,
+      0.38208614934313756,
+      0.3822227605958599,
+      0.3802338613322838,
+      0.37886641233550367
+    ],
+    [
+      0.3854869965359266,
+      0.38935716427002104,
+      0.389395727634285,
+      0.38920155019956215,
+      0.3890286326958374,
+      0.38638143895168847,
+      0.38749845987487064
+    ],
+    [
+      0.38929554213082207,
+      0.3929802161763173,
+      0.3919099848404144,
+      0.3908616269972813,
+      0.38976567763363756,
+      0.38910165769839267,
+      0.3865570449393921
+    ],
+    [
+      0.38395249362270434,
+      0.3839762747294199,
+      0.3853046578009246,
+      0.38367219414978054,
+      0.38258919937019903,
+      0.38182234296783335,
+      0.3806734336994248
+    ]
+  ],
+  "ema_oof_by_epoch": null,
+  "oof_ndcg_ema_final": null,
+  "minutes": 8.204956026871999
+}

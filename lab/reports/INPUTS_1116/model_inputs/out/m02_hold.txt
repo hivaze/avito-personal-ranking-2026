@@ -1,0 +1,85 @@
+== M2 gate calibration on hold: 30000 feeds, 4630966 rows
+
+--- block pop8_drop: 8 popularity / co-visitation inputs removed (the record's control); base abl_e10_xdrop_pop / twin w5_e10_base, seeds (951, 952, 953, 954)
+   base pool 0.31476, twin pool 0.32328; TRUE trained-input value +0.00852 +- 0.00066 (z +12.9); selected checkpoints
+   last-step checkpoints: TRUE +0.00824 +- 0.00066
+   member-level deltas per seed: ['+0.00883', '+0.00756', '+0.00817', '+0.00773'] mean +0.00807
+   linear nested seq_cv_invd20_fz       +0.00086 +- 0.00029  w [0.05, 0.02]  = +0.10 of true
+   linear nested seq_cv_pop_fz          +0.00012 +- 0.00013  w [0.02, 0.02]  = +0.01 of true
+   linear nested seq_cv_norm_fz         +0.00085 +- 0.00029  w [0.05, 0.02]  = +0.10 of true
+   linear nested it_hist_all_luo_fz     +0.00045 +- 0.00026  w [0.05, 0.05]  = +0.05 of true
+   linear nested it_hist_et1_luo_fz     +0.00024 +- 0.00021  w [0.02, 0.05]  = +0.03 of true
+   linear nested it_hist_et2_luo_fz     +0.00039 +- 0.00026  w [0.05, 0.05]  = +0.05 of true
+   linear nested it_hist_et3_luo_fz     +0.00049 +- 0.00026  w [0.05, 0.05]  = +0.06 of true
+   linear nested it_hist_et4_luo_fz     +0.00047 +- 0.00024  w [0.05, 0.05]  = +0.06 of true
+   LINEAR share seq_cv_invd20        +0.100  [95% +0.037, +0.165]
+   LINEAR share seq_cv_pop           +0.014  [95% -0.016, +0.044]
+   LINEAR share seq_cv_norm          +0.100  [95% +0.035, +0.167]
+   LINEAR share it_hist_all_luo      +0.052  [95% -0.004, +0.110]
+   LINEAR share it_hist_et1_luo      +0.028  [95% -0.018, +0.075]
+   LINEAR share it_hist_et2_luo      +0.046  [95% -0.017, +0.107]
+   LINEAR share it_hist_et3_luo      +0.057  [95% -0.002, +0.118]
+   LINEAR share it_hist_et4_luo      +0.056  [95% +0.004, +0.112]
+   LINEAR best-of-8 (post hoc): point +0.100; the max re-picked inside each bootstrap draw: median +0.109, 95% [+0.057, +0.169]
+  [pop8_drop] fit half 1: scale 1.0, cfg 0, rounds 250, inner gain +0.00250 -> other half +0.00193 +- 0.00045 (n 15017) [97s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 72, 90, 126, 188, 241, 250], [0, 87, 141, 199, 217, 213, 168], [0, 96, 131, 221, 217, 163, 109]]
+  [pop8_drop] fit half 0: scale 1.0, cfg 1, rounds 80, inner gain +0.00169 -> other half +0.00251 +- 0.00047 (n 14983) [180s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 82, 81, 129, 138, 145, 143], [0, 106, 114, 146, 169, 135, 119], [0, 105, 113, 133, 140, 120, 113]]
+  [pop8_drop] BOTH halves: +0.00222 +- 0.00033 (z +6.82) over 30000 feeds; all-feed mean +0.00222; top gain: it_hist_et1_luo 0.17, seq_cv_pop 0.10, it_hist_all_luo 0.07, seq_cv_pop_fz 0.07, it_hist_et1_luo_fz 0.07, it_hist_et4_luo 0.06, it_hist_et4_luo_fz 0.06, it_hist_all_luo_fz 0.06
+   GBDT residual +0.00222 +- 0.00033 (z +6.82); share +0.261  [95% +0.190, +0.329]
+   detectability: linear best z +2.99; GBDT z +6.82; true z +12.94
+
+--- block pre2_drop: encoder scalars removed; base abl_e10_xdrop_pre2 / twin w5_e10_base, seeds (951, 952)
+   base pool 0.32168, twin pool 0.32226; TRUE trained-input value +0.00059 +- 0.00049 (z +1.2); selected checkpoints
+   last-step checkpoints: TRUE +0.00049 +- 0.00050
+   member-level deltas per seed: ['+0.00131', '+0.00004'] mean +0.00067
+   linear nested pre2_fe_z_fz           +0.00027 +- 0.00015  w [0.05, 0.05]  = +0.46 of true
+   linear nested pre2_new_z_fz          +0.00028 +- 0.00019  w [0.1, 0.05]  = +0.49 of true
+   linear nested pre2_fe_s_fz           +0.00026 +- 0.00015  w [0.05, 0.05]  = +0.44 of true
+   linear nested pre2_new_s_fz          +0.00007 +- 0.00027  w [0.1, 0.2]  = +0.11 of true
+   linear nested pre2_hmax32_fz         -0.00019 +- 0.00014  w [0.1, -0.02]  = -0.33 of true
+   LINEAR share pre2_fe_z            +0.458  [95% -4.131, +4.681]
+   LINEAR share pre2_new_z           +0.485  [95% -4.285, +4.929]
+   LINEAR share pre2_fe_s            +0.442  [95% -3.748, +4.595]
+   LINEAR share pre2_new_s           +0.114  [95% -3.302, +3.244]
+   LINEAR share pre2_hmax32          -0.331  [95% -4.056, +3.355]
+   LINEAR best-of-5 (post hoc): point +0.485; the max re-picked inside each bootstrap draw: median +0.544, 95% [+0.039, +7.875]
+  [pre2_drop] fit half 1: scale 1.0, cfg 0, rounds 10, inner gain +0.00002 -> other half +0.00007 +- 0.00007 (n 15017) [82s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 2, -11, -15, -35, -42, -17], [0, -8, -12, -26, -40, -56, -32], [0, -27, -29, -58, -63, -58, -121]]
+  [pre2_drop] fit half 0: scale 1.0, cfg 0, rounds 250, inner gain +0.00023 -> other half -0.00027 +- 0.00025 (n 14983) [186s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 10, -11, -16, -13, 15, 23], [0, -3, -6, -5, -15, -20, -57], [0, -14, -20, -21, -29, -47, -114]]
+  [pre2_drop] BOTH halves: -0.00010 +- 0.00013 (z -0.77) over 30000 feeds; all-feed mean -0.00010; top gain: pre2_hmax32_fz 0.19, pre2_hmax32 0.10, pre2_fe_s 0.09, pre2_new_s 0.08, M 0.08, hour 0.08, pre2_new_s_fz 0.06, pre2_new_z_fz 0.06
+   GBDT residual -0.00010 +- 0.00013 (z -0.77); share -0.170  [95% -2.591, +2.051]
+   detectability: linear best z +1.77; GBDT z -0.77; true z +1.18
+
+--- block xp_imp_add: ONE column added to the popularity-free view; base abl_e10_xdrop_pop / twin abl_e10_pop1, seeds (951, 952, 953, 954)
+   base pool 0.31476, twin pool 0.31677; TRUE trained-input value +0.00201 +- 0.00046 (z +4.4); selected checkpoints
+   last-step checkpoints: TRUE +0.00164 +- 0.00046
+   member-level deltas per seed: ['+0.00183', '+0.00184', '+0.00228', '+0.00142'] mean +0.00184
+   linear nested xp_imp_c50_fz          -0.00021 +- 0.00026  w [0.1, 0.02]  = -0.10 of true
+   LINEAR share xp_imp_c50           -0.103  [95% -0.467, +0.142]
+   LINEAR best-of-1 (post hoc): point -0.103; the max re-picked inside each bootstrap draw: median -0.100, 95% [-0.467, +0.142]
+  [xp_imp_add] fit half 1: scale 1.0, cfg 0, rounds 150, inner gain +0.00065 -> other half +0.00004 +- 0.00023 (n 15017) [77s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 25, 28, 40, 39, 65, 24], [0, 24, 13, 37, 45, -2, -24], [0, 33, 29, 14, -2, -21, -37]]
+  [xp_imp_add] fit half 0: scale 1.0, cfg 2, rounds 80, inner gain +0.00044 -> other half +0.00009 +- 0.00032 (n 14983) [154s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 6, 17, 16, 10, 17, 22], [0, 14, 19, 19, 38, 26, 8], [0, 17, 17, 38, 44, 32, -7]]
+  [xp_imp_add] BOTH halves: +0.00007 +- 0.00020 (z +0.33) over 30000 feeds; all-feed mean +0.00007; top gain: xp_imp_c50_fz 0.27, H 0.20, xp_imp_c50 0.18, hour 0.17, M 0.17, guest 0.01, base_z 0.00, base_rk 0.00
+   GBDT residual +0.00007 +- 0.00020 (z +0.33); share +0.033  [95% -0.193, +0.221]
+   detectability: linear best z -0.80; GBDT z +0.33; true z +4.38
+
+--- block xp_ctr_add: ONE label statistic added to the popularity-free view; base abl_e10_xdrop_pop / twin abl_e10_pop2, seeds (951, 952, 953, 954)
+   base pool 0.31476, twin pool 0.31625; TRUE trained-input value +0.00149 +- 0.00044 (z +3.4); selected checkpoints
+   last-step checkpoints: TRUE +0.00143 +- 0.00045
+   member-level deltas per seed: ['+0.00098', '+0.00170', '+0.00100', '+0.00115'] mean +0.00120
+   linear nested xp_ctr_c_fz            +0.00026 +- 0.00024  w [0.05, 0.05]  = +0.17 of true
+   LINEAR share xp_ctr_c             +0.172  [95% -0.165, +0.566]
+   LINEAR best-of-1 (post hoc): point +0.172; the max re-picked inside each bootstrap draw: median +0.167, 95% [-0.165, +0.566]
+  [xp_ctr_add] fit half 1: scale 1.0, cfg 1, rounds 20, inner gain +0.00046 -> other half +0.00010 +- 0.00021 (n 15017) [67s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 22, 35, 35, 45, 19, 15], [0, 22, 46, 31, 20, -4, -70], [0, 39, 29, 3, -30, -40, -85]]
+  [xp_ctr_add] fit half 0: scale 1.0, cfg 0, rounds 150, inner gain +0.00046 -> other half +0.00038 +- 0.00028 (n 14983) [137s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 15, 14, 20, 24, 46, 21], [0, 22, 33, 35, 12, -2, -50], [0, 17, 16, 28, -14, -41, -110]]
+  [xp_ctr_add] BOTH halves: +0.00024 +- 0.00018 (z +1.37) over 30000 feeds; all-feed mean +0.00024; top gain: xp_ctr_c 0.32, xp_ctr_c_fz 0.25, hour 0.16, M 0.15, H 0.11, guest 0.00, base_z 0.00, base_rk 0.00
+   GBDT residual +0.00024 +- 0.00018 (z +1.37); share +0.162  [95% -0.087, +0.474]
+   detectability: linear best z +1.07; GBDT z +1.37; true z +3.41
+
+saved per-feed deltas -> out/m02_hold.npz

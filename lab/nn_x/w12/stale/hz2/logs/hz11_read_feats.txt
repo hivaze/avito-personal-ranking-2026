@@ -1,0 +1,24 @@
+=== HZ11 read 2026-11-15T04:51:00Z; view feats; holdout feeds of days >= Sep 13: 13424; +- = 1 SE paired per feed ===
+ path control (CPU fp32 "stored" replay vs nn_x/w5/preds/holdout/nn_<v>_holdout.npy, same feeds):
+   w5_cd_m02ref_r101      NDCG GPU file 0.31841 CPU replay 0.31834 diff -0.00006 +- 0.00014 (z -0.44) corr(z) 0.99994 -> ok
+   w5_cd_m02ref_r102      NDCG GPU file 0.31903 CPU replay 0.31895 diff -0.00008 +- 0.00013 (z -0.66) corr(z) 0.99993 -> ok
+   w5_cd_m02ref_r103      NDCG GPU file 0.31904 CPU replay 0.31906 diff +0.00002 +- 0.00013 (z +0.16) corr(z) 0.99993 -> ok
+   w5_cd_m02ref_r104      NDCG GPU file 0.31965 CPU replay 0.31962 diff -0.00003 +- 0.00014 (z -0.23) corr(z) 0.99993 -> ok
+   w5_cd_hzcd_r101        NDCG GPU file 0.31822 CPU replay 0.31823 diff +0.00001 +- 0.00014 (z +0.05) corr(z) 0.99994 -> ok
+   w5_cd_hzcd_r102        NDCG GPU file 0.31814 CPU replay 0.31836 diff +0.00023 +- 0.00014 (z +1.66) corr(z) 0.99993 -> ok
+   w5_cd_hzcd_r103        NDCG GPU file 0.31930 CPU replay 0.31937 diff +0.00007 +- 0.00014 (z +0.49) corr(z) 0.99993 -> ok
+   w5_cd_hzcd_r104        NDCG GPU file 0.31927 CPU replay 0.31916 diff -0.00011 +- 0.00014 (z -0.80) corr(z) 0.99993 -> ok
+ PATH CONTROL VALID
+ levels, days >= Sep 13: pool R stored 0.32133 view 0.31757 | pool H stored 0.32177 view 0.31825
+ days >= Sep 13   n 13424 | Q_view +0.00067 +- 0.00041 (z +1.64) | Q_stored +0.00044 +- 0.00040 (z +1.11) | I = Q_view - Q_stored +0.00023 +- 0.00048 (z +0.49) | dR -0.00376 +- 0.00073 (z -5.12) | dH -0.00352 +- 0.00069 (z -5.09)
+ Sep 13-14        n  5145 | Q_view +0.00065 +- 0.00068 (z +0.95) | Q_stored -0.00048 +- 0.00065 (z -0.74) | I = Q_view - Q_stored +0.00113 +- 0.00080 (z +1.41) | dR -0.00726 +- 0.00133 (z -5.45) | dH -0.00613 +- 0.00128 (z -4.77)
+ Sep 17-19        n  8279 | Q_view +0.00069 +- 0.00052 (z +1.34) | Q_stored +0.00101 +- 0.00050 (z +2.01) | I = Q_view - Q_stored -0.00032 +- 0.00060 (z -0.54) | dR -0.00158 +- 0.00085 (z -1.85) | dH -0.00190 +- 0.00079 (z -2.41)
+ private-like     n  9379 | Q_view +0.00048 +- 0.00049 (z +0.99) | Q_stored +0.00035 +- 0.00047 (z +0.73) | I = Q_view - Q_stored +0.00014 +- 0.00056 (z +0.24) | dR -0.00339 +- 0.00088 (z -3.86) | dH -0.00326 +- 0.00082 (z -3.98)
+ public-like      n  4045 | Q_view +0.00112 +- 0.00078 (z +1.44) | Q_stored +0.00066 +- 0.00074 (z +0.90) | I = Q_view - Q_stored +0.00046 +- 0.00091 (z +0.51) | dR -0.00461 +- 0.00133 (z -3.46) | dH -0.00415 +- 0.00130 (z -3.20)
+ member level (mean of the 4 paired single-model differences), days >= Sep 13: Q_view +0.00064 +- 0.00031 (z +2.09) | Q_stored -0.00021 +- 0.00029 (z -0.73) | I +0.00085 +- 0.00034 (z +2.51)
+   root 101: Q_view +0.00094 +- 0.00062 (z +1.53) | Q_stored -0.00012 +- 0.00059 (z -0.20)
+   root 102: Q_view +0.00003 +- 0.00053 (z +0.05) | Q_stored -0.00058 +- 0.00052 (z -1.12)
+   root 103: Q_view +0.00154 +- 0.00053 (z +2.92) | Q_stored +0.00031 +- 0.00047 (z +0.67)
+   root 104: Q_view +0.00006 +- 0.00049 (z +0.13) | Q_stored -0.00046 +- 0.00049 (z -0.95)
+ Q_stored from the stored GPU files: days >= Sep 13 +0.00061 +- 0.00039 (z +1.54) | all 30,000 -0.00011 +- 0.00028 (z -0.40) | days < Sep 13 -0.00069 +- 0.00038 (z -1.80)
+ READING (ADDENDUM 6): not separated at 4 models / 13,424 feeds

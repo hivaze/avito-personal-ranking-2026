@@ -1,0 +1,39 @@
+=== (1) input lists ===
+  base smoke log: train-stage extra features (34); nx3 smoke log: (37): last five ['pre2_hmax32', 'has:pre2_fe', 'nx_rp3_z', 'nx_rp3_rk', 'has:nx_rp3_z']; stored control w5_e10_base_s951: (34)
+  [ok] base smoke lists 34 inputs, identical (names and order) to the stored control w5_e10_base_s951 
+  [ok] nx3 smoke lists 34 + 3 = 37 inputs = the base list + nx_rp3_z, nx_rp3_rk, has:nx_rp3_z (appended last) 
+  nx3 log: ["abl xt_add: appended 3 xt columns ['nx_rp3_z', 'nx_rp3_rk', 'has:nx_rp3_z'] after the 34 kept (indices [34, 35, 36]; +3 dense inputs)"]
+=== (2) command ===
+  base smoke vs stored control, keys with different values (smoke, control): {'cliplog': (10, 50), 'epochs': (1.0, 10.0), 'eval_every': (25, 2500), 'seed': (23, 951), 'select_min_step': (25, 12000), 'train_feeds': (20000, 0), 'variant': ('abl_smoke_base_s23', 'w5_e10_base_s951')}
+  keys only in the abl harness (must be off): {'hzcd': False, 'kd_T': 1.0, 'kd_file': '', 'kd_w': 0.5, 'kv64': 0, 'retr_cat': 0, 'trunc_lifts': '', 'val_fold': -1, 'val_mix': 0.0, 'xt_add': '', 'xt_add_relonly': '', 'xt_exclude': '', 'xt_rel_extra': ''}; keys only in the stored control: {}
+  [ok] base smoke command = stored control command apart from variant, seed and the five smoke keys; every input / distillation flag of the abl harness off 
+  nx3 smoke vs base smoke, keys with different values: {'variant': ('abl_smoke_nx3_s23', 'abl_smoke_base_s23'), 'xt_add': ('nx_rp3_z,nx_rp3_rk,has:nx_rp3_z', '')}
+  [ok] nx3 smoke command = base smoke command + --xt_add nx_rp3_z,nx_rp3_rk,has:nx_rp3_z 
+=== (3) checkpoint cfg ===
+  [ok] cfg of the base smoke checkpoint = cfg of w5_e10_base_s951 (every key) differences: {}
+  nx3 cfg vs base cfg, differing keys: {'n_dense': (107, 104), 'xt_names': ('list[37]', 'list[34]')}
+  [ok] nx3 cfg: xt_names = base + 3, n_dense 104 -> 107, nothing else differs (xt_rel, xt_relonly, xt_idcols unchanged) 
+  tensors in the state dict: base 1008720 values, nx3 1009497 values (difference 777; expected 3 x (256 + 1) first-layer / wide weights + 2 x 3 statistics = 777)
+  [ok] parameter difference is exactly the three new input columns c_mlp.0.weight (256, 107), wide.weight (1, 107)
+=== (4) smoke control against the precedent ===
+  [ok] base smoke f_mean / f_std (104 inputs) bitwise equal to nn_x/abl/ckpt/abl_smoke_kv64_s23.pt (seed 23, 20,000 feeds, same 34 inputs: True) max abs diff mean 0.000e+00 std 0.000e+00
+  [ok] base smoke f_mean / f_std (104 inputs) bitwise equal to nn_x/r7/ckpt/r7_smoke-base_s23.pt (seed 23, 20,000 feeds, same 34 inputs: True) max abs diff mean 0.000e+00 std 0.000e+00
+  base smoke: holdout: 30000 random-like train feeds excluded from training | stored abl_smoke_kv64_s23: holdout: 30000 random-like train feeds excluded from training | nx3 smoke: holdout: 30000 random-like train feeds excluded from training
+  base smoke: p_random: mean 0.0570, feeds>0.5 164118, training feeds 19827 | stored abl_smoke_kv64_s23: p_random: mean 0.0570, feeds>0.5 164118, training feeds 19827 | nx3 smoke: p_random: mean 0.0570, feeds>0.5 164118, training feeds 19827
+  base smoke: params: 1.01M | stored abl_smoke_kv64_s23: params: 1.03M | nx3 smoke: params: 1.01M
+  base smoke: muon: 46 matrices, 0.944M params | stored abl_smoke_kv64_s23: muon: 48 matrices, 0.961M params | nx3 smoke: muon: 46 matrices, 0.945M params
+  base smoke: train feeds 19827, steps/epoch 73, total steps 73 | stored abl_smoke_kv64_s23: train feeds 19827, steps/epoch 73, total steps 73 | nx3 smoke: train feeds 19827, steps/epoch 73, total steps 73
+  base smoke: cooldown mix: p=0.02 from step 58, exploration pool 843 feeds | stored abl_smoke_kv64_s23: cooldown mix: p=0.02 from step 58, exploration pool 843 feeds | nx3 smoke: cooldown mix: p=0.02 from step 58, exploration pool 843 feeds
+  [FAIL] data lines of the base smoke log (holdout, p_random / training feeds, steps, cooldown pool, muon) equal to the stored seed-23 smoke abl_smoke_kv64_s23 
+  for scale only (different object): base smoke f_mean against the stored control w5_e10_base_s951 (all training feeds, seed 951): max abs diff 0.0323
+=== (5) nx3 inputs as the model standardises them ===
+  [ok] nx3 f_mean / f_std on the 104 old positions (new columns at 94, 95, 96 removed) bitwise equal to the base smoke max abs diff mean 0.000e+00 std 0.000e+00
+  new positions over the 40 statistic batches: nx_rp3_z mean -0.0031 sd 0.6367; nx_rp3_rk mean +0.00000 sd 0.1413; has:nx_rp3_z mean 0.4571 sd 0.4982
+  the installed train files as the loader transforms them, 5,000,000 random rows of ALL train feeds: nx_rp3_z mean -0.0034 sd 0.6398; nx_rp3_rk mean +0.00005 sd 0.1423; has mean 0.4669 sd 0.4989
+  [ok] new-column statistics of the model agree with the files (has share within 0.03, sd of z within 0.05, sd of rk within 0.02) 
+=== (6) outputs ===
+  abl_smoke_base_s23: best step 73, val NDCG 0.34384; last eval step 73: val 0.34384 holdout 0.26693; train 1.0 min; preds val (1389971,) test (2904806,) holdout (4630966,)
+  [ok] abl_smoke_base_s23: predictions written for val (1,389,971), test (2,904,806), holdout (4,630,966), all finite 
+  abl_smoke_nx3_s23: best step 73, val NDCG 0.34170; last eval step 73: val 0.34170 holdout 0.26183; train 1.0 min; preds val (1389971,) test (2904806,) holdout (4630966,)
+  [ok] abl_smoke_nx3_s23: predictions written for val (1,389,971), test (2,904,806), holdout (4,630,966), all finite 
+SMOKE READ: FAIL

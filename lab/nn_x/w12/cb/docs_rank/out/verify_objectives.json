@@ -1,0 +1,709 @@
+[
+ {
+  "section": "a.objectives",
+  "name": "reference levels",
+  "status": "INFO",
+  "detail": "random scores NDCG 0.2810; teacher score NDCG 0.7748; train 600 feeds / 44411 rows, eval 200 feeds / 15389 rows, positives per feed 1.73, mean M 74.0, max M 300",
+  "sec": 0.0
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank (defaults, CPU, binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7239, pred sd 1.46, trees 40",
+  "sec": 1.12
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRankPairwise (defaults, CPU, binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6912, pred sd 0.617, trees 40",
+  "sec": 1.37
+ },
+ {
+  "section": "a.objectives",
+  "name": "QuerySoftMax (defaults, CPU, binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6625, pred sd 0.315, trees 40",
+  "sec": 0.17
+ },
+ {
+  "section": "a.objectives",
+  "name": "QueryRMSE (defaults, CPU, binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7261, pred sd 0.0636, trees 40",
+  "sec": 0.16
+ },
+ {
+  "section": "a.objectives",
+  "name": "PairLogit (defaults, CPU, binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7070, pred sd 1.68, trees 40",
+  "sec": 0.31
+ },
+ {
+  "section": "a.objectives",
+  "name": "PairLogitPairwise (defaults, CPU, binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6705, pred sd 0.628, trees 40",
+  "sec": 0.93
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart (defaults, CPU, binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7163, pred sd 1.45, trees 40",
+  "sec": 0.35
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=NDCG (defaults, CPU, binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7129, pred sd 0.00645, trees 40",
+  "sec": 14.04
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticFilter (defaults, CPU, binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5138, pred sd 0.0054, trees 40",
+  "sec": 0.19
+ },
+ {
+  "section": "a.objectives",
+  "name": "GroupQuantile (defaults, CPU, binary labels)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.3440, pred sd 0.00792, trees 40",
+  "sec": 0.27
+ },
+ {
+  "section": "a.objectives",
+  "name": "QueryCrossEntropy (defaults, CPU, binary labels)",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/options/catboost_options.cpp:661: QueryCrossEntropy loss function is not supported for CPU learning",
+  "sec": 0.01
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank (defaults, CPU, binary labels)",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/options/catboost_options.cpp:907: StochasticRank requires metric param",
+  "sec": 0.01
+ },
+ {
+  "section": "a.objectives",
+  "name": "unknown loss parameter YetiRank:bogus=1 (rejected, or silently ignored = NOEFFECT?)",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7239, pred sd 1.46, trees 40 (identical to 'YetiRank')",
+  "sec": 2.07
+ },
+ {
+  "section": "a.objectives",
+  "name": "unknown loss parameter QuerySoftMax:temperature=2 (rejected, or silently ignored?)",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/libs/metrics/metric.cpp:6324: QuerySoftMax metric shouldn't have temperature parameter. Valid parameters are beta, hints, lambda, proba_border, use_weights.",
+  "sec": 0.03
+ },
+ {
+  "section": "a.objectives",
+  "name": "unknown TRAINING parameter bogus_param=1",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoostRanker.__init__() got an unexpected keyword argument 'bogus_param'",
+  "sec": 0.0
+ },
+ {
+  "section": "a.objectives",
+  "name": "determinism of YetiRank (the NOEFFECT test relies on it)",
+  "status": "PASS",
+  "detail": "same seed twice identical: True; other seed corr 0.956; 2 threads instead of 4 identical: True",
+  "sec": 4.6
+ },
+ {
+  "section": "a.objectives",
+  "name": "determinism of YetiRank:mode=NDCG (the NOEFFECT test relies on it)",
+  "status": "PASS",
+  "detail": "same seed twice identical: True; other seed corr 0.942; 2 threads instead of 4 identical: True",
+  "sec": 6.36
+ },
+ {
+  "section": "a.objectives",
+  "name": "determinism of YetiRankPairwise (the NOEFFECT test relies on it)",
+  "status": "PASS",
+  "detail": "same seed twice identical: True; other seed corr 0.994; 2 threads instead of 4 identical: True",
+  "sec": 6.45
+ },
+ {
+  "section": "a.objectives",
+  "name": "determinism of QuerySoftMax (the NOEFFECT test relies on it)",
+  "status": "PASS",
+  "detail": "same seed twice identical: True; other seed corr 0.995; 2 threads instead of 4 identical: True",
+  "sec": 0.83
+ },
+ {
+  "section": "a.objectives",
+  "name": "determinism of QueryRMSE (the NOEFFECT test relies on it)",
+  "status": "PASS",
+  "detail": "same seed twice identical: True; other seed corr 0.959; 2 threads instead of 4 identical: True",
+  "sec": 0.77
+ },
+ {
+  "section": "a.objectives",
+  "name": "determinism of PairLogit (the NOEFFECT test relies on it)",
+  "status": "PASS",
+  "detail": "same seed twice identical: True; other seed corr 0.962; 2 threads instead of 4 identical: True",
+  "sec": 1.42
+ },
+ {
+  "section": "a.objectives",
+  "name": "determinism of LambdaMart (the NOEFFECT test relies on it)",
+  "status": "PASS",
+  "detail": "same seed twice identical: True; other seed corr 0.969; 2 threads instead of 4 identical: True",
+  "sec": 1.54
+ },
+ {
+  "section": "a.objectives",
+  "name": "determinism of StochasticRank:metric=NDCG (the NOEFFECT test relies on it)",
+  "status": "PASS",
+  "detail": "same seed twice identical: True; other seed corr 0.977; 2 threads instead of 4 identical: True",
+  "sec": 66.24
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=Classic",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7239, pred sd 1.46, trees 40 (identical to 'YetiRank')",
+  "sec": 0.99
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:permutations=3",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7317, pred sd 1.45, trees 40; differs from 'YetiRank' (corr 0.950)",
+  "sec": 0.71
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:permutations=30",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7277, pred sd 1.42, trees 40; differs from 'YetiRank' (corr 0.959)",
+  "sec": 1.97
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:decay=0.5",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7142, pred sd 1.44, trees 40; differs from 'YetiRank' (corr 0.950)",
+  "sec": 1.09
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:decay=0.99",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7278, pred sd 1.5, trees 40; differs from 'YetiRank' (corr 0.958)",
+  "sec": 1.09
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:top=10",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7239, pred sd 1.46, trees 40 (identical to 'YetiRank')",
+  "sec": 1.1
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:num_neighbors=3",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7239, pred sd 1.46, trees 40 (identical to 'YetiRank')",
+  "sec": 1.06
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:noise=Gauss",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7237, pred sd 1.27, trees 40; differs from 'YetiRank' (corr 0.946)",
+  "sec": 1.42
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:noise=Gauss;noise_power=0.3",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7064, pred sd 0.955, trees 40; differs from 'YetiRank' (corr 0.867)",
+  "sec": 1.43
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:noise=No",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6966, pred sd 1.07, trees 40; differs from 'YetiRank' (corr 0.845)",
+  "sec": 0.85
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:dcg_type=Exp",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7239, pred sd 1.46, trees 40 (identical to 'YetiRank')",
+  "sec": 1.09
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7137, pred sd 1.39, trees 40",
+  "sec": 1.49
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=DCG",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7161, pred sd 1.4, trees 40; differs from 'YetiRank' (corr 0.953)",
+  "sec": 1.45
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=MRR",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7318, pred sd 1.38, trees 40; differs from 'YetiRank' (corr 0.941)",
+  "sec": 1.0
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=MAP",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7202, pred sd 1.45, trees 40; differs from 'YetiRank' (corr 0.955)",
+  "sec": 1.11
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=ERR",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7318, pred sd 1.38, trees 40; differs from 'YetiRank' (corr 0.941)",
+  "sec": 1.05
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=PFound",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/algo/yetirank_helpers.cpp:42: Unknown weights mode PFound",
+  "sec": 0.03
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG;top=10",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7234, pred sd 1.41, trees 40; differs from 'YetiRank:mode=NDCG' (corr 0.946)",
+  "sec": 2.55
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG;top=300",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7137, pred sd 1.39, trees 40 (identical to 'YetiRank:mode=NDCG')",
+  "sec": 1.54
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG;num_neighbors=3",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7142, pred sd 1.42, trees 40; differs from 'YetiRank:mode=NDCG' (corr 0.947)",
+  "sec": 2.24
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG;num_neighbors=-1",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7260, pred sd 1.73, trees 40; differs from 'YetiRank:mode=NDCG' (corr 0.936)",
+  "sec": 22.14
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG;num_neighbors=1000",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7260, pred sd 1.73, trees 40; differs from 'YetiRank:mode=NDCG' (corr 0.936)",
+  "sec": 21.88
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG;decay=0.5",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7137, pred sd 1.39, trees 40 (identical to 'YetiRank:mode=NDCG')",
+  "sec": 1.4
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG;permutations=30",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7450, pred sd 1.4, trees 40; differs from 'YetiRank:mode=NDCG' (corr 0.947)",
+  "sec": 3.15
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG;dcg_type=Exp",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7137, pred sd 1.39, trees 40 (identical to 'YetiRank:mode=NDCG')",
+  "sec": 1.68
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG;dcg_denominator=Position",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7248, pred sd 1.41, trees 40; differs from 'YetiRank:mode=NDCG' (corr 0.947)",
+  "sec": 1.17
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG;dcg_denominator=LogPosition",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7137, pred sd 1.39, trees 40 (identical to 'YetiRank:mode=NDCG')",
+  "sec": 1.41
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG;noise=Gauss;noise_power=0.5",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7076, pred sd 1.08, trees 40; differs from 'YetiRank:mode=NDCG' (corr 0.900)",
+  "sec": 1.79
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=NDCG;noise=No",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6635, pred sd 1.34, trees 40; differs from 'YetiRank:mode=NDCG' (corr 0.842)",
+  "sec": 1.15
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=MRR;num_neighbors=2",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7270, pred sd 1.44, trees 40; differs from 'YetiRank' (corr 0.950)",
+  "sec": 0.94
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRank:mode=MAP;top=20",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7221, pred sd 1.45, trees 40; differs from 'YetiRank' (corr 0.958)",
+  "sec": 0.86
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRankPairwise:mode=NDCG",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6939, pred sd 0.593, trees 40; differs from 'YetiRankPairwise' (corr 0.988)",
+  "sec": 2.96
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRankPairwise:permutations=3;decay=0.9",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7015, pred sd 0.621, trees 40; differs from 'YetiRankPairwise' (corr 0.990)",
+  "sec": 0.85
+ },
+ {
+  "section": "a.objectives",
+  "name": "YetiRankPairwise:mode=MRR",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6896, pred sd 0.593, trees 40; differs from 'YetiRankPairwise' (corr 0.988)",
+  "sec": 1.25
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:metric=NDCG",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7163, pred sd 1.45, trees 40 (identical to 'LambdaMart')",
+  "sec": 0.66
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:metric=DCG",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7163, pred sd 1.45, trees 40 (identical to 'LambdaMart')",
+  "sec": 0.33
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:metric=MRR",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7104, pred sd 1.38, trees 40; differs from 'LambdaMart' (corr 0.960)",
+  "sec": 0.19
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:metric=MAP",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7332, pred sd 1.27, trees 40; differs from 'LambdaMart' (corr 0.969)",
+  "sec": 0.37
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:metric=ERR",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6937, pred sd 1.45, trees 40; differs from 'LambdaMart' (corr 0.958)",
+  "sec": 0.34
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:sigma=2",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7227, pred sd 0.736, trees 40; differs from 'LambdaMart' (corr 0.955)",
+  "sec": 0.32
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:sigma=0.5",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7342, pred sd 2.73, trees 40; differs from 'LambdaMart' (corr 0.965)",
+  "sec": 0.32
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:norm=false",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7173, pred sd 1.65, trees 40; differs from 'LambdaMart' (corr 0.960)",
+  "sec": 0.32
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:norm=0",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7173, pred sd 1.65, trees 40; differs from 'LambdaMart' (corr 0.960)",
+  "sec": 0.32
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:metric=NDCG;top=10",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7122, pred sd 1.43, trees 40; differs from 'LambdaMart' (corr 0.969)",
+  "sec": 0.24
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:top=10",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7122, pred sd 1.43, trees 40; differs from 'LambdaMart' (corr 0.969)",
+  "sec": 0.24
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:metric=NDCG;type=Exp",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7163, pred sd 1.45, trees 40 (identical to 'LambdaMart')",
+  "sec": 0.35
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:metric=NDCG;denominator=Position",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7284, pred sd 1.37, trees 40; differs from 'LambdaMart' (corr 0.969)",
+  "sec": 0.29
+ },
+ {
+  "section": "a.objectives",
+  "name": "LambdaMart:metric=PFound",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/options/catboost_options.cpp:890: LambdaMart does not support target_metric PFound",
+  "sec": 0.01
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=DCG",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7160, pred sd 0.00777, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.978)",
+  "sec": 26.46
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=PFound",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7248, pred sd 0.00898, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.967)",
+  "sec": 13.73
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=MRR",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7171, pred sd 0.00711, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.977)",
+  "sec": 0.42
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=ERR",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7171, pred sd 0.00711, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.977)",
+  "sec": 13.74
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=MAP",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/options/catboost_options.cpp:929: StochasticRank does not support target_metric MAP",
+  "sec": 0.01
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=FilteredDCG",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6481, pred sd 0.0389, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.913)",
+  "sec": 14.02
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=NDCG;sigma=0.3",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7104, pred sd 0.0112, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.936)",
+  "sec": 13.35
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=NDCG;mu=0.1",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7046, pred sd 0.00607, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.984)",
+  "sec": 13.17
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=NDCG;num_estimations=8",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7206, pred sd 0.00646, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.982)",
+  "sec": 108.07
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=NDCG;top=10",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6975, pred sd 0.0075, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.976)",
+  "sec": 1.34
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=NDCG;nu=0.1",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6745, pred sd 0.0179, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.955)",
+  "sec": 13.68
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=NDCG;lambda=0.5",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6678, pred sd 0.0143, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.964)",
+  "sec": 13.25
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=NDCG;type=Exp",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7129, pred sd 0.00645, trees 40 (identical to 'StochasticRank:metric=NDCG')",
+  "sec": 13.35
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticRank:metric=PFound;decay=0.7",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7103, pred sd 0.00763, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.974)",
+  "sec": 13.83
+ },
+ {
+  "section": "a.objectives",
+  "name": "QuerySoftMax:beta=0.5",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6534, pred sd 0.18, trees 40; differs from 'QuerySoftMax' (corr 0.994)",
+  "sec": 0.37
+ },
+ {
+  "section": "a.objectives",
+  "name": "QuerySoftMax:beta=3",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7117, pred sd 0.299, trees 40; differs from 'QuerySoftMax' (corr 0.892)",
+  "sec": 0.19
+ },
+ {
+  "section": "a.objectives",
+  "name": "QuerySoftMax:lambda=0.5",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.6625, pred sd 0.315, trees 40 (identical to 'QuerySoftMax')",
+  "sec": 0.18
+ },
+ {
+  "section": "a.objectives",
+  "name": "QuerySoftMax:lambda=0",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.6625, pred sd 0.315, trees 40 (identical to 'QuerySoftMax')",
+  "sec": 0.19
+ },
+ {
+  "section": "a.objectives",
+  "name": "PairLogit:max_pairs=5",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7238, pred sd 1.55, trees 40; differs from 'PairLogit' (corr 0.949)",
+  "sec": 0.64
+ },
+ {
+  "section": "a.objectives",
+  "name": "PairLogit:max_pairs=100000",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.7070, pred sd 1.68, trees 40 (identical to 'PairLogit')",
+  "sec": 0.35
+ },
+ {
+  "section": "a.objectives",
+  "name": "PairLogitPairwise:max_pairs=5",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6889, pred sd 0.63, trees 40; differs from 'PairLogitPairwise' (corr 0.965)",
+  "sec": 1.48
+ },
+ {
+  "section": "a.objectives",
+  "name": "GroupQuantile:alpha=0.9",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5645, pred sd 0.176, trees 40; differs from 'GroupQuantile' (corr 0.223)",
+  "sec": 0.54
+ },
+ {
+  "section": "a.objectives",
+  "name": "QueryCrossEntropy:alpha=0.5",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/options/catboost_options.cpp:661: QueryCrossEntropy loss function is not supported for CPU learning",
+  "sec": 0.01
+ },
+ {
+  "section": "a.objectives",
+  "name": "StochasticFilter:sigma=2;num_estimations=4",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6313, pred sd 0.00535, trees 40; differs from 'StochasticFilter' (corr 0.544)",
+  "sec": 0.49
+ },
+ {
+  "section": "a.objectives",
+  "name": "Logloss via CatBoost() with group_id in the pool (pointwise baseline)",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoost.__init__() got an unexpected keyword argument 'loss_function'",
+  "sec": 0.0
+ },
+ {
+  "section": "a.objectives",
+  "name": "CrossEntropy via CatBoost() with group_id in the pool (pointwise baseline)",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoost.__init__() got an unexpected keyword argument 'loss_function'",
+  "sec": 0.0
+ },
+ {
+  "section": "a.objectives",
+  "name": "RMSE via CatBoost() with group_id in the pool (pointwise baseline)",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoost.__init__() got an unexpected keyword argument 'loss_function'",
+  "sec": 0.0
+ },
+ {
+  "section": "a.objectives",
+  "name": "Logloss via CatBoostRanker (is it allowed?)",
+  "status": "FAIL",
+  "detail": "CatBoostError: Invalid loss_function='Logloss': for ranker use YetiRank, YetiRankPairwise, StochasticFilter, StochasticRank, QueryCrossEntropy, QueryRMSE, GroupQuantile, QuerySoftMax, PairLogit, PairLogitPairwise. It's also possible to use a regression loss",
+  "sec": 0.01
+ },
+ {
+  "section": "a.objectives",
+  "name": "RMSE via CatBoostRanker (regression loss in the ranker class)",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7238, pred sd 0.063, trees 40 [warning: Regression loss ('RMSE') ignores an important ranking parameter 'group_id']",
+  "sec": 0.24
+ }
+]

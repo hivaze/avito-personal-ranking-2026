@@ -1,0 +1,66 @@
+[project]
+name = "avito-ranker"
+version = "1.0.0"
+description = "Our solution to the Avito ML Cup 2026, track Personal ranking: a distilled set ranker over user histories"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12,<3.13"
+# What the avito_ranker package and the numbered scripts need.
+dependencies = [
+    "numpy>=2.1",
+    "polars>=1.30",
+    "pyarrow>=18",
+    "scipy>=1.14",
+    "scikit-learn>=1.5",
+    "lightgbm>=4.5",
+    "numba>=0.61",
+    "torch==2.11.0",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+# scripts/figures, which draws docs/figures.
+figures = ["matplotlib>=3.9", "pandas>=2.2"]
+# Libraries only the lab tree and the research lines under experiments/ import.
+lab = [
+    "pandas>=2.2",
+    "catboost>=1.2.8",
+    "xgboost>=3.0",
+    "optuna>=4.0",
+    "implicit>=0.7",
+    "faiss-cpu>=1.9",
+    "ipykernel",
+    "tqdm",
+    "loguru",
+    "click",
+]
+
+[tool.uv]
+default-groups = ["dev", "figures", "lab"]
+
+[build-system]
+requires = ["setuptools>=77"]   # 77: the SPDX string form of `license`
+build-backend = "setuptools.build_meta"
+
+# The repository holds other top-level folders (scripts, tests, the lab tree);
+# only the pipeline package is installed.
+[tool.setuptools.packages.find]
+include = ["avito_ranker*"]
+
+# Only tests/ is collected: the lab tree holds old test scripts that run (and write logs) at import.
+# Tests that need the stored artefacts or a GPU carry a marker and skip cleanly without them;
+# "python -m pytest -m 'not artefacts and not gpu'" runs the rest on any machine.
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "artefacts: needs stored data, predictions or checkpoints; skipped when the files are absent",
+    "gpu: needs a CUDA device; skipped without one",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu130" }

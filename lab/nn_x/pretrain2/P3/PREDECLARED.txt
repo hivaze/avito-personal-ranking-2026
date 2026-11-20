@@ -1,0 +1,40 @@
+P3 (PRETRAIN_PLAN_1113 sec. 4, E4-reduced) stage 0 -- within-category whitened / CSLS similarity as a retrieval-space proxy.
+Pre-declared at: 2026-11-13 05:15:05 UTC (written before any P3 number was computed). CPU only, 12 threads. No training, no val labels outside nested folds.
+Context: abl_retr_cat FAILED (CURRENT_STATUS 05:25: val +0.00046 +- 0.00049, holdout +0.00000) -> stage 1 is CLOSED regardless;
+this stage 0 only decides whether the direction stays OPEN as a proxy (E1 trigger already dead via xdrop_pre2 +0.00128 < +0.0015).
+
+DEFINITIONS (fixed now)
+- Unit vectors: e/|e| of the int8 content vectors, each split's own table (val -> val memmap; holdout feeds = train feeds -> train memmap).
+- History set per feed: valid history events (hist_emb_idx >= 0), all H <= 256, de-duplicated by item_id keeping the most recent occurrence.
+- Fit (train table only, fixed, label-free): <= 5M distinct train items sampled from train history events + train candidate rows, category from
+  the flat row. mu_k = mean unit vector of category k; Sigma_k = within-category covariance; Sigma_pool = n-weighted mean of Sigma_k;
+  shrunk Sigma~_k = (n_k Sigma_k + 5000 Sigma_pool) / (n_k + 5000); W_k = (Sigma~_k + lam_k I)^(-1/2), lam_k = 0.1 * tr(Sigma~_k)/128.
+- S0 raw   = cos(c, h).
+- S1 (PRIMARY, gated) = cos(W_k (c - mu_k), W_k (h - mu_k)), k = the CANDIDATE's category (per-category centre + per-category shrunk ZCA).
+- S1g (secondary, not gated) = same with the pooled within-category W (one W, per-category mu).
+- S2 CSLS (secondary, not gated) = 2 cos(c,h) - rC(c) - rH(h); rC(c) = mean of the top-10 raw cos of c to a fixed pool of 50K distinct
+  train history items (event-sampled); rH(h) = mean top-10 raw cos of h to a fixed pool of 50K distinct train candidate items (row-sampled).
+- Candidate signal (primary) = max over the feed's history set of the similarity (maxsim_all). Secondary signals: top-16 mean, max over
+  the last-32 valid events, rec_hl3 (weights exp(-k/3) over valid events, k = 0 newest), mean of last 5 valid events.
+- (1) Jaccard of the top-16 retrieved history items (top-min(16, n_hist)) raw vs S1 / S1g / S2, per candidate; mean and median on all val
+  candidates and on candidates whose feed has > 32 distinct valid history items. Plan rule: Jaccard > 0.8 stops that arm.
+- (2) Cell: exactly nn_x/r3/stage0_gate.py: zG3 = 0.5 z(ens_G3_ft_val) + 0.5 z(ens_G3_to_val); positives in G3's LSE-top category of the
+  feed with >= 3 same-category candidates G3 ranks above; pairs = (cell positive, same-category negative with zG3 > zG3[pos]) on the
+  14,306 leak-free val feeds (qt.leak_mask). Pair AUC = P(s_pos > s_neg) + 0.5 P(tie), pairs with a NaN side dropped (coverage reported).
+  Controls: -log1p(it_hist_all_luo), -maxsim32 (data/feats). Chance 0.5. Holdout replica: same cell on the 30K holdout feeds with
+  G3_holdout = member-equal within-feed z-mean of the 20 G3 members' holdout preds (F10 s501-506, F7x r101-107, F7x70 r101-107).
+- (3) Nested residual on G3: score = z(G3) + w z(x), x = within-feed z of the signal (NaN -> 0); w grid {0, +-0.02, +-0.05, +-0.1,
+  +-0.15, +-0.2, +-0.3, +-0.5}, chosen on 4/5 user groups (sklearn GroupKFold(5, shuffle) seeds 0 and 1, user 0 feeds as singleton
+  groups; val selection on leak-free training-fold feeds only) by mean per-feed NDCG, applied OOF; delta averaged over the 2 seeds;
+  reported on leak-free val feeds with paired SE. Secondary 'ridge' variant: per fold, ridge (alpha 1) of the within-feed-centred label on
+  [z(G3), z(x)] fitted on the 4/5 training users' rows, w = b_x / b_G3, applied OOF. Holdout replica: the same nested procedure inside the
+  30K holdout feeds (train user ids, user 0 singletons), base G3_holdout. pmix = private-weighted mean +- SE of the val OOF delta.
+
+GATE (keep the direction OPEN only if ALL hold, on S1 maxsim_all; otherwise CLOSED):
+  (i)   val cell AUC(S1) - cell AUC(S0 raw) >= +0.05;
+  (ii)  val cell AUC(S1) > max(cell AUC of -log1p(it_hist_all_luo), cell AUC of -maxsim32);
+  (iii) val nested residual (grid) >= +0.0003 AND >= 2 SE (leak-free), and the ridge variant > 0;
+  (iv)  holdout nested residual >= 0;
+  (v)   pmix >= -1 SE (veto only).
+S1g / S2 / secondary signals are reported only; they cannot pass the gate (no OR branches). Stage 1 stays CLOSED in every case
+(abl_retr_cat FAIL). If the design cannot finish on CPU within ~2 h, the holdout part is scaled down and the scale is stated in the log.

@@ -1,0 +1,23 @@
+members with holdout + train-only val preds: 170
+ACROSS ALL MEMBERS (Spearman):
+  rho(holdout, val) = +0.934   rho(val_M>=50, val) = +0.954
+  rho(holdout, val_M<50) = +0.898   rho(val_M>=50, val_M<50) = +0.855
+  rho(holdout, val_M>=50) = +0.910   rho(val_M>=50, val_M>=50) = +1.000
+  rho(holdout, val_M<20) = +0.806   rho(val_M>=50, val_M<20) = +0.772
+WITHIN-FAMILY (seed level, family mean removed; families with >= 4 members):
+  r6_cd_c0                     n=7 seed-sd val 0.00104 M<50 0.00194 M>=50 0.00075 hold 0.00035 | rho(hold,val) +0.75 rho(hold,M<50) +0.75 rho(hold,M>=50) +0.54 rho(M<50,M>=50) +0.68
+  r6_cd_m0                     n=7 seed-sd val 0.00033 M<50 0.00067 M>=50 0.00062 hold 0.00031 | rho(hold,val) +0.11 rho(hold,M<50) +0.32 rho(hold,M>=50) -0.21 rho(M<50,M>=50) -0.71
+  r6_cd_m02                    n=11 seed-sd val 0.00054 M<50 0.00109 M>=50 0.00054 hold 0.00029 | rho(hold,val) -0.15 rho(hold,M<50) +0.05 rho(hold,M>=50) -0.28 rho(M<50,M>=50) -0.14
+  r6_cd_m02_p70k               n=7 seed-sd val 0.00082 M<50 0.00142 M>=50 0.00059 hold 0.00033 | rho(hold,val) +0.43 rho(hold,M<50) +0.39 rho(hold,M>=50) +0.36 rho(M<50,M>=50) +0.75
+  v14                          n=5 seed-sd val 0.00102 M<50 0.00151 M>=50 0.00096 hold 0.00023 | rho(hold,val) +0.70 rho(hold,M<50) +0.40 rho(hold,M>=50) +0.50 rho(M<50,M>=50) +0.80
+  v17_pre2s                    n=7 seed-sd val 0.00072 M<50 0.00078 M>=50 0.00106 hold 0.00043 | rho(hold,val) +0.68 rho(hold,M<50) +0.57 rho(hold,M>=50) +0.86 rho(M<50,M>=50) +0.36
+  v20_pre2s_e2                 n=12 seed-sd val 0.00070 M<50 0.00123 M>=50 0.00055 hold 0.00027 | rho(hold,val) +0.03 rho(hold,M<50) +0.43 rho(hold,M>=50) -0.29 rho(M<50,M>=50) +0.15
+  v22_pre2s_lr1                n=6 seed-sd val 0.00105 M<50 0.00205 M>=50 0.00083 hold 0.00034 | rho(hold,val) +0.66 rho(hold,M<50) +0.60 rho(hold,M>=50) +1.00 rho(M<50,M>=50) +0.60
+  v23_gru_pre2s                n=6 seed-sd val 0.00049 M<50 0.00082 M>=50 0.00058 hold 0.00027 | rho(hold,val) -0.14 rho(hold,M<50) -0.54 rho(hold,M>=50) +0.49 rho(M<50,M>=50) -0.03
+  v24_din_pre2s                n=4 seed-sd val 0.00107 M<50 0.00185 M>=50 0.00069 hold 0.00025 | rho(hold,val) +0.40 rho(hold,M<50) +0.40 rho(hold,M>=50) +0.40 rho(M<50,M>=50) +0.40
+  v26_d192_pre2s               n=7 seed-sd val 0.00106 M<50 0.00188 M>=50 0.00065 hold 0.00025 | rho(hold,val) +0.07 rho(hold,M<50) +0.29 rho(hold,M>=50) -0.18 rho(M<50,M>=50) +0.64
+  v27_gru_m02                  n=6 seed-sd val 0.00116 M<50 0.00128 M>=50 0.00118 hold 0.00025 | rho(hold,val) +0.83 rho(hold,M<50) +0.83 rho(hold,M>=50) +0.66 rho(M<50,M>=50) +0.94
+  v28_lr1_m02                  n=7 seed-sd val 0.00057 M<50 0.00115 M>=50 0.00048 hold 0.00038 | rho(hold,val) +0.00 rho(hold,M<50) -0.36 rho(hold,M>=50) -0.11 rho(M<50,M>=50) +0.36
+  v30_f7_m02                   n=6 seed-sd val 0.00060 M<50 0.00117 M>=50 0.00092 hold 0.00042 | rho(hold,val) +0.37 rho(hold,M<50) -0.31 rho(hold,M>=50) +0.49 rho(M<50,M>=50) -0.49
+  v9_e10                       n=4 seed-sd val 0.00034 M<50 0.00099 M>=50 0.00074 hold 0.00020 | rho(hold,val) +0.20 rho(hold,M<50) -0.20 rho(hold,M>=50) +0.80 rho(M<50,M>=50) -0.40
+pooled within-family (n=102): rho(hold, val) +0.331, rho(hold, val M<50) +0.202, rho(hold, val M>=50) +0.343, rho(val M<50, val M>=50) +0.263, rho(hold, val M<20) +0.190

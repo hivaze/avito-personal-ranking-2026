@@ -1,0 +1,34 @@
+Adversarial review of INSIGHTS_1112: findings index (full text: nn_x/insights/review/review.txt)
+
+CONFIRMED by independent recomputation:
+- TRUNC premise: NN rev = clamp(M-1-pos). The rev-0 bucket holds 13.54 candidates per feed at 0.0262; the true last
+  item is clicked 0.2346 (prod M>=50). [r1]
+- TRUNC CPU proxy on a FRESH disjoint 150K sample, 4 new seeds:
+  - 200 rounds: +0.0031 ± 0.0006 val, +0.0020 ± 0.0005 holdout;
+  - 100 rounds: only +0.0016 / +0.0003, i.e. mostly anti-decay at long training. [r2, r2b]
+- M-split exact: G3 +0.00054 ± 0.00028 (user-clustered SE identical), pmix +0.00040 ± 0.00040. No bias from the
+  5-fold test averaging (fold-noise variance 13-15% of the FT shift, flat in M). [r3]
+- Nested Optuna routing: low FT weight on small feeds in 15/15 folds, but the tuned rule does not beat the plain M-split
+  out of fold (G3 +0.00040, PF7x +0.00028, M2 +0.00055 vs fixed 0.5). [r5]
+- Age miscalibration from LUO density: the G3 TO pool is calibrated on the train-period holdout (1-3d 0.974) and
+  miscalibrated on val (1.131). The LUO==0 rate for 3-7d listings rises from 0.23 (holdout) to 0.62 (val), 0.83
+  (public) and 0.86 (private): the skew is larger on private. [r6, r7]
+
+REFUTED or overstated:
+- Re-cool D ~= 0.0015 (F7x - v30 +0.00153 ± 0.00020).
+  - Same-trunk paired, selection-free: +0.00056 ± 0.00041 (cs811) and +0.00033 ± 0.00039 (cs813).
+  - The unpaired statistic is +0.00104 with cs813.
+  - v30's gap (-0.00030) is the lowest of the 8 continuous families (-0.0003..+0.00095), and F7-original minus v30 is
+    +0.00115 with no re-cool.
+  - D ~= 0.0005. [r4, r4b]
+- "NEW lowers the G3 asymptote": val only. The holdout k->inf is equal (0.32378 vs 0.32379). [errors 07 log]
+- "FT 3-4 of 20 members = FT of all": under the M-split, k=4 -0.00017 mean, worst -0.00043; k=8 -0.00004. Use >= 8. [r8]
+- "Truncation never tested in the NN": a diluted end effect was learned and was neutral (nn_report.md:34, :48-49).
+
+Corrected top 6:
+1. TRUNC 10-epoch from-scratch pairs on v30 seeds (plus a CD early read).
+2. D recalibration plus a harness-controlled re-cool A/B.
+3. M-split by rule, with FT on >= 8 members.
+4. LUO-parity (hzcd) as a private-shift lever, with a pre-flight against private.
+5. P8 CPU gate.
+6. AUXF, 2-epoch pair only.

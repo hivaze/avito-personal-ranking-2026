@@ -1,0 +1,131 @@
+=== 2026-11-15T02:34:43Z fulldata: rules written BEFORE the reads they judge (HARD RULE 7) ===
+
+R1  FLAG-OFF END-TO-END IDENTITY (runs A_orig_E vs B_copy_E_off; and any later orig / copy flag-off pair: K, P).
+    Same CPU smoke configuration (lane W5_SMOKE settings), same eval cap, 12 threads, deterministic kernels.
+    PASS iff ALL of: (a) the two logs are identical line for line after removing the wall-clock fields (the "==== <date>"
+    prefix, "<x> min", "<n>s") ; (b) record.npz: identical feed ids of every training batch, identical per-step main loss
+    (float64, exact), identical train-mode logit checksums; (c) logs/<v>_cliplog.npz: identical pre-clip grad norm of
+    every step (exact); (d) ckpt/<v>.pt and ckpt/<v>@last.pt: every state_dict tensor bit-identical; (e) every prediction
+    file (*_trainonly_val.npy, *_trainonly_test.npy, holdout/*.npy) byte-identical array content.
+    If (b)-(e) differ: run the ORIGINAL twice (A/A) before concluding anything: CPU nondeterminism is the alternative.
+
+R2  FLAG-ON SMOKE (C_copy_E_on, D_copy_K_on[_mix], abl / hz analogues). PASS iff ALL of:
+    (a) record.npz: the multiset of feed ids of epoch 1's regular batches == the --train_feeds subsample BEFORE the holdout
+        removal (20,000 feeds for the from-scratch form); number of holdout feeds in them == |subsample & holdout| (194 for
+        seed 951; 19,806 + 194); every non-holdout feed is the same set as in the flag-off run;
+    (b) for every holdout feed in a training batch the recorded listwise target y == (1 - kd_w) y_label / sum(y_label)
+        + kd_w softmax(teacher_file[rows of that feed] / T) recomputed here from the npy teacher file and data/flat labels
+        (max abs diff < 1e-6); the same identity holds on the non-holdout feeds;
+    (c) steps/epoch == the SplitData.batches count of the feed list with the holdout (computed independently) and
+        t_cool / total follow the same formulas (t_cool = round((1 - cooldown_frac) total));
+    (d) log: "holdout_ndcg nan" on every eval line, one "IN-SAMPLE" line per eval, "BEST step" == total steps, kept checkpoint
+        bit-identical to the @last checkpoint; files nn_<v>_holdoutINSAMPLE.npy and nn_<v>@last_holdoutINSAMPLE.npy exist and
+        no file named *_holdout.npy / *_holdout_hz.npy exists in the run's preds/holdout; val / test prediction files exist
+        for the kept and the @last checkpoint;
+    (e) pool (re-cool form with --cooldown_mix raised to 0.3 so that pool batches occur in 73 steps): the pool batches
+        contain holdout feeds; pool size == |subsample feeds with p_random > 0.5| including the holdout feeds;
+    (f) schedule fractions unchanged: lr at step s equals the flag-off formula evaluated with the new total.
+
+R3  POOL-LEVEL RE-READ OF THE ROUND5 NESTED FILES (nn_x/solvers/preds/refit/nested_*.npz; information, no decision by itself).
+    First reproduce row 99: pooled per-feed mean of the 3 member deltas (ii) - (i) must give -0.00025 +- 0.00018 (n 14,423).
+    New statistic: D_pool = NDCG(mean over the 3 members of per-feed z(P_ii)) - NDCG(mean over the 3 members of per-feed
+    z(P_i)), paired per feed (the pool-level form: the finals average 16 members, so single-model fine-tune noise is
+    averaged out there). Also D_pool2 = the same with [P_ii, production OOF] (two 80% seeds per member) on the refit side.
+    Reading: D_pool >= +2 SE -> "more val per model wins once members are pooled: the 6-part nested test is worth its GPU
+    cost"; D_pool <= -2 SE -> "the full-val refit loses at pool level too: not recommended"; otherwise -> "no evidence
+    either way: the recommendation rests on cost and on the loss of the OOF witness".
+
+R4  ACCEPTANCE CHECK FOR THE FULL-DATA TWINS (applied by the lead after the GPU runs; val is the only clean witness).
+    Null band: s16 = the SD over random splits of the 16 W16 members into two disjoint 8-pools of the val NDCG difference
+    of the two pools, divided by sqrt(2) (seed noise of a 16-pool vs an independent 16-pool of the same recipe on the same
+    val feeds). s16 is computed in facts.py BEFORE any twin exists and frozen in the report.
+    For the FULL-RETRAIN twins (reference = the 16 W16 members, train-only, @last AND selected):
+      A1 structural (any failure = DEFECT, do not use the twin): log has "training feeds 3121208 -> 3151208", steps/epoch
+         9984, total 99840 (re-cool form: 19968), pool 164118 feeds of which 30000 holdout, every eval line "holdout_ndcg nan",
+         BEST step == total, no *_holdout.npy file for the twin, val / test files finite with 1,389,971 / 2,904,806 rows.
+      A2 positive control (DEFECT if it fails): the twin's IN-SAMPLE holdout NDCG (last eval) minus its original's
+         out-of-sample @last holdout NDCG must be >= +0.005 (the feeds are trained on 10 times; a model that never saw them
+         would show ~0). For re-cool twins the bar is >= +0.002 (two passes).
+      A3 pool level: D = val NDCG(z-mean of the 16 twins) - val NDCG(z-mean of the 16 originals, @last), paired per feed.
+         |D| <= 3 s16 -> ACCEPT (expected value of +1% data: about +0.0001, unmeasurable); D < -3 s16 -> DEFECT suspected
+         (inspect before any use); D > +3 s16 -> not a defect by itself but UNEXPECTED: inspect (nothing in the change can
+         legitimately add that much), do not claim it as a gain.
+      A4 member level (information): each twin's val NDCG minus its original's (@last); flag any member below -4 member SDs.
+    For RE-COOL twins the reference is the K: / L:ref re-cool of the same snapshot (paired by snapshot and cooldown seed)
+    and the null band is the harness's own A/A (ref2 - ref) when available, else 3 s16.
+    The twins REPLACE the originals in a final file only member for member in the SAME file recipe (fine-tune n2cpv3s3 of
+    the twin checkpoints, 0.5 z(FT) + 0.5 z(TO)); the presub gate is run on the rebuilt file as on every candidate. The
+    in-period holdout columns of the gate are IN-SAMPLE for twin members and must be ignored / marked as such.
+
+=== 2026-11-15T03:00:17Z addendum (before any fine-tune smoke run is started) ===
+R5  FINE-TUNE COPY (finetune_full.py, --full_val): the identity / flag-on criteria are the two rule paragraphs in the
+    docstring of check_ft.py (same form as R1 / R2). Smoke configuration: the production n2cpv3s3 command of
+    nn_x/w12/kd/ft_w5.sh on w5_e10_kd05w192_s951 cut to "--epochs 1"; identity pair with "--folds 2 --seeds 1";
+    flag-on run with "--full_val --seeds 1 --out <v>_n2cpv3fv1". CPU fp32, eval cap 1000,1500,1500 as for the train smokes.
+    No NDCG of these smoke runs is a result; nothing about the VALUE of a full-val fine-tune is read from them.
+
+=== 2026-11-15T03:37:33Z addendum (resumed run; written BEFORE accept_twins.py exists or reads any file, and before any twin exists) ===
+R6  ACCEPTANCE SCRIPT accept_twins.py = R4 made executable; R4 is applied AS WRITTEN. Three points R4 left open are fixed here:
+    (a) pools other than the 16 W16 twins. R4 defines the band only for a 16-pool (3 s16 = 0.00090). For a complete pool of
+        k members of one recipe the band is 3 s16 sqrt(16 / k): 8-pool (the 8 popularity-light twins, or one W16 arm)
+        0.00127, 4-pool (one popularity-light arm) 0.00180. This assumes the popularity-light students have the W16 members'
+        seed noise (not measured: 4 members per arm are too few for a split statistic); the script also prints the paired
+        per-feed SE of D so that the reader sees both. An INCOMPLETE set (runs still landing) is printed as information and
+        gets NO verdict.
+    (b) the reference checkpoint. R4 says "@last AND selected": the verdict uses the originals' @last (like against like: a
+        twin is a last-step checkpoint); the difference to the originals' selected checkpoints is printed as information.
+    (c) re-cool twins (stages R / RH / PR). Reference = the K:ref / L:ref re-cool of the same snapshot (@last), for RH the
+        K:hz / L:hz re-cool; for PR no reference re-cool exists in nn_x/abl, so the reference is the original member @last and
+        the band is (a). A/A band of the re-cool harness = RMS over the available (ref2 - ref) pairs: member level directly,
+        pool level as that RMS / sqrt(k) ("available" = both runs finished when accept_twins.py null is run; the number and
+        the pair list are frozen in logs/accept_null.txt before any twin exists). If fewer than 4 pairs are available the
+        band is 3 s16 sqrt(16 / k) as in (a). A3 for re-cool twins: |D| <= 3 x (A/A pool-level RMS) -> ACCEPT.
+    A2 (unchanged, and I record a doubt before any data): the re-cool bar "+0.002" is an inferred number (two passes at a
+        decaying learning rate; half of the target mass on those rows is an out-of-sample teacher). If a re-cool twin passes
+        A1 (30,000 holdout feeds counted in every epoch's batches by the run itself) and fails only A2, the script still
+        prints DEFECT as R4 says, and prints next to it the run's own batch count so that the lead can see which of the two
+        it is: feeds not in the batches (a real defect) or a bar set too high.
+    Self-test of the script (no twin needed): A1 parser on the CPU smoke runs runs/C_copy_E_on, runs/D_copy_K_on_mix03,
+        runs/I_copy_P_on, runs/J_copy_K_hz_on with the smoke expectations (subsample counts instead of 3,121,208 -> 3,151,208);
+        A3 / A4 numerics with the originals' SELECTED checkpoints standing in for twins of the @last checkpoints: must
+        reproduce facts.py (16-pool val selected - @last = -0.00013 +- 0.00016).
+
+=== 2026-11-15T03:42:33Z AMENDMENT of R6(c) (no twin exists; written before the label-swap statistic below is computed) ===
+What I had read when writing this: accept_twins.py null, first version (logs/accept_null.txt of 03:41Z): 5 finished (ref, ref2)
+pairs, member-level A/A RMS 0.00027, one direct 5-pool difference +0.00012 +- 0.00040; and facts.py (02:44Z).
+Why R6(c) as first written is wrong: it takes the pool-level A/A noise as (member-level RMS) / sqrt(k). On the 16 from-scratch W16
+members the same formula predicts 0.00019 for an 8-pool against an 8-pool (within-arm member SD 0.00038, / 2), while the directly
+measured pool-level number is s8 = 0.00042 (facts.py, 60 splits): the member-level formula under-states pool-level noise by a
+factor of about 2.2 (a pooled score's NDCG is not the mean of the members' NDCGs). A band built on it (16-pool: 0.00020) would
+flag correct twins.
+R6(c) AMENDED: the A/A noise of the re-cool harness is measured AT POOL LEVEL, the way s8 was:
+    s_AA(k0) = RMS over the within-pair label swaps (for each of the k0 finished (ref, ref2) pairs, which of the two goes to
+    side A; all 2^(k0-1) distinct assignments if k0 <= 10, else 256 random ones, rng 20261115) of
+    [val NDCG of the z-mean pool of side A] - [that of side B], @last checkpoints.
+    Band for a k-pool of re-cool twins against the k reference re-cools = 3 x s_AA(k0) x sqrt(k0 / k), and never wider than
+    the R6(a) band 3 s16 sqrt(16 / k). Needs k0 >= 4, else R6(a). accept_twins.py null may be re-run when more ref2 runs have
+    finished (each run is appended with its time stamp); the value in force for a check is the latest one computed BEFORE the
+    first twin of that stage finished. The first-version number (member RMS / sqrt(k)) stays printed, marked "superseded".
+Everything else of R4 / R6 is unchanged.
+
+=== 2026-11-15T04:06:27Z R7: CALIBRATION OF THE A2 BARS (no twin exists; written before insample_gap.py exists or runs) ===
+Why: A2 is the sharp check, and its bars (+0.005 full retrain, +0.002 re-cool; R4) are inferred. The only measured analogue so
+far is the TEACHER ensemble (0.344 on feeds its members trained on, 0.324 on the holdout). A student differs: half of its
+target is the teacher, and on the holdout rows a twin's teacher half is OUT of sample, so the twin's in-sample lift on the
+holdout comes through the label half only. If the bar is above what a correct twin shows, A2 raises a false DEFECT.
+Measurement (insample_gap.py, CPU, existing checkpoints only; no twin involved):
+    G_s = NDCG of an ORIGINAL final member (@last checkpoint) on 20,000 exploration-like TRAINING feeds drawn by the holdout
+    rule from the feeds that are not in the holdout (p_random > 0.9, M >= 50, rng 777; in sample for the member, teacher
+    in sample too) MINUS its out-of-sample NDCG on the 30,000 holdout feeds (its saved @last holdout file). Unpaired SE.
+    Members: w5_e10_kd05w192_s951 (W16) and abl_e10_pop1kd05t25_s951 (popularity-light, W8P20). Path check: the same CPU
+    code re-predicts 2,000 holdout feeds; their NDCG must agree with the saved GPU file's on those feeds within 0.002 and the
+    per-feed-centred scores must correlate > 0.999, otherwise the measurement is void and R4's bars stay.
+    Null noise of the A2 statistic: s_null = sqrt(2) x (SD over the 16 W16 originals of their @last holdout NDCG, logs).
+Rule (bars can only go DOWN from R4, never below 3 s_null; G_s = the smaller of the two members' values):
+    full retrain:  bar_F = max(3 s_null, min(0.005, 0.25 G_s))
+    re-cool:       bar_R = max(3 s_null, min(0.002, 0.10 G_s))
+    Reasoning behind 0.25 and 0.10 [I]: the label half of the target is 0.5, so a full-retrain twin is expected near 0.5 G_s
+    and the bar sits at half of that; a re-cool twin has 2 of 10 passes at 35% of the peak learning rate, expected 0.2 to
+    0.5 of the full lift, bar at 0.10 G_s.
+    accept_twins.py reads logs/a2_calib.json when it exists, prints the R4 bar and the bar in force, and judges A2 by the
+    bar in force. If the measurement is void or absent, R4's bars are in force.

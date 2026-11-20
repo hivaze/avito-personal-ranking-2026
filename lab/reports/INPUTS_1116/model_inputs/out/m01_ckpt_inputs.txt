@@ -1,0 +1,50 @@
+
+=== held-out wide student: nn_x/w5/ckpt/w5_e10_kd05w192_s951.pt
+cfg: {'d': 192, 'heads': 4, 'hist_layers': 1, 'blocks': 2, 'drop': 0.1, 'use_hist': True, 'use_set': True, 'use_pos_tower': False, 'n_dense': 104, 'aux_pos': True, 'ff': 2, 'sim_bias': 1, 'pos_mode': 'both', 'domain': True, 'intent': False, 'id_buckets': 0, 'id_dim': 32, 'id_drop': 0.5, 'arch': 'tf', 'id_hist_only': False, 'xt_rel': [0, 3, 30, 31, 32], 'xt_drop': 0.0, 'xt_idcols': [0, 1, 2, 3, 4, 5, 6, 7], 'xt_relonly': [30, 31, 32], 'attn_gate': True, 'split_kv': True, 'retr_m': 16}
+xt_names (34): ['seq_cv_invd20', 'seq_cv_pop', 'seq_cv_norm', 'it_hist_all_luo', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo', 'ctx_nd_hcent', 'ctx_nd_knn_f1', 'ctx_nd_knn_h', 'ctx_nd_knn_h_dev', 'ctx_nd_knn_u', 'ctx_nd_knn_u_dev', 'ctx_nd_max', 'ctx_nd_top5h', 'ctx_nd_top5u', 'ctx_nd_ucent', 'ctx_hn_top1w', 'ctx_hn_rrw', 'ctx_hn_bestrk', 'ctx_hn_margin', 'ctx_hn_soft05', 'ctx_hn_e1_rrw', 'ctx_hs_mutual', 'ctx_hs_k128', 'ctx_hs_e1', 'ctx_hs_t10', 'pre2_fe_z', 'pre2_new_z', 'pre2_fe_s', 'pre2_new_s', 'pre2_hmax32', 'has:pre2_fe']
+xt_rel -> ['seq_cv_invd20', 'it_hist_all_luo', 'pre2_fe_s', 'pre2_new_s', 'pre2_hmax32']
+xt_relonly -> ['pre2_fe_s', 'pre2_new_s', 'pre2_hmax32']
+xt_idcols -> ['seq_cv_invd20', 'seq_cv_pop', 'seq_cv_norm', 'it_hist_all_luo', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo']
+n_dense cfg 104  rebuilt names 104  c_mlp.0.weight (384, 104)  wide.weight (1, 104)  c_lin.weight (192, 256)
+args (input-relevant): {'xt': 'cvnd_pre2s', 'xt_exclude': None, 'xt_add': None, 'xt_rel_extra': None, 'xt_add_relonly': None, 'd': 192, 'retr_m': 16, 'max_hist': 256, 'user0': True, 'domain': True, 'sim_bias': 1, 'kd_file': '<repo>/nn_x/w12/kd/out/teacher_mean11.npy', 'kd_w': 0.5, 'kd_T': 1.0, 'holdout': 30000, 'holdout_in_train': None, 'epochs': 10.0, 'seed': 951}
+params: 2118848
+top-level modules / buffers: ['aux_head', 'c_lin', 'c_ln', 'c_miss', 'c_mlp', 'cat', 'cross', 'dom', 'es', 'et', 'f_mean', 'f_std', 'h_lin', 'h_ln', 'h_miss', 'head', 'hist_enc', 'rec', 'retr', 'sets', 'u_lin', 'wide']
+
+=== full-data wide student: nn_x/w5/ckpt/w5_fd10_kd05w192_s951.pt
+cfg: {'d': 192, 'heads': 4, 'hist_layers': 1, 'blocks': 2, 'drop': 0.1, 'use_hist': True, 'use_set': True, 'use_pos_tower': False, 'n_dense': 104, 'aux_pos': True, 'ff': 2, 'sim_bias': 1, 'pos_mode': 'both', 'domain': True, 'intent': False, 'id_buckets': 0, 'id_dim': 32, 'id_drop': 0.5, 'arch': 'tf', 'id_hist_only': False, 'xt_rel': [0, 3, 30, 31, 32], 'xt_drop': 0.0, 'xt_idcols': [0, 1, 2, 3, 4, 5, 6, 7], 'xt_relonly': [30, 31, 32], 'attn_gate': True, 'split_kv': True, 'retr_m': 16}
+xt_names (34): ['seq_cv_invd20', 'seq_cv_pop', 'seq_cv_norm', 'it_hist_all_luo', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo', 'ctx_nd_hcent', 'ctx_nd_knn_f1', 'ctx_nd_knn_h', 'ctx_nd_knn_h_dev', 'ctx_nd_knn_u', 'ctx_nd_knn_u_dev', 'ctx_nd_max', 'ctx_nd_top5h', 'ctx_nd_top5u', 'ctx_nd_ucent', 'ctx_hn_top1w', 'ctx_hn_rrw', 'ctx_hn_bestrk', 'ctx_hn_margin', 'ctx_hn_soft05', 'ctx_hn_e1_rrw', 'ctx_hs_mutual', 'ctx_hs_k128', 'ctx_hs_e1', 'ctx_hs_t10', 'pre2_fe_z', 'pre2_new_z', 'pre2_fe_s', 'pre2_new_s', 'pre2_hmax32', 'has:pre2_fe']
+xt_rel -> ['seq_cv_invd20', 'it_hist_all_luo', 'pre2_fe_s', 'pre2_new_s', 'pre2_hmax32']
+xt_relonly -> ['pre2_fe_s', 'pre2_new_s', 'pre2_hmax32']
+xt_idcols -> ['seq_cv_invd20', 'seq_cv_pop', 'seq_cv_norm', 'it_hist_all_luo', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo']
+n_dense cfg 104  rebuilt names 104  c_mlp.0.weight (384, 104)  wide.weight (1, 104)  c_lin.weight (192, 256)
+args (input-relevant): {'xt': 'cvnd_pre2s', 'xt_exclude': None, 'xt_add': None, 'xt_rel_extra': None, 'xt_add_relonly': None, 'd': 192, 'retr_m': 16, 'max_hist': 256, 'user0': True, 'domain': True, 'sim_bias': 1, 'kd_file': '<repo>/nn_x/w12/kd/out/teacher_mean11.npy', 'kd_w': 0.5, 'kd_T': 1.0, 'holdout': 30000, 'holdout_in_train': True, 'epochs': 10.0, 'seed': 951}
+params: 2118848
+top-level modules / buffers: ['aux_head', 'c_lin', 'c_ln', 'c_miss', 'c_mlp', 'cat', 'cross', 'dom', 'es', 'et', 'f_mean', 'f_std', 'h_lin', 'h_ln', 'h_miss', 'head', 'hist_enc', 'rec', 'retr', 'sets', 'u_lin', 'wide']
+
+=== full-data popularity-light student: nn_x/abl/ckpt/abl_fd10_pop1kd05w192_s951.pt
+cfg: {'d': 192, 'heads': 4, 'hist_layers': 1, 'blocks': 2, 'drop': 0.1, 'use_hist': True, 'use_set': True, 'use_pos_tower': False, 'n_dense': 93, 'aux_pos': True, 'ff': 2, 'sim_bias': 1, 'pos_mode': 'both', 'domain': True, 'intent': False, 'id_buckets': 0, 'id_dim': 32, 'id_drop': 0.5, 'arch': 'tf', 'id_hist_only': False, 'xt_rel': [22, 23, 24], 'xt_drop': 0.0, 'xt_idcols': None, 'xt_relonly': [22, 23, 24], 'attn_gate': True, 'split_kv': True, 'retr_m': 16}
+xt_names (27): ['ctx_nd_hcent', 'ctx_nd_knn_f1', 'ctx_nd_knn_h', 'ctx_nd_knn_h_dev', 'ctx_nd_knn_u', 'ctx_nd_knn_u_dev', 'ctx_nd_max', 'ctx_nd_top5h', 'ctx_nd_top5u', 'ctx_nd_ucent', 'ctx_hn_top1w', 'ctx_hn_rrw', 'ctx_hn_bestrk', 'ctx_hn_margin', 'ctx_hn_soft05', 'ctx_hn_e1_rrw', 'ctx_hs_mutual', 'ctx_hs_k128', 'ctx_hs_e1', 'ctx_hs_t10', 'pre2_fe_z', 'pre2_new_z', 'pre2_fe_s', 'pre2_new_s', 'pre2_hmax32', 'has:pre2_fe', 'xp_imp_c50']
+xt_rel -> ['pre2_fe_s', 'pre2_new_s', 'pre2_hmax32']
+xt_relonly -> ['pre2_fe_s', 'pre2_new_s', 'pre2_hmax32']
+xt_idcols -> []
+n_dense cfg 93  rebuilt names 93  c_mlp.0.weight (384, 93)  wide.weight (1, 93)  c_lin.weight (192, 256)
+args (input-relevant): {'xt': 'cvnd_pre2s', 'xt_exclude': 'seq_cv_invd20,seq_cv_pop,seq_cv_norm,it_hist_all_luo,it_hist_et1_luo,it_hist_et2_luo,it_hist_et3_luo,it_hist_et4_luo', 'xt_add': 'xp_imp_c50', 'xt_rel_extra': '', 'xt_add_relonly': '', 'd': 192, 'retr_m': 16, 'max_hist': 256, 'user0': True, 'domain': True, 'sim_bias': 1, 'kd_file': '<repo>/nn_x/w12/kd/out/teacher_mean11.npy', 'kd_w': 0.5, 'kd_T': 1.0, 'holdout': 30000, 'holdout_in_train': True, 'epochs': 10.0, 'seed': 951}
+params: 2114613
+top-level modules / buffers: ['aux_head', 'c_lin', 'c_ln', 'c_miss', 'c_mlp', 'cat', 'cross', 'dom', 'es', 'et', 'f_mean', 'f_std', 'h_lin', 'h_ln', 'h_miss', 'head', 'hist_enc', 'rec', 'retr', 'sets', 'u_lin', 'wide']
+
+held-out and full-data wide student: identical input lists (xt_names, dense column names)
+pop1 minus wide (xt): ['xp_imp_c50']  wide minus pop1: ['seq_cv_invd20', 'seq_cv_pop', 'seq_cv_norm', 'it_hist_all_luo', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo']
+
+rows per split: {'train': 246745836, 'val': 1389971, 'test': 2904806}
+train-stage input files: 35 names x 3 splits checked, problems: []
+dtypes: ['float32']  twins: ['data/feats', 'data/feats_new']
+
+fine-tune extras from the FT log (42): ['centrality', 'it_hist_all_luo', 'it_hist_all_luo_rk', 'it_hist_all_luo_zsl', 'it_hist_all_luo_gap', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo', 'it_hist_et5_luo', 'it_hist_et6_luo', 'it_hist_et7_luo', 'it_hist_et8_luo', 'it_hist_et9_luo', 'it_hist_et10_luo', 'seq_cv_invd20', 'seq_cv_invd20_rk', 'seq_cv_pop', 'seq_max_all', 'seq_top3', 'seq_argmax_hpos', 'ctx_nd_hcent', 'ctx_nd_knn_f1', 'ctx_nd_knn_h', 'ctx_nd_knn_h_dev', 'ctx_nd_knn_u', 'ctx_nd_knn_u_dev', 'ctx_nd_max', 'ctx_nd_top5h', 'ctx_nd_top5u', 'ctx_nd_ucent', 'pre_fe', 'pre_fe_z', 'pre_new', 'pre_new_z', 'pre_hmax32_c', 'pre_hmax8_c', 'pre_fe_noid', 'pre_id_contrib_v2', 'pre_idmax32', 'pre_idmax32_has', 'pre_hmax32_sent']
+fine-tune extra files problems: []
+fine-tune extras that exist for TRAIN rows in nn/feat_cache: ['it_hist_all_luo', 'it_hist_all_luo_rk', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo', 'seq_cv_invd20', 'seq_cv_invd20_rk', 'seq_cv_pop', 'ctx_nd_hcent', 'ctx_nd_knn_f1', 'ctx_nd_knn_h', 'ctx_nd_knn_h_dev', 'ctx_nd_knn_u', 'ctx_nd_knn_u_dev', 'ctx_nd_max', 'ctx_nd_top5h', 'ctx_nd_top5u', 'ctx_nd_ucent']
+fine-tune extras that exist for TRAIN rows in data/feats: ['centrality', 'it_hist_all_luo', 'it_hist_all_luo_rk', 'it_hist_all_luo_gap', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo', 'it_hist_et5_luo', 'it_hist_et6_luo', 'it_hist_et7_luo', 'it_hist_et8_luo', 'it_hist_et9_luo', 'it_hist_et10_luo', 'seq_cv_invd20', 'seq_cv_invd20_rk', 'seq_cv_pop', 'seq_max_all', 'seq_top3', 'seq_argmax_hpos', 'ctx_nd_hcent', 'ctx_nd_knn_f1', 'ctx_nd_knn_h', 'ctx_nd_knn_h_dev', 'ctx_nd_knn_u', 'ctx_nd_knn_u_dev', 'ctx_nd_max', 'ctx_nd_top5h', 'ctx_nd_top5u', 'ctx_nd_ucent']
+fine-tune extras also among the 34 train-stage inputs: ['it_hist_all_luo', 'it_hist_et1_luo', 'it_hist_et2_luo', 'it_hist_et3_luo', 'it_hist_et4_luo', 'seq_cv_invd20', 'seq_cv_pop', 'ctx_nd_hcent', 'ctx_nd_knn_f1', 'ctx_nd_knn_h', 'ctx_nd_knn_h_dev', 'ctx_nd_knn_u', 'ctx_nd_knn_u_dev', 'ctx_nd_max', 'ctx_nd_top5h', 'ctx_nd_top5u', 'ctx_nd_ucent']
+extra branch of a fine-tuned model = Linear(42, 2d) GELU Linear(2d, d), zero-init last layer (model.add_extra); stats from val (attach_extra)
+
+nn/feat_cache/train files not read by the wide or the pop1 student: ['it_hist_all_luo_rk', 'it_hist_all_luo_z', 'pre2_id_contrib', 'pre2_new', 'pre2n_fe', 'pre2n_fe_s', 'pre2n_fe_z', 'pre2n_hmax32', 'pre2n_new', 'pre2n_new_s', 'pre2n_new_z', 'prew_fe', 'prew_fe_z', 'prew_hmax32', 'prew_new', 'prew_new_z', 'seq_cv_invd20_rk', 'tm_hcos', 'tm_hsin', 'tm_weekend', 'xp_ctr_c']
+of these present for val and test too: ['it_hist_all_luo_rk', 'it_hist_all_luo_z', 'pre2_id_contrib', 'pre2_new', 'pre2n_fe', 'pre2n_fe_s', 'pre2n_fe_z', 'pre2n_hmax32', 'pre2n_new', 'pre2n_new_s', 'pre2n_new_z', 'prew_fe', 'prew_fe_z', 'prew_hmax32', 'prew_new', 'prew_new_z', 'seq_cv_invd20_rk', 'tm_hcos', 'tm_hsin', 'tm_weekend', 'xp_ctr_c']

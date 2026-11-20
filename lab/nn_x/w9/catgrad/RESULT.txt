@@ -1,0 +1,12 @@
+WAVE 9 arm CATGRAD — RESULT (implementation agent, 2026-11-13 14:10 UTC). Rule: nn_x/w5/logs/E_catgrad_predeclared.txt (frozen 13:38:39Z).
+STAGE S (2-epoch screen, w9_catgrad_s23/24 vs w9_base_s23/24, A_BASE + HYG, @last ckpt = selected ckpt here): CLOSED.
+  s1 pooled member val -0.00097 +- 0.00061 (OK, >= -0.0010) | holdout -0.00120 +- 0.00034 (z -3.5) NO (needed >= -0.0005)
+  s2 diversity margin rho_bb 0.97979 - rho_x 0.96847 = +0.0113 OK (needed +0.003; scale no_aux +0.0054, xdrop_pop +0.0185)
+  s3 within-category cross-seed corr drop +0.0053 OK (0.97636 -> 0.97107; needed +0.002); between-category drop +0.0176 (info)
+  s4 graft [catgrad category + base within] - base val -0.00095 +- 0.00043 NO (needed >= -0.0006); category NDCG softmax(g) - base LSE -0.00061 +- 0.00052 OK
+  s5 graft [base category + catgrad within] - base val +0.00025 +- 0.00049 / holdout -0.00001 +- 0.00029 OK
+  s6 M<50 slice z -0.56 OK. Info: mixed 2-member pool -0.00044, catgrad pair pool -0.00172; per seed d val -0.00177 / -0.00016, d hold -0.00159 / -0.00081.
+Reading: the mechanism works as designed (the trunk's within-category order is as strong as the base's and decorrelated by 0.005 cross-seed), but
+the detached LSE-pooled category head is weaker than the base's LSE marginal (the err_category_intent failure mode: dedicated category models
+0.0008-0.0025 category NDCG below the NN LSE), which costs -0.0012 holdout. Diversity from weakness -> not a family. No stage E; nothing copied
+to nn_x/w5; nothing fine-tuned / pooled / submitted. Full read-out: logs/w9_eval_S_catgrad.{txt,json}; tests logs/test_w9_catgrad_{cpu,gpu}.log.

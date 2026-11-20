@@ -1,0 +1,23 @@
+=== poplag_verify remaining claims 2026-11-15T01:25:31Z (label-free) ===
+
+ gate history, view priv (study's cached v1 / v2 columns, my gate code); primaries dZ / largest bucket / dM:
+   v1: it_hist_all_luo 0.0433 / 0.1010 (10-24d) / 0.1363 | seq_cv_pop 0.0427 / 0.0923 (10-24d) / 0.1193 | xp_imp_c50 0.0617 / 0.1196 (>76d+cap) / 0.1590
+   v2 at g = 3: it_hist_all_luo 0.0131 / 0.0352 (3-7d) / 0.0314 | seq_cv_pop 0.0090 / 0.0304 (3-7d) / 0.0247 | xp_imp_c50 0.0473 / 0.1929 (10-24d) / 0.0969
+   J(g) = sum of the three primary dZ, g = 0..6: 0.1452, 0.1294, 0.0941, 0.0693, 0.0989, 0.1771, 0.2659  -> argmin g = 3
+
+ gate history, view pub (study's cached v1 / v2 columns, my gate code); primaries dZ / largest bucket / dM:
+   v1: it_hist_all_luo 0.0447 / 0.0875 (10-24d) / 0.1317 | seq_cv_pop 0.0361 / 0.0830 (10-24d) / 0.1129 | xp_imp_c50 0.0582 / 0.1055 (>76d+cap) / 0.1504
+   v2 at g = 3: it_hist_all_luo 0.0183 / 0.0426 (3-7d) / 0.0407 | seq_cv_pop 0.0097 / 0.0174 (3-7d) / 0.0286 | xp_imp_c50 0.0498 / 0.1557 (10-24d) / 0.1113
+   J(g) = sum of the three primary dZ, g = 0..6: 0.1383, 0.1211, 0.0931, 0.0778, 0.1245, 0.2077, 0.3019  -> argmin g = 3
+
+ feed-level cold share (per-feed share of rows with it_hist_all_luo = 0): q10 / q50 / q90 / share of feeds >= 0.45
+   holdout stored (lag 0): 0.113 / 0.210 / 0.340 / 0.017
+   holdout private-like v3: 0.346 / 0.468 / 0.600 / 0.573
+   holdout public-like v3: 0.325 / 0.447 / 0.579 / 0.489
+   private test feeds, M >= 50: 0.337 / 0.452 / 0.581 / 0.509
+   public test feeds, M >= 50: 0.309 / 0.425 / 0.551 / 0.400
+
+ label-free prediction shift, private-like v3 vs lag 0 (CPU both), 30,000 feeds:
+   W8 pool: per-feed corr 0.9810 +- 0.0001; top-1 changed 0.4046 +- 0.0028; top-10 overlap 0.7837 | subset: corr 0.9875, top-1 changed 0.3276
+   pop1kd pool: per-feed corr 0.9942 +- 0.0000; top-1 changed 0.1820 +- 0.0022; top-10 overlap 0.8968 | subset: corr 0.9974, top-1 changed 0.1333
+   per-feed corr(W8 pool, pop1kd pool): lag 0 0.9765 -> lagged 0.9795; paired change +0.00306 +- 0.00005

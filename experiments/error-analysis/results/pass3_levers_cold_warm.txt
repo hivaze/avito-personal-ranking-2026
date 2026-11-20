@@ -1,0 +1,36 @@
+# Copy of the raw run log (not published; third pass, base G3 = 0.40032 val): how much each earlier lever (alternative members and blends) changes the summed per-positive loss, split by cold or warm positive and by how recently the user touched its category.
+=== Lever response by positive class: change in summed per-positive loss (NDCG points per feed; + = lever helps) ===
+lever                           total  warm|recent     warm|mid   warm|novel  cold|recent     cold|mid   cold|novel    G3top   notTop
+(positive share)                             0.460        0.110        0.127        0.219        0.038        0.046    0.519    0.481
+G3 vs nf2_oof                +0.01434     +0.00610     +0.00146     +0.00241     +0.00326     +0.00077     +0.00034 +0.00968 +0.00467
+FT half (G3 vs G3_to)        -0.00001     -0.00040     -0.00001     -0.00012     +0.00050     -0.00001     +0.00003 +0.00005 -0.00006
+m02 (F7x_to vs F7b_to)       +0.00096     -0.00064     -0.00008     +0.00032     +0.00102     +0.00015     +0.00020 +0.00073 +0.00023
+a4u (a4u_to vs F7s12_to)     +0.00013     -0.00118     -0.00062     -0.00012     +0.00173     +0.00011     +0.00022 +0.00004 +0.00009
+NEW (N1 vs G3)               -0.00025     -0.00029     -0.00002     -0.00014     +0.00018     +0.00002     +0.00001 -0.00023 -0.00002
+GRU fam (G3 vs M2)           -0.00063     +0.00002     -0.00006     -0.00004     -0.00037     -0.00006     -0.00012 -0.00056 -0.00008
+cset (cset_to vs F7s12_to)   -0.00018     -0.00131     +0.00002     -0.00064     +0.00159     +0.00008     +0.00008 +0.00002 -0.00020
+
+feed-clustered SE of the class contributions (same order):
+G3 vs nf2_oof                     0.00098      0.00038      0.00036      0.00058      0.00019      0.00017      0.00103      0.00072
+FT half (G3 vs G3_to)             0.00031      0.00013      0.00011      0.00019      0.00007      0.00006      0.00033      0.00023
+m02 (F7x_to vs F7b_to)            0.00046      0.00020      0.00020      0.00027      0.00010      0.00009      0.00048      0.00037
+a4u (a4u_to vs F7s12_to)          0.00065      0.00026      0.00025      0.00040      0.00014      0.00012      0.00068      0.00049
+NEW (N1 vs G3)                    0.00022      0.00011      0.00009      0.00013      0.00005      0.00004      0.00023      0.00018
+GRU fam (G3 vs M2)                0.00027      0.00010      0.00011      0.00017      0.00006      0.00006      0.00029      0.00020
+cset (cset_to vs F7s12_to)        0.00066      0.00026      0.00026      0.00039      0.00015      0.00011      0.00070      0.00049
+
+=== lambda (swap) mass of misordered pairs by the NEGATIVE's rank (G3) ===
+  neg rank 0-2 share 0.4856  (same-cat 0.1835, cross-cat 0.3021)
+  3-9          share 0.2475  (same-cat 0.0836, cross-cat 0.1639)
+  10-29        share 0.1736  (same-cat 0.0517, cross-cat 0.1219)
+  30-99        share 0.0855  (same-cat 0.0212, cross-cat 0.0643)
+  100+         share 0.0078  (same-cat 0.0014, cross-cat 0.0064)
+
+=== feed-level lever deltas: val vs private-mix (pmix weights; report only) ===
+  G3 vs nf2_oof                val +0.01434 ± 0.00123   priv-mix +0.01435 ± 0.00187
+  FT half (G3 vs G3_to)        val -0.00001 ± 0.00039   priv-mix +0.00063 ± 0.00059
+  m02 (F7x_to vs F7b_to)       val +0.00096 ± 0.00059   priv-mix +0.00083 ± 0.00088
+  a4u (a4u_to vs F7s12_to)     val +0.00013 ± 0.00082   priv-mix -0.00074 ± 0.00125
+  NEW (N1 vs G3)               val -0.00025 ± 0.00028   priv-mix -0.00000 ± 0.00043
+  GRU fam (G3 vs M2)           val -0.00063 ± 0.00034   priv-mix -0.00073 ± 0.00051
+  cset (cset_to vs F7s12_to)   val -0.00018 ± 0.00083   priv-mix -0.00047 ± 0.00127

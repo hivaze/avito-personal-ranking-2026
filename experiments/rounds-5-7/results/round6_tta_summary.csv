@@ -1,0 +1,18 @@
+# Extracted from lab/solvers/r6/out/tta_eval.json (1,031 lines): the 6-member ensemble and member read-outs of each test-time augmentation arm, val NDCG, paired per feed against the deterministic CPU replay (14,423 feeds). Slices and timings were left out.
+row,kind,ensemble_ndcg,ensemble_delta,ensemble_se,ensemble_z,members_positive,mean_member_delta
+det (deterministic replay),baseline,0.39877,,,,,
+T1,arm,0.39869,-0.00009,0.00024,-0.36,4/6,+0.00006
+T2,arm,0.39869,-0.00008,0.00034,-0.23,5/6,+0.00036
+T3,arm,0.39777,-0.00100,0.00045,-2.22,0/6,-0.00087
+fp32_cpu_minus_bf16_gpu,diagnostic,,-0.00003,0.00016,-0.17,,
+T1_K1,diagnostic,0.39814,-0.00063,0.00040,-1.59,,
+T2_K1,diagnostic,0.39883,+0.00006,0.00040,+0.14,,
+T1_K2,diagnostic,0.39799,-0.00079,0.00031,-2.53,,
+T2_K2,diagnostic,0.39891,+0.00013,0.00036,+0.37,,
+T1_K4,diagnostic,0.39844,-0.00033,0.00028,-1.17,,
+T2_K4,diagnostic,0.39865,-0.00013,0.00034,-0.37,,
+T1+T2_K8each,diagnostic,0.39880,+0.00003,0.00026,+0.10,,
+crop192_single,diagnostic,0.39804,-0.00074,0.00032,-2.34,,
+crop128_single,diagnostic,0.39732,-0.00146,0.00050,-2.91,,
+crop64_single,diagnostic,0.39469,-0.00408,0.00075,-5.44,,
+W256_tiebreak,diagnostic,0.39877,+0.00000,0.00000,+0.00,,

@@ -1,0 +1,26 @@
+<repo>/nn_x/w12/recheck/feasibility_value/s6_w8p20_probe.py:39: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+  day = np.array([datetime.datetime.utcfromtimestamp(int(t) + 3 * 3600).weekday() for t in ts])  # MSK weekday
+pop1kd members with a finished n2cpv3s3 fine-tune: [951, 952, 953, 954]
+W8 final val 0.40165 (log: 0.40165)
+
+weight 0.15: final val delta vs W8 +0.00039 +- 0.00027 (M>=50 +0.00072 +- 0.00031, M<50 -0.00010 +- 0.00048); per-feed sd 0.0321; test corr to W8 final 0.99967
+  SE of the paired public delta 0.00035, private 0.00023; the +-0.0003 thresholds are 0.86 public SE
+  true delta +0.0000: P(public >= W8 + 0.0003) 0.19 | P(public <= W8 - 0.0003) 0.19 | P(private file better than W8 on the private sample) 0.50
+  true delta +0.0003: P(public >= W8 + 0.0003) 0.50 | P(public <= W8 - 0.0003) 0.04 | P(private file better than W8 on the private sample) 0.91
+  true delta +0.0005: P(public >= W8 + 0.0003) 0.72 | P(public <= W8 - 0.0003) 0.01 | P(private file better than W8 on the private sample) 0.99
+
+weight 0.2: final val delta vs W8 +0.00049 +- 0.00031 (M>=50 +0.00080 +- 0.00035, M<50 +0.00003 +- 0.00058); per-feed sd 0.0376; test corr to W8 final 0.99942
+  SE of the paired public delta 0.00041, private 0.00027; the +-0.0003 thresholds are 0.74 public SE
+  true delta +0.0000: P(public >= W8 + 0.0003) 0.23 | P(public <= W8 - 0.0003) 0.23 | P(private file better than W8 on the private sample) 0.50
+  true delta +0.0003: P(public >= W8 + 0.0003) 0.50 | P(public <= W8 - 0.0003) 0.07 | P(private file better than W8 on the private sample) 0.87
+  true delta +0.0005: P(public >= W8 + 0.0003) 0.69 | P(public <= W8 - 0.0003) 0.02 | P(private file better than W8 on the private sample) 0.97
+  val weekday 1 (0 = Monday, MSK): n 7542, delta +0.00100 +- 0.00045
+  val weekday 2 (0 = Monday, MSK): n 1, delta -0.00503 +- 0.00000
+  val weekday 3 (0 = Monday, MSK): n 6878, delta -0.00008 +- 0.00043
+  val weekday 4 (0 = Monday, MSK): n 2, delta +0.00335 +- 0.00237
+
+weight 0.3: final val delta vs W8 +0.00012 +- 0.00040 (M>=50 +0.00086 +- 0.00045, M<50 -0.00094 +- 0.00073); per-feed sd 0.0479; test corr to W8 final 0.99868
+  SE of the paired public delta 0.00052, private 0.00034; the +-0.0003 thresholds are 0.58 public SE
+  true delta +0.0000: P(public >= W8 + 0.0003) 0.28 | P(public <= W8 - 0.0003) 0.28 | P(private file better than W8 on the private sample) 0.50
+  true delta +0.0003: P(public >= W8 + 0.0003) 0.50 | P(public <= W8 - 0.0003) 0.12 | P(private file better than W8 on the private sample) 0.81
+  true delta +0.0005: P(public >= W8 + 0.0003) 0.65 | P(public <= W8 - 0.0003) 0.06 | P(private file better than W8 on the private sample) 0.93

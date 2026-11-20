@@ -1,0 +1,267 @@
+{
+ "checks": [
+  {
+   "name": "frozen reference tests/ref_w5/train.py.txt == nn_x/w5/train.py at copy time (md5 recorded)",
+   "ok": true,
+   "info": "93b8c1001f95c3a21f7e43b9a4d5ba36"
+  },
+  {
+   "name": "frozen reference tests/ref_w5/model.py.txt == nn_x/w5/model.py at copy time (md5 recorded)",
+   "ok": true,
+   "info": "8942ee1824f73221fbafcc7ab290060c"
+  },
+  {
+   "name": "frozen reference tests/ref_w5/common.py.txt == nn_x/w5/common.py at copy time (md5 recorded)",
+   "ok": true,
+   "info": "932746bf85f34adcc1cbefe76ede33a7"
+  },
+  {
+   "name": "frozen reference tests/ref_w5/lane.sh.txt == nn_x/w5/lane.sh at copy time (md5 recorded)",
+   "ok": true,
+   "info": "959bc8b68b870d6ab8c9167041aeff53"
+  },
+  {
+   "name": "lane.sh DRY: 6 w9 commands (4 stage-A, 2 stage-E) and 4 w5 reference commands",
+   "ok": true,
+   "info": "(['w5_e10_catgrad_s951', 'w5_e10_catgrad_s952', 'w9_base_s23', 'w9_base_s24', 'w9_catgrad_s23', 'w9_catgrad_s24'], ['w5_base_s23', 'w5_base_s24', 'w5_e10_base_s951', 'w5_e10_base_s952'])"
+  },
+  {
+   "name": "A:base:23: w9_base_s23 == nn_x/w5 lane A:base:23 (A_BASE + HYG) except the variant name",
+   "ok": true,
+   "info": "{'variant': ('w5_base_s23', 'w9_base_s23')}"
+  },
+  {
+   "name": "A:catgrad:23 differs from A:base:23 ONLY by catw '' -> 'grad'",
+   "ok": true,
+   "info": "{'catw': ('', 'grad')}"
+  },
+  {
+   "name": "A:base:24: w9_base_s24 == nn_x/w5 lane A:base:24 (A_BASE + HYG) except the variant name",
+   "ok": true,
+   "info": "{'variant': ('w5_base_s24', 'w9_base_s24')}"
+  },
+  {
+   "name": "A:catgrad:24 differs from A:base:24 ONLY by catw '' -> 'grad'",
+   "ok": true,
+   "info": "{'catw': ('', 'grad')}"
+  },
+  {
+   "name": "E:catgrad:951 == nn_x/w5 lane E:base:951 (E_BASE + HYG) + catw grad; variant w5_e10_catgrad_s951",
+   "ok": true,
+   "info": "{'catw': ('', 'grad')}"
+  },
+  {
+   "name": "E:catgrad:952 == nn_x/w5 lane E:base:952 (E_BASE + HYG) + catw grad; variant w5_e10_catgrad_s952",
+   "ok": true,
+   "info": "{'catw': ('', 'grad')}"
+  },
+  {
+   "name": "lane.sh refuses some GPUs (also in DRY mode)",
+   "ok": true,
+   "info": "[True, True, True, True, True, True]"
+  },
+  {
+   "name": "bash -n lane.sh",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "W5_SMOKE=1 names the stage-A smoke variant w9_smoke_catgrad_s23 (20K feeds, 1 epoch, evals every 25)",
+   "ok": true,
+   "info": "['w9_smoke_catgrad_s23']"
+  },
+  {
+   "name": "AST: train.py minus the wave-9 statements (exact set) == frozen nn_x/w5/train.py (flag-off path unchanged)",
+   "ok": true,
+   "info": "{'add_argument --catw': 1, 'if a.catw': 1, 'Ranker(catw=)': 1}"
+  },
+  {
+   "name": "AST: model.py minus the wave-9 statements (exact set) == frozen nn_x/w5/model.py",
+   "ok": true,
+   "info": "{'__init__ catw=None': 1, 'def catgrad': 1, 'self.catw = catw': 1, 'if catw': 1, 'if self.catw': 1}"
+  },
+  {
+   "name": "common.py == nn_x/w5/common.py up to string constants (output directory nn_x/w9/catgrad)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "data / cd_arms* / finetune / holdout_eval / stale_pred / blend / tests/mini_split byte-identical to nn_x/w5",
+   "ok": true,
+   "info": "{}"
+  },
+  {
+   "name": "parse(): --catw OFF by default ('')",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "guards `a.catw` False at the default; Ranker gets catw=None (a.catw or None)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "parse(): --catw accepts only '' / 'grad' (argparse choices)",
+   "ok": true,
+   "info": "ad}]\nt: error: argument --catw: invalid choice: 'mean' (choose from '', 'grad')"
+  },
+  {
+   "name": "model.py: Ranker.catgrad called once, in forward, behind `if self.catw`",
+   "ok": true,
+   "info": "[['if self.catw', 'def forward']]"
+  },
+  {
+   "name": "model.py: cg_* attributes used only in __init__ and catgrad",
+   "ok": true,
+   "info": "['def __init__', 'def catgrad']"
+  },
+  {
+   "name": "train.py: a.catw read only by its guard, the log line / asserts inside it and the Ranker keyword",
+   "ok": true,
+   "info": "['a.catw or None', 'if a.catw:', '{a.catw}']"
+  },
+  {
+   "name": "no other module of the copy mentions catw (finetune / holdout_eval / stale_pred read the composite through Ranker(**cfg))",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "paired init: every baseline parameter bit-identical with / without --catw at the same seed; extra keys = cg_* only",
+   "ok": true,
+   "info": "['cg_cat.weight', 'cg_cnt.bias', 'cg_cnt.weight', 'cg_q.0.bias', 'cg_q.0.weight', 'cg_q.1.bias', 'cg_q.1.weight', 'cg_q.3.bias', 'cg_q.3.weight', 'cg_wide.bias', 'cg_wide.weight']"
+  },
+  {
+   "name": "cfg: flag-off cfg == nn_x/w5 cfg (no catw key); flag-on cfg == cfg + {catw: 'grad'}",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "zero-init of the head's output layers (cg_q.3, cg_wide, cg_cat, cg_cnt)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "batches cover singleton categories, padding and multi-positive feeds",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flag ON at init: h == the flag-off logit (bitwise) and g_k == log n_k (size prior) for every present category",
+   "ok": true,
+   "info": "(0.0, 0.0)"
+  },
+  {
+   "name": "exact factorisation: softmax(composite)_i == softmax_k(g)_{k(i)} * softmax_{within k(i)}(h)_i (<= 1e-5, fp32)",
+   "ok": true,
+   "info": "2.3245811462402344e-06"
+  },
+  {
+   "name": "loss identity: listwise_loss(composite, norm feed) == L_c + L_w (brute force, <= 1e-5 rel)",
+   "ok": true,
+   "info": "3.725290298461914e-08"
+  },
+  {
+   "name": "gradient routing: d CE(composite)/d trunk == d L_w/d trunk and d/d head == d L_c/d head (<= 1e-5 rel)",
+   "ok": true,
+   "info": "(3.026798367500305e-07, 3.3527612686157227e-08)"
+  },
+  {
+   "name": "no cross gradient: L_c -> trunk and L_w -> head are exactly zero / unused",
+   "ok": true,
+   "info": "0.0"
+  },
+  {
+   "name": "for every (feed, category): sum_j dL/dh_j == 0 (the trunk receives no category-choice gradient; <= 1e-6)",
+   "ok": true,
+   "info": "9.422365110367537e-09"
+  },
+  {
+   "name": "train mode (dropout, K9 aux): forward / backward finite; the category head receives gradient",
+   "ok": true,
+   "info": "non-zero cg_ grads 11"
+  },
+  {
+   "name": "code copies for the e2e (outputs redirected to scratch so the real preds/holdout meta is never touched): modules byte-identical to nn_x/w5 / nn_x/w9/catgrad, common.py differs only in the output-path string",
+   "ok": true,
+   "info": "(True, True)"
+  },
+  {
+   "name": "flags OFF vs frozen w5: identical training-batch sequence (incl. cooldown pool draws)",
+   "ok": true,
+   "info": "40 training batches, 4 holdout evals, 8 predicts"
+  },
+  {
+   "name": "flags OFF vs frozen w5: identical train-mode model logits and loss-input logits (bitwise)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flags OFF vs frozen w5: identical logged loss / val / holdout / BEST lines",
+   "ok": true,
+   "info": "BEST step 40 val_ndcg 0.32210; train time"
+  },
+  {
+   "name": "flags OFF vs frozen w5: bit-identical selected + @last checkpoints, val preds and holdout preds",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flags OFF: stored args == frozen w5 args + {catw: ''}; same best_step / val_ndcg; no wave-9 log line",
+   "ok": true,
+   "info": "{'variant': ('w5_t9e2e_ref_off', 'w5_t9e2e_new_off'), 'catw': (None, '')}"
+  },
+  {
+   "name": "--catw grad: same training-batch sequence as flags OFF; one loss-input logit set per train forward",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "--catw grad: for EVERY training batch the logits into the loss == g[cat] + h - LSE_cat(h) recomputed from the recorded g / h (<= 1e-4 on every valid candidate) and == the model output",
+   "ok": true,
+   "info": "max |diff| 6.10e-07 over 20508 cells"
+  },
+  {
+   "name": "--catw grad changes training: train-mode logits differ from flags OFF on every batch; checkpoint differs",
+   "ok": true,
+   "info": "40/40 batches differ"
+  },
+  {
+   "name": "--catw grad: checkpoint cfg has catw 'grad' (otherwise == the flags-off cfg), 11 cg_* parameters, args catw 'grad', wave-9 log line, @last / holdout files written",
+   "ok": true,
+   "info": "best_step 40 val 0.33981"
+  },
+  {
+   "name": "--catw grad: Ranker(**cfg) + load_state_dict reload (the finetune / holdout_eval / stale_pred path) reproduces the saved val preds (<= 1e-5)",
+   "ok": true,
+   "info": "RELOAD True 4.76837158203125e-07"
+  }
+ ],
+ "lane_cmds": {
+  "w9_base_s23": "--variant w9_base_s23 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 23",
+  "w9_catgrad_s23": "--variant w9_catgrad_s23 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 23 --catw grad",
+  "w9_base_s24": "--variant w9_base_s24 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 24",
+  "w9_catgrad_s24": "--variant w9_catgrad_s24 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --muon --lr 1e-3 --sched wsd --cooldown_frac 0.2 --cooldown_mix 0.02 --aux_anneal 0.1 --retr_m 16 --attn_gate --epochs 2 --eval_every 1000 --no_test --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 24 --catw grad",
+  "w5_e10_catgrad_s951": "--variant w5_e10_catgrad_s951 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 951 --catw grad",
+  "w5_e10_catgrad_s952": "--variant w5_e10_catgrad_s952 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 952 --catw grad"
+ },
+ "e2e": {
+  "off_lines": [
+   "step 10/40 loss 4.5506 val_ndcg 0.30643 holdout_ndcg 0.27442 lr 1.00e-03",
+   "step 20/40 loss 0.0000 val_ndcg 0.33138 holdout_ndcg 0.33563 lr 1.00e-03",
+   "step 30/40 loss 0.0000 val_ndcg 0.33366 holdout_ndcg 0.36367 lr 3.49e-04 cd_loss_reg 4.4646 cd_loss_pool 2.6790",
+   "step 40/40 loss 0.0000 val_ndcg 0.32210 holdout_ndcg 0.36568 lr 5.46e-05 cd_loss_reg 5.2610 cd_loss_pool 1.5806",
+   "BEST step 40 val_ndcg 0.32210; train time"
+  ],
+  "on_lines": [
+   "step 10/40 loss 4.5196 val_ndcg 0.33250 holdout_ndcg 0.28979 lr 1.00e-03",
+   "step 20/40 loss 0.0000 val_ndcg 0.34543 holdout_ndcg 0.32689 lr 1.00e-03",
+   "step 30/40 loss 0.0000 val_ndcg 0.34562 holdout_ndcg 0.35030 lr 3.49e-04 cd_loss_reg 4.4925 cd_loss_pool 2.7185",
+   "step 40/40 loss 0.0000 val_ndcg 0.33981 holdout_ndcg 0.35528 lr 5.46e-05 cd_loss_reg 5.2671 cd_loss_pool 1.5507",
+   "BEST step 40 val_ndcg 0.33981; train time"
+  ],
+  "on_wave9": [
+   "wave-9 CATGRAD: --catw grad: composite logit g_cat + h - LSE_cat(h) with a DETACHED LSE-pooled category head (model.Ranker.catgrad); listwise loss (norm feed) on the composite = L_c + L_w; K9 aux unchanged"
+  ]
+ },
+ "failed": []
+}

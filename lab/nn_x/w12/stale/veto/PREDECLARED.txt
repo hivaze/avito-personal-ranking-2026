@@ -1,0 +1,81 @@
+veto: RE-READ RULES, written BEFORE any re-read of this audit (KEY = veto; the rules below are the task's rules made exact).
+(timestamp of this block: see the line appended by `date -u` at the end)
+
+0. What is re-read. Stored predictions only, plus CPU fp32 stale-val re-predictions of stored checkpoints (no training). Nothing is
+   launched on a GPU; nothing is built or submitted. The re-reads re-open or do not re-open an idea for a NEW run; they adopt nothing.
+
+1. Statistics (all paired per feed; +- = 1 SE = sd/sqrt(n) of the per-feed delta; feed count stated):
+   val        : per-feed NDCG (pessimistic ties) on the 14,423 val feeds; pool = member mean of per-feed z (stack_val.feed_rank_z[:,1])
+                of TRAIN-ONLY predictions; decision on the SELECTED checkpoints, @last reported where files exist.
+   val M>=50 / M<50, coldpos / warmpos : slices of the same per-feed delta (coldpos = feeds whose positives are all cold,
+                warmpos = feeds with no cold positive; cold = it_hist_all_luo == 0, the r6_eval definition).
+   pmix-public / pmix-private : src/pmix.py weights() over val feeds (M bin x cold-share bin), weighted mean, SE with n_eff
+                (src/pmix.py wmean_se). Same sample as val: information, never an independent witness.
+   stale-val  : the same NDCG with the 'both_pre2both' private-like val inputs. Two sources, never mixed inside one delta:
+                (G) stored GPU bf16 files nn_x/*/preds/stale/*_staleval.npy; (C) CPU fp32 re-predictions made by
+                nn_x/w12/stale/veto/stale_cpu.py. Validity of (C): without overrides the script must reproduce the stored
+                train-only val file of the first member of every group with within-feed corr >= 0.9999 and |NDCG diff| <= 0.0003.
+   holdout    : 30,000 in-period feeds, REPORTED for every item; late holdout = days >= Sep 13 MSK (13,424 feeds; label-free
+                definition of the poplag subset read) also reported. Neither enters a staleness-family verdict.
+
+2. Classification comes first and from the mechanism, written in the report next to each item BEFORE its re-read numbers:
+   STALENESS FAMILY iff the idea (a) removes, lags, blanks or re-weights popularity / recency inputs (LUO counts, co-visitation,
+   impressions, CTR), or (b) trains the model on inputs with test-like staleness, or (c) is an admixture / pool weight of such
+   members, or (d) exists to make cold items rank better (cold offsets, content-only scores, age-conditioned handling).
+   Everything else is NOT (capacity, optimiser, schedule, loss, teacher, generic regularisers, time/calendar inputs, generic
+   features with no popularity content): for those the in-period holdout veto stands and my re-read is information only.
+
+3. Verdict per STALENESS-FAMILY item (pool level where >= 4 members exist; with fewer members the verdict carries the tag
+   "member-level, noise" and can at most be "re-open for a pool-level run"):
+   PASS-S  iff val delta >= 0 AND stale-val delta >= +2 SE.
+   PASS-P  iff val delta >= 0 AND pmix-private delta >= +1 SE.
+   FAIL    iff val delta < 0 (after which stale-val / pmix are reported only), or val >= 0 with stale-val < +2 SE and
+           pmix-private < +1 SE (both read), or val >= 0 with the one readable lens below its bar.
+   UNREADABLE iff no stored prediction exists (the reason is stated: files deleted / GBDT-gate only / never run).
+   A PASS re-opens the idea for a distilled d192 arm under the 2026-11-15T02:15Z "RULE hz" form; it does not adopt it.
+   Multiplicity: I count the staleness-family items read and report how many PASS; with K items at a one-sided 2 SE bar the
+   expected number of false PASS-S is 0.023 K; PASS-P at +1 SE is weak (0.16 per item under the null) and is ranked below PASS-S.
+
+4. Reverse check (things ADOPTED on the in-period holdout). For each adopted setting A against its stored alternative B
+   (delta = A - B, pool level, same seeds / roots):
+   CONFIRMED-OFF-HOLDOUT iff val >= 0 AND (stale-val >= 0 where readable) AND pmix-private >= -1 SE.
+   IN DOUBT   iff val < 0, or stale-val <= -1 SE, or pmix-private <= -1 SE, while the holdout delta is > 0.
+   CONTRADICTED iff (val <= -2 SE) or (stale-val <= -2 SE with val < 0).
+   NOT READABLE iff the alternative was never trained / no files.
+   IN DOUBT or CONTRADICTED = a proposal to run the alternative as a pre-declared arm; it changes no file by itself.
+
+5. Checkpoint selection (the first reverse check), exact form: S = pool of holdout-SELECTED checkpoints, L = pool of @last
+   checkpoints of the same runs; reported for (i) W16 = 16 wide students, (ii) every hard-label re-cool arm with stored
+   selected and @last stale files (w5_cd_* roots 101-104), (iii) hard-label 10-epoch members with both files. Runs whose
+   selected step IS the last step contribute 0 by construction and are counted. The rule of item 4 is applied to S - L.
+
+6. I think two parts of the task's bars are weak and still apply them as written: (i) pmix-private >= +1 SE is on the same
+   feeds as val and passes 16% of nulls; (ii) "val >= 0" as a hard clause rejects an idea at val -0.00001 +- 0.0004.
+   I report these cases explicitly instead of bending the bars.
+written 2026-11-15T02:23:09Z (before any re-read; only project logs and reports had been read)
+
+=== ADDENDUM R1 (resume run), written 2026-11-15 BEFORE read8.py exists or any of its numbers is computed (timestamp line at the end) ===
+Why: COVERAGE_MAP row 301 ("0 of 52 families adds on the holdout at 2 SE", reports/RECHECK_1114/pool_composition.md) is a pool-composition screen
+     judged holdout-first; the first run re-read only the popularity-light families as admixtures. This addendum fixes the re-read of ALL stored families.
+R1.1 Statistic, one per family F: NDCG(0.8 z(W16 pool) + 0.2 z(F pool)) - NDCG(z(W16 pool)); train-only, selected checkpoints, paired per feed; weight 0.2 fixed
+     (the scored W8P20 form; no weight scan). Columns: val, M>=50 / M<50, coldpos / warmpos, pmix-public, pmix-private, holdout, holdout >= Sep 13.
+     Families = every group of nn_x/w12/recheck/pool_composition/pc_common.groups() with >= 2 members and all files on disk, plus: pop-free x4, pop1 x4+x4, pop2 x4,
+     pop1kd d128 x4, pop1kd w192 x4, hzcd x4 and m02ref x4 (its control), the 11-14 evening student arms with >= 4 seeds (kd05w224, kdmixw192, kd05w192gru),
+     blocks3 / a4u / PSEUDO hard-label members. A family whose members are part of W16 is a re-weighting of W16 and is marked "in W16".
+R1.2 FLAG "holdout-only rejection signature" iff val >= 0 AND pmix-private >= +1 SE AND holdout < 0. Under the null a family is flagged with probability
+     about 0.08 (0.16 x 0.5), so about 4 flags of 50 are expected by chance; the count is reported next to that expectation.
+R1.3 Verdict words PASS-P / FAIL (PREDECLARED item 3) are given ONLY to families of the staleness family as classified by item 2 (pop-free, pop1, pop2,
+     pop1kd, hzcd). For every other family the flag is information, the two-witness rule stands, and pooled z = (z_val + z_holdout) / sqrt(2) is reported.
+R1.4 Controls: same-view families (hard base x6, narrow kd05t25 x4) must read |val| < 2 SE; the first run's numbers for pop1kd d128 / w192 and hard pop1 x8
+     (report section 3.3) must be reproduced exactly, else the screen is not used.
+R1.5 CPU stale-val of mine stays INFORMATION ONLY (item 1 bar missed in the first run). New cross-check: every member that exists both in my preds/ and in
+     the witness cache is compared (max |logit diff|, NDCG of each); reads use one source per member, mine first.
+written 2026-11-15T03:39:52Z (before read8.py was written; first-run outputs and the recheck of six of its numbers were the only numbers seen)
+
+=== ADDENDUM R2 (resume run), written BEFORE read9.py exists ===
+Reverse check, items added from the component ledger (nn_x/abl/ledger/ledger.md section 1), rule of item 4 unchanged (A = adopted, B = alternative, pool level):
+ (i) lr 2e-3 at 10 epochs: A = F7 (v17_pre2s_s101-106), B = F9 (v22_pre2s_lr1_s401-406), hard labels, 6 vs 6, not seed-paired (recorded: val +0.00078 z_run 1.4, holdout +0.00067 z 2.9).
+ (ii) information for the width entry, no verdict: hard-label d192 (F12 = v26_d192_pre2s) against F7 at d128, same number of members.
+ (iii) information: GRU history encoder family F10 against F7 (6 vs 6).
+Columns as everywhere: val, M bins, coldpos / warmpos, pmix-public / pmix-private, holdout, holdout >= Sep 13. No stale-val files exist for these members.
+written 2026-11-15T03:42:22Z

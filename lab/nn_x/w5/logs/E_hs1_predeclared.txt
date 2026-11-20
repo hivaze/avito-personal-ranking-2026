@@ -1,0 +1,77 @@
+WAVE 9 arm HS1 (feed-surface history view) PRE-DECLARATION — frozen 2026-11-13T13:35:59Z, before ANY run of this arm existed
+(checked at 2026-11-13T13:35:59Z: 0 files matching w9_hs1* / w5_e10_hs1* / w9_base* / w5_eval_E_hs1* / div_readout_hs1* in nn_x/w5/{logs,preds,ckpt},
+nn_x/abl/{logs,preds}, nn_x/w9/hs1/{logs,preds,ckpt}; the only HS1-named files are the code and its test log nn_x/w9/hs1/logs/test_hs1_cpu.log).
+Idea / mechanism / spec / skeptic reports: scratchpad w9/hs1.json (fresh-eye round, CURRENT_STATUS 13:09 / 13:11). Agent: wave-9 HS1 implementation agent.
+
+ARM. HS1 = --hist_src 1 (nn_x/w9/hs1/cd_arms9.py): every GPU-side history channel (cand x history cosine features smax / smax8 / smax32 /
+smean / lse / top3 / per-type max, category-affinity counts, sim_bias, TabR retr16 + attn_gate, the history encoder) is built from the
+history events whose event_source is 1 (the main-page recommendation feed = the target's surface, CODES_DECODING_1113 s2) only, for
+TRAIN, VAL, TEST and the selection HOLDOUT alike, applied right after the splits load and before feature_stats / holdout selection;
+the kept events are compacted newest-first and SplitData.gather reads them as before (every split's stored history is <= 256 events,
+so the view = the s1 events among the stored history). xt inputs (seq_cv, ctx_nd, ctx_hn/hs, pre2, LUO popularity), user_emb and the
+candidate side are untouched (skeptic fix e). The view spec is stored in ck['args'] and ck['cfg']; finetune.py, holdout_eval.py and
+stale_pred.py of the private copy apply the checkpoint's view (skeptic fix a/b: loader parity), and nn_x/w5 scripts REFUSE such a
+checkpoint (Ranker(**cfg) TypeError on 'hist_src') instead of silently scoring the full history. FT / replays of HS1 checkpoints
+must therefore use nn_x/w9/hs1/{finetune,holdout_eval,stale_pred}.py.
+Information arm HS1b = --hist_et 2,3,4,7,9 (the actual Avito 'model 5' filter: target ACTIONS of types 2/3/4/7/9 from any source, plain
+views excluded; skeptic fix (a)/(d)), run at stage S only, concurrently with HS1 on the same two GPUs (cost ~1 GPU-h at 2 epochs).
+Code: private copy nn_x/w9/hs1 (nn_x/w5 code + cd_arms9.py; nothing in nn_x/w5/*.py or lane.sh edited). Flag off = bit-identical to
+nn_x/w5 (tests/test_hs1.py: AST proofs for train / model / finetune / holdout_eval / stale_pred, md5 for the rest, CPU end-to-end
+identity on a mini split, holdout_eval == train.py holdout preds for a flag-on checkpoint, stale_pred base check, finetune smoke).
+
+DATA FACTS (skeptic fix c; recomputed on the full flat files, tests C2): s1 share of history events 0.3757 train / 0.3376 val / 0.3433
+test. Feeds with an EMPTY s1 slice after the view: 2.96% train (exact; the skeptic's 2.87% was a sample), 2.97% val, 2.37% test, of
+which 1.11% / 1.35% / 0.86% are already empty in the full history (emptied BY the view: 1.84% / 1.62% / 1.52%). Those feeds take the
+base's empty-history path: hmask / hemb_ok all False, he_raw 0, smax / lse / top3 / per-type max = -1.5, counts 0, log1p(H) = 0,
+retrieval all mass on the learned sink, history context = the user token only; the model ranks them from the candidate side, the
+xt inputs and user_emb (at chance w.r.t. the GPU-side history only). Source is set only for types 1 / 4 / 7, so the s1 view holds
+views, favourites and type-7 actions only: the per-type max-similarity and per-type category-count columns of types 2 3 5 6 8 9 10
+are dead constants under HS1 (verified in tests C1). Skeptic's PSI of the s1 count: 0.217 train->val, 0.211 train->test (full H 0.040).
+EXPECTED OUTCOME (skeptic 2, stated up front): member cross-corr with the base ~0.93-0.94 (the 'material' <= 0.92 is NOT expected),
+pool margin rho_bb - rho_x ~0.005-0.018; P(same strength) ~0.25-0.4, P(pool moves) ~0.03.
+
+STAGE S = 2-EPOCH FUTILITY SCREEN (runs FIRST; lead's amended rule). Runs: w9_hs1_s23 / w9_hs1_s24 (and w9_hs1b_s23 / s24) in
+nn_x/w9/hs1 = lane.sh stage A: A_BASE + HYG + --seed 23|24 + the arm flag (DRY-verified: the arm commands differ from A:base ONLY by
+the arm flag; A:base == nn_x/w5 A:base except the w9_ name). Base pair: nn_x/abl abl_base_s23 / s24 (stored args == A_BASE + HYG,
+verified in tests C0(h): the only differences are flags absent on one side at their off values; nn_x/abl is proven bit-identical to
+nn_x/w5 at flags off), so NO new base pair is trained. GPUs N, one HS1 and one HS1b run per GPU.
+Read-out nn_x/w9/hs1/s_readout.py <arm> (written before the runs): selected checkpoint primary (@last information); delta = arm - base
+on the SAME seed per val feed, pooled over the two seeds; member level diversity on val with within-feed rank-z (feed_rank_z) Pearson:
+rho_bb = corr(base_s23, base_s24), rho_x = mean(corr(hs1_s23, base_s24), corr(hs1_s24, base_s23)), margin = rho_bb - rho_x.
+PROCEED to stage E iff ALL of: (S1) pooled member val delta dval >= -0.0015; (S2) margin >= +0.005; (S3) dval >= 0 OR margin / |dval| >= 5
+(the 4:1 removal frontier of the abl screen: no_retr margin 0.014 at -0.0034). Otherwise HS1 is CLOSED as 'removal on the frontier'
+and stage E is not run. HS1b is read by the same rule (information): if HS1 fails S and HS1b passes S, HS1b takes HS1's place at
+stage E (variant w5_e10_hs1b_s951 / 952, --hist_et 2,3,4,7,9) under the same stage-E rule; if both pass, HS1 goes to stage E and HS1b
+is reported only. Information: holdout delta, slices, pmix, @last, 2-member pool, same-seed / arm-arm correlations.
+
+STAGE E (only if stage S passes): w5_e10_hs1_s951 / s952 = lane.sh E:hs1 = E_BASE + HYG + --seed 951|952 + --hist_src 1 (DRY-verified
+== nn_x/w5 E:base + the flag only), one per GPU (4 / 5), paired against w5_e10_base_s951 / s952 (nn_x/w5/preds, preds/holdout; selected
+checkpoint primary, @last information). Outputs copied into nn_x/w5 with cp --update=none (logs/<v>.json/.log, preds/nn_<v>_trainonly_
+{val,test}.npy and @last, preds/holdout/nn_<v>_holdout.npy and @last) so the standard read-outs run unchanged:
+  E RULE (nn_x/w5/w5_eval_e_ap1.py hs1 951,952 -> logs/w5_eval_E_hs1.txt): PASS iff pooled per-seed paired member val > 0 AND
+    holdout > +1 SE AND no val slice (M<50, M>=50, Tue, Thu) < -2 SE AND pmix >= -1 SE.
+  DIVERSITY CLAUSE (scratchpad div_readout.py hs1 951,952 -> logs/div_readout_hs1.txt; E_batch_predeclared amendment 1 mechanics):
+    (d1) pooled member val >= -0.0005 AND holdout >= -0.0005; (d2) rho_bb - rho_x >= +0.005 on val, rho_x = corr(hs1 pool{951,952},
+    base pool{953,954}), rho_bb = corr(base pool{951,952}, base pool{953,954}) (= 0.97364); (d3) 2-member pool hs1 vs base{951,952}
+    >= -0.0005 on val and holdout.
+  FAMILY CANDIDATE iff the E rule PASSES OR the diversity clause (d1 AND d2 AND d3) holds. Reported as information (never a gate):
+    the member cross-corr vs the 0.92 target ('material' iff <= 0.92), the holdout margin, margin / |member val delta| against the
+    4:1 frontier, and the swap-pool line (P) z-mean{hs1_951, hs1_952, base_953, base_954} - z-mean{base_951..954} on val and holdout.
+  KILL GATE at step 60000 (eval_every 2500: the step-60000 eval exists): both seeds' holdout_ndcg at step 60000 < base@60000 - 2 x 0.00077,
+    base@60000 = 0.31659 (s951) / 0.31740 (s952) from nn_x/w5/logs/w5_e10_base_s95x.json -> thresholds 0.31505 / 0.31586. Both below ->
+    stop by exact PID, arm CLOSED (information). One look at step 60000, one look at the end.
+NOTHING is fine-tuned, pooled or submitted by this agent; a family candidate is reported and the lead continues (seeds 953/954 +
+n2cpv3 FT with nn_x/w9/hs1/finetune.py + decide7, per hs1.json stage 2 under a NEW pre-declaration).
+GPU rules: GPUs N and 5 only, one CUDA_VISIBLE_DEVICES id per process, <= 3 compute processes and >= 60 GB free before every launch,
+12 CPU threads, setsid nohup, real PIDs from /proc/<pid>/cmdline in nn_x/w9/hs1/RUNNING.txt + one line in nn_x/w5/logs/RUNNING_w5.txt.
+
+RESULT (appended 2026-11-13T14:10:06Z, after the stage-S read-outs nn_x/w5/logs/w9_s_readout_hs1.txt / w9_s_readout_hs1b.txt; rule unchanged):
+STAGE S HS1 = CLOSED ('removal on the frontier'): w9_hs1_s23/24 vs abl_base_s23/24, selected ckpt: pooled member val -0.00311 +- 0.00074
+  (z -4.2; per seed -0.00323 / -0.00299), holdout -0.00266 +- 0.00043 (z -6.2), pmix -0.00402, slices M<50 -0.00240 M>=50 -0.00360 Tue
+  -0.00220 Thu -0.00411; @last -0.00312 / -0.00273; diversity margin rho_bb 0.97776 - rho_x 0.96186 = +0.01590 (S2 OK), margin / |dval|
+  5.1 (S3 OK), but S1 (dval >= -0.0015) FAILS -> stage E NOT run. Member cross-corr 0.962 (not 'material').
+STAGE S HS1b (information) = CLOSED: val -0.00473 +- 0.00083, holdout -0.00493 +- 0.00050, margin +0.02510, ratio 5.3; S1 fails.
+Both arms sit slightly ABOVE the 4:1 removal frontier (5.1 / 5.3) but are too weak at 2 epochs for the stage-E family bar.
+Pre-launch inference probe (information, nn_x/w5/logs/w9_hs1_probe_inference_view.txt): the s1 view applied at inference to the
+  trained base members w5_e10_base_s951/952 gives zcorr 0.930 / 0.937 with their full-history preds (val -0.0116 / -0.0095);
+  the model-5 view 0.903 / 0.903 (val -0.0165 / -0.0167). Nothing fine-tuned, pooled or submitted.

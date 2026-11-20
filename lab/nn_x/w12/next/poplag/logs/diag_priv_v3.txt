@@ -1,0 +1,9 @@
+=== poplag label-free prediction shift 2026-11-15T00:25:34Z; 30,000 holdout feeds; +- = 1 SE over feeds ===
+ lag 0: per-feed corr(W8 pool, pop1kd pool) 0.9765 +- 0.0001
+
+##### view priv_v3 vs lag 0 (both CPU fp32) #####
+ W8 pool     : per-feed corr(lag 0, lagged) 0.9810 +- 0.0001 | top-1 changed in 0.4046 +- 0.0028 of feeds | top-10 overlap 0.7837 | days >= Sep 13: corr 0.9875, top-1 changed 0.3276
+ pop1kd pool : per-feed corr(lag 0, lagged) 0.9942 +- 0.0000 | top-1 changed in 0.1820 +- 0.0022 of feeds | top-10 overlap 0.8968 | days >= Sep 13: corr 0.9974, top-1 changed 0.1333
+ per-feed corr(W8 pool, pop1kd pool): lagged 0.9795 +- 0.0001 (lag 0 0.9765); paired change +0.00306 +- 0.00005
+ W8 pool     : mean change of the within-feed z: rows that lose their history count (lag 0 > 0 -> lagged 0; 0.250 of rows) -0.1197; rows that keep a count (0.530) +0.0113; rows cold at lag 0 (0.220) +0.1084; mean z at lag 0 of the rows that lose it -0.0608, lagged -0.1805
+ pop1kd pool : mean change of the within-feed z: rows that lose their history count (lag 0 > 0 -> lagged 0; 0.250 of rows) -0.0189; rows that keep a count (0.530) +0.0090; rows cold at lag 0 (0.220) -0.0003; mean z at lag 0 of the rows that lose it -0.1054, lagged -0.1243

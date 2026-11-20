@@ -1,0 +1,207 @@
+
+== IDENTITY (R1): A_orig_E (original) vs B_copy_E_off (copy, flag off)   [2026-11-15T02:42:33Z]
+   anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 951 --kd_file <repo>/nn_x/w12/kd/out/teacher_mean11.npy --kd_w 0.5 --d 192 --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10
+  [PASS] both runs finished (record ok) minutes 10.5 / 10.0; eval cap 1000,1500,1500
+  [PASS] (a) logs identical line for line (wall-clock fields removed; args line: copy has the extra key holdout_in_train False) 23 lines; first diff []
+  [PASS] (b) record.fidx identical (19806,)
+  [PASS] (b) record.off identical (73,)
+  [PASS] (b) record.shapes identical (72, 2)
+  [PASS] (b) record.ci identical (1670912,)
+  [PASS] (b) record.y identical (1670912,)
+  [PASS] (b) record.loss identical (72,)
+  [PASS] (b) record.lgsum identical (72,)
+  [PASS] (b) record.calls identical (12,)
+       training steps 72, per-step main loss first/last 1.324003 / 1.308992
+  [PASS] (c) cliplog.gn identical (pre-clip grad norm of every step) (72,)
+  [PASS] (c) cliplog.is_pool identical (pre-clip grad norm of every step) (72,)
+  [PASS] (c) cliplog.mpad identical (pre-clip grad norm of every step) (72,)
+  [PASS] (c) cliplog.split identical (pre-clip grad norm of every step) (8, 5)
+  [PASS] (d) ckpt/w5_smoke_e10_kd05w192_s951.pt: every state_dict tensor bit-identical; cfg equal; args equal up to holdout_in_train=False 153 tensors
+  [PASS] (d) ckpt/w5_smoke_e10_kd05w192_s951@last.pt: every state_dict tensor bit-identical; cfg equal; args equal up to holdout_in_train=False 153 tensors
+  [PASS] (e) same set of prediction files ['preds/holdout/holdout_meta.npy', 'preds/holdout/holdout_y.npy', 'preds/holdout/nn_w5_smoke_e10_kd05w192_s951@last_holdout.npy', 'preds/holdout/nn_w5_smoke_e10_kd05w192_s951_holdout.npy', 'preds/nn_w5_smoke_e10_kd05w192_s951@last_trainonly_test.npy', 'preds/nn_w5_smoke_e10_kd05w192_s951@last_trainonly_val.npy', 'preds/nn_w5_smoke_e10_kd05w192_s951_trainonly_test.npy', 'preds/nn_w5_smoke_e10_kd05w192_s951_trainonly_val.npy']
+  [PASS] (e) preds/holdout/holdout_meta.npy identical (2, 30000) nonzero 59999
+  [PASS] (e) preds/holdout/holdout_y.npy identical (4630966,) nonzero 53524
+  [PASS] (e) preds/holdout/nn_w5_smoke_e10_kd05w192_s951@last_holdout.npy identical (4630966,) nonzero 229155
+  [PASS] (e) preds/holdout/nn_w5_smoke_e10_kd05w192_s951_holdout.npy identical (4630966,) nonzero 229155
+  [PASS] (e) preds/nn_w5_smoke_e10_kd05w192_s951@last_trainonly_test.npy identical (2904806,) nonzero 157655
+  [PASS] (e) preds/nn_w5_smoke_e10_kd05w192_s951@last_trainonly_val.npy identical (1389971,) nonzero 98592
+  [PASS] (e) preds/nn_w5_smoke_e10_kd05w192_s951_trainonly_test.npy identical (2904806,) nonzero 157655
+  [PASS] (e) preds/nn_w5_smoke_e10_kd05w192_s951_trainonly_val.npy identical (1389971,) nonzero 98592
+  [PASS] summary json identical (minutes removed) 
+   -> ALL PASS
+
+== FLAG ON (R2): D_copy_K_on_mix03   [2026-11-15T02:53:46Z]
+   cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1951 --kd_file <repo>/nn_x/w12/kd/out/teacher_mean11.npy --kd_w 0.5 --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10 --cooldown_mix 0.3 --holdout_in_train
+  [PASS] run finished 11.1 min; eval cap 1000,1500,1500
+  [PASS] checkpoint args: holdout_in_train True, keep 'last' 
+  [PASS] (a) regular-batch feeds are a subset of the subsample BEFORE the holdout removal, none twice per epoch 13673 of 20000 feeds seen in 50 regular steps (24 steps replaced by pool batches)
+  [PASS] (a) holdout feeds IN the regular batches: 129 (subsample holds 186 holdout feeds; log says training feeds 20000) holdout candidates in the regular batches 21770
+  [PASS] (b) target of every HOLDOUT feed in a training batch == (1-kd_w) y/sum(y) + kd_w softmax(teacher FILE rows / T) 401 holdout feed-occurrences, max abs diff 4.91e-08, mean teacher mass per feed 0.5000
+  [PASS] (b) the same identity on the non-holdout feeds 14800 feed-occurrences, max abs diff 8.05e-08, mean teacher mass 0.5000
+  [PASS] (c) steps/epoch 74 == batches of the feed list WITH the holdout (74; without: 74); total == int(steps/epoch x epochs) total 74, t_cool 0, recorded steps 74
+  [PASS] (c) FULLDATA log lines: put back / steps note agree with the independent count 10 FULLDATA lines
+  [PASS] (d) every eval line shows 'holdout_ndcg nan'; one IN-SAMPLE line per eval 3 evals; e.g. 'FULLDATA step 74: holdout IN-SAMPLE ndcg 0.17101 (these feed...'
+  [PASS] (d) BEST step == total steps; kept checkpoint bit-identical to @last BEST step 74
+  [PASS] (d) holdout files: only *_holdoutINSAMPLE*.npy (no *_holdout.npy, no *_holdout_hz.npy, no holdout_meta / holdout_y) ['nn_w5_smoke_kcd_ref_s951@last_holdoutINSAMPLE.npy', 'nn_w5_smoke_kcd_ref_s951_holdoutINSAMPLE.npy']
+  [PASS] (d) val / test predictions of the kept and the @last checkpoint exist and are finite ['nn_w5_smoke_kcd_ref_s951@last_trainonly_test.npy', 'nn_w5_smoke_kcd_ref_s951@last_trainonly_val.npy', 'nn_w5_smoke_kcd_ref_s951_trainonly_test.npy', 'nn_w5_smoke_kcd_ref_s951_trainonly_val.npy']
+  [PASS] (d) in-sample holdout files: 4,630,966 rows, kept == @last 
+  [PASS] (d) summary json: every history holdout_ndcg is NaN, best_step == total; <v>_fulldata.json has the in-sample history in-sample history [0.17104, 0.17104, 0.17101]
+  [PASS] (e) pool size 998 == subsample feeds with p_random > 0.5 INCLUDING the 186 holdout feeds (without them: 812) 
+  [PASS] (e) pool batches drawn: 24; they contain holdout feeds; every pool-batch feed has p_random > 0.5 272 holdout of 1528 pool-batch feeds
+  [PASS] (f) logged lr of every eval == the unchanged schedule formula at the new total ['lr 8.95e-04', 'lr 4.21e-04', 'lr 7.32e-05']
+   -> ALL PASS
+
+== FLAG ON (R2): C_copy_E_on (flag-off run of the same configuration: B_copy_E_off)   [2026-11-15T02:54:49Z]
+    0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 951 --kd_file <repo>/nn_x/w12/kd/out/teacher_mean11.npy --kd_w 0.5 --d 192 --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10 --holdout_in_train
+  [PASS] run finished 12.0 min; eval cap 1000,1500,1500
+  [PASS] checkpoint args: holdout_in_train True, keep 'last' 
+  [PASS] (a) regular batches = every feed of the 20000-feed subsample BEFORE the holdout removal, each 1x 20000 feeds in 73 steps
+  [PASS] (a) holdout feeds IN the regular batches: 194 (subsample holds 194 holdout feeds; log says training feeds 20000) holdout candidates in the regular batches 29937
+  [PASS] (a) the flag-off run of the same configuration has 0 holdout feeds in ANY batch 19806 distinct feeds
+  [PASS] (a)/(d) same feeds otherwise: flag-on feeds minus holdout == flag-off feeds 19806 feeds
+       flag off: train feeds 19806, steps/epoch 72, total 72  |  flag on: 20000, 73, 73
+  [PASS] (b) target of every HOLDOUT feed in a training batch == (1-kd_w) y/sum(y) + kd_w softmax(teacher FILE rows / T) 194 holdout feed-occurrences, max abs diff 3.11e-08, mean teacher mass per feed 0.5000
+  [PASS] (b) the same identity on the non-holdout feeds 19806 feed-occurrences, max abs diff 6.45e-08, mean teacher mass 0.5000
+  [PASS] (c) steps/epoch 73 == batches of the feed list WITH the holdout (73; without: 72); total == int(steps/epoch x epochs) total 73, t_cool 58, recorded steps 73
+  [PASS] (c) FULLDATA log lines: put back / steps note agree with the independent count 10 FULLDATA lines
+  [PASS] (d) every eval line shows 'holdout_ndcg nan'; one IN-SAMPLE line per eval 3 evals; e.g. 'FULLDATA step 73: holdout IN-SAMPLE ndcg 0.16906 (these feed...'
+  [PASS] (d) BEST step == total steps; kept checkpoint bit-identical to @last BEST step 73
+  [PASS] (d) holdout files: only *_holdoutINSAMPLE*.npy (no *_holdout.npy, no *_holdout_hz.npy, no holdout_meta / holdout_y) ['nn_w5_smoke_e10_kd05w192_s951@last_holdoutINSAMPLE.npy', 'nn_w5_smoke_e10_kd05w192_s951_holdoutINSAMPLE.npy']
+  [PASS] (d) val / test predictions of the kept and the @last checkpoint exist and are finite ['nn_w5_smoke_e10_kd05w192_s951@last_trainonly_test.npy', 'nn_w5_smoke_e10_kd05w192_s951@last_trainonly_val.npy', 'nn_w5_smoke_e10_kd05w192_s951_trainonly_test.npy', 'nn_w5_smoke_e10_kd05w192_s951_trainonly_val.npy']
+  [PASS] (d) in-sample holdout files: 4,630,966 rows, kept == @last 
+  [PASS] (d) summary json: every history holdout_ndcg is NaN, best_step == total; <v>_fulldata.json has the in-sample history in-sample history [0.16769, 0.16839, 0.16906]
+  [PASS] (e) pool size 1004 == subsample feeds with p_random > 0.5 INCLUDING the 194 holdout feeds (without them: 810) 
+       (e) no pool batch was drawn in this run (15 cooldown steps at p 0.02): pool content is checked in the run with --cooldown_mix 0.3
+  [PASS] (f) logged lr of every eval == the unchanged schedule formula at the new total ['lr 1.00e-04', 'lr 2.00e-04', 'lr 2.92e-04']
+   -> ALL PASS
+
+== IDENTITY (R1): E_orig_K_mix03 (original) vs F_copy_K_off_mix03 (copy, flag off)   [2026-11-15T03:05:35Z]
+   x 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1951 --kd_file <repo>/nn_x/w12/kd/out/teacher_mean11.npy --kd_w 0.5 --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10 --cooldown_mix 0.3
+  [PASS] both runs finished (record ok) minutes 10.5 / 10.0; eval cap 1000,1500,1500
+  [PASS] (a) logs identical line for line (wall-clock fields removed; args line: copy has the extra key holdout_in_train False) 24 lines; first diff []
+  [PASS] (b) record.fidx identical (15797,)
+  [PASS] (b) record.off identical (75,)
+  [PASS] (b) record.shapes identical (74, 2)
+  [PASS] (b) record.ci identical (1335776,)
+  [PASS] (b) record.y identical (1335776,)
+  [PASS] (b) record.loss identical (74,)
+  [PASS] (b) record.lgsum identical (74,)
+  [PASS] (b) record.calls identical (12,)
+       training steps 74, per-step main loss first/last 0.212740 / 1.161535
+  [PASS] (c) cliplog.gn identical (pre-clip grad norm of every step) (74,)
+  [PASS] (c) cliplog.is_pool identical (pre-clip grad norm of every step) (74,)
+  [PASS] (c) cliplog.mpad identical (pre-clip grad norm of every step) (74,)
+  [PASS] (c) cliplog.split identical (pre-clip grad norm of every step) (8, 5)
+  [PASS] (d) ckpt/w5_smoke_kcd_ref_s951.pt: every state_dict tensor bit-identical; cfg equal; args equal up to holdout_in_train=False 153 tensors
+  [PASS] (d) ckpt/w5_smoke_kcd_ref_s951@last.pt: every state_dict tensor bit-identical; cfg equal; args equal up to holdout_in_train=False 153 tensors
+  [PASS] (e) same set of prediction files ['preds/holdout/holdout_meta.npy', 'preds/holdout/holdout_y.npy', 'preds/holdout/nn_w5_smoke_kcd_ref_s951@last_holdout.npy', 'preds/holdout/nn_w5_smoke_kcd_ref_s951_holdout.npy', 'preds/nn_w5_smoke_kcd_ref_s951@last_trainonly_test.npy', 'preds/nn_w5_smoke_kcd_ref_s951@last_trainonly_val.npy', 'preds/nn_w5_smoke_kcd_ref_s951_trainonly_test.npy', 'preds/nn_w5_smoke_kcd_ref_s951_trainonly_val.npy']
+  [PASS] (e) preds/holdout/holdout_meta.npy identical (2, 30000) nonzero 59999
+  [PASS] (e) preds/holdout/holdout_y.npy identical (4630966,) nonzero 53524
+  [PASS] (e) preds/holdout/nn_w5_smoke_kcd_ref_s951@last_holdout.npy identical (4630966,) nonzero 229155
+  [PASS] (e) preds/holdout/nn_w5_smoke_kcd_ref_s951_holdout.npy identical (4630966,) nonzero 229155
+  [PASS] (e) preds/nn_w5_smoke_kcd_ref_s951@last_trainonly_test.npy identical (2904806,) nonzero 157655
+  [PASS] (e) preds/nn_w5_smoke_kcd_ref_s951@last_trainonly_val.npy identical (1389971,) nonzero 98592
+  [PASS] (e) preds/nn_w5_smoke_kcd_ref_s951_trainonly_test.npy identical (2904806,) nonzero 157655
+  [PASS] (e) preds/nn_w5_smoke_kcd_ref_s951_trainonly_val.npy identical (1389971,) nonzero 98592
+  [PASS] summary json identical (minutes removed) 
+   -> ALL PASS
+
+== IDENTITY (R1): G_orig_P (original) vs H_copy_P_off (copy, flag off)   [2026-11-15T03:17:08Z]
+    50 --seed 951 --xt_exclude seq_cv_invd20,seq_cv_pop,seq_cv_norm,it_hist_all_luo,it_hist_et1_luo,it_hist_et2_luo,it_hist_et3_luo,it_hist_et4_luo --xt_add xp_imp_c50 --kd_file <repo>/nn_x/w12/kd/out/teacher_mean11.npy --kd_w 0.5 --d 192 --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10
+  [PASS] both runs finished (record ok) minutes 11.3 / 10.8; eval cap 1000,1500,1500
+  [PASS] (a) logs identical line for line (wall-clock fields removed; args line: copy has the extra key holdout_in_train False) 25 lines; first diff []
+  [PASS] (b) record.fidx identical (19806,)
+  [PASS] (b) record.off identical (73,)
+  [PASS] (b) record.shapes identical (72, 2)
+  [PASS] (b) record.ci identical (1670912,)
+  [PASS] (b) record.y identical (1670912,)
+  [PASS] (b) record.loss identical (72,)
+  [PASS] (b) record.lgsum identical (72,)
+  [PASS] (b) record.calls identical (12,)
+       training steps 72, per-step main loss first/last 1.325842 / 1.337553
+  [PASS] (c) cliplog.gn identical (pre-clip grad norm of every step) (72,)
+  [PASS] (c) cliplog.is_pool identical (pre-clip grad norm of every step) (72,)
+  [PASS] (c) cliplog.mpad identical (pre-clip grad norm of every step) (72,)
+  [PASS] (c) cliplog.split identical (pre-clip grad norm of every step) (8, 5)
+  [PASS] (d) ckpt/abl_smoke_e10_pop1kd05w192_s951.pt: every state_dict tensor bit-identical; cfg equal; args equal up to holdout_in_train=False 153 tensors
+  [PASS] (d) ckpt/abl_smoke_e10_pop1kd05w192_s951@last.pt: every state_dict tensor bit-identical; cfg equal; args equal up to holdout_in_train=False 153 tensors
+  [PASS] (e) same set of prediction files ['preds/holdout/holdout_meta.npy', 'preds/holdout/holdout_y.npy', 'preds/holdout/nn_abl_smoke_e10_pop1kd05w192_s951@last_holdout.npy', 'preds/holdout/nn_abl_smoke_e10_pop1kd05w192_s951_holdout.npy', 'preds/nn_abl_smoke_e10_pop1kd05w192_s951@last_trainonly_test.npy', 'preds/nn_abl_smoke_e10_pop1kd05w192_s951@last_trainonly_val.npy', 'preds/nn_abl_smoke_e10_pop1kd05w192_s951_trainonly_test.npy', 'preds/nn_abl_smoke_e10_pop1kd05w192_s951_trainonly_val.npy']
+  [PASS] (e) preds/holdout/holdout_meta.npy identical (2, 30000) nonzero 59999
+  [PASS] (e) preds/holdout/holdout_y.npy identical (4630966,) nonzero 53524
+  [PASS] (e) preds/holdout/nn_abl_smoke_e10_pop1kd05w192_s951@last_holdout.npy identical (4630966,) nonzero 229155
+  [PASS] (e) preds/holdout/nn_abl_smoke_e10_pop1kd05w192_s951_holdout.npy identical (4630966,) nonzero 229155
+  [PASS] (e) preds/nn_abl_smoke_e10_pop1kd05w192_s951@last_trainonly_test.npy identical (2904806,) nonzero 157655
+  [PASS] (e) preds/nn_abl_smoke_e10_pop1kd05w192_s951@last_trainonly_val.npy identical (1389971,) nonzero 98592
+  [PASS] (e) preds/nn_abl_smoke_e10_pop1kd05w192_s951_trainonly_test.npy identical (2904806,) nonzero 157655
+  [PASS] (e) preds/nn_abl_smoke_e10_pop1kd05w192_s951_trainonly_val.npy identical (1389971,) nonzero 98592
+  [PASS] summary json identical (minutes removed) 
+   -> ALL PASS
+
+== FLAG ON (R2): I_copy_P_on (flag-off run of the same configuration: H_copy_P_off)   [2026-11-15T03:31:53Z]
+   0 --cliplog 50 --seed 951 --xt_exclude seq_cv_invd20,seq_cv_pop,seq_cv_norm,it_hist_all_luo,it_hist_et1_luo,it_hist_et2_luo,it_hist_et3_luo,it_hist_et4_luo --xt_add xp_imp_c50 --kd_file <repo>/nn_x/w12/kd/out/teacher_mean11.npy --kd_w 0.5 --d 192 --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10 --holdout_in_train
+  [PASS] run finished 12.8 min; eval cap 1000,1500,1500
+  [PASS] checkpoint args: holdout_in_train True, keep 'last' 
+  [PASS] (a) regular batches = every feed of the 20000-feed subsample BEFORE the holdout removal, each 1x 20000 feeds in 73 steps
+  [PASS] (a) holdout feeds IN the regular batches: 194 (subsample holds 194 holdout feeds; log says training feeds 20000) holdout candidates in the regular batches 29937
+  [PASS] (a) the flag-off run of the same configuration has 0 holdout feeds in ANY batch 19806 distinct feeds
+  [PASS] (a)/(d) same feeds otherwise: flag-on feeds minus holdout == flag-off feeds 19806 feeds
+       flag off: train feeds 19806, steps/epoch 72, total 72  |  flag on: 20000, 73, 73
+  [PASS] (b) target of every HOLDOUT feed in a training batch == (1-kd_w) y/sum(y) + kd_w softmax(teacher FILE rows / T) 194 holdout feed-occurrences, max abs diff 3.11e-08, mean teacher mass per feed 0.5000
+  [PASS] (b) the same identity on the non-holdout feeds 19806 feed-occurrences, max abs diff 6.45e-08, mean teacher mass 0.5000
+  [PASS] (c) steps/epoch 73 == batches of the feed list WITH the holdout (73; without: 72); total == int(steps/epoch x epochs) total 73, t_cool 58, recorded steps 73
+  [PASS] (c) FULLDATA log lines: put back / steps note agree with the independent count 10 FULLDATA lines
+  [PASS] (d) every eval line shows 'holdout_ndcg nan'; one IN-SAMPLE line per eval 3 evals; e.g. 'FULLDATA step 73: holdout IN-SAMPLE ndcg 0.16692 (these feed...'
+  [PASS] (d) BEST step == total steps; kept checkpoint bit-identical to @last BEST step 73
+  [PASS] (d) holdout files: only *_holdoutINSAMPLE*.npy (no *_holdout.npy, no *_holdout_hz.npy, no holdout_meta / holdout_y) ['nn_abl_smoke_e10_pop1kd05w192_s951@last_holdoutINSAMPLE.npy', 'nn_abl_smoke_e10_pop1kd05w192_s951_holdoutINSAMPLE.npy']
+  [PASS] (d) val / test predictions of the kept and the @last checkpoint exist and are finite ['nn_abl_smoke_e10_pop1kd05w192_s951@last_trainonly_test.npy', 'nn_abl_smoke_e10_pop1kd05w192_s951@last_trainonly_val.npy', 'nn_abl_smoke_e10_pop1kd05w192_s951_trainonly_test.npy', 'nn_abl_smoke_e10_pop1kd05w192_s951_trainonly_val.npy']
+  [PASS] (d) in-sample holdout files: 4,630,966 rows, kept == @last 
+  [PASS] (d) summary json: every history holdout_ndcg is NaN, best_step == total; <v>_fulldata.json has the in-sample history in-sample history [0.1657, 0.16618, 0.16692]
+  [PASS] (e) pool size 1004 == subsample feeds with p_random > 0.5 INCLUDING the 194 holdout feeds (without them: 810) 
+       (e) no pool batch was drawn in this run (15 cooldown steps at p 0.02): pool content is checked in the run with --cooldown_mix 0.3
+  [PASS] (f) logged lr of every eval == the unchanged schedule formula at the new total ['lr 1.00e-04', 'lr 2.00e-04', 'lr 2.92e-04']
+   -> ALL PASS
+
+== FLAG ON (R2): J_copy_K_hz_on   [2026-11-15T03:32:01Z]
+   n_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1951 --kd_file <repo>/nn_x/w12/kd/out/teacher_mean11.npy --kd_w 0.5 --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10 --cooldown_mix 0.3 --hzcd --holdout_in_train
+  [PASS] run finished 12.8 min; eval cap 1000,1500,1500
+  [PASS] checkpoint args: holdout_in_train True, keep 'last' 
+  [PASS] (a) regular-batch feeds are a subset of the subsample BEFORE the holdout removal, none twice per epoch 13673 of 20000 feeds seen in 50 regular steps (24 steps replaced by pool batches)
+  [PASS] (a) holdout feeds IN the regular batches: 129 (subsample holds 186 holdout feeds; log says training feeds 20000) holdout candidates in the regular batches 21770
+  [PASS] (b) target of every HOLDOUT feed in a training batch == (1-kd_w) y/sum(y) + kd_w softmax(teacher FILE rows / T) 401 holdout feed-occurrences, max abs diff 4.91e-08, mean teacher mass per feed 0.5000
+  [PASS] (b) the same identity on the non-holdout feeds 14800 feed-occurrences, max abs diff 8.05e-08, mean teacher mass 0.5000
+  [PASS] (c) steps/epoch 74 == batches of the feed list WITH the holdout (74; without: 74); total == int(steps/epoch x epochs) total 74, t_cool 0, recorded steps 74
+  [PASS] (c) FULLDATA log lines: put back / steps note agree with the independent count 11 FULLDATA lines
+  [PASS] (d) every eval line shows 'holdout_ndcg nan'; one IN-SAMPLE line per eval 3 evals; e.g. 'FULLDATA step 74: holdout IN-SAMPLE ndcg 0.17096 (these feed...'
+  [PASS] (d) BEST step == total steps; kept checkpoint bit-identical to @last BEST step 74
+  [PASS] (d) holdout files: only *_holdoutINSAMPLE*.npy (no *_holdout.npy, no *_holdout_hz.npy, no holdout_meta / holdout_y) ['nn_w5_smoke_kcd_ref_s951@last_holdoutINSAMPLE.npy', 'nn_w5_smoke_kcd_ref_s951_holdoutINSAMPLE.npy', 'nn_w5_smoke_kcd_ref_s951_holdoutINSAMPLE_hz.npy']
+  [PASS] (d) val / test predictions of the kept and the @last checkpoint exist and are finite ['nn_w5_smoke_kcd_ref_s951@last_trainonly_test.npy', 'nn_w5_smoke_kcd_ref_s951@last_trainonly_val.npy', 'nn_w5_smoke_kcd_ref_s951_trainonly_test.npy', 'nn_w5_smoke_kcd_ref_s951_trainonly_val.npy']
+  [PASS] (d) in-sample holdout files: 4,630,966 rows, kept == @last 
+  [PASS] (d) summary json: every history holdout_ndcg is NaN, best_step == total; <v>_fulldata.json has the in-sample history in-sample history [0.17094, 0.17094, 0.17096]
+  [PASS] (e) pool size 998 == subsample feeds with p_random > 0.5 INCLUDING the 186 holdout feeds (without them: 812) 
+  [PASS] (e) pool batches drawn: 24; they contain holdout feeds; every pool-batch feed has p_random > 0.5 272 holdout of 1528 pool-batch feeds
+  [PASS] (f) logged lr of every eval == the unchanged schedule formula at the new total ['lr 8.95e-04', 'lr 4.21e-04', 'lr 7.32e-05']
+   -> ALL PASS
+
+== FLAG ON (R2): K_copy_E_hz_on (flag-off run of the same configuration: B_copy_E_off)   [2026-11-15T04:04:01Z]
+   aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 951 --kd_file <repo>/nn_x/w12/kd/out/teacher_mean11.npy --kd_w 0.5 --d 192 --train_feeds 20000 --epochs 1 --eval_every 25 --select_min_step 25 --cliplog 10 --hzcd --holdout_in_train
+  [PASS] run finished 11.3 min; eval cap 1000,1500,1500
+  [PASS] checkpoint args: holdout_in_train True, keep 'last' 
+  [PASS] (a) regular batches = every feed of the 20000-feed subsample BEFORE the holdout removal, each 1x 20000 feeds in 73 steps
+  [PASS] (a) holdout feeds IN the regular batches: 194 (subsample holds 194 holdout feeds; log says training feeds 20000) holdout candidates in the regular batches 29937
+  [PASS] (a) the flag-off run of the same configuration has 0 holdout feeds in ANY batch 19806 distinct feeds
+  [PASS] (a)/(d) same feeds otherwise: flag-on feeds minus holdout == flag-off feeds 19806 feeds
+       flag off: train feeds 19806, steps/epoch 72, total 72  |  flag on: 20000, 73, 73
+  [PASS] (b) target of every HOLDOUT feed in a training batch == (1-kd_w) y/sum(y) + kd_w softmax(teacher FILE rows / T) 194 holdout feed-occurrences, max abs diff 3.11e-08, mean teacher mass per feed 0.5000
+  [PASS] (b) the same identity on the non-holdout feeds 19806 feed-occurrences, max abs diff 6.45e-08, mean teacher mass 0.5000
+  [PASS] (c) steps/epoch 73 == batches of the feed list WITH the holdout (73; without: 72); total == int(steps/epoch x epochs) total 73, t_cool 58, recorded steps 73
+  [PASS] (c) FULLDATA log lines: put back / steps note agree with the independent count 11 FULLDATA lines
+  [PASS] (d) every eval line shows 'holdout_ndcg nan'; one IN-SAMPLE line per eval 3 evals; e.g. 'FULLDATA step 73: holdout IN-SAMPLE ndcg 0.16898 (these feed...'
+  [PASS] (d) BEST step == total steps; kept checkpoint bit-identical to @last BEST step 73
+  [PASS] (d) holdout files: only *_holdoutINSAMPLE*.npy (no *_holdout.npy, no *_holdout_hz.npy, no holdout_meta / holdout_y) ['nn_w5_smoke_e10_kd05w192_s951@last_holdoutINSAMPLE.npy', 'nn_w5_smoke_e10_kd05w192_s951_holdoutINSAMPLE.npy', 'nn_w5_smoke_e10_kd05w192_s951_holdoutINSAMPLE_hz.npy']
+  [PASS] (d) val / test predictions of the kept and the @last checkpoint exist and are finite ['nn_w5_smoke_e10_kd05w192_s951@last_trainonly_test.npy', 'nn_w5_smoke_e10_kd05w192_s951@last_trainonly_val.npy', 'nn_w5_smoke_e10_kd05w192_s951_trainonly_test.npy', 'nn_w5_smoke_e10_kd05w192_s951_trainonly_val.npy']
+  [PASS] (d) in-sample holdout files: 4,630,966 rows, kept == @last 
+  [PASS] (d) summary json: every history holdout_ndcg is NaN, best_step == total; <v>_fulldata.json has the in-sample history in-sample history [0.16769, 0.16839, 0.16898]
+  [PASS] (e) pool size 1004 == subsample feeds with p_random > 0.5 INCLUDING the 194 holdout feeds (without them: 810) 
+       (e) no pool batch was drawn in this run (15 cooldown steps at p 0.02): pool content is checked in the run with --cooldown_mix 0.3
+  [PASS] (f) logged lr of every eval == the unchanged schedule formula at the new total ['lr 1.00e-04', 'lr 2.00e-04', 'lr 2.92e-04']
+   -> ALL PASS

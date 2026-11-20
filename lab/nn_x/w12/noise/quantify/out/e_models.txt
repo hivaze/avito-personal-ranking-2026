@@ -1,0 +1,17 @@
+model                                          NDCG    T_A NLL/click B entropy B  E[NDCG]          act-exp
+lgb_tr300k (trees, 300k feeds)              0.36822  0.633      3.7017    3.7160  0.35744 +0.01077 ± 0.00159
+cb_tr300k (trees, 300k feeds)               0.36997  0.971      3.7060    3.7044  0.36696 +0.00301 ± 0.00161
+member click-label s951 (train-only)        0.39632  1.178      3.5639    3.5910  0.39442 +0.00190 ± 0.00169
+member click-label s952 (train-only)        0.39691  1.189      3.5646    3.5924  0.39356 +0.00335 ± 0.00169
+member KD0.5 s951 (train-only)              0.39879  1.118      3.5502    3.5781  0.39566 +0.00312 ± 0.00171
+member KD0.5 s952 (train-only)              0.39967  1.140      3.5460    3.5782  0.39584 +0.00383 ± 0.00171
+member all-data KD w192 s951 (train-only)   0.39951  1.147      3.5485    3.5777  0.39642 +0.00309 ± 0.00171
+pool G3 (click labels)                      0.40033  0.993      3.5535    3.5718  0.40031 +0.00002 ± 0.00174
+pool W8P20                                  0.40214  1.010      3.5488    3.5661  0.40111 +0.00103 ± 0.00175
+pool FD16P20                                0.40270  1.005      3.5475    3.5639  0.40157 +0.00114 ± 0.00175
+best FD16P20@m0.4_0.2                       0.40294  1.004      3.5472    3.5641  0.40143 +0.00151 ± 0.00175
+
+across the neural models: d NDCG / d NLL-per-click (half B, K=1) = -0.268 per nat (i.e. 0.0037 nats per +0.001 NDCG)
+all models incl. trees: -0.204 per nat
+reference, uniform sharpening of the best score (a_ceiling.py): t 1.00 -> 0.98 moved E[NDCG] 0.40137 -> 0.40390 and the mean entropy 3.722 -> 3.710 nats (all feeds) -> about 0.21 NDCG per nat
+done 45s

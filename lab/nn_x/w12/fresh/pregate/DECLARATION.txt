@@ -1,0 +1,178 @@
+DECLARATION  nn_x/w12/fresh/pregate  (CPU pre-gate "fresh exposure from the val + test feeds themselves")
+=====================================================================================================================
+BLOCK 1 written 2026-11-15T14:54:52Z  (date -u), BEFORE any count, coverage, AUC or NDCG number of this task was computed.
+Known at this moment (label-free, read from code / flat tables only): val 14,423 feeds / 1,389,971 rows, days 20718 + 20720
+(+3 straggler feeds on 20719 / 20721); test 28,595 feeds / 2,904,806 rows, days 20722-20725; timestamps have a 128 s grid;
+no (feed, item) duplicates; 219,526 items shared by val and test; 92 non-zero users appear in both val and test;
+cold share (tte_it_imp == 0) val 0.3457, test 0.4618; public-like = test feeds with timestamp < 1790497920 (src/pmix.py BOUND;
+8,562 feeds = day 20722 + day 20723 until 11:32 MSK), private-like = the other 20,033 test feeds.
+Step 0 finding (code read): no impression count over val / test feeds is among the 34 train-stage inputs (cvnd_pre2s) or the
+42 fine-tune extras (n2c_pre_v3); it_cand_cnt_split* exists on disk but is banned (own feed + same-user feeds). -> proceed.
+
+A. DEFINITIONS (fixed)
+A1 Universe U = all val + test feeds (43,018). Query row = candidate (item i) of feed f, user u, timestamp t.
+   A source feed g counts for the row iff g != f, g shows item i, and user(g) != u.
+   user_id 0: every uid-0 feed is treated as its own user (it counts for every other feed, and other uid-0 feeds count for
+   it). Variant NZSRC ("without them"): uid-0 feeds are never sources (queries of uid-0 feeds are still scored).
+   Same non-zero user: ALL of that user's feeds in U (earlier and later, val and test) are excluded.
+A2 Windows:  a   = ts(g) <  t                      (AS-OF, strictly earlier 128 s tick)
+             a24 = t - 86400 <= ts(g) < t          (AS-OF, last 24 h; an as-of form, belongs to group A)
+             b   = same Moscow day, day = (ts + 10800) // 86400, any time of that day
+             c   = |ts(g) - t| <= 86400            (symmetric +-1 day, rolling)
+             d   = every feed of U                 (whole val + test period)
+             e   = ts(g) >  t                      (later-only; DIAGNOSTIC for step 6, never part of group A)
+A3 Forms per window w with count n_w: raw n_w; l_w = log1p(n_w); r_w = within-feed percent rank of n_w (average ties,
+   0.5 if all tied); z_w = within-feed z of l_w (0 if the feed sd is 0); i_w = 1[n_w >= 1];
+   cs_w = cold * i_w  ("cold in train but shown elsewhere in val / test"), cold = 1[tte_it_imp == 0] (= xp_imp_c50 == 0).
+A4 Pool score b = zf(0.5 * zf(preds/ens_FD16P20kd_ft_val.npy) + 0.5 * zf(preds/ens_FD16P20kd_to_val.npy)), zf = within-feed
+   z (src/stack_val.feed_rank_z[:, 1]) = the final FD16P20 val score of nn_x/w12/kd/build_r4.py (fin()). Sanity: its plain
+   val NDCG is printed and compared with the build_r4 read-out of FD16P20 before anything else.
+A5 Splits of test: public-like / private-like by src/pmix.py BOUND. Feed cold share bins = pmix bins (<15, 15-30, 30-45, >=45 %).
+
+B. STEP 1 (coverage) and STEP 2 (descriptive AUC): NO pass / fail criterion. Nothing in sections C-F is chosen from them:
+   the model, columns, arms and the rule below are fixed HERE. Step 2 uses val labels in sample and is a sanity read only.
+   Within-feed AUC = mean over feeds (that have >= 1 positive and >= 1 negative in the scored subset) of the per-feed AUC
+   with ties = 0.5; "among cold" = the same restricted to the cold candidates of each feed. Yardstick: xp_imp_c50.
+
+C. STEP 3 NESTED RESIDUAL READ (the decision)
+C1 PRIMARY family (decides): per-feed conditional logit = listwise softmax with multiple positives,
+     s = beta * b + sum_j w_j x_j ;  loss = sum over training feeds with >= 1 positive of [ -sum_pos s + npos * logsumexp_feed(s) ]
+     + 0.5 * LAMBDA * sum_j w_j^2,  LAMBDA = 10 (beta not penalised); every x_j is divided by its sd over all val rows
+     (label-free scaling); L-BFGS-B, start beta = 1, w = 0, maxiter 300.
+   CONTROL columns: b ; b*lm ; cold ; cold*b ; cold*lm      with lm = ln(M) - mean over val rows of ln(M).
+   ARM = CONTROL + for every window w of the arm these 8 columns:
+     min(n_w, 50) ; l_w ; r_w - 0.5 ; z_w ; i_w ; cs_w ; l_w*cold ; l_w*lm.
+   Arms:  A   = windows {a, a24}          (AS-OF forms only; THE DECISION ARM)
+          B   = windows {b, c, d}         (forms that use later feeds)
+          ALL = windows {a, a24, b, c, d}
+          L   = window  {e}               (later-only, diagnostic)
+   The same four arms are repeated with NZSRC counts (information: "without user 0 as a source").
+C2 Folds: 5 folds over val feeds grouped by user_id (every uid-0 feed is its own group, as nn_x/w5/finetune.py
+   --u0_singleton), users shuffled with fold seeds 0, 1, 2 (3 x 5 fits per arm). Each fold: fit on 4 folds, score the 5th.
+C3 Numbers: per-feed NDCG by src/metrics.ndcg_per_feed (all 14,423 feeds; feeds without positives = 1 in both arms).
+   d_f = mean over the 3 fold seeds of [NDCG_f(arm) - NDCG_f(control)]; GAIN = mean_f d_f; SE = sd_f(d_f) / sqrt(14,423)
+   (paired per-feed SE); z = GAIN / SE. Plain (unweighted) val is the decision number. Reported next to it, not deciding:
+   pmix public / private (src/pmix.weights, wmean_se), feed cold-share bin, day (20718 / 20720), M < 50 / >= 50,
+   uid-0 feeds vs others, third of the day (position in the period), per fold seed.
+C4 SECONDARY family (information only, never decides): LightGBM lambdarank, init_score = beta_fold * b (beta_fold = the
+   coefficient of a conditional logit on [b] alone fitted on the training folds), final score = init + trees;
+   num_leaves 15, learning_rate 0.05, 200 rounds (fixed, no early stopping), min_data_in_leaf 100, lambda_l2 10,
+   lambdarank_truncation_level 100, feature_fraction 1.0, deterministic, num_threads 12, same folds / seeds.
+   Control features [b, M, cold]; arm features = control + [n_w, r_w, z_w, cs_w] per window; arms A and ALL.
+   If the secondary clears the bar where the primary does not, this is reported as a disagreement, NOT as PROMISING.
+
+D. STEP 4 PLACEBO
+D1 Decision placebo P1 ("profile swap", implements the task's stated intent "destroys the item link, keeps the count
+   distribution"): within strata = (Moscow day of the feed) x (cold flag) x (3-hour block of the feed time), the vector of raw
+   counts (n_a, n_a24, n_b, n_c, n_d, n_e) is permuted across candidate rows (one permutation per draw, the same for every
+   window); l / r / z / i / cs are then recomputed inside each feed. Every row keeps a count vector that really occurs for a
+   candidate of the same day, cold status and time of day, but it belongs to a random other item.
+   20 draws (>= 10 required), draw seeds 100..119; each draw runs the identical nested read (same folds, 3 fold seeds) for
+   arms A, B, ALL. "Above every placebo draw" = GAIN_real(arm) > max over the 20 draws of GAIN_placebo(arm).
+D2 Literal placebo P2 (information): the item-id column of the SOURCE rows is permuted across source rows within each Moscow
+   day and the counts are recomputed against the true item of each query row. Declared reason why P2 cannot be the decision
+   placebo (arithmetic, before running it): a within-day permutation of the item column preserves the day's multiset of
+   item ids, so the number of source rows carrying item i on day D stays n_i(D); the query's same-day and whole-period
+   counts are therefore still a function of its TRUE item's multiplicity (n_i instead of n_i - 1: the own occurrence is
+   relocated instead of excluded) -> the item link is NOT destroyed for windows b, c, d and only the within-day timing is
+   randomised for window a. P2 is run with 10 draws (seeds 200..209) and reported as "timing / location placebo".
+D3 Reported: the 20 (10) placebo gains per arm, their mean / sd / max, the rank of the real gain, and
+   (GAIN_real - mean_placebo) / sd_placebo.
+
+E. DECISION RULE (given by the task; operationalised with C3 / D1; primary family only)
+   PROMISING iff arm A (as-of forms alone): GAIN >= +0.0005 AND z >= 2 AND GAIN > every P1 placebo draw of arm A.
+   WEAK      iff not PROMISING and (arm B or arm ALL): GAIN >= +0.0005 AND z >= 2 AND GAIN > every P1 draw of that arm.
+   NO        otherwise.
+   Information flags (do not change the verdict): pmix-private GAIN < -1 SE; NZSRC arm disagreeing in sign with the main
+   arm; the secondary family; arm L. Multiple looks are disclosed: 4 arms x 2 source variants x 2 families are read,
+   exactly ONE cell (primary family, arm A, uid-0 feeds as sources) decides PROMISING, two cells (B, ALL) decide WEAK.
+
+F. STEP 5 DENSITY PARITY (label-free; no training on train rows)
+F1 Train-row version: a pseudo-period inside train with the val / test density: source = a random subsample of train feeds
+   per Moscow day (seed 7), other users only (rule A1), query rows = the candidates of the sampled feeds themselves (as in
+   val / test, where every query feed is also a source). Pseudo-period: "val-like" days 20709, 20710 (7,542 and 6,878 feeds),
+   "test-like" days 20713, 20714, 20715 (7,367 / 7,578 / 7,600 feeds) = 36,965 feeds = 1.17 % of the train feeds.
+   cold for these rows = no candidate impression in ANY train feed of days <= 20708 (7 full days before the pseudo-period).
+   Two sampling populations: U = all train feeds of the day; R = random-like feeds (p_random > 0.9,
+   eda/labels_position/out/train_prandom.npz), because val / test are the exploration domain.
+F2 Compared, for cold and warm rows separately and per window: zero share, mean count, PSI over the count bins
+   {0, 1, 2, 3-4, 5-9, 10-19, 20+} (clip 1e-6) between the train version and (i) val, (ii) public-like test,
+   (iii) private-like test; position-matched where the window depends on the position in the period
+   (first / second day of the pseudo-period against val day 20718 / 20720; the test-like days against the test days).
+F3 Criterion: PARITY ATTAINABLE for a window iff the best of {U, R} has PSI < 0.25 against val AND against both test parts,
+   for cold AND warm rows; "inside the project rule" iff PSI < 0.5 (CURRENT_STATUS section 3); else NOT ATTAINABLE by
+   density-matched subsampling alone.
+
+G. STEP 6 (written reasoning + these reads; no pass / fail, one flag)
+G1 Share of the gain that needs later feeds = GAIN(B) - GAIN(A), GAIN(ALL) - GAIN(A), GAIN(L); by val day and third of day.
+G2 Transfer flag for a window: PSI(val rows vs public-like rows) or PSI(val rows vs private-like rows) of the raw count
+   >= 0.25 = "raw / log forms do not transfer"; the same for the within-feed z form on 10 val-quantile bins.
+
+H. RULES OF THIS RUN: CPU only (CUDA_VISIBLE_DEVICES=""), <= 2 heavy processes x 12 threads, < 30 GB resident; writes only
+   under nn_x/w12/fresh/pregate/ and reports/FRESH_1115/pregate.md; no label enters any feature; val labels only in the
+   descriptive step 2 (declared as such) and inside the user-grouped nested folds of steps 3-4; test labels do not exist.
+
+AMENDMENT 1 written 2026-11-15T14:59:42Z (before any nested NDCG number; the first start of s3_nested.py stopped at an assert
+after the pool-score sanity line, no arm had been fitted). Label-free numbers known by now: coverage (logs/s1_build.log) and
+the descriptive step 2 (logs/s2_auc.log, in sample, nothing chosen from it; sections C-G are unchanged).
+- A5 clarified: the pmix feed table's "cold_share" is the share of candidates never seen in train as candidate OR in a
+  history (mean 0.290 on val), not the task's "no train impression" share (0.348; = the table's "coldcand_share").
+  The by-cold-share slices are therefore reported twice with the same edges (15 / 30 / 45 %): (i) by the task's definition
+  (no train impression), (ii) by the pmix variable. pmix public / private weights are used unchanged (src/pmix.weights()).
+- Reporting only, no criterion: both slicings, and the gain restricted to cold-clicked feeds if cheap.
+
+AMENDMENT 2 written 2026-11-15T15:01:21Z (step 5 only; written BEFORE any train-row count was built; label-free step).
+- F1 gets a third sampling population RM = random-like feeds (p_random > 0.9) drawn so that the feed-size (M) histogram of
+  each sampled day equals the val + test histogram (20 quantile bins of M over the 43,018 val + test feeds): the source
+  density that matters is candidate rows per day, and val / test feeds are larger (mean M 96 / 102) than train feeds (78).
+  F3 reads "the best of {U, R, RM}".
+- Period L (declared in F1: days 20709, 20710 | 20713, 20714, 20715; cold from days <= 20708) is the cold / warm comparison.
+  Its calendar differs from the real one (real: day, gap, day, gap, 4 days), so the position-free window b (same day) and
+  window a on the first day are the clean cold / warm comparisons; a24, c, d, e of period L are reported with that caveat.
+- Added period X with the REAL calendar pattern (offsets 0, 2 | 4, 5, 6, 7): train days 20703, 20705 | 20707, 20708,
+  20709, 20710 with the real per-day feed numbers 7,542 / 6,878 | 6,050 / 7,367 / 7,578 / 7,600 (43,015 feeds = 1.37 % of
+  train feeds). Only ONE train day precedes it, so its cold flag is not comparable: period X is compared for ALL rows
+  pooled (every window, position-matched: public-like = pseudo days 5-6 up to 11:32 MSK of day 6, private-like = the rest).
+- F3 is applied (i) to window b and first-day window a on period L by cold / warm, (ii) to every window on period X pooled.
+
+AMENDMENT 3 written 2026-11-15T15:04:49Z. Disclosure first: the first full s3 run was stopped by me at 15:03:09Z for a thread-cap
+breach (PROGRESS.md) after it had printed fold seeds 0 and 1 (logs/s3_nested_lbfgs_seed0_STOPPED.log): control 0.40244 / 0.40229
+against pool-only 0.40271; arm A 0.40191 / 0.40190, B 0.40190 / 0.40216, ALL 0.40152 / 0.40183, L 0.40208 / 0.40223 (all below
+the control), and "max nit 300" = at least one fit reached the L-BFGS cap. The identical declared run was restarted at
+15:03:24Z (no change of model, columns, LAMBDA, folds, maxiter). Sections C-E stay as written and decide.
+Added, INFORMATION ONLY (cannot produce PROMISING / WEAK; declared after the two seeds above were seen, so a positive
+reading here would be a post-hoc look and is treated as such):
+- MIN arms: control + [z_w, cs_w] (2 columns) for each single window w in {a, a24, b, c, d, e} = the least-parameter read,
+  to separate "no signal" from "signal eaten by the fitting cost of 16-40 columns". Script s3c_min.py, same folds / seeds.
+- CONV check: the main arms refitted with maxiter 5000 (converged optimum of the same objective) on fold seed 0, to show
+  whether the 300-iteration cap matters. Script s3c_min.py prints both.
+- The control itself is below the raw pool score (the conditional logit re-weights cold rows and feed size by likelihood,
+  which is not NDCG): this is reported; the decision contrast stays arm minus control as declared.
+- (same AMENDMENT 3, added 2026-11-15T15:15:35Z, after the primary read was printed: A -0.00044 +- 0.00015, B -0.00032 +- 0.00033,
+  ALL -0.00064 +- 0.00034, L -0.00012 +- 0.00033) INFORMATION ONLY: an in-sample ceiling per arm (fit and score on all val
+  feeds, maxiter 5000) to bound from above what the forms could give; and an extra descriptive read s5b_train_auc.py
+  (within-feed AUC of the density-matched counts for the TRAIN click label on the RM pseudo-period L rows; no model).
+- (AMENDMENT 3, added 2026-11-15T15:18:24Z; seen by now: the LGB secondary real read (control -0.00301 below the raw pool score;
+  arm A +0.00079 +- 0.00045 against that control, B +0.00028, ALL -0.00020) and its first 3 placebo draws for arm A
+  (+0.00032, +0.00026, +0.00032)) INFORMATION ONLY, post hoc, cannot give PROMISING / WEAK:
+  MINB arms = control + [i_w*b, cs_w*b, z_w, cs_w] per single window (does the exposure interact with the pool score?).
+  LGB-R family (a tree model that cannot re-shape the pool score): features WITHOUT b, control [M, cold], arm A = control +
+  [n_w, r_w, z_w, cs_w] for windows a, a24; init_score = beta_fold * b; num_leaves 7, learning_rate 0.03, 100 rounds,
+  min_data_in_leaf 1000, lambda_l2 10, truncation 100; same folds / seeds; P1 placebo 10 draws (seeds 100..109).
+  Reading: REPLICATE-worthy only if its arm A is >= +0.0005 with z >= 2, above all 10 placebo draws AND its level is
+  >= the raw pool score; otherwise it changes nothing.
+
+READ 2026-11-15T15:50:17Z (by the rule of section E; primary family; numbers from out/s3_nested.json, out/s4_placebo_P1.jsonl)
+  arm A (as-of only): GAIN -0.00044 +- 0.00015, z -2.85; P1 placebo 20 draws: mean -0.00015, sd 0.00017, max +0.00011;
+     real above 2 of 20 draws.  (a) GAIN >= +0.0005: FAIL  (b) z >= 2: FAIL  (c) above every placebo draw: FAIL  -> not PROMISING
+  arm B (b, c, d):    GAIN -0.00032 +- 0.00033, z -0.96; placebo mean -0.00033, max +0.00003; real above 9 of 20 -> FAIL
+  arm ALL:            GAIN -0.00064 +- 0.00034, z -1.89; placebo mean -0.00036, max +0.00002; real above 1 of 20 -> FAIL
+  VERDICT: NO.
+  Information: pmix public / private of arm A -0.00064 +- 0.00021 / -0.00067 +- 0.00026 (flag: private < -1 SE); NZSRC arm A
+  -0.00045 +- 0.00016 (same sign); arm L -0.00012 +- 0.00033; in-sample ceiling of arm A -0.00004 +- 0.00017; MIN a
+  -0.00020 +- 0.00008; LGB secondary arm A +0.00079 +- 0.00045 (z 1.78) against a control that is 0.00301 below the raw pool
+  score, above 10 of 10 of its placebo draws (max +0.00034) = a disagreement between families, not PROMISING (C4);
+  LGB-R (post hoc) arm A -0.00002 +- 0.00022 against its control, above 6 of 10 placebo draws, -0.00027 against the raw pool.
+  Step 5 (F3): parity ATTAINABLE (population RM: PSI <= 0.003 pooled on period X; <= 0.011 for cold / warm on window b).
+  Step 6 (G2) flags: windows a, a24, c, e do not transfer val -> private (within-feed z PSI 2.17 / 1.11 / 0.55 / 0.78;
+  raw PSI of window a 0.24, warm rows 0.32); windows b and d are stationary.

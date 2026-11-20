@@ -1,0 +1,212 @@
+[
+ {
+  "section": "z.followup",
+  "name": "early stopping: od_type=Iter od_wait=5",
+  "status": "PASS",
+  "detail": "iterations run 17 of 400; trees kept 12; best_iteration 11; get_best_score() = {}",
+  "sec": 0.48
+ },
+ {
+  "section": "z.followup",
+  "name": "early stopping: early_stopping_rounds=5",
+  "status": "PASS",
+  "detail": "iterations run 17 of 400; trees kept 12; best_iteration 11; get_best_score() = {}",
+  "sec": 0.43
+ },
+ {
+  "section": "z.followup",
+  "name": "early stopping: od_type=IncToDec od_pval=1e-2 od_wait=5",
+  "status": "PASS",
+  "detail": "iterations run 400 of 400; trees kept 21; best_iteration 20; get_best_score() = {}",
+  "sec": 9.41
+ },
+ {
+  "section": "z.followup",
+  "name": "early stopping: od_type=Iter od_wait=5 use_best_model=False",
+  "status": "PASS",
+  "detail": "iterations run 17 of 400; trees kept 17; best_iteration 11; get_best_score() = {}",
+  "sec": 0.42
+ },
+ {
+  "section": "z.followup",
+  "name": "early stopping: od_type=Iter od_wait=5 best_model_min_trees=60",
+  "status": "PASS",
+  "detail": "iterations run 17 of 400; trees kept 17; best_iteration 11; get_best_score() = {}",
+  "sec": 0.46
+ },
+ {
+  "section": "z.followup",
+  "name": "early stopping without eval_metric uses the objective's default metric",
+  "status": "PASS",
+  "detail": "no eval_metric: stops on ['PFound']; iterations run 14",
+  "sec": 0.34
+ },
+ {
+  "section": "z.followup",
+  "name": "YetiRank + {\"leaf_estimation_iterations\": 2}",
+  "status": "PASS",
+  "detail": "trees 40 of 40; pred sd 1.68; eval NDCG 0.7162",
+  "sec": 1.48
+ },
+ {
+  "section": "z.followup",
+  "name": "YetiRank + {\"leaf_estimation_iterations\": 5}",
+  "status": "UNSTABLE",
+  "detail": "trees 15 of 40; pred sd 2.22e+15; eval NDCG 0.7046",
+  "sec": 1.23
+ },
+ {
+  "section": "z.followup",
+  "name": "YetiRank + {\"leaf_estimation_iterations\": 5, \"l2_leaf_reg\": 1}",
+  "status": "PASS",
+  "detail": "trees 40 of 40; pred sd 1.42; eval NDCG 0.7252",
+  "sec": 3.2
+ },
+ {
+  "section": "z.followup",
+  "name": "YetiRank + {\"leaf_estimation_iterations\": 5, \"l2_leaf_reg\": 5}",
+  "status": "PASS",
+  "detail": "trees 40 of 40; pred sd 1.15; eval NDCG 0.7193",
+  "sec": 3.03
+ },
+ {
+  "section": "z.followup",
+  "name": "YetiRank + {\"leaf_estimation_iterations\": 5, \"l2_leaf_reg\": 30}",
+  "status": "PASS",
+  "detail": "trees 40 of 40; pred sd 0.563; eval NDCG 0.6477",
+  "sec": 3.02
+ },
+ {
+  "section": "z.followup",
+  "name": "QuerySoftMax + {\"leaf_estimation_method\": \"Newton\"}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7039, pred sd 1.11, trees 40",
+  "sec": 0.18
+ },
+ {
+  "section": "z.followup",
+  "name": "QuerySoftMax:lambda=0.5 + {\"leaf_estimation_method\": \"Newton\"}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6601, pred sd 0.329, trees 40; differs from 'QuerySoftMax' (corr 0.849)",
+  "sec": 0.36
+ },
+ {
+  "section": "z.followup",
+  "name": "QuerySoftMax:lambda=0.0001 + {\"leaf_estimation_method\": \"Newton\"}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7166, pred sd 1.4, trees 40; differs from 'QuerySoftMax' (corr 0.975)",
+  "sec": 0.2
+ },
+ {
+  "section": "z.followup",
+  "name": "QuerySoftMax + {\"learning_rate\": 1.0}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6993, pred sd 0.731, trees 40",
+  "sec": 0.18
+ },
+ {
+  "section": "z.followup",
+  "name": "QuerySoftMax + {\"leaf_estimation_iterations\": 10}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7102, pred sd 0.888, trees 40",
+  "sec": 0.35
+ },
+ {
+  "section": "z.followup",
+  "name": "QuerySoftMax:beta=3 + {\"leaf_estimation_method\": \"Newton\"}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7153, pred sd 0.423, trees 40",
+  "sec": 0.17
+ },
+ {
+  "section": "z.followup",
+  "name": "LambdaMart + leaf_estimation_method=Gradient ranks in the WRONG direction?",
+  "status": "BUG?",
+  "detail": "Newton NDCG 0.7163; Gradient NDCG 0.2113 (random 0.2810), corr(Newton, Gradient) -0.834; NDCG of MINUS the Gradient model 0.6533; norm=false + Gradient 0.2244",
+  "sec": 0.97
+ },
+ {
+  "section": "z.followup",
+  "name": "modes that coincide with binary labels",
+  "status": "PASS",
+  "detail": "YetiRank MRR == ERR: False; LambdaMart DCG == NDCG: True; StochasticRank MRR == ERR: False (binary labels)",
+  "sec": 16.24
+ },
+ {
+  "section": "z.followup",
+  "name": "YetiRank: does the label SCALE matter (y vs 10*y)?",
+  "status": "PASS",
+  "detail": "labels x10: identical False; corr 0.9614; sd ratio 1.03; NDCG 0.7239 -> 0.7179",
+  "sec": 1.96
+ },
+ {
+  "section": "z.followup",
+  "name": "YetiRank:mode=NDCG: does the label SCALE matter (y vs 10*y)?",
+  "status": "NOEFFECT",
+  "detail": "labels x10: identical True; corr 1.0000; sd ratio 1; NDCG 0.7137 -> 0.7137",
+  "sec": 2.67
+ },
+ {
+  "section": "z.followup",
+  "name": "LambdaMart: does the label SCALE matter (y vs 10*y)?",
+  "status": "PASS",
+  "detail": "labels x10: identical False; corr 1.0000; sd ratio 1; NDCG 0.7163 -> 0.7163",
+  "sec": 0.66
+ },
+ {
+  "section": "z.followup",
+  "name": "LambdaMart:norm=false: does the label SCALE matter (y vs 10*y)?",
+  "status": "PASS",
+  "detail": "labels x10: identical False; corr 1.0000; sd ratio 1; NDCG 0.7173 -> 0.7173",
+  "sec": 0.66
+ },
+ {
+  "section": "z.followup",
+  "name": "PairLogit: does the label SCALE matter (y vs 10*y)?",
+  "status": "NOEFFECT",
+  "detail": "labels x10: identical True; corr 1.0000; sd ratio 1; NDCG 0.7070 -> 0.7070",
+  "sec": 0.59
+ },
+ {
+  "section": "z.followup",
+  "name": "QueryRMSE: does the label SCALE matter (y vs 10*y)?",
+  "status": "PASS",
+  "detail": "labels x10: identical False; corr 1.0000; sd ratio 10; NDCG 0.7261 -> 0.7261",
+  "sec": 0.33
+ },
+ {
+  "section": "z.followup",
+  "name": "StochasticRank:metric=NDCG;top=10: does the label SCALE matter (y vs 10*y)?",
+  "status": "PASS",
+  "detail": "labels x10: identical False; corr 1.0000; sd ratio 1; NDCG 0.6975 -> 0.6975",
+  "sec": 2.64
+ },
+ {
+  "section": "z.followup",
+  "name": "soft labels: YetiRank is magnitude-aware, PairLogit is order-only",
+  "status": "PASS",
+  "detail": "YetiRank on logit vs logit^3 (same order): corr 0.985, NDCG 0.7277 / 0.7359; on within-feed rank: 0.7302; PairLogit logit vs rank identical: True (PairLogit uses the ORDER only; YetiRank weights pairs by the label gap)",
+  "sec": 6.56
+ },
+ {
+  "section": "z.followup",
+  "name": "built-in NDCG with group weights on the eval pool",
+  "status": "PASS",
+  "detail": "unweighted 0.28095; with group_weight 0.27562; with group_weight and use_weights=false 0.28095",
+  "sec": 0.01
+ },
+ {
+  "section": "z.followup",
+  "name": "QuerySoftMax beta with a baseline",
+  "status": "PASS",
+  "detail": "baseline alone 0.7748; QuerySoftMax: baseline+trees 0.7645 (trees sd 0.567); QuerySoftMax:beta=0.3: baseline+trees 0.7127 (trees sd 2.240); QuerySoftMax:beta=3: baseline+trees 0.7667 (trees sd 0.075) (beta multiplies baseline AND trees inside the softmax)",
+  "sec": 0.57
+ },
+ {
+  "section": "z.followup",
+  "name": "QuerySoftMax: group_weight vs label scaling",
+  "status": "PASS",
+  "detail": "QuerySoftMax with group_weight w vs labels multiplied by w: identical False, corr 0.9932",
+  "sec": 0.37
+ }
+]

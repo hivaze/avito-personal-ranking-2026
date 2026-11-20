@@ -1,0 +1,192 @@
+{
+ "checks": [
+  {
+   "name": "ref_pre_hzcd copies intact (md5.txt: train.py, lane.sh, test_w5.py, test_trunc_lifts.py)",
+   "ok": true,
+   "info": "{'train.py.txt': True, 'lane.sh.txt': True, 'test_w5.py.txt': True, 'test_trunc_lifts.py.txt': True}"
+  },
+  {
+   "name": "train.py minus the wave-7 statements (exact set) minus the valcd statements (exact set) minus the hzcd statements (exact set) == previous train.py (AST, docstrings stripped)",
+   "ok": true,
+   "info": "removed {'import cd_arms6': 1, 'add_argument --hzcd': 1, 'tr_hz = None': 1, 'if a.hzcd': 3, 'ifexp tr_hz': 1}; valcd {'import cd_arms7': 1, 'add_argument --val_mix': 1, 'add_argument --val_fold': 1, 'valcd = None': 1, 'if a.val_mix > 0': 1, 'if valcd is not None and step >= t_cool and valcd.draw(is_pool)': 1, 'if valcd is not None and valcd.is_val': 1, 'if valcd is not None': 2}; w7 {'import cd_arms8': 1, 'add_argument --rdrop_cd': 1, 'add_argument --sam_cd': 1, 'rdrop, sam = None, None': 1, 'if a.rdrop_cd > 0': 1, 'if a.sam_cd > 0': 1, 'if rdrop is not None and step >= t_cool': 1, 'if sam is not None and step >= t_cool': 1, 'if rdrop is not None': 1, 'if sam is not None': 1}"
+  },
+  {
+   "name": "parse(): hzcd default False (val_mix 0 / val_fold -1 / rdrop_cd 0 / sam_cd 0: later flags); every other default == the previous parser",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "lane.sh DRY: all 50 previous jobs print byte-identical commands to the previous lane.sh",
+   "ok": true,
+   "info": "50 commands"
+  },
+  {
+   "name": "B:hzcd:101-104 == B:m02ref + {hzcd True}; CDSEED 900 + root; init v17_pre2s_s<root>@77500",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "E:hzcd:951-954 == E:base + {hzcd True}; seed 951-954",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "hzcd is a stage-B / stage-E arm only; roots / seeds range-checked (bad jobs refused)",
+   "ok": true,
+   "info": "[1, 1, 1]"
+  },
+  {
+   "name": "bash -n lane.sh",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "setup_hzcd and save_holdout_hz: one call each, behind `if a.hzcd`, in main()",
+   "ok": true,
+   "info": "{'setup_hzcd': [['if a.hzcd', 'def main']], 'save_holdout_hz': [['if a.hzcd', 'def main']]}"
+  },
+  {
+   "name": "the hzcd gather conditional appears once, in the training loop of main()",
+   "ok": true,
+   "info": "[['for (step, fb)', 'def main']]"
+  },
+  {
+   "name": "`tr_hz`: 6 Name nodes (init, setup assignment, conditional test + body, save_holdout_hz argument, release)",
+   "ok": true,
+   "info": "['save_holdout_hz(a, model, tr_hz, hold, hold_rows, PREDS, predict, ndcg, log)', 'tr_hz = None', 'tr_hz = setup_hzcd(a, tr, xt_names, hold, t_cool, total, log)', 'tr_hz if tr_hz is not None and step >= t_cool else tr_cap if tr_cap is not None ', 'tr_hz is not None']"
+  },
+  {
+   "name": "train.py: eval_subset / predict / feature_stats / save_* never take tr_hz",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "no other nn_x/w5 module imports cd_arms6 (predict / eval / holdout_eval / stale_pred / finetune untouched)",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "common.py / model.py / data.py contain no hzcd code",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms6.py imports only time / numpy / torch (no GPU guard; unit tests call the real functions)",
+   "ok": true,
+   "info": "['numpy', 'time', 'torch']"
+  },
+  {
+   "name": "guards: hzcd False at the defaults; the gather conditional test is False at any step when tr_hz is None",
+   "ok": true,
+   "info": "{0: False, 1: False, 12: False, 19669: False}"
+  },
+  {
+   "name": "hzcd False in every existing DRY command (50)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "hz files: float32, length == sum of M for train / val / test; val / test hz BYTE-IDENTICAL to feat_cache luo",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "train hz: no NaN, hz <= luo on every row (subset of the as-built LUO occurrences), rows changed > 5% for 'all'",
+   "ok": true,
+   "info": "{'it_hist_hz_all': {'nan': 0, 'subset': True, 'changed': 0.16691219056681467, 'zero_luo': 0.13015310215812517, 'zero_hz': 0.22757830855552919}, 'it_hist_hz_et1': {'nan': 0, 'subset': True, 'changed': 0.16061701645088755, 'zero_luo': 0.1542788790972748, 'zero_hz': 0.2521421313873763}, 'it_hist_hz_et2': {'nan': 0, 'subset': True, 'changed': 0.08270115650502811, 'zero_luo': 0.4803162919434231, 'zero_hz': 0.5498424459734348}, 'it_hist_hz_et3': {'nan': 0, 'subset': True, 'changed': 0.0821150837982125, 'zero_luo': 0.49628553812758164, 'zero_hz': 0.5674256849465131}, 'it_hist_hz_et4': {'nan': 0, 'subset': True, 'changed': 0.06026720548183841, 'zero_luo': 0.5758899817867645, 'zero_hz': 0.6249238264754344}}"
+  },
+  {
+   "name": "luo_cols(F7 checkpoint xt_names = cvnd_pre2s, 34 inputs) == columns 3-7 it_hist_{all,et1,et2,et3,et4}_luo",
+   "ok": true,
+   "info": "[(3, 'it_hist_all_luo', 'it_hist_hz_all'), (4, 'it_hist_et1_luo', 'it_hist_hz_et1'), (5, 'it_hist_et2_luo', 'it_hist_hz_et2'), (6, 'it_hist_et3_luo', 'it_hist_hz_et3'), (7, 'it_hist_et4_luo', 'it_hist_hz_et4')]"
+  },
+  {
+   "name": "checkpoint cfg xt_rel contains column 3 (in-model within-feed rank / z of it_hist_all_luo follow the swap); xt_drop 0",
+   "ok": true,
+   "info": "xt_rel [0, 3, 30, 31, 32] xt_drop 0.0"
+  },
+  {
+   "name": "xt_transform(luo name, raw feat_cache rows) cast as attach_xt == MiniSplit.xt column (bitwise; same transform path for the hz columns, names start with it_hist)",
+   "ok": true,
+   "info": "180 feeds, 28125 rows"
+  },
+  {
+   "name": "HzTrainView.gather on 19 batches / 180 feeds: every key and every non-LUO xt column == SplitData.gather; the 5 LUO columns == brute-force fp16(log1p(max(hz, 0))) -> fp32 at every position (padding reads the feed's first row, as xt does)",
+   "ok": true,
+   "info": "bad other 0, bad luo 0"
+  },
+  {
+   "name": "the swap is active: changed LUO cells > 0 (feeds with young listings included)",
+   "ok": true,
+   "info": "changed cells 22165; young-feed changed rows 5103"
+  },
+  {
+   "name": "delegation: view.n / n_cand / device / M_np / target_np / batches / scatter are the split's own; view.hzcd True",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "setup_hzcd refuses: no xt inputs, --hcap, t_cool >= total (before loading anything)",
+   "ok": true,
+   "info": "{'no xt': '--hzcd needs xt inputs holding the LUO popularity columns (p', 'hcap': '--hzcd is not combined with --hcap (both replace the trainin', 't_cool>=total': '--hzcd: the cooldown never starts (t_cool >= total steps)'}"
+  },
+  {
+   "name": "tr_hz None -> previous object at every step (tr; tr_cap in the cooldown with hcap); tr_hz set, t_cool 12 -> tr before step 12, the view from step 12",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "the expression's else branch is exactly the previous gather expression",
+   "ok": true,
+   "info": "tr_cap if tr_cap is not None and step >= t_cool else tr"
+  }
+ ],
+ "dry_new": [
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_hzcd_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1001 --hzcd",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_hzcd_r102 --init <repo>/nn/ckpt/v17_pre2s_s102@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1002 --hzcd",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_hzcd_r103 --init <repo>/nn/ckpt/v17_pre2s_s103@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1003 --hzcd",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_cd_hzcd_r104 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.02 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 1004 --hzcd",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_e10_hzcd_s951 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 951 --hzcd",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_e10_hzcd_s952 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 952 --hzcd",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_e10_hzcd_s953 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 953 --hzcd",
+  "lane: <repo>/.venv/bin/python train.py --variant w5_e10_hzcd_s954 --no_pos --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --sim_bias --user0 --domain --holdout 30000 --select_on holdout --loss_norm feed --xt cvnd_pre2s --xt_drop 0 --epochs 10 --eval_every 2500 --muon --sched wsd --cooldown_frac 0.2 --aux_anneal 0.1 --retr_m 16 --attn_gate --cooldown_mix 0.02 --lr 2e-3 --save_steps 70000,77500 --save_last --save_holdout --select_min_step 12000 --cliplog 50 --seed 954 --hzcd"
+ ],
+ "files": {
+  "it_hist_hz_all": {
+   "nan": 0,
+   "subset": true,
+   "changed": 0.16691219056681467,
+   "zero_luo": 0.13015310215812517,
+   "zero_hz": 0.22757830855552919
+  },
+  "it_hist_hz_et1": {
+   "nan": 0,
+   "subset": true,
+   "changed": 0.16061701645088755,
+   "zero_luo": 0.1542788790972748,
+   "zero_hz": 0.2521421313873763
+  },
+  "it_hist_hz_et2": {
+   "nan": 0,
+   "subset": true,
+   "changed": 0.08270115650502811,
+   "zero_luo": 0.4803162919434231,
+   "zero_hz": 0.5498424459734348
+  },
+  "it_hist_hz_et3": {
+   "nan": 0,
+   "subset": true,
+   "changed": 0.0821150837982125,
+   "zero_luo": 0.49628553812758164,
+   "zero_hz": 0.5674256849465131
+  },
+  "it_hist_hz_et4": {
+   "nan": 0,
+   "subset": true,
+   "changed": 0.06026720548183841,
+   "zero_luo": 0.5758899817867645,
+   "zero_hz": 0.6249238264754344
+  }
+ },
+ "failed": []
+}

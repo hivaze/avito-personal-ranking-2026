@@ -1,0 +1,149 @@
+[
+ {
+  "section": "g.constraints",
+  "name": "YetiRank + monotone_constraints={'x0': 1, 'x3': -1}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5669, pred sd 1.23, trees 40; differs from 'YetiRank' (corr 0.788)",
+  "sec": 0.89
+ },
+ {
+  "section": "g.constraints",
+  "name": "YetiRank:mode=NDCG + monotone_constraints={'x0': 1, 'x3': -1}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5334, pred sd 1.23, trees 40; differs from 'YetiRank:mode=NDCG' (corr 0.766)",
+  "sec": 1.15
+ },
+ {
+  "section": "g.constraints",
+  "name": "QuerySoftMax + monotone_constraints={'x0': 1, 'x3': -1}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5360, pred sd 0.222, trees 40; differs from 'QuerySoftMax' (corr 0.649)",
+  "sec": 0.24
+ },
+ {
+  "section": "g.constraints",
+  "name": "QueryRMSE + monotone_constraints={'x0': 1, 'x3': -1}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5713, pred sd 0.0438, trees 40; differs from 'QueryRMSE' (corr 0.630)",
+  "sec": 0.22
+ },
+ {
+  "section": "g.constraints",
+  "name": "LambdaMart + monotone_constraints={'x0': 1, 'x3': -1}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5313, pred sd 1.25, trees 40; differs from 'LambdaMart' (corr 0.749)",
+  "sec": 0.37
+ },
+ {
+  "section": "g.constraints",
+  "name": "StochasticRank:metric=NDCG + monotone_constraints={'x0': 1, 'x3': -1}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5564, pred sd 0.0054, trees 40; differs from 'StochasticRank:metric=NDCG' (corr 0.648)",
+  "sec": 13.16
+ },
+ {
+  "section": "g.constraints",
+  "name": "PairLogit + monotone_constraints={'x0': 1, 'x3': -1}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5710, pred sd 1.58, trees 40; differs from 'PairLogit' (corr 0.818)",
+  "sec": 0.37
+ },
+ {
+  "section": "g.constraints",
+  "name": "YetiRankPairwise + monotone_constraints={'x0': 1, 'x3': -1}",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/options/catboost_options.cpp:718: Monotone constraints is unsupported for pairwise loss functions.",
+  "sec": 0.01
+ },
+ {
+  "section": "g.constraints",
+  "name": "PairLogitPairwise + monotone_constraints={'x0': 1, 'x3': -1}",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/options/catboost_options.cpp:718: Monotone constraints is unsupported for pairwise loss functions.",
+  "sec": 0.01
+ },
+ {
+  "section": "g.constraints",
+  "name": "monotone constraint is actually enforced (YetiRank)",
+  "status": "PASS",
+  "detail": "x0: -2 -> +2 never lowers the score: True (min diff 0.0000)",
+  "sec": 0.9
+ },
+ {
+  "section": "g.constraints",
+  "name": "YetiRank + monotone_constraints + grow_policy=Lossguide",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/algo/monotonic_constraint_utils.h:42: Internal CatBoost Error (contact developers for assistance): Monotone constraints are unsupported for non-symmetric trees yet",
+  "sec": 0.03
+ },
+ {
+  "section": "g.constraints",
+  "name": "YetiRank + monotone_constraints + boosting_type=Ordered",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5566, pred sd 1.2, trees 40",
+  "sec": 2.94
+ },
+ {
+  "section": "g.constraints",
+  "name": "YetiRank + feature_weights={x0:0.1,x1:0.1}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6198, pred sd 1.14, trees 40; differs from 'YetiRank' (corr 0.860)",
+  "sec": 0.84
+ },
+ {
+  "section": "g.constraints",
+  "name": "YetiRank + first_feature_use_penalties={x0:5}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5413, pred sd 1.27, trees 40; differs from 'YetiRank' (corr 0.788)",
+  "sec": 0.8
+ },
+ {
+  "section": "g.constraints",
+  "name": "YetiRank + per_object_feature_penalties={x0:0.01}",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5413, pred sd 1.27, trees 40; differs from 'YetiRank' (corr 0.788)",
+  "sec": 0.81
+ },
+ {
+  "section": "g.constraints",
+  "name": "YetiRank + penalties_coefficient=10 + first_feature_use_penalties",
+  "status": "NOEFFECT",
+  "detail": "eval NDCG 0.5413, pred sd 1.27, trees 40 (identical to 'YetiRank')",
+  "sec": 1.65
+ },
+ {
+  "section": "g.constraints",
+  "name": "YetiRank + ignored_features=['x0','x1']",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5133, pred sd 1.11, trees 40; differs from 'YetiRank' (corr 0.754)",
+  "sec": 0.82
+ },
+ {
+  "section": "g.constraints",
+  "name": "YetiRank Lossguide + feature_weights",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6373, pred sd 1, trees 40; differs from 'YetiRank' (corr 0.813)",
+  "sec": 1.02
+ },
+ {
+  "section": "g.constraints",
+  "name": "YetiRankPairwise + feature_weights",
+  "status": "PASS",
+  "detail": "eval NDCG 0.5985, pred sd 0.643, trees 40; differs from 'YetiRankPairwise' (corr 0.869)",
+  "sec": 1.13
+ },
+ {
+  "section": "g.constraints",
+  "name": "interaction_constraints (not a CatBoost parameter)",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoostRanker.__init__() got an unexpected keyword argument 'interaction_constraints'",
+  "sec": 0.0
+ },
+ {
+  "section": "g.constraints",
+  "name": "constructor signature (installed core.py)",
+  "status": "PASS",
+  "detail": "CatBoostRanker.__init__ has: monotone_constraints, feature_weights, first_feature_use_penalties, per_object_feature_penalties, penalties_coefficient, ignored_features, fixed_binary_splits, embedding_features, feature_calcers, text_processing | absent: interaction_constraints, embedding_processing",
+  "sec": 0.0
+ }
+]

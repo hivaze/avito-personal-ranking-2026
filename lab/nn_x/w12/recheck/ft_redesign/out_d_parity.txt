@@ -1,0 +1,79 @@
+== 1. extra features on test under val standardisation (mean, sd; val = 0, 1 before clipping); nan share val/test
+  centrality             log 0 val mean +0.000 sd 1.000 | test mean -0.008 sd 0.991 | nan 0.000/0.000 
+  it_hist_all_luo        log 1 val mean -0.002 sd 0.998 | test mean -0.109 sd 0.989 | nan 0.000/0.000 <-- DRIFT
+  it_hist_all_luo_rk     log 0 val mean +0.000 sd 1.000 | test mean +0.000 sd 1.000 | nan 0.000/0.000 
+  it_hist_all_luo_zsl    log 0 val mean -0.000 sd 0.999 | test mean -0.001 sd 0.985 | nan 0.000/0.000 
+  it_hist_all_luo_gap    log 0 val mean +0.001 sd 0.995 | test mean +0.038 sd 0.952 | nan 0.000/0.000 
+  it_hist_et1_luo        log 1 val mean -0.003 sd 0.999 | test mean -0.103 sd 0.982 | nan 0.000/0.000 <-- DRIFT
+  it_hist_et2_luo        log 1 val mean +0.000 sd 1.003 | test mean -0.060 sd 0.967 | nan 0.000/0.000 
+  it_hist_et3_luo        log 1 val mean +0.000 sd 1.003 | test mean -0.063 sd 0.959 | nan 0.000/0.000 
+  it_hist_et4_luo        log 1 val mean -0.000 sd 0.996 | test mean -0.045 sd 0.959 | nan 0.000/0.000 
+  it_hist_et5_luo        log 1 val mean -0.006 sd 0.950 | test mean -0.041 sd 0.900 | nan 0.000/0.000 
+  it_hist_et6_luo        log 1 val mean -0.007 sd 0.947 | test mean -0.040 sd 0.896 | nan 0.000/0.000 
+  it_hist_et7_luo        log 1 val mean -0.002 sd 0.982 | test mean -0.028 sd 0.947 | nan 0.000/0.000 
+  it_hist_et8_luo        log 1 val mean -0.014 sd 0.901 | test mean -0.034 sd 0.859 | nan 0.000/0.000 
+  it_hist_et9_luo        log 1 val mean -0.018 sd 0.852 | test mean -0.029 sd 0.822 | nan 0.000/0.000 
+  it_hist_et10_luo       log 1 val mean -0.005 sd 0.966 | test mean -0.042 sd 0.898 | nan 0.000/0.000 
+  seq_cv_invd20          log 1 val mean -0.026 sd 0.687 | test mean -0.050 sd 0.620 | nan 0.000/0.000 
+  seq_cv_invd20_rk       log 0 val mean -0.005 sd 1.001 | test mean -0.005 sd 0.944 | nan 0.000/0.000 
+  seq_cv_pop             log 1 val mean -0.002 sd 0.998 | test mean -0.089 sd 0.985 | nan 0.000/0.000 
+  seq_max_all            log 0 val mean -0.002 sd 0.993 | test mean -0.001 sd 0.995 | nan 0.014/0.009 
+  seq_top3               log 0 val mean -0.001 sd 0.993 | test mean -0.001 sd 0.994 | nan 0.014/0.009 
+  seq_argmax_hpos        log 1 val mean -0.001 sd 0.993 | test mean -0.004 sd 0.999 | nan 0.014/0.009 
+  ctx_nd_hcent           log 0 val mean +0.000 sd 0.993 | test mean +0.001 sd 1.007 | nan 0.014/0.009 
+  ctx_nd_knn_f1          log 0 val mean -0.000 sd 1.000 | test mean -0.012 sd 0.993 | nan 0.000/0.000 
+  ctx_nd_knn_h           log 0 val mean +0.000 sd 0.993 | test mean -0.001 sd 0.994 | nan 0.014/0.009 
+  ctx_nd_knn_h_dev       log 0 val mean +0.000 sd 0.993 | test mean +0.003 sd 0.987 | nan 0.014/0.009 
+  ctx_nd_knn_u           log 0 val mean +0.000 sd 0.993 | test mean +0.001 sd 0.995 | nan 0.014/0.003 
+  ctx_nd_knn_u_dev       log 0 val mean +0.000 sd 0.992 | test mean +0.003 sd 0.990 | nan 0.014/0.003 
+  ctx_nd_max             log 0 val mean -0.008 sd 1.000 | test mean +0.007 sd 0.991 | nan 0.000/0.000 
+  ctx_nd_top5h           log 0 val mean +0.000 sd 1.000 | test mean -0.014 sd 0.994 | nan 0.000/0.000 
+  ctx_nd_top5u           log 0 val mean -0.000 sd 0.993 | test mean -0.006 sd 0.991 | nan 0.014/0.003 
+  ctx_nd_ucent           log 0 val mean -0.000 sd 0.993 | test mean +0.014 sd 1.000 | nan 0.014/0.003 
+  pre_fe                 log 0 val mean -0.000 sd 1.000 | test mean +0.025 sd 0.978 | nan 0.000/0.000 
+  pre_fe_z               log 0 val mean +0.000 sd 1.000 | test mean +0.000 sd 1.000 | nan 0.000/0.000 
+  pre_new                log 0 val mean -0.000 sd 1.000 | test mean +0.032 sd 0.980 | nan 0.000/0.000 
+  pre_new_z              log 0 val mean +0.000 sd 1.000 | test mean +0.000 sd 1.000 | nan 0.000/0.000 
+  pre_hmax32_c           log 0 val mean -0.000 sd 0.993 | test mean +0.011 sd 1.001 | nan 0.014/0.009 
+  pre_hmax8_c            log 0 val mean -0.000 sd 0.993 | test mean +0.001 sd 1.005 | nan 0.014/0.009 
+  pre_fe_noid            log 0 val mean -0.000 sd 1.000 | test mean +0.039 sd 0.978 | nan 0.000/0.000 
+  pre_id_contrib_v2      log 0 val mean -0.001 sd 0.991 | test mean -0.059 sd 0.920 | nan 0.000/0.000 
+  pre_idmax32            log 0 val mean -0.000 sd 0.669 | test mean -0.012 sd 0.643 | nan 0.553/0.595 <-- DRIFT
+  pre_idmax32_has        log 0 val mean +0.000 sd 0.998 | test mean -0.085 sd 0.985 | nan 0.000/0.000 
+  pre_hmax32_sent        log 0 val mean -0.034 sd 0.719 | test mean -0.066 sd 0.568 | nan 0.000/0.000 <-- DRIFT
+  flagged: ['it_hist_all_luo', 'it_hist_et1_luo', 'pre_idmax32', 'pre_hmax32_sent']
+
+== 1b. the same drift, test public (weekend) vs private, for the flagged + popularity features (mean under val standardisation)
+  ctx_nd_max             public +0.011 private +0.005
+  it_hist_all_luo        public -0.082 private -0.121
+  it_hist_et1_luo        public -0.077 private -0.115
+  pre_fe                 public +0.011 private +0.032
+  pre_hmax32_sent        public -0.071 private -0.065
+  pre_idmax32            public -0.008 private -0.014
+  seq_cv_pop             public -0.072 private -0.096
+
+== 2. shift as a function of the inputs: ridge on 86 columns; R2 in-split and cross-split
+ W8: fit val -> R2 val 0.180, R2 test 0.218 | fit test -> R2 test 0.223, R2 val 0.175 | cos(coef val, coef test) 0.983
+    val NDCG: TO 0.40157 | TO + explained part +0.00001+-0.00045 | TO + residual part -0.00120+-0.00057 | TO + full shift (= FT) -0.00069+-0.00061 | TO + 0.5 explained +0.00039+-0.00032 | TO + 0.5 residual -0.00016+-0.00040
+ C3: fit val -> R2 val 0.297, R2 test 0.339 | fit test -> R2 test 0.343, R2 val 0.293 | cos(coef val, coef test) 0.913
+    val NDCG: TO 0.40103 | TO + explained part -0.00053+-0.00050 | TO + residual part -0.00129+-0.00051 | TO + full shift (= FT) -0.00060+-0.00057 | TO + 0.5 explained -0.00021+-0.00033 | TO + 0.5 residual -0.00044+-0.00035
+
+== 3. RMS of the W8 pooled shift by segment
+  M<20     val 0.1265 | test 0.1201 | ratio 0.949
+  M20-49   val 0.1285 | test 0.1205 | ratio 0.938
+  M50-99   val 0.1318 | test 0.1241 | ratio 0.942
+  M>=100   val 0.1388 | test 0.1315 | ratio 0.948
+  val day 0 (7542 feeds): 0.1366
+  val day 2 (6878 feeds): 0.1367
+  test public Sat      (6050 feeds): RMS 0.1294 | corr(z_FT, z_TO) 0.99163
+  test public Sun-am   (2512 feeds): RMS 0.1310 | corr(z_FT, z_TO) 0.99142
+  test private Sun-pm  (4855 feeds): RMS 0.1286 | corr(z_FT, z_TO) 0.99173
+  test private Mon     (7578 feeds): RMS 0.1290 | corr(z_FT, z_TO) 0.99167
+  test private Tue     (7600 feeds): RMS 0.1298 | corr(z_FT, z_TO) 0.99157
+  test PUBLIC          (8562 feeds): RMS 0.1298 | corr(z_FT, z_TO) 0.99157
+  test PRIVATE         (20033 feeds): RMS 0.1292 | corr(z_FT, z_TO) 0.99165
+
+== 4. val: mean shift on positives (z units; per-feed mean over positives, then mean over feeds with a positive)
+  W8: -0.00353+-0.00099  (M<50 -0.00644+-0.00149, M>=50 -0.00151+-0.00131)
+  N8: -0.00270+-0.00090  (M<50 -0.00512+-0.00135, M>=50 -0.00103+-0.00120)
+  C3: -0.00579+-0.00088  (M<50 -0.00790+-0.00137, M>=50 -0.00434+-0.00116)

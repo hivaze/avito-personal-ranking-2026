@@ -1,0 +1,24 @@
+FOLLOW-UP DECLARATION of explorer "new constructions", written 2026-11-16T05:14:30Z, AFTER out/gates.txt was read (gate run ended 05:12:22Z) and BEFORE any of the reads below exists.
+
+WHAT WAS SEEN (out/gates.txt): by the rule of PRELIST.txt none of the six constructions passes (largest whole-feed |cz| given nx3: H 2.00, V 2.80, never the same
+form on both). The placebo sd is 0.70 (H) / 0.79 (V), below the 0.8-1.2 band, so by PRELIST the threshold is scaled to 1.75 (H) / 1.98 (V): still no form passes
+(closest: N6 aud_item rank form -2.00 / -1.90, a negative sign that exists only with nx3 in the null model).
+The pre-declared split read ("reported, not a gate") shows one pattern shared by the three cell constructions N1-N3 (they share cells and sequences, so this is ONE
+observation): COLD rows +1.2..+2.9 on V (twin), +1.8..+2.3 on natural val, but -0.1..+1.0 on H; WARM rows -2.6..-3.3 on H and -1.5..-2.9 on V.
+These are 48 unplanned-for-decision reads; nothing is promoted on them. The reads below size them and test them on feeds not read so far.
+
+NO NEW CONSTRUCTION. The same six raw columns, the same forms. New: one more witness and slices.
+ E   third witness = the holdout feeds WITHOUT the lag view (slots 1-5; slot 0 has no source and is left out), FRESH view: dense = c9.source_fidx(train, own slot),
+     sparse = the 1/37 sample on slots >= own slot admitted iff timestamp < own (the lag-view driver with L = 0). In-period and fresh: it shares the holdout's known
+     bias toward fresh popularity; it is used only as an independent set of labelled feeds. nx3 analogue in the null model = the walk of record built in the same
+     fresh view (my driver, column rp3_rec; forms with nx3's K).
+ Null model on the holdout: pool + control block + nx3 files (lag view, 0 elsewhere) + the fresh analogue (E feeds, 0 elsewhere). On val: as in nc_gates.py (twin).
+ Reads (z and rk form, re-computed among the rows of the subset; 0 elsewhere), each with cz, b1, dnats:
+   F1  COLD-only and WARM-only forms of N1 cw_item, N2 cw_cell, N3 aud_cell on E, H, V (TO16), V natural; whole-feed forms of all six on E.
+   F2  on V: the COLD-only and WARM-only forms by val day (slots 16 / 18) and by feed size (M < 50 / M >= 50; the holdout holds only M >= 50 feeds).
+   F3  placebo for the subset forms: 5 permutations of each column AMONG THE SUBSET ROWS of the feed (seeds 11000+), per witness; sd and max printed.
+   F4  descriptive, no decision: within-feed AUC of each raw column alone (whole feed; cold rows; warm rows) on H, V, E ("is the column alive").
+ WORDS, fixed now (information for the lead; nothing here is a survivor of the PRELIST rule):
+   COLD lead "SUPPORTED OUTSIDE VAL" iff for one of N1-N3 the same form reads cz >= +2.5 on V and >= +2.0 on E or on H; otherwise "VAL ONLY".
+   WARM negative effect "REPLICATED" iff for one of N1-N3 the same form reads cz <= -2.0 on E (new feeds) in addition to <= -2.5 on H and V (seen); otherwise
+   "NOT REPLICATED".

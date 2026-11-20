@@ -1,0 +1,38 @@
+# student_wide_t25.toml with 30,000 train feeds held out to choose the checkpoint. W8P20 holds 4 of
+# these (seeds 951 to 954, listed under [record]). One run: 98,350 steps, about 3.3 hours on one
+# GPU.
+
+model = "full"                     # configs/recipes/model_full.toml: 34 inputs, width 192
+
+[targets]
+teacher = "mean25"                 # entry of [teachers] in configs/paths.toml
+teacher_weight = 0.5               # main target = 0.5 * clicks / n_clicks + 0.5 * softmax(teacher scores)
+position_weight = 0.5              # weight of the production-order loss until the cooldown ...
+position_weight_end = 0.1          # ... then annealed with the learning rate down to this
+position_temperature = 10.0        # its target is softmax(-position / 10)
+
+[schedule]
+epochs = 10                        # 9,835 steps per epoch over the 3,121,208 training feeds
+learning_rate = 2e-3
+weight_decay = 0.02
+warmup_steps = 500
+cooldown_fraction = 0.2            # 1-sqrt decay to 3% of the peak over the last 20% of the steps
+exploration_probability = 0.02     # chance that a cooldown step trains on a batch of random-order feeds
+
+[batches]
+max_candidates = 32768             # padded candidates per batch
+max_feeds = 512
+
+[holdout]
+feeds = 30000                      # exploration-like train feeds kept out of training
+select_from_step = 12000           # keep the checkpoint with the best holdout NDCG from this step on
+# 12,000 was set for the 2-epoch cooldown runs, whose cooldown gain appeared only after about 10,000
+# steps; in a 10-epoch run it leaves out the first four evaluations.
+eval_every = 2500                  # steps between two holdout scores
+
+[record]
+# The stored runs of this recipe; their checkpoints, logs and prediction files carry these names.
+# The trainer does not read this table.
+members = [
+    "w5_e10_kd05t25w192_s951", "w5_e10_kd05t25w192_s952", "w5_e10_kd05t25w192_s953", "w5_e10_kd05t25w192_s954",
+]

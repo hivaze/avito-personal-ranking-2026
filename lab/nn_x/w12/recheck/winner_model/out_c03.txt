@@ -1,0 +1,33 @@
+== w5_e10_kd05w192_s951: CPU fp32 full-feed val 0.39897 | stored GPU bf16 0.39859 | fp32 - bf16 +0.00038 +- 0.00019 (z +2.0); Pearson 1.000000
+   scheme 2x4: Spearman(full, sub) mean 0.9860 (M<50 0.9744, M>=50 0.9926, M>=150 0.9945)
+     TTA (mean sub-feed z) - full: -0.00353 +- 0.00071 (z -5.0) | M<50 -0.00707 | M>=50 -0.00109 | M>=150 -0.00055
+     TTA (mean raw logit)  - full: -0.00838 +- 0.00093 (z -9.0)
+     0.5 z(full) + 0.5 z(TTA) - full: -0.00088 +- 0.00047 (z -1.9) | M<50 -0.00200 | M>=50 -0.00010 | M>=150 -0.00011
+       K-curve reps 1: TTA - full -0.00717
+       K-curve reps 2: TTA - full -0.00556
+       K-curve reps 3: TTA - full -0.00486
+       K-curve reps 4: TTA - full -0.00353
+   scheme 5x1: Spearman(full, sub) mean 0.9948 (M<50 0.9898, M>=50 0.9980, M>=150 0.9987)
+     TTA (mean sub-feed z) - full: -0.00042 +- 0.00031 (z -1.3) | M<50 -0.00071 | M>=50 -0.00021 | M>=150 -0.00017
+     TTA (mean raw logit)  - full: -0.00294 +- 0.00056 (z -5.2)
+     0.5 z(full) + 0.5 z(TTA) - full: -0.00035 +- 0.00022 (z -1.6) | M<50 -0.00065 | M>=50 -0.00014 | M>=150 -0.00015
+== w5_e10_kd05w192_s952: CPU fp32 full-feed val 0.39969 | stored GPU bf16 0.39968 | fp32 - bf16 +0.00001 +- 0.00018 (z +0.0); Pearson 1.000000
+   scheme 5x1: Spearman(full, sub) mean 0.9949 (M<50 0.9899, M>=50 0.9981, M>=150 0.9987)
+     TTA (mean sub-feed z) - full: -0.00073 +- 0.00032 (z -2.3) | M<50 -0.00091 | M>=50 -0.00060 | M>=150 -0.00065
+     TTA (mean raw logit)  - full: -0.00235 +- 0.00058 (z -4.1)
+     0.5 z(full) + 0.5 z(TTA) - full: -0.00034 +- 0.00022 (z -1.5) | M<50 -0.00017 | M>=50 -0.00046 | M>=150 -0.00029
+== w5_e10_kd05w192_s953: CPU fp32 full-feed val 0.39929 | stored GPU bf16 0.39914 | fp32 - bf16 +0.00015 +- 0.00016 (z +0.9); Pearson 1.000000
+   scheme 5x1: Spearman(full, sub) mean 0.9944 (M<50 0.9886, M>=50 0.9981, M>=150 0.9988)
+     TTA (mean sub-feed z) - full: -0.00121 +- 0.00033 (z -3.7) | M<50 -0.00205 | M>=50 -0.00062 | M>=150 -0.00106
+     TTA (mean raw logit)  - full: -0.00233 +- 0.00057 (z -4.1)
+     0.5 z(full) + 0.5 z(TTA) - full: -0.00052 +- 0.00020 (z -2.6) | M<50 -0.00059 | M>=50 -0.00048 | M>=150 -0.00052
+== w5_e10_kd05w192_s954: CPU fp32 full-feed val 0.39908 | stored GPU bf16 0.39931 | fp32 - bf16 -0.00023 +- 0.00017 (z -1.4); Pearson 1.000000
+   scheme 5x1: Spearman(full, sub) mean 0.9949 (M<50 0.9899, M>=50 0.9982, M>=150 0.9988)
+     TTA (mean sub-feed z) - full: -0.00016 +- 0.00032 (z -0.5) | M<50 +0.00010 | M>=50 -0.00034 | M>=150 -0.00071
+     TTA (mean raw logit)  - full: -0.00159 +- 0.00056 (z -2.8)
+     0.5 z(full) + 0.5 z(TTA) - full: +0.00026 +- 0.00022 (z +1.2) | M<50 +0.00061 | M>=50 +0.00001 | M>=150 -0.00005
+== POOL of 4 (member-equal z-mean): CPU full-feed 0.40122 | stored GPU preds 0.40134 | fp32 - bf16 -0.00012 +- 0.00015 (z -0.8)
+   scheme 5x1: pool of TTA members - pool of full members: -0.00072 +- 0.00033 (z -2.2) | M<50 -0.00163 | M>=50 -0.00008 | M>=150 -0.00050
+   scheme 5x1: 0.5 z(pool full) + 0.5 z(pool TTA) - pool full: -0.00015 +- 0.00023 (z -0.6) | M<50 -0.00061 | M>=50 +0.00017 | M>=150 +0.00006
+   scheme 5x1: member-level mix then pool - pool full: -0.00015 +- 0.00023 (z -0.6)
+   scheme 5x1: corr(pool full, pool TTA) 0.99969; member-pair corr full 0.9722 vs TTA 0.9725

@@ -1,0 +1,47 @@
+SYNTHESIS of the five 11-12 deep analyses (errors, labels_loss, data_usage, ensemble, dynamics)
+Written 2026-11-12 ~19:00 UTC. The full report is reports/INSIGHTS_1112.md: TL;DR, loss map, conflicts, ranked plan,
+do-not list. This file records only the checks the synthesis step ran itself. CPU only, no GPU used.
+
+1. Dynamics E1, the pre-declared same-recipe re-cool calibration, re-run with 4 complete v30 seeds
+   (dyn_rerun/a7_v30_vs_f7x_rerun.txt; the scripts are copies of nn_x/insights/dynamics/{parse_logs,fams,a7_v30_vs_f7x}.py
+   with OUT pointed at dyn_rerun/; the analyst's files are untouched).
+   - Late-cooldown (k >= 16320) val-minus-holdout gap, F7x minus v30: +0.00153 +- 0.00020. The pre-declared bar is
+     +0.0006, so the excess is re-cool-specific; use D ~ +0.0015 per re-cooled member.
+   - Gain over each run's own plateau, F7x - v30: selected val +0.00118 +- 0.00031, selected holdout -0.00013 +- 0.00028;
+     last val +0.00145 +- 0.00036, last holdout -0.00019 +- 0.00028.
+   - The SE is optimistic: the 7 F7x runs share CDSEED 811, so their eval residuals are step-locked.
+
+2. ftopt TUNE-half M-slices (ftopt_tune_mslice.py/.log). CONFIRM labels were not read. Set A is 4 members; deltas are
+   per feed on 7,218 TUNE feeds, 2,969 of them M<50.
+   - FT half (n2cpv3 pool - TO-only pool): all -0.00016 +- 0.00055, M<50 -0.00229 +- 0.00101, M>=50 +0.00133 +- 0.00061.
+   - M-split (TO-only for M<50) - n2cpv3 pool: all +0.00094 +- 0.00041.
+   - Trials 0-13: every positive trial gains on M<50 (+0.0010..+0.0019) and is <= ~0 on M>=50. The best is t12, +0.00085
+     +- 0.00066. None beats the M-split on TUNE.
+   - Trial 8 (n2cpv3 with loss_norm=feed only): all +0.00010 +- 0.00031, M<50 +0.00029 +- 0.00057. It removes about 13% of
+     the M<50 harm, so the batch-normalisation skew is not the main cause, and ensemble E2 gets no dedicated GPU run.
+
+3. M-split under private-mix weights (msplit_pmix.py/.log; src/pmix.py weights, report only).
+   - G3: +0.00054 +- 0.00028 val (M<50 +0.00131), private-mix +0.00040 +- 0.00040.
+   - PF7x: +0.00063 +- 0.00029, private-mix +0.00041 +- 0.00042.
+   - M2: +0.00043 +- 0.00030, private-mix +0.00014 +- 0.00046.
+   - Cd: +0.00019 +- 0.00028, private-mix +0.00004 +- 0.00040.
+   - No pmix veto. The FT half itself is private-mix +0.0006..+0.0011, a cold/warm lever, so the pmix check is part of
+     the M-split acceptance rule.
+
+4. Context read: wave 4 (nn_x/r6/logs/r6_eval_cd_w4.txt, 17:46) is all STOP.
+   - hcap: val +0.00007, holdout +0.00002, stale-val -0.00009.
+   - rec33: val -0.00212 (z -4.3), holdout -0.00120, pmix veto.
+   - rho70: val -0.00350 (z -5.7), holdout -0.00195, pmix veto.
+
+Ranked plan, in short (details and kill rules in reports/INSIGHTS_1112.md section 3):
+- Tomorrow:
+  - 1 TRUNC-PROD;
+  - 2 FT small-feed fix (M-split confirm, ftopt freeze read vs M-split, FT only ~4 members per pool);
+  - 3 AUXF;
+  - 4 re-cool mechanism A/B on the v30 trunks;
+  - 5 P8 CPU gate on warm|recent beater pairs;
+  - 6 hzcd popularity-parity cooldown (after a free age read and a pre-flight);
+  - 7 DOMAIN-DIAG;
+  - 8 wave-5 hygiene and the seed freeze.
+- Later: L1 TRUNC/AUXF members; L2 FT study v2 on M>=50; L3 exam offsets; L4 wcat; L5 replay timing; L6 short-exploration
+  relabel; L7 dropout brake for d192/lr1.

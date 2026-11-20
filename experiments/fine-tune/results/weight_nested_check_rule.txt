@@ -1,0 +1,30 @@
+r5_wft: nested-CV check of the fine-tuned share w_ft for the Cd ensemble (SOLUTIONS_REVIEW roadmap #9).
+Written BEFORE any w != 0.5 score of the Cd pool was computed in this round (2026-11-11 ~23:06 UTC).
+
+Pool: the 19 Cd members
+  F5cd: v15_cd_all_e10, v15_cd_all_s81, v15_cd_all_s82, v15_cd_allprew_s83, v15_cd_allprew_s84, v15_cd_allprew_s85
+  F6:   v13_lr1_mix1, v14_s92, v14_s93, v14_s94, v14_s95, v14_s96
+  F7:   v17_pre2s_s101 .. v17_pre2s_s107
+Branches: ft = z(member-equal mean of per-feed z of preds/nn_<m>_n2cpv3_val_oof.npy)
+          to = z(member-equal mean of per-feed z of preds/nn_<m>_trainonly_val.npy)
+          (per-feed z = src/stack_val.feed_rank_z column 1, as in the decide.py that built Cd)
+Final:    s(w) = w z(ft) + (1-w) z(to); per-feed NDCG = src/metrics.ndcg_per_feed (pessimistic ties).
+Sanity:   s(0.5) must reproduce the Cd val score 0.39901 (CURRENT_STATUS 3o / SOLUTIONS_REVIEW 4.1).
+
+Grid: w in {0.33, 0.5, 0.67}.
+Folds (PRIMARY): sklearn GroupKFold(n_splits=5) over np.arange(n_val_feeds), groups = val user_id (user 0 = one group),
+                 i.e. the fold definition of solvers/ensemble/ens_common.py (task text: "GroupKFold by user_id").
+Folds (ROBUSTNESS, report only): the n2cpv3 fine-tune folds (same GroupKFold, user-0 feeds as singleton groups,
+                 nn/finetune.py --u0_singleton).
+Nested rule: for outer fold k, choose the w with the highest mean per-feed NDCG over the feeds of the other 4 folds;
+             ties resolve to 0.5, then to the smaller w. Score the held-out fold's feeds with that w.
+Nested delta: per feed, nested score minus s(0.5) score; mean +- SE (std/sqrt(n_feeds)); z = mean/SE.
+             Also a user-clustered SE (information only).
+Slices: all, M<50, M>=50, Tue, Thu, M-private-weighted (calib.py weights, ens_common.private_w).
+
+ADOPTION (pre-declared, primary folds only): adopt w != 0.5 only if ALL 5 folds choose the same w != 0.5
+AND the nested delta z >= 2.5. Otherwise keep w_ft = 0.5.
+
+Information only (never used for the decision): in-sample full-val deltas of fixed w in {0, 0.1, ..., 1.0} vs 0.5
+with slices; per-family (F5cd / F6 / F7) in-sample fixed-w deltas.
+Not available: stale-val (the CPU2 replay rebuilds train-only halves only; no fine-tuned predictions exist at stale coverage).

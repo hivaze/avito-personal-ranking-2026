@@ -1,0 +1,104 @@
+WAVE 10 arm R4 = PARALLEL GDCN CROSS BRANCH — PRE-DECLARATION (implementation agent). Frozen 2026-11-13T16:53:17Z (date -u), BEFORE any run of
+this arm: 0 files matching w10_r4* / w5_e10_r4_* in nn_x/w10/r4/{logs,preds,preds/holdout,ckpt} and nn_x/w5/{logs,preds,preds/holdout,ckpt}
+(the only files in nn_x/w10/r4/logs are the CPU test log/json of tests/test_r4.py cpu = 56/56 PASS, which runs no arm and produces no
+read-out number). The GPU tests (tests/test_r4.py gpu: G1 flag-off end-to-end identity, G2 flags-on smoke; test variants deleted) and the
+step-time measurement (tests/timing.py) run AFTER this declaration and before stage S; they yield no number that enters any rule.
+Source: reports/EXTERNAL_SCAN_1113.md §2.2 R4 (x7.6, x11.8; P 0.02-0.025) + the lead's wave-10 brief (CURRENT_STATUS 16:39).
+
+CODE: nn_x/w10/r4 = a copy of the nn_x/w5 code (train.py, model.py, data.py, common.py, cd_arms*.py, finetune.py, holdout_eval.py,
+  stale_pred.py, blend.py, lane.sh, tests/; NOT preds/ckpt/logs) + the flags --dcn_par L / --dcn_rank r / --dcn_nox (OFF by default:
+  AST proofs in tests/test_r4.py: model.py minus {class GDCNBranch, 3 __init__ kwargs, self.dcnp = None, if dcn_par, if self.dcnp is not
+  None} == nn_x/w5/model.py; train.py minus {3 add_argument, if a.dcn_par, 3 Ranker kwargs, variant assert} == nn_x/w5/train.py; flag-off
+  state_dict / cfg / dense / eval+train logits bit-identical on real MiniSplit batches; nn_x/w5 sources unchanged (md5)). Outputs land in
+  nn_x/w10/r4/{logs,preds,ckpt}; nn_x/w5/*.py and nn_x/w5/lane.sh are not edited; reports/ not edited.
+ARM (model.py GDCNBranch, Ranker(dcn_par=2, dcn_rank=32)) = GDCN (gated cross network, Wang et al. 2023 = low-rank DCNv2 crosses with
+  a sigmoid gate), TWO layers, rank 32, over
+      x0 = [LN_dcn(c_final); X_std]   (c_final = the final candidate token the MLP head reads, incl. the domain vector; X_std = the
+            standardised, +-6-clamped dense vector the wide term already receives: 61 in-model + user0 2 + 34 xt + 10 rel - 3 = 104),
+      dim x0 = 128 + 104 = 232;   x_{l+1} = x0 * (U_l V_l x_l + b_l) * sigmoid(Gu_l Gv_l x_l + g_l) + x_l   (l = 0, 1);
+      logit = head(c_final) + wide(X_std) + out(x_2),   out = Linear(232 -> 1) ZERO-INIT (weight and bias),
+  computed in the fp32 head block (autocast disabled), in PARALLEL with the MLP head. Exact no-op at init: tests prove the flag-on
+  model's step-0 logits are bit-identical to the base's in eval AND train mode (no RNG draw in the branch; the base parameters keep
+  their paired init because the branch is built LAST under extra_init(offset=1299709)). +60,809 parameters (6.0%). Optimiser: V/U/Gv/Gu
+  (8 matrices) fall under train.py's unchanged Muon rule (hidden 2-D Linear weights; the Muon log line goes 31 -> 39 matrices); the
+  output layer and LN_dcn go to AdamW (out.weight: wd 0.02 like wide). No dropout in the branch. Everything else (history encoder, cross
+  + set attention, retrieval retr16 + attn_gate, sim_bias, user0, domain, K9 aux head on c_final, listwise loss norm feed, WSD + m02
+  cooldown, selection on the holdout, hygiene flags) is unchanged. At init the output layer gets the whole gradient and U/V/G get
+  exactly zero (tests); from step 1 on the branch is live.
+  INFORMATION arm r4c = --dcn_par 2 --dcn_nox: x0 = LN_dcn(c_final) only (dim 128, +33,665 params), i.e. the same crosses WITHOUT the
+  dense-input block. Stage S only (w10_r4c_s23 / s24, co-running on the same GPUs), read with the same mechanics, NEVER a gate; it
+  attributes a stage-S outcome to the crosses over X vs the extra non-linearity on c (the scan's suggested attribution arm).
+MECHANISM UNDER TEST: explicit bounded-degree (degree-3 after two gated cross layers) MULTIPLICATIVE feature interactions over the
+  dense-input block and the candidate token, as a DIFFERENT FUNCTIONAL FORM at full strength = a candidate member FAMILY (objective:
+  same strength, lower cross-seed correlation with the base), as the lead's brief states. NOT claimed: a feature gain (the data-pipeline
+  audit, DATA_PIPELINE_1113 §2, found no residual structure over G3 in a GBDT on the inputs: +0.00005 +- 0.00021 val); the wave-9 DINset
+  proposal (which carried a DCNv2 head) was refuted because F11's decorrelation equalled its weakness. External evidence (Avito L3
+  parallel DCN, Yandex RecSys'25 4th DCNv2 heads, LiRank +2.15%, BARS CIKM'21 DCN ~ DNN) only says the form is competitive, not better.
+  Honest prior: P(family candidate) ~0.02-0.025; the realistic best case is a same-strength member with rho_x below rho_bb.
+
+STAGE S = 2-EPOCH FUTILITY SCREEN. Runs w10_r4_s23 (GPU N) / w10_r4_s24 (GPU N) = nn_x/w10/r4/lane.sh A_BASE + HYG + "--dcn_par 2"
+  (seeds 23 / 24; the parser diff vs the nn_x/w5 lane's A:base is exactly {dcn_par 0 -> 2}, tested), paired vs the EXISTING nn_x/abl
+  abl_base_s23 / abl_base_s24 (verified by tests/test_r4.py: stored args == A_BASE + HYG exactly, seeds 23 / 24, 2 epochs = 19,670 steps,
+  cooldown_mix 0.02; nn_x/abl/model.py byte-identical to nn_x/w5/model.py; same 30K holdout meta / labels). Co-running information pair
+  w10_r4c_s23 (GPU N) / w10_r4c_s24 (GPU N) under the same lane (2 arm processes per GPU, within the <= 3 processes / >= 60 GB rule).
+  Primary read = the LAST checkpoint (step 19,670; the abl screen convention: the holdout is then an unselected judge); the selected
+  checkpoint is reported. Delta = arm - base on the SAME seed, per feed; pooled = per-feed mean over the two seeds; SE_feed = sd / sqrt(n).
+  Script: nn_x/w10/r4/s_readout.py -> nn_x/w10/r4/logs/s_readout_r4.{txt,json} (+ copy nn_x/w5/logs/w10_s_readout_r4.txt), run once
+  by wait_s.sh when both w10_r4 runs are done (r4c added when its files exist, waited for at most 20 min).
+  GO iff ALL of (pooled, @last):
+    (s1) member val delta >= -0.0015;
+    (s2) member holdout delta >= -0.0010;
+    (s3) no val slice (M<50, M>=50, Tue, Thu) < -2 SE_feed(slice);
+    (s4) 2-epoch diversity margin rho_bb - rho_x >= +0.008 on val, rho_bb = corr(z(base_s23), z(base_s24)), rho_x = mean(corr(z(r4_s23),
+         z(base_s24)), corr(z(r4_s24), z(base_s23))) (within-feed rank-z, Pearson over all val candidates; the arch_div / abl mechanics).
+         The margin is REPORTED whatever its value (also when s1-s3 fail).
+  Reported, never gates: pmix (private mix), the two fixed label-free holdout columns late = Sep 17-19 (8,279 feeds) and early = Sep 6-8
+  (7,823 feeds) (rule amendment 16:10 (b); holdout feeds derived from train.py's fixed rng-12345 selection, checked against
+  holdout_meta), holdout rho gap, arm-arm / same-seed corr, selected-ckpt reads, 2-member partner pools, train minutes vs base, peak
+  memory, the r4c information pair.
+  GO -> stage E (launched automatically by wait_s.sh). Otherwise the arm is CLOSED at stage S (numbers reported; nothing else is run).
+
+STAGE E = 10-EPOCH PAIR w5_e10_r4_s951 (GPU N) / w5_e10_r4_s952 (GPU N) = nn_x/w10/r4/lane.sh E_BASE + HYG + "--dcn_par 2" (parser diff
+  vs the nn_x/w5 lane's E:base exactly {dcn_par 0 -> 2}, tested), one run per GPU, paired per seed vs the EXISTING nn_x/w5
+  w5_e10_base_s951 / s952 (selected checkpoint primary, @last information). After the runs the outputs are copied into nn_x/w5 with
+  cp --update=none (logs/<v>.json/.log, preds/nn_<v>_trainonly_{val,test}.npy and @last, preds/holdout/nn_<v>_holdout.npy and @last) and
+  read by the standard scripts (wait_e.sh):
+    nn_x/w5/w5_eval_e_ap1.py r4 951,952   -> nn_x/w5/logs/w5_eval_E_r4.txt     (E rule)
+    scratchpad/div_readout.py r4 951,952  -> nn_x/w5/logs/div_readout_r4.txt   (diversity clause)
+  E RULE: PASS iff pooled per-seed paired member val > 0 AND holdout > +1 SE AND no val slice (M<50, M>=50, Tue, Thu) < -2 SE
+    AND pmix >= -1 SE.
+  DIVERSITY CLAUSE (= nn_x/w5/logs/E_batch_predeclared.txt amendment 1):
+    (d1) pooled member val >= -0.0005 AND pooled member holdout >= -0.0005 (selected ckpt);
+    (d2) rho_bb - rho_x >= +0.005 on val, rho_x = corr(r4 pool{951,952}, base pool{953,954}), rho_bb = corr(base pool{951,952},
+         base pool{953,954}) (within-feed rank-z, Pearson);
+    (d3) the 2-member pool r4 vs base{951,952}: val >= -0.0005 AND holdout >= -0.0005.
+  FAMILY CANDIDATE iff the E rule PASSES OR the diversity clause (d1 AND d2 AND d3) PASSES. A family candidate is REPORTED to the lead
+    (seeds 953/954, n2cpv3 FT and decide7 are the lead's); otherwise CLOSED with the numbers.
+  Information (never gates): member cross-seed corr (arm-base), base-base and arm-arm corr, holdout rho gap, @last deltas, pmix, slices,
+    the late / early holdout columns (added by hand to the report from the copied preds), step time vs base.
+  STEP-60000 KILL GATE (the only interim look; evaluated ONCE by wait_e.sh when BOTH arm logs contain their step-60000 eval line; base facts
+    from nn_x/w5/logs/w5_e10_base_s95x.json history: h_base(60000) s951 0.31659185, s952 0.31739697; SE_gate 0.00076575 = the LD addendum
+    constant (RMS of plateau holdout differences over the base seed pairs, reused unchanged): KILL iff for BOTH seeds
+    h_r4,s(60000) - h_base,s(60000) < -2 SE_gate = -0.00153150, i.e. iff h_951(60000) < 0.31506035 AND h_952(60000) < 0.31586547 ->
+    both train.py processes stopped by exact PID (cmdline re-verified through /proc), recorded in both RUNNING files, arm CLOSED
+    (information: the plateau numbers); otherwise the runs continue untouched and the gate numbers are information only.
+  A crashed run (process gone without its json) -> INCOMPLETE (no verdict); a re-run needs a new dated amendment. A run that fails twice
+  -> stop and report.
+PROTOCOL: stage S first; stage E only on a stage-S GO. Nothing is fine-tuned, pooled or submitted by the agent. GPUs N and 3 only
+  (CUDA_VISIBLE_DEVICES = one id per process), launch only with <= 3 compute processes and >= 60 GB free on that GPU (lane.sh
+  check_gpu under the per-GPU flock, nvidia-smi); OMP/MKL/OPENBLAS/NUMBA/POLARS threads 12; setsid nohup launches; REAL train.py PIDs
+  (the lane's direct child, re-verified via /proc/<pid>/cmdline) in nn_x/w10/r4/RUNNING.txt, logs/RUNNING_w5.txt of the copy and
+  nn_x/w5/logs/RUNNING_w5.txt; stops only by exact PID after a /proc cmdline check; no pkill -f / kill $(pgrep); other processes never
+  touched. Time cap 5 h from the brief (16:39 UTC); a run that fails twice -> stop and report.
+
+INFORMATION (no rule change) - 2026-11-13T17:03:05Z: tests run after the declaration. CPU part 56/56 PASS (16:5x; AST proofs, flag-off bit-identity,
+  zero-init proof: flag-on step-0 logits bit-identical to the base in eval and train mode). GPU part on GPU N (17:00): G1 flag-off end-to-end
+  identity vs the frozen nn_x/w5 code 5/5 PASS (identical 39-step batch sequence, train-mode and loss-input logits, logged lines, bit-identical
+  checkpoint and val preds); G2 flags-on smoke 8/9 PASS (runs end to end, cfg stores the dcn keys, holdout_eval.py reproduces the saved holdout
+  preds bitwise, finetune.build_model rebuilds strictly); the one FAIL was the test's own constant (it expected a base Muon count of 31; the base
+  logs say 46 -> 46 + 8 = 54 matrices observed, as designed); the check is now relative to the base log. First GPU-test attempt aborted because
+  the inherited tests/ref_w5/common.py wrote into nn_x/w9/joint (4 stray w5_t10e2e_ref_off files there, deleted); fixed to nn_x/w10/r4.
+  Timing (tests/timing.py, GPU N, 100 real training steps, alternating base/dcn2 while another smoke shared the GPU): steady state
+  base 32.7 / 32.7 ms/step vs dcn2 35.0 / 34.6 ms/step = 1.06x the base step time, peak memory +0.27 GB; the very first measurement (47.3 ms)
+  was the cold-start artefact and is excluded. Stage S launched 17:00:51Z (w10_r4_s23 GPU N / s24 GPU N; r4c information pair 17:01:51Z),
+  3 compute processes per GPU incl. another job, >= [n] GB free at launch.

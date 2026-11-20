@@ -1,0 +1,41 @@
+INVENTORY D, step 3: RULE AND LIST OF CHECKS, written 2026-11-16T01:53:50Z BEFORE the first likelihood-ratio run.
+(Label reads made before this file: d02_relations.py section [H] (row-index vs label, descriptive) and section [G] (positive rate of
+re-shown rows; that job was still running when this file was written and its [G] line had not been read).)
+
+LENS. Conditional logit per feed (d03_lib.py): u = C a + beta x; C = [s, s^2, s^3, s*log(M/50)], s = within-feed z of the pool score.
+LR = 2 (ll[C,x] - ll[C]), 1 dof.  Placebo = x shuffled within feed (seed 1000), same fit.
+RULE. A check is INTERESTING iff LR >= 10.83 (chi2_1 p = 0.001) AND its placebo LR < 3.84.  Nothing else promotes a signal.
+A null does not close a signal (lens sensitivity 10-25% of a trained input, reports/COVERAGE_MAP.md line 323 as quoted in the task).
+CONTROLS. val-TO = preds/ens_FD16P20kd_to_val.npy (main, as assigned); val-FIN = 0.5 z(FT oof) + 0.5 z(TO) of FD16P20 (second column: does the
+fine-tune stage with its 42 val/test-only extras already read the signal?); hold = W16P20x8-composition pool of held-out members on the 30,000
+holdout feeds (only for signals that are not popularity-type).
+MULTIPLICITY. Every (signal form x control) below is reported, pass or not. With K 1-dof looks of pure noise the best LR has median
+chi2_1^{-1}(0.5^(1/K)): K=10 -> 3.3, K=20 -> 4.5, K=30 -> 5.2; P(any >= 10.83) = 1-(0.999)^K: 1%, 2%, 3%.
+
+CHECKS (signal -> form x; splits):
+ V1 feed timestamp (hour of day, MSK), unused by every input:
+    V1a hourcat  = log-lift of the candidate's category in the feed's 4-hour bin minus the category's all-day log-lift; lifts from train labels of the
+                   3,121,208 non-holdout train feeds (smoothed with 200 pseudo-impressions at the category rate). val-TO, val-FIN, hold.
+    V1b hourage  = the same with f4 deciles (listing-age bucket) in place of the category. val-TO, val-FIN, hold.
+ V2 same user's EARLIER train feeds (user_id used only for leave-user-out and the user-0 flag):
+    V2a ui_reshown = 1 if the same (user, item) was a candidate in a train feed of an earlier day (data/feats/<split>/tte_ui_imp > 0). val-TO, val-FIN, hold.
+    V2b uc_ctr     = log(user x category smoothed train CTR / category train CTR) (tte_uc_ctr / tte_c_ctr; 0 where the user is unknown). val-TO, val-FIN, hold.
+ V3 train TARGET as an item statistic (target is used only as the label): it_coec = log((clicks+1)/(expected clicks+1)) over train feeds
+    (tte_it_coec). val-TO, val-FIN only (popularity-type).
+ V4 train POS as an item statistic (pos is used only as the auxiliary target): it_prodpos = log((sum of position-CTR over the item's train
+    impressions + 20*0.0159)/(impressions + 20)) = label-free placement prior of the production ranker. val-TO, val-FIN only.
+ V5 history EVENT SOURCE of the item across users (source is read only as a per-event embedding of the own history; popularity inputs are split by
+    event type, not by source):
+    V5a it_s1share = logit-smoothed share of source s1 (main-page feed) among the item's e1 events in all history snapshots of OTHER users
+                     ((n_s1+1)/(n_e1+2)), 0 where the item has no e1 event. val-TO, val-FIN only.
+    V5b it_s1cnt   = log1p(number of e1/s1 events of the item in snapshots of other users). val-TO, val-FIN only.
+ V6 history events WITHOUT an embedding in the split's own table (14-16% of events; the model keeps the token but has no content for it):
+    missemb_gain = max(0, max cosine(candidate, events recovered from another split's table by item_id) - max cosine(candidate, events embedded in
+    the own table)), 0 where nothing is recoverable. val-TO, val-FIN, hold (form fixed after the recoverability numbers of d02 [F]; if < 5% of the
+    missing events are recoverable the check is replaced by the count of same-category missing-embedding events, log1p).
+ V7 candidate sets of OTHER feeds of the same split (fresh co-exposure; feed relations across users): fresh_cnt = log(number of val feeds whose
+    candidate list holds the item) (data/feats/item_stats.npz cand_cnt_val). val-TO, val-FIN only (popularity-type, label-free, transductive).
+ V8 equality structure of the quantile-encoded f columns inside a feed (inputs carry value, z and percentile, never "same value as"):
+    V8a f2_home = 1 if f2 equals the most frequent non-zero f2 of the feed (home-region proxy). val-TO, val-FIN, hold.
+    V8b f1_tie  = log(number of candidates of the feed with exactly the same f1). val-TO, val-FIN, hold.
+Looks in total: 12 forms; 12 x 2 val controls + 6 holdout = 30 LR reads.

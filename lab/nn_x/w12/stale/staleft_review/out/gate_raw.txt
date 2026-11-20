@@ -1,0 +1,41 @@
+=== (a) rebuild from raw: stale = max(max(fresh - test_split_count + same_user_later_overlap, 0) - train_Sep17-19_count, 0) ===
+it_hist_all_luo: my rebuild vs nn_x/r6/stale_cf/both_it_hist_all_luo.npy: max|d| 0.000000, rows differing 0 of 1389971; zero share fresh 0.3794 stale 0.4850
+it_hist_et5_luo: my rebuild vs nn_x/w12/stale/staleft/cf/both_it_hist_et5_luo.npy: max|d| 0.000000, rows differing 0 of 1389971; zero share fresh 0.9046 stale 0.9262
+
+=== (b) own gate: zero share by listing-age bucket; dZ = sum_b w_b |share_view - share_part|; dM on log1p scale / SD of the test part ===
+it_hist_all_luo: pooled zero share fresh val 0.3794 | stale val 0.4850 | private 0.4558 | public 0.4276
+   vs private: dZ fresh 0.0797 -> stale 0.0276 | dM fresh 0.1264 -> stale 0.0793 | closer on dZ: True
+      zero share by bucket (fresh / stale / private): <1d 0.923/0.981/0.975; 1-3d 0.842/0.948/0.916; 3-7d 0.617/0.921/0.860; 7-10d 0.409/0.836/0.787; 10-24d 0.262/0.389/0.396; 24-76d 0.175/0.217/0.192; >76d 0.184/0.230/0.200
+   vs public : dZ fresh 0.0510 -> stale 0.0546 | dM fresh 0.0845 -> stale 0.1082 | closer on dZ: False
+      zero share by bucket (fresh / stale / public): <1d 0.923/0.981/0.944; 1-3d 0.842/0.948/0.878; 3-7d 0.617/0.921/0.832; 7-10d 0.409/0.836/0.606; 10-24d 0.262/0.389/0.334; 24-76d 0.175/0.217/0.185; >76d 0.184/0.230/0.197
+it_hist_et5_luo: pooled zero share fresh val 0.9046 | stale val 0.9262 | private 0.9200 | public 0.9145
+   vs private: dZ fresh 0.0160 -> stale 0.0068 | dM fresh 0.0438 -> stale 0.0298 | closer on dZ: True
+   vs public : dZ fresh 0.0104 -> stale 0.0112 | dM fresh 0.0258 -> stale 0.0415 | closer on dZ: False
+seq_cv_pop: pooled zero share fresh val 0.4197 | stale val 0.4742 | private 0.4764 | public 0.4642
+   vs private: dZ fresh 0.0625 -> stale 0.0327 | dM fresh 0.1028 -> stale 0.0606 | closer on dZ: True
+   vs public : dZ fresh 0.0470 -> stale 0.0200 | dM fresh 0.0741 -> stale 0.0280 | closer on dZ: True
+pre_id_contrib_v2: pooled zero share fresh val 0.5479 | stale val 0.5792 | private 0.5981 | public 0.5791
+   vs private: dZ fresh 0.0540 -> stale 0.0230 | dM fresh 0.0727 -> stale 0.0566 | closer on dZ: True
+   vs public : dZ fresh 0.0376 -> stale 0.0115 | dM fresh 0.0475 -> stale 0.0320 | closer on dZ: True
+
+=== (c) stale view: 4 extras stay FRESH (gate_exclude: it_hist_all_luo_gap, et7, et9, et10) while their parent is stale ===
+gap == fresh count - fresh feed max exactly: max|d| 0.000000
+rows with STALE count 0: 0.4850 of val rows; of them newly cold (fresh > 0) 0.2177, always cold 0.7823
+flag 'kept-fresh gap > -feed max' among stale-zero rows: P(flag | newly cold) 1.0000, P(flag | always cold) 0.0000
+flag 'kept-fresh gap > feed min gap' among stale-zero rows: P(flag | newly cold) 0.9997, P(flag | always cold) 0.0000
+kept-fresh it_hist_et7_luo > 0 on a row whose stale all-count is 0 (a pattern no real row has): 0.0075 of stale-zero rows; 0.0343 of newly cold rows
+kept-fresh it_hist_et9_luo > 0 on a row whose stale all-count is 0 (a pattern no real row has): 0.0020 of stale-zero rows; 0.0093 of newly cold rows
+kept-fresh it_hist_et10_luo > 0 on a row whose stale all-count is 0 (a pattern no real row has): 0.0084 of stale-zero rows; 0.0388 of newly cold rows
+among stale-zero rows, corr(log1p fresh count, kept-fresh gap) = -0.023 (gap + max recovers the count: 0.805)
+
+=== (d) label-free: mean per-feed z of the prediction on NEWLY COLD rows minus ALWAYS COLD rows (feeds that hold both), stale view unless said ===
+train-only (no extras), stale view    : +0.2686 +- 0.0051 (13441 feeds)
+P=0 fine-tune, stale view             : +0.3088 +- 0.0051 (13441 feeds)
+P=0.5 fine-tune, stale view           : +0.3158 +- 0.0051 (13441 feeds)
+P=1.0 fine-tune, stale view           : +0.3216 +- 0.0051 (13441 feeds)
+P=0 fine-tune, FRESH view             : +0.4067 +- 0.0052 (13441 feeds)
+P=1.0 fine-tune, FRESH view           : +0.3828 +- 0.0052 (13441 feeds)
+paired: [P=1.0 fine-tune, stale view] - [P=0 fine-tune, stale view] = +0.0128 +- 0.0003
+paired: [P=0.5 fine-tune, stale view] - [P=0 fine-tune, stale view] = +0.0070 +- 0.0002
+paired: [P=0 fine-tune, stale view] - [train-only (no extras), stale view] = +0.0402 +- 0.0007
+paired: [P=0 fine-tune, FRESH view] - [P=0 fine-tune, stale view] = +0.0978 +- 0.0009

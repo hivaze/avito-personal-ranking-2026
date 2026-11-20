@@ -1,0 +1,89 @@
+DECLARATION of the adversarial review of build hz2n (reviewer). Directory nn_x/w12/stale/hz2n_review/. Report reports/STALE_1115/hz2n_review.md.
+Reviewer start 2026-11-15T07:48:56Z (first command). This block written 2026-11-15T07:52:23Z.
+State of knowledge when written: READ ONLY, nothing computed by me. Read so far: the task text with the builder's return value, tail of nn_x/w5/logs/E_kd_predeclared.txt,
+builder DECLARATION.txt + READY.txt sections 0-4 (its numbers are [D] for me), nn_x/w5/cd_arms6b.py, hz2n/cd_arms6c.py and their textual diff (seen: docstring, two constants,
+an 8-line block in luo_cols, 3 lines + the tag in setup_hzcd), solvers/CPU2_stale_replay_pre2s_and_arms.py::build_pre2both / build_pre2full, pretrain/assemble.py,
+pretrain/assemble_train.py, hz2n/enc_common.py, nn_x/w5/data.py::attach_xt, XT_PRESETS of nn_x/w5/train.py. train.py line 56 still imports cd_arms6b at 07:50Z; no hz2n run log exists.
+Default for anything I cannot re-derive: NOT PROVEN. No val / test / holdout label file is opened by any script of mine (no cand_target of val / test; train cand_target not opened either).
+
+DEFINITIONS (fixed now)
+ S = nn/feat_cache/train/it_hist_all_luo.npy (stored counter). V = <base>/train/it_hist_hz_all.npy with base = hz2/feats (a), hz2/feats_L (b), data/feats_new (c).
+ keep = hz2/feats{,_L}/train/hz2_keep_rows.npy for a / b, all False for c. nc = (V == 0) & (S > 0) & ~keep. effective cold = where(keep, S, V) == 0.
+ idc = data/feats/train/pre2_id_contrib.npy (NaN -> 0). B rows = nc & idc != 0. D rows = S == 0 (as-built cold). E rows = nc & idc == 0 (made cold, never had an ID contribution).
+ My random samples: numpy default_rng(20261115). Train feed sample for the from-raw recomputation: 1,500 feeds per encoder window (3 windows) drawn uniformly from window_feeds.npy,
+ plus 600 feeds outside all windows, the SAME feed sample for all views (so >= 500 per view in every window). Full-array (246,745,836 rows) chunked counts wherever the check is a row-wise relation.
+
+R1 IDENTITY (item 1)
+ R1a text: every line of 'diff cd_arms6b.py cd_arms6c.py' lies in {module docstring, ENC_TO_HZ / ENC_GROUPS constants (+ comments), luo_cols, setup_hzcd}. PASS iff so. Also md5(nn_x/w5/cd_arms6c.py) == md5(hz2n/cd_arms6c.py).
+ R1b AST (my own script): top-level statements of 6c minus {docstring, the two new Assign nodes} are ast.dump-identical to those of 6b except FunctionDef luo_cols and setup_hzcd;
+     luo_cols / setup_hzcd of 6c, after deleting the statements whose source lines carry the comment '# 6c' and replacing the f-string of the log call by the 6b one, are identical to 6b.
+     PASS iff all hold. Each changed statement is explained in the report.
+ R1c behaviour without new files (separate python process per module and environment; my own stand-in split object, my own random feeds):
+     environments E0 = HZCD_DIR unset, E1 = hz2/feats + its keep, E2 = hz2/feats_L + its keep. xt name lists: cvnd_pre2s (34 names) and a popularity-light style list.
+     (i) luo_cols(xt_names) equal as lists; (ii) load_hz('train', cols, cpu, rows=my rows) bit-identical; (iii) apply_keep + HzTrainView.gather on >= 2,000 of my random train feeds:
+     every key of the batch bit-identical; (iv) hz_stats equal. PASS iff 0 differing bits in every environment. Extra (reported): in each of the builder's directories the columns 6c swaps
+     that 6b also swaps are bit-identical to the base directory's (the popularity part of the view is not altered by the new directory).
+ R1d transform parity: for each new file name, cd_arms6c.xt_transform(hz name, x) == the branch attach_xt applies to the stored name, on real values of my sample (incl. NaN rows). PASS iff 0 differing bits.
+
+R2 WITNESS PARITY (item 2)
+ R2a val, my own implementation (numpy, float64 per-feed moments via bincount; NOT the builder's function, NOT numba feed_rank_z): nc_val = (both_it_hist_all_luo == 0) & (val luo > 0);
+     fe' = where(nc, noid, fe); fe_s' = (fe' + 20) / 6; z' = mean over the 2 configs of the within-feed z of where(nc, aligned noid_c, aligned fe_c).
+     vs solvers/out/stale/cf/pre2both_pre2_fe.npy / pre2_fe_s.npy: PASS iff 0 rows differ bitwise. vs pre2both_pre2_fe_z.npy: my float64 z differs from the float32 numba arithmetic by
+     rounding only: PASS iff max|d| <= 1e-4 on all rows of feeds whose float64 within-feed SD of each config score is >= 1e-3 (degenerate feeds reported separately, count and max|d|).
+     nc_val vs solvers/out/stale/cf/newly_cold.npy: PASS iff equal. The builder's function (enc_common.mix_rows) run by me on the same inputs: reported next to mine (max|d| vs witness, vs mine).
+ R2b train, full arrays, each of feats_n / feats_Ln / feats_hn: with MY nc (definition above, from the raw counter files)
+     (1) hz2n_newly_cold.npy == my nc on every row;
+     (2) pre2_hz_fe == where(nc, pre2_fe_noid, pre2_fe) bitwise on every row; (3) pre2_hz_fe_s: non-nc rows bitwise == stored pre2_fe_s; nc rows == float32((pre2_fe_noid + 20) / 6) bitwise or |d| <= 1e-6;
+     (4) aux/pre2_hz_fe_has == float32(~isnan(pre2_hz_fe)) and == ~isnan(stored pre2_fe) on every row (has flag consistent AND unchanged);
+     (5) keep rows: 0 rows with any new file differing bitwise from the stored file; (6) pre2_hz_fe_z bitwise == stored pre2_fe_z on every row of every feed without an nc row.
+     PASS iff 0 violating rows in each. Shares of rows changed reported and compared with READY.txt (must agree to the printed digits).
+ R2c train, from RAW (winscores) on my feed sample, my own code: per window and config the affine maps from the 60K-sample moments (assemble_train arithmetic), aligned fe_c / noid_c,
+     (1) config means reproduce stored pre2_fe / pre2_fe_noid: max|d| <= 2e-5 (float32/float64 scalar promotion may differ from the original run; exact equality reported);
+     (2) z' (float64 moments) vs pre2_hz_fe_z on every row of sampled feeds WITH an nc row: PASS iff max|d| <= 1e-4 outside degenerate feeds (SD < 1e-3), per view;
+     (3) the per-feed mean and SD of the builder's implied standardisation are those of the MIXED per-config score over ALL M rows of the feed (not over warm rows, not over the window sample):
+         checked by (2); additionally a wrong-variant control: z of the UNMIXED score must differ from the file (max|d| > 1e-2) so that the test has power.
+     The same for the new head in feats_nF / feats_hnF (files pre2_hz_new, _s, _z; rule = build_pre2full: the NEW key's own map on raw new_noid) and seq_cv_hz_* of feats_hnFS
+     (== where(V == 0, 0, stored), full arrays, 0 violating rows), because the lead's declared arms (07:42Z block) are hznFS and hz2nF.
+
+R3 LEAK AUDIT (item 3): by reading the builders (pretrain/score*.py, build_corpus_window.py, assemble_train.py, feat_new/it_hist_hz.py, the hz2 view builder) and by these counts:
+ (1) inputs of every new value = {V, S, keep, per-config window scores fe / fe_noid (/ new / new_noid), 60K-sample moments}; I state for each whether a train label, a later snapshot of
+     the same user, or a val / test / holdout label can enter it, with file and line. (2) pre2_fe_noid train vs val vs test construction: same forward pass and same alignment or not; stated.
+ (3) standardisation statistics: listed with the rows they are computed on. Verdict words: CLEAN / NOT PROVEN / LEAK. A LEAK needs a mechanism by which the row's own label changes the value.
+
+R4 GATE (item 4)
+ G1 recount, full arrays, 3 views, day groups all / >= Sep 13 (MSK day slot >= 7 as the builder defines it): before = P(idc != 0 | effective cold); after = P(idc != 0 AND pre2_hz_fe not bitwise
+     pre2_fe_noid | effective cold). The builder's numbers HOLD iff my before agrees to 3 decimals and my after count is 0. Model-input form (mine): after2 = share of effective-cold rows with
+     idc != 0 whose pre2_hz_fe_s differs from float32((noid + 20) / 6) by > 1e-6; must be 0.
+ G2 recount, full arrays: SMD of pre2_fe_s (before: stored; after: pre2_hz_fe_s) between train rows and PRIVATE test cold rows (test it_hist_all_luo == 0, feed ts >= 1790497920), unit = SD of
+     pre2_fe_s over all private rows; populations B and A (= all effective-cold rows with a score) and D, on all feeds and on feeds of days >= Sep 13 (the builder's 'pool' needs its trPool
+     definition: recounted too if I can reproduce the definition from hz2_review/pre2_tell.py, else stated NOT RECOUNTED). HOLD iff each of my numbers agrees with gate_table.txt within 0.005.
+ N: NEW impossible-at-test combinations. Severity index I = |shift in target-SD units| x share of train rows of days >= Sep 13 affected; reference I0 = the ORIGINAL defect measured the same way
+     (B rows, stored pre2_fe_s vs private cold rows, view a). Classification fixed now: MAJOR if I >= I0 / 2; MEDIUM if I0 / 10 <= I < I0 / 2; LOW if I < I0 / 10. For a combination that is
+     impossible by identity at test (probability exactly 0 on val / public / private cold rows) the index uses the share of rows alone with shift := the SMD of the affected input vs target cold rows.
+  N1 E rows (made cold, no ID): mean(pre2_hz_fe - stored pre2_fe) and the same on the model inputs pre2_fe_s (target-SD units) per window; at test fe == noid on such rows (val: reported from files).
+  N2 has flag set with NaN score or the reverse; nc rows with finite fe and NaN noid (count; must be 0).
+  N3 fe head without ID + new head with ID on the same row (as-asked views): P(raw new != raw new_noid | effective cold) on my sample; and after F.
+  N4 it_hist_all == 0 with seq_cv_pop > 0 (view c), and after FS.
+  N5 pre2_hmax32 (model input, untouched): SMD of B rows vs private cold rows and vs D rows of the same day group.
+  N6 generic scan, all 34 xt inputs of cvnd_pre2s as the model sees them through each trained view (feats_nF, feats_hnFS): SMD of effective-cold train rows (days >= Sep 13) vs private cold
+     rows, and of B rows vs private cold rows; inputs with |SMD| > 0.15 listed with the same number for as-built D rows (to separate a view artefact from a population offset). Reported, no bar.
+  N7 within-feed consistency: on B / E rows the swapped pre2_fe_z must be the z of the swapped score in the same feed (covered by R2c) and the in-model xt_rel of pre2_fe_s reads the swapped column
+     (by code reading of HzTrainView.gather / model.dense_features; stated).
+
+R5 RUNS (item 5): if a log of a variant with hz2n / hzn in its name exists when I finish: its 'wave-5 hzcd' line must contain 'ENCODER-SCORE VIEW ON' with the counts of READY.txt section 1
+ for its directory, the column names in xt order, and plausible zero rates / changed shares (compared with my full-array counts within 0.001). train.py: md5 now vs after the switch; AST with the one
+ import replaced must be identical (my own ast comparison of the current file with a copy in which line 56 reads cd_arms6c). If no run exists: stated, with the check list for the lead.
+
+OVERALL: confirmed = True iff R1, R2 PASS, R3 has no LEAK, G1 after == 0, and no N item is classified MAJOR for the directories the lead trains (feats_nF, feats_hnFS). A MEDIUM N item does not
+ block training but is listed with its cost; whether it blocks use in a FINAL member is stated separately.
+
+ADDENDUM R-1, written 2026-11-15T08:06:42Z, AFTER n8_lowcount.py printed its table (so this item is NOT pre-declared; it is a finding of the N6 scan, which showed P(ID | view-warm) 0.86 / 0.78 vs 0.74 private).
+ Observation [M]: P(pre2 ID contribution != 0 | it_hist_all in {1, 2}) is EXACTLY 0 on val / public / private rows and on as-built train rows (the ID slot needs >= 3 occurrences), but
+ 0.73-0.80 / 0.28-0.35 for view-a counters in (0,1] / (1,2] and 0.14-0.21 / 0.10-0.17 for view c. Same family as MAJOR 2 of hz2_review (counter below the ID threshold + ID-carrying encoder score),
+ not introduced by hz2n, not repaired by it, not seen by the builder's gate (G1 conditions on counter == 0 only).
+ Measurement declared now, before its numbers (n8b_lowrows.py): L rows = (0 < effective view counter < 3) & (idc != 0). Per view and population (pool13 / ge13 samples of 30,000 feeds, the N6 samples):
+ share of rows; shift := mean(idc on L rows) / 6 / SD(pre2_fe_s, private all rows) (= what the hz2n rule applied to these rows would remove); index I_L = shift x share (ge13, as declared for N items);
+ classification by the SAME thresholds vs I0 as declared above (both readings of I0: by the letter = SMD-before x share of B, and 'removed' = what the fix removed on B x share of B).
+ Also for the stale-val witness (val rows, scenario 'both'): share of val rows with 0 < both counter < 3 and idc != 0 (these keep their ID in both_pre2both AND both_pre2full).
+ Consequence rule, fixed now: this item cannot make the verdict 'not safe to TRAIN' (hz2n is strictly closer to test than its base views on every count I made); it bears on (a) the lead's label
+ 'every cold-row tell removed' and (b) whether a further arm (no-ID score where the view counter < 3) is worth a GPU slot: recommended iff I_L >= I0('removed') / 4 for the view of the chosen recipe (view c).

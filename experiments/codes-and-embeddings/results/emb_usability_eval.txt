@@ -1,0 +1,43 @@
+[    0.4s] feeds 14423, leak-free 14306, base G3 NDCG all 0.40032 leak-free 0.40046
+[    0.6s] pairs 2,428,822; same-cat 0.265; same-cat+same-pop-decile 0.063 (8 pop bins)
+[    0.6s] cell sizes (M tercile x H tercile) [1571, 1600, 1605, 1630, 1602, 1598, 1598, 1606, 1613]
+[    0.7s] === ITEM 1 lifts
+[    0.7s]   LIFT changed (cos<0.99) vs unchanged, items with a train vector: rate A 0.01797+-0.00103 (n 17,469) vs B 0.01715+-0.00020 (n 959,007) -> lift 1.048 [95% 0.937, 1.172]
+[    0.7s]   LIFT in train table vs not: rate A 0.01717+-0.00020 (n 976,476) vs B 0.01247+-0.00022 (n 400,568) -> lift 1.376 [95% 1.331, 1.423]
+[    0.7s]   LIFT strongly changed (cos<0.9) vs unchanged: rate A 0.01992+-0.00290 (n 2,410) vs B 0.01715+-0.00020 (n 959,007) -> lift 1.161 [95% 0.873, 1.544]
+[    0.8s]   LIFT bit-identical vs not (but cos>=0.99): rate A 0.01687+-0.00021 (n 752,866) vs B 0.01816+-0.00033 (n 206,141) -> lift 0.929 [95% 0.895, 0.964]
+[    0.8s]   category differs between tables: changed 0.0278 vs unchanged 0.0015
+[    0.8s]   mean f1: changed +0.4079  unchanged +0.4002  not-in-train +0.3973
+[    0.8s]   mean f2: changed +0.4108  unchanged +0.4226  not-in-train +0.4824
+[    0.8s]   mean f3: changed +0.4451  unchanged +0.4522  not-in-train +0.4472
+[    0.8s]   mean f4: changed +0.5183  unchanged +0.5996  not-in-train +0.2782
+[    0.8s]   mean f5: changed +0.5212  unchanged +0.5064  not-in-train +0.2841
+[    0.8s]   mean log1p(it_hist_all_luo): changed 2.028 unchanged 2.150 not-in-train 0.101
+[    0.8s] === ITEM 4 lifts
+[    0.9s]   LIFT nd_act vs neither: rate A 0.03588+-0.00146 (n 21,434) vs B 0.01498+-0.00017 (n 1,325,342) -> lift 2.394 [95% 2.207, 2.597]
+[    0.9s]   LIFT nd_view_only vs neither: rate A 0.03737+-0.00120 (n 30,268) vs B 0.01498+-0.00017 (n 1,325,342) -> lift 2.494 [95% 2.339, 2.659]
+[    0.9s]   LIFT nd_act vs nd_view_only: rate A 0.03588+-0.00146 (n 21,434) vs B 0.03737+-0.00120 (n 30,268) -> lift 0.960 [95% 0.870, 1.060]
+[    0.9s]   LIFT maxcos_act in (0.9,0.95] vs neither: rate A 0.02304+-0.00049 (n 114,258) vs B 0.01498+-0.00017 (n 1,325,342) -> lift 1.537 [95% 1.480, 1.597]
+[    0.9s]   LIFT maxcos_act in (0.95,0.98] vs neither: rate A 0.02757+-0.00078 (n 55,607) vs B 0.01498+-0.00017 (n 1,325,342) -> lift 1.840 [95% 1.743, 1.942]
+[    0.9s]   LIFT maxcos_act in (0.98,0.995] vs neither: rate A 0.03455+-0.00139 (n 19,739) vs B 0.01498+-0.00017 (n 1,325,342) -> lift 2.306 [95% 2.127, 2.500]
+[    0.9s]   LIFT maxcos_act in (0.995,1.01] vs neither: rate A 0.05133+-0.00663 (n 1,695) vs B 0.01498+-0.00017 (n 1,325,342) -> lift 3.425 [95% 2.659, 4.413]
+[    0.9s] === SCREEN (leak-free val; nested = grid, cell = M x H tercile cell-wise grid; GBM = with-x minus control)
+[   16.7s] GBM control (zG3, logM, logH, user0) minus base G3: -0.01413 +- 0.00079
+[   30.1s] chg_d          it1 P   cov 0.709 | AUC 0.5083+-0.0029 same 0.5106 same+pop 0.5131 | nested -0.00024+-0.00012 (w_full -0.02 in-sample +0.00001; folds -0.02,+0.02,+0.02,+0.00,+0.02,-0.02,+0.02,+0.00,+0.02,+0.00) pmix -0.00017+-0.00017 | cell -0.00020+-0.00029 | GBM +0.00668+-0.00082
+[   46.6s] chg_flag       it1 S   cov 0.709 | AUC 0.4998+-0.0007 same 0.5000 same+pop 0.4994 | nested -0.00002+-0.00009 (w_full -0.02 in-sample +0.00004; folds -0.02,-0.02,-0.02,+0.00,-0.02,-0.02,-0.02,+0.00,-0.02,-0.02) pmix -0.00004+-0.00012 | cell -0.00055+-0.00016 | GBM +0.00341+-0.00072
+[   50.5s] in_train       it1 S   cov 1.000 | AUC 0.5288+-0.0020 same 0.5214 same+pop 0.5075 | nested +0.00024+-0.00028 (w_full -0.05 in-sample +0.00044; folds -0.02,-0.05,-0.05,-0.02,-0.05,-0.05,-0.05,-0.02,-0.05,-0.05) pmix +0.00015+-0.00046 | cell +0.00023+-0.00033
+[   67.1s] zca_maxcos     it2 P   cov 0.986 | AUC 0.6507+-0.0027 same 0.6216 same+pop 0.6238 | nested -0.00002+-0.00021 (w_full -0.02 in-sample +0.00019; folds -0.02,-0.02,-0.05,-0.02,-0.02,-0.02,-0.05,-0.05,-0.02,-0.02) pmix +0.00008+-0.00031 | cell -0.00022+-0.00032 | GBM +0.00909+-0.00083
+[   71.0s] cen_maxcos     it2 S   cov 0.986 | AUC 0.6500+-0.0027 same 0.6199 same+pop 0.6243 | nested -0.00019+-0.00017 (w_full -0.02 in-sample +0.00009; folds -0.02,-0.02,+0.02,-0.02,-0.02,-0.02,-0.02,-0.05,+0.02,+0.02) pmix -0.00026+-0.00025 | cell -0.00017+-0.00034
+[   75.1s] abtt3_maxcos   it2 S   cov 0.986 | AUC 0.6452+-0.0027 same 0.6180 same+pop 0.6211 | nested -0.00034+-0.00020 (w_full -0.05 in-sample +0.00005; folds -0.05,-0.02,+0.02,-0.02,-0.02,-0.02,-0.05,-0.05,+0.05,+0.02) pmix -0.00049+-0.00031 | cell -0.00005+-0.00030
+[   78.9s] cen_new5       it2 S   cov 0.986 | AUC 0.6339+-0.0036 same 0.6033 same+pop 0.6103 | nested -0.00013+-0.00019 (w_full +0.02 in-sample +0.00013; folds +0.02,-0.02,+0.02,+0.02,+0.02,-0.02,+0.02,-0.02,+0.02,+0.02) pmix -0.00003+-0.00030 | cell -0.00094+-0.00035
+[   82.7s] abtt3_new5     it2 S   cov 0.986 | AUC 0.6281+-0.0038 same 0.6007 same+pop 0.6064 | nested -0.00006+-0.00018 (w_full +0.02 in-sample +0.00021; folds +0.02,-0.02,+0.02,+0.02,+0.02,-0.02,+0.02,+0.02,+0.02,+0.02) pmix +0.00006+-0.00029 | cell -0.00079+-0.00029
+[   86.4s] zca_new5       it2 S   cov 0.986 | AUC 0.6303+-0.0038 same 0.6042 same+pop 0.6117 | nested -0.00028+-0.00013 (w_full +0.02 in-sample +0.00003; folds +0.00,-0.02,+0.00,+0.02,+0.02,-0.02,+0.02,-0.02,+0.02,+0.00) pmix -0.00026+-0.00021 | cell -0.00072+-0.00038
+[   90.2s] raw_maxcos     it2 ref cov 0.986 | AUC 0.6527+-0.0027 same 0.6217 same+pop 0.6248 | nested -0.00004+-0.00025 (w_full -0.05 in-sample +0.00015; folds -0.05,-0.05,-0.05,-0.02,-0.05,-0.05,-0.05,-0.05,-0.05,+0.00) pmix -0.00003+-0.00036 | cell -0.00052+-0.00031
+[   93.9s] raw_new5       it2 ref cov 0.986 | AUC 0.6345+-0.0035 same 0.6030 same+pop 0.6085 | nested +0.00008+-0.00020 (w_full +0.02 in-sample +0.00020; folds +0.02,+0.02,+0.02,+0.02,+0.02,+0.00,+0.02,+0.02,+0.02,+0.02) pmix +0.00021+-0.00030 | cell -0.00095+-0.00035
+[  111.6s] proj_mu        it3 P   cov 1.000 | AUC 0.5001+-0.0029 same 0.5039 same+pop 0.4957 | nested +0.00045+-0.00022 (w_full +0.02 in-sample +0.00045; folds +0.02,+0.02,+0.02,+0.02,+0.02,+0.02,+0.02,+0.02,+0.02,+0.02) pmix +0.00030+-0.00036 | cell +0.00007+-0.00037 | GBM +0.00877+-0.00083
+[  115.3s] proj_pc1       it3 S   cov 1.000 | AUC 0.5089+-0.0036 same 0.4952 same+pop 0.5033 | nested -0.00037+-0.00021 (w_full -0.05 in-sample +0.00001; folds -0.05,-0.05,+0.02,+0.02,+0.00,+0.02,-0.05,-0.02,-0.05,+0.00) pmix -0.00075+-0.00030 | cell -0.00106+-0.00042
+[  131.5s] nd_act         it4 P   cov 1.000 | AUC 0.5088+-0.0009 same 0.5079 same+pop 0.5079 | nested +0.00003+-0.00016 (w_full +0.02 in-sample +0.00022; folds +0.02,-0.02,+0.02,+0.02,+0.02,+0.02,+0.02,-0.02,+0.02,+0.02) pmix -0.00001+-0.00028 | cell -0.00023+-0.00024 | GBM +0.00026+-0.00069
+[  135.1s] nd_view_only   it4 S   cov 1.000 | AUC 0.5146+-0.0010 same 0.5114 same+pop 0.5105 | nested -0.00009+-0.00009 (w_full +0.00 in-sample +0.00000; folds +0.00,+0.00,+0.00,+0.00,-0.02,+0.00,-0.02,+0.00,+0.00,+0.00) pmix -0.00025+-0.00016 | cell -0.00097+-0.00026
+[  152.4s] maxcos_act     it4 S   cov 0.973 | AUC 0.6078+-0.0031 same 0.5975 same+pop 0.6043 | nested -0.00004+-0.00018 (w_full -0.02 in-sample +0.00015; folds -0.02,-0.02,-0.02,-0.02,-0.02,-0.02,+0.02,-0.02,-0.02,+0.00) pmix +0.00010+-0.00025 | cell -0.00085+-0.00028 | GBM +0.00749+-0.00080
+[  170.0s] cos_u          it5 P   cov 1.000 | AUC 0.6479+-0.0033 same 0.6135 same+pop 0.6212 | nested -0.00015+-0.00022 (w_full +0.05 in-sample +0.00008; folds +0.05,+0.00,+0.05,+0.02,+0.05,+0.05,+0.05,+0.00,+0.05,+0.00) pmix +0.00003+-0.00034 | cell -0.00043+-0.00044 | GBM +0.00883+-0.00081
+[  170.0s] done

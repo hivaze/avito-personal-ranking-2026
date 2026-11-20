@@ -1,0 +1,223 @@
+{
+ "names": [
+  "tm_weekend",
+  "tm_hsin",
+  "tm_hcos"
+ ],
+ "def": "tm_weekend = 1[Moscow weekday in Sat/Sun]; tm_hsin/hcos = sin/cos(2 pi * local seconds-of-day / 86400); feed value broadcast to every candidate (cand_fidx); float32",
+ "train": {
+  "feeds": 3151208,
+  "rows": 246745836,
+  "feeds_per_weekday": {
+   "Mon": 526363,
+   "Tue": 291034,
+   "Wed": 286479,
+   "Thu": 551745,
+   "Fri": 504107,
+   "Sat": 436571,
+   "Sun": 554909
+  },
+  "weekend_share_feeds": 0.31463489557020674,
+  "weekend_share_rows": 0.321384072303772,
+  "mean": {
+   "tm_weekend": 0.321384072303772,
+   "tm_hsin": -0.1742069125175476,
+   "tm_hcos": -0.09450752288103104
+  },
+  "sd": {
+   "tm_weekend": 0.4670078754425049,
+   "tm_hsin": 0.6737983226776123,
+   "tm_hcos": 0.7118399739265442
+  },
+  "hour_block_share_feeds": [
+   0.0523,
+   0.0454,
+   0.1289,
+   0.1554,
+   0.1603,
+   0.1561,
+   0.1543,
+   0.1473
+  ],
+  "hour_block_share_rows": [
+   0.0587,
+   0.0467,
+   0.1257,
+   0.1434,
+   0.1483,
+   0.1502,
+   0.1619,
+   0.1652
+  ],
+  "local_hour_mean": 13.93425442207842,
+  "days": [
+   "Fri Sep 11",
+   "Fri Sep 18",
+   "Mon Sep 07",
+   "Mon Sep 14",
+   "Sat Sep 12",
+   "Sat Sep 19",
+   "Sun Sep 06",
+   "Sun Sep 13",
+   "Sun Sep 20",
+   "Thu Sep 10",
+   "Thu Sep 17",
+   "Tue Sep 08",
+   "Tue Sep 15",
+   "Wed Sep 09"
+  ]
+ },
+ "val": {
+  "feeds": 14423,
+  "rows": 1389971,
+  "feeds_per_weekday": {
+   "Mon": 0,
+   "Tue": 7542,
+   "Wed": 1,
+   "Thu": 6878,
+   "Fri": 2,
+   "Sat": 0,
+   "Sun": 0
+  },
+  "weekend_share_feeds": 0.0,
+  "weekend_share_rows": 0.0,
+  "mean": {
+   "tm_weekend": 0.0,
+   "tm_hsin": -0.1617492437362671,
+   "tm_hcos": -0.188319131731987
+  },
+  "sd": {
+   "tm_weekend": 0.0,
+   "tm_hsin": 0.6814703941345215,
+   "tm_hcos": 0.6884556412696838
+  },
+  "hour_block_share_feeds": [
+   0.0519,
+   0.0402,
+   0.1326,
+   0.1775,
+   0.1768,
+   0.1704,
+   0.1273,
+   0.1233
+  ],
+  "hour_block_share_rows": [
+   0.0574,
+   0.0414,
+   0.1295,
+   0.1693,
+   0.1627,
+   0.1672,
+   0.1357,
+   0.1367
+  ],
+  "local_hour_mean": 13.534983167317632,
+  "days": [
+   "Fri Sep 25",
+   "Thu Sep 24",
+   "Tue Sep 22",
+   "Wed Sep 23"
+  ]
+ },
+ "test": {
+  "feeds": 28595,
+  "rows": 2904806,
+  "feeds_per_weekday": {
+   "Mon": 7578,
+   "Tue": 7600,
+   "Wed": 0,
+   "Thu": 0,
+   "Fri": 0,
+   "Sat": 6050,
+   "Sun": 7367
+  },
+  "weekend_share_feeds": 0.4692079034796293,
+  "weekend_share_rows": 0.4787527918815613,
+  "mean": {
+   "tm_weekend": 0.4787527918815613,
+   "tm_hsin": -0.18453022837638855,
+   "tm_hcos": -0.05833091214299202
+  },
+  "sd": {
+   "tm_weekend": 0.4995483458042145,
+   "tm_hsin": 0.6791719198226929,
+   "tm_hcos": 0.7080053687095642
+  },
+  "hour_block_share_feeds": [
+   0.0551,
+   0.0447,
+   0.1244,
+   0.1548,
+   0.1384,
+   0.1703,
+   0.1487,
+   0.1636
+  ],
+  "hour_block_share_rows": [
+   0.0593,
+   0.0478,
+   0.1245,
+   0.1419,
+   0.1249,
+   0.1632,
+   0.1599,
+   0.1785
+  ],
+  "local_hour_mean": 14.106717491402925,
+  "days": [
+   "Mon Sep 28",
+   "Sat Sep 26",
+   "Sun Sep 27",
+   "Tue Sep 29"
+  ]
+ },
+ "hour_block_labels": [
+  "00-03",
+  "03-06",
+  "06-09",
+  "09-12",
+  "12-15",
+  "15-18",
+  "18-21",
+  "21-24"
+ ],
+ "psi_train_val": {
+  "weekend_rows": 4.199863985369891,
+  "hour_blocks_rows": 0.018260420716184212,
+  "hour_blocks_feeds": 0.016010825619853286
+ },
+ "psi_train_test": {
+  "weekend_rows": 0.10423763812776793,
+  "hour_blocks_rows": 0.006211148701578147,
+  "hour_blocks_feeds": 0.0066902976265111914
+ },
+ "psi_val_test": {
+  "hour_blocks_feeds": 0.028423912324837097
+ },
+ "holdout_meta_check": "OK (M of the rng-12345 subset == holdout_meta.npy)",
+ "holdout": {
+  "feeds": 30000,
+  "weekend_feeds": 9632,
+  "weekday_feeds": 20368,
+  "weekend_share": 0.32106666666666667,
+  "feeds_per_weekday": {
+   "Mon": 5136,
+   "Tue": 2659,
+   "Wed": 2440,
+   "Thu": 5268,
+   "Fri": 4865,
+   "Sat": 4459,
+   "Sun": 5173
+  },
+  "hour_block_share_feeds": [
+   0.0606,
+   0.0445,
+   0.1282,
+   0.1452,
+   0.1494,
+   0.1504,
+   0.1532,
+   0.1685
+  ]
+ }
+}

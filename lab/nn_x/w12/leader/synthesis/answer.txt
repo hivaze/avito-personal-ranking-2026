@@ -1,0 +1,56 @@
+WHERE COULD THE LEADER GET A LOT OF INFORMATION? SYNTHESIS, 18 NOV (no new runs; sources in brackets)
+
+Gap: leader 0.3982556 minus us 0.3952092 = +0.00305 (1.7-2.5 cross-team SE); #2 +0.00207, #3 +0.00127 (past_audits/board_update.log).
+
+1. HYPOTHESES, MOST LIKELY FIRST
+
+H-A. Better modelling or training-data use, shared by the top cluster. P 0.60.
+For: the board is a continuum (top-8 gaps 0.00008-0.00098); five teams passed 0.3955 in five days; our distillation added +0.0010 public in one day; the model is data-limited (training on 80% of users costs 0.0017 at pool level, docs/07).
+Against: 309 catalogued ideas, mostly null at pool level; the error is calibrated (fixing all ~660 slices: +0.00035).
+Legitimate, leak-safe.
+Test: the one mechanism-backed lever never run is distillation on the unlabelled val+test feeds (teacher soft targets from stored train-only predictions, no labels). 8 seeds x 2 user halves as 2-epoch cooldown re-runs (16 runs, ~1 h on the GPUs) plus fine-tunes (~40 min); each half's students see only the other half's in-period feeds, so no user's later feed trains the model that scores that user (keeps it inside our rule); read held-out halves with arm_read8. EV about +0.0002 (precedents: teacher-labelled held-out user fold +0.00069 +- 0.00057 / -0.00017 +- 0.00032; pseudo-feeds +0.00028 val, -0.00010 public); P(>= +0.001) about 0.1.
+
+H-B. Public-specific fit, luck and best-of-K selection. P 0.12.
+For: leader minus #2 is 0.5-0.8 SE; for 30-100 near-copies at sd 0.0003-0.0005 the best file sits +0.0006 to +0.0013 above its family mean (ours: +0.00041 over 14 files).
+Against: the leader set its score with 1 entry, so its own optimism is small.
+Legitimate. Test: none needed. The honest gap to the cluster is about +0.001-0.002, and the private order is open.
+
+H-C. Organiser- or Avito-affiliated entry with production inputs. P 0.08.
+For: score frozen since 12 Nov across 3 entries; Avito's stack uses ~200 features and a transformer on up to 10M feeds (habr 1090584).
+Against: five teams on anonymised data are within 0.0028 of it.
+Legitimacy unknowable. Test: none; watch the board.
+
+H-D. Heavier use of validation labels. P 0.06.
+For: trees on train+val +0.0015 +- 0.0007 at seed level; network fine-tune +0.0005 public.
+Against: pool gain about 0; val in the cooldown +0.00014, refit -0.00025; 14K feeds.
+Legitimate, leak-safe (val precedes test). Test: nothing new; EV <= +0.0003.
+
+H-E. A small in-file channel used by many teams. P 0.04.
+For: the forward f5 echo carries real information (section 2).
+Against: every channel reads <= +0.0003 NDCG nested, most at or below placebo; such a channel would look like modelling, not leave a step.
+Allowed by the rules as far as they show (FAQ: no data restrictions); the forward forms break our rule. Test: no GPU time; the harness cannot see < +0.0002.
+
+H-F. Fresh item popularity from outside the files (crawled view counters or logs). P 0.03.
+For: the only information gap of the right size. Popularity inputs are worth 0.0074 NDCG at 1.75 days old, 0.0023 at 5.69, 0.0009 at 11.23; public rows are 9.34 days old (docs/02). Posting time + category isolates 47% of test items within the data (outside_practice/p01).
+Against: ~2.4M pages behind anti-bot; site-side uniqueness unmeasured.
+Grey under the rules (no de-anonymisation clause; confidentiality clause 10.3; organiser reviews the top 10). Breaks our rule: counters include the user's own later view. Test: none; the team should not do it.
+
+H-G. Merge. P 0.03 for the leader (rows stayed and the team count rose on 12 Nov); open for the rising cluster. Legitimate. For us +0.0002 to +0.0008 over the better pool (docs/07; GLOBAL_RECAP_1113); protocol and lab/src/merge_check2.py exist. Owner's call; deadline 8 Dec.
+
+Probing, calendar data and format tricks: 0.04 together.
+
+2. DO THE PROBES SHOW INFORMATION THE BEST FILE LACKS?
+In likelihood, yes; in NDCG, no. On top of FD16P20@m0.4_0.2 (val 0.40293), nested over user halves:
+- same-user later snapshots (leak): +0.0248 +- 0.0030 nats per click, +0.00452 +- 0.00047 NDCG on val, 0 on public;
+- forward f5 echo (leak class): +0.00457 +- 0.00070 nats, -0.00015 +- 0.00038 NDCG (in-sample ceiling +0.00032); all of it is "not clicked" at the bottom of lists;
+- lost history (legal): +0.00115 +- 0.00040 nats, +0.00000 NDCG;
+- all legal as-of channels and other users' later activity: -0.00011 to -0.00038 NDCG, against placebos of -0.00013 to -0.00024.
++0.003 would need 0.009-0.017 nats concentrated at the top. The best legal channel holds about a tenth of that, at the wrong end of the list (data_channels/logs/p2_read_v2.log, p5_lost_history_v2.log).
+
+3. BOTTOM LINE AND NEXT STEP
+The files hold no channel of the gap's size that the best file is missing. The leader most likely has a better model plus some public luck; after selection optimism, the cluster above us shares a modelling edge of about +0.001-0.002. The one input gap of the right size is fresh popularity, which exists only outside the files and breaks our rule.
+With 20 days left:
+1. Stop channel hunting.
+2. Run the cross-fitted transductive distillation screen (~2 h on the GPUs), declared beforehand under the 8-seed rule; build an all-data file only on a pass.
+3. Owner decides on a merge before 8 Dec: the only lever with an expected +0.0002-0.0008.
+4. Snapshot the board daily with entries per row, to catch merges and any new leader entry.

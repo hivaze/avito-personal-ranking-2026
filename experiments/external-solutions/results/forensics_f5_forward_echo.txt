@@ -1,0 +1,24 @@
+f5 value stats val: n unique 1132477 share ==0 0.013
+
+[later in val only] rows covered 0.1081, feeds with >=1 covered 0.8825
+  all      n 150235  target rate: f5 up 0.0200 (n 53577) | same 0.0128 (n 37503) | down 0.0130 (n 59155)
+  gap<6h   n  63004  target rate: f5 up 0.0198 (n 11027) | same 0.0137 (n 33366) | down 0.0102 (n 18611)
+  gap<24h  n  99480  target rate: f5 up 0.0214 (n 25238) | same 0.0131 (n 36364) | down 0.0115 (n 37878)
+  gap>=24h n  50755  target rate: f5 up 0.0186 (n 28339) | same 0.0044 (n 1139) | down 0.0156 (n 21277)
+  sign                   nested +0.00022 +- 0.00027 w=[0.05, 0.05]  in-sample w=0.05 +0.00022
+  delta                  nested -0.00019 +- 0.00030 w=[0.05, 0.1]  in-sample w=0.05 +0.00020
+  sign/gap<24h           nested +0.00027 +- 0.00031 w=[0.1, 0.05]  in-sample w=0.1 +0.00041
+  delta*exp(-gap/12h)    nested -0.00010 +- 0.00017 w=[0.05, 0]  in-sample w=0.05 +0.00010
+
+[later in val+test] rows covered 0.2661, feeds with >=1 covered 0.9826
+  all      n 369803  target rate: f5 up 0.0191 (n 161961) | same 0.0118 (n 42207) | down 0.0145 (n 165635)
+  gap<6h   n  63004  target rate: f5 up 0.0198 (n 11027) | same 0.0137 (n 33366) | down 0.0102 (n 18611)
+  gap<24h  n  99480  target rate: f5 up 0.0214 (n 25238) | same 0.0131 (n 36364) | down 0.0115 (n 37878)
+  gap>=24h n 270323  target rate: f5 up 0.0187 (n 136723) | same 0.0043 (n 5843) | down 0.0154 (n 127757)
+  sign                   nested +0.00003 +- 0.00032 w=[0.02, 0.05]  in-sample w=0.02 +0.00030
+  delta                  nested +0.00021 +- 0.00039 w=[0.1, 0.02]  in-sample w=0.1 +0.00062
+  sign/gap<24h           nested +0.00027 +- 0.00031 w=[0.1, 0.05]  in-sample w=0.1 +0.00041
+  delta*exp(-gap/12h)    nested +0.00001 +- 0.00025 w=[0.05, 0.02]  in-sample w=0.05 +0.00018
+
+test rows covered: public 0.2542 private 0.1472 ; gap<24h: public 0.1273 private 0.1125 ; f5-up rows: public 0.0934 private 0.0438
+val (within-val) rows covered 0.1081 ; f5-up rows 0.0385

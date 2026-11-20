@@ -1,0 +1,100 @@
+# Artefact and recipe locations. The package reads every location from here (avito_ranker/paths.py).
+# A relative entry resolves against `root`, and `root` against the folder of this file: ".." is the
+# repository root. A copy of this file elsewhere (AVITO_PATHS) sets its own `root` or absolute entries.
+root = ".."
+
+[configs]
+recipes = "configs/recipes"                     # model, training, teacher, fine-tune and encoder recipes
+ensembles = "configs/ensembles"                 # one recipe per submission
+
+[data]
+raw = "artifacts/data/raw"                      # competition.zip and the sample submission
+competition = "artifacts/data/competition"      # extracted parquet and embedding tables
+flat = "artifacts/data/flat"                    # flattened arrays per split
+features = "artifacts/data/feats"               # inputs as the lab built them; the gate checks that no cached input is a hard link into quarantine
+feature_cache = "artifacts/feature_cache"       # where 02_build_features.py writes and the ranker reads (hard links into features for the stored inputs)
+quarantine = "artifacts/data/feats_quarantine"  # inputs withdrawn for leakage; the gate checks nobody reads them
+
+[outputs]
+predictions = "artifacts/predictions"           # stored member and pool predictions on val and test; 08_build_submission.py reads members here
+submissions = "artifacts/submissions"
+runs = "artifacts/runs"                         # checkpoints/, logs/ and predictions/ of runs made with this package (steps 4, 6, 7)
+member_logs = "artifacts/members/logs"          # training and fine-tune logs of the final members; the gate reads their input lists
+
+[records]
+gate_outputs = "docs/records/gate-outputs"      # gate outputs stored when the submissions were built; the freeze check compares against them
+
+[members]
+checkpoints = "artifacts/members/checkpoints"   # stored checkpoints of the 36 final members (read by tests)
+
+[exploration]
+position_proxy = "artifacts/exploration/04b_posproxy.txt"   # LightGBM model of the production position, fitted on 400,000 train feeds
+probability = "artifacts/exploration/train_prandom.npz"     # per train feed: p_random (exploration probability), z, gap_share
+
+[teachers]
+dumps = "artifacts/teachers"                       # summed train scores of groups of members: teacher_<group>.npy, member count in teacher_<group>.n
+mean11 = "artifacts/teachers/teacher_mean11.npy"   # teacher of the full-view, popularity-light and popularity-free students: centred mean of 11 click-label members
+mean25 = "artifacts/teachers/teacher_mean25.npy"   # teacher of the _t25 students: centred mean of 25 click-label members
+
+[encoder.corpus]                           # token, target and count arrays of the trajectory-encoder corpora
+all = "artifacts/data/pretrain"                      # train + val + test snapshots; the no_test models read it without its test sequences
+window1 = "artifacts/data/pretrain/win1"             # one corpus per block of train days, with the list of train feeds it scores
+window2 = "artifacts/data/pretrain/win2"
+window3 = "artifacts/data/pretrain/win3"
+
+[encoder.content]                          # item content tables indexed by item id (int8 [n_items, 128]) and their presence masks
+partial = "artifacts/data/pretrain/item_tab.npy"     # items of the histories and of the val and test candidates
+partial_mask = "artifacts/data/pretrain/item_has.npy"
+full = "artifacts/data/pretrain/item_tab2.npy"       # the same plus the train candidates
+full_mask = "artifacts/data/pretrain/item_has2.npy"
+
+[encoder.checkpoints]                      # one trained encoder per corpus and variant (7 to 21 GB each)
+all_id64 = "artifacts/data/pretrain/ckpt_v3.pt"
+all_id128_bias = "artifacts/data/pretrain/ckpt_v4.pt"
+no_test_id64 = "artifacts/data/pretrain/ckpt_v3A.pt"
+no_test_id128_bias = "artifacts/data/pretrain/ckpt_v4A.pt"
+window1_id64 = "artifacts/data/pretrain/ckpt_w1r_v3.pt"
+window1_id128_bias = "artifacts/data/pretrain/ckpt_w1r_v4.pt"
+window2_id64 = "artifacts/data/pretrain/ckpt_w2r_v3.pt"
+window2_id128_bias = "artifacts/data/pretrain/ckpt_w2r_v4.pt"
+window3_id64 = "artifacts/data/pretrain/ckpt_w3r_v3.pt"
+window3_id128_bias = "artifacts/data/pretrain/ckpt_w3r_v4.pt"
+
+# Raw encoder scores per content table, scoring target and model. "{key}" stands for the score
+# name: fe, new, fe_noid, hmax32, hmax8, idmax32 (score keys: see
+# avito_ranker/features/trajectory_encoder/score.py). The ranker's encoder inputs come from the
+# "full" tables; the "partial" ones feed the encoder columns of the fine-tune extras.
+[encoder.scores.full.val]
+no_test_id64 = "artifacts/predictions/pre_v3At2_{key}_val.npy"
+no_test_id128_bias = "artifacts/predictions/pre_v4At2_{key}_val.npy"
+all_id64 = "artifacts/predictions/pre_v3t2_{key}_val.npy"
+all_id128_bias = "artifacts/predictions/pre_v4t2_{key}_val.npy"
+[encoder.scores.full.test]
+all_id64 = "artifacts/predictions/pre_v3t2_{key}_test.npy"
+all_id128_bias = "artifacts/predictions/pre_v4t2_{key}_test.npy"
+[encoder.scores.full.window1]
+window1_id64 = "artifacts/data/pretrain/winscores/pre_w1r_v3_{key}_win1.npy"
+window1_id128_bias = "artifacts/data/pretrain/winscores/pre_w1r_v4_{key}_win1.npy"
+[encoder.scores.full.window1_sample]
+all_id64 = "artifacts/data/pretrain/winscores/pre_v3t2_{key}_win1_s60000.npy"
+all_id128_bias = "artifacts/data/pretrain/winscores/pre_v4t2_{key}_win1_s60000.npy"
+[encoder.scores.full.window2]
+window2_id64 = "artifacts/data/pretrain/winscores/pre_w2r_v3_{key}_win2.npy"
+window2_id128_bias = "artifacts/data/pretrain/winscores/pre_w2r_v4_{key}_win2.npy"
+[encoder.scores.full.window2_sample]
+all_id64 = "artifacts/data/pretrain/winscores/pre_v3t2_{key}_win2_s60000.npy"
+all_id128_bias = "artifacts/data/pretrain/winscores/pre_v4t2_{key}_win2_s60000.npy"
+[encoder.scores.full.window3]
+window3_id64 = "artifacts/data/pretrain/winscores/pre_w3r_v3_{key}_win3.npy"
+window3_id128_bias = "artifacts/data/pretrain/winscores/pre_w3r_v4_{key}_win3.npy"
+[encoder.scores.full.window3_sample]
+all_id64 = "artifacts/data/pretrain/winscores/pre_v3t2_{key}_win3_s60000.npy"
+all_id128_bias = "artifacts/data/pretrain/winscores/pre_v4t2_{key}_win3_s60000.npy"
+[encoder.scores.partial.val]
+no_test_id64 = "artifacts/predictions/pre_v3A_{key}_val.npy"
+no_test_id128_bias = "artifacts/predictions/pre_v4A_{key}_val.npy"
+all_id64 = "artifacts/predictions/pre_v3_{key}_val.npy"
+all_id128_bias = "artifacts/predictions/pre_v4_{key}_val.npy"
+[encoder.scores.partial.test]
+all_id64 = "artifacts/predictions/pre_v3_{key}_test.npy"
+all_id128_bias = "artifacts/predictions/pre_v4_{key}_test.npy"

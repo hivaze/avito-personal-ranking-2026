@@ -1,0 +1,16 @@
+items with a decoded posting time: 39407913
+train: feeds 200000 | history items with a known posting time (mean share) 0.438 | days from the newest posting time among history items to the feed: q05 0.19 q25 0.99 median 2.51 q75 6.59 | share < 1 day 0.253 < 2 days 0.437 < 0.25 day 0.066
+train: newest 32 events: mean share of e1 0.5666, of source s1 0.4017 | whole history e1 share 0.5147
+val: feeds 14423 | history items with a known posting time (mean share) 0.519 | days from the newest posting time among history items to the feed: q05 0.50 q25 1.96 median 3.94 q75 7.11 | share < 1 day 0.129 < 2 days 0.255 < 0.25 day 0.025
+val: newest 32 events: mean share of e1 0.5817, of source s1 0.4244 | whole history e1 share 0.4595
+   val feeds of MSK day 20718 (Sep 21): newest history posting time, days before the feed: q05 0.50 median 3.64; newest posting date (Sep, MSK) q95 20.98 max 21.95
+   val feeds of MSK day 20720 (Sep 23): newest history posting time, days before the feed: q05 0.49 median 4.58; newest posting date (Sep, MSK) q95 22.95 max 23.96
+test: feeds 28595 | history items with a known posting time (mean share) 0.517 | days from the newest posting time among history items to the feed: q05 0.57 q25 2.05 median 4.88 q75 9.80 | share < 1 day 0.110 < 2 days 0.240 < 0.25 day 0.021
+test: newest 32 events: mean share of e1 0.5838, of source s1 0.4274 | whole history e1 share 0.4628
+   test feeds of MSK day 20722 (Sep 25): newest history posting time, days before the feed: q05 0.50 median 4.64; newest posting date (Sep, MSK) q95 24.95 max 25.91
+   test feeds of MSK day 20723 (Sep 26): newest history posting time, days before the feed: q05 0.49 median 4.78; newest posting date (Sep, MSK) q95 25.99 max 26.98
+   test feeds of MSK day 20724 (Sep 27): newest history posting time, days before the feed: q05 0.54 median 4.96; newest posting date (Sep, MSK) q95 26.91 max 27.98
+   test feeds of MSK day 20725 (Sep 28): newest history posting time, days before the feed: q05 0.73 median 5.06; newest posting date (Sep, MSK) q95 27.81 max 28.88
+CORRECTION (2026-11-16, same author): the "(Sep X)" labels and the two "newest posting date (Sep, MSK)" numbers on the per-day lines above are 1 too low
+(the run used day - 20697; MSK day 20702 = Sep 6, so Sep = day - 20696). Correct reading: day 20718 = Sep 22, 20720 = Sep 24 (val); 20722..20725 = Sep 26..29 (test);
+newest posting dates: add 1.00 to each printed value (e.g. val Sep 22: q95 21.98, max 22.95). The gap columns (days before the feed) are unaffected. The script is fixed.

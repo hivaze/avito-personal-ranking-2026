@@ -1,0 +1,73 @@
+=== BLOCK 0  2026-11-15T18:26:36Z  (adversarial review of the refill replay; written BEFORE any labelled number of mine; I have read the study's report and its numbers) ===
+RULE under review (not mine, unchanged): nn_x/w5/logs/E_kd_predeclared.txt block 2026-11-15T17:41:25Z. OPEN iff rho >= 0.5 with the numerator at z >= 2 on the holdout AND the same sign on val;
+ CLOSE iff the upper 95% bound of the numerator is below 25% of the denominator; otherwise UNDECIDED.
+MY VERDICT RULE (confirmed = true / false), fixed now:
+ confirmed = TRUE iff ALL of: (R1) no leak / provenance violation in the study's recovered events (every recovered row belongs to a feed of the SAME user_id with a STRICTLY smaller timestamp; no user_id 0 feed in a read set);
+   (R2) my own inference + my own statistics on the STUDY's recovered events reproduce its verdict-row numerator and denominator (design 1, holdout, 4-pool) within 0.0003 each, and the rule read on my numbers gives the same label (UNDECIDED);
+   (R3) the rule read on MY OWN alignment (own aligner, own read set, design 1 analogue) does not give a decided label opposite in kind to the study's claim, i.e. does not read OPEN or CLOSE by the rule's thresholds;
+   (R4) no artefact control shows that the numerator is produced by something other than the recovered events' content (see controls) to an extent that would change the label.
+ Otherwise confirmed = FALSE and I state the corrected label. If R2 holds and R3 reads OPEN or CLOSE on my alignment: confirmed = FALSE with corrected verdict "UNSTABLE: the label depends on the alignment implementation", not OPEN / CLOSE.
+ The second clause of the rule ("one more replay design at most, then closed") is the lead's call; I give an opinion [I], it does not enter confirmed.
+
+OWN CODE (nothing of nn_x/w12/seg/refill/*.py is imported; nn_x/w5/model.py is imported read-only for Ranker / dense_features; src/metrics.py only as a cross-check of my own NDCG):
+ qualifying : H = 256, user_id != 0, >= 1 feed of the same user_id in train / val / test with a strictly smaller timestamp. Holdout = the 30,000 feeds of train.py --holdout 30000 (rng 12345 on p_random > 0.9 and M >= 50).
+ event key  : (item_id, event_type, event_source). Stored order index 0 = newest (to be re-established from the data, label-free).
+ MY ALIGNER (different from the study's LCS + swap repair): anchors = keys that occur exactly once in both sequences, made monotone by a longest increasing subsequence (patience alignment);
+   inside each gap between consecutive anchors (and before the first / after the last) events of equal key are paired as multisets (order-free, so tie swaps need no repair); unpaired events of the earlier snapshot = old-only.
+   A snapshot is used iff >= 16 anchors and >= 8 paired events that are consecutive in both sequences (my criterion A). Snapshots merged from the most recent to the oldest into one union timeline; old-only events of a gap are placed after
+   the timeline's own events of that gap (no order information inside a gap).
+   T_mine = old-only events placed after the last stored event, counted only if the deepest paired stored event has index >= 248 (my criterion B). U_mine = all old-only events, newest first.
+ 300-feed checks (label-free): random 300 qualifying feeds per set (holdout, val, test), numpy rng seed 4242 on the sorted qualifying list. Reported: (i) provenance (same user, strictly earlier, for ALL recovered rows of the study's files, not only 300);
+   (ii) aligner-free order test for the study's T events: share of T events for which a key common to the stored history and the source snapshot (unique in both) sits at a DEEPER position of the source snapshot than the T event (should be ~0 if T is older than
+   every stored event); (iii) overlap of the study's T / U with mine (key multisets, first 128); (iv) positive check with my aligner (cap pretended 192, stored history and snapshots cut to 192, truth = stored 193-256):
+   exact position / is a true event 193-256 / is stored among the newest 192 (placement error) / not stored at all.
+ MEMBERS: the study's four (held-out, args.holdout == 30000 asserted from each checkpoint): distilled w5_e10_kd05w192_s951, w5_e10_kd05t25w192_s951; hard-label w5_e10_base_s951, w5_e10_base_s952. Pool = member-equal mean of per-feed score z (sd + 1e-6).
+ INFERENCE: fp32, eval mode, own subset loader and own batching (feeds sorted by M, candidate budget per batch; history given per pass as explicit event lists; padded slots masked); holdout feeds get dom = [1 - p_random, p_random, 0], val feeds none
+   (model default), as holdout_eval.py / the stored val predictions. xt inputs unchanged in every pass (same lower-bound caveat as the study). Fidelity gate (label-free): pass a vs stored predictions flat corr >= 0.9999 per member and set.
+   Only QUALIFYING feeds are scored (no all-capped passes). Device: GPU N under the lane lock if a slot exists (<= 3 compute processes, >= 60 GB free), else CPU.
+ PASSES (suffix s = the study's recovered events from its align_*.npz; suffix m = my aligner's; T / U = the two recovery sets; n = min(recovered, 128)):
+   a      stored 256.                         b      newest 128 (H = 128).
+   cTs, cUs, cTm, cUm   newest 128 + first n recovered events in slots 129..128+n (H = 128 + n).
+   amTs, amUs           stored newest 128 + n (length-matched stored reference).
+   eTs, eUs             placebo with MY donor draw (rng seed 777; donor = uniform among read-set feeds of the same set of another user_id with >= n recovered events; donor's first n events).
+  Artefact controls (task item 4), on the study's events:
+   bLT, bLU   LENGTH-INPUT control: history = newest 128 (mask unchanged) but the H the dense inputs see = 128 + n. Isolates log(1+H) and count/H.
+   cNT, cNU   METADATA-ONLY control: as c, but the recovered events lose their item embedding (hemb_ok false, vector 0; type / source / category / position kept), the review's embedding-only control. c - cN = content of the recovered events.
+   cXT, cXU   NO-RESTORE control: as c, but recovered events whose item_id occurs among the feed's stored events 129-256 (the part pass b removed) are dropped (remaining events compacted, H = 128 + n').
+              Motive: pass b removes stored events 129-256; if recovered events are other events on the SAME items, pass c partly restores what b removed and the numerator overstates what the events would add ON TOP of the stored 256.
+              The label-free share of such events is reported first.
+ STATISTICS (own code): per-feed NDCG (binary gain, log2 discount, pessimistic ties, 1 for feeds without positives; cross-checked against src/metrics.py), paired per feed, SE cluster-robust by user_id; ratio intervals by MY bootstrap
+   (4,000 resamples of users, numpy seed 2026, percentile 95%). "Upper 95% bound of the numerator" = mean + 1.96 SE. Rule thresholds as written.
+ READ SETS: study-events passes on the study's read sets (R_T: its A, B, n_T >= 1; R_U: its A, n_U >= 1), taken from its align files; my-events passes on my own read sets (my A, B, n >= 1).
+ ROWS I WILL QUOTE AS THE CHECK OF THE VERDICT: (V1) design 1, study events, holdout, 4-pool, literal rho; val sign. (V2) the same with my events on my read set. Design 2 (U) rows likewise as companions. Per-member and family rows descriptive.
+ ARTEFACT READS: bL - b (should be ~0 if length inputs do not produce the numerator); cN - b against c - b; cX - b against c - b with the share of dropped events; e - b and c - e with my donors. Descriptive; an artefact is "material" for R4 only if
+   the control removes the numerator's sign or more than half of it at >= 2 SE of the paired difference (c - control).
+ SIZE: plain form, mean effect over the read set x label-free share of feeds in the read set (val / public-like / private-like test days, boundary 1790497920), from my numbers; compared with the study's bucketed form.
+ PARITY (label-free): share of capped, user_id != 0 train feeds with a strictly earlier TRAIN snapshot by train day; the same for val feeds by day with train + earlier val snapshots; test by day; gap distributions.
+ EXPECTATION [I], before any number of mine: R1 holds; my numbers reproduce the study's to about 0.0002 (GPU tie order); verdict UNDECIDED stands; item-restore share 10-30% for U, lower for T; length control ~0.
+ DISCLOSURE: the labelled holdout / val feeds have now been read by the study; my passes are additional looks at the same labels. Controls bL / cN / cX are review instruments, not a new replay design under the rule.
+
+=== BLOCK 1  2026-11-15T18:32:08Z  (still before any labelled number of mine; s1_checks.py and s2_passes.py read no label) ===
+LABEL-FREE RESULTS (out_s1.txt) that fix the remaining choices:
+ - qualifying lists identical to the study's (3,235 / 2,160 / 4,102). Provenance of ALL the study's recovered rows (T and U; 351,504 / 265,847 / 490,246 rows): 0 rows outside their feed's history, 0 of another user_id, 0 from a snapshot that is not strictly earlier
+   (smallest gap 128 s = one timestamp step); holdout rows come from the train table only. R1 holds.
+ - my aligner (patience anchors + multiset gaps) vs the study's LCS: read sets R_T 2,361 vs 2,358 (2,351 common) on the holdout, 1,377 vs 1,383 (1,367) on val; T events 99.3% / 99.0% identical; U events 97.6% / 96.5%. So V2 (my alignment) is NOT an independent
+   sample: it tests the implementation, not the sampling noise. Stated here so that R3 is not over-read.
+ - positive check with my aligner on my 300 feeds reproduces the study's decomposition (holdout: true event 72.8%, placement error 0.5%, not stored 26.7%; val 60.5% / 1.3% / 38.2%).
+ - item-restore share (recovered events whose item occurs among the stored events 129-256): T 4.8% (holdout) / 6.1% (val); U 15.5% / 20.1%. The cX control therefore matters for design 2 mainly.
+ - smoke test (CPU, 40 feeds per set, pass a only): flat corr with the stored predictions 0.999994-1.000000 for the four members on both sets. Fidelity gate PASS.
+CHOICES FIXED NOW:
+ - batches: feeds sorted by M (descending), candidate budget 12,000 per batch on the GPU; history padded to the batch maximum rounded up to 32 (the model has no input that depends on the padded length; the study pads to 64).
+ - padded history slots carry event 0 of the local table and are masked.
+ - cX: feeds whose recovered events are all dropped are scored with the newest 128 only (equal to pass b by construction) and stay in the read set.
+ - placebo donors: one rng (seed 777) per set, design T first then U, uniform among read-set feeds of another user_id with at least as many (capped at 128) recovered events of the same design.
+ - one process on GPU N under the lane lock (blocking flock with a 30-minute limit, <= 3 compute processes and >= 61,440 MiB free at launch, lock held until the process is visible in nvidia-smi); if no slot in 30 minutes the same script runs on CPU
+   (the smoke test shows the whole job fits on CPU, so no subset would be needed).
+ - s3_read.py (labels) is run once after the scores exist; statistics as block 0. Anything added after that read is marked POST-HOC.
+
+=== BLOCK 2  2026-11-15T18:40:18Z  (AFTER my labelled read of 18:37:33Z; nothing in blocks 0-1 changed; s3_read.py was run once) ===
+ - Result of the declared read: V1 = study's verdict row reproduced exactly; V2 UNDECIDED; R1-R4 hold -> confirmed = TRUE by block 0.
+ - POST-HOC additions (marked as such in the report; none is a decision statistic):
+   s1b_order_parity.py (label-free): order test restricted to common keys stored at index >= 200 (a repeated key whose old occurrence left the window is not an ordering error); lag-matched train coverage.
+   s4_posthoc.py (labels): (i) the study's stored scores of the passes I did NOT re-run (d1, d2, dP, g, b192, c192) read with MY statistics code, to check its arithmetic only; (ii) why family sub-rows move between the study's events and mine
+   (feeds with identical vs different recovered events); (iii) c - b by fill bucket with my code.

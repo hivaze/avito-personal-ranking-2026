@@ -1,0 +1,66 @@
+=== famS (family S of nn_x/w12/cb/PREDECLARED.txt, ROUND-2 PLAN), written 2026-11-15 01:25Z BEFORE any famS arm is trained ===
+Rules applied unchanged: SCREEN (PROMISING iff nats >= 0.0016 on val AND holdout), MEMBER RULE (0.9 z(W16) + 0.1 z(X), val >= 0, holdout >= 0, pooled z >= 2),
+train-side selection of the tree count (cbx.run_arm), CPU only, 12 threads, at most 2 heavy processes.
+Arms (data xm, 177 features, category_id native, target = centred teacher_mean11 logit unless stated, selection metric = click NDCG of the train-side split):
+  S1   RMSE d8 lr 0.1 l2 5, 3000 trees (no early stop: od_wait = iterations, the best iteration of the selection curve is used)        [spec arm]
+  S1f  fast twin of S1: lr 0.3, 1000 trees. Reason: depth 10 costs 8.0 s per tree and the 512-column embedding block about 5 s per tree (infra timing),
+       so S2 / S3 cannot be run at lr 0.1 x 3000 inside the 5-hour budget. S2 / S3 are run at the fast setting and compared with S1f (same lr, same cap),
+       and S1f is compared with S1 to say what the fast setting costs.
+  S3   S1f + raw-embedding block "raw" = candidate vector (128) + element-wise products of the candidate vector with the unit-normalised user, mean-history and
+       last-5-history vectors (3 x 128) = 512 numeric columns; variant "pca" = 32-dim PCA of the candidate vector (fitted on train fit rows, no label) + the
+       products in that PCA basis (3 x 32) = 128 columns, if time allows.
+  S2   depth 10 (or Depthwise with min_data_in_leaf) on the better input set of S1f / S3, fast setting, capped by wall time (cap stated in the report).
+  S4   QuerySoftMax, Newton leaves, label 0.5 y / sum(y) + 0.5 softmax(teacher_mean11), tree count capped by wall time (stated).
+       YetiRank on the teacher logit only if time allows (24 s per tree expected).
+Comparisons between arms: paired per feed on val AND holdout (cbx.Evaluator.compare) and the nats screen; "better" input set / shape = > 0 on both witnesses and pooled z >= 2,
+  otherwise the cheaper one is kept.
+BEST S ARM (for the 3 seeds and the bundle): chosen WITHOUT val / holdout labels = the arm with the highest train-side selection click-NDCG at its selected iteration,
+  among arms whose two extra seeds fit in the remaining budget; differences below 0.0005 on the selection split count as ties and the cheaper arm is taken.
+BUNDLE declared now: member-equal z-mean of the 3 seeds of the best S arm (one X). Extra read declared now: bundle(best S arm seed 0, ts_lr020_s0) versus each alone,
+  plus a 3-covariate conditional logit [z_W16, z_S, z_hard] (joint nats) to say whether the two carry the same pool-independent information.
+Expectation written before the runs (audit 1.3, path A): no S arm is PROMISING (nats below 0.0016 on at least one witness), none passes the member rule;
+  level val 0.385 to 0.388; stage-2 gate (val >= 0.3900) not met.
+
+=== addendum 2026-11-15 03:15Z, written BEFORE any full-scale S2 / S4 arm (S1 and S3 still running; only S1f read on val / holdout) ===
+Pilots (15,000 feeds, lr 0.3, 300 trees, paired at 300 trees against RMSE d8; not arms): block forms pca / cand / raw all about +0.0005 val / +0.001 holdout and
+  indistinguishable -> S3 at full scale = pca (128 columns), the 512-column raw form is not run at full scale; Depthwise d8 -0.0004 / -0.0008; symmetric depth 10
+  +0.0006 / +0.0016 at 3.3x cost per tree; QuerySoftMax on the KD-mix label -0.0085 / -0.0054; QuerySoftMax on the PURE soft label softmax(teacher) +0.0010 / +0.0018 at 2.0x cost.
+Consequences declared now:
+  S4  = QuerySoftMax Newton, label 0.5 y / sum(y) + 0.5 softmax(teacher_mean11) (the spec arm), lr 0.3, cap 35 min of fitting.
+  S4b = QuerySoftMax Newton, label softmax(teacher_mean11) only (kd_w 1.0), lr 0.3, cap 55 min: added because of the pilot; it is a candidate for the best S arm.
+  S2  = symmetric depth 10 (not Depthwise), lr 0.3, cap about 45 min, on the 177 features (the pca block would make it 5x the cost of S1f); compared with S1f at equal rounds.
+  Best S arm for the 3 seeds: rule unchanged (highest train-side selection NDCG among arms whose two extra seeds fit; ties below 0.0005 -> the cheaper arm).
+  The two extra seeds use the same tree cap as seed 0 of that arm.
+
+=== addendum 2, 2026-11-15 03:53Z (second run of the task after the account-limit cut), written BEFORE S4, S4b and S2 are read on val / holdout
+    (read so far on val / holdout: S1f, S1, S3 and the pilots; S4 / S4b only by their train-side selection curves at 150 / 100 trees) ===
+State: S1 0.38453 / 0.30762 (sel 0.31133, 135 min), S1f 0.38404 / 0.30737 (sel 0.31165, 55 min), S3 pca 0.38353 / 0.30726 (sel 0.31200, 75 min). Nothing PROMISING.
+Declared now:
+  (a) Best S arm for the seeds: rule unchanged (highest train-side selection NDCG; arms within 0.0005 of the top are tied and the cheapest is taken; equal cost -> the higher selection NDCG).
+      S1 (135 min per seed) is NOT eligible: two more seeds do not fit in the remaining budget (about 3 hours, two slots). S3 / S1f / S2 / S4 / S4b are eligible.
+  (b) Tree cap of the extra seeds = the number of trees BUILT by seed 0 of that arm (T0), given as --iters T0 (the wall-time budget only as a guard), so the three seeds have the same number of trees
+      whatever the machine load; each seed uses its own best train-side selection iteration within T0.
+  (c) Plateau information (the owner's question how good a CatBoost model can get): if seed 0 of the best arm was still rising when its budget stopped it, seed 1 is run with about 2 x T0 trees.
+      Its BUNDLE member is the model truncated at T0 trees (prediction at its best selection iteration among the first T0 trees: identical to a T0-tree run of that seed, boosting is sequential);
+      the untruncated model is reported as a separate line "<tag> long" (level and nats), never as a bundle member and never chosen against the truncated one on val / holdout.
+  (d) If a slot is free after the seeds: YetiRank on the centred teacher logit (S4 "if time allows"), lr 0.3, cap about 40 min, compared with S1f and S4b at equal rounds (information only).
+  (e) The EXTRA joint read (student + hard-label tree) is repeated for the best arm (seed 0) and for its 3-seed bundle against ts_lr020_s0.
+  (f) Following the lead's notice of 02:19Z: nats and the member-rule statistic are also reported on val M >= 50 alone (fs_m50.py), and the S3 block columns are compared label-free
+      between xm, holdout, val and test rows (fs_dist.py). No S arm builds a label-aware or count statistic, so no lag construction applies; the 177 inherited features keep their known freshness caveat.
+
+=== decision log 2026-11-15 04:31Z (best S arm for the seeds; label-free, rule as written above) ===
+Train-side selection NDCG at the selected iteration: S3 0.31200 (75 min) | S1f 0.31165 (55 min) | S1 0.31133 (135 min, not eligible) | S4b 0.31110 (55 min) | S4 0.30731 (35 min) |
+  S2 0.30778 at 150 of about 310 trees (still running; it cannot reach the tie band at its cap, to be checked when it ends).
+Top = S3; inside the 0.0005 tie band: S3 and S1f; the cheaper one = S1f -> BEST S ARM = S1f (RMSE on the centred teacher logit, depth 8, lr 0.3, T0 = 886 trees).
+S1f was still rising at its cap (selection 0.31098 at 700 trees, 0.31165 at 858) -> by addendum 2 (c) seed 1 runs 2 x T0 = 1772 trees (tag s1f_rmse_d8_lr030_s1long, launched 04:31Z);
+  its bundle member is the truncation at 886 trees (tag s1f_rmse_d8_lr030_s1). Seed 2: --iters 886 (tag s1f_rmse_d8_lr030_s2, queued behind S2).
+Known at this moment and NOT used: S4b reads val 0.38456 / holdout 0.30861 in its run log, the highest level of the family; on the selection split it is 0.0009 below the top, outside the tie band,
+  so the rule does not take it. It is reported as an arm; its seeds and a longer run are listed under "not run".
+
+=== closing log 2026-11-15 06:36Z (third run of the task, 06:01Z to the end; no rule changed, no new fit started) ===
+Read as declared: seed 1 of S1f at T0 = 886 trees (truncation of the 1,761-tree run), seed 2, the 3-seed bundle with nats.py (three val / hold pairs), the long run as a separate line,
+  YetiRank on the teacher logit (117 trees, information only), the joint reads of the best arm (seed 0) and of the 3-seed bundle with ts_lr020_s0.
+Reads added by the third run, none of them a decision: nats.py itself on every arm (identical to the wrapper's lines); paired NATS(X) - NATS(ts_lr020_s0) (fs_natsdiff.py);
+  staged levels of the long run at 300..1,761 trees and their paired differences; S4y against S1f / S4b at equal rounds and at equal wall time; the bundles at w 0.05 / 0.2 (reported, never chosen).
+Outcome against the expectation written at 01:25Z: as expected. No S arm and no declared bundle is PROMISING (largest NATS +0.00074 val / +0.00048 holdout, bar 0.0016 on both); none passes the
+  member rule (pooled z -1.05 to +0.06; bundle -0.52); level val 0.3846 (expected 0.385 to 0.388); stage-2 gate not met.

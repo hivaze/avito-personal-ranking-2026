@@ -1,0 +1,19 @@
+=== 2026-11-15T22:07:56Z DOMTOK val read on CPU (synthesiser), written BEFORE any prediction of this check exists ===
+What: the 16 all-data wide students of FD16P20 (w5_fd10_kd05w192_s951-958, w5_fd10_kd05t25w192_s951-958; kept checkpoint <v>.pt) are re-predicted on VAL on CPU (fp32)
+  with the inference domain token changed. Settings, both fixed here, no third one: PROD = production token on every feed (model.infer_domain = 0);
+  MIX = the even mix of the production and the random-like token (dom.weight[1] <- 0.5 (dom.weight[0] + dom.weight[1])). The stored setting is the random-like token (infer_domain = 1).
+  The 4 popularity-light students and the fine-tuned branch are NOT touched (stored files).
+Files read: TO' = 0.8 z(mean of per-feed z of the 16 re-predicted members) + 0.2 z(popularity-light pool, stored); FILE' = 0.5 z(FT branch, stored preds/ens_FD16P20kd_ft_val.npy) + 0.5 z(TO').
+  Reference = the same construction from the stored train-only val files (must reproduce final val 0.40271). Path check: CPU re-prediction with the stored token on 4 members against their stored files.
+Witnesses (paired per feed, 14,423 val feeds): final val, pmix-private, pmix-public, val M<50, val M>=50; information only: TO-branch delta, feeds whose positives are all cold / none cold.
+RULE (file level, per setting; this is the val part of the staleness-family rule of reports/TRICKS_1115/int_weak.md proposal DOMTOK; the stale-val and test parts need GPU inference and stay with the lead):
+  CONTINUE (to test + stale-val inference and one public slot) iff val delta >= 0 AND pmix-private delta >= +1 SE AND val M<50 delta >= -1 SE.
+  CLOSE row 157 under the 11-15 evidence policy iff BOTH settings read pmix-private delta <= 0 OR val delta <= -1 SE.
+  Anything else: INCONCLUSIVE; no file is built from it, the row keeps the status "inference-only test read on val, not supported".
+  If both settings read CONTINUE the one with the larger pmix-private z goes on. Things tried: 2 settings, 1 member set, 1 look.
+Power, stated before the read: file-level paired SE is expected at 0.0002 (val) / 0.0003 (pmix-private) from the half-size of the 12-pool hard-label read (val +0.00031 +- 0.00035, pmix-private +0.00052 +- 0.00052,
+  nn_x/w12/weak_1115/out/domtok_read.txt); at that expected effect (file +0.00015 val, +0.00026 pmix-private) CONTINUE has probability about 0.4; under no effect about 0.13 per setting.
+  A CONTINUE is therefore a screen, not evidence of a gain.
+
+=== 2026-11-15T22:10:37Z AMENDMENT, written after the first path-check line only (member s951 base: corr 0.9999997, member val NDCG CPU 0.39959 vs stored 0.39951; no PROD / MIX number read) ===
+The CPU fp32 path differs from the stored GPU bf16 files by up to 0.0001 NDCG per member. REFERENCE is therefore the CPU re-prediction with the STORED token for all 16 members (same code path as the two settings; third process, DOMTOK_ARMS=base); the reference built from stored files is reported next to it as the path difference. Rule, settings and witnesses unchanged.

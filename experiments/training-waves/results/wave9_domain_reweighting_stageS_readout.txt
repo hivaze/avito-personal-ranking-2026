@@ -1,0 +1,14 @@
+== STAGE S read-out dw3 (2026-11-13T14:01:43Z): ['w9_dw3_s23', 'w9_dw3_s24'] vs ['w9_base_s23', 'w9_base_s24'] (nn_x/w9/dw3, 2-epoch A_BASE + HYG; LAST checkpoint primary, selected reported; rule nn_x/w5/logs/E_dw3_predeclared.txt stage S)
+[last] seed 23: base val 0.39377 hold 0.31738 | dw3 val 0.39347 hold 0.31807 | d val -0.00030 d hold +0.00069
+[last] seed 24: base val 0.39346 hold 0.31757 | dw3 val 0.39234 hold 0.31692 | d val -0.00111 d hold -0.00065
+[last] POOLED member: val -0.00071+-0.00047 (z -1.52; SE_cal 0.00053) | holdout +0.00002+-0.00027 (z +0.08; SE_cal 0.00029) | pmix -0.00070+-0.00070 (z -1.00) | slices M<50 -0.00086 (z -1.0) M>=50 -0.00060 (z -1.2) Tue -0.00007 (z -0.1) Thu -0.00141 (z -2.1)
+[last] DIVERSITY (member, val rank-z): rho_x (arm-base cross-seed) 0.97848 | rho_bb (base-base) 0.97981 | margin +0.00133 | arm-arm 0.97879 | same-seed arm-base 0.98597 | holdout: rho_x 0.97905 rho_bb 0.98049 margin +0.00144
+[last] 2-member POOL dw3 vs base: val -0.00070+-0.00055 | holdout -0.00009+-0.00032
+[sel] seed 23: base val 0.39377 hold 0.31738 | dw3 val 0.39347 hold 0.31807 | d val -0.00030 d hold +0.00069
+[sel] seed 24: base val 0.39346 hold 0.31757 | dw3 val 0.39234 hold 0.31692 | d val -0.00111 d hold -0.00065
+[sel] POOLED member: val -0.00071+-0.00047 (z -1.52; SE_cal 0.00053) | holdout +0.00002+-0.00027 (z +0.08; SE_cal 0.00029) | pmix -0.00070+-0.00070 (z -1.00) | slices M<50 -0.00086 (z -1.0) M>=50 -0.00060 (z -1.2) Tue -0.00007 (z -0.1) Thu -0.00141 (z -2.1)
+[sel] DIVERSITY (member, val rank-z): rho_x (arm-base cross-seed) 0.97848 | rho_bb (base-base) 0.97981 | margin +0.00133 | arm-arm 0.97879 | same-seed arm-base 0.98597 | holdout: rho_x 0.97905 rho_bb 0.98049 margin +0.00144
+[sel] 2-member POOL dw3 vs base: val -0.00070+-0.00055 | holdout -0.00009+-0.00032
+gates (LAST ckpt): (s1) val >= -0.0010 OK; (s2) holdout >= -0.0005 OK; (s3) no val slice < -2 SE NO; (s4) pmix >= -1 SE OK; (s5) member margin >= +0.003 NO
+VERDICT stage S dw3: STOP (futility) (val -0.00071 +- 0.00047, holdout +0.00002 +- 0.00027, margin +0.00133, pmix -0.00070)
+registry: w9_dw3_s23/24 vs w9_base (2-epoch A_BASE + HYG pair in nn_x/w9/dw3, LAST ckpt, pre-declared stage-S rule): val -0.00071 +- 0.00047 (z -1.5), holdout +0.00002 +- 0.00027 (z +0.1), pmix -0.00070, M<50 -0.00086 M>=50 -0.00060 Tue -0.00007 Thu -0.00141, member margin +0.00133 (rho_x 0.9785 rho_bb 0.9798), pool val -0.00070 / hold -0.00009; selected ckpt val -0.00071 / hold +0.00002 -> STOP (<repo>/nn_x/w9/dw3/logs/s_readout_dw3.txt)

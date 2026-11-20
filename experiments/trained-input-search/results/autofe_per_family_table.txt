@@ -1,0 +1,91 @@
+# Copy of lab/nn_x/w12/autofe/analyze_out.txt: stage 1 of the automatic feature search on top of the 8-student file W8, per operator family: counts of nested val z above 2 or below -2 for the linear and the binned tilt, against 397 label-free noise features (row CTRL), and the holdout signs.
+total 12064 const 50
+| family | n | lin z>2 | lin z<-2 | lin mean z (sd) | lin pass* | bin z>2 | bin z<-2 | bin mean z (sd) | bin pass* | hold lin <0 / =0 / >0 | corr(val z, hold z) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| A_feedrel | 330 | 4 (0.012) | 16 | -0.29 (0.99) | 0 | 3 (0.009) | 10 | -0.35 (0.95) | 0 | 186 / 18 / 126 | -0.04 |
+| B_mono | 275 | 5 (0.018) | 15 | -0.28 (1.04) | 0 | 0 (0.000) | 10 | -0.45 (0.95) | 0 | 159 / 11 / 105 | -0.01 |
+| C2_pair | 4620 | 49 (0.011) | 165 | -0.24 (0.98) | 4 | 13 (0.003) | 216 | -0.43 (0.91) | 1 | 2668 / 293 / 1659 | -0.04 |
+| C3_pair | 2243 | 24 (0.011) | 83 | -0.35 (0.99) | 0 | 8 (0.004) | 85 | -0.39 (0.91) | 1 | 1381 / 96 / 766 | -0.05 |
+| CTRL | 397 | 4 (0.010) | 16 | -0.27 (1.03) | 1 | 1 (0.003) | 23 | -0.48 (0.92) | 0 | 243 / 25 / 129 | +0.01 |
+| C_ctx | 204 | 2 (0.010) | 10 | -0.36 (0.98) | 0 | 1 (0.005) | 6 | -0.22 (0.89) | 0 | 140 / 11 / 53 | -0.18 |
+| C_pair | 2805 | 24 (0.009) | 110 | -0.43 (0.96) | 2 | 11 (0.004) | 126 | -0.41 (0.93) | 2 | 1774 / 144 / 887 | -0.10 |
+| D2_grp | 200 | 2 (0.010) | 8 | -0.39 (1.00) | 0 | 1 (0.005) | 6 | -0.47 (0.92) | 0 | 103 / 7 / 90 | -0.02 |
+| D_catgrp | 116 | 2 (0.017) | 10 | -0.48 (1.10) | 0 | 1 (0.009) | 7 | -0.47 (0.96) | 0 | 77 / 5 / 34 | -0.11 |
+| E2_hist | 6 | 0 (0.000) | 0 | -0.40 (0.69) | 0 | 0 (0.000) | 0 | -0.45 (0.55) | 0 | 6 / 0 / 0 | -0.08 |
+| E_hist | 48 | 0 (0.000) | 7 | -0.69 (1.22) | 0 | 0 (0.000) | 2 | -0.47 (0.85) | 0 | 22 / 4 / 22 | -0.26 |
+| F_emb | 62 | 0 (0.000) | 3 | -0.42 (1.09) | 0 | 2 (0.032) | 2 | -0.48 (1.01) | 0 | 45 / 1 / 16 | -0.11 |
+| G_efx | 690 | 6 (0.009) | 44 | -0.45 (1.09) | 1 | 3 (0.004) | 42 | -0.43 (0.99) | 2 | 394 / 18 / 278 | -0.15 |
+| H_het | 18 | 0 (0.000) | 0 | +0.08 (0.67) | 0 | 1 (0.056) | 0 | -0.17 (1.06) | 0 | 9 / 0 / 9 | +0.34 |
+| ALL non-ctrl | 11617 | 118 (0.010) | 471 | -0.33 (0.99) | 7 | 44 (0.004) | 512 | -0.42 (0.92) | 6 | 6964 / 608 / 4045 | -0.06 |
+
+Top 20 by lin_z (val nested delta, se, z | holdout delta, z | w)
+  ratio(f2,ctx_nd_knn_f1)                    C_pair     +0.00068 ±0.00020 z +3.38 | hold -0.00011 z -1.33 | wF -0.02
+  zmul(cos_het3,it_hist_et4_luo)             C2_pair    +0.00075 ±0.00023 z +3.21 | hold -0.00015 z -1.10 | wF +0.02
+  zabs(cos_u,it_hist_et2_luo)                C3_pair    +0.00057 ±0.00019 z +2.97 | hold -0.00007 z -0.76 | wF +0.01
+  kgrk[cold](pre2_hmax32)                    D2_grp     +0.00041 ±0.00014 z +2.94 | hold -0.00001 z -0.19 | wF +0.01
+  zdiff(it_hist_all_luo,ctx_nd_knn_u_dev)    C2_pair    +0.00055 ±0.00019 z +2.91 | hold -0.00012 z -1.25 | wF -0.01
+  zdiff(cos_hall,it_hist_et2_luo)            C_pair     +0.00055 ±0.00019 z +2.91 | hold -0.00010 z -1.08 | wF +0.01
+  rmax(f3,cos_het1)                          C2_pair    +0.00040 ±0.00014 z +2.82 | hold -0.00009 z -1.40 | wF +0.01
+  rmul(seq_cv_pop,ctx_hn_rrw)                C3_pair    +0.00055 ±0.00020 z +2.72 | hold -0.00011 z -1.10 | wF -0.01
+  zmul(cos_het2,it_hist_et4_luo)             C2_pair    +0.00065 ±0.00024 z +2.72 | hold -0.00011 z -0.87 | wF +0.02
+  zdiff(cos_het1,it_hist_et2_luo)            C2_pair    +0.00051 ±0.00019 z +2.70 | hold -0.00010 z -1.08 | wF +0.01
+  ratio(item_norm,ctx_nd_top5u)              C2_pair    +0.00038 ±0.00014 z +2.67 | hold -0.00000 z -0.01 | wF -0.01
+  rdiff(cos_hall,it_hist_et2_luo)            C3_pair    +0.00047 ±0.00018 z +2.56 | hold +0.00002 z +0.21 | wF +0.01
+  ratio(seq_top3,cos_hall)                   C_pair     +0.00048 ±0.00019 z +2.56 | hold +0.00005 z +0.58 | wF -0.01
+  rmin(seq_cv_pop,ctx_hn_margin)             C_pair     +0.00053 ±0.00021 z +2.54 | hold -0.00009 z -0.97 | wF -0.01
+  ratio(item_norm,ctx_nd_knn_u_dev)          C2_pair    +0.00053 ±0.00021 z +2.54 | hold -0.00007 z -0.64 | wF -0.02
+  ratio(cos_het1,item_norm)                  C2_pair    +0.00053 ±0.00021 z +2.54 | hold +0.00001 z +0.10 | wF +0.02
+  zctx(cos_u,cold)                           C_ctx      +0.00053 ±0.00021 z +2.50 | hold -0.00013 z -1.22 | wF +0.02
+  qn(ctx_nd_top5u)                           B_mono     +0.00038 ±0.00015 z +2.49 | hold +0.00002 z +0.18 | wF +0.01
+  ratio(f3,ctx_nd_knn_u)                     C_pair     +0.00027 ±0.00011 z +2.45 | hold +0.00000 z +0.06 | wF -0.01
+  zdiff(ctx_nd_knn_h,pre2_hmax32)            C_pair     +0.00033 ±0.00013 z +2.44 | hold -0.00012 z -1.84 | wF -0.01
+Formal passes (lin):  [('zmul(e_last16,f5)', 0.00057, 2.16, 0.00013, 0.93), ('rmax(cos_u,ctx_nd_knn_h)', 0.00058, 2.06, 6e-05, 0.44), ('rmin(it_hist_all_luo,ctx_nd_knn_f1)', 0.00056, 2.01, 4e-05, 0.3), ('rmin(cos_het1,ctx_hs_k128)', 0.00051, 2.25, 5e-05, 0.4), ('rmin(it_hist_et4_luo,ctx_nd_top5h)', 0.0005, 2.01, 0.00017, 1.22), ('ratio(cos_het1,item_norm)', 0.00053, 2.54, 1e-05, 0.1), ('zmul(it_hist_et4_luo,ctx_nd_knn_h)', 0.00053, 2.12, 6e-05, 0.47)]
+
+Top 20 by bin_z (val nested delta, se, z | holdout delta, z | w)
+  zmax(feed_cat_share,ctx_hn_soft05)         C3_pair    +0.00058 ±0.00020 z +2.88 | hold +0.00008 z +0.61 | wF +0.02
+  zmul(f1,item_norm)                         C_pair     +0.00062 ±0.00023 z +2.71 | hold -0.00013 z -0.98 | wF -0.02
+  zmax(item_norm,seq_cv_invd20)              C3_pair    +0.00069 ±0.00026 z +2.67 | hold -0.00005 z -0.34 | wF -0.02
+  zmul(ctx_nd_top5h,ctx_hn_top1w)            C2_pair    +0.00049 ±0.00019 z +2.60 | hold +0.00002 z +0.17 | wF -0.02
+  zabs(f5,cat_min_hpos)                      C3_pair    +0.00106 ±0.00042 z +2.56 | hold -0.00024 z -1.19 | wF -0.04
+  rmax(f5,it_hist_et1_luo)                   C_pair     +0.00056 ±0.00022 z +2.53 | hold -0.00034 z -1.53 | wF -0.04
+  zdiff(seq_cv_pop,ctx_nd_top5h)             C2_pair    +0.00074 ±0.00030 z +2.51 | hold -0.00009 z -0.55 | wF -0.02
+  rmul(item_norm,ctx_hn_margin)              C3_pair    +0.00052 ±0.00021 z +2.47 | hold -0.00004 z -0.29 | wF -0.01
+  pc6_c                                      F_emb      +0.00045 ±0.00018 z +2.47 | hold -0.00033 z -1.99 | wF -0.01
+  rmax(ctx_nd_max,ctx_hs_e1)                 C_pair     +0.00067 ±0.00028 z +2.42 | hold +0.00011 z +0.61 | wF -0.01
+  rmin(cos_het1,pre2_new_z)                  C2_pair    +0.00057 ±0.00024 z +2.39 | hold -0.00010 z -0.95 | wF +0.01
+  rmul(seq_cv_pop,ctx_hn_margin)             C3_pair    +0.00050 ±0.00021 z +2.38 | hold -0.00002 z -0.23 | wF -0.01
+  rmax(it_hist_et2_luo,ctx_nd_knn_u_dev)     C2_pair    +0.00047 ±0.00020 z +2.37 | hold -0.00000 z -0.01 | wF +0.08
+  zrob(it_hist_et4_luo)                      A_feedrel  +0.00044 ±0.00019 z +2.35 | hold -0.00001 z -0.11 | wF +0.01
+  zrob(f1)                                   A_feedrel  +0.00052 ±0.00022 z +2.35 | hold -0.00014 z -0.85 | wF -0.01
+  zdiff(ctx_nd_knn_h_dev,ctx_hn_bestrk)      C2_pair    +0.00030 ±0.00013 z +2.35 | hold -0.00002 z -0.14 | wF +0.01
+  rmul(it_hist_all_luo,ctx_hn_margin)        C3_pair    +0.00045 ±0.00020 z +2.28 | hold -0.00008 z -0.96 | wF -0.01
+  rmin(f2,cat_cnt_et3)                       C2_pair    +0.00050 ±0.00022 z +2.28 | hold -0.00000 z -0.03 | wF +0.02
+  rdiff(it_hist_all_luo,pre2_hmax32)         C3_pair    +0.00052 ±0.00023 z +2.27 | hold -0.00021 z -1.07 | wF -0.02
+  rmax(seq_max_all,cat_cnt_et3)              C2_pair    +0.00055 ±0.00025 z +2.22 | hold +0.00014 z +0.90 | wF +0.02
+Formal passes (bin):  [('zmul(pc4_c,f3)', 0.00052, 2.12, 5e-05, 0.39), ('zmul(pc4_dh,f3)', 0.00052, 2.12, 5e-05, 0.39), ('zmul(cat_share_all,item_norm)', 0.00065, 2.16, 0.00011, 0.73), ('rmax(ctx_nd_max,ctx_hs_e1)', 0.00067, 2.42, 0.00011, 0.61), ('rmax(seq_max_all,cat_cnt_et3)', 0.00055, 2.22, 0.00014, 0.9), ('zmax(feed_cat_share,ctx_hn_soft05)', 0.00058, 2.88, 8e-05, 0.61)]
+
+Top 15 by holdout lin z:
+  rmax(hf4_sc,f3)                            G_efx      val -0.00032 z -0.92 | hold +0.00053 z +3.24 | wF +0.04
+  zmul(c_n08,it_hist_all_luo)                G_efx      val -0.00000 z -0.00 | hold +0.00044 z +3.01 | wF +0.02
+  zmul(f5,cos_het2)                          C2_pair    val +0.00001 z +0.05 | hold +0.00024 z +2.85 | wF +0.01
+  rmin(f4,ctx_nd_knn_h_dev)                  C2_pair    val -0.00024 z -0.97 | hold +0.00041 z +2.83 | wF +0.02
+  rmax(ctx_nd_knn_h_dev,pre2_new_s)          C2_pair    val +0.00005 z +0.26 | hold +0.00044 z +2.68 | wF +0.04
+  zmul(f4,ctx_hn_margin)                     C_pair     val -0.00025 z -0.94 | hold +0.00037 z +2.63 | wF +0.02
+  rmul(it_hist_et1_luo,ctx_nd_max)           C3_pair    val -0.00014 z -0.44 | hold +0.00052 z +2.63 | wF +0.04
+  rmax(ctx_nd_knn_h_dev,pre2_new_z)          C2_pair    val +0.00006 z +0.29 | hold +0.00043 z +2.61 | wF +0.04
+  kgmf[cold](cat_min_hpos)                   D2_grp     val -0.00009 z -0.63 | hold +0.00018 z +2.60 | wF -0.02
+  zmul(e_sc_cent,it_hist_all_luo)            G_efx      val +0.00001 z +0.05 | hold +0.00033 z +2.38 | wF +0.04
+  rmax(ctx_nd_max,pre2_fe_z)                 C2_pair    val -0.00011 z -0.39 | hold +0.00018 z +2.36 | wF +0.01
+  rmax(ctx_nd_max,pre2_fe_s)                 C_pair     val -0.00011 z -0.38 | hold +0.00018 z +2.35 | wF +0.01
+  zmul(f5,cos_het3)                          C2_pair    val -0.00027 z -0.90 | hold +0.00027 z +2.30 | wF +0.02
+  rmul(f4,maxsim32)                          C3_pair    val -0.00003 z -0.12 | hold +0.00033 z +2.30 | wF +0.02
+  grk(f4)                                    D_catgrp   val +0.00019 z +0.78 | hold +0.00034 z +2.25 | wF +0.02
+
+top-12 inner-CV gain fit A: [('zdiff(f4,seq_max_all)', 16.4), ('log(ctx_hn_top1w)', 13.3), ('sqrt(ctx_hn_top1w)', 13.3), ('sq(ctx_hn_top1w)', 13.3), ('exp(ctx_hn_top1w)', 13.3), ('rk(hf_cov)', 12.9), ('ratio(it_hist_et3_luo,ctx_hn_top1w)', 12.5), ('rmin(ctx_nd_max,pre2_hmax32)', 12.3), ('qn(ctx_hn_top1w)', 12.1), ('log(ctx_hs_mutual)', 11.6), ('sqrt(ctx_hs_mutual)', 11.6), ('sq(ctx_hs_mutual)', 11.6)]
+
+top-12 inner-CV gain fit B: [('ratio(f2,ctx_hn_rrw)', 14.3), ('log(ctx_hn_top1w)', 13.3), ('sqrt(ctx_hn_top1w)', 13.3), ('sq(ctx_hn_top1w)', 13.3), ('exp(ctx_hn_top1w)', 13.3), ('dmed(ctx_hn_top1w)', 12.4), ('rmul(cat_cnt_all,feed_cat_share)', 12.3), ('rmul(cat_share_all,feed_cat_share)', 12.3), ('rk(feed_cat_share)', 11.9), ('gap(feed_cat_share)', 11.6), ('rmin(feed_cat_share,ctx_hs_k128)', 11.1), ('rmin(ctx_nd_knn_f1,ctx_nd_max)', 11.1)]
+
+top-12 inner-CV gain fit F: [('rmin(feed_cat_share,ctx_nd_hcent)', 20.3), ('rmul(seq_top3,feed_cat_share)', 17.7), ('dmed(feed_cat_share)', 15.9), ('zmax(ctx_nd_knn_u,ctx_nd_max)', 15.6), ('exp(ctx_nd_knn_u_dev)', 14.9), ('rmul(seq_max_all,pre2_hmax32)', 14.9), ('dmax(cat_cnt_et1)', 13.3), ('zmax(ctx_nd_knn_f1,ctx_nd_knn_u)', 13.3), ('ratio(seq_cv_pop,ctx_hn_soft05)', 13.2), ('ratio(feed_cat_share,it_hist_et4_luo)', 13.1), ('rmin(cat_cnt_et1,cat_share_all)', 13.0), ('rmin(cat_cnt_all,cat_cnt_et1)', 13.0)]
+overlap of top-40 selections between halves: 7
+share of features with positive inner-CV gain: A 0.02720151502108978 B 0.03684255831970388 both 0.0036153912369802873 corr A,B 0.07326875686314464
+CTRL: positive inner-CV gain A 0.037783375314861464 B 0.05037783375314862 max [9.84830429 8.34466609]

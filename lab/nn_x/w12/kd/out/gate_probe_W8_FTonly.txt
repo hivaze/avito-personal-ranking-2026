@@ -1,0 +1,26 @@
+A file validity checked
+B reproduction: min per-feed Spearman 0.999999
+  w5_e10_kd05w192_s951: 34 train-stage inputs audited, fine-tune n2cpv3s3 audited
+  w5_e10_kd05w192_s952: 34 train-stage inputs audited, fine-tune n2cpv3s3 audited
+  w5_e10_kd05w192_s953: 34 train-stage inputs audited, fine-tune n2cpv3s3 audited
+  w5_e10_kd05w192_s954: 34 train-stage inputs audited, fine-tune n2cpv3s3 audited
+  w5_e10_kd05t25w192_s951: 34 train-stage inputs audited, fine-tune n2cpv3s3 audited
+  w5_e10_kd05t25w192_s952: 34 train-stage inputs audited, fine-tune n2cpv3s3 audited
+  w5_e10_kd05t25w192_s953: 34 train-stage inputs audited, fine-tune n2cpv3s3 audited
+  w5_e10_kd05t25w192_s954: 34 train-stage inputs audited, fine-tune n2cpv3s3 audited
+D val new 0.40087 ref 0.40214 delta -0.00126 +- 0.00043
+   M<50      n=  5893 delta -0.00091 +- 0.00080
+   M>=50     n=  8530 delta -0.00151 +- 0.00048
+[WARN] D slice M>=50 below -2 SE
+   Tue       n=  7543 delta -0.00156 +- 0.00061
+[WARN] D slice Tue below -2 SE
+   Thu       n=  6880 delta -0.00093 +- 0.00062
+   user0     n=   658 delta +0.00201 +- 0.00187
+   has_later n=   117 delta +0.00671 +- 0.00852
+   no_later  n= 14306 delta -0.00133 +- 0.00043
+[WARN] D slice no_later below -2 SE
+   LEAK PROBE has_later - no_later gain: +0.00804 +- 0.00853 (low power on val: few has-later feeds)
+E predicted public 0.3928 private 0.3954 (+-0.003); ref 0.3940 / 0.3967
+F new-vs-ref per-feed Spearman: val mean 0.9933 p5 0.9831 | test mean 0.9942 p5 0.9846
+
+GATE: PASS with WARN  (FAIL 0, WARN 3)

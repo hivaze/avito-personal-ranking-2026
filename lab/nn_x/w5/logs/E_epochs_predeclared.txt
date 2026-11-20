@@ -1,0 +1,23 @@
+E-EPOCHS (training-length dose-response) PRE-DECLARATION — frozen 2026-11-13T09:20:06Z, before any run of these arms existed
+(checked: no logs/w5_e10_e15_*, w5_e10_e20_*, w5_e10_e30_* files, no ckpt).
+Hypothesis: the ranker is under-trained at 10 epochs. Evidence: (i) 2 -> 10 epochs gave single +0.0006 val / +0.0007 hold and
+6-seed ensemble +0.0040 / +0.0031 (COVERAGE_MAP row '2 vs 10 epochs'); (ii) the constant-lr plateau of w5_e10_base_s951 still
+drifts up (holdout 0.3158 @20k -> 0.3173 @75k, val 0.3905 -> 0.3930) before the cooldown adds +0.0035; (iii) GNS B_simple
+4,900-9,400 feeds vs 317 feeds per step (noise-dominated regime -> more steps help); (iv) 15 / 20 epochs were NEVER completed
+(AdamW probes killed at 20k steps; COVERAGE_MAP row '15 / 20 epochs').
+Arms (stage E = E_BASE + HYG, nn_x/w5/lane.sh; WSD cooldown_frac 0.2 scales with the run length):
+  e20 = --epochs 20, seeds 951-954, some GPUs (DECISION arm; 4-seed cooldown = 4 epochs)
+  e15 = --epochs 15, seeds 951/952, GPUs N (information; dose-response point)
+  e30 = --epochs 30, seeds 951/952, GPUs N (information; dose-response point)
+Paired references: w5_e10_base_s<seed> (selected checkpoint primary; @last information).
+RULE e20 (= the stage-E rule of 11-12 19:3x): PASS iff pooled per-seed paired member val > 0 AND holdout > +1 SE AND no val slice
+  (M<50, M>=50, Tue, Thu) < -2 SE AND pmix >= -1 SE (scratchpad e_readout.py e20; 4-member pool reported as information).
+  PASS -> chain_e.sh ARM=e20: n2cpv3 fine-tune of the 4 members (GPUs N, after they are free), copy preds, decide7
+  (T1 = G3 + e20(4), T2 = F10 + F7x + e20(4); qualify iff H > +1 SE, V >= 0, no val slice < -2 SE, pmix >= -1 SE, presub PASS;
+  pick = highest H). Pick-1 replacement only under the frozen rule (H >= 2 SE AND V >= 0); otherwise a qualifying pick is a
+  pick-2 / hedge candidate. FAIL -> e20 closed, nothing adopted.
+RULE e15 / e30: information read-outs only (w5_eval_e_ap1.py <arm> 951,952 mechanics, 2 seeds); they choose the epoch count of a
+  follow-up family ONLY if e20 PASSES (e30 member holdout > e20 member holdout by > +1 SE on the same seeds -> a 30-epoch family
+  may be launched under a NEW pre-declaration). Nothing from e15 / e30 is pooled or adopted by itself.
+Kill gates: none (GPUs otherwise idle; one process per GPU). ETA alone on a GPU (10 ep ~ 95 min): e15 ~2.4 h, e20 ~3.2 h, e30 ~4.8 h.
+Memorisation watch (information): cooldown train loss and the val/holdout gap at the plateau end are reported next to the base.

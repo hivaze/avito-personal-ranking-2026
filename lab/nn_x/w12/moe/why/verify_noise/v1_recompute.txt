@@ -1,0 +1,37 @@
+== (a) member NDCG of the stored (selected) preds vs the json record (val_ndcg = selected; holdout from history at best_step)
+  w5_e10_kd05w192_s951               best_step  97500 | val stored 0.39859 json 0.39859 | hold stored 0.32258 hist@best 0.32260 | hold @last file 0.32219 hist@98350 0.32215
+  w5_e10_kd05w192_s952               best_step  98350 | val stored 0.39968 json 0.39968 | hold stored 0.32298 hist@best 0.32304 | hold @last file 0.32298 hist@98350 0.32304  <-- MISMATCH
+  w5_e10_kd05w192_s953               best_step  97500 | val stored 0.39914 json 0.39914 | hold stored 0.32263 hist@best 0.32263 | hold @last file 0.32258 hist@98350 0.32258
+  w5_e10_kd05w192_s954               best_step  98350 | val stored 0.39931 json 0.39931 | hold stored 0.32247 hist@best 0.32248 | hold @last file 0.32247 hist@98350 0.32248
+  w5_e10_kd05w192_s955               best_step  97500 | val stored 0.39948 json 0.39948 | hold stored 0.32247 hist@best 0.32246 | hold @last file 0.32229 hist@98350 0.32229
+  w5_e10_kd05w192_s956               best_step  97500 | val stored 0.39861 json 0.39861 | hold stored 0.32228 hist@best 0.32229 | hold @last file 0.32227 hist@98350 0.32227
+  w5_e10_kd05w192_s957               best_step  98350 | val stored 0.39866 json 0.39866 | hold stored 0.32251 hist@best 0.32250 | hold @last file 0.32251 hist@98350 0.32250
+  w5_e10_kd05w192_s958               best_step  97500 | val stored 0.39868 json 0.39868 | hold stored 0.32276 hist@best 0.32276 | hold @last file 0.32276 hist@98350 0.32275
+  w5_e10_kd05w192moeffn_s951         best_step  98350 | val stored 0.39927 json 0.39927 | hold stored 0.32285 hist@best 0.32286 | hold @last file 0.32285 hist@98350 0.32286
+  w5_e10_kd05w192moeffn_s952         best_step  98350 | val stored 0.39948 json 0.39948 | hold stored 0.32265 hist@best 0.32261 | hold @last file 0.32265 hist@98350 0.32261  <-- MISMATCH
+  w5_e10_kd05w192moeffn_s953         best_step  98350 | val stored 0.39880 json 0.39880 | hold stored 0.32242 hist@best 0.32237 | hold @last file 0.32242 hist@98350 0.32237  <-- MISMATCH
+  w5_e10_kd05w192moeffn_s954         best_step  87500 | val stored 0.39861 json 0.39861 | hold stored 0.32214 hist@best 0.32213 | hold @last file 0.32190 hist@98350 0.32187
+  w5_e10_kd05w192moevo_s951          best_step  97500 | val stored 0.39815 json 0.39815 | hold stored 0.32258 hist@best 0.32256 | hold @last file 0.32231 hist@98350 0.32232  <-- MISMATCH
+  w5_e10_kd05w192moevo_s952          best_step  98350 | val stored 0.39855 json 0.39855 | hold stored 0.32203 hist@best 0.32207 | hold @last file 0.32203 hist@98350 0.32207  <-- MISMATCH
+  w5_e10_kd05w192moevo_s953          best_step  97500 | val stored 0.39826 json 0.39826 | hold stored 0.32270 hist@best 0.32276 | hold @last file 0.32240 hist@98350 0.32239  <-- MISMATCH
+  w5_e10_kd05w192moevo_s954          best_step  87500 | val stored 0.39856 json 0.39856 | hold stored 0.32235 hist@best 0.32233 | hold @last file 0.32209 hist@98350 0.32216
+  w5_e10_kd05w192b3ff1_s951          best_step  90000 | val stored 0.39883 json 0.39883 | hold stored 0.32288 hist@best 0.32287 | hold @last file 0.32264 hist@98350 0.32264
+  w5_e10_kd05w192b3ff1_s952          best_step  85000 | val stored 0.39866 json 0.39866 | hold stored 0.32261 hist@best 0.32260 | hold @last file 0.32251 hist@98350 0.32253
+  w5_e10_kd05w192b3ff1_s953          best_step  97500 | val stored 0.39844 json 0.39844 | hold stored 0.32326 hist@best 0.32326 | hold @last file 0.32321 hist@98350 0.32319
+  w5_e10_kd05w192b3ff1_s954          best_step  97500 | val stored 0.39873 json 0.39873 | hold stored 0.32270 hist@best 0.32269 | hold @last file 0.32250 hist@98350 0.32250
+  mismatches: 6  (1s)
+== (d) ndcg_fast vs src/metrics.ndcg_per_feed on Ra val: 0.401338 vs 0.401338 (max |diff| per feed 0.00e+00)
+== (c) max |z diff| own recompute vs the noise cache over 20 members: 0.00e+00
+
+== (b) reference 4-pools and arms (independent recompute)
+  val  : 70-subset mean 0.40077 sd 0.00032; Ra 0.40134 rank 68/70; Rb 0.39996 rank 2/70
+  hold : 70-subset mean 0.32408 sd 0.00020; Ra 0.32408 rank 34/70; Rb 0.32407 rank 32/70
+  Ra-Rb val +0.00138+-0.00056 holdout +0.00001+-0.00032; |Ra-Rb| rank among 35 even splits: 1/35 (1 = largest)
+  Ra - Rbar70 val +0.00057+-0.00032 holdout -0.00001+-0.00018
+  A: vs Ra val -0.00086+-0.00057 hold +0.00020+-0.00031 | vs Rb val +0.00052+-0.00056 hold +0.00022+-0.00032 | vs Rbar70 val -0.00029+-0.00046 hold +0.00020+-0.00026
+  B: vs Ra val -0.00144+-0.00057 hold +0.00029+-0.00032 | vs Rb val -0.00006+-0.00058 hold +0.00031+-0.00033 | vs Rbar70 val -0.00087+-0.00048 hold +0.00029+-0.00027
+  C: vs Ra val -0.00069+-0.00058 hold +0.00040+-0.00034 | vs Rb val +0.00068+-0.00058 hold +0.00041+-0.00034 | vs Rbar70 val -0.00012+-0.00048 hold +0.00039+-0.00029
+
+== (e) member NDCG by seed for 8-seed w192 recipes: is there a seed (init + data order) effect shared across recipes?
+  [val] seed effects (mean over recipes, x1e4): 951:-1.1 952:+1.2 953:-1.2 954:+0.5 955:-0.4 956:-1.4 957:+2.2 958:+0.3 | F(seed) 0.48 p 0.843 | a-half minus b-half shared seed effect -0.00003 | 7 non-ref recipes: a-b -0.00008; corr(ref seed pattern, other recipes) -0.23
+  [holdout] seed effects (mean over recipes, x1e4): 951:-0.4 952:-0.3 953:-0.4 954:-0.4 955:-1.2 956:+0.5 957:+0.3 958:+2.0 | F(seed) 0.82 p 0.578 | a-half minus b-half shared seed effect -0.00008 | 7 non-ref recipes: a-b -0.00011; corr(ref seed pattern, other recipes) -0.13

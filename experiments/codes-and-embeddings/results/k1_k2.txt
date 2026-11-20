@@ -1,0 +1,22 @@
+[   102s]   train: e1 rows on val-candidate items 12,930,873
+[   102s]   val: e1 rows on val-candidate items 87,784
+[   102s]   test: e1 rows on val-candidate items 191,845
+[   103s] distinct (user key, item, class) 18,569,189
+[   107s] parity V-exact vs lensA itsrc_val e1/s1: max |diff| (0.0, 0.0)
+[   107s]   exact : mean n_e1 11.758 n_s1 8.849; share n_e1>0 0.5888
+[   107s]   lf    : mean n_e1 11.498 n_s1 8.644; share n_e1>0 0.5601
+[   107s]   notest: mean n_e1 11.564 n_s1 8.696; share n_e1>0 0.5680
+[   107s] X1 exact vs lensA cues_val X1: max |diff| 0.00e+00
+[   108s] G3 val 0.40032
+[   117s] K1 X1[exact ] tail win 0.5091 +- 0.0046 | nested +0.00033 (SE 0.00042, z +0.78; clustered SE 0.00042) w [0.05, 0.05] | corr with exact 1.000
+[   123s] K1 X1[notest] tail win 0.5053 +- 0.0046 | nested -0.00001 (SE 0.00030, z -0.03; clustered SE 0.00030) w [0.05, 0] | corr with exact 0.985
+[   135s] K1 X1[lf    ] tail win 0.5047 +- 0.0046 | nested -0.00001 (SE 0.00030, z -0.02; clustered SE 0.00030) w [0.05, 0] | corr with exact 0.981
+[   135s] K1 X1[exact ] fixed w=+0.05 val delta +0.00033 (SE 0.00042)
+[   136s] K1 X1[notest] fixed w=+0.05 val delta +0.00009 (SE 0.00042)
+[   137s] K1 X1[lf    ] fixed w=+0.05 val delta +0.00015 (SE 0.00042)
+[   137s] K1b forward increment n_s1: share > 0 0.1160, mean 0.205
+[   138s] K1b forward increment: tail win 0.4991 +- 0.0029; pooled within-feed pos-vs-neg AUC 0.5207
+[   174s] G3 holdout 0.32379; holdout feeds 30000, distinct user keys 29918
+[   178s] K2 X1 holdout transfer w=+0.05: -0.00073 (feed SE 0.00024, z -3.10; user-clustered SE 0.00024, z -3.10)
+[   181s] K2 Y2 holdout transfer w=+0.05: -0.00055 (feed SE 0.00024, z -2.35; user-clustered SE 0.00024, z -2.35)
+[   181s] done

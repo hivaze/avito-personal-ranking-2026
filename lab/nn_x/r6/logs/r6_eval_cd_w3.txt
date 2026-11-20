@@ -1,0 +1,79 @@
+REFERENCE = m02 (r6_cd_m02_r<root>); every 'c0' label below means the m02 reference
+== r6 Q1 wave 2, STAGE 1 (futility), roots (101, 102, 103, 104): arm CONTINUES iff pooled member delta vs c0[=m02] >= 0 on val AND >= 0 on holdout
+== runs: selected (holdout-best) step / total | selected val, holdout | end - selected (decline) val, holdout
+  r6:r6_cd_m02_r101        best  17000/19670 | sel val 0.39730 hold 0.32005 | end-sel val -0.00015 hold -0.00001 | 24 min
+  r6:r6_cd_m02_r102        best  19670/19670 | sel val 0.39728 hold 0.31990 | end-sel val +0.00000 hold +0.00000 | 36 min
+  r6:r6_cd_m02_r103        best  19670/19670 | sel val 0.39563 hold 0.32021 | end-sel val +0.00000 hold +0.00000 | 36 min
+  r6:r6_cd_m02_r104        best  19000/19670 | sel val 0.39678 hold 0.32066 | end-sel val +0.00057 hold -0.00038 | 23 min
+  -> c0[=m02]    mean best step   18835  mean end-sel val +0.00011 hold -0.00010  (n 4)
+  r6:r6_cd_cf4_p60k_r101   best  19000/39340 | sel val 0.39610 hold 0.31980 | end-sel val -0.00095 hold -0.00140 | 95 min
+  r6:r6_cd_cf4_p60k_r102   best  19000/39340 | sel val 0.39532 hold 0.32032 | end-sel val -0.00226 hold -0.00123 | 90 min
+  r6:r6_cd_cf4_p60k_r103   best  19000/39340 | sel val 0.39531 hold 0.31961 | end-sel val -0.00081 hold -0.00197 | 89 min
+  r6:r6_cd_cf4_p60k_r104   best  19000/39340 | sel val 0.39544 hold 0.32009 | end-sel val -0.00211 hold -0.00164 | 66 min
+  -> cf4_p60k mean best step   19000  mean end-sel val -0.00153 hold -0.00156  (n 4)
+  r6:r6_cd_e3_r101         best  19000/29505 | sel val 0.39705 hold 0.32005 | end-sel val -0.00067 hold -0.00096 | 75 min
+  r6:r6_cd_e3_r102         best  19000/29505 | sel val 0.39685 hold 0.31985 | end-sel val -0.00067 hold -0.00128 | 72 min
+  r6:r6_cd_e3_r103         best  19000/29505 | sel val 0.39572 hold 0.32016 | end-sel val -0.00106 hold -0.00069 | 37 min
+  r6:r6_cd_e3_r104         best  19000/29505 | sel val 0.39692 hold 0.32091 | end-sel val -0.00168 hold -0.00127 | 58 min
+  -> e3    mean best step   19000  mean end-sel val -0.00102 hold -0.00105  (n 4)
+  r6:r6_cd_s2c2_r101       best  39000/39340 | sel val 0.39686 hold 0.31943 | end-sel val +0.00072 hold -0.00001 | 99 min
+  r6:r6_cd_s2c2_r102       best  39000/39340 | sel val 0.39702 hold 0.31996 | end-sel val -0.00051 hold -0.00004 | 97 min
+  r6:r6_cd_s2c2_r103       best  39000/39340 | sel val 0.39649 hold 0.32005 | end-sel val +0.00009 hold -0.00017 | 43 min
+  r6:r6_cd_s2c2_r104       best  39340/39340 | sel val 0.39621 hold 0.32055 | end-sel val +0.00000 hold +0.00000 | 27 min
+  -> s2c2  mean best step   39085  mean end-sel val +0.00007 hold -0.00005  (n 4)
+
+== cf4_p60k vs c0[=m02], roots 101-104 (B = arm)
+  VAL  r6:r6_cd_cf4_p60k_r101 0.39610 vs r6:r6_cd_m02_r101 0.39730: all -0.00121+-0.00089 (z -1.35)  M<50 -0.00156+-0.00169 (z -0.93)  M>=50 -0.00096+-0.00095 (z -1.01)  Tue -0.00140+-0.00124 (z -1.13)  Thu -0.00099+-0.00128 (z -0.77)  coldpos -0.00796+-0.00180 (z -4.43)  warmpos +0.00154+-0.00118 (z +1.30)
+  VAL  r6:r6_cd_cf4_p60k_r102 0.39532 vs r6:r6_cd_m02_r102 0.39728: all -0.00196+-0.00086 (z -2.28)  M<50 -0.00431+-0.00162 (z -2.66)  M>=50 -0.00033+-0.00093 (z -0.36)  Tue -0.00197+-0.00118 (z -1.67)  Thu -0.00195+-0.00126 (z -1.55)  coldpos -0.00232+-0.00172 (z -1.35)  warmpos -0.00171+-0.00115 (z -1.49)
+  VAL  r6:r6_cd_cf4_p60k_r103 0.39531 vs r6:r6_cd_m02_r103 0.39563: all -0.00032+-0.00089 (z -0.36)  M<50 -0.00065+-0.00165 (z -0.39)  M>=50 -0.00009+-0.00099 (z -0.09)  Tue -0.00094+-0.00124 (z -0.76)  Thu +0.00036+-0.00129 (z +0.28)  coldpos -0.00583+-0.00178 (z -3.27)  warmpos +0.00165+-0.00120 (z +1.38)
+  VAL  r6:r6_cd_cf4_p60k_r104 0.39544 vs r6:r6_cd_m02_r104 0.39678: all -0.00134+-0.00087 (z -1.54)  M<50 -0.00120+-0.00168 (z -0.71)  M>=50 -0.00144+-0.00091 (z -1.58)  Tue -0.00263+-0.00122 (z -2.15)  Thu +0.00008+-0.00124 (z +0.06)  coldpos -0.00698+-0.00175 (z -3.99)  warmpos +0.00084+-0.00116 (z +0.72)
+  VAL  pooled: all -0.00121+-0.00052 (z -2.31)  M<50 -0.00193+-0.00097 (z -1.99)  M>=50 -0.00071+-0.00057 (z -1.23)  Tue -0.00174+-0.00071 (z -2.43)  Thu -0.00062+-0.00076 (z -0.82)  coldpos -0.00577+-0.00107 (z -5.38)  warmpos +0.00058+-0.00069 (z +0.85)
+  HOLD r6:r6_cd_cf4_p60k_r101 0.31981 vs r6:r6_cd_m02_r101 0.32003: all -0.00022+-0.00053 (z -0.43)  late20% +0.00111+-0.00120 (z +0.93)
+  HOLD r6:r6_cd_cf4_p60k_r102 0.32033 vs r6:r6_cd_m02_r102 0.31989: all +0.00044+-0.00050 (z +0.88)  late20% +0.00059+-0.00109 (z +0.54)
+  HOLD r6:r6_cd_cf4_p60k_r103 0.31962 vs r6:r6_cd_m02_r103 0.32020: all -0.00058+-0.00049 (z -1.18)  late20% -0.00087+-0.00113 (z -0.77)
+  HOLD r6:r6_cd_cf4_p60k_r104 0.32009 vs r6:r6_cd_m02_r104 0.32066: all -0.00057+-0.00050 (z -1.13)  late20% -0.00078+-0.00114 (z -0.69)
+  HOLD pooled: all -0.00023+-0.00031 (z -0.76)  late20% +0.00001+-0.00069 (z +0.02)
+  ENS VAL 4-member arm vs 4-member c0[=m02]: all -0.00308+-0.00070 (z -4.43)  (c0[=m02] ens 0.40070, arm ens 0.39761)
+  ENS HOLD 4-member arm vs 4-member c0[=m02]: all -0.00049+-0.00040 (z -1.21)  (c0[=m02] ens 0.32265, arm ens 0.32216)
+  same-root corr arm vs c0[=m02] (val, within-feed z): 0.9631 0.9687 0.9694 0.9709
+  decline diagnostic (arm - c0[=m02], end-sel): val -0.00164 hold -0.00146
+  ==> cf4_p60k: member val -0.00121 (z -2.31), holdout -0.00023 (z -0.76) -> STOP (stage-1 futility)
+
+== e3 vs c0[=m02], roots 101-104 (B = arm)
+  VAL  r6:r6_cd_e3_r101 0.39705 vs r6:r6_cd_m02_r101 0.39730: all -0.00025+-0.00071 (z -0.36)  M<50 -0.00043+-0.00135 (z -0.32)  M>=50 -0.00013+-0.00075 (z -0.17)  Tue -0.00002+-0.00101 (z -0.02)  Thu -0.00051+-0.00100 (z -0.51)  coldpos -0.00226+-0.00140 (z -1.61)  warmpos +0.00029+-0.00095 (z +0.30)
+  VAL  r6:r6_cd_e3_r102 0.39685 vs r6:r6_cd_m02_r102 0.39728: all -0.00043+-0.00062 (z -0.70)  M<50 -0.00058+-0.00113 (z -0.51)  M>=50 -0.00033+-0.00069 (z -0.48)  Tue -0.00030+-0.00085 (z -0.35)  Thu -0.00058+-0.00090 (z -0.65)  coldpos -0.00286+-0.00124 (z -2.31)  warmpos +0.00088+-0.00082 (z +1.07)
+  VAL  r6:r6_cd_e3_r103 0.39572 vs r6:r6_cd_m02_r103 0.39563: all +0.00008+-0.00062 (z +0.13)  M<50 +0.00031+-0.00112 (z +0.27)  M>=50 -0.00007+-0.00069 (z -0.11)  Tue -0.00071+-0.00085 (z -0.83)  Thu +0.00095+-0.00089 (z +1.06)  coldpos -0.00347+-0.00125 (z -2.77)  warmpos +0.00169+-0.00082 (z +2.05)
+  VAL  r6:r6_cd_e3_r104 0.39692 vs r6:r6_cd_m02_r104 0.39678: all +0.00014+-0.00058 (z +0.23)  M<50 -0.00039+-0.00111 (z -0.35)  M>=50 +0.00050+-0.00062 (z +0.80)  Tue -0.00048+-0.00081 (z -0.60)  Thu +0.00081+-0.00085 (z +0.96)  coldpos -0.00415+-0.00117 (z -3.56)  warmpos +0.00199+-0.00078 (z +2.54)
+  VAL  pooled: all -0.00012+-0.00038 (z -0.31)  M<50 -0.00027+-0.00069 (z -0.39)  M>=50 -0.00001+-0.00042 (z -0.02)  Tue -0.00038+-0.00053 (z -0.71)  Thu +0.00017+-0.00054 (z +0.31)  coldpos -0.00319+-0.00075 (z -4.24)  warmpos +0.00121+-0.00050 (z +2.40)
+  HOLD r6:r6_cd_e3_r101 0.32007 vs r6:r6_cd_m02_r101 0.32003: all +0.00003+-0.00040 (z +0.09)  late20% +0.00041+-0.00092 (z +0.45)
+  HOLD r6:r6_cd_e3_r102 0.31986 vs r6:r6_cd_m02_r102 0.31989: all -0.00003+-0.00035 (z -0.09)  late20% -0.00111+-0.00077 (z -1.44)
+  HOLD r6:r6_cd_e3_r103 0.32016 vs r6:r6_cd_m02_r103 0.32020: all -0.00004+-0.00033 (z -0.12)  late20% -0.00112+-0.00075 (z -1.49)
+  HOLD r6:r6_cd_e3_r104 0.32090 vs r6:r6_cd_m02_r104 0.32066: all +0.00025+-0.00034 (z +0.73)  late20% -0.00036+-0.00073 (z -0.50)
+  HOLD pooled: all +0.00005+-0.00022 (z +0.24)  late20% -0.00055+-0.00049 (z -1.10)
+  ENS VAL 4-member arm vs 4-member c0[=m02]: all -0.00120+-0.00053 (z -2.25)  (c0[=m02] ens 0.40070, arm ens 0.39950)
+  ENS HOLD 4-member arm vs 4-member c0[=m02]: all +0.00009+-0.00031 (z +0.29)  (c0[=m02] ens 0.32265, arm ens 0.32273)
+  same-root corr arm vs c0[=m02] (val, within-feed z): 0.9836 0.9898 0.9911 0.9919
+  decline diagnostic (arm - c0[=m02], end-sel): val -0.00113 hold -0.00095
+  ==> e3: member val -0.00012 (z -0.31), holdout +0.00005 (z +0.24) -> STOP (stage-1 futility)
+
+== s2c2 vs c0[=m02], roots 101-104 (B = arm)
+  VAL  r6:r6_cd_s2c2_r101 0.39686 vs r6:r6_cd_m02_r101 0.39730: all -0.00045+-0.00086 (z -0.52)  M<50 +0.00000+-0.00164 (z +0.00)  M>=50 -0.00075+-0.00092 (z -0.82)  Tue +0.00035+-0.00120 (z +0.29)  Thu -0.00131+-0.00124 (z -1.06)  coldpos +0.00149+-0.00175 (z +0.85)  warmpos -0.00140+-0.00115 (z -1.22)
+  VAL  r6:r6_cd_s2c2_r102 0.39702 vs r6:r6_cd_m02_r102 0.39728: all -0.00026+-0.00084 (z -0.31)  M<50 -0.00066+-0.00157 (z -0.42)  M>=50 +0.00002+-0.00093 (z +0.02)  Tue +0.00028+-0.00117 (z +0.24)  Thu -0.00085+-0.00122 (z -0.69)  coldpos -0.00092+-0.00166 (z -0.55)  warmpos +0.00003+-0.00113 (z +0.03)
+  VAL  r6:r6_cd_s2c2_r103 0.39649 vs r6:r6_cd_m02_r103 0.39563: all +0.00086+-0.00085 (z +1.01)  M<50 +0.00121+-0.00159 (z +0.76)  M>=50 +0.00061+-0.00092 (z +0.66)  Tue -0.00038+-0.00118 (z -0.32)  Thu +0.00221+-0.00121 (z +1.82)  coldpos +0.00155+-0.00169 (z +0.92)  warmpos +0.00038+-0.00114 (z +0.33)
+  VAL  r6:r6_cd_s2c2_r104 0.39621 vs r6:r6_cd_m02_r104 0.39678: all -0.00058+-0.00084 (z -0.69)  M<50 -0.00103+-0.00160 (z -0.64)  M>=50 -0.00027+-0.00089 (z -0.30)  Tue -0.00136+-0.00117 (z -1.16)  Thu +0.00028+-0.00120 (z +0.24)  coldpos -0.00031+-0.00179 (z -0.17)  warmpos -0.00042+-0.00110 (z -0.38)
+  VAL  pooled: all -0.00011+-0.00044 (z -0.24)  M<50 -0.00012+-0.00082 (z -0.15)  M>=50 -0.00010+-0.00048 (z -0.20)  Tue -0.00028+-0.00062 (z -0.45)  Thu +0.00008+-0.00062 (z +0.13)  coldpos +0.00045+-0.00090 (z +0.51)  warmpos -0.00035+-0.00058 (z -0.60)
+  HOLD r6:r6_cd_s2c2_r101 0.31943 vs r6:r6_cd_m02_r101 0.32003: all -0.00060+-0.00048 (z -1.26)  late20% +0.00017+-0.00107 (z +0.16)
+  HOLD r6:r6_cd_s2c2_r102 0.31996 vs r6:r6_cd_m02_r102 0.31989: all +0.00007+-0.00047 (z +0.15)  late20% +0.00105+-0.00105 (z +1.01)
+  HOLD r6:r6_cd_s2c2_r103 0.32005 vs r6:r6_cd_m02_r103 0.32020: all -0.00015+-0.00047 (z -0.31)  late20% +0.00144+-0.00106 (z +1.36)
+  HOLD r6:r6_cd_s2c2_r104 0.32055 vs r6:r6_cd_m02_r104 0.32066: all -0.00010+-0.00048 (z -0.21)  late20% +0.00072+-0.00108 (z +0.67)
+  HOLD pooled: all -0.00020+-0.00025 (z -0.78)  late20% +0.00085+-0.00058 (z +1.47)
+  ENS VAL 4-member arm vs 4-member c0[=m02]: all -0.00099+-0.00061 (z -1.62)  (c0[=m02] ens 0.40070, arm ens 0.39971)
+  ENS HOLD 4-member arm vs 4-member c0[=m02]: all +0.00020+-0.00033 (z +0.60)  (c0[=m02] ens 0.32265, arm ens 0.32285)
+  same-root corr arm vs c0[=m02] (val, within-feed z): 0.9697 0.9719 0.9724 0.9721
+  decline diagnostic (arm - c0[=m02], end-sel): val -0.00003 hold +0.00004
+  ==> s2c2: member val -0.00011 (z -0.24), holdout -0.00020 (z -0.78) -> STOP (stage-1 futility)
+
+== summary (stage 1)
+  cf4_p60k val -0.00121 (z -2.31)  hold -0.00023 (z -0.76)  ENS val -0.00308 hold -0.00049  best steps [19000, 19000, 19000, 19000]  -> STOP (stage-1 futility)
+  e3    val -0.00012 (z -0.31)  hold +0.00005 (z +0.24)  ENS val -0.00120 hold +0.00009  best steps [19000, 19000, 19000, 19000]  -> STOP (stage-1 futility)
+  s2c2  val -0.00011 (z -0.24)  hold -0.00020 (z -0.78)  ENS val -0.00099 hold +0.00020  best steps [39000, 39000, 39000, 39340]  -> STOP (stage-1 futility)

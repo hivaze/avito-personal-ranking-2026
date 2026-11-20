@@ -1,0 +1,16 @@
+SE used (arm minus reference): 2-seed Qhat hold 0.00073 val 0.00139 | 4-seed asymptote hold 0.00048 val 0.00088 | 8-pool hold 0.00033 val 0.00055
+
+rule                                                 | P(pass) at true shift 0 | +0.0003 | +0.0005 | +0.0007 (width-sized) | +0.0010
+2-seed Qhat screen (hold >= +0.0004, val >= 0)       |                  0.147 |   0.261 |   0.355 |                 0.456 |   0.606
+4-seed asymptote rule (hold >= +0.00074, val >= 0)   |                  0.030 |   0.113 |   0.219 |                 0.367 |   0.616
+8-seed pool confirmation (hold >= +0.0004, val >= 0) |                  0.055 |   0.269 |   0.507 |                 0.736 |   0.933
+8-vs-8 pooled-z rule (both >= 0, z >= 2)             |                  0.039 |   0.231 |   0.475 |                 0.725 |   0.935
+pooled-z rule, 3-rotation holdout, 12 runs/arm       |                  0.057 |   0.380 |   0.681 |                 0.868 |   0.964
+
+prior P(an arm truly moves the pool by >= +0.0005), Beta(0.5, 19.5) updated with today's KD record:
+  lever closed under hard labels, re-tested under KD (width 192 worked; drop0, e20, id, hl2, ff4, w256, b3 failed): 1 of 8 -> 0.054
+  KD target / teacher variant (kd_w 0.3 / 0.8 / 1.0, t25, gen 2 x2, cross-fit x2, pop1-view students at 50/50): 0 of 9 -> 0.017
+  all of today's KD arms together (KD itself + width of about 19): 2 of 19 -> 0.064
+wave of 6 arms, prior 0.04: screen passes true 0.05 / false 0.17; after the 8-seed confirmation true 0.027 / false 0.010; P(at least one confirmed real +0.0005) about 0.026
+wave of 15 arms, prior 0.04: screen passes true 0.13 / false 0.43; after the 8-seed confirmation true 0.067 / false 0.024; P(at least one confirmed real +0.0005) about 0.065
+wave of 30 arms, prior 0.03: screen passes true 0.20 / false 0.88; after the 8-seed confirmation true 0.100 / false 0.049; P(at least one confirmed real +0.0005) about 0.095

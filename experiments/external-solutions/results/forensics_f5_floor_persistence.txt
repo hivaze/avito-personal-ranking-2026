@@ -1,0 +1,23 @@
+val rows at floor 0.1216 target rate 0.0090
+
+[val-only bank] floor rows with a later obs: 13497 (0.0097 of rows)
+  still-floor-later: n 10212 rate 0.00157 | up-later: n 3285 rate 0.0134 ; up within 6h n 1478 rate 0.0129 ; up within 24h n 2133 rate 0.0117
+  W8 z of still-floor rows: mean -1.270 ; positives among them 16 ; feeds touched 4937
+  non-floor rows: later lower n 66322 rate 0.0135 | never lower n 70460 rate 0.0193
+  demote still-floor                 nested +0.00001 +- 0.00001 w=[0.25, 1] in-sample w=1 +0.00002
+  floor: up(+1)/still(-1)            nested +0.00001 +- 0.00006 w=[0.1, 1] in-sample w=1 +0.00003
+  floor: up within 24h               nested -0.00000 +- 0.00000 w=[0, 0.25] in-sample w=0.25 +0.00001
+  hard demote still-floor (w fixed)  delta +0.00001 +- 0.00001 (no tuning)
+
+[val+test bank] floor rows with a later obs: 22679 (0.0163 of rows)
+  still-floor-later: n 13681 rate 0.00139 | up-later: n 8998 rate 0.0140 ; up within 6h n 1478 rate 0.0129 ; up within 24h n 2133 rate 0.0117
+  W8 z of still-floor rows: mean -1.158 ; positives among them 19 ; feeds touched 6324
+  non-floor rows: later lower n 192531 rate 0.0151 | never lower n 154678 rate 0.0190
+  demote still-floor                 nested +0.00006 +- 0.00002 w=[4, 1] in-sample w=2 +0.00007
+  floor: up(+1)/still(-1)            nested +0.00048 +- 0.00022 w=[1, 1] in-sample w=1 +0.00048
+  floor: up within 24h               nested -0.00000 +- 0.00000 w=[0, 0.25] in-sample w=0.25 +0.00001
+  hard demote still-floor (w fixed)  delta +0.00007 +- 0.00002 (no tuning)
+
+test floor share: public 0.1119 private 0.1157
+test still-floor-later rows: public 0.01101 private 0.00925 ; up-later rows: public 0.00497 private 0.00305
+val (val-only bank) still-floor-later rows 0.00735 ; up-later rows 0.00236

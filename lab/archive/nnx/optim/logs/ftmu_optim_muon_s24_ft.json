@@ -1,0 +1,95 @@
+{
+  "args": {
+    "variant": "s2_optim_muon_s24",
+    "out": "ftmu_optim_muon_s24",
+    "epochs": 6,
+    "lr": 5e-05,
+    "wd": 0.02,
+    "warmup": 30,
+    "cand_budget": 8192,
+    "max_feeds": 128,
+    "loss": "softmax",
+    "loss_norm": "batch",
+    "folds": 5,
+    "seeds": 1,
+    "drop": null,
+    "from_scratch": false,
+    "extra": "it_cand_cnt_train,it_tr_coec,it_tr_coec_rk,it_tr_coec_z,it_tr_coec_gap,it_tr_ctr,it_tr_pos,u_tr_ctr,u_tr_feeds,hour,centrality,it_hist_all_luo,it_hist_all_luo_rk,it_hist_all_luo_z,it_hist_all_luo_gap,it_hist_et1_luo,it_hist_et2_luo,it_hist_et3_luo,it_hist_et4_luo,it_hist_et5_luo,it_hist_et6_luo,it_hist_et7_luo,it_hist_et8_luo,it_hist_et9_luo,it_hist_et10_luo,seq_cv_invd20,seq_cv_invd20_rk,seq_cv_pop,seq_cv_norm,seq_max_all,seq_top3,seq_argmax_hpos,ctx_nd_c80,ctx_nd_c90,ctx_nd_c95,ctx_nd_dupb_f1,ctx_nd_dupb_h,ctx_nd_dupb_u,ctx_nd_hcent,ctx_nd_knn_f1,ctx_nd_knn_h,ctx_nd_knn_h_dev,ctx_nd_knn_u,ctx_nd_knn_u_dev,ctx_nd_max,ctx_nd_mean,ctx_nd_top5h,ctx_nd_top5u,ctx_nd_ucent",
+    "extra_lr_mult": 10.0,
+    "add_random": 0,
+    "pseudo": "",
+    "w_test": 0.3,
+    "pseudo_n": 12000,
+    "pseudo_T": 1.0,
+    "select": "snapshot",
+    "decay": "const",
+    "ema": 0.0,
+    "ema_start": 0.5,
+    "lpft_epochs": 0,
+    "lpft_lr": 0.0005,
+    "muon": true
+  },
+  "oof_by_epoch": [
+    0.383795084397764,
+    0.3861860047229078,
+    0.3870327989852079,
+    0.3866479009698373,
+    0.38580411633612693,
+    0.38406606211068517,
+    0.38333723033603306
+  ],
+  "best_epoch": 2,
+  "oof_ndcg_best_epoch": 0.3870327989852079,
+  "oof_ndcg_snapshot": 0.3864791419815175,
+  "saved": "snapshot",
+  "fold_curves": [
+    [
+      0.3767372299926802,
+      0.3802130728656184,
+      0.3800690724279923,
+      0.37943751035332063,
+      0.38009007011931684,
+      0.37659481042083864,
+      0.37538626324875957
+    ],
+    [
+      0.3806761934083041,
+      0.38167037726891595,
+      0.3822038118281903,
+      0.3819645646905072,
+      0.3805213949375698,
+      0.3790968719843775,
+      0.37842691213900365
+    ],
+    [
+      0.38642867951541304,
+      0.38927724038592737,
+      0.3909135494684547,
+      0.39124399356238976,
+      0.39044674505361326,
+      0.39017810397450625,
+      0.3901398519852223
+    ],
+    [
+      0.3896655345758519,
+      0.39259677774869883,
+      0.39290657440811655,
+      0.39237116402368183,
+      0.39072691458430014,
+      0.3898279413135295,
+      0.387110437706049
+    ],
+    [
+      0.3854704000133098,
+      0.3871751202980998,
+      0.3890737301924643,
+      0.3882248026056614,
+      0.3872376602240099,
+      0.38463477717361083,
+      0.38562478738602507
+    ]
+  ],
+  "ema_oof_by_epoch": null,
+  "oof_ndcg_ema_final": null,
+  "minutes": 10.256498046716054
+}

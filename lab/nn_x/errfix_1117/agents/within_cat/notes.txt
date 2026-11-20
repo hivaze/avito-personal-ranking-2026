@@ -1,0 +1,98 @@
+ERROR ANALYSIS, LENS "WITHIN-CATEGORY ORDERING AND NEAR-DUPLICATES" (agent within_cat, 2026-11-17)
+
+RESULT: no rule submitted. Nothing in this lens survived cross-fitting; every NDCG cross-fit was <= +0.00014 with z < 2.
+Data: discovery sample (7,214 feeds, 697,304 rows, 11,026 positives, base NDCG 0.39939). CPU only, 12 threads.
+Scripts in this folder: wc.py has the helpers (listwise conditional logit "clogit" with score offset, cross_fit,
+O/E tables). Each screen or test is its own .py file, named below.
+
+1. WHERE THE LOSS IS
+- Positives by model rank: 1-3: 2,097 | 4-10: 2,403 | 11-30: 2,998 | 31+: 3,528.
+  The median within-category rank of the positive is 1 / 3 / 6 / 14 in those bands.
+- 31% of all items ranked above a positive belong to the positive's own category.
+- Among positives at rank 31+, 57% have more than 10 same-category items above them. Only 7.5% are their category's leader.
+- Reading the bad feeds (show.py bad) shows a typical case: a large dominant category (60-160 candidates) with scores packed
+  into a narrow band (e.g. feed 11372: 159 clothing items scored 1.14-1.70). The clicked item looks like its category mates
+  on every column. The good feeds (show.py good) are mostly small feeds, or feeds with an obvious near-copy of a recently
+  engaged item.
+
+2. WITHIN-CATEGORY RESIDUALS ARE CALIBRATED (once the model score is accounted for)
+- screen_within.py: listwise conditional logit inside (feed, category) groups that contain a positive (8,306 groups),
+  with z = a*score + b*x, one feature at a time (31 features).
+  * All groups: the largest effect is h32 +0.049/sd (z 2.7), then xp_imp_c50 -0.030 (z -2.6). Everything else has |z| < 1.9.
+  * Groups of size >= 30: xp_imp_c50 -0.057 (z -3.1), lpop -0.046 (z -2.6), f4 -0.041 (z -2.2), ldup +0.044 (z 2.1).
+    Fresher, less-exposed items and items with near-copies are slightly under-ranked inside big categories.
+    This is likelihood only and did not survive NDCG cross-fitting (section 5, item g).
+- desc3.py: O/E by within-category quintile (categories with >= 10 candidates) is flat within +-6% for all 19 features
+  (|z| <= 2.5).
+- screen_inter.py: segment-specific within-category slopes. 20 features (as x - category mean) x 33 segment levels
+  (newest event type, M, cat_user_rank, category size, same_cat_newest, the 14 largest categories) = 660 tests.
+  Max |z| = 3.77 (furniture, cat 7, f4: fresher is better). That is what the null predicts for 660 tests.
+- head_oe.py / head_oe2.py: O/E inside the top-10 (E = softmax of a*score within the head) for ~120 discrete cells.
+  Cells: hmax band x hmax_idx band, hmax_type, hmax_src, dup count, f4/f5 quintiles, exposure band, cat_user_rank,
+  within-category rank, c_contact/c_fav/c_vfeed >= .95, n_hdup95, same_cat_newest, f2_home, cat_newest_idx band,
+  h1 band, category share, M x share, newest_type, category code.
+  All have |z| <= 1.9. The head is remarkably well calibrated on every dimension of this lens.
+- pairs_head.py: NDCG-weighted pairwise logistic over same-category pairs in the top-10 and top-30, with feed-clustered SEs.
+  Max |z| = 2.0 (ldup +, c_contact -). Over pairs of any category in the top-10 the signals are category-level instead:
+  f1 +0.088 (z 3.1), pre2_fe_z +0.087 (z 3.0), lcatnew -0.08 (z -2.9), f3 +0.082 (z 2.9), lcatn +0.07 (z 2.5).
+  Items from the user's main and recent categories beat minority-category items in the head slightly more often than the
+  score says. A cross-fitted version of this was negative (5f).
+
+3. NEAR-DUPLICATE CLUSTERS (cand_maxcos >= .95)
+- Clusters cannot be rebuilt from similarity profiles: profile linkage matched n_cand_dup95 in under 30% of items.
+  Mutual nearest pairs can be found exactly, though, as two rows of a feed that share the same cand_maxcos value
+  (56,243 such pairs; 29,768 isolated pairs).
+- pairs_sign.py: pairs with exactly one positive (1,572 pairs). The model's score picks the clicked member
+  58% of the time when cos is .95-.98 (z 5.4), 61% when .98-.995, and 61% above .995 (61 pairs).
+  Unconditionally, the clicked member is more similar to the user (ucos, h10, pre2: 55% each, z 3.3-3.7) and more popular
+  (xp_imp, lpop_et2: 54-55%). Both are already in the score.
+  The clicked member is slightly fresher: lower f4 in 47.6% / 47.0% / 39.3% of pairs in the three bands (z -1.6, -1.3, -1.7).
+  pairs.py, the conditional logit given score: f4 -0.07/sd (z -1.7), ldup -0.32 (z -3.1, only where the two members differ
+  in duplicate count). There is no strong freshness or popularity preference between duplicates once the score is known.
+- No dilution among duplicates (head_dupabove.py, top-10): the lower member of a pair whose partner is ranked above it has
+  O/E 1.10 (z 1.2). The upper member has 1.04-1.12. Over the whole list, O/E is 1.05-1.16 when n_cand_dup95 is 1-3
+  (desc2.py). Duplicates are, if anything, slightly under-ranked. Boosting them fails cross-fitting (5d).
+
+4. A REAL BUT UNUSABLE EFFECT: THE WITHIN-CATEGORY SCORE SPREAD DEPENDS ON CATEGORY SIZE
+- screen_scale.py / fit_scale.py: conditional logit over the full list with z = a*s + (b0 + b1*log cat_n) * (s - category mean of s).
+  Result: b0 = -0.239 (z -5.3) and b1 = +0.083 (z +6.3), so the two cancel at cat_n of about 18.
+  Inside big categories (>= 40 candidates) the within-category score differences are under-stretched by about 14%.
+  Inside small ones (< 5) they are over-stretched by about 22%. The same holds for the newest event's category (+0.115, z 4.5).
+- t_oofll.py: the effect holds out of fold in log-likelihood (+0.0026 nats per feed, z 2.95) but not in NDCG
+  (-0.00042, z -1.0). The gain comes from deep ranks, where NDCG weight is negligible.
+  In the top-10 and top-20 the effect is only z 1.6-2.0 (fit_scale_head.py).
+- The same likelihood-versus-NDCG mismatch holds for lcatn (category size, z 5.5), cat_hist_share (z 5.3) and ldup.
+  Each one improves the out-of-fold listwise likelihood and lowers NDCG.
+
+5. NDCG CROSS-FITS (5 folds by user; parameters chosen on 4 folds, evaluated on the 5th). About 185 variants in total.
+  a. score + w*log(cat_n_in_feed), 7 values of w: oof -0.00024 (se 0.00021). Same with cat_hist_share: -0.00039. With f3: -0.00013.
+  b. Branch reweighting (1-l)*s_ft + l*s_to, l in .3-.7, globally and in 6 row segments (30 variants).
+     Best: rows of categories absent from history (cat_user_rank 0), l = .7: oof +0.00011 (se 0.00006, z 1.76).
+     The conditional logit sees nothing there (z -0.19), and widening l to 1.0 gives +0.00004..0.00011. Treated as noise.
+  c. Within-category stretch score + w*(log cat_n - c)*(s - category mean), 15 variants: -0.00031.
+     Stretch in the newest event's category, 5 variants: -0.00017.
+  d. Near-duplicate boosts: w*log(1+n_cand_dup95) or w*[dup>=1], all rows or top-30 only (24 variants): -0.00008..0.
+     w*10*max(cand_maxcos-.9, 0), 12 variants: +0.00010 (se 0.00007, z 1.4-1.5).
+  e. Fresher member of each mutual near-duplicate pair +w (5 variants): 0 (in-sample -0.00015..-0.00046).
+  f. Learned head re-rankers, fitted on 4 folds and applied to the 5th:
+     - conditional logit on the top-K, K in 10/20/40, with 5 a-priori feature sets (15 configs): -0.00001 to -0.00168.
+     - NDCG-weighted pairwise logistic (one LambdaRank step) on the top 10/20, 3 sets (6 configs): -0.00102 to +0.00012.
+     - LightGBM lambdarank on the residual (init_score = score), 6 sizes x 2 feature sets: all negative,
+       from -0.00034 for the tiniest model to -0.0116. The model's residual is not learnable from these columns on 5.8k feeds.
+  g. Novelty inside big categories: -w*(within-category exposure, lpop or f4) when cat_n >= 20 or 40 (24 variants):
+     -0.00005 / -0.00011 / -0.00007 (in-sample best +0.00014).
+  h. f2 (region affinity) demotion, raw or within-category (10 variants): -0.00011 / -0.00020.
+
+6. SIDE CHECKS
+- Repeated items across feeds of the same user: impossible. Only 15 of 6,887 users have two feeds.
+- Item recurrence across feeds of the sample: weak (z 2.3 in likelihood), and it would depend on sample size. Dropped.
+
+7. TAKEAWAYS FOR THE LEAD
+- The model orders items inside categories and among near-duplicates as well as these columns allow.
+  No column separates the clicked item from its higher-ranked category mates once the score is known.
+- Several listwise-likelihood miscalibrations are real but live in the tail and do not move NDCG:
+  * category size and history share (z 5-6);
+  * within-category spread versus category size (z 6);
+  * near-duplicate count (z 3).
+  Any future "rule" should be judged by NDCG cross-fit, not by likelihood or O/E z-scores.
+- The losses in large packed categories look irreducible with these features: the clicked item is not distinguishable.

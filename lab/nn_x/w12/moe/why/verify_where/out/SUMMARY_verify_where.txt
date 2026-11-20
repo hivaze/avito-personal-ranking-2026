@@ -1,0 +1,29 @@
+verify_where (2026-11-19): adversarial check of why/where. All contrasts paired per feed (val n=14,423, holdout n=30,000), +- = 1 SE.
+Scripts: v1_seed.py v2_cold.py v3_misc.py v4_ckpt.py v5_last_seg.py v6_lag_last.py v7_stale_last.py v8_traj.py v9_last_rank.py;
+lane: lag_last_gpu.py / stale_last_gpu.py (they import the analyst's scripts unchanged and write only here).
+
+R0 (reference luck): reproduced exactly. ref4 = rank 3/70 on val (+0.00057); seed swap val -0.00138+-0.00056.
+  Seed-borne luck test: slope of (arm4 - refN) on (ref4 - refN) per feed is about 0 (val A -0.055+-0.037, B -0.006, C -0.008).
+  Same-seed row correlation of arm vs ref members is +0.03 to +0.05 (other seeds: -0.007). The kd05t25w192 s951-954 pool is not lucky on val (51/70).
+  So the luck is not shared through data order, and arm - refN is the right contrast. CONFIRMED.
+  MISSED: holdout-based checkpoint selection. Selected vs @last val per member: A s954 (87500) -0.00167; B s954 (87500) -0.00095; C all four (85k-97.5k) -0.0003 each.
+  Refs: 0/8 picks at <=92.5k (kd05t25w192 0/8, kd08w192 0/8, kd05w192ps 0/8); arms 4/12 at <=90k.
+  Swing selected -> @last of (arm - refN) on val: A +0.00099+-0.00032, B +0.00055+-0.00034, C +0.00058+-0.00039.
+  At @last vs refN@last: val A +0.00070+-0.00046, B -0.00031+-0.00048, C +0.00045+-0.00047, mean +0.00028+-0.00033; holdout mean +0.00030+-0.00019.
+  So the val-holdout gap is -0.00002+-0.00038: nothing is left to explain.
+  The screen mean val deficit vs ref4 (-0.00100) splits into ref4 luck (~-0.00057) + checkpoint selection (~-0.00071) + arms at @last vs refN (+0.00028).
+  B members are worse at @last as well (val -0.00055+-0.00038, holdout -0.00030+-0.00022).
+W1 (cold/mix): arithmetic reproduced, but the effect depends on the checkpoint.
+  At @last, the cold-minus-warm T on val is +0.00056+-0.00083 (sign flips from -0.00180) and on holdout -0.00051+-0.00070 (from -0.00174).
+  Under the seed null, T_val and T_hold are correlated (+0.51 kd05w192, +0.66 kd05t25w192 over 35 splits), so the two periods are not independent.
+  Corrected per-arm combined z is about -1.6 to -1.8, not -1.9 to -2.3.
+  At selected checkpoints the cold deficit holds against any reference (t25N, mid16).
+  The mix model explains 45% of an all-val gap that is only z -1.86 (M>=50: z -0.93). WEAKENED.
+W2a: at @last the pool DiD is -0.00030+-0.00020 (same as the analyst), member DiD +0.00016/+0.00012/-0.00003.
+  Seed null of the DiD: z sd 1.26-1.44, so the per-feed SE understates it and the shrink is about 1 SE. CONFIRMED as mixed or weak.
+W2b: at @last the stale-val DiD is -0.00004+-0.00028 (the opposite-sign pattern disappears). Member DiD is -0.00026/-0.00031/+0.00011.
+  Arms vs refN on stale-val: +0.00024+-0.00032. ref4 luck under stale inputs: +0.00005 (fresh +0.00061). The 'no extra reliance' conclusion is CONFIRMED.
+W3: trimmed means reproduced, but their SE was understated by 1.5x.
+  Winsorised/bootstrap SE: A -0.00074+-0.00051, B -0.00122+-0.00051, C -0.00049+-0.00051.
+  The corr ~+0.5 with the null swap comes from the construction: a control kd05t25w192 pool gives +0.45 to +0.58.
+  The 'spread, not concentrated' conclusion stands.

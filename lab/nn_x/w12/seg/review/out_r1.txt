@@ -1,0 +1,86 @@
+### R1(a) / R2: gap and skill ratio by ranker (own code). Paired contrast = [NDCG_X - NDCG_FINAL](cap) - [..](NEAR)
+| ranker                                    | ALL     | NEAR   | cap    | D(cap-NEAR)     | D(cap-REST)     | AUC NEAR | AUC cap | skill ratio (boot SE) | R_FINAL - R_X           | paired contrast vs FINAL  | AUC-edge ratio |
+|-------------------------------------------|---------|--------|--------|-----------------|-----------------|----------|---------|-----------------------|-------------------------|---------------------------|----------------|
+| FINAL (FD16P20)                           | 0.40271 | 0.4060 | 0.3906 | -0.0155+-0.0047 | -0.0171+-0.0044 | 0.7339   | 0.7201  | 0.872 (0.035)         |                         |                           | 0.941          |
+| W16P20w (held-out twin)                   | 0.40214 | 0.4051 | 0.3904 | -0.0147+-0.0047 | -0.0166+-0.0044 | 0.7337   | 0.7201  | 0.877 (0.035)         | -0.006+-0.008 (z -0.70) | +0.0008+-0.0009 (z +0.83) | 0.942          |
+| W16 (held-out, no pop-light)              | 0.40158 | 0.4050 | 0.3899 | -0.0150+-0.0047 | -0.0164+-0.0044 | 0.7337   | 0.7194  | 0.874 (0.035)         | -0.002+-0.009 (z -0.24) | +0.0005+-0.0010 (z +0.44) | 0.939          |
+| TEACHER 11 hard-label (TO)                | 0.40054 | 0.4036 | 0.3900 | -0.0136+-0.0047 | -0.0148+-0.0044 | 0.7307   | 0.7174  | 0.885 (0.035)         | -0.013+-0.012 (z -1.12) | +0.0019+-0.0014 (z +1.37) | 0.943          |
+| G3 file (hard labels, FT+TO)              | 0.40032 | 0.4034 | 0.3893 | -0.0141+-0.0047 | -0.0155+-0.0044 | 0.7311   | 0.7180  | 0.881 (0.035)         | -0.010+-0.012 (z -0.84) | +0.0014+-0.0013 (z +1.05) | 0.943          |
+| single hard-label w5_e10_base_s951 (TO)   | 0.39632 | 0.4001 | 0.3857 | -0.0144+-0.0047 | -0.0150+-0.0044 | 0.7274   | 0.7109  | 0.873 (0.036)         | -0.001+-0.018 (z -0.07) | +0.0011+-0.0021 (z +0.53) | 0.928          |
+| single student w5_fd10_kd05w192_s951 (TO) | 0.39951 | 0.4033 | 0.3866 | -0.0167+-0.0047 | -0.0181+-0.0044 | 0.7302   | 0.7154  | 0.853 (0.035)         | +0.018+-0.015 (z +1.25) | -0.0012+-0.0017 (z -0.69) | 0.936          |
+| pre2_fe                                   | 0.35780 | 0.3592 | 0.3501 | -0.0091+-0.0042 | -0.0108+-0.0040 | 0.6630   | 0.6549  | 0.872 (0.048)         | -0.000+-0.046 (z -0.00) | +0.0064+-0.0040 (z +1.60) | 0.950          |
+| max cosine, all stored history            | 0.34228 | 0.3450 | 0.3383 | -0.0066+-0.0041 | -0.0055+-0.0038 | 0.6458   | 0.6360  | 0.859 (0.062)         | +0.012+-0.059 (z +0.21) | +0.0088+-0.0043 (z +2.06) | 0.933          |
+| max cosine, newest 64                     | 0.34534 | 0.3504 | 0.3391 | -0.0112+-0.0041 | -0.0087+-0.0039 | 0.6510   | 0.6346  | 0.806 (0.053)         | +0.066+-0.052 (z +1.26) | +0.0042+-0.0043 (z +1.00) | 0.892          |
+| max cosine, newest 16                     | 0.34989 | 0.3533 | 0.3455 | -0.0078+-0.0042 | -0.0062+-0.0040 | 0.6455   | 0.6331  | 0.876 (0.054)         | -0.004+-0.050 (z -0.08) | +0.0077+-0.0041 (z +1.89) | 0.915          |
+| max cosine, newest 128                    | 0.34249 | 0.3457 | 0.3378 | -0.0079+-0.0041 | -0.0066+-0.0038 | 0.6457   | 0.6338  | 0.843 (0.060)         | +0.028+-0.057 (z +0.49) | +0.0076+-0.0043 (z +1.78) | 0.918          |
+| mean of top-16 cosines                    | 0.33871 | 0.3435 | 0.3350 | -0.0085+-0.0040 | -0.0052+-0.0038 | 0.6355   | 0.6318  | 0.836 (0.060)         | +0.035+-0.058 (z +0.61) | +0.0070+-0.0044 (z +1.61) | 0.973          |
+| mean of top-32 cosines                    | 0.33620 | 0.3394 | 0.3344 | -0.0050+-0.0040 | -0.0026+-0.0038 | 0.6243   | 0.6273  | 0.911 (0.067)         | -0.040+-0.065 (z -0.61) | +0.0105+-0.0044 (z +2.38) | 1.024          |
+| popularity only (it_hist_all_luo)         | 0.30406 | 0.3039 | 0.2997 | -0.0042+-0.0037 | -0.0061+-0.0035 | 0.5526   | 0.5398  | 0.805 (0.251)         | +0.067+-0.250 (z +0.27) | +0.0113+-0.0048 (z +2.36) | 0.758          |
+| exposure only (xp_imp_c50)                | 0.27355 | 0.2740 | 0.2702 | -0.0038+-0.0029 | -0.0047+-0.0027 | 0.5311   | 0.5167  | 1.185 (0.158)         | -0.313+-0.164 (z -1.91) | +0.0117+-0.0044 (z +2.64) | 0.538          |
+| f1 column                                 | 0.32787 | 0.3316 | 0.3220 | -0.0096+-0.0039 | -0.0082+-0.0037 | 0.6226   | 0.6131  | 0.793 (0.074)         | +0.079+-0.071 (z +1.11) | +0.0059+-0.0043 (z +1.38) | 0.923          |
+
+### R1(c1/c2): cosine rankers at the cap (paired per feed)
+  max cosine, newest 64 minus max cosine, all stored history [NDCG] @ cap: +0.0008 +- 0.0021 (n 4176)
+  max cosine, newest 64 minus max cosine, all stored history [NDCG] @ NEAR: +0.0054 +- 0.0013 (n 7165)
+  max cosine, newest 64 minus max cosine, all stored history [NDCG] @ H 20-99: +0.0009 +- 0.0007 (n 2337)
+  max cosine, newest 16 minus max cosine, all stored history [NDCG] @ cap: +0.0072 +- 0.0029 (n 4176)
+  max cosine, newest 16 minus max cosine, all stored history [NDCG] @ NEAR: +0.0083 +- 0.0020 (n 7165)
+  max cosine, newest 16 minus max cosine, all stored history [NDCG] @ H 20-99: +0.0085 +- 0.0029 (n 2337)
+  max cosine, newest 128 minus max cosine, all stored history [NDCG] @ cap: -0.0005 +- 0.0015 (n 4176)
+  max cosine, newest 128 minus max cosine, all stored history [NDCG] @ NEAR: +0.0007 +- 0.0007 (n 7165)
+  max cosine, newest 128 minus max cosine, all stored history [NDCG] @ H 20-99: +0.0000 +- 0.0000 (n 2337)
+  max cosine, newest 64 minus max cosine, all stored history [AUC] @ cap: -0.0013 +- 0.0029 (n 4176)
+  max cosine, newest 64 minus max cosine, all stored history [AUC] @ NEAR: +0.0052 +- 0.0017 (n 7165)
+  max cosine, newest 64 minus max cosine, all stored history [AUC] @ H 20-99: +0.0008 +- 0.0010 (n 2337)
+  mean of top-32 cosines minus mean of top-16 cosines [AUC] @ cap: -0.0045 +- 0.0012 (n 4176)
+  mean of top-32 cosines minus mean of top-16 cosines [AUC] @ NEAR: -0.0112 +- 0.0011 (n 7165)
+  mean of top-32 cosines minus mean of top-16 cosines [AUC] @ H 20-99: -0.0097 +- 0.0018 (n 2337)
+  mean of top-32 cosines minus mean of top-16 cosines [NDCG] @ cap: -0.0006 +- 0.0014 (n 4176)
+  mean of top-32 cosines minus mean of top-16 cosines [NDCG] @ NEAR: -0.0041 +- 0.0011 (n 7165)
+  mean of top-32 cosines minus mean of top-16 cosines [NDCG] @ H 20-99: -0.0017 +- 0.0020 (n 2337)
+
+### R1(c3): stored history-drop predictions (HDROP-ALL), cost of one 20% / 10% pass, 2 hard-label members
+  d20 @ cap: -0.00199 +- 0.00072
+  d20 @ NEAR: -0.00198 +- 0.00055
+  d20 @ H 20-99: -0.00069 +- 0.00083
+  d20 contrast cap - NEAR: -0.00001 +- 0.00091
+  d10 @ cap: -0.00121 +- 0.00061
+  d10 @ NEAR: -0.00069 +- 0.00048
+  d10 @ H 20-99: -0.00029 +- 0.00069
+  d10 contrast cap - NEAR: -0.00052 +- 0.00078
+
+### R1(b): odds-weighted residual (propensity cap vs reference, LightGBM, 5 folds by user, weights clipped at p99)
+  ref NEAR | M only                                     | propensity AUC 0.511 | ESS of the reference 6813 of 7165 | FINAL: -0.0140+-0.0047 (90% left) | W16P20w: -0.0135+-0.0047 (92% left) | TEACHER 11 hard-label: -0.0121+-0.0047 (89% left) | G3 file: -0.0125+-0.0047 (89% left)
+  ref NEAR | feed only                                  | propensity AUC 0.575 | ESS of the reference 6118 of 7165 | FINAL: -0.0132+-0.0048 (85% left) | W16P20w: -0.0126+-0.0048 (86% left) | TEACHER 11 hard-label: -0.0109+-0.0048 (81% left) | G3 file: -0.0115+-0.0048 (82% left)
+  ref NEAR | XA (newest-64 composition, no activity)    | propensity AUC 0.750 | ESS of the reference 3582 of 7165 | FINAL: -0.0108+-0.0055 (69% left) | W16P20w: -0.0097+-0.0055 (66% left) | TEACHER 11 hard-label: -0.0089+-0.0055 (66% left) | G3 file: -0.0088+-0.0055 (63% left)
+  ref NEAR | XB (XA + seen in train, n train feeds)     | propensity AUC 0.779 | ESS of the reference 2881 of 7165 | FINAL: -0.0074+-0.0058 (48% left) | W16P20w: -0.0069+-0.0058 (47% left) | TEACHER 11 hard-label: -0.0061+-0.0058 (45% left) | G3 file: -0.0060+-0.0058 (43% left)
+  ref REST | M only                                     | propensity AUC 0.512 | ESS of the reference 9842 of 10247 | FINAL: -0.0160+-0.0044 (94% left) | W16P20w: -0.0157+-0.0045 (95% left) | TEACHER 11 hard-label: -0.0140+-0.0044 (95% left) | G3 file: -0.0145+-0.0044 (93% left)
+  ref REST | feed only                                  | propensity AUC 0.608 | ESS of the reference 8296 of 10247 | FINAL: -0.0131+-0.0046 (76% left) | W16P20w: -0.0127+-0.0046 (76% left) | TEACHER 11 hard-label: -0.0108+-0.0045 (73% left) | G3 file: -0.0111+-0.0045 (71% left)
+  ref REST | XA (newest-64 composition, no activity)    | propensity AUC 0.808 | ESS of the reference 3976 of 10247 | FINAL: -0.0100+-0.0054 (59% left) | W16P20w: -0.0092+-0.0054 (56% left) | TEACHER 11 hard-label: -0.0076+-0.0054 (52% left) | G3 file: -0.0081+-0.0053 (52% left)
+  ref REST | XB (XA + seen in train, n train feeds)     | propensity AUC 0.833 | ESS of the reference 3183 of 10247 | FINAL: -0.0077+-0.0056 (45% left) | W16P20w: -0.0074+-0.0056 (45% left) | TEACHER 11 hard-label: -0.0063+-0.0056 (43% left) | G3 file: -0.0062+-0.0056 (40% left)
+
+### balance after weighting (XB, ref NEAR): standardised mean differences cap vs weighted NEAR for the largest raw gaps
+| covariate     | cap   | NEAR  | SMD raw | SMD weighted |
+|---------------|-------|-------|---------|--------------|
+| hall_distinct | 0.642 | 0.710 | -0.59   | -0.27        |
+| log_ntr       | 0.507 | 0.238 | +0.56   | +0.11        |
+| seen          | 0.517 | 0.283 | +0.48   | +0.06        |
+| h64_distinct  | 0.658 | 0.738 | -0.44   | -0.02        |
+| h64_et1       | 0.520 | 0.634 | -0.43   | -0.03        |
+| h64_et5       | 0.058 | 0.031 | +0.39   | +0.01        |
+| h64_noemb     | 0.001 | 0.020 | -0.37   | -0.01        |
+| h64_et6       | 0.051 | 0.026 | +0.37   | +0.02        |
+| h64_et2       | 0.088 | 0.060 | +0.32   | +0.04        |
+| h64_et3       | 0.170 | 0.129 | +0.30   | +0.03        |
+| ccat_in_h64   | 0.741 | 0.777 | -0.27   | -0.01        |
+| h64_et8       | 0.020 | 0.013 | +0.20   | -0.02        |
+| uid0          | 0.002 | 0.023 | -0.18   | -0.01        |
+| h64_et10      | 0.002 | 0.012 | -0.18   | -0.01        |
+
+### regression cross-check (LightGBM of per-feed NDCG on XB fitted on NEAR feeds, 5 folds by user; residual cap minus residual NEAR)
+  FINAL      | XA (newest-64 composition, no activity)    | residual D(cap - NEAR) -0.0100 +- 0.0042
+  FINAL      | XB (XA + seen in train, n train feeds)     | residual D(cap - NEAR) -0.0077 +- 0.0042
+  W16P20w    | XA (newest-64 composition, no activity)    | residual D(cap - NEAR) -0.0092 +- 0.0041
+  W16P20w    | XB (XA + seen in train, n train feeds)     | residual D(cap - NEAR) -0.0071 +- 0.0041
+  TEACHER 11 hard-label | XA (newest-64 composition, no activity)    | residual D(cap - NEAR) -0.0084 +- 0.0041
+  TEACHER 11 hard-label | XB (XA + seen in train, n train feeds)     | residual D(cap - NEAR) -0.0066 +- 0.0041

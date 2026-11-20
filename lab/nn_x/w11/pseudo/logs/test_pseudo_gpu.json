@@ -1,0 +1,164 @@
+{
+ "part": "gpu",
+ "passed": 9,
+ "total": 9,
+ "fails": [],
+ "res": {
+  "smoke": {
+   "base": {
+    "val": 0.3181831697592585,
+    "best_step": 73,
+    "minutes": 0.40815368890762327,
+    "total": 73,
+    "lines": [
+     "step 73/73 loss 2.5451 val_ndcg 0.31818 holdout_ndcg 0.24729 lr 1.46e-04 cd_loss_reg 2.3597 cd_loss_pool 0.0000",
+     "BEST step 73 val_ndcg 0.31818; train time"
+    ],
+    "wave11": []
+   },
+   "pseudo": {
+    "val": 0.3180733887560273,
+    "best_step": 73,
+    "minutes": 0.42317980925242105,
+    "total": 73,
+    "lines": [
+     "step 73/73 loss 2.6124 val_ndcg 0.31807 holdout_ndcg 0.24714 lr 1.46e-04 cd_loss_reg 2.3588 cd_loss_pool 0.0000",
+     "BEST step 73 val_ndcg 0.31807; train time"
+    ],
+    "wave11": [
+     "wave-11 PSEUDO-DIRECT: --pseudo_ratio 1.0 (ceil(R B) draws per plateau step, steps 0..57 of 73; the cooldown 15 steps stays on real feeds), target = new type-1/source-1 event at t <= 63, g ~ U[16, 64], history = events at index >= t + g re-indexed, negatives = the source feed's non-clicked candidates (minus items seen at index < t + g), f1-f5 / xt = 0, user_emb = 0, domain row 2, K9 aux 0, loss += 0.3 * listwise(norm feed, denom 512); context-free head ON (183 params, AdamW no-decay group); set attention on pseudo rows on; source rows blocked as holdout users: 107 of 19827 training feeds (28383 holdout users)",
+     "wave-11 PSEUDO step 25: 25 steps with pseudo-feeds of 25 plateau steps since the last eval; 5047 pseudo-feeds (= positives) from 5832 draws (dropped: no eligible target 785, no negative 0; source rows blocked as holdout users 38); mean M' 90.7 H' 134.8 t 28.9 g 39.6; mean pseudo CE per feed 4.0376 (weight 0.3, ratio 1.0, gap 16-64, tmax 63, head on, noset 0, pseudo until step 58)",
+     "wave-11 PSEUDO step 50: 25 steps with pseudo-feeds of 25 plateau steps since the last eval; 6105 pseudo-feeds (= positives) from 7077 draws (dropped: no eligible target 972, no negative 0; source rows blocked as holdout users 39); mean M' 70.8 H' 134.8 t 28.9 g 39.4; mean pseudo CE per feed 3.6991 (weight 0.3, ratio 1.0, gap 16-64, tmax 63, head on, noset 0, pseudo until step 58)",
+     "wave-11 PSEUDO step 73: 8 steps with pseudo-feeds of 8 plateau steps since the last eval; 2252 pseudo-feeds (= positives) from 2585 draws (dropped: no eligible target 333, no negative 0; source rows blocked as holdout users 8); mean M' 56.5 H' 135.4 t 28.7 g 39.9; mean pseudo CE per feed 3.5600 (weight 0.3, ratio 1.0, gap 16-64, tmax 63, head on, noset 0, pseudo until step 58)",
+     "wave-11 PSEUDO final: 58 steps with pseudo-feeds, 13404 pseudo-feeds from 15494 draws, mean M' 75.9 H' 134.9 t 28.9 g 39.6; dropped 2090 / 0; blocked rows 85; head saved to <repo>/nn_x/w11/pseudo/ckpt/w11_smoke_pseudo_s23_pseudo_head.pt"
+    ]
+   }
+  },
+  "timing": {
+   "off": {
+    "ms_median": 36.19092982262373,
+    "ms_mean": 76.4581512393696,
+    "ms_p90": 183.1668308004737,
+    "peak_gb": 40.24272632598877,
+    "n": 35
+   },
+   "on": {
+    "ms_median": 65.69714285433292,
+    "ms_mean": 63.51638159581593,
+    "ms_p90": 72.07857631146908,
+    "peak_gb": 43.485482692718506,
+    "n": 35
+   },
+   "pseudo": {
+    "per_batch_mean": 288.825,
+    "B_mean": 330.525,
+    "share_of_rows": 0.8738370773769004,
+    "positives_per_feed": 1,
+    "total": 11553,
+    "M_mean": 74.83043365359647,
+    "drop_tgt_share": 0.1261629226230996,
+    "drop_neg_share": 0.0,
+    "blocked_share": 0.004386960139172528,
+    "eligible_rows_share": 0.9373076424002648,
+    "M_median": 56.0,
+    "H_mean": 134.44681035228945,
+    "H_source_mean": 203.35540552237515,
+    "t_mean": 29.026919414870598,
+    "g_mean": 39.8816757552151,
+    "t_hist": [
+     368,
+     277,
+     244,
+     242,
+     217,
+     219,
+     211,
+     220,
+     209,
+     218,
+     215,
+     196,
+     194,
+     183,
+     200,
+     170,
+     178,
+     174,
+     183,
+     199,
+     185,
+     175,
+     171,
+     191,
+     163,
+     165,
+     190,
+     189,
+     157,
+     146,
+     163,
+     170,
+     183,
+     160,
+     162,
+     183,
+     184,
+     119,
+     133,
+     160,
+     166,
+     163,
+     163,
+     160,
+     142,
+     171,
+     175,
+     147,
+     171,
+     153,
+     151,
+     155,
+     159,
+     145,
+     176,
+     171,
+     181,
+     166,
+     161,
+     158,
+     147,
+     167,
+     155,
+     184
+    ],
+    "g_min": 16,
+    "g_max": 64,
+    "n": 11553
+   },
+   "off2": {
+    "ms_median": 34.58538092672825,
+    "ms_mean": 33.48055849117892,
+    "ms_p90": 37.168523482978344,
+    "peak_gb": 40.24272632598877,
+    "n": 35
+   },
+   "on2": {
+    "ms_median": 65.57428278028965,
+    "ms_mean": 63.62333563821657,
+    "ms_p90": 70.97750045359135,
+    "peak_gb": 43.485482692718506,
+    "n": 35
+   },
+   "ratio": 1.8960115812867218,
+   "ratio_cold_first_pass": 1.8152930354738834,
+   "off_ms_median": 34.58538092672825,
+   "on_ms_median": 65.57428278028965,
+   "n_steps": 40,
+   "gpu": null,
+   "real_batch": {
+    "B_mean": 330.525,
+    "M_mean": 117.23128978550008
+   }
+  }
+ }
+}

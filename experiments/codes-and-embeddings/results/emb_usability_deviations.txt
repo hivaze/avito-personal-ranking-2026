@@ -1,0 +1,8 @@
+DEVIATION 1 (2026-11-13 05:27 UTC, after s1_eval ran, before s2_gbm was run):
+The pre-declared GBM variant (LightGBM lambdarank from scratch on [zG3, logM, logH, user0] vs + [x, z(x)]) is broken as a
+measuring device: its control scores 0.01413 +- 0.00079 BELOW base G3 because a 150-tree x 15-leaf ensemble over zG3 is a
+step function with many within-feed ties (pessimistic tie rule), so 'with-x minus control' = tie-breaking value of x
+(+0.003..+0.009 for every signal, incl. ones with AUC 0.50). Those GBM numbers in eval.log/eval.csv are VOID.
+Fix in s2_gbm.py, identical for control and with-x (still paired): boost from G3, init_score = k zG3 with k = pairwise-logistic
+MLE on the training folds' leak-free pairs, final score k zG3 + trees + 1e-6 zG3; all other settings as declared. The bar is
+unchanged (>= +0.0005 and >= 2 SE). Item 5's primary number is the s2_gbm value.

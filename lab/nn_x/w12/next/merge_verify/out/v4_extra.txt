@@ -1,0 +1,10 @@
+(a) val: W8TO 0.40157 C3 0.40101 | equal z-mix of model scores - W8TO +0.00004 ± 0.00040 | rank partner on our shape: ties left tied -0.00573 ± 0.00040 | ties -> our order -0.00019 ± 0.00027 | ties -> partner order -0.00024 ± 0.00051
+(b) per-feed Spearman vs the W8 file on test: mean, SE, share of feeds < 0, share of feeds with M >= 20 below 0 / below 0.3, 1st percentile (M >= 20)
+   C3                           mean 0.9873 ± 0.0001 | < 0: 0.000% | M>=20: < 0 0.000%, < 0.3 0.000%, p1 +0.965 | min +0.899
+   GRUx6                        mean 0.9728 ± 0.0002 | < 0: 0.000% | M>=20: < 0 0.000%, < 0.3 0.000%, p1 +0.928 | min +0.807
+   CatBoost                     mean 0.8147 ± 0.0006 | < 0: 0.066% | M>=20: < 0 0.000%, < 0.3 0.084%, p1 +0.543 | min +0.113
+   XGBoost                      mean 0.7350 ± 0.0008 | < 0: 0.196% | M>=20: < 0 0.021%, < 0.3 0.447%, p1 +0.377 | min -0.082
+   LLMx2                        mean 0.8122 ± 0.0007 | < 0: 0.080% | M>=20: < 0 0.000%, < 0.3 0.033%, p1 +0.540 | min +0.096
+   V_partial_inversion_10pct    mean 0.7898 ± 0.0035 | < 0: 9.998% | M>=20: < 0 9.779%, < 0.3 9.779%, p1 -0.995 | min -1.000
+   V_partial_inversion_30pct    mean 0.3950 ± 0.0054 | < 0: 29.998% | M>=20: < 0 29.997%, < 0.3 29.997%, p1 -0.997 | min -0.999
+   V_shuffled_12pct_feeds       mean 0.8680 ± 0.0019 | < 0: 6.197% | M>=20: < 0 6.132%, < 0.3 11.755%, p1 -0.165 | min -0.589

@@ -1,0 +1,215 @@
+# premortem: private-leaderboard pre-mortem of the candidate files and of the lead's standing assumptions (KEY = premortem)
+
+Written 2026-11-15 (04:55Z onward) by the premortem agent. CPU only, stored predictions only, no training, no submission file. Work directory `nn_x/w12/stale/premortem/`. Conventions: ± = 1 SE paired per feed; val = 14,423 feeds; holdout = 30,000 in-period feeds (all M >= 50); lagged subset = 13,424 holdout feeds of days >= Sep 13; [M] measured by me, [D] read in a project file (path given), [I] inferred. FINAL = 0.5 z(FT branch) + 0.5 z(TO branch), FT branch on val = out-of-fold. pmix = `src/pmix.py` reweighting of val feeds to the public / private mix of (M bin x cold-share bin). stale-val = CPU fp32 re-prediction of the train-only members with private-like inputs (files of the witness and veto agents; CPU against CPU). SVF = "half-stale final" = 0.5 z(FT out-of-fold, fresh inputs) + 0.5 z(TO from the stale-val files) (my definition, information: no fine-tuned prediction exists under stale inputs). Rules R1-R7 and the dated blocks: `nn_x/w12/stale/premortem/PREDECLARED.txt`, each written before the read it judges.
+
+Names. W8 / W16 = 8 / 16 wide students; W8b = the 8 newer ones (seeds 955-958); Pd = 4 popularity-light students d128; Pw = 4 popularity-light students d192 (fine-tunes landed 04:04-05:05Z); Px8 = Pd + Pw member-equal. "W16P40x8" = per branch 0.6 z(W16) + 0.4 z(Px8), and so on; suffix d / w / x8 = Pd / Pw / Px8. RULEM1040 = W16 + Px8 with popularity-light weight 0.1 on feeds with M < 50 and 0.4 on feeds with M >= 50; RULEM2040 = 0.2 / 0.4 (the scored weight kept on short feeds); RULEM2040w = the same with Pw. All new compositions exist in memory only.
+
+## 0. Verdict
+
+{{VERDICT}}
+
+## 1. The witness table
+
+Checks first [M] (`logs/t1_build.txt`): my NDCG equals `src/metrics.ndcg_per_feed` on a tied random score (max difference 0); my four branch pools of W8, W16, S16 reproduce `preds/ens_<tag>_*` (corr > 0.999999); G3 and C3 are read from the stored branches of the scored files (G3 has the one-seed fine-tune, C3 = `ens_Q2a8s3`); W8P20 - W8 reproduces the numbers on record on val (+0.00049 ± 0.00031), holdout (-0.00063 ± 0.00022) and CPU stale-val (+0.00088 ± 0.00036). The first build ran with 3 of 4 wide popularity-light fine-tunes (kept as `out/t1_table_3of4.md`); everything below is the re-run with 4 of 4.
+
+### 1.1 Levels
+
+{{T1A}}
+
+Feed cold share used by pmix (feed mean of the share of candidates with `it_hist_all_luo` = 0): val 0.290, public 0.371, private 0.406 [M]. (The 0.439 / 0.477 of the task text is a different definition; the ordering is the same.)
+
+### 1.2 Deltas against W8 (the reference of the scored pairs)
+
+{{T1B}}
+
+### 1.3 Deltas against W8P20 (the public-best file)
+
+{{T1D}}
+
+Deltas against W16: `nn_x/w12/stale/premortem/out/t1_table.md`, table T1c.
+
+### 1.4 Per branch
+
+{{T1E}}
+
+### 1.5 Sanity comparison with the scored pairs (rule R7, nothing fitted)
+
+{{T1F}}
+
+Reading [M]. (1) At FINAL level plain val, pmix-public and pmix-private all have the public sign on the three pairs that are at least 1 public SE away from zero, and on 5 of 6 overall (the misses are S16 - W8 for val and W16 - W8 for pmix; the second has a public delta of 0.000003). X2: pmix-public 0.16, val 0.22, pmix-private 0.28, SVF 0.53, in-period holdout 2.10. (2) The holdout is wrong only on the popularity-light pairs; on the three other pairs (W16 - W8, S16 - W8, W8 - C3) it has the public sign and size, so the two-witness rule for non-staleness families is not contradicted by these readings. (3) SVF over-reads the value of the fine-tune half (W8TO - W8: -0.00149 against public -0.00048) because only one branch is made stale; it is an upper bound for "the fine-tune is immune to staleness". (4) Slope of public on the column over the 6 pairs: unweighted 1.19 (val FINAL), 0.84 (pmix-public), 0.61 (pmix-private) in the table above; weighted by the public SEs, with its SE: 1.08 ± 0.49, 0.78 ± 0.34, 0.59 ± 0.26 (table T5c in section 4.3).
+
+## 2. Private forecast
+
+### 2.1 The forecast (rule R1) for the short list fixed in advance: W8P20, W16, W8, W16P20d, W16P20x8
+
+Forecast = inverse-variance mean of (a) the centre of three views of the val sample (plain val, pmix-private, SVF; sampling SE = the largest of the three, plus half their range as model spread) and (b) the public delta shifted by (pmix-private - pmix-public) where a public delta exists. "Realised" adds the sampling SE of the private part itself (20,033 feeds).
+
+{{T2A}}
+
+{{T2B}}
+
+**The file I expect to be best on private among the scored files and the short list: W8P20.** P(W8P20 beats W16 on private) = 0.92; P(beats W8) = 0.94; P(beats the lead's declared W16P20x8) = 0.73; P(beats W16P20d) = 0.82 [by rule R1; I]. The expected margin over W16 is +0.0007 (90% interval of the realised delta -0.0001 .. +0.0016). W8 against W16 is a coin flip (+0.00004 ± 0.00036). Rule R1 does not use the lagged holdout; after my lagged read (section 3.4: under the private-like lag the train-only pool of W16 equals the train-only half of W8P20, +0.00000 ± 0.00034, and the admixture reads +0.00003 ± 0.00023 over nine compositions) and for shift that no witness covers, my own number for P(W8P20 beats W16 on private) is 0.85.
+
+Winner's curse of the short list [M]: picking the list member with the largest centre on one user half and scoring it on the other (200 splits) picks W8P20 in 83% of the half-samples and reads -0.00013 against "always W8P20": the list contains nothing that a selection on val would prefer to W8P20.
+
+### 2.2 The four sources, one by one, for the popularity-light contrast W8P20 - W8
+
+| source | reading | what it says about private |
+|---|---|---|
+| (a) pmix-private, FINAL | +0.00079 ± 0.00048 (pmix-public +0.00063 ± 0.00039; public +0.00052 ± 0.00041) | +0.0002 more than public; but pmix-private over-reads the six public pairs by a factor 1.7 (slope 0.59 ± 0.26), so I do not add the +0.0002 |
+| (b) stale-val, TO branch | +0.00088 ± 0.00036; minus the fresh TO delta: +0.00032 ± 0.00041; SVF +0.00064 ± 0.00033; by day under stale inputs: Tue +0.00097, Thu +0.00078 | private-like inputs do not reduce the gain; they raise it by about +0.0003 at TO level (0.8 SE) |
+| (c) staleness gradient | in-period holdout (1.75 d) -0.00063 ± 0.00022, val (5.69 d) +0.00049 ± 0.00031, public (9.34 d) +0.00052 ± 0.00041 [D]; lagged holdout: private-like minus public-like lag +0.00006 ± 0.00018 [D poplag_verify 1.3]; within val: Tue +0.00100 ± 0.00045, Thu -0.00008 ± 0.00043 (fresh inputs), no monotone trend over the four cold-share bins (table below) | a straight line through the three points gives +0.0010 at 11.2 d, but the curve is flat between val and public (+0.00001 per day) and the direct manipulation of the lag says +0.00006: the gradient implies private = public, about +0.0005, not more. The holdout-to-val jump is "in period against out of period", not a dose of staleness that keeps growing |
+| (d) label-free behaviour by day | same per-feed correlation (0.99940 / 0.99939) and same top-1 agreement (93.4% / 93.4%) on public and private days; the cold-minus-warm offset of the admixture is +0.0064 on public days and +0.0055 on private days (val +0.0055 / +0.0057) | the two files differ on private days exactly as they do on val and public days: no drift, the public reading transfers; if anything the admixture acts 14% less on private than on public |
+
+Forecast for W8P20 - W8 on private: **+0.00066 ± 0.00033** (expected), realised 90% interval -0.0000 .. +0.0014. Two further scored contrasts of the same view on older pools agree [M, table T5a]: C1 - G3 public +0.00057, C3 - C2 public +0.00070 (pmix-public +0.00090 / +0.00085).
+
+The gradient table (val slices; shares of public / private feeds per slice):
+
+{{T2G}}
+
+Label-free day tables (three of ten pairs; the rest in `out/t2_forecast.md` T2h).
+
+W8P20 against W8:
+
+{{T2H_A}}
+
+W16P40x8 against W8P20:
+
+{{T2H_B}}
+
+W8TO against W8 (= what the fine-tune half does): the only pair with a drift. The cold promotion of the fine-tune half grows with the calendar day (val Tue -0.0094, val Thu -0.0136, public -0.0169, private -0.0195, last private day -0.0210, in z units; on record in ft_redesign finding 7) and is larger on private than on anything val covers.
+
+{{T2H_C}}
+
+### 2.3 Is the gain of W8P20 specific to the view? (same-view control)
+
+{{T8}}
+
+Reading [M]: 20% of fresh same-view members add nothing to an 8-pool at FINAL level (-0.00005, -0.00003); the popularity-light members add +0.0005 .. +0.0010 on BOTH disjoint 8-bases; view minus same view +0.00053 .. +0.00106 on val (z 1.6 - 3.5), +0.0008 .. +0.0010 on SVF. So the admixture gain is not "12 members instead of 8". On the 16-base the same admixture reads lower on fresh val (+0.00014 Pd, +0.00031 Px8, +0.00056 Pw) while stale-val and SVF keep +0.0006 .. +0.0010: the 16-base file is the average of the two 8-base twins and reads 0.0004 below both (-0.00044 ± 0.00021; a 2 SE oddity; I verified that the 16-base file equals the average of the twins branch by branch, so it is not a code error). I treat the differences BETWEEN popularity-light compositions at weight 0.2 as unresolved (all within 1.5 SE).
+
+### 2.4 Compositions outside the short list (information; selection guard of R1)
+
+{{T2C}}
+
+Nested picks (the out-of-sample value of choosing on val):
+
+{{T2E}}
+
+Base-seed draw (the same admixture on W8, W8b, W16):
+
+{{T2F}}
+
+## 3. The popularity-light weight for private
+
+### 3.1 Constant weight (rule R2)
+
+{{T3A}}
+
+Result by the rule as written. For the scored form (W8 + Pd) no weight beats 0.2 on any FINAL-level column; 0.2 is also the nested pick (54%). On W16 + Px8 the weights 0.3 and 0.4 pass R2 WITHOUT the lagged clause (0.4 against 0.2: val +0.00055 ± 0.00031, pmix-private +0.00092 ± 0.00049, stale-val +0.00082 ± 0.00033); with the lagged clause see 3.4. 12 declared looks + 4 on W16 + Pw.
+
+### 3.2 Why a weight could depend on the feed: the level gap between the pools by feed group
+
+{{T3B}}
+
+On short feeds (M < 50; 39% of public and of private feeds) the popularity-light pool is 0.002 - 0.004 behind the base pool at every level; on long feeds it is within 1 SE of it or ahead at FINAL level (Pd -0.0009 ± 0.0009, Px8 +0.0009 ± 0.0009, Pw +0.0015 ± 0.0009) and level with it under stale inputs. Two pools of equal strength and correlation 0.98 want a weight near one half; a pool that is 0.003 behind wants a small one. That is the mechanism. The in-period holdout cannot see it: all its feeds are long AND its popularity is fresh, where the popularity-light pool is 0.006 - 0.007 behind.
+
+### 3.3 Feed-dependent weight (rule R3: 3 properties x 25 weight pairs, nested on user halves)
+
+{{T3C}}
+
+Result by the rule as written: **DEFENSIBLE on W16 + Px8** (nested out-of-sample +0.00065 over constant 0.2, z 2.31; pmix-private +0.00113; stale-val +0.00058), **not on the scored form W8 + Pd** (-0.00015). Over the five compositions the mean nested gain is +0.000298 with all three columns >= 0 in 4 of 5: by the letter of block 4 (bar +0.0003) "one composition only", by a hair. Multiplicity: 75 rules x 5 compositions (2 declared in block 1, 2 run with them, 1 declared in block 4); the modal property is feed size in all five, and the hypothesis "short feeds dislike the admixture" was formed on the full val sample (witness.md 3.4) before my nested read, so the nested z is optimistic. What is consistent across all five compositions is narrower than the rule: on M >= 50 the weight 0.4 beats 0.2 in 5 of 5 (+0.00035 .. +0.00119 per long feed), on M < 50 the weight 0.4 loses to 0.2 in 5 of 5 (-0.0002 .. -0.0012), and 0.1 against 0.2 on short feeds is mixed. Robustness of the rule files against the constant-0.2 file of the same members (in-sample, selection-biased; all slices) and what a public slot would read:
+
+{{T7}}
+
+### 3.4 The lagged holdout (my read; PREDECLARED block 3)
+
+{{LAGTEXT}}
+
+{{T6}}
+
+### 3.5 Answer
+
+{{WEIGHTANSWER}}
+
+## 4. Assumption audit (extension of reports/STALE_1115/veto.md to claims that rest on val out-of-fold reads of the fine-tune, on arguments, or that the 11-15 public scores weaken)
+
+### 4.1 The list
+
+{{AUDIT}}
+
+### 4.2 Measurements behind the list
+
+Fine-tune weight (rule R4):
+
+{{T4WFT}}
+
+Fold-to-fold agreement of the fine-tune branch on test rows and the SIMEX read (rules R5 / R5b):
+
+{{T4FOLD}}
+
+The SIMEX extrapolations are noisy (20-30 noise draws; the lambda points differ by 0.0001 or less), so the honest statement is an order of magnitude: doubling the fold noise costs about 0.0001 at FINAL level, removing four fifths of it gains about +0.0001 (my three quadratic estimates +0.00008 .. +0.00015; linear fits -0.00002 .. +0.00008).
+
+Pool size (rule R6):
+
+{{T4SIZE}}
+
+### 4.3 More fine-tune seeds, the level line, transfer slopes, the soft-target pilot at the private mix
+
+{{T5}}
+
+{{T9}}
+
+{{T10}}
+
+Reading of T10 [M]: no cell differs from its neighbours by more than 1 SE; the admixture placed in the train-only branch alone (a = 0, b = 0.2) reads +0.00024 / +0.00035 against +0.00049 / +0.00031 in both branches, so "new members do not need their own fine-tune" (ft_redesign) is not contradicted on val; nothing here supports a branch-specific weight.
+
+## 5. Recommendation
+
+{{RECO}}
+
+## 6. Method
+
+- Loaders and compositions: `pm_common.py`, `t1_build.py` (member z = `stack_val.feed_rank_z[:, 1]` re-implemented in numba; pool = member mean of z; branch mix = (1 - w) z(base) + w z(pop); FINAL = 0.5 z(FT) + 0.5 z(TO), as `nn_x/w12/kd/build_r3.py`). Per-feed NDCG arrays of every composition and view are stored in `out/pf.npz` (rule files in `out/pf_rule.npz`), test and val FINAL scores in `cache/{testfin,valfin}_<name>.npy`.
+- Feed-dependent rules are composed per feed from the constant-weight arrays (the per-feed z makes a per-feed weight well defined); a test-side rule file would be built the same way from the two constant-weight test scores.
+- Nested reads: 200 random user-half splits (user-0 feeds are singletons), both directions, cross-fitted per-feed deltas over all 14,423 feeds; SE = median per-split paired SE.
+- Forecast rule R1, weight rules R2 / R3, fine-tune weight R4, fold noise R5 / R5b, pool size R6, sanity R7: `PREDECLARED.txt` block 1 (before any number); the later blocks are dated additions, each before its read, each listing what had been seen.
+- Fold statistics: `n2cpv3s3_test_folds.npy` holds, per fold, the mean over the 3 fine-tune seeds of the per-feed z on test rows (`nn_x/w5/finetune.py` line 280); GroupKFold without shuffle gives every member the same user folds.
+- SIMEX: noise of variance lambda x v1 x var(pool) is added to the val out-of-fold FT pool (white: independent per row; structured: (P_A - P_B) / 2 of a random 8 / 8 split of the 16 students, which is uncorrelated with the 16-pool), FINAL NDCG at lambda 0.5 / 1 / 2, quadratic and linear extrapolation to lambda = -0.8.
+- Lagged holdout: the witness agent's `lagged_score.py` imported read-only by `lag_run.py` with its output path redirected to `cache/lag/`; control = one member re-scored against the witness cache (max |logit| difference 1.53e-05); read-out `t6_lag_read.py`.
+- Label-free day statistics (`t2_forecast.py`, T2h): per-feed Pearson r of the two FINAL z vectors, same top-1 item, cold-minus-warm offset (cold = `it_hist_all_luo` = 0), by Moscow day and public / private.
+
+## 7. Limits, and what I did NOT check
+
+{{LIMITS}}
+
+## 8. Commands
+
+```
+cd <repo>/nn_x/w12/stale/premortem
+export CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 MKL_NUM_THREADS=12 OPENBLAS_NUM_THREADS=12 NUMBA_NUM_THREADS=12 POLARS_MAX_THREADS=12 PYTHONDONTWRITEBYTECODE=1
+PY=<repo>/.venv/bin/python
+$PY t1_build.py                      # pools, compositions, per-feed arrays, test FINAL scores (16 s)
+$PY t1_table.py                      # out/t1_table.md
+$PY t3_weight.py                     # out/t3_weight.md (R2, R3)
+$PY t3b_rule.py                      # out/pf_rule.npz (rule files in memory)
+$PY t2_forecast.py out/pf_rule.npz   # out/t2_forecast.md (R1, nested pick, twins, gradient, day tables)
+$PY t4_audit.py wft; $PY t4_audit.py fold; $PY t4_audit.py size     # out/t4_*.md (R4, R5, R6)
+$PY t5_misc.py; $PY t7_robust.py; $PY t8_sameview.py; $PY t9_softft.py; $PY t10_branch.py
+WT_THREADS=12 $PY lag_run.py control                                 # control of the lagged tool
+WT_THREADS=12 $PY lag_run.py abl_e10_pop1kd05w192_s951,abl_e10_pop1kd05w192_s952,abl_e10_pop1kd05w192_s953,abl_e10_pop1kd05w192_s954 lag0,priv
+WT_THREADS=12 $PY lag_run.py w5_e10_kd05w192_s955,w5_e10_kd05t25w192_s955,w5_e10_kd05w192_s956,w5_e10_kd05t25w192_s956,w5_e10_kd05w192_s957,w5_e10_kd05t25w192_s957,w5_e10_kd05w192_s958,w5_e10_kd05t25w192_s958 lag0,priv
+$PY t6_lag_read.py                   # out/t6_lag.md
+$PY make_report.py                   # this file (report_head.txt + blk_*.txt + out/*.md)
+```
+
+## 9. Files (all under `nn_x/w12/stale/premortem/` unless stated)
+
+- `reports/STALE_1115/premortem.md` (this report); `PROGRESS.md`; `PREDECLARED.txt` (dated blocks).
+- Code: `pm_common.py`, `t1_build.py`, `t1_table.py`, `t2_forecast.py`, `t3_weight.py`, `t3b_rule.py`, `t4_audit.py`, `t5_misc.py`, `t6_lag_read.py`, `t7_robust.py`, `t8_sameview.py`, `t9_softft.py`, `t10_branch.py`, `lag_run.py`, `make_report.py`, `report_head.txt`, `blk_*.txt`.
+- Tables: `out/t1_table.md` (+ `_3of4`), `out/t2_forecast.md` / `.json`, `out/t3_weight.md` (+ `_run1`), `out/t4_wft.md`, `out/t4_fold.md`, `out/t4_size.md`, `out/t5_misc.md`, `out/t6_lag.md`, `out/t7_robust.md`, `out/t8_sameview.md`, `out/t9_softft.md`, `out/t10_branch.md`, `out/t1_pairs.json`, `out/avail.json`.
+- Arrays: `out/pf.npz`, `out/pf_rule.npz` (per-feed NDCG), `cache/pool_*.npy` (pool z per kind), `cache/{testfin,valfin}_*.npy` (FINAL scores of compositions aligned to data/flat; NOT submission files), `cache/lag/{lag0,priv}/*.npy` (my lagged predictions), `cache/lag/control/`.
+- Logs: `logs/`.
+
+## 10. Compliance
+
+CPU only (`CUDA_VISIBLE_DEVICES=""` in every command), 12 threads per process, two long processes of mine at most (the two `lag_run.py` jobs, 05:13-05:52Z). SELF-REPORTED: while those two ran I also started short table scripts (`t3_weight.py`, `t2_forecast.py`, `t7_robust.py`, `t8_sameview.py`, `t9_softft.py`, `t10_branch.py`, two one-off read-outs; 5 - 50 s each, 12 threads, one at a time); if a script of under a minute counts as heavy, the cap of two was exceeded for about 4 minutes in total. No process was stopped, signalled or reniced by me (mine ended by themselves); no pattern kill was used (`ps` / `pgrep` were used once each to LIST my own PIDs). No file outside `nn_x/w12/stale/premortem/` and `reports/STALE_1115/premortem.md` was written: the witness agent's tool was imported read-only with `PYTHONDONTWRITEBYTECODE=1`, its output path was redirected to my cache, my driver asserts beforehand that every raw column the tool would cache already exists in the witness directory, and my numba cache is in my directory. No install, no network, no submission file, nothing sent. Val labels were used only to score stored out-of-fold and train-only predictions; holdout labels only for train-only reads; no test label exists. Rules were written before the reads they judge (seven dated blocks), with one lapse that is listed in section 7 item 6: two of the five compositions of the R3 read (W8 + Px8, W16 + Pd) were run in the first pass without having been named in block 1. The report file itself is assembled by `make_report.py` from text templates (the session's write tool does not write report files directly; the task requires this file).

@@ -1,0 +1,1943 @@
+{
+ "verdict": "PASS",
+ "checks": [
+  [
+   "LD stable phase: every nn.Dropout (Block FFN-hidden ff.2, Block residual dr, HistRetrieval value dp) p = 0 (set) and identity (measured) at every step < t_cool",
+   true
+  ],
+  [
+   "LD stable phase: every attention-probability site p = 0.1 (set) and SDPA receives dropout_p == [0.1] (measured)",
+   true
+  ],
+  [
+   "LD cooldown (step >= t_cool, from the FIRST cooldown step): every nn.Dropout p = 0.1 (set) and drops ~10% (measured), every attention site p = 0.1 and SDPA receives [0.1]",
+   true
+  ],
+  [
+   "base reference: every site 0.1 at every step (so the LD cooldown == the base's dropout everywhere)",
+   true
+  ],
+  [
+   "LD and base have the same dropout sites (names) and the same parameters at init (dropout has no parameters)",
+   true
+  ],
+  [
+   "eval mode: no dropout anywhere (SDPA dropout_p 0, nn.Dropout identity) for LD and base",
+   true
+  ],
+  [
+   "train.py t_cool formula at the 10-epoch length (98350 steps) = 78680 (= the base run's logged cooldown start)",
+   true
+  ],
+  [
+   "parser: LD differs from E_BASE+HYG only by drop / attn_drop / drop_cd",
+   true
+  ],
+  [
+   "parser: E_BASE+HYG == the w5_e10_base_s951 reference recipe",
+   true
+  ]
+ ],
+ "t_cool_probe": 8,
+ "n_dropout_modules": 11,
+ "n_attn_sites": 5,
+ "ld_steps": {
+  "0": {
+   "set_p": {
+    "Dropout retr.dp": 0.0,
+    "Dropout hist_enc.0.ff.2": 0.0,
+    "Dropout hist_enc.0.dr": 0.0,
+    "Dropout cross.0.ff.2": 0.0,
+    "Dropout cross.0.dr": 0.0,
+    "Dropout cross.1.ff.2": 0.0,
+    "Dropout cross.1.dr": 0.0,
+    "Dropout sets.0.ff.2": 0.0,
+    "Dropout sets.0.dr": 0.0,
+    "Dropout sets.1.ff.2": 0.0,
+    "Dropout sets.1.dr": 0.0,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "retr.dp": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ]
+   },
+   "loss": 0.019697003066539764
+  },
+  "1": {
+   "set_p": {
+    "Dropout retr.dp": 0.0,
+    "Dropout hist_enc.0.ff.2": 0.0,
+    "Dropout hist_enc.0.dr": 0.0,
+    "Dropout cross.0.ff.2": 0.0,
+    "Dropout cross.0.dr": 0.0,
+    "Dropout cross.1.ff.2": 0.0,
+    "Dropout cross.1.dr": 0.0,
+    "Dropout sets.0.ff.2": 0.0,
+    "Dropout sets.0.dr": 0.0,
+    "Dropout sets.1.ff.2": 0.0,
+    "Dropout sets.1.dr": 0.0,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "retr.dp": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ]
+   },
+   "loss": 0.03775681555271149
+  },
+  "2": {
+   "set_p": {
+    "Dropout retr.dp": 0.0,
+    "Dropout hist_enc.0.ff.2": 0.0,
+    "Dropout hist_enc.0.dr": 0.0,
+    "Dropout cross.0.ff.2": 0.0,
+    "Dropout cross.0.dr": 0.0,
+    "Dropout cross.1.ff.2": 0.0,
+    "Dropout cross.1.dr": 0.0,
+    "Dropout sets.0.ff.2": 0.0,
+    "Dropout sets.0.dr": 0.0,
+    "Dropout sets.1.ff.2": 0.0,
+    "Dropout sets.1.dr": 0.0,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "retr.dp": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ]
+   },
+   "loss": 0.03281138092279434
+  },
+  "3": {
+   "set_p": {
+    "Dropout retr.dp": 0.0,
+    "Dropout hist_enc.0.ff.2": 0.0,
+    "Dropout hist_enc.0.dr": 0.0,
+    "Dropout cross.0.ff.2": 0.0,
+    "Dropout cross.0.dr": 0.0,
+    "Dropout cross.1.ff.2": 0.0,
+    "Dropout cross.1.dr": 0.0,
+    "Dropout sets.0.ff.2": 0.0,
+    "Dropout sets.0.dr": 0.0,
+    "Dropout sets.1.ff.2": 0.0,
+    "Dropout sets.1.dr": 0.0,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "retr.dp": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ]
+   },
+   "loss": 0.03422856330871582
+  },
+  "4": {
+   "set_p": {
+    "Dropout retr.dp": 0.0,
+    "Dropout hist_enc.0.ff.2": 0.0,
+    "Dropout hist_enc.0.dr": 0.0,
+    "Dropout cross.0.ff.2": 0.0,
+    "Dropout cross.0.dr": 0.0,
+    "Dropout cross.1.ff.2": 0.0,
+    "Dropout cross.1.dr": 0.0,
+    "Dropout sets.0.ff.2": 0.0,
+    "Dropout sets.0.dr": 0.0,
+    "Dropout sets.1.ff.2": 0.0,
+    "Dropout sets.1.dr": 0.0,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "retr.dp": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ]
+   },
+   "loss": 0.06197496876120567
+  },
+  "5": {
+   "set_p": {
+    "Dropout retr.dp": 0.0,
+    "Dropout hist_enc.0.ff.2": 0.0,
+    "Dropout hist_enc.0.dr": 0.0,
+    "Dropout cross.0.ff.2": 0.0,
+    "Dropout cross.0.dr": 0.0,
+    "Dropout cross.1.ff.2": 0.0,
+    "Dropout cross.1.dr": 0.0,
+    "Dropout sets.0.ff.2": 0.0,
+    "Dropout sets.0.dr": 0.0,
+    "Dropout sets.1.ff.2": 0.0,
+    "Dropout sets.1.dr": 0.0,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "retr.dp": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ]
+   },
+   "loss": 0.020198121666908264
+  },
+  "6": {
+   "set_p": {
+    "Dropout retr.dp": 0.0,
+    "Dropout hist_enc.0.ff.2": 0.0,
+    "Dropout hist_enc.0.dr": 0.0,
+    "Dropout cross.0.ff.2": 0.0,
+    "Dropout cross.0.dr": 0.0,
+    "Dropout cross.1.ff.2": 0.0,
+    "Dropout cross.1.dr": 0.0,
+    "Dropout sets.0.ff.2": 0.0,
+    "Dropout sets.0.dr": 0.0,
+    "Dropout sets.1.ff.2": 0.0,
+    "Dropout sets.1.dr": 0.0,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "retr.dp": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ]
+   },
+   "loss": 0.04185354709625244
+  },
+  "7": {
+   "set_p": {
+    "Dropout retr.dp": 0.0,
+    "Dropout hist_enc.0.ff.2": 0.0,
+    "Dropout hist_enc.0.dr": 0.0,
+    "Dropout cross.0.ff.2": 0.0,
+    "Dropout cross.0.dr": 0.0,
+    "Dropout cross.1.ff.2": 0.0,
+    "Dropout cross.1.dr": 0.0,
+    "Dropout sets.0.ff.2": 0.0,
+    "Dropout sets.0.dr": 0.0,
+    "Dropout sets.1.ff.2": 0.0,
+    "Dropout sets.1.dr": 0.0,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "retr.dp": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.0.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "cross.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.dr": [
+     [
+      "identity"
+     ],
+     0.0
+    ],
+    "sets.1.ff.2": [
+     [
+      "identity"
+     ],
+     0.0
+    ]
+   },
+   "loss": 0.012723526917397976
+  },
+  "8": {
+   "set_p": {
+    "Dropout retr.dp": 0.1,
+    "Dropout hist_enc.0.ff.2": 0.1,
+    "Dropout hist_enc.0.dr": 0.1,
+    "Dropout cross.0.ff.2": 0.1,
+    "Dropout cross.0.dr": 0.1,
+    "Dropout cross.1.ff.2": 0.1,
+    "Dropout cross.1.dr": 0.1,
+    "Dropout sets.0.ff.2": 0.1,
+    "Dropout sets.0.dr": 0.1,
+    "Dropout sets.1.ff.2": 0.1,
+    "Dropout sets.1.dr": 0.1,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "dropped"
+     ],
+     0.10066066682338715
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09976896643638611
+    ],
+    "retr.dp": [
+     [
+      "dropped"
+     ],
+     0.100434809923172
+    ],
+    "cross.0.dr": [
+     [
+      "dropped"
+     ],
+     0.0973772294819355
+    ],
+    "cross.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.1012253537774086
+    ],
+    "sets.0.dr": [
+     [
+      "dropped"
+     ],
+     0.1001790389418602
+    ],
+    "sets.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0998477041721344
+    ],
+    "cross.1.dr": [
+     [
+      "dropped"
+     ],
+     0.1006673201918602
+    ],
+    "cross.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0985398069024086
+    ],
+    "sets.1.dr": [
+     [
+      "dropped"
+     ],
+     0.1009521484375
+    ],
+    "sets.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.1002197265625
+    ]
+   },
+   "loss": 0.04360178858041763
+  },
+  "9": {
+   "set_p": {
+    "Dropout retr.dp": 0.1,
+    "Dropout hist_enc.0.ff.2": 0.1,
+    "Dropout hist_enc.0.dr": 0.1,
+    "Dropout cross.0.ff.2": 0.1,
+    "Dropout cross.0.dr": 0.1,
+    "Dropout cross.1.ff.2": 0.1,
+    "Dropout cross.1.dr": 0.1,
+    "Dropout sets.0.ff.2": 0.1,
+    "Dropout sets.0.dr": 0.1,
+    "Dropout sets.1.ff.2": 0.1,
+    "Dropout sets.1.dr": 0.1,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "dropped"
+     ],
+     0.10168269276618958
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09834735840559006
+    ],
+    "retr.dp": [
+     [
+      "dropped"
+     ],
+     0.10006487369537354
+    ],
+    "cross.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09771173447370529
+    ],
+    "cross.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.10028631240129471
+    ],
+    "sets.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09872159361839294
+    ],
+    "sets.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09914328902959824
+    ],
+    "cross.1.dr": [
+     [
+      "dropped"
+     ],
+     0.09877707436680794
+    ],
+    "cross.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.10114080458879471
+    ],
+    "sets.1.dr": [
+     [
+      "dropped"
+     ],
+     0.10008655861020088
+    ],
+    "sets.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.10124067962169647
+    ]
+   },
+   "loss": 0.023169688880443573
+  }
+ },
+ "base_steps": {
+  "0": {
+   "set_p": {
+    "Dropout retr.dp": 0.1,
+    "Dropout hist_enc.0.ff.2": 0.1,
+    "Dropout hist_enc.0.dr": 0.1,
+    "Dropout cross.0.ff.2": 0.1,
+    "Dropout cross.0.dr": 0.1,
+    "Dropout cross.1.ff.2": 0.1,
+    "Dropout cross.1.dr": 0.1,
+    "Dropout sets.0.ff.2": 0.1,
+    "Dropout sets.0.dr": 0.1,
+    "Dropout sets.1.ff.2": 0.1,
+    "Dropout sets.1.dr": 0.1,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09973857179284096
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09847702085971832
+    ],
+    "retr.dp": [
+     [
+      "dropped"
+     ],
+     0.09954436123371124
+    ],
+    "cross.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09954833984375
+    ],
+    "cross.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.1002197265625
+    ],
+    "sets.0.dr": [
+     [
+      "dropped"
+     ],
+     0.099365234375
+    ],
+    "sets.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0991668701171875
+    ],
+    "cross.1.dr": [
+     [
+      "dropped"
+     ],
+     0.0985565185546875
+    ],
+    "cross.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0971832275390625
+    ],
+    "sets.1.dr": [
+     [
+      "dropped"
+     ],
+     0.1016387939453125
+    ],
+    "sets.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0991668701171875
+    ]
+   },
+   "loss": 0.019704669713974
+  },
+  "1": {
+   "set_p": {
+    "Dropout retr.dp": 0.1,
+    "Dropout hist_enc.0.ff.2": 0.1,
+    "Dropout hist_enc.0.dr": 0.1,
+    "Dropout cross.0.ff.2": 0.1,
+    "Dropout cross.0.dr": 0.1,
+    "Dropout cross.1.ff.2": 0.1,
+    "Dropout cross.1.dr": 0.1,
+    "Dropout sets.0.ff.2": 0.1,
+    "Dropout sets.0.dr": 0.1,
+    "Dropout sets.1.ff.2": 0.1,
+    "Dropout sets.1.dr": 0.1,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "dropped"
+     ],
+     0.10060113668441772
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.10014515370130539
+    ],
+    "retr.dp": [
+     [
+      "dropped"
+     ],
+     0.10037120431661606
+    ],
+    "cross.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09965163096785545
+    ],
+    "cross.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09886756539344788
+    ],
+    "sets.0.dr": [
+     [
+      "dropped"
+     ],
+     0.10009296238422394
+    ],
+    "sets.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09930889308452606
+    ],
+    "cross.1.dr": [
+     [
+      "dropped"
+     ],
+     0.09958590194582939
+    ],
+    "cross.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.10015869140625
+    ],
+    "sets.1.dr": [
+     [
+      "dropped"
+     ],
+     0.10207425430417061
+    ],
+    "sets.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09995210915803909
+    ]
+   },
+   "loss": 0.03794058412313461
+  },
+  "2": {
+   "set_p": {
+    "Dropout retr.dp": 0.1,
+    "Dropout hist_enc.0.ff.2": 0.1,
+    "Dropout hist_enc.0.dr": 0.1,
+    "Dropout cross.0.ff.2": 0.1,
+    "Dropout cross.0.dr": 0.1,
+    "Dropout cross.1.ff.2": 0.1,
+    "Dropout cross.1.dr": 0.1,
+    "Dropout sets.0.ff.2": 0.1,
+    "Dropout sets.0.dr": 0.1,
+    "Dropout sets.1.ff.2": 0.1,
+    "Dropout sets.1.dr": 0.1,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09957137331366539
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09953591227531433
+    ],
+    "retr.dp": [
+     [
+      "dropped"
+     ],
+     0.10126426070928574
+    ],
+    "cross.0.dr": [
+     [
+      "dropped"
+     ],
+     0.0984700545668602
+    ],
+    "cross.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0970865860581398
+    ],
+    "sets.0.dr": [
+     [
+      "dropped"
+     ],
+     0.1015625
+    ],
+    "sets.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.096435546875
+    ],
+    "cross.1.dr": [
+     [
+      "dropped"
+     ],
+     0.0984293632209301
+    ],
+    "cross.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.1017659530043602
+    ],
+    "sets.1.dr": [
+     [
+      "dropped"
+     ],
+     0.0987955741584301
+    ],
+    "sets.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.1004638671875
+    ]
+   },
+   "loss": 0.032512545585632324
+  },
+  "3": {
+   "set_p": {
+    "Dropout retr.dp": 0.1,
+    "Dropout hist_enc.0.ff.2": 0.1,
+    "Dropout hist_enc.0.dr": 0.1,
+    "Dropout cross.0.ff.2": 0.1,
+    "Dropout cross.0.dr": 0.1,
+    "Dropout cross.1.ff.2": 0.1,
+    "Dropout cross.1.dr": 0.1,
+    "Dropout sets.0.ff.2": 0.1,
+    "Dropout sets.0.dr": 0.1,
+    "Dropout sets.1.ff.2": 0.1,
+    "Dropout sets.1.dr": 0.1,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09884180501103401
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09953084588050842
+    ],
+    "retr.dp": [
+     [
+      "dropped"
+     ],
+     0.09948796778917313
+    ],
+    "cross.0.dr": [
+     [
+      "dropped"
+     ],
+     0.1015692800283432
+    ],
+    "cross.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0999891459941864
+    ],
+    "sets.0.dr": [
+     [
+      "dropped"
+     ],
+     0.0995347760617733
+    ],
+    "sets.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0993584543466568
+    ],
+    "cross.1.dr": [
+     [
+      "dropped"
+     ],
+     0.0983615443110466
+    ],
+    "cross.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.1003078892827034
+    ],
+    "sets.1.dr": [
+     [
+      "dropped"
+     ],
+     0.1006266251206398
+    ],
+    "sets.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.1011216938495636
+    ]
+   },
+   "loss": 0.03414008021354675
+  },
+  "4": {
+   "set_p": {
+    "Dropout retr.dp": 0.1,
+    "Dropout hist_enc.0.ff.2": 0.1,
+    "Dropout hist_enc.0.dr": 0.1,
+    "Dropout cross.0.ff.2": 0.1,
+    "Dropout cross.0.dr": 0.1,
+    "Dropout cross.1.ff.2": 0.1,
+    "Dropout cross.1.dr": 0.1,
+    "Dropout sets.0.ff.2": 0.1,
+    "Dropout sets.0.dr": 0.1,
+    "Dropout sets.1.ff.2": 0.1,
+    "Dropout sets.1.dr": 0.1,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09960611909627914
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09962783008813858
+    ],
+    "retr.dp": [
+     [
+      "dropped"
+     ],
+     0.09971081465482712
+    ],
+    "cross.0.dr": [
+     [
+      "dropped"
+     ],
+     0.0995803102850914
+    ],
+    "cross.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0999116450548172
+    ],
+    "sets.0.dr": [
+     [
+      "dropped"
+     ],
+     0.0993768572807312
+    ],
+    "sets.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0993129163980484
+    ],
+    "cross.1.dr": [
+     [
+      "dropped"
+     ],
+     0.0996558777987957
+    ],
+    "cross.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0996500626206398
+    ],
+    "sets.1.dr": [
+     [
+      "dropped"
+     ],
+     0.1014927439391613
+    ],
+    "sets.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.099684938788414
+    ]
+   },
+   "loss": 0.062305986881256104
+  },
+  "5": {
+   "set_p": {
+    "Dropout retr.dp": 0.1,
+    "Dropout hist_enc.0.ff.2": 0.1,
+    "Dropout hist_enc.0.dr": 0.1,
+    "Dropout cross.0.ff.2": 0.1,
+    "Dropout cross.0.dr": 0.1,
+    "Dropout cross.1.ff.2": 0.1,
+    "Dropout cross.1.dr": 0.1,
+    "Dropout sets.0.ff.2": 0.1,
+    "Dropout sets.0.dr": 0.1,
+    "Dropout sets.1.ff.2": 0.1,
+    "Dropout sets.1.dr": 0.1,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09812560677528381
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09998788684606552
+    ],
+    "retr.dp": [
+     [
+      "dropped"
+     ],
+     0.0996774435043335
+    ],
+    "cross.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09968261420726776
+    ],
+    "cross.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09984131157398224
+    ],
+    "sets.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09929199144244194
+    ],
+    "sets.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09938964992761612
+    ],
+    "cross.1.dr": [
+     [
+      "dropped"
+     ],
+     0.09827880561351776
+    ],
+    "cross.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09967041015625
+    ],
+    "sets.1.dr": [
+     [
+      "dropped"
+     ],
+     0.09818115085363388
+    ],
+    "sets.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.10018310695886612
+    ]
+   },
+   "loss": 0.020055070519447327
+  },
+  "6": {
+   "set_p": {
+    "Dropout retr.dp": 0.1,
+    "Dropout hist_enc.0.ff.2": 0.1,
+    "Dropout hist_enc.0.dr": 0.1,
+    "Dropout cross.0.ff.2": 0.1,
+    "Dropout cross.0.dr": 0.1,
+    "Dropout cross.1.ff.2": 0.1,
+    "Dropout cross.1.dr": 0.1,
+    "Dropout sets.0.ff.2": 0.1,
+    "Dropout sets.0.dr": 0.1,
+    "Dropout sets.1.ff.2": 0.1,
+    "Dropout sets.1.dr": 0.1,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09955009445548058
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.10027054697275162
+    ],
+    "retr.dp": [
+     [
+      "dropped"
+     ],
+     0.10065741091966629
+    ],
+    "cross.0.dr": [
+     [
+      "dropped"
+     ],
+     0.10067382827401161
+    ],
+    "cross.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09907226264476776
+    ],
+    "sets.0.dr": [
+     [
+      "dropped"
+     ],
+     0.10095703229308128
+    ],
+    "sets.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09981445223093033
+    ],
+    "cross.1.dr": [
+     [
+      "dropped"
+     ],
+     0.10054687410593033
+    ],
+    "cross.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.10049805045127869
+    ],
+    "sets.1.dr": [
+     [
+      "dropped"
+     ],
+     0.10030273348093033
+    ],
+    "sets.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09935546666383743
+    ]
+   },
+   "loss": 0.042164091020822525
+  },
+  "7": {
+   "set_p": {
+    "Dropout retr.dp": 0.1,
+    "Dropout hist_enc.0.ff.2": 0.1,
+    "Dropout hist_enc.0.dr": 0.1,
+    "Dropout cross.0.ff.2": 0.1,
+    "Dropout cross.0.dr": 0.1,
+    "Dropout cross.1.ff.2": 0.1,
+    "Dropout cross.1.dr": 0.1,
+    "Dropout sets.0.ff.2": 0.1,
+    "Dropout sets.0.dr": 0.1,
+    "Dropout sets.1.ff.2": 0.1,
+    "Dropout sets.1.dr": 0.1,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "dropped"
+     ],
+     0.10420672968029976
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09723557531833649
+    ],
+    "retr.dp": [
+     [
+      "dropped"
+     ],
+     0.10026461631059647
+    ],
+    "cross.0.dr": [
+     [
+      "dropped"
+     ],
+     0.1004638671875
+    ],
+    "cross.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0994415283203125
+    ],
+    "sets.0.dr": [
+     [
+      "dropped"
+     ],
+     0.1018829345703125
+    ],
+    "sets.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.102691650390625
+    ],
+    "cross.1.dr": [
+     [
+      "dropped"
+     ],
+     0.1002044677734375
+    ],
+    "cross.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.1009063720703125
+    ],
+    "sets.1.dr": [
+     [
+      "dropped"
+     ],
+     0.097930908203125
+    ],
+    "sets.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0995025634765625
+    ]
+   },
+   "loss": 0.012720605358481407
+  },
+  "8": {
+   "set_p": {
+    "Dropout retr.dp": 0.1,
+    "Dropout hist_enc.0.ff.2": 0.1,
+    "Dropout hist_enc.0.dr": 0.1,
+    "Dropout cross.0.ff.2": 0.1,
+    "Dropout cross.0.dr": 0.1,
+    "Dropout cross.1.ff.2": 0.1,
+    "Dropout cross.1.dr": 0.1,
+    "Dropout sets.0.ff.2": 0.1,
+    "Dropout sets.0.dr": 0.1,
+    "Dropout sets.1.ff.2": 0.1,
+    "Dropout sets.1.dr": 0.1,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09894313663244247
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.1006961315870285
+    ],
+    "retr.dp": [
+     [
+      "dropped"
+     ],
+     0.09977935254573822
+    ],
+    "cross.0.dr": [
+     [
+      "dropped"
+     ],
+     0.1008475162088871
+    ],
+    "cross.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.1005161851644516
+    ],
+    "sets.0.dr": [
+     [
+      "dropped"
+     ],
+     0.0997430719435215
+    ],
+    "sets.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.0998477041721344
+    ],
+    "cross.1.dr": [
+     [
+      "dropped"
+     ],
+     0.0999814011156559
+    ],
+    "cross.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.100196473300457
+    ],
+    "sets.1.dr": [
+     [
+      "dropped"
+     ],
+     0.1000104621052742
+    ],
+    "sets.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.1003476083278656
+    ]
+   },
+   "loss": 0.04378755763173103
+  },
+  "9": {
+   "set_p": {
+    "Dropout retr.dp": 0.1,
+    "Dropout hist_enc.0.ff.2": 0.1,
+    "Dropout hist_enc.0.dr": 0.1,
+    "Dropout cross.0.ff.2": 0.1,
+    "Dropout cross.0.dr": 0.1,
+    "Dropout cross.1.ff.2": 0.1,
+    "Dropout cross.1.dr": 0.1,
+    "Dropout sets.0.ff.2": 0.1,
+    "Dropout sets.0.dr": 0.1,
+    "Dropout sets.1.ff.2": 0.1,
+    "Dropout sets.1.dr": 0.1,
+    "Attn-prob hist_enc.0.attn": 0.1,
+    "Attn-prob cross.0.attn": 0.1,
+    "Attn-prob cross.1.attn": 0.1,
+    "Attn-prob sets.0.attn": 0.1,
+    "Attn-prob sets.1.attn": 0.1
+   },
+   "sdpa_dropout_p_passed": [
+    0.1
+   ],
+   "n_sdpa_calls": 5,
+   "dropout_obs": {
+    "hist_enc.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09891826659440994
+    ],
+    "hist_enc.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.10102163255214691
+    ],
+    "retr.dp": [
+     [
+      "dropped"
+     ],
+     0.10032853484153748
+    ],
+    "cross.0.dr": [
+     [
+      "dropped"
+     ],
+     0.09732333198189735
+    ],
+    "cross.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.10069691389799118
+    ],
+    "sets.0.dr": [
+     [
+      "dropped"
+     ],
+     0.1016845703125
+    ],
+    "sets.0.ff.2": [
+     [
+      "dropped"
+     ],
+     0.10094105452299118
+    ],
+    "cross.1.dr": [
+     [
+      "dropped"
+     ],
+     0.09953169152140617
+    ],
+    "cross.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.09975364059209824
+    ],
+    "sets.1.dr": [
+     [
+      "dropped"
+     ],
+     0.10033069923520088
+    ],
+    "sets.1.ff.2": [
+     [
+      "dropped"
+     ],
+     0.10059703141450882
+    ]
+   },
+   "loss": 0.02336789108812809
+  }
+ },
+ "eval_ld": {
+  "sdpa": [
+   0.0
+  ],
+  "drop": [
+   "identity"
+  ]
+ },
+ "eval_base": {
+  "sdpa": [
+   0.0
+  ],
+  "drop": [
+   "identity"
+  ]
+ },
+ "namespace_diff": {
+  "variant": [
+   "abl_e10_base_s951",
+   "abl_e10_latedrop_s951"
+  ],
+  "drop": [
+   0.1,
+   0.0
+  ],
+  "attn_drop": [
+   -1.0,
+   0.1
+  ],
+  "drop_cd": [
+   -1.0,
+   0.1
+  ]
+ },
+ "ref_diff": {}
+}

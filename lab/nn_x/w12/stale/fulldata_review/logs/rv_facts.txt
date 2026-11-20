@@ -1,0 +1,13 @@
+train feeds 3151208, candidates 246745836; val feeds 14423, candidates 1389971
+holdout: 30000 feeds = 0.952% of feeds; rows 4630966 = 1.877% of candidates; mean M holdout 154.4 vs all 78.3
+draw set (p>0.9, M>=50): 89794 -> holdout share 33.4%; exploration-like (p>0.5): 164118 -> holdout share 18.28%; all holdout have p>0.5: True
+steps/epoch without holdout 9835 (x10 = 98350; t_cool 78680); with holdout 9984 (x10 = 99840; t_cool 79872); re-cool 2 epochs: 19670 -> 19968
+cooldown pool: without holdout 134118; with 164118
+train feeds with 0 positives: 0; val feeds with 0 positives: 0
+my NDCG == src/metrics on a tied random score (val): ok
+W16 16-pool val: selected 0.40144 @last 0.40157; selected - @last -0.00013 +- 0.00016 (n 14423)
+W16 16-pool holdout: selected 0.32460 @last 0.32449; selected - @last +0.00011 +- 0.00009 (n 30000)
+member level selected - @last: holdout mean +0.00011 (min -0.00000, max +0.00062); val mean +0.00012 (min -0.00011 max +0.00065)
+@last members: val SD 0.00048 (mean 0.39921); holdout SD 0.00030 (mean 0.32244; min 0.32199 max 0.32303)
+null: 60 random 8 vs 8 splits (4+4 per arm), val: RMS 0.00040, max |d| 0.00101 -> s16 = s8/sqrt(2) = 0.00028; 3 s16 = 0.00085
+done 125s

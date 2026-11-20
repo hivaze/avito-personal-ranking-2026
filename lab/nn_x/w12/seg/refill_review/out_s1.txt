@@ -1,0 +1,87 @@
+## 0. tables
+   train: feeds 3151208, timestamp range 1788642048..1789851648 (resolution 128 s), user_id 0 share 3.93%, H = 256 share 42.27%
+   val: feeds 14423, timestamp range 1790024448..1790283648 (resolution 128 s), user_id 0 share 4.56%, H = 256 share 28.95%
+   test: feeds 28595, timestamp range 1790370048..1790715520 (resolution 128 s), user_id 0 share 4.12%, H = 256 share 28.81%
+   train max ts < val min ts: True; val max ts < test min ts: True
+
+## 1. PROVENANCE of the study's recovered events (all qualifying feeds; from raw tables via hist_fidx)
+   holdout: qualifying mine 3235 = 10.78% of 30000; the study's list identical: True; user_id 0 among them: 0; H != 256 among them: 0
+      T: recovered rows 121114 (from train / val / test tables: [121114, 0, 0]); row outside its feed's history 0; other user_id 0; source snapshot NOT strictly earlier 0; smallest gap 128 s, median 4.56 d
+      U: recovered rows 230390 (from train / val / test tables: [230390, 0, 0]); row outside its feed's history 0; other user_id 0; source snapshot NOT strictly earlier 0; smallest gap 128 s, median 4.17 d
+      study flags: A 3140, B 2511, R_T (A, B, n_T >= 1) 2358, R_U (A, n_U >= 1) 3123
+   val: qualifying mine 2160 = 14.98% of 14423; the study's list identical: True; user_id 0 among them: 0; H != 256 among them: 0
+      T: recovered rows 67880 (from train / val / test tables: [67798, 82, 0]); row outside its feed's history 0; other user_id 0; source snapshot NOT strictly earlier 0; smallest gap 5504 s, median 11.63 d
+      U: recovered rows 197967 (from train / val / test tables: [197553, 414, 0]); row outside its feed's history 0; other user_id 0; source snapshot NOT strictly earlier 0; smallest gap 640 s, median 10.20 d
+      study flags: A 1879, B 1465, R_T (A, B, n_T >= 1) 1383, R_U (A, n_U >= 1) 1878
+   test: qualifying mine 4102 = 14.35% of 28595; the study's list identical: True; user_id 0 among them: 0; H != 256 among them: 0
+      T: recovered rows 127776 (from train / val / test tables: [126667, 782, 327]); row outside its feed's history 0; other user_id 0; source snapshot NOT strictly earlier 0; smallest gap 256 s, median 16.09 d
+      U: recovered rows 362470 (from train / val / test tables: [357418, 3218, 1834]); row outside its feed's history 0; other user_id 0; source snapshot NOT strictly earlier 0; smallest gap 256 s, median 14.76 d
+      study flags: A 3222, B 2565, R_T (A, B, n_T >= 1) 2427, R_U (A, n_U >= 1) 3222
+
+## 2. MY ALIGNER (patience anchors + multiset gaps) on all qualifying feeds
+   holdout: order evidence (1484 feeds, most recent earlier snapshot, >= 16 anchors): stored-only stretch BEFORE the first anchor 37.4 events, AFTER the last anchor 14.0; earlier-snapshot stretch before its first anchor 0.9, after its last anchor 27.2  -> index 0 = newest
+   holdout: my A 3130 (96.8%; study 3140, both 3130); my B 2500 (study 2511, both 2500); my R_T 2361 (study 2358, both 2351); my R_U 3122 (study 3123, both 3113)
+      n_T on my R_T (5/25/50/75/95%): 2 / 11 / 33 / 79 / 167, >= 128: 208; study on its R_T: 2 / 11 / 33 / 78 / 163, >= 128: 197; corr(n_T mine, study) on common R_T 0.996; mean fill mine 47.0, study 46.7
+      n_U on my R_U: 9 / 36 / 79 / 132 / 262, >= 128: 825; study on its R_U: 6 / 33 / 75 / 128 / 253, >= 128: 791; corr 0.996; mean fill mine 76.4, study 73.8
+      gap to the most recent earlier snapshot, days (5/25/50/75/95%): 0.1 / 1.0 / 2.9 / 5.8 / 10.4
+   [2s]
+   val: order evidence (1417 feeds, most recent earlier snapshot, >= 16 anchors): stored-only stretch BEFORE the first anchor 98.6 events, AFTER the last anchor 18.0; earlier-snapshot stretch before its first anchor 4.7, after its last anchor 26.7  -> index 0 = newest
+   val: my A 1868 (86.5%; study 1879, both 1868); my B 1448 (study 1465, both 1447); my R_T 1377 (study 1383, both 1367); my R_U 1868 (study 1878, both 1867)
+      n_T on my R_T (5/25/50/75/95%): 3 / 14 / 32 / 70 / 186, >= 128: 159; study on its R_T: 3 / 14 / 31 / 68 / 184, >= 128: 155; corr(n_T mine, study) on common R_T 0.989; mean fill mine 46.8, study 46.0
+      n_U on my R_U: 37 / 89 / 146 / 214 / 406, >= 128: 1078; study on its R_U: 32 / 85 / 142 / 209 / 394, >= 128: 1051; corr 0.992; mean fill mine 107.2, study 105.4
+      gap to the most recent earlier snapshot, days (5/25/50/75/95%): 3.0 / 5.3 / 9.6 / 13.1 / 16.5
+      val shares of all val feeds: my R_T 9.55%, my R_U 12.95%; study R_T 9.59%, R_U 13.02%
+   [4s]
+   test: order evidence (1337 feeds, most recent earlier snapshot, >= 16 anchors): stored-only stretch BEFORE the first anchor 120.7 events, AFTER the last anchor 15.5; earlier-snapshot stretch before its first anchor 5.9, after its last anchor 33.1  -> index 0 = newest
+   test: my A 3193 (77.8%; study 3222, both 3193); my B 2540 (study 2565, both 2539); my R_T 2425 (study 2427, both 2401); my R_U 3193 (study 3222, both 3193)
+      n_T on my R_T (5/25/50/75/95%): 4 / 17 / 37 / 75 / 200, >= 128: 290; study on its R_T: 4 / 17 / 37 / 75 / 197, >= 128: 291; corr(n_T mine, study) on common R_T 0.982; mean fill mine 50.4, study 50.4
+      n_U on my R_U: 53 / 110 / 161 / 224 / 400, >= 128: 2137; study on its R_U: 50 / 106 / 158 / 217 / 396, >= 128: 2099; corr 0.988; mean fill mine 113.7, study 112.5
+      gap to the most recent earlier snapshot, days (5/25/50/75/95%): 7.1 / 10.0 / 14.2 / 17.8 / 21.3
+      test shares: qualifying public-like 15.03%, private-like 14.05%; my R_T 9.20% / 8.17%; my R_U 12.09% / 10.77%; study R_T 9.29% / 8.15%; study R_U 12.21% / 10.87%
+   [6s]
+
+## 3. OVERLAP study vs mine (key multisets, first min(n, 128) events) and ITEM-RESTORE shares (label-free)
+   holdout T: feeds in both read sets 2351; study events 109492, mine 110990, common (key multiset) 108743 = 99.3% of the study's, 98.0% of mine; identical (table, row) 99.3% of the study's
+      ITEM-RESTORE, study events on its read set (110038 events): item occurs in the stored events 129-256 (removed by pass b) 4.8% | only in the newest 128 0.5% | item not in the stored 256 94.6% || same (item, type, source) key present in the stored 256: 1.8%
+      ITEM-RESTORE, my events on my read set (111032 events): in stored 129-256 5.3% | only newest 128 0.5% | novel 94.2%
+   holdout U: feeds in both read sets 3113; study events 229110, mine 238559, common (key multiset) 223624 = 97.6% of the study's, 93.7% of mine; identical (table, row) 97.5% of the study's
+      ITEM-RESTORE, study events on its read set (230390 events): item occurs in the stored events 129-256 (removed by pass b) 15.5% | only in the newest 128 4.0% | item not in the stored 256 80.5% || same (item, type, source) key present in the stored 256: 2.6%
+      ITEM-RESTORE, my events on my read set (238582 events): in stored 129-256 18.5% | only newest 128 5.5% | novel 75.9%
+   [15s]
+   val T: feeds in both read sets 1367; study events 62541, mine 64284, common (key multiset) 61905 = 99.0% of the study's, 96.3% of mine; identical (table, row) 98.9% of the study's
+      ITEM-RESTORE, study events on its read set (63575 events): item occurs in the stored events 129-256 (removed by pass b) 6.1% | only in the newest 128 0.6% | item not in the stored 256 93.4% || same (item, type, source) key present in the stored 256: 2.2%
+      ITEM-RESTORE, my events on my read set (64398 events): in stored 129-256 7.1% | only newest 128 0.5% | novel 92.4%
+   val U: feeds in both read sets 1867; study events 196559, mine 200263, common (key multiset) 189686 = 96.5% of the study's, 94.7% of mine; identical (table, row) 96.1% of the study's
+      ITEM-RESTORE, study events on its read set (197967 events): item occurs in the stored events 129-256 (removed by pass b) 20.1% | only in the newest 128 3.8% | item not in the stored 256 76.1% || same (item, type, source) key present in the stored 256: 2.1%
+      ITEM-RESTORE, my events on my read set (200271 events): in stored 129-256 23.3% | only newest 128 4.5% | novel 72.2%
+   [19s]
+   test T: feeds in both read sets 2401; study events 119880, mine 122095, common (key multiset) 118427 = 98.8% of the study's, 97.0% of mine; identical (table, row) 98.6% of the study's
+      ITEM-RESTORE, study events on its read set (122279 events): item occurs in the stored events 129-256 (removed by pass b) 5.5% | only in the newest 128 0.4% | item not in the stored 256 94.1% || same (item, type, source) key present in the stored 256: 2.0%
+      ITEM-RESTORE, my events on my read set (122221 events): in stored 129-256 6.2% | only newest 128 0.4% | novel 93.4%
+   test U: feeds in both read sets 3193; study events 358758, mine 363056, common (key multiset) 347184 = 96.8% of the study's, 95.6% of mine; identical (table, row) 96.6% of the study's
+      ITEM-RESTORE, study events on its read set (362470 events): item occurs in the stored events 129-256 (removed by pass b) 20.7% | only in the newest 128 2.7% | item not in the stored 256 76.6% || same (item, type, source) key present in the stored 256: 1.8%
+      ITEM-RESTORE, my events on my read set (363056 events): in stored 129-256 23.4% | only newest 128 3.1% | novel 73.5%
+   [30s]
+
+## 4. 300 RANDOM QUALIFYING FEEDS per set (rng 4242): aligner-free order test of the study's T events; positive check with my aligner
+   holdout: order test on 218 of the 300 feeds (study's R_T): T events 10768; events with >= 1 common stored event DEEPER in the source snapshot 357 = 3.32%; mean share of the common events that are deeper 1.791%; feeds with any such event 7
+   holdout positive check, my aligner, snapshots cut to 192: feeds with >= 1 recovered event 236 of 300 (70 with all 64); recovered events 8878: exact position 38.6% | is a true event 193-256 72.8% | stored among the newest 192 (placement error) 0.5% | not stored in the 256 26.7% || feeds with 64 recovered: share of the 64 true events found 71.8%
+   holdout positive check, my aligner, snapshots at stored length: feeds with >= 1 recovered event 246 of 300 (217 with all 64); recovered events 15230: exact position 45.2% | is a true event 193-256 75.8% | stored among the newest 192 (placement error) 0.3% | not stored in the 256 23.8% || feeds with 64 recovered: share of the 64 true events found 77.5%
+   [31s]
+   val: order test on 197 of the 300 feeds (study's R_T): T events 8851; events with >= 1 common stored event DEEPER in the source snapshot 796 = 8.99%; mean share of the common events that are deeper 0.564%; feeds with any such event 13
+   val positive check, my aligner, snapshots cut to 192: feeds with >= 1 recovered event 173 of 300 (71 with all 64); recovered events 7498: exact position 31.7% | is a true event 193-256 60.5% | stored among the newest 192 (placement error) 1.3% | not stored in the 256 38.2% || feeds with 64 recovered: share of the 64 true events found 50.8%
+   val positive check, my aligner, snapshots at stored length: feeds with >= 1 recovered event 187 of 300 (174 with all 64); recovered events 11647: exact position 35.5% | is a true event 193-256 65.4% | stored among the newest 192 (placement error) 0.8% | not stored in the 256 33.8% || feeds with 64 recovered: share of the 64 true events found 65.9%
+   [31s]
+   test: order test on 175 of the 300 feeds (study's R_T): T events 8042; events with >= 1 common stored event DEEPER in the source snapshot 353 = 4.39%; mean share of the common events that are deeper 1.486%; feeds with any such event 13
+   test positive check, my aligner, snapshots cut to 192: feeds with >= 1 recovered event 169 of 300 (81 with all 64); recovered events 7904: exact position 21.8% | is a true event 193-256 53.7% | stored among the newest 192 (placement error) 0.8% | not stored in the 256 45.6% || feeds with 64 recovered: share of the 64 true events found 50.4%
+   test positive check, my aligner, snapshots at stored length: feeds with >= 1 recovered event 180 of 300 (168 with all 64); recovered events 11222: exact position 24.7% | is a true event 193-256 59.8% | stored among the newest 192 (placement error) 0.5% | not stored in the 256 39.8% || feeds with 64 recovered: share of the 64 true events found 59.5%
+   [32s]
+
+## 5. PARITY by day: capped, user_id != 0 feeds with a strictly earlier snapshot of the user (train feeds: TRAIN snapshots only)
+   train (snapshots from train): feeds 3151208; capped and user_id != 0 42.08%; qualifying 11.58% of feeds = 27.5% of capped; gap to the most recent earlier snapshot, days (5/25/50/75/95%): 0.10 / 1.01 / 2.82 / 5.68 / 10.41
+      by day: d0: 1.9% of feeds (5% of capped) | d1: 4.4% of feeds (11% of capped) | d2: 6.7% of feeds (16% of capped) | d3: 8.9% of feeds (22% of capped) | d4: 10.8% of feeds (26% of capped) | d5: 12.5% of feeds (29% of capped) | d6: 14.0% of feeds (32% of capped) | d7: 14.8% of feeds (35% of capped) | d8: 15.8% of feeds (38% of capped) | d9: 11.9% of feeds (31% of capped) | d11: 16.5% of feeds (39% of capped) | d12: 17.9% of feeds (42% of capped) | d13: 18.8% of feeds (44% of capped) | d14: 14.7% of feeds (38% of capped)
+   val (snapshots from train+val): feeds 14423; capped and user_id != 0 28.91%; qualifying 14.98% of feeds = 51.8% of capped; gap to the most recent earlier snapshot, days (5/25/50/75/95%): 3.05 / 5.30 / 9.60 / 13.09 / 16.53
+      by day: d0: 14.6% of feeds (51% of capped) | d1: 0.0% of feeds (0% of capped) | d2: 15.4% of feeds (53% of capped) | d3: 0.0% of feeds (0% of capped)
+   test (snapshots from train+val+test): feeds 28595; capped and user_id != 0 28.79%; qualifying 14.35% of feeds = 49.8% of capped; gap to the most recent earlier snapshot, days (5/25/50/75/95%): 7.08 / 9.99 / 14.16 / 17.79 / 21.28
+      by day: d0: 15.4% of feeds (52% of capped) | d1: 14.0% of feeds (49% of capped) | d2: 13.6% of feeds (49% of capped) | d3: 14.5% of feeds (50% of capped)
+[33s] done

@@ -1,0 +1,43 @@
+LATE-DROPOUT 10-epoch pair: SETUP RECORD (written Fri Nov 13 04:57:24 UTC 2026; no arm run had started)
+
+1. FLAG VERIFICATION (CPU probe; probe_dropout_schedule.{py,txt,json}; imports nn_x/abl model.py / cd_arms.py / abl_arms.py /
+   tests/mini_split.py read-only; train.py's own parse(), XT_* presets, Ranker(...) call, t_cool statement and drop_cd block
+   exec'd from its AST): PROBE VERDICT PASS 9/9.
+   - parser: LD = E_BASE + HYG + '--drop 0 --attn_drop 0.1 --drop_cd 0.1' differs from E_BASE + HYG by exactly
+     drop 0.1 -> 0.0, attn_drop -1.0 -> 0.1, drop_cd -1.0 -> 0.1; E_BASE + HYG (seed 951) == the w5_e10_base_s951 args.
+   - flag -> site map (model.py / cd_arms.py): --drop sets every nn.Dropout (11 modules: retr.dp = HistRetrieval value MLP;
+     hist_enc.0 / cross.0 / cross.1 / sets.0 / sets.1 .ff.2 = FFN hidden and .dr = residual branch, dr used for both the
+     attention and the FFN residual) and Attn.drop; --attn_drop >= 0 sets Attn.attn_drop, which overrides Attn.drop for the
+     attention-probability dropout (F.scaled_dot_product_attention dropout_p, 5 sites); --drop_cd P calls
+     cd_arms.set_dropout(model, P) at step == t_cool: every nn.Dropout p = P and every Attn.attn_drop = P. xt_drop 0 and
+     id_drop (id_buckets 0, unused) are not dropout sites here.
+   - 10-step CPU smoke run on real train batches (t_cool 8 by train.py's formula), LD: steps 0-7 every nn.Dropout p 0.0 and
+     measured identity, SDPA dropout_p passed [0.1] on all 5 calls; step 8 (first cooldown step) on: train.py logs
+     'drop_cd: dropout p=0.1 from step 8 on 11 nn.Dropout modules and 5 attention-probability sites (model cfg unchanged:
+     drop 0.0)', every nn.Dropout p 0.1 with measured zeroed share 0.097-0.102, SDPA [0.1]. Base reference: 0.1 everywhere at
+     every step (zeroed share 0.097-0.104). Same parameters at init as the base. Eval mode: no dropout (SDPA 0.0, identity).
+   - 10-epoch run: total 98350 steps, t_cool = 78680 (= the base log's 'cooldown mix ... from step 78680').
+   - NOTE: the LD checkpoint cfg stores drop 0.0 / attn_drop 0.1; a later FT that rebuilds from this cfg would train with
+     drop 0 / attn_drop 0.1. Irrelevant to this readout (train-only + holdout preds only).
+2. RULE: PREDECLARED.txt (04:50:54 UTC) + addendum (04:51:13 UTC). Kill gate constant SE_gate = 0.00076575 (se_gate.py /
+   se_gate.json: 15 base seed pairs x 16 plateau evals 40000-77500; RMS at step 60000 alone 0.00107); base step-60000
+   holdouts s951 0.31659185 / s952 0.31739697 (s953 0.31673795, s954 0.31596394, s955 0.31725901, s956 0.31543011);
+   KILL iff LD_s951(60000) < 0.31506035 AND LD_s952(60000) < 0.31586547.
+   Disclosed: step 60000 is mid-plateau (cooldown starts at 78680; last plateau eval 77500, first cooldown eval 80000), not
+   the plateau end named in the task text; the literal step 60000 is kept.
+3. READOUT PLUMBING TEST (readout_late_dropout.py with LD_READOUT_TEST_ARM=blocks3, output in the scratchpad, not here):
+   reproduces the registered blocks3 10-epoch numbers exactly (member val +0.00030 +- 0.00073, holdout -0.00041 +- 0.00042,
+   pmix +0.00203, 2-member pool val +0.00121 +- 0.00083 / holdout -0.00055). Diversity scale on that test: pool-level
+   rho_bb = corr(base{951,952}, base{953,954}) 0.97353 on val; member-level rho_bb 0.94747; same-seed vs cross-seed member
+   corr 0.94705 vs 0.94490 (the same-seed confound is small at 10 epochs).
+4. PROCESSES (all setsid nohup, PIDs from /proc/<pid>/cmdline, recorded in nn_x/abl/RUNNING.txt):
+   launch waiter PID 1814946 (launch_waiter.sh; log launch_waiter.log): waits for nn_x/abl/logs/abl_e10_xdrop_pop_s95{1,2,3,4}.json
+     (pop-free ETA ~06:10-06:20 UTC from their step rates at 04:57), then launches abl_e10_latedrop_s951 on GPU N and
+     abl_e10_latedrop_s952 on GPU N, each only when that GPU shows < 4 compute processes and >= 60 GB free (poll 120 s, cap
+     10 h, no other GPU); train.py PIDs -> pids.txt + nn_x/abl/RUNNING.txt.
+   readout waiter PID 1815082 (wait_readout.sh; log wait_readout.log): kill gate (kill_gate.py -> gate.json) when both logs
+     reach step 60000 (~80-115 min after launch); stop by exact PID on KILL; final readout_late_dropout.py -> RESULT.txt when
+     both runs have json + selected holdout + selected trainonly_val preds (ETA ~08:30-09:30 UTC if not killed).
+   Files: nn_x/tricks/late_dropout/{PREDECLARED.txt, SETUP.txt, RESULT.txt, probe_dropout_schedule.{py,txt,json},
+     se_gate.{py,json}, kill_gate.py, readout_late_dropout.py, launch_waiter.sh, wait_readout.sh, pids.txt (at launch),
+     gate.json (at step 60000), result.json (final)}.

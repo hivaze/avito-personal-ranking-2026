@@ -1,0 +1,76 @@
+[     1s] views: holdout feeds 30000 (has = 1 on 15225), pool feeds with has = 1 69173; cuts in use [5, 6, 7, 8, 9, 10, 11, 12, 14]
+[     1s]    cut  5: window slots [0, 1, 2, 3, 4] (key 31)
+[     1s]    cut  6: window slots [1, 2, 3, 4, 5] (key 62)
+[     1s]    cut  7: window slots [2, 3, 4, 5, 6] (key 124)
+[     1s]    cut  8: window slots [3, 4, 5, 6, 7] (key 248)
+[     1s]    cut  9: window slots [4, 5, 6, 7, 8] (key 496)
+[     1s]    cut 10: window slots [4, 5, 6, 7, 8] (key 496)
+[     1s]    cut 11: window slots [4, 5, 6, 7, 8] (key 496)
+[     1s]    cut 12: window slots [5, 6, 7, 8, 11] (key 992)
+[     1s]    cut 14: window slots [7, 8, 11, 12, 13] (key 3968)
+[     1s]    hold: 30000 feeds, rows 4630966; feeds by cut {-1: 14775, 5: 13362, 6: 1291, 7: 572}
+[     1s]    pool: 69173 feeds, rows 10254287; feeds by cut {5: 60776, 6: 5892, 7: 2505}
+[     1s]    val_nat: 14423 feeds, rows 1389971; feeds by cut {14: 14423}
+[     1s]    val_twin: 14423 feeds, rows 1389971; feeds by cut {7: 1965, 8: 1987, 9: 3751, 10: 3460, 11: 1760, 12: 1500}
+[     1s]    test_nat: 28595 feeds, rows 2904806; feeds by cut {14: 28595}
+[     3s] pool: rows 10254287 loaded
+[     3s] val_nat: rows 1389971 loaded
+[     3s] test_nat: rows 2904806 loaded
+[     3s] 
+=== S1. correlation of the entered form with the ranker's inputs (within-feed z of log1p), and OLS R2 on the four inputs + nx_rp3_z + age-bucket dummies ===
+[     3s] --- kn1_5:z
+[     4s]   TRv (pool, slots 6-8)    sd 0.996 | corr with it_hist_all_luo +0.255, it_hist_et1_luo +0.253, seq_cv_invd20 +0.075, seq_cv_pop +0.212, nx_rp3_z +0.090 | OLS R2 0.073; coefficients +0.226 +0.088 +0.007 -0.048 +0.042
+[     5s]   TRt (pool, slots 11-13)  sd 0.997 | corr with it_hist_all_luo +0.232, it_hist_et1_luo +0.230, seq_cv_invd20 +0.077, seq_cv_pop +0.204, nx_rp3_z +0.085 | OLS R2 0.065; coefficients +0.224 +0.071 +0.014 -0.029 +0.038
+[     6s]   VAL (M >= 50)            sd 0.997 | corr with it_hist_all_luo +0.200, it_hist_et1_luo +0.201, seq_cv_invd20 +0.077, seq_cv_pop +0.196, nx_rp3_z +0.096 | OLS R2 0.058; coefficients +0.186 +0.057 -0.001 +0.022 +0.052
+[     6s]   PUB (M >= 50)            sd 0.997 | corr with it_hist_all_luo +0.187, it_hist_et1_luo +0.188, seq_cv_invd20 +0.073, seq_cv_pop +0.184, nx_rp3_z +0.091 | OLS R2 0.054; coefficients +0.179 +0.051 -0.001 +0.033 +0.050
+[     6s]   PRIV (M >= 50)           sd 0.997 | corr with it_hist_all_luo +0.180, it_hist_et1_luo +0.182, seq_cv_invd20 +0.074, seq_cv_pop +0.181, nx_rp3_z +0.092 | OLS R2 0.052; coefficients +0.111 +0.053 +0.001 +0.094 +0.050
+[     6s] --- ns2_5:z
+[     7s]   TRv (pool, slots 6-8)    sd 0.993 | corr with it_hist_all_luo +0.605, it_hist_et1_luo +0.617, seq_cv_invd20 +0.199, seq_cv_pop +0.677, nx_rp3_z +0.193 | OLS R2 0.482; coefficients -0.310 +0.373 +0.045 +0.603 -0.014
+[     9s]   TRt (pool, slots 11-13)  sd 0.990 | corr with it_hist_all_luo +0.625, it_hist_et1_luo +0.638, seq_cv_invd20 +0.202, seq_cv_pop +0.666, nx_rp3_z +0.204 | OLS R2 0.477; coefficients -0.312 +0.438 +0.035 +0.527 +0.004
+[     9s]   VAL (M >= 50)            sd 0.991 | corr with it_hist_all_luo +0.690, it_hist_et1_luo +0.708, seq_cv_invd20 +0.211, seq_cv_pop +0.696, nx_rp3_z +0.182 | OLS R2 0.514; coefficients -0.312 +0.599 +0.065 +0.446 -0.053
+[     9s]   PUB (M >= 50)            sd 0.989 | corr with it_hist_all_luo +0.699, it_hist_et1_luo +0.717, seq_cv_invd20 +0.218, seq_cv_pop +0.707, nx_rp3_z +0.193 | OLS R2 0.528; coefficients -0.410 +0.609 +0.067 +0.546 -0.052
+[    10s]   PRIV (M >= 50)           sd 0.988 | corr with it_hist_all_luo +0.703, it_hist_et1_luo +0.721, seq_cv_invd20 +0.216, seq_cv_pop +0.708, nx_rp3_z +0.190 | OLS R2 0.530; coefficients -0.353 +0.626 +0.066 +0.474 -0.056
+[    10s] --- bt5:rk
+[    11s]   TRv (pool, slots 6-8)    sd 0.249 | corr with it_hist_all_luo -0.324, it_hist_et1_luo -0.328, seq_cv_invd20 -0.076, seq_cv_pop -0.346, nx_rp3_z -0.093 | OLS R2 0.155; coefficients +0.012 -0.036 +0.004 -0.059 -0.001
+[    12s]   TRt (pool, slots 11-13)  sd 0.225 | corr with it_hist_all_luo -0.345, it_hist_et1_luo -0.348, seq_cv_invd20 -0.092, seq_cv_pop -0.368, nx_rp3_z -0.114 | OLS R2 0.173; coefficients +0.019 -0.036 +0.003 -0.056 -0.003
+[    12s]   VAL (M >= 50)            sd 0.246 | corr with it_hist_all_luo -0.351, it_hist_et1_luo -0.353, seq_cv_invd20 -0.082, seq_cv_pop -0.352, nx_rp3_z -0.093 | OLS R2 0.177; coefficients +0.003 -0.043 +0.003 -0.051 +0.003
+[    13s]   PUB (M >= 50)            sd 0.231 | corr with it_hist_all_luo -0.379, it_hist_et1_luo -0.379, seq_cv_invd20 -0.093, seq_cv_pop -0.381, nx_rp3_z -0.111 | OLS R2 0.201; coefficients +0.010 -0.041 +0.002 -0.054 +0.002
+[    13s]   PRIV (M >= 50)           sd 0.224 | corr with it_hist_all_luo -0.390, it_hist_et1_luo -0.390, seq_cv_invd20 -0.098, seq_cv_pop -0.390, nx_rp3_z -0.114 | OLS R2 0.204; coefficients +0.001 -0.042 +0.001 -0.042 +0.002
+[    13s] --- nx_rp3_z
+[    14s]   TRv (pool, slots 6-8)    sd 0.896 | corr with it_hist_all_luo +0.237, it_hist_et1_luo +0.236, seq_cv_invd20 +0.516, seq_cv_pop +0.273 | OLS R2 0.291; coefficients -0.033 +0.027 +0.604 +0.122
+[    15s]   TRt (pool, slots 11-13)  sd 0.863 | corr with it_hist_all_luo +0.251, it_hist_et1_luo +0.249, seq_cv_invd20 +0.485, seq_cv_pop +0.273 | OLS R2 0.263; coefficients -0.032 +0.040 +0.542 +0.104
+[    15s]   VAL (M >= 50)            sd 0.900 | corr with it_hist_all_luo +0.286, it_hist_et1_luo +0.283, seq_cv_invd20 +0.558, seq_cv_pop +0.290 | OLS R2 0.335; coefficients +0.016 +0.024 +0.675 +0.072
+[    16s]   PUB (M >= 50)            sd 0.880 | corr with it_hist_all_luo +0.297, it_hist_et1_luo +0.293, seq_cv_invd20 +0.556, seq_cv_pop +0.300 | OLS R2 0.335; coefficients +0.029 +0.024 +0.678 +0.063
+[    16s]   PRIV (M >= 50)           sd 0.873 | corr with it_hist_all_luo +0.298, it_hist_et1_luo +0.294, seq_cv_invd20 +0.557, seq_cv_pop +0.300 | OLS R2 0.336; coefficients +0.043 +0.017 +0.678 +0.057
+[    16s] 
+=== S2. J1-style conditional shares ===
+[    16s] --- ns2_pos
+[    16s]   TRv (pool, slots 6-8)    share 0.3051 | P(. | it_hist_all_luo > 0) 0.3819 (it_hist > 0 on 0.7987) | P(. | it_hist_all_luo = 0) 0.0000 | P(. | seq_cv_invd20 > 0) 0.6532 | P(it_hist > 0 | .) 1.0000
+[    16s]   TRt (pool, slots 11-13)  share 0.2655 | P(. | it_hist_all_luo > 0) 0.3569 (it_hist > 0 on 0.7439) | P(. | it_hist_all_luo = 0) 0.0000 | P(. | seq_cv_invd20 > 0) 0.6092 | P(it_hist > 0 | .) 1.0000
+[    16s]   VAL (M >= 50)            share 0.2731 | P(. | it_hist_all_luo > 0) 0.4399 (it_hist > 0 on 0.6209) | P(. | it_hist_all_luo = 0) 0.0000 | P(. | seq_cv_invd20 > 0) 0.6422 | P(it_hist > 0 | .) 1.0000
+[    16s]   PUB (M >= 50)            share 0.2476 | P(. | it_hist_all_luo > 0) 0.4324 (it_hist > 0 on 0.5726) | P(. | it_hist_all_luo = 0) 0.0000 | P(. | seq_cv_invd20 > 0) 0.6395 | P(it_hist > 0 | .) 1.0000
+[    16s]   PRIV (M >= 50)           share 0.2378 | P(. | it_hist_all_luo > 0) 0.4363 (it_hist > 0 on 0.5451) | P(. | it_hist_all_luo = 0) 0.0000 | P(. | seq_cv_invd20 > 0) 0.6339 | P(it_hist > 0 | .) 1.0000
+[    16s] --- bt_seen
+[    16s]   TRv (pool, slots 6-8)    share 0.3716 | P(. | it_hist_all_luo > 0) 0.4419 (it_hist > 0 on 0.7987) | P(. | it_hist_all_luo = 0) 0.0927 | P(. | seq_cv_invd20 > 0) 0.6649 | P(it_hist > 0 | .) 0.9498
+[    16s]   TRt (pool, slots 11-13)  share 0.2720 | P(. | it_hist_all_luo > 0) 0.3488 (it_hist > 0 on 0.7439) | P(. | it_hist_all_luo = 0) 0.0490 | P(. | seq_cv_invd20 > 0) 0.5724 | P(it_hist > 0 | .) 0.9538
+[    16s]   VAL (M >= 50)            share 0.3554 | P(. | it_hist_all_luo > 0) 0.5022 (it_hist > 0 on 0.6209) | P(. | it_hist_all_luo = 0) 0.1148 | P(. | seq_cv_invd20 > 0) 0.6446 | P(it_hist > 0 | .) 0.8775
+[    16s]   PUB (M >= 50)            share 0.2914 | P(. | it_hist_all_luo > 0) 0.4520 (it_hist > 0 on 0.5726) | P(. | it_hist_all_luo = 0) 0.0761 | P(. | seq_cv_invd20 > 0) 0.6087 | P(it_hist > 0 | .) 0.8883
+[    16s]   PRIV (M >= 50)           share 0.2669 | P(. | it_hist_all_luo > 0) 0.4373 (it_hist > 0 on 0.5451) | P(. | it_hist_all_luo = 0) 0.0628 | P(. | seq_cv_invd20 > 0) 0.5880 | P(it_hist > 0 | .) 0.8930
+[    16s] --- imp_pos
+[    16s]   TRv (pool, slots 6-8)    share 0.6267 | P(. | it_hist_all_luo > 0) 0.7259 (it_hist > 0 on 0.7987) | P(. | it_hist_all_luo = 0) 0.2331 | P(. | seq_cv_invd20 > 0) 0.9121 | P(it_hist > 0 | .) 0.9251
+[    16s]   TRt (pool, slots 11-13)  share 0.4793 | P(. | it_hist_all_luo > 0) 0.5987 (it_hist > 0 on 0.7439) | P(. | it_hist_all_luo = 0) 0.1327 | P(. | seq_cv_invd20 > 0) 0.8205 | P(it_hist > 0 | .) 0.9291
+[    16s]   VAL (M >= 50)            share 0.5821 | P(. | it_hist_all_luo > 0) 0.7844 (it_hist > 0 on 0.6209) | P(. | it_hist_all_luo = 0) 0.2507 | P(. | seq_cv_invd20 > 0) 0.8915 | P(it_hist > 0 | .) 0.8367
+[    16s]   PUB (M >= 50)            share 0.4886 | P(. | it_hist_all_luo > 0) 0.7246 (it_hist > 0 on 0.5726) | P(. | it_hist_all_luo = 0) 0.1722 | P(. | seq_cv_invd20 > 0) 0.8589 | P(it_hist > 0 | .) 0.8494
+[    17s]   PRIV (M >= 50)           share 0.4520 | P(. | it_hist_all_luo > 0) 0.7097 (it_hist > 0 on 0.5451) | P(. | it_hist_all_luo = 0) 0.1433 | P(. | seq_cv_invd20 > 0) 0.8375 | P(it_hist > 0 | .) 0.8558
+[    17s] --- walk_pos
+[    17s]   TRv (pool, slots 6-8)    share 0.1773 | P(. | it_hist_all_luo > 0) 0.2220 (it_hist > 0 on 0.7987) | P(. | it_hist_all_luo = 0) 0.0000 | P(. | seq_cv_invd20 > 0) 0.8794 | P(it_hist > 0 | .) 1.0000
+[    17s]   TRt (pool, slots 11-13)  share 0.1513 | P(. | it_hist_all_luo > 0) 0.2034 (it_hist > 0 on 0.7439) | P(. | it_hist_all_luo = 0) 0.0000 | P(. | seq_cv_invd20 > 0) 0.7723 | P(it_hist > 0 | .) 1.0000
+[    17s]   VAL (M >= 50)            share 0.1982 | P(. | it_hist_all_luo > 0) 0.3192 (it_hist > 0 on 0.6209) | P(. | it_hist_all_luo = 0) 0.0000 | P(. | seq_cv_invd20 > 0) 0.9995 | P(it_hist > 0 | .) 1.0000
+[    17s]   PUB (M >= 50)            share 0.1794 | P(. | it_hist_all_luo > 0) 0.3133 (it_hist > 0 on 0.5726) | P(. | it_hist_all_luo = 0) 0.0000 | P(. | seq_cv_invd20 > 0) 0.9995 | P(it_hist > 0 | .) 1.0000
+[    17s]   PRIV (M >= 50)           share 0.1725 | P(. | it_hist_all_luo > 0) 0.3165 (it_hist > 0 on 0.5451) | P(. | it_hist_all_luo = 0) 0.0000 | P(. | seq_cv_invd20 > 0) 0.9996 | P(it_hist > 0 | .) 1.0000
+[    17s] 
+=== S3. domain classifier: train lag-view rows (label 0) against test / val rows (label 1); AUC, 3 folds grouped by feed ===
+[    39s] TRt (pool, slots 11-13)  vs  PRIV (M >= 50): inputs only 0.9262 | + nx3 (yardstick) 0.9377 | + nx3 + kn1_5:z 0.9382 | + nx3 + ns2_5:z 0.9435 | + nx3 + bt5:rk 0.9401 | + nx3 + all three 0.9446
+[    61s] TRt (pool, slots 11-13)  vs  PUB (M >= 50): inputs only 0.8947 | + nx3 (yardstick) 0.9154 | + nx3 + kn1_5:z 0.9167 | + nx3 + ns2_5:z 0.9238 | + nx3 + bt5:rk 0.9236 | + nx3 + all three 0.9303
+[    82s] TRv (pool, slots 6-8)  vs  VAL (M >= 50): inputs only 0.9180 | + nx3 (yardstick) 0.9207 | + nx3 + kn1_5:z 0.9214 | + nx3 + ns2_5:z 0.9293 | + nx3 + bt5:rk 0.9243 | + nx3 + all three 0.9291
+[    82s] DONE

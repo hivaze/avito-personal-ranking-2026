@@ -1,0 +1,86 @@
+HDROP-ALL diagnostic: RESULT (written 2026-11-13T04:50:28Z)
+
+VERDICT: rule branch C -> RECORDED AND CLOSED. HDROP-ALL (TRICKS_SWEEP_1113 section 3 #3) leaves the GPU queue; no training spent.
+  Pre-declared 2026-11-13T04:46:10Z (PREDECLARED.txt), before any replay / NDCG / corr was computed.
+  Decisional (val, rate 0.1, 4-mask TTA, pooled over s951+s952):
+    D(0.1) = -0.00013 +- 0.00036 (z -0.35)  -> |D| <= 0.0003 holds
+    C(0.1) = 0.995741 (mean member within-feed z corr, TTA vs full history) -> < 0.999, so branch A (robust) FAILS
+    D(0.2) = -0.00098 +- 0.00041 (z -2.37)  -> branch B (> +0.0005 at either rate) FAILS
+  => C: record and close. Reading: the 10-ep members are NOT invariant to history thinning (corr 0.9957 at 10%), but the
+     perturbation only removes information: a single dropped-history pass costs -0.00077 val / -0.00056 holdout (z -2.4 / -3.5)
+     at 10% and -0.00170 / -0.00099 (z -4.6 / -5.0) at 20%, and averaging 4 masks only buys that loss back to ~0 at 10%
+     (val -0.00013, holdout +0.00012) and not even that at 20% (val -0.00098). There is no sign of a train-vs-eval
+     history-depth shift that history dropout would close; the r6 T2 member gain (+0.00036 at 2 ep, 6 members) is gone
+     at 10 ep (+0.00002 / -0.00027 val; -0.00016 / +0.00040 holdout).
+  Earlier sweep wording (per-member drop-robustness gap < +0.0002 -> close): per-member val TTA d10 +0.00002 / -0.00027
+     -> also close.
+
+RUN
+  Members: nn_x/w5/ckpt/w5_e10_base_s951.pt, w5_e10_base_s952.pt (selected checkpoints), nn_x/abl model/data/common code
+    imported read-only; history dropout applied by an in-process wrapper of SplitData.gather (hdrop_replay.py).
+  GPU N only (1 other compute process, [n] GB free at launch); PID 1680503 (from /proc cmdline),
+    04:47:19-04:49:11 UTC, 1.9 min, exited normally. val scoring TF32 on / no dom; holdout TF32 off / dom [1-p,p,0].
+  Mask: each valid event among the first min(H,256) except the newest dropped w.p. p in {0.1, 0.2}; survivors compacted
+    newest-first in place (batch width kept); he_raw/hemb_ok/hmask/hcat/het/hes/H/hidx recomputed -> all in-model history
+    features (dense sim/category/H features, history encoder, target attention, sim_bias, retrieval) follow. xt inputs
+    (ctx_*, seq_cv_*, it_hist_*, pre2_*) unchanged, as in solvers/r6/tta.py T2. 4 masks per rate, mean of raw logits.
+  Unit tests (GPU, 300 val feeds, no labels): (a) p=0 -> logits bit-identical (max|d| 0.0); (b) compaction == physical
+    deletion of the dropped events from the flat arrays (all tensors equal, width 256 -> 256); (c) newest kept on every
+    feed; (d) realised drop rate 0.2031 at p 0.2.
+  Replay check: full-history replay == stored preds bit-exactly for both members (val and holdout: max|d| 0.0, corr 1.0,
+    NDCG val 0.39632 / 0.39691, holdout 0.32084 / 0.32000).
+
+FULL READ-OUT (readout.py -> readout.txt, result.json)
+HDROP-ALL diagnostic read-out (rule: nn_x/tricks/HDROP-ALL/PREDECLARED.txt). Members w5_e10_base_s951/s952 (selected checkpoints). delta = mode - full history, paired per feed, SE = sd/sqrt(n_feeds).
+
+=== val (14423 feeds) ===
+[w5_e10_base_s951] full-history replay NDCG 0.39632 | stored 0.39632 | replay check: max|d| 0.00e+00 Pearson 1.00000000 zcorr 1.00000000, replay-stored +0.00000 +- 0.00000 (z +0.00)
+  d10: TTA(4) delta +0.00002 +- 0.00050 (z +0.03) | single-pass mean delta -0.00056 +- 0.00044 (z -1.27) (each -0.00037 -0.00097 -0.00039 -0.00051)
+       corr TTA vs full: zcorr 0.995630, mean per-feed Pearson 0.995061; single-pass zcorr 0.992403 (min 0.992350)
+       TTA slices: M<50 -0.00081+-0.00096  M>=50 +0.00058+-0.00053  Tue +0.00044+-0.00070  Thu -0.00045+-0.00072  H<64 -0.00007+-0.00093  H64-191 -0.00081+-0.00087  H>=192 +0.00064+-0.00074
+  d20: TTA(4) delta -0.00100 +- 0.00056 (z -1.78) | single-pass mean delta -0.00177 +- 0.00050 (z -3.53) (each -0.00184 -0.00207 -0.00128 -0.00190)
+       corr TTA vs full: zcorr 0.993541, mean per-feed Pearson 0.992808; single-pass zcorr 0.988676 (min 0.988616)
+       TTA slices: M<50 -0.00152+-0.00107  M>=50 -0.00064+-0.00059  Tue -0.00030+-0.00078  Thu -0.00176+-0.00080  H<64 +0.00202+-0.00112  H64-191 -0.00186+-0.00094  H>=192 -0.00118+-0.00083
+[w5_e10_base_s952] full-history replay NDCG 0.39691 | stored 0.39691 | replay check: max|d| 0.00e+00 Pearson 1.00000000 zcorr 1.00000000, replay-stored +0.00000 +- 0.00000 (z +0.00)
+  d10: TTA(4) delta -0.00027 +- 0.00049 (z -0.56) | single-pass mean delta -0.00098 +- 0.00043 (z -2.26) (each -0.00018 -0.00157 -0.00147 -0.00069)
+       corr TTA vs full: zcorr 0.995852, mean per-feed Pearson 0.995328; single-pass zcorr 0.992739 (min 0.992694)
+       TTA slices: M<50 +0.00000+-0.00095  M>=50 -0.00046+-0.00051  Tue +0.00057+-0.00069  Thu -0.00119+-0.00070  H<64 -0.00031+-0.00096  H64-191 +0.00045+-0.00082  H>=192 -0.00079+-0.00073
+  d20: TTA(4) delta -0.00096 +- 0.00055 (z -1.74) | single-pass mean delta -0.00163 +- 0.00049 (z -3.30) (each -0.00199 -0.00148 -0.00109 -0.00195)
+       corr TTA vs full: zcorr 0.993797, mean per-feed Pearson 0.993170; single-pass zcorr 0.989011 (min 0.988972)
+       TTA slices: M<50 -0.00171+-0.00107  M>=50 -0.00044+-0.00056  Tue -0.00074+-0.00077  Thu -0.00120+-0.00079  H<64 -0.00086+-0.00119  H64-191 +0.00003+-0.00088  H>=192 -0.00171+-0.00084
+
+[pooled over 2 members] (decisional on val at d10: D = TTA delta, C = mean member zcorr)
+  d10: TTA(4) pooled D -0.00013 +- 0.00036 (z -0.35) | single-pass pooled -0.00077 +- 0.00032 (z -2.40) | C zcorr 0.995741 (per-feed Pearson 0.995195; single-pass zcorr 0.992571)
+       pooled TTA slices: M<50 -0.00040+-0.00070  M>=50 +0.00006+-0.00038  Tue +0.00050+-0.00051  Thu -0.00082+-0.00051  H<64 -0.00019+-0.00070  H64-191 -0.00018+-0.00061  H>=192 -0.00007+-0.00054
+       2-member z-mean ensemble: ref 0.39837, TTA delta -0.00066 +- 0.00042 (z -1.58), zcorr vs ref ensemble 0.997460
+  d20: TTA(4) pooled D -0.00098 +- 0.00041 (z -2.37) | single-pass pooled -0.00170 +- 0.00037 (z -4.58) | C zcorr 0.993669 (per-feed Pearson 0.992989; single-pass zcorr 0.988844)
+       pooled TTA slices: M<50 -0.00161+-0.00078  M>=50 -0.00054+-0.00043  Tue -0.00052+-0.00058  Thu -0.00148+-0.00059  H<64 +0.00058+-0.00084  H64-191 -0.00092+-0.00067  H>=192 -0.00144+-0.00062
+       2-member z-mean ensemble: ref 0.39837, TTA delta -0.00094 +- 0.00047 (z -2.01), zcorr vs ref ensemble 0.995914
+
+=== holdout (30000 feeds) ===
+[w5_e10_base_s951] full-history replay NDCG 0.32084 | stored 0.32084 | replay check: max|d| 0.00e+00 Pearson 1.00000000 zcorr 1.00000000, replay-stored +0.00000 +- 0.00000 (z +0.00)
+  d10: TTA(4) delta -0.00016 +- 0.00025 (z -0.62) | single-pass mean delta -0.00079 +- 0.00023 (z -3.49) (each -0.00065 -0.00096 -0.00072 -0.00085)
+       corr TTA vs full: zcorr 0.995921, mean per-feed Pearson 0.995820; single-pass zcorr 0.992892 (min 0.992880)
+       TTA slices: H<64 -0.00041+-0.00049  H64-191 -0.00050+-0.00049  H>=192 +0.00010+-0.00036
+  d20: TTA(4) delta -0.00034 +- 0.00030 (z -1.15) | single-pass mean delta -0.00131 +- 0.00027 (z -4.89) (each -0.00151 -0.00123 -0.00126 -0.00123)
+       corr TTA vs full: zcorr 0.993914, mean per-feed Pearson 0.993800; single-pass zcorr 0.989331 (min 0.989317)
+       TTA slices: H<64 -0.00049+-0.00060  H64-191 -0.00091+-0.00057  H>=192 -0.00000+-0.00042
+[w5_e10_base_s952] full-history replay NDCG 0.32000 | stored 0.32000 | replay check: max|d| 0.00e+00 Pearson 1.00000000 zcorr 1.00000000, replay-stored +0.00000 +- 0.00000 (z +0.00)
+  d10: TTA(4) delta +0.00040 +- 0.00025 (z +1.65) | single-pass mean delta -0.00032 +- 0.00022 (z -1.48) (each -0.00068 -0.00020 -0.00033 -0.00009)
+       corr TTA vs full: zcorr 0.996221, mean per-feed Pearson 0.996120; single-pass zcorr 0.993369 (min 0.993345)
+       TTA slices: H<64 -0.00026+-0.00045  H64-191 +0.00063+-0.00049  H>=192 +0.00049+-0.00034
+  d20: TTA(4) delta +0.00006 +- 0.00030 (z +0.20) | single-pass mean delta -0.00067 +- 0.00026 (z -2.53) (each -0.00074 -0.00046 -0.00086 -0.00061)
+       corr TTA vs full: zcorr 0.994321, mean per-feed Pearson 0.994190; single-pass zcorr 0.989913 (min 0.989870)
+       TTA slices: H<64 +0.00023+-0.00057  H64-191 -0.00003+-0.00057  H>=192 +0.00005+-0.00043
+
+[pooled over 2 members] (decisional on val at d10: D = TTA delta, C = mean member zcorr)
+  d10: TTA(4) pooled D +0.00012 +- 0.00018 (z +0.69) | single-pass pooled -0.00056 +- 0.00016 (z -3.47) | C zcorr 0.996071 (per-feed Pearson 0.995970; single-pass zcorr 0.993130)
+       pooled TTA slices: H<64 -0.00033+-0.00033  H64-191 +0.00007+-0.00035  H>=192 +0.00029+-0.00025
+       2-member z-mean ensemble: ref 0.32226, TTA delta -0.00010 +- 0.00021 (z -0.45), zcorr vs ref ensemble 0.997654
+  d20: TTA(4) pooled D -0.00014 +- 0.00022 (z -0.64) | single-pass pooled -0.00099 +- 0.00020 (z -4.96) | C zcorr 0.994117 (per-feed Pearson 0.993995; single-pass zcorr 0.989622)
+       pooled TTA slices: H<64 -0.00013+-0.00044  H64-191 -0.00047+-0.00043  H>=192 +0.00003+-0.00031
+       2-member z-mean ensemble: ref 0.32226, TTA delta -0.00013 +- 0.00026 (z -0.49), zcorr vs ref ensemble 0.996202
+
+=== DECISION (val, pre-declared) ===
+C: neither A (|D(0.1)| 0.00013 vs 0.0003, C(0.1) 0.995741 vs 0.999) nor B (D(0.1) -0.00013, D(0.2) -0.00098 vs +0.0005) -> recorded and CLOSED
+info (sweep's earlier wording, per-member drop-robustness gap < +0.0002 -> close): per-member TTA d10 deltas w5_e10_base_s951 +0.00002, w5_e10_base_s952 -0.00027

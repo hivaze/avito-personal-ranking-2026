@@ -1,0 +1,37 @@
+== STAGE S read-out WAVE-9 catgrad (2026-11-13T14:08:11Z): w9_catgrad_s[23, 24] vs w9_base_s[23, 24], paired per seed, LAST checkpoint primary (selected ckpt = information). Rule: nn_x/w5/logs/E_catgrad_predeclared.txt (13:38:39Z): gates {'s1_val': -0.001, 's1_hold': -0.0005, 's2_margin': 0.003, 's3_within_drop': 0.002, 's4_graft_val': -0.0006, 's4_catndcg': -0.002, 's5_graft_val': -0.0008, 's5_graft_hold': -0.0005, 's6_m50_z': -2.0}
+val 14423 feeds / 1389971 cands / 173200 (feed, category) groups; holdout 30000 feeds / 4630966 cands / 441344 groups; singleton-category positives: val 0.0514, holdout 0.0109; val M<50 positives in singleton categories 0.1334
+
+---- LAST checkpoint view (PRIMARY)
+seed 23: base val 0.39391 hold 0.31771 | catgrad val 0.39214 hold 0.31612 | d val -0.00177 d hold -0.00159
+seed 24: base val 0.39310 hold 0.31723 | catgrad val 0.39294 hold 0.31642 | d val -0.00016 d hold -0.00081
+(s1) POOLED member: val -0.00097+-0.00061 (z -1.58) | holdout -0.00120+-0.00034 (z -3.49) | slices M<50 -0.00066 (z -0.6) M>=50 -0.00118 (z -1.8) Tue -0.00109 (z -1.3) Thu -0.00083 (z -0.9)
+(s2) diversity margin: rho_bb 0.97979 - rho_x 0.96847 = +0.01132 (need >= +0.003) | arm-arm 0.97601, same-seed arm-base 0.97281
+(s3) within-category cross-seed corr: base-base 0.97636, arm-base 0.97107, drop +0.00529 (need >= +0.002) | between-category (info): base-base 0.98416, arm-base 0.96661, drop +0.01756
+(s4) category head: graft [catgrad category + base within] - base: val -0.00095+-0.00043 (need >= -0.0006) | category NDCG catgrad softmax(g) - base LSE: -0.00061+-0.00052 (need >= -0.002; base LSE category NDCG 0.7825)
+(s5) within part: graft [base category + catgrad within] - base: val +0.00025+-0.00049 (need >= -0.0008) | holdout -0.00001+-0.00029 (need >= -0.0005)
+(s6) M<50 slice: d -0.00066 z -0.56 (need z >= -2.0)
+(info) 2-member pools vs base23+base24 (0.39456): mixed base_s + catgrad_s' -0.00044; catgrad23+catgrad24 -0.00172
+gates: s1 val >= -0.0010 OK; s1 holdout >= -0.0005 NO; s2 margin >= +0.003 OK; s3 within drop >= +0.002 OK; s4 graft(cat) val >= -0.0006 NO; s4 catNDCG >= -0.002 OK; s5 graft(within) val >= -0.0008 OK; s5 graft(within) holdout >= -0.0005 OK; s6 M<50 z >= -2 OK
+LAST verdict: CLOSED
+
+---- SELECTED checkpoint view (information)
+seed 23: base val 0.39391 hold 0.31771 | catgrad val 0.39214 hold 0.31612 | d val -0.00177 d hold -0.00159
+seed 24: base val 0.39310 hold 0.31723 | catgrad val 0.39294 hold 0.31642 | d val -0.00016 d hold -0.00081
+(s1) POOLED member: val -0.00097+-0.00061 (z -1.58) | holdout -0.00120+-0.00034 (z -3.49) | slices M<50 -0.00066 (z -0.6) M>=50 -0.00118 (z -1.8) Tue -0.00109 (z -1.3) Thu -0.00083 (z -0.9)
+(s2) diversity margin: rho_bb 0.97979 - rho_x 0.96847 = +0.01132 (need >= +0.003) | arm-arm 0.97601, same-seed arm-base 0.97281
+(s3) within-category cross-seed corr: base-base 0.97636, arm-base 0.97107, drop +0.00529 (need >= +0.002) | between-category (info): base-base 0.98416, arm-base 0.96661, drop +0.01756
+(s4) category head: graft [catgrad category + base within] - base: val -0.00095+-0.00043 (need >= -0.0006) | category NDCG catgrad softmax(g) - base LSE: -0.00061+-0.00052 (need >= -0.002; base LSE category NDCG 0.7825)
+(s5) within part: graft [base category + catgrad within] - base: val +0.00025+-0.00049 (need >= -0.0008) | holdout -0.00001+-0.00029 (need >= -0.0005)
+(s6) M<50 slice: d -0.00066 z -0.56 (need z >= -2.0)
+(info) 2-member pools vs base23+base24 (0.39456): mixed base_s + catgrad_s' -0.00044; catgrad23+catgrad24 -0.00172
+gates: s1 val >= -0.0010 OK; s1 holdout >= -0.0005 NO; s2 margin >= +0.003 OK; s3 within drop >= +0.002 OK; s4 graft(cat) val >= -0.0006 NO; s4 catNDCG >= -0.002 OK; s5 graft(within) val >= -0.0008 OK; s5 graft(within) holdout >= -0.0005 OK; s6 M<50 z >= -2 OK
+SELECTED verdict: CLOSED
+
+(info) secondary reference abl_base_s23/24 (selected ckpt, nn_x/abl code): catgrad(selected) - abl_base val -0.00094+-0.00062; w9_base(selected) - abl_base val +0.00003+-0.00030; corr(w9_base_s, abl_base_s) same seed 0.99710, abl base-base 0.97776
+(info) w9_base_s23: best_step 19670 val(selected) 0.39391 train 24.2 min
+(info) w9_catgrad_s23: best_step 19670 val(selected) 0.39214 train 24.6 min; head: cg_cnt w -0.047 b +6.471, |cg_cat| max 1.138, |cg_wide| max 2.875, |cg_q.3| max 0.287
+(info) w9_base_s24: best_step 19670 val(selected) 0.39310 train 24.1 min
+(info) w9_catgrad_s24: best_step 19670 val(selected) 0.39294 train 24.4 min; head: cg_cnt w -0.033 b +6.448, |cg_cat| max 0.913, |cg_wide| max 2.975, |cg_q.3| max 0.250
+
+VERDICT catgrad (LAST ckpt, pre-declared stage-S rule): CLOSED at stage S | selected-ckpt view: CLOSED
+registry: w9_catgrad_s23/24 vs w9_base (2-epoch screen A_BASE + HYG, @last ckpt, rule E_catgrad_predeclared.txt 13:38:39Z): val -0.00097 +- 0.00061, holdout -0.00120 +- 0.00034, margin +0.0113 (bb 0.9798), within drop +0.0053 (bb 0.9764), graft cat -0.00095, catNDCG -0.00061, graft within +0.00025 / -0.00001, M<50 z -0.6, mixed 2-pool -0.00044 -> CLOSED (<repo>/nn_x/w9/catgrad/logs/w9_eval_S_catgrad.txt); 34s

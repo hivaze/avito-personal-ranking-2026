@@ -1,0 +1,22 @@
+u20a_s951: args differing from u20c_s951: {'xfold': (-1, 0), 'variant': ('w5_e10_u20c_s951', 'w5_e10_u20a_s951')}
+    select_on holdout select_min_step 12000 epochs 10.0 lr 0.002 holdout 30000 cooldown_mix 0.02 | evals 32 last step 78710 best_step 77500 best val 0.39619 hold 0.32132 | last val 0.39627 hold 0.32124 | minutes 216
+u20a_s952: args differing from u20c_s951: {'seed': (951, 952), 'xfold': (-1, 0), 'variant': ('w5_e10_u20c_s951', 'w5_e10_u20a_s952')}
+    select_on holdout select_min_step 12000 epochs 10.0 lr 0.002 holdout 30000 cooldown_mix 0.02 | evals 32 last step 78710 best_step 78710 best val 0.39714 hold 0.32122 | last val 0.39714 hold 0.32122 | minutes 215
+u20b_s951: args differing from u20c_s951: {'xfold': (-1, 0), 'variant': ('w5_e10_u20c_s951', 'w5_e10_u20b_s951'), 'xfold_unlab': (False, True)}
+    select_on holdout select_min_step 12000 epochs 10.0 lr 0.002 holdout 30000 cooldown_mix 0.02 | evals 40 last step 98350 best_step 97500 best val 0.39833 hold 0.32119 | last val 0.39822 hold 0.32103 | minutes 268
+u20b_s952: args differing from u20c_s951: {'seed': (951, 952), 'xfold': (-1, 0), 'variant': ('w5_e10_u20c_s951', 'w5_e10_u20b_s952'), 'xfold_unlab': (False, True)}
+    select_on holdout select_min_step 12000 epochs 10.0 lr 0.002 holdout 30000 cooldown_mix 0.02 | evals 40 last step 98350 best_step 98350 best val 0.39743 hold 0.32188 | last val 0.39743 hold 0.32188 | minutes 267
+u20c_s951: args differing from u20c_s951: {}
+    select_on holdout select_min_step 12000 epochs 10.0 lr 0.002 holdout 30000 cooldown_mix 0.02 | evals 40 last step 98350 best_step 97500 best val 0.39759 hold 0.32227 | last val 0.39768 hold 0.32227 | minutes 267
+u20c_s952: args differing from u20c_s951: {'seed': (951, 952), 'variant': ('w5_e10_u20c_s951', 'w5_e10_u20c_s952')}
+    select_on holdout select_min_step 12000 epochs 10.0 lr 0.002 holdout 30000 cooldown_mix 0.02 | evals 40 last step 98350 best_step 98350 best val 0.39778 hold 0.32279 | last val 0.39778 hold 0.32279 | minutes 265
+teacher member xf0_s951: xfold 0 unlab None holdout 30000 kd_file '' d 128
+teacher member xf0_s952: xfold 0 unlab None holdout 30000 kd_file '' d 128
+teacher member xf0_s953: xfold 0 unlab None holdout 30000 kd_file '' d 128
+[data] train: 3151208 feeds, 246745836 cands, 583586378 hist, table (81557944, 128), 11s, gpu mem 21.2 GB
+<repo>/nn_x/w5/ckpt/w5_e10_xf0_s951.pt 100.04898071289062 12.428107261657715
+<repo>/nn_x/w5/ckpt/w5_e10_xf0_s952.pt 102.09464263916016 12.435538291931152
+<repo>/nn_x/w5/ckpt/w5_e10_xf0_s953.pt 96.65841674804688 12.303956031799316
+DONE
+
+XH (n 8000) within-feed corr to teacher_xf0 (IN-SAMPLE teacher on these feeds): A 0.97435 B 0.98083 C 0.97747; B - A +0.00649 +- 0.00008

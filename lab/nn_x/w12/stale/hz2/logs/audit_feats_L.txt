@@ -1,0 +1,20 @@
+sample: 240 train feeds (60 per day group), 19163 rows; seq recount on 80 of them; view feats_L, m = 5
+history events of the sampled items: 1183210
+train impressions of the sampled items: 1909760
+rows: exact 6479, truncated 12684
+it_hist counted (row, snapshot) pairs: 294230 = dense 287979 + sparse 6251 + own snapshot 0
+  pairs with snapshot day AFTER the row day: 0 (share 0.000000)  [must be 0]
+  pairs of the same non-zero user with a later timestamp: 0  [must be 0]
+  pairs from ANY snapshot of the row's own non-zero user (own snapshot or earlier ones): 4 (share 0.000014)
+  sparse pairs of other users later on the SAME day (allowed by the rule, ts > row ts): 1617 (0.2587 of sparse pairs)
+  dense pairs by distance row day - snapshot day (days 1..13): 26979 24802 29329 36134 34557 29571 32689 26951 13029 12928 12302 6914 1794; distance 0: 0 [must be 0]
+  recount vs view file seq_cv_hz_invd20 : rows 6320, exact 0.8883, max rel diff 8.67e-08, non-zero rows 707 -> ok
+  recount vs view file seq_cv_hz_pop    : rows 6320, exact 0.7430, max rel diff 9.5e-08, non-zero rows 2947 -> ok
+  recount vs view file seq_cv_hz_norm   : rows 6320, exact 0.8881, max rel diff 3.73e-08, non-zero rows 707 -> ok
+  recount vs view file it_hist_hz_all   : rows 19163, exact 0.7157, max rel diff 1.05e-07, non-zero rows 9407 -> ok
+  recount vs view file it_hist_hz_et1   : rows 19163, exact 0.7318, max rel diff 1.14e-07, non-zero rows 8876 -> ok
+  recount vs view file it_hist_hz_et2   : rows 19163, exact 0.8501, max rel diff 8.65e-08, non-zero rows 4345 -> ok
+  recount vs view file it_hist_hz_et3   : rows 19163, exact 0.8661, max rel diff 1.01e-07, non-zero rows 3985 -> ok
+  recount vs view file it_hist_hz_et4   : rows 19163, exact 0.8798, max rel diff 9e-08, non-zero rows 3721 -> ok
+  recount vs view file xp_imp_hz_c50    : rows 19163, exact 0.5571, max rel diff 4.4e-08, non-zero rows 8488 -> ok
+V3 PASS

@@ -1,0 +1,47 @@
+{
+  "variant": "llmq9_probe",
+  "backbone": "qwen3.5-9b",
+  "gpu": null,
+  "grad_accum": 1,
+  "token_budget": 56000,
+  "probe_steps": 40,
+  "full_steps": 1514,
+  "n_evals": 8,
+  "setup_s": 49.3,
+  "s_per_step": 8.252,
+  "train_real_tok_s": 6287.991505671808,
+  "train_padded_tok_s": 6726.565961834317,
+  "eval_s": 398.7,
+  "fp32_load_s": 6.3,
+  "fp32_real_tok_s": 2850.617984494929,
+  "fp32_tokens_final": {
+    "holdout": 9969779,
+    "val": 3918364,
+    "test": 7935102
+  },
+  "fp32_final_s": 7655.6,
+  "est_hours": {
+    "train": 3.470418736946015,
+    "evals": 0.886,
+    "fp32_final": 2.1283245027893813,
+    "setup": 0.027388176255755955,
+    "total": 6.512131415991152
+  },
+  "peak_alloc_train_gb": 91.38786506652832,
+  "peak_reserved_train_gb": 141.494140625,
+  "peak_reserved_fp32_gb": 104.708984375,
+  "holdout_ndcg_probe": 0.25290388384581464,
+  "gate": {
+    "mem_gb": 200.0,
+    "hours": 10.0,
+    "mem_ok": true,
+    "time_ok": true,
+    "PASS": true
+  },
+  "utc": "2026-11-12 04:23:43",
+  "n_evals_fixed": {
+    "old_n_evals": 38,
+    "old_total_h": 9.83496376152982,
+    "note": "One-off correction (2026-11-12 04:20 UTC) of size-probe JSONs written before the n_evals fix in train_llm.size_probe:"
+  }
+}

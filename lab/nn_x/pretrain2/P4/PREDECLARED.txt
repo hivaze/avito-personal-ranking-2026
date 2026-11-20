@@ -1,0 +1,53 @@
+P4 (E5-reduced) cross-user trajectory-neighbour label transfer: stage 0, val + holdout, CPU only (12 threads)
+PRE-DECLARED at 2026-11-13T05:15:18Z (date -u), before any P4 signal, coverage or residual was computed.
+Plan: reports/PRETRAIN_PLAN_1113.md section 4 (P4) and section 6 (kill row "P4").
+
+BANK (label source; train labels only)
+- train feeds with p_random > 0.5 (eda/labels_position/out/train_prandom.npz; NaN -> 0; M < 50 -> 0) and M >= 50.
+- excluded: the 30K holdout feeds (rng 12345 rule of nn_x/r6/train.py); user_id 0; every user_id that appears in val,
+  test or the holdout feeds (no same-user information of any kind, earlier or later).
+- data days = MSK calendar days with >= 1000 train feeds: day idx 0-8 (Sep 6-14) and 11-13 (Sep 17-19).
+- FIXED-LENGTH trailing window: for a query on day D the bank is the 5 most recent data days d with d <= D - 3
+  (gap >= 3 calendar days, = val's minimum gap Sep 19 -> Sep 22).
+  val (D = Sep 22 / Sep 24) -> {Sep 13, 14, 17, 18, 19}; holdout D = Sep 13 -> {Sep 6-10}; Sep 14 -> {Sep 7-11};
+  Sep 17/18/19 -> {Sep 10-14}. Holdout feeds on Sep 6-12 have no full window -> no bank (eligible set = Sep 13,14,17,18,19).
+- one bank entry per user: key = L2-normalised mean of the L2-normalised int8 user_emb of the user's in-window bank feeds;
+  value = all shown candidates of those feeds (item_id, cl4096 code from data/clu_work/cand_cl_4096_train.npy, cand_target).
+- no subsampling unless the runtime forces it (then stated in the report).
+
+QUERY / NEIGHBOURS
+- query key = the feed's own user_emb (val: data/flat/val/user_emb.npy; holdout: its train row), L2-normalised.
+- k = 32 nearest bank users by cosine (exact numpy matmul); weights w_j = softmax(10 * cos_j) over the 32.
+
+SIGNALS per candidate c (key X(c) = item_id or cl4096 code; code < 0 -> no cluster evidence)
+- s_pos_X    = sum_j w_j * 1[neighbour j clicked >= 1 shown item with key X(c)]
+- s_neg_X    = sum_j w_j * 1[neighbour j was shown >= 1 item with key X(c) and clicked none of them]  (shown-but-ignored)
+- contrast_X = s_pos_X - s_neg_X
+- X in {item, cl4096} -> 6 signals.
+- PRIMARY (gated) arms: s_neg_item, contrast_item, s_neg_cl, contrast_cl (4 arms; the plan's distinct-mechanism signals).
+- SECONDARY (reported, never gated): s_pos_item, s_pos_cl, and JOINT = nested ridge direction over z(s_pos_item, s_neg_item,
+  s_pos_cl, s_neg_cl) (ridge alpha 1.0 on within-feed-demeaned labels, fitted on the 4/5 training users together with z(G3)).
+
+COVERAGE: share of candidates with any neighbour evidence (s_pos + s_neg > 0), item and cl4096 level, val and holdout,
+  ratio estimate with feed-clustered SE.
+
+RESIDUAL LENS (nested on G3)
+- val base: within-feed z of preds/ens_G3_final_val.npy; val lens = 14,306 leak-free feeds (eda/errors/synthesis/qt.leak_mask);
+  labels data/flat/val/cand_target.npy.
+- holdout base: member-equal within-feed z-mean of the 20 G3 members' holdout preds (sanity: NDCG ~0.32379); labels
+  preds/holdout/holdout_y.npy.
+- per arm: score = zG3 + w * z(x) (within-feed z; zero-variance feed -> 0); w from the grid
+  +-{0, .02, .05, .1, .15, .2, .3, .5, .75, 1.0} chosen by mean per-feed NDCG on the 4/5 training users of a user-grouped
+  5-fold (user-0 feeds are singleton groups), applied to the held-out 1/5; fold seeds 0 and 1; per-feed OOF delta averaged
+  over the 2 seeds; report mean +- SE (paired per-feed SE).
+- the holdout replica runs the same nested procedure inside the holdout feeds. PRIMARY holdout set = eligible feeds
+  (Sep 13/14/17/18/19); SECONDARY = all 30K (ineligible feeds carry no signal -> delta 0).
+
+GATE (task gate; Bonferroni note: 3 SE one-sided over 4 primary arms = family-wise alpha <= 0.0054)
+- an arm PASSES iff val nested residual >= +0.0010 AND >= 3 SE (z >= 3.0) AND primary-holdout nested residual > 0 (sign agreement).
+- P4 PASS iff any primary arm passes; otherwise P4 CLOSED (close cross-user label transfer with the other CF channels).
+- plan extras (reported; a task-gate PASS is downgraded to PASS-CONDITIONAL if any fails): private-mix (src/pmix) delta
+  >= -1 SE; |within-feed corr with cos_u| < 0.8; 'right category, buried' cell pair AUC (nn_x/r3/stage0_gate.py
+  definition, leak-free val) above both controls -log1p(it_hist_all_luo) and -maxsim32.
+- also reported (no gate role): single-feature val NDCG of each signal, query-to-neighbour time-gap distribution
+  val vs holdout, bank sizes, val slices M<50 / M>=50.

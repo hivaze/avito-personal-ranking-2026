@@ -1,0 +1,6 @@
+DIVERSITY read-out e30 seeds [951, 952] vs w5_e10_base (selected ckpt; rule E_batch_predeclared.txt amendment 1)
+(d1) pooled member: val -0.00155+-0.00076 | holdout -0.00069+-0.00043 -> NO (need both >= -0.0005)
+(d2) val: rho_x = corr(e30 pool[951, 952], base pool[953,954]) 0.96705 | rho_bb = corr(base pool[951, 952], base pool[953,954]) 0.97364 | margin +0.00659 -> OK (need >= +0.005)
+     (info) holdout rho_x 0.96945 rho_bb 0.97527 margin +0.00582 | member corr: arm-base cross-seed 0.93684, base-base 0.94747, arm-arm 0.92836, same-seed arm-base 0.93845
+(d3) 2-member pool e30 vs base[951, 952]: val -0.00098+-0.00088 | holdout +0.00030+-0.00051 -> NO
+VERDICT e30: CLOSED (diversity clause)

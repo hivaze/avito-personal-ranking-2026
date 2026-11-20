@@ -1,0 +1,27 @@
+# Read-out copied from lab/nn_x/picks/decide5_out.txt, unchanged below this line.
+NEW member gate (a): single to val >= 0.39467 and holdout >= 0.31799
+  v27_gru_m02_s511       to val 0.39743 hold 0.31992 PASS
+  v27_gru_m02_s513       to val 0.39643 hold 0.32008 PASS
+  v27_gru_m02_s515       to val 0.39485 hold 0.31974 PASS
+  v28_lr1_m02_s411       to val 0.39510 hold 0.31899 PASS
+  v28_lr1_m02_s412       to val 0.39429 hold 0.31914 fail
+  v28_lr1_m02_s413       to val 0.39526 hold 0.31925 PASS
+  v28_lr1_m02_s414       to val 0.39552 hold 0.31904 PASS
+  v28_lr1_m02_s415       to val 0.39497 hold 0.31831 PASS
+  v28_lr1_m02_s416       to val 0.39376 hold 0.31909 fail
+  v28_lr1_m02_s417       to val 0.39507 hold 0.31823 PASS
+  v29_d192_m02_s711      to val 0.39580 hold 0.31971 PASS
+  v29_d192_m02_s712      to val 0.39617 hold 0.31928 PASS
+  v29_d192_m02_s713      to val 0.39457 hold 0.31984 fail
+  v30_f7_m02_s901        to val 0.39529 hold 0.31969 PASS
+  v30_f7_m02_s902        to val 0.39506 hold 0.31960 PASS
+NEW eligible: 12 ['v27_gru_m02_s511', 'v27_gru_m02_s513', 'v27_gru_m02_s515', 'v28_lr1_m02_s411', 'v28_lr1_m02_s413', 'v28_lr1_m02_s414', 'v28_lr1_m02_s415', 'v28_lr1_m02_s417', 'v29_d192_m02_s711', 'v29_d192_m02_s712', 'v30_f7_m02_s901', 'v30_f7_m02_s902']
+PF7x             n= 38 val 0.39974 hold 0.32360 | V +0.00000+-0.00000 Vto +0.00000 H +0.00000+-0.00000 D +0.00000 S +0.00000 | M<50 +0.0 M>=50 +0.0 Tue +0.0 Thu +0.0 coldpos +0.0 warmpos +0.0 | eligible
+G3               n= 20 val 0.40032 hold 0.32379 | V +0.00058+-0.00039 Vto +0.00051 H +0.00020+-0.00022 D +0.00031 S +0.00027 | M<50 +1.0 M>=50 +1.1 Tue +1.5 Thu +0.5 coldpos -0.1 warmpos +1.4 | eligible
+M2               n= 14 val 0.40094 hold 0.32361 | V +0.00120+-0.00047 Vto +0.00101 H +0.00002+-0.00027 D +0.00099 S +0.00020 | M<50 +2.0 M>=50 +1.6 Tue +1.6 Thu +2.0 coldpos +2.8 warmpos +1.3 | eligible
+N1=G3+NEW        n= 32 val 0.40007 hold 0.32363 | V +0.00032+-0.00035 Vto +0.00029 H +0.00003+-0.00021 D +0.00026 S +0.00007 | M<50 +0.5 M>=50 +0.8 Tue +0.0 Thu +1.3 coldpos +1.4 warmpos +0.1 | eligible
+N2=F10+F7x+NEW   n= 25 val 0.39980 hold 0.32352 | V +0.00006+-0.00035 Vto +0.00015 H -0.00008+-0.00021 D +0.00023 S -0.00017 | M<50 -0.1 M>=50 +0.4 Tue +0.1 Thu +0.2 coldpos +0.9 warmpos -0.2 | eligible
+N3=PF7x+NEW      n= 50 val 0.39991 hold 0.32335 | V +0.00016+-0.00020 Vto -0.00011 H -0.00025+-0.00012 D +0.00014 S +0.00002 | M<50 +0.4 M>=50 +0.8 Tue +0.5 Thu +0.7 coldpos +0.1 warmpos +1.0 | NOT eligible
+N4=F10+NEW       n= 18 val 0.39946 hold 0.32337 | V -0.00029+-0.00037 Vto -0.00039 H -0.00022+-0.00024 D -0.00016 S -0.00029 | M<50 -0.2 M>=50 -0.9 Tue -1.1 Thu -0.0 coldpos -0.6 warmpos -0.3 | eligible
+S(G3) = +0.00027; eligible N ranked by S: N1=G3+NEW +0.00007, N2=F10+F7x+NEW -0.00017, N4=F10+NEW -0.00029
+SUBMISSIONS (pending presub_gate PASS): none beats G3 on S

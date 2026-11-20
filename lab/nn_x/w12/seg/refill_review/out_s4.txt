@@ -1,0 +1,21 @@
+## (i) the study's stored scores, my statistics, 4-pool (passes I did not re-run)
+   T holdout : d1 - a +0.00029 +- 0.00058 (z +0.51, n 2358) | d2 - a +0.00097 +- 0.00065 (z +1.49, n 2358) | dP - a -0.00082 +- 0.00074 (z -1.10, n 2358) | c192 - b192 +0.00167 +- 0.00078 (z +2.13, n 2358) | a - b192 +0.00203 +- 0.00117 (z +1.73, n 2358)
+   T val     : d1 - a +0.00186 +- 0.00132 (z +1.41, n 1383) | d2 - a +0.00108 +- 0.00147 (z +0.74, n 1383) | dP - a -0.00089 +- 0.00120 (z -0.74, n 1383) | c192 - b192 +0.00108 +- 0.00159 (z +0.68, n 1383) | a - b192 -0.00093 +- 0.00186 (z -0.50, n 1383)
+   T pooled  : d1 - a +0.00087 +- 0.00061 (z +1.43, n 3741) | d2 - a +0.00101 +- 0.00068 (z +1.49, n 3741) | dP - a -0.00084 +- 0.00065 (z -1.31, n 3741)
+   U holdout : d1 - a +0.00037 +- 0.00071 (z +0.53, n 3123) | d2 - a +0.00011 +- 0.00073 (z +0.15, n 3123) | dP - a -0.00252 +- 0.00077 (z -3.26, n 3123) | c192 - b192 +0.00032 +- 0.00072 (z +0.44, n 3123) | a - b192 +0.00167 +- 0.00099 (z +1.69, n 3123)
+   U val     : d1 - a -0.00064 +- 0.00172 (z -0.37, n 1878) | d2 - a +0.00041 +- 0.00178 (z +0.23, n 1878) | dP - a +0.00221 +- 0.00150 (z +1.47, n 1878) | c192 - b192 -0.00130 +- 0.00161 (z -0.81, n 1878) | a - b192 +0.00069 +- 0.00157 (z +0.44, n 1878)
+   U pooled  : d1 - a -0.00001 +- 0.00078 (z -0.01, n 5001) | d2 - a +0.00022 +- 0.00081 (z +0.28, n 5001) | dP - a -0.00074 +- 0.00074 (z -1.00, n 5001)
+   calibration g, holdout, all 11601 capped feeds: g - b +0.00251 +- 0.00053 (z +4.75, n 11601) | b192 - b +0.00141 +- 0.00053 (z +2.67, n 11601) | ratio 1.78 | a - b192 +0.00174 +- 0.00050 (z +3.49, n 11601) | a - b +0.00314 +- 0.00066 (z +4.74, n 11601)
+   calibration g, val, all 4176 capped feeds: g - b +0.00031 +- 0.00111 (z +0.28, n 4176) | b192 - b +0.00202 +- 0.00111 (z +1.82, n 4176) | ratio 0.15 | a - b192 +0.00139 +- 0.00099 (z +1.40, n 4176) | a - b +0.00341 +- 0.00135 (z +2.52, n 4176)
+
+## (iii) c - b by fill bucket, study events, my inference and statistics, 4-pool, holdout + val pooled
+   Ts: 1-31: +0.00098 +- 0.00057 (z +1.72, n 1848) | 32-63: +0.00073 +- 0.00207 (z +0.35, n 788) | 64-127: +0.00269 +- 0.00242 (z +1.11, n 753) | 128-128: +0.00585 +- 0.00327 (z +1.79, n 352)
+   Us: 1-31: -0.00021 +- 0.00108 (z -0.19, n 853) | 32-63: -0.00117 +- 0.00189 (z -0.62, n 814) | 64-127: +0.00189 +- 0.00194 (z +0.97, n 1492) | 128-128: +0.00436 +- 0.00196 (z +2.22, n 1842)
+
+## (ii) stability: hard-label family and 4-pool numerators, study events vs my events, on the feeds common to both read sets (design 1)
+   holdout pool4    : common feeds 2351 (identical recovered events 1879); cTs - cTm on identical-event feeds: mean +0.000000, feeds with a different NDCG 0; on feeds with different events (472): -0.00020 +- 0.00098 (z -0.20, n 472); contribution to the read-set mean -0.00004
+   holdout hard     : common feeds 2351 (identical recovered events 1879); cTs - cTm on identical-event feeds: mean +0.000000, feeds with a different NDCG 0; on feeds with different events (472): +0.00225 +- 0.00120 (z +1.88, n 472); contribution to the read-set mean +0.00045
+   holdout distilled: common feeds 2351 (identical recovered events 1879); cTs - cTm on identical-event feeds: mean +0.000000, feeds with a different NDCG 0; on feeds with different events (472): +0.00021 +- 0.00118 (z +0.18, n 472); contribution to the read-set mean +0.00004
+   val pool4    : common feeds 1367 (identical recovered events 992); cTs - cTm on identical-event feeds: mean +0.000000, feeds with a different NDCG 0; on feeds with different events (375): -0.00127 +- 0.00138 (z -0.92, n 375); contribution to the read-set mean -0.00035
+   val hard     : common feeds 1367 (identical recovered events 992); cTs - cTm on identical-event feeds: mean +0.000000, feeds with a different NDCG 0; on feeds with different events (375): -0.00316 +- 0.00239 (z -1.32, n 375); contribution to the read-set mean -0.00087
+   val distilled: common feeds 1367 (identical recovered events 992); cTs - cTm on identical-event feeds: mean +0.000000, feeds with a different NDCG 0; on feeds with different events (375): +0.00213 +- 0.00168 (z +1.26, n 375); contribution to the read-set mean +0.00058

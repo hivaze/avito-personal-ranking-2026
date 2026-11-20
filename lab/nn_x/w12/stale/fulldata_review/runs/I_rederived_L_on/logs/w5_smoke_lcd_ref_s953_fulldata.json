@@ -1,0 +1,44 @@
+{
+  "variant": "w5_smoke_lcd_ref_s953",
+  "holdout_in_train": true,
+  "kept_step": 75,
+  "total_steps": 75,
+  "n_holdout_feeds_in_training": 194,
+  "holdout_candidates_in_training": 29886,
+  "n_training_feeds": 20000,
+  "pool_holdout_feeds": 194,
+  "holdout_feeds_per_epoch": 194,
+  "steps": {
+    "steps_per_epoch": 75,
+    "steps_per_epoch_without_holdout": 74,
+    "total": 75
+  },
+  "keep_arg_before": "best",
+  "insample_history": [
+    {
+      "step": 25,
+      "holdout_insample_ndcg": 0.17152589726103767
+    },
+    {
+      "step": 50,
+      "holdout_insample_ndcg": 0.17160228579397216
+    },
+    {
+      "step": 75,
+      "holdout_insample_ndcg": 0.17152150269598956
+    }
+  ],
+  "insample_files": [
+    {
+      "file": "<repo>/nn_x/w12/stale/fulldata_review/runs/I_rederived_L_on/preds/holdout/nn_w5_smoke_lcd_ref_s953@last_holdoutINSAMPLE.npy",
+      "insample_ndcg": 0.17152150269598956,
+      "what": "the last checkpoint"
+    },
+    {
+      "file": "<repo>/nn_x/w12/stale/fulldata_review/runs/I_rederived_L_on/preds/holdout/nn_w5_smoke_lcd_ref_s953_holdoutINSAMPLE.npy",
+      "insample_ndcg": 0.17152150269598956,
+      "what": "the kept (= LAST) checkpoint"
+    }
+  ],
+  "note": "every holdout number of this run is IN-SAMPLE; val is the only clean witness"
+}

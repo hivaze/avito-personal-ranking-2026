@@ -1,0 +1,54 @@
+== ABLATION SCREEN (2-epoch from-scratch, base = A_BASE + HYG, seeds (23, 24), primary = last checkpoint; rules in the abl_eval.py docstring, frozen 2026-11-13 00:08 UTC)
+== runs: selected step / total | selected val, holdout (in-training eval) | last val, holdout | minutes
+  abl:abl_base_s23               best  19000/19670 | sel val 0.39348 hold 0.31756 | last val 0.39364 hold 0.31754 | 37 min
+  abl:abl_base_s24               best  19670/19670 | sel val 0.39348 hold 0.31754 | last val 0.39348 hold 0.31754 | 37 min
+  abl:abl_time_s23               best  19670/19670 | sel val 0.39342 hold 0.31760 | last val 0.39342 hold 0.31760 | 20 min
+  abl:abl_time_s24               best  19000/19670 | sel val 0.39344 hold 0.31750 | last val 0.39404 hold 0.31748 | 20 min
+
+== time (SCALE-UP: feed time inputs tm_weekend, tm_hsin, tm_hcos (Moscow weekend flag + sin / cos hour-of-day; --xt_add tm_weekend,tm_hsin,tm_hcos on the full base inputs)) vs base (B = arm, delta = arm - base)
+    VAL  abl_time_s23@last 0.39342 vs abl_base_s23@last 0.39364: -0.00022
+    VAL  abl_time_s24@last 0.39404 vs abl_base_s24@last 0.39348: +0.00055
+    HOLD abl_time_s23@last 0.31760 vs abl_base_s23@last 0.31754: +0.00006
+    HOLD abl_time_s24@last 0.31748 vs abl_base_s24@last 0.31753: -0.00005
+  [last] VAL  pooled: all +0.00017+-0.00049 (z +0.34)  M<50 +0.00081+-0.00092 (z +0.88)  M>=50 -0.00028+-0.00054 (z -0.52)  Tue +0.00101+-0.00068 (z +1.49)  Thu -0.00076+-0.00072 (z -1.06)  coldpos -0.00101+-0.00100 (z -1.00)  warmpos +0.00072+-0.00065 (z +1.10)
+  [last] HOLD pooled: all +0.00001+-0.00028 (z +0.02)  late20% -0.00028+-0.00060 (z -0.47)  weekend +0.00021+-0.00051 (z +0.40)  weekday -0.00009+-0.00034 (z -0.26)
+  [last] val SE_cal 0.00055 (z_cal +0.30)
+  [last] hold SE_cal 0.00030 (z_cal +0.02)
+    VAL  abl_time_s23 0.39342 vs abl_base_s23 0.39348: -0.00006
+    VAL  abl_time_s24 0.39344 vs abl_base_s24 0.39348: -0.00004
+    HOLD abl_time_s23 0.31760 vs abl_base_s23 0.31756: +0.00004
+    HOLD abl_time_s24 0.31750 vs abl_base_s24 0.31753: -0.00003
+  [selected (info)] VAL  pooled: all -0.00005+-0.00050 (z -0.10)  M<50 +0.00032+-0.00092 (z +0.34)  M>=50 -0.00030+-0.00057 (z -0.53)  Tue +0.00082+-0.00070 (z +1.19)  Thu -0.00101+-0.00073 (z -1.37)  coldpos +0.00198+-0.00104 (z +1.90)  warmpos -0.00094+-0.00067 (z -1.42)
+  [selected (info)] HOLD pooled: all +0.00001+-0.00028 (z +0.03)  late20% -0.00066+-0.00059 (z -1.11)  weekend +0.00026+-0.00053 (z +0.49)  weekday -0.00011+-0.00034 (z -0.32)
+  MINUTES base [37.1, 37.5] arm [20.4, 20.2] -> ratio 0.54
+  PMIX private-mix pooled delta -0.00056 +- 0.00075 (z -0.75); < -1 SE: no
+  STALE-VAL pooled delta (private-like inputs): -0.00080 +- 0.00050 (z -1.60); < -1 SE: YES
+  PRIVATE TRADE (stale-val delta - val delta): -0.00096 (arm loses MORE than the base under the private-like coverage shift)
+  stale-val (selected checkpoints, info):
+  STALE-VAL pooled delta (private-like inputs): -0.00059 +- 0.00051 (z -1.15); < -1 SE: YES
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent +0.00045+-0.00039 (pos 0.460)  warm|mid -0.00002+-0.00016 (pos 0.110)  warm|novel +0.00002+-0.00016 (pos 0.127)  cold|recent -0.00037+-0.00025 (pos 0.219)  cold|mid +0.00007+-0.00008 (pos 0.038)  cold|novel -0.00003+-0.00007 (pos 0.046)  cat#1|w3+ +0.00003+-0.00017 (pos 0.347)  total +0.00013+-0.00049 (pos 1.000)
+  CLIPLOG abl_base_s23: warmup clipped 0.128 (median 0.438); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.260) | aux/main grad norm by Mpad 16:0.03 64:0.10 112:0.24 160:0.39 208:0.53 256:0.67 304:1.43
+  CLIPLOG abl_base_s24: warmup clipped 0.146 (median 0.424); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.242) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.21 160:0.41 208:0.54 256:0.75 304:1.25
+  CLIPLOG abl_time_s23: warmup clipped 0.112 (median 0.438); plateau clipped 0.000 (median 0.321); cooldown clipped 0.000 (median 0.310); pool clipped 0.000 (median 0.252) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.23 160:0.37 208:0.52 256:0.64 304:1.41
+  CLIPLOG abl_time_s24: warmup clipped 0.164 (median 0.431); plateau clipped 0.000 (median 0.322); cooldown clipped 0.000 (median 0.303); pool clipped 0.000 (median 0.244) | aux/main grad norm by Mpad 16:0.02 64:0.10 112:0.20 160:0.39 208:0.60 256:0.75 304:1.27
+  CLIPLOG decision (INSIGHTS item 1): max plateau clipped share 0.000 -> clipping CLOSED as an issue (< 20%)
+  ==> time: val +0.00017 (SE_cal 0.00055, z_cal +0.30; seeds -0.00022 +0.00055), holdout +0.00001 (z_cal +0.02; seeds +0.00006 -0.00005) -> FAIL
+
+== SUMMARY (last checkpoints; delta = arm - base, pooled over seeds; ABLATION worth = -delta)
+  arm          type      val d (z_cal)        hold d (z_cal)      M<50     M>=50    Tue      Thu      coldpos  warmpos  late20%  pmix     stale    min  -> verdict
+  time         SCALE-UP  +0.00017 (+0.30)  +0.00001 (+0.02)  +0.00081 -0.00028 +0.00101 -0.00076 -0.00101 +0.00072 -0.00028 -0.00056 -0.00080 0.54 -> FAIL
+
+== COMPONENT WORTH on the current recipe (ablation arms; -delta; val / holdout; +SE_cal)
+
+== TIME ARM: PRE-DECLARED PRIMARY READ (ledger section 9; holdout WEEKEND slice; last checkpoints; delta = time - base)
+  [last] weekend per seed +0.00144 -0.00103 | weekday per seed -0.00059 +0.00041
+  [sel] weekend per seed +0.00137 -0.00086 | weekday per seed -0.00058 +0.00037
+  holdout WEEKEND slice (n 9632): +0.00021 +- 0.00051 (z +0.40; z with SE_cal 0.00052: +0.39)  -> > +1 SE_feed: False
+  holdout WEEKDAY slice (n 20368): -0.00009 +- 0.00034 (z -0.26)   [information]
+  holdout overall: +0.00001 +- 0.00028 (z_cal +0.02)  -> >= 0: True
+  val overall: +0.00017 (SE_cal 0.00055, z_cal +0.30)  -> >= -1 SE_cal: True
+  pmix: -0.00056 +- 0.00075 (z -0.75)  -> >= -1 SE: True
+  stale-val (information): -0.00080 +- 0.00050 (z -1.60)
+  ==> TIME ARM PRIMARY VERDICT: FAIL -> the TIME arm stops; nothing else is run
+      (standard SCALE-UP verdict of abl_eval.py, information: FAIL)

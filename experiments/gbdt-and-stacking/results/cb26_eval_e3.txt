@@ -1,0 +1,23 @@
+reference G3: val 0.40032  trH(to) 0.32379
+
+E3 XM (exploration-subset CatBoost member): train feeds 134118, best iter 1935
+   single: val 0.38201 (half A=ES 0.38533, half B 0.37870); trH 0.30424
+   rho with pool: val 0.856 trH 0.850; gap to pool 0.0183; law (eq-mix gain ~ 0.0186(1-rho) - 0.378 gap) = -0.0042
+   w=0.05: val +0.00015 +- 0.00024 (half B +0.00007 +- 0.00032) | trH -0.00016 +- 0.00014
+   w=0.10: val -0.00013 +- 0.00033 (half B -0.00012 +- 0.00047) | trH -0.00041 +- 0.00020
+   w=0.20: val -0.00092 +- 0.00047 (half B -0.00082 +- 0.00068) | trH -0.00066 +- 0.00029
+[E3 member at selected w=0.05] val delta +0.00015 +- 0.00024 (z +0.61) -> rule1 FAIL
+   holdout delta -0.00016 +- 0.00014 (z -1.12) -> rule2 FAIL
+   slice M<50      n= 5893 +0.00034 +- 0.00045
+   slice M>=50     n= 8530 +0.00001 +- 0.00027
+   slice Tue       n= 7543 +0.00003 +- 0.00033
+   slice Thu       n= 6880 +0.00028 +- 0.00036
+   slice user0     n=  658 -0.00104 +- 0.00115
+   slice known     n=13765 +0.00020 +- 0.00025
+   slice cold_lo   n= 4811 -0.00006 +- 0.00044
+   slice cold_mid  n= 5098 +0.00018 +- 0.00032
+   slice cold_hi   n= 4514 +0.00033 +- 0.00050
+   pmix private +0.00018 +- 0.00040 -> rule4 OK
+   ==> NOT useful (fails)
+
+SUMMARY {"E3": false}

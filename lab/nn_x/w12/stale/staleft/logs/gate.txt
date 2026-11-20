@@ -1,0 +1,88 @@
+=== staleft GATE (label-free) ===
+val rows 1389971; test rows private 2017882 public 886924
+age-bucket share of rows: <1d val 0.114 pub 0.103 priv 0.110 | 1-3d val 0.075 pub 0.078 priv 0.073 | 3-7d val 0.096 pub 0.104 priv 0.101 | 7-10d val 0.050 pub 0.046 priv 0.046 | 10-24d val 0.129 pub 0.131 priv 0.130 | 24-76d val 0.175 pub 0.176 priv 0.176 | >76d(+cap) val 0.361 pub 0.362 priv 0.363
+
+kind column                   | private: dZ fresh -> stale | dM fresh -> stale || all test: dZ fresh -> stale | dM fresh -> stale || public: dZ fresh -> stale | dM fresh -> stale || verdict
+xt  seq_cv_invd20            | 0.0166 -> 0.0131 | 0.0355 -> 0.0315 || 0.0151 -> 0.0115 | 0.0320 -> 0.0280 || 0.0117 -> 0.0080 | 0.0242 -> 0.0204 || SWITCH
+xt  seq_cv_pop               | 0.0625 -> 0.0327 | 0.1028 -> 0.0606 || 0.0575 -> 0.0270 | 0.0938 -> 0.0505 || 0.0470 -> 0.0200 | 0.0741 -> 0.0280 || SWITCH
+xt  seq_cv_norm              | 0.0166 -> 0.0131 | 0.0316 -> 0.0257 || 0.0151 -> 0.0115 | 0.0288 -> 0.0227 || 0.0117 -> 0.0080 | 0.0225 -> 0.0163 || SWITCH
+xt  it_hist_all_luo          | 0.0797 -> 0.0276 | 0.1264 -> 0.0793 || 0.0709 -> 0.0346 | 0.1135 -> 0.0812 || 0.0510 -> 0.0546 | 0.0845 -> 0.1082 || SWITCH [overshoots public]
+xt  it_hist_et1_luo          | 0.0767 -> 0.0288 | 0.1197 -> 0.0803 || 0.0683 -> 0.0353 | 0.1073 -> 0.0815 || 0.0492 -> 0.0545 | 0.0795 -> 0.1068 || SWITCH [overshoots public]
+xt  it_hist_et2_luo          | 0.0407 -> 0.0225 | 0.0733 -> 0.0676 || 0.0367 -> 0.0233 | 0.0653 -> 0.0685 || 0.0274 -> 0.0320 | 0.0476 -> 0.0816 || SWITCH [overshoots public]
+xt  it_hist_et3_luo          | 0.0389 -> 0.0240 | 0.0774 -> 0.0676 || 0.0354 -> 0.0245 | 0.0695 -> 0.0680 || 0.0274 -> 0.0318 | 0.0519 -> 0.0810 || SWITCH [overshoots public]
+xt  it_hist_et4_luo          | 0.0278 -> 0.0215 | 0.0552 -> 0.0614 || 0.0252 -> 0.0215 | 0.0498 -> 0.0611 || 0.0193 -> 0.0270 | 0.0378 -> 0.0697 || KEEP FRESH (fails) [overshoots public]
+xt  pre2_fe_z                |    -   ->    -   | 0.0160 -> 0.0124 ||    -   ->    -   | 0.0137 -> 0.0092 ||    -   ->    -   | 0.0110 -> 0.0092 || SWITCH
+xt  pre2_fe_s                |    -   ->    -   | 0.0338 -> 0.0365 ||    -   ->    -   | 0.0272 -> 0.0297 ||    -   ->    -   | 0.0129 -> 0.0141 || SWITCH
+xt  has:pre2_fe              | 0.0000 -> 0.0000 | 0.0000 -> 0.0000 || 0.0000 -> 0.0000 | 0.0000 -> 0.0000 || 0.0000 -> 0.0000 | 0.0000 -> 0.0000 || SWITCH
+xe  it_hist_all_luo          | 0.0797 -> 0.0276 | 0.1264 -> 0.0793 || 0.0709 -> 0.0346 | 0.1135 -> 0.0812 || 0.0510 -> 0.0546 | 0.0845 -> 0.1082 || SWITCH [overshoots public]
+xe  it_hist_all_luo_rk       |    -   ->    -   | 0.1181 -> 0.0342 ||    -   ->    -   | 0.1067 -> 0.0297 ||    -   ->    -   | 0.0807 -> 0.0243 || SWITCH
+xe  it_hist_all_luo_zsl      |    -   ->    -   | 0.0558 -> 0.0236 ||    -   ->    -   | 0.0495 -> 0.0187 ||    -   ->    -   | 0.0351 -> 0.0103 || SWITCH
+xe  it_hist_all_luo_gap      |    -   ->    -   | 0.0605 -> 0.2458 ||    -   ->    -   | 0.0386 -> 0.2604 ||    -   ->    -   | 0.0076 -> 0.2922 || KEEP FRESH (fails) [overshoots public]
+xe  it_hist_et1_luo          | 0.0767 -> 0.0288 | 0.1197 -> 0.0803 || 0.0683 -> 0.0353 | 0.1073 -> 0.0815 || 0.0492 -> 0.0545 | 0.0795 -> 0.1068 || SWITCH [overshoots public]
+xe  it_hist_et2_luo          | 0.0407 -> 0.0225 | 0.0733 -> 0.0676 || 0.0367 -> 0.0233 | 0.0654 -> 0.0685 || 0.0274 -> 0.0320 | 0.0476 -> 0.0816 || SWITCH [overshoots public]
+xe  it_hist_et3_luo          | 0.0389 -> 0.0240 | 0.0774 -> 0.0676 || 0.0354 -> 0.0245 | 0.0695 -> 0.0680 || 0.0274 -> 0.0318 | 0.0519 -> 0.0810 || SWITCH [overshoots public]
+xe  it_hist_et4_luo          | 0.0278 -> 0.0215 | 0.0553 -> 0.0615 || 0.0252 -> 0.0215 | 0.0499 -> 0.0612 || 0.0193 -> 0.0270 | 0.0379 -> 0.0697 || KEEP FRESH (fails) [overshoots public]
+xe  it_hist_et5_luo          | 0.0160 -> 0.0068 | 0.0456 -> 0.0291 || 0.0143 -> 0.0074 | 0.0399 -> 0.0304 || 0.0104 -> 0.0112 | 0.0274 -> 0.0409 || SWITCH [overshoots public]
+xe  it_hist_et6_luo          | 0.0150 -> 0.0064 | 0.0444 -> 0.0286 || 0.0133 -> 0.0071 | 0.0387 -> 0.0298 || 0.0097 -> 0.0107 | 0.0260 -> 0.0409 || SWITCH [overshoots public]
+xe  it_hist_et7_luo          | 0.0118 -> 0.0132 | 0.0323 -> 0.0497 || 0.0109 -> 0.0131 | 0.0298 -> 0.0493 || 0.0087 -> 0.0150 | 0.0242 -> 0.0530 || KEEP FRESH (fails) [overshoots public]
+xe  it_hist_et8_luo          | 0.0075 -> 0.0047 | 0.0295 -> 0.0250 || 0.0067 -> 0.0050 | 0.0256 -> 0.0259 || 0.0047 -> 0.0069 | 0.0169 -> 0.0334 || SWITCH [overshoots public]
+xe  it_hist_et9_luo          | 0.0032 -> 0.0044 | 0.0161 -> 0.0277 || 0.0029 -> 0.0044 | 0.0147 -> 0.0277 || 0.0022 -> 0.0050 | 0.0114 -> 0.0296 || KEEP FRESH (fails) [overshoots public]
+xe  it_hist_et10_luo         | 0.0130 -> 0.0130 | 0.0483 -> 0.0525 || 0.0117 -> 0.0130 | 0.0433 -> 0.0516 || 0.0089 -> 0.0159 | 0.0323 -> 0.0595 || KEEP FRESH (fails) [overshoots public]
+xe  seq_cv_invd20            | 0.0166 -> 0.0131 | 0.0434 -> 0.0379 || 0.0151 -> 0.0115 | 0.0391 -> 0.0336 || 0.0117 -> 0.0080 | 0.0297 -> 0.0244 || SWITCH
+xe  seq_cv_invd20_rk         |    -   ->    -   | 0.0365 -> 0.0338 ||    -   ->    -   | 0.0328 -> 0.0287 ||    -   ->    -   | 0.0247 -> 0.0174 || SWITCH
+xe  seq_cv_pop               | 0.0625 -> 0.0327 | 0.1028 -> 0.0606 || 0.0575 -> 0.0270 | 0.0938 -> 0.0505 || 0.0470 -> 0.0200 | 0.0741 -> 0.0280 || SWITCH
+xe  pre_fe                   |    -   ->    -   | 0.0338 -> 0.0365 ||    -   ->    -   | 0.0272 -> 0.0297 ||    -   ->    -   | 0.0129 -> 0.0141 || SWITCH
+xe  pre_fe_z                 |    -   ->    -   | 0.0160 -> 0.0124 ||    -   ->    -   | 0.0137 -> 0.0092 ||    -   ->    -   | 0.0110 -> 0.0092 || SWITCH
+xe  pre_id_contrib_v2        | 0.0540 -> 0.0230 | 0.0727 -> 0.0566 || 0.0490 -> 0.0180 | 0.0649 -> 0.0489 || 0.0376 -> 0.0115 | 0.0477 -> 0.0320 || SWITCH
+xe  pre_idmax32              | 0.0519 -> 0.0212 | 0.0366 -> 0.0423 || 0.0468 -> 0.0161 | 0.0321 -> 0.0393 || 0.0352 -> 0.0107 | 0.0222 -> 0.0327 || KEEP FRESH (fails) [overshoots public]
+xe  pre_idmax32_has          | 0.0519 -> 0.0212 | 0.1060 -> 0.0433 || 0.0468 -> 0.0161 | 0.0953 -> 0.0328 || 0.0352 -> 0.0107 | 0.0713 -> 0.0217 || SWITCH
+xe  centrality               | 0.0000 ->    n/a | 0.0104 ->    n/a || 0.0000 ->    n/a | 0.0104 ->    n/a || 0.0000 ->    n/a | 0.0132 ->    n/a || kept fresh (not in the scenario)
+xe  seq_max_all              | 0.0000 ->    n/a | 0.0036 ->    n/a || 0.0000 ->    n/a | 0.0053 ->    n/a || 0.0000 ->    n/a | 0.0095 ->    n/a || kept fresh (not in the scenario)
+xe  seq_top3                 | 0.0000 ->    n/a | 0.0047 ->    n/a || 0.0000 ->    n/a | 0.0057 ->    n/a || 0.0000 ->    n/a | 0.0085 ->    n/a || kept fresh (not in the scenario)
+xe  seq_argmax_hpos          | 0.0016 ->    n/a | 0.0062 ->    n/a || 0.0013 ->    n/a | 0.0046 ->    n/a || 0.0007 ->    n/a | 0.0050 ->    n/a || kept fresh (not in the scenario)
+xe  ctx_nd_hcent             | 0.0000 ->    n/a | 0.0029 ->    n/a || 0.0000 ->    n/a | 0.0037 ->    n/a || 0.0000 ->    n/a | 0.0059 ->    n/a || kept fresh (not in the scenario)
+xe  ctx_nd_knn_f1            | 0.0000 ->    n/a | 0.0184 ->    n/a || 0.0000 ->    n/a | 0.0149 ->    n/a || 0.0000 ->    n/a | 0.0106 ->    n/a || kept fresh (not in the scenario)
+xe  ctx_nd_knn_h             | 0.0000 ->    n/a | 0.0045 ->    n/a || 0.0000 ->    n/a | 0.0056 ->    n/a || 0.0000 ->    n/a | 0.0121 ->    n/a || kept fresh (not in the scenario)
+xe  ctx_nd_knn_h_dev         | 0.0000 ->    n/a | 0.0033 ->    n/a || 0.0000 ->    n/a | 0.0029 ->    n/a || 0.0000 ->    n/a | 0.0033 ->    n/a || kept fresh (not in the scenario)
+xe  ctx_nd_knn_u             | 0.0000 ->    n/a | 0.0054 ->    n/a || 0.0000 ->    n/a | 0.0057 ->    n/a || 0.0000 ->    n/a | 0.0129 ->    n/a || kept fresh (not in the scenario)
+xe  ctx_nd_knn_u_dev         | 0.0000 ->    n/a | 0.0036 ->    n/a || 0.0000 ->    n/a | 0.0031 ->    n/a || 0.0000 ->    n/a | 0.0039 ->    n/a || kept fresh (not in the scenario)
+xe  ctx_nd_max               | 0.0000 ->    n/a | 0.0099 ->    n/a || 0.0000 ->    n/a | 0.0105 ->    n/a || 0.0000 ->    n/a | 0.0118 ->    n/a || kept fresh (not in the scenario)
+xe  ctx_nd_top5h             | 0.0000 ->    n/a | 0.0141 ->    n/a || 0.0000 ->    n/a | 0.0150 ->    n/a || 0.0000 ->    n/a | 0.0169 ->    n/a || kept fresh (not in the scenario)
+xe  ctx_nd_top5u             | 0.0000 ->    n/a | 0.0080 ->    n/a || 0.0000 ->    n/a | 0.0086 ->    n/a || 0.0000 ->    n/a | 0.0123 ->    n/a || kept fresh (not in the scenario)
+xe  ctx_nd_ucent             | 0.0000 ->    n/a | 0.0141 ->    n/a || 0.0000 ->    n/a | 0.0130 ->    n/a || 0.0000 ->    n/a | 0.0111 ->    n/a || kept fresh (not in the scenario)
+xe  pre_new                  | 0.0000 ->    n/a | 0.0380 ->    n/a || 0.0000 ->    n/a | 0.0310 ->    n/a || 0.0000 ->    n/a | 0.0150 ->    n/a || kept fresh (not in the scenario)
+xe  pre_new_z                |    -   ->    n/a | 0.0147 ->    n/a ||    -   ->    n/a | 0.0126 ->    n/a ||    -   ->    n/a | 0.0122 ->    n/a || kept fresh (not in the scenario)
+xe  pre_hmax32_c             | 0.0000 ->    n/a | 0.0130 ->    n/a || 0.0000 ->    n/a | 0.0084 ->    n/a || 0.0000 ->    n/a | 0.0071 ->    n/a || kept fresh (not in the scenario)
+xe  pre_hmax8_c              | 0.0000 ->    n/a | 0.0068 ->    n/a || 0.0000 ->    n/a | 0.0068 ->    n/a || 0.0000 ->    n/a | 0.0095 ->    n/a || kept fresh (not in the scenario)
+xe  pre_fe_noid              | 0.0000 ->    n/a | 0.0460 ->    n/a || 0.0000 ->    n/a | 0.0369 ->    n/a || 0.0000 ->    n/a | 0.0162 ->    n/a || kept fresh (not in the scenario)
+xe  pre_hmax32_sent          | 0.0049 ->    n/a | 0.0521 ->    n/a || 0.0052 ->    n/a | 0.0563 ->    n/a || 0.0059 ->    n/a | 0.0665 ->    n/a || kept fresh (not in the scenario)
+
+pooled special share (zero / NaN) fresh val -> stale val | private test | public test, for the switched columns:
+  xt:seq_cv_invd20             0.8865 -> 0.8902 | 0.9024 | 0.8977
+  xt:seq_cv_pop                0.4197 -> 0.4742 | 0.4764 | 0.4642
+  xt:seq_cv_norm               0.8865 -> 0.8902 | 0.9024 | 0.8977
+  xt:it_hist_all_luo           0.3794 -> 0.4850 | 0.4558 | 0.4276
+  xt:it_hist_et1_luo           0.4112 -> 0.5148 | 0.4847 | 0.4576
+  xt:it_hist_et2_luo           0.6893 -> 0.7488 | 0.7281 | 0.7154
+  xt:it_hist_et3_luo           0.7135 -> 0.7726 | 0.7507 | 0.7396
+  xt:it_hist_et4_luo           0.7490 -> 0.7953 | 0.7752 | 0.7672
+  xt:has:pre2_fe               0.0000 -> 0.0000 | 0.0000 | 0.0000
+  xe:it_hist_all_luo           0.3794 -> 0.4850 | 0.4558 | 0.4276
+  xe:it_hist_et1_luo           0.4112 -> 0.5148 | 0.4847 | 0.4576
+  xe:it_hist_et2_luo           0.6893 -> 0.7488 | 0.7281 | 0.7154
+  xe:it_hist_et3_luo           0.7135 -> 0.7726 | 0.7507 | 0.7396
+  xe:it_hist_et4_luo           0.7490 -> 0.7953 | 0.7752 | 0.7672
+  xe:it_hist_et5_luo           0.9046 -> 0.9262 | 0.9200 | 0.9145
+  xe:it_hist_et6_luo           0.9096 -> 0.9300 | 0.9241 | 0.9189
+  xe:it_hist_et7_luo           0.8752 -> 0.8988 | 0.8862 | 0.8833
+  xe:it_hist_et8_luo           0.9445 -> 0.9561 | 0.9517 | 0.9490
+  xe:it_hist_et9_luo           0.9636 -> 0.9708 | 0.9666 | 0.9657
+  xe:it_hist_et10_luo          0.9128 -> 0.9376 | 0.9253 | 0.9213
+  xe:seq_cv_invd20             0.8865 -> 0.8902 | 0.9024 | 0.8977
+  xe:seq_cv_pop                0.4197 -> 0.4742 | 0.4764 | 0.4642
+  xe:pre_id_contrib_v2         0.5479 -> 0.5792 | 0.5981 | 0.5791
+  xe:pre_idmax32               0.5531 -> 0.5840 | 0.6011 | 0.5818
+  xe:pre_idmax32_has           0.5531 -> 0.5840 | 0.6011 | 0.5818
+
+SWITCH (26): ['xt:seq_cv_invd20', 'xt:seq_cv_pop', 'xt:seq_cv_norm', 'xt:it_hist_all_luo', 'xt:it_hist_et1_luo', 'xt:it_hist_et2_luo', 'xt:it_hist_et3_luo', 'xt:pre2_fe_z', 'xt:pre2_fe_s', 'xt:has:pre2_fe', 'xe:it_hist_all_luo', 'xe:it_hist_all_luo_rk', 'xe:it_hist_all_luo_zsl', 'xe:it_hist_et1_luo', 'xe:it_hist_et2_luo', 'xe:it_hist_et3_luo', 'xe:it_hist_et5_luo', 'xe:it_hist_et6_luo', 'xe:it_hist_et8_luo', 'xe:seq_cv_invd20', 'xe:seq_cv_invd20_rk', 'xe:seq_cv_pop', 'xe:pre_fe', 'xe:pre_fe_z', 'xe:pre_id_contrib_v2', 'xe:pre_idmax32_has']
+FAIL -> keep fresh (7): ['xt:it_hist_et4_luo', 'xe:it_hist_all_luo_gap', 'xe:it_hist_et4_luo', 'xe:it_hist_et7_luo', 'xe:it_hist_et9_luo', 'xe:it_hist_et10_luo', 'xe:pre_idmax32']

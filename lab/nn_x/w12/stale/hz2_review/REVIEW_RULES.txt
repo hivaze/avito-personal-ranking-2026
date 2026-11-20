@@ -1,0 +1,34 @@
+=== 2026-11-15T06:07Z hz2_review: judging rules of the reviewer, written BEFORE the reads they judge ===
+(Already seen at this time: recount.py on 480 train feeds / 250 val / 400 test feeds (label-free): logs/recount_40_2024.log. Nothing else.)
+R1 CAUSALITY (recount.py, own code from raw data): CONFIRMED iff 0 counted pairs on a slot after the row day, 0 dense pairs on or after the row day, and my
+   recount equals the view files on >= 99.9% of sampled rows for it_hist_hz_all, it_hist_hz_et1, xp_imp_hz_c50 (rel 1e-5); seq_cv_hz_pop >= 99.9% after the
+   kernel's documented conventions (3000 cap, empty-history feeds) are applied.
+R2 GATE (gate_own.py, own code): a number of the study's decision table is "agree" iff my dZ is within 0.005 absolute of the study's and my zero share by
+   age bucket within 0.005. The study's declared bars G1 (dZ <= 0.05), G2 (bucket <= 0.10) are applied as written; I do not re-judge with other bars.
+R3 EXTRA PARITY CHECKS (descriptive, not part of the study's gate; flagged as an ISSUE, not as a failed gate):
+   a. shape: per age bucket, total-variation distance between view rows and private rows of the model-scale value binned at 0.25 (zero = own bin),
+      row-weighted over buckets = dTV. Flag if dTV(hz2) > 0.10 or if hz2 is worse than as built.
+   b. staleness of warm rows: mean (row day - latest dense day counted) on rows with a dense count > 0. A test row has 7-10 d. Flag "not full dose on the
+      staleness axis" if the mean is < 4 d.
+   c. joint tell with unswapped inputs: P(pre2 ID contribution != 0 | it_hist_all == 0) and P(has:pre2_fe = 1 | it_hist_all == 0), view rows vs private rows.
+      Flag if the two differ by > 0.10 (a combination of inputs that exists in training and not at test time).
+   d. scan of the other xt inputs (not swapped): |mean gap| in private-row SD by age bucket, row-weighted. Flag any input with gap > 0.20 that the report does not name.
+R4 LABELLED NUMBERS (own NDCG on the study's cached holdout predictions): "agree" iff mean within 0.00003 and SE within 0.00003 of the study's.
+   I use train-holdout labels only (data/flat/train/cand_target.npy at holdout rows). No val / test label is opened by any script of this review.
+R5 DROP-IN: CONFIRMED iff, with HZCD_DIR / HZ2_KEEP unset, cd_arms6b and cd_arms6 give bit-identical gathered batches on 200 random train feeds in my own
+   harness (own split object, real files), and the flag-off path of train.py does not call into the module.
+R6 confirmed = false if any number or identity of the study's verdict lines 1-3 fails R1, R2 or R4.
+
+=== 2026-11-15T06:30Z ADDENDUM (before pre2_tell.py; seen so far: gate_own.log incl. the label-free joint P(pre2_id_contrib != 0 | it_hist_all == 0) = 0.000 private / 0.223 hz2; read_own.log) ===
+R3e MATERIALITY OF THE pre2 JOINT TELL (train labels of NON-holdout trPool feeds only; descriptive; no val / test label):
+   population trPool private-like feeds of days >= Sep 13, rows that are cold under the hz2 view (it_hist_hz_all == 0).
+   statistic: mean over feeds (with >= 1 positive and >= 1 negative among those rows) of the within-feed AUC of (i) pre2_id_contrib, (ii) the model input pre2_fe_s,
+   (iii) for scale, the stored it_hist_all_luo that the view removed. SE over feeds.
+   "MATERIAL" iff AUC(pre2_id_contrib) >= 0.52 with (AUC - 0.5) / SE >= 3: the encoder path then carries label-relevant fresh item-ID information on rows that the view
+   presents as cold, a combination that has frequency 0 on test rows. Otherwise "not shown to be material".
+   Also reported label-free: the same joint for the arm as trained (hz2k, all days), for the half-dose hz view, and exact counts on val / public / private rows.
+
+=== CORRECTION OF CLOCK STAMPS (written 06:11Z, real clock) ===
+The two headers above carry my ESTIMATED times (06:07Z, 06:30Z). Real times from the file system: recount log 05:55:46Z; first block written about 05:56-05:57Z
+(before gate_own.py was written 05:57:54Z; gate_own.log 05:59:24Z, read_own.log 05:59:30Z, dropin_own.log 06:02:52Z); addendum written 06:02:39Z (file mtime), pre2_tell.log 06:02:47Z.
+The ORDER stated in the headers is correct (rules before the reads they judge); only the stamps were wrong.

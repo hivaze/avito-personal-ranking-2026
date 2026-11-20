@@ -1,0 +1,20 @@
+runs 72 (unique data seeds 57)
+== A5.1 residual (vs quadratic trend) by epoch phase, unique-seed runs: val | hold
+   phase ~0.05: val -0.00008+-0.00003  hold -0.00012+-0.00003  (runs 57, evals 342)
+   phase ~0.30: val -0.00007+-0.00004  hold -0.00007+-0.00002  (runs 57, evals 342)
+   phase ~0.55: val -0.00002+-0.00003  hold +0.00002+-0.00002  (runs 57, evals 342)
+   phase ~0.82: val +0.00017+-0.00004  hold +0.00017+-0.00002  (runs 57, evals 342)
+   per-run contrast phase~0.82 minus phase~0.05, val: +0.00025 +- 0.00006 (z +4.3, n 57); runs with positive contrast 38/57
+   per-run contrast phase~0.82 minus phase~0.05, hold: +0.00029 +- 0.00004 (z +7.0, n 57); runs with positive contrast 50/57
+   lr 1e-03: contrast val +0.00037 hold +0.00037 (n 18)
+   lr 2e-03: contrast val +0.00019 hold +0.00024 (n 39)
+
+== A5.2 successive-eval changes: crossing an epoch boundary (phase ~0.82 -> ~0.05) vs within an epoch (raw, not detrended; the trend adds ~+0.00004 per eval)
+   within  : val +0.00016+-0.00002  hold +0.00016+-0.00001  (runs 57, steps 1026)
+   boundary: val -0.00014+-0.00006  hold -0.00017+-0.00004  (runs 57, steps 285)
+
+== A5.3 consequences for snapshots / selection
+   @60000 (cf4 snapshot): epoch phase 0.10
+   @70000 (F7x70 snapshot): epoch phase 0.12
+   @77500 (F7x snapshot): epoch phase 0.88
+   87500 (most-selected step of m02 scratch runs): epoch phase 0.90

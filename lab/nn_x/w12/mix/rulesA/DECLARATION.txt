@@ -1,0 +1,162 @@
+=== DECLARATION rulesA (searcher A, declared rule families) ; written 2026-11-15T13:16:02Z BEFORE any labelled number of this study ===
+Labelled numbers seen so far by this agent: only numbers on record in reports/CURRENT_STATUS.md sections 1-4 and nn_x/w5/logs/E_kd_predeclared.txt (blocks 09:27Z-12:55Z) [D]. Label-free looks done before this
+declaration: quantiles of M, H, cold share, user0 share, time stamps on val / public-like / private-like test (to fix thresholds).
+
+BLOCK 0. REPRODUCTION (step 1; bar fixed here)
+ Own loader (member files -> per-feed z -> pools -> branches -> final), project functions feed_rank_z / ndcg_per_feed for the reference path and an own numba kernel for the grid path.
+ PASS iff every one of these final-val levels, rounded to 5 decimals, equals the number on record: FD16P20 0.40271, FD16P20@m0.2_0.4 0.40298, FD8P20 0.40240, FD8P20@m0.2_0.4 0.40290, W16P20w 0.40214,
+ W16P20w@m0.2_0.4 0.40285; and rule-minus-plain deltas FD16 +0.00026+-0.00021, W16P20w +0.00071+-0.00021, W8P20w +0.00043+-0.00019 (to 1e-5).
+ Kernel bar: own numba kernel (float64, pessimistic ties) vs the reference path: max abs difference of the mean final val over the checked rules <= 1e-5 AND mean abs per-feed difference <= 1e-5. If FAIL: stop and fix before any search.
+
+BLOCK 1. OBJECTS
+ Compositions (base pool + popularity-light pool; all 4 pools = member-equal mean of per-feed z of the member files, as build_r4.py):
+   C1 PRIMARY  FD16 + 4 wide full-data popularity-light (FDP s951-954)            = FD16P20
+   C2          FD8  + 4 wide full-data popularity-light                             = FD8P20
+   C3 (replication on other trained models, SAME val feeds) W16 + 4 wide held-out (P1w) = W16P20w
+   C4 (replication, same val feeds)                         W8  + 4 wide held-out      = W8P20w
+ Score of a feed under weights (a_ft, a_to, c):  final = c * z( (1-a_ft) z(baseFT) + a_ft z(popFT) ) + (1-c) * z( (1-a_to) z(baseTO) + a_to z(popTO) ),  z = per-feed standardisation; per-feed NDCG as src/metrics.py.
+ Weight grids: a (w_pop) in {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6}; c (w_ft) in {0.3, 0.4, 0.5, 0.6, 0.7, 0.8}.
+ Baselines: PLAIN = (a_ft = a_to = 0.2, c = 0.5) on every feed. MRULE = a_ft = a_to = 0.2 if M < 50 else 0.4, c = 0.5 (fixed rule, declared by the lead 09:27Z; in-sample on these val feeds).
+
+BLOCK 2. GATES (label-free feed properties; thresholds fixed HERE, never tuned to labels)
+ Variables: M (candidates), H (history length), U0 (user_id == 0), CL = "luo cold share" = share of candidates with it_hist_all_luo == 0 (nn/feat_cache; the task's definition), CS = "segment cold share" = share of candidates whose
+ item is in no train candidate list / history (eda/errors/segments feed_table / test_segments; the pmix variable; the variable behind the on-record statement "FT value sits in feeds with cold share >= 45%"), DAY (val: first vs second val day).
+ Quantiles are those of the POOLED val + test feeds (label-free): M 39 / 70 / 117 (1/3, 1/2, 2/3), CL 0.3737 / 0.4225 / 0.4744, H 141 / 190 / 241.
+ Two-cell gates (cell 1 = condition true):
+   M50  : M >= 50            (the M-rule's cut; on record, originally label-prompted)
+   Mq   : M >= 70            (pooled median)
+   CS45 : CS >= 0.45         (pmix bin edge; on record)
+   CLq  : CL >= 0.4225       (pooled median)
+   Hq   : H >= 190           (pooled median)
+   U0   : user_id == 0
+   DAY  : second val day     (DIAGNOSTIC ONLY: test lies after both val days, so the gate does not cover the same range on test; never a candidate; reported as a transfer warning light)
+ Three-cell gates:
+   M3q  : M < 39 | 39 <= M < 117 | M >= 117   (pooled terciles)
+   M3r  : M < 30 | 30 <= M < 100 | M >= 100   (the cut of hypothesis h4)
+   CL3q : CL < 0.3737 | .. | CL >= 0.4744
+   H3q  : H < 141 | 141 <= H < 241 | H >= 241
+
+BLOCK 3. RULE FAMILIES (piecewise constant; every family has <= 4 free weight parameters; "a" = w_pop used in both branches unless stated)
+   A   CONST2        a, c constant                                             2 par   42 rules      1 family
+   B   CONST3        a_ft, a_to, c constant                                    3 par   294           1
+   C   POP1(g)       a by two-cell gate g; c = 0.5                             2 par   49            7 (6 eligible + DAY)        [C(M50) = the M-rule's family]
+   D   POP1F(g)      a by g; c constant free                                   3 par   294           7
+   E   FT1(g)        c by g; a = 0.2                                           2 par   36            7
+   F   FT1P(g)       c by g; a constant free                                   3 par   252           7
+   G   POP3(t)       a by three-cell gate t; c = 0.5                           3 par   343           4
+   H   POP3F(t)      a by t; c constant free                                   4 par   2058          4
+   I   BR(g)         a_ft by g and a_to by g (separate per branch); c = 0.5    4 par   2401          7
+   J   POPxFT(g,g')  a by g, c by g' (g, g' eligible two-cell gates, may be equal) 4 par 1764        36
+   K   POP2D(g,g')   a on the 2 x 2 cells of two different eligible gates; c = 0.5  4 par 2401       15
+   L   FT3(t)        c by three-cell gate t; a = 0.2                           3 par   216           4
+ Total 100 families (93 eligible: every family with DAY is diagnostic only), about 131,000 rules. PLAIN is a member of A, B, C, D, E, F, G, H, I, J, K, L (every family). MRULE is a member of C(M50), D(M50), I(M50), J(M50, .), K(M50, .).
+
+BLOCK 4. NESTED READ (step 3)
+ Folds: K = 5 user-grouped folds, 5 fold seeds (seeds 11, 22, 33, 44, 55); a user's feeds never straddle folds; each user_id 0 feed is its own group. Users are assigned by a seeded permutation of the unique groups.
+ Variant A (per family): in each training part (4 folds) the rule with the highest mean NDCG of the training feeds (ties: first in enumeration order, which lists the plain-like values in natural grid order) is applied to the held-out
+   fold. Nested per-feed NDCG of a seed = concatenation over the 5 held-out folds; the reported nested vector is the per-feed mean over the 5 seeds.
+ Variant B (best family; double nested): inside each training part, each family is scored by inner cross-validation over its 4 folds (rule fitted on 3 folds, read on the 4th; inner score = mean over the training feeds); the family
+   with the highest inner score is taken, its best rule on the whole training part is applied to the held-out fold. B-all = over the 93 eligible families; B-3 = over the eligible families with <= 3 parameters (A-G, L).
+ Variant G (greedy, for the record of the selection bias): the single rule with the highest training mean over ALL eligible families (the richest families win by construction).
+ Numbers reported for each family / variant and each composition: in-sample gain (best rule on all val minus PLAIN), nested gain minus PLAIN, nested minus MRULE (fixed), nested minus nested C(M50) (the fair read of "better than
+   the M-rule family"), each with the paired per-feed SE (sd of the per-feed difference / sqrt(14423); selection variance is NOT in this SE: the placebo gives it), plus the range over the 5 fold seeds.
+ Multiplicity is disclosed as: 100 families, about 131,000 rules, 3 selection variants, 4 compositions, 2 baselines.
+
+BLOCK 5. PLACEBO (step 4; measures the selection bias and the noise of the whole search)
+ PL-A (the task's placebo): draw d = 1..200 on the FD16 members: 4 random members of the 16 wide students play the "popularity-light pool", the other 12 the base pool; a random half of the base (6) and of the pseudo pool (2)
+   swap their fine-tuned / train-only files (so "branch FT" and "branch TO" are both half fine-tuned, half train-only). The IDENTICAL search (families, grids, folds, variants) is run; recorded per draw and family / variant:
+   in-sample gain and nested gain over the placebo's own PLAIN (0.2, 0.5), nested minus nested C(M50), nested minus nested A.
+   Same with the held-out W16 members, 100 draws (run if time allows; if not, stated as not run).
+ PL-G (gate permutation; real pools of C1): the vector of feed properties (all gates jointly) is permuted across feeds (200 permutations), predictions and labels untouched; the identical search; recorded as PL-A.
+   PL-G is the null "the gate carries no information" at the real pools: its reference quantity is nested(family) minus nested(A).
+ Placebo-calibrated p-value of an observed nested quantity q: p = (1 + #{draws with placebo q_d >= q}) / (1 + N). Reported: p_A (PL-A, gain over PLAIN), p_A,M (PL-A, family minus C(M50)), p_G (PL-G, family minus A).
+ Expected under a sound procedure: placebo nested gains centred at or below 0 (a positive mean beyond 2 SE of the mean = a leak in my procedure: STOP and find it); placebo in-sample gains positive = the optimism.
+
+BLOCK 6. CANDIDATE CRITERIA (fixed here; judged on the PRIMARY composition C1 unless stated)
+ A family (variant A) or a selection variant (B-all, B-3) yields a CANDIDATE iff ALL of:
+   c1  nested gain over PLAIN >= +2 paired SE and p_A <= 0.05;
+   c2  nested minus nested C(M50) > the 95th percentile of the same difference over the PL-A draws (p_A,M <= 0.05) AND nested minus fixed MRULE > 0;
+   c3  replication: nested minus nested C(M50) > 0 on at least 2 of the 3 other compositions (C2, C3, C4; same val feeds, other member sets), and nested gain over PLAIN > 0 on all 4;
+   c4  nested minus fixed MRULE >= 0 under the val reweighted to the private mix (src/pmix.py), and nested over PLAIN >= 0 at the public mix;
+   c5  transfer: every gate cell of the rule holds >= 5% of the public-like AND of the private-like test feeds, and the gating variable's test range lies inside the val range; no DAY gate.
+ If no family / variant meets c2: verdict = "nothing beats the M-rule family nested by more than its placebo noise"; then the output is the honest nested value of the M-rule family itself:
+   C(M50) "holds" iff its nested gain over PLAIN >= +2 paired SE on C1 or p_A <= 0.05, AND > 0 on all 4 compositions; it "is not shown" otherwise.
+ At most two candidates are named; if more than two families pass, the two with the largest nested gain over PLAIN that differ in their gate variable are named.
+ Deployed weights of a candidate family = its best rule on ALL val feeds of C1 (its honest value = the nested number; the in-sample number is printed next to it).
+
+BLOCK 7. SINGLE DECLARED HYPOTHESES (step 6; NO search; each = one fixed rule read on full val, paired per-feed SE; not nested because nothing is fitted)
+ h1  w_ft higher on cold feeds: c = 0.7 where cold share >= 0.45, 0.5 elsewhere. Two definitions of cold share = 2 looks: h1a with CS (pmix variable; 8.4% of val feeds, 29% of test), h1b with CL (the task's definition; 25.9% of val,
+     48% of test). Each on a = 0.2 (vs PLAIN) and on the MRULE weights (vs MRULE). SUPPORTED iff delta >= +1 SE on C1 and > 0 on all 4 compositions and >= 0 at pmix-private; REFUTED iff delta <= -1 SE on C1; else NOT SHOWN.
+ h2  M-rule with 0.5 on M >= 50 when the popularity-light pool has 8 members. What exists at the time of the read is used: held-out W16 + (4 wide + 4 d128) = W16P20x8 and W8P20x8; full-data FD16 / FD8 + 8 if their files exist when
+     the final read is made (FD16P20w8 or FD16P20x8). Read: rule(0.2 / 0.5) minus rule(0.2 / 0.4) and minus PLAIN. SUPPORTED iff (0.5 minus 0.4) >= +1 SE on both 16-base compositions read and >= 0 at pmix-private; REFUTED iff <= -1 SE
+     on either; else NOT SHOWN. Prior exposure [D]: the lead's dose line (4-member pools) 0.4 / 0.5 = +0.00043 / +0.00052 (8 + 4) and +0.00071 / +0.00080 (16 + 4).
+ h3  M-rule in one branch only: h3-TO = (a_to by the M-rule, a_ft = 0.2), h3-FT = (a_ft by the M-rule, a_to = 0.2). Read each minus PLAIN and minus MRULE (both branches). A single-branch form REPLACES the M-rule iff it is
+     >= MRULE + 1 SE on C1 and > MRULE on the 3 others; "the effect sits in branch X" is stated iff branch X alone carries >= 2/3 of the MRULE gain on all 4 compositions.
+ h4  three-step M rule on M < 30 / 30-99 / >= 100: h4a = (0.2, 0.3, 0.4) (interpolating form), h4b = (0.1, 0.3, 0.5) (linear ramp); 2 looks. Each minus PLAIN and minus MRULE. SUPPORTED over the M-rule iff >= MRULE + 1 SE on C1 and
+     > MRULE on at least 2 of the 3 others; else NOT SHOWN. The fitted three-step forms are families G(M3r) / G(M3q) of the nested search.
+ Multiplicity of this block: 2 (h1) x 2 bases + 1 (h2) + 2 (h3) + 2 (h4) = 9 fixed rules.
+
+BLOCK 8. ROBUSTNESS (step 5) for the families named in the output (and for C(M50) in any case): nested gain by val day, by M bucket (pmix bins), under pmix public / private weights; label-free on test: share of
+ public-like / private-like test feeds per gate cell against val; share of test feeds whose top-1 item is unchanged against the PLAIN file of the same members, and the mean per-feed Spearman of the two rankings.
+ No file under subs/ or preds/ is written; score arrays, if any, are written here as NOT_A_SUBMISSION_*.npy.
+
+=== ADDENDUM 1 ; written 2026-11-15T13:22:28Z AFTER the first nested tables (C1-C4), the hypotheses read and the first placebo draws were seen; everything below is POST HOC in design (not in outcome: no number of it exists yet) ===
+ Correction of a count: the family list has 95 eligible families (the DAY gate appears in 5 forms: C, D, E, F, I), not 93. No definition changed.
+ Seen so far [M]: nested C(M50) minus PLAIN = +0.00018 / +0.00021 / +0.00055 / +0.00028 on C1..C4; the top C1 family F(Hq) (+0.00076) is negative on C3 / C4; h1-h4 read (logs_hyp.txt).
+ X-MODEL read (motivation: the fixed M-rule was chosen on the held-out twins and is read on the full-data members over the SAME val feeds; how much of such a "replication on other trained models" is shared feed noise?):
+   for a family, the rule is fitted on member set SRC and read on member set TGT, in two ways:
+     xm-same  = fitted on ALL val feeds of SRC, read on all val feeds of TGT (other models, same feeds: the kind of evidence on record for the M-rule);
+     xm-nest  = fitted on the training users (4 folds) of SRC, read on the held-out users of TGT (other models AND other users), 5 x 5 folds as before.
+   Pairs SRC -> TGT: C3 -> C1, C1 -> C3, C4 -> C2, C2 -> C4. Reported per family: own in-sample, xm-same, xm-nest, own nested (all minus TGT's PLAIN, paired SE for the nested ones).
+   POOLED read: rule fitted on the SUM of the training tables of C1 and C3 (resp. C2 and C4), read on the held-out users of each (pool-nest): the selection sees two member sets, the evaluation other users.
+   Use: descriptive calibration of "same feeds, other models" evidence, and a second honest read of each family. No candidate can pass on these reads alone; the criteria of block 6 stay as declared.
+   Additional observation rule (fixed now): shared-feed share = 1 - mean over families (eligible, 2-3 parameters) of (xm-nest) / mean of (xm-same), reported with both means.
+
+=== ADDENDUM 2 ; written 2026-11-15T13:25:50Z : STOP RULE OF BLOCK 5 TRIGGERED on the W16 placebo -> leak check declared before it is run ===
+ Seen [M]: PL-A on FD16 (200 draws): pooled placebo nested mean -0.00002 (sd of the per-draw mean / sqrt(200) = 0.00001). PL-A on W16 (100 draws): pooled placebo nested mean +0.00006 (0.00002): positive beyond "2 SE of the mean".
+ Two readings: (i) a leak in my nested procedure; (ii) no leak: the "SE over draws" is not the SE of that mean (all draws share the 14,423 val feeds, so the mean over draws keeps the feed-sampling noise), and / or a real
+ constant re-tune effect of the placebo pools (the pseudo pool of 4 same-recipe members deserves the member-equal weight 0.25-0.3, PLAIN gives it 0.2).
+ LEAK CHECK (decides between them; criteria fixed now):
+   L1 label-permutation null: on the C1 pools, the labels are permuted WITHIN each feed (number of positives per feed kept), 60 independent permutations; the identical search. Under no leak every rule has the same expected NDCG,
+      so the nested gain over PLAIN has expectation exactly 0 and the permutations are independent. PASS (no leak) iff |mean over permutations of the pooled nested gain (95 eligible families)| <= 2.5 SE (SE = sd over permutations / sqrt(60))
+      AND the same for the variants B-all, B-3, G. The in-sample gains must be positive (they measure pure selection optimism).
+   L2 explanation check on the W16 placebo (40 new draws): mean over draws of NDCG(a, c = 0.5) - NDCG(a = 0.2, c = 0.5) for a in the grid, and of NDCG(a = 0.2, c) - PLAIN; reading (ii) is supported iff some a > 0.2 has a positive mean
+      of at least the size of the placebo nested mean (+0.00006) with the sign in >= 70% of the draws.
+   If L1 FAILS: every nested number of this study is withdrawn until the leak is found. If L1 PASSES: the placebo p-values stand as computed; the wording "placebo mean <= 0" is replaced by "placebo mean = the small real
+   constant re-tune effect of the placebo pools plus feed noise", and the p-values are conservative or neutral with respect to it (they compare against the placebo distribution as it is).
+
+=== ADDENDUM 2b ; written 2026-11-15T13:27:22Z ===
+ Seen [M]: L1 (60 label permutations): pooled nested gain +0.000036 +- 0.000025 (z +1.44), variants z +1.06..+1.28: PASS by the declared bar (|z| <= 2.5), but the sign is positive in all four statistics (they share noise).
+ L2: W16 placebo, const a at c = .5: a 0.1 +0.00007 [80% of draws], a 0.4 +0.00007 [70%]; FD16 placebo: a 0.4 +0.00006 [62%], a 0.1 +0.00003: reading (ii) supported for W16 by the declared rule (a 0.4: +0.00007, 70%).
+ To settle L1 with a tighter SE: 240 MORE independent label permutations (seeds 2000..2239); the verdict is taken on all 300: PASS iff |z| <= 2.5 for the pooled mean and for each variant. A bias of the size seen
+ (+0.00004) would be one tenth of the effects under study; it is reported in any case.
+
+=== ADDENDUM 3 ; written 2026-11-15T13:27:54Z : TWO-MEMBER-SET statistic with a MATCHED placebo (post hoc design, declared before any of its numbers) ===
+ Motivation: each composition alone has a nested paired SE of about 0.0003 and the member sets disagree; the mean over the two 16-base member sets (C1 full-data, C3 held-out twins; same val feeds) halves the member noise.
+ T2(family) = mean of the nested gain over PLAIN on C1 and on C3 (variant A, as declared; paired SE from the per-feed mean of the two nested vectors). T2(fixed MRULE) likewise from the fixed rule.
+ Matched placebo PL-A2: 100 draws; in each draw the SAME member indices (the i-th FD16 member and the i-th W16 member are twins: same recipe and seed) form the pseudo popularity-light pool (4) / base (12) and the same
+ indices swap roles, in both member sets; the identical search on each; T2 of the draw = mean of the two nested gains. p2 = (1 + #{T2_d >= T2}) / (1 + 100). Family-wise: max over the 95 eligible families of T2 per draw.
+ Statements fixed now: "the M-gated popularity-light weight is supported across member sets" iff p2(C(M50)) <= 0.05. A family "beats the M-rule family across member sets" iff
+ T2(family) - T2(C(M50)) > the 95th percentile of the same difference over the PL-A2 draws; with 94 other families looked at, the family-wise version (max over families of the difference per draw) is printed next to it.
+ DOSE TABLE (dose.py; descriptive, fixed rules, in-sample, no selection claimed): final val of constant a in the grid at c = 0.5, by M cell, minus a = 0.2, for C1..C4; pool-only levels by M cell.
+
+=== ADDENDUM 4 ; written 2026-11-15T13:30:23Z : descriptive w_ft curve under the pmix weights (no number of it seen yet) ===
+ Why: val OOF under-reads the fine-tuned branch against public (+0.00009 val, about +0.0005 public, +0.00066 / +0.00104 at the public / private mix [D]); the declared h1 reads only c = 0.7 on cold feeds.
+ cdose.py prints, for C1..C4, the final val of constant c in {0 (train-only branch alone), 0.3 .. 0.8, 1 (fine-tuned branch alone)} minus c = 0.5, at a = 0.2 and under the M-rule weights, unweighted and under the
+ pmix public / private weights, and for the cold cell CS >= 0.45 alone. Fixed rules, in-sample, descriptive. Statement fixed now: "a higher constant w_ft is a candidate for a public probe" iff some c in {0.6, 0.7}
+ reads >= +1 SE at the private mix on C1 AND is > 0 at the private mix on all four compositions; otherwise "w_ft = 0.5 stands on val at every mix".
+
+=== ADDENDUM 5 ; written 2026-11-15T13:34:10Z : POST HOC descriptive contrast, full-data members vs held-out twins on short feeds ===
+ Seen [M] (dose table + logs_fd_vs_twin.txt, 6 contrasts looked at): a 0.4 minus 0.2 on M < 50 reads +0.00053 (C1) / -0.00001 (C2) on full-data members and -0.00119 / -0.00122 on the twins; paired full-data minus twins
+ +0.00172+-0.00067 (z 2.55; 16-base) and +0.00121+-0.00072 (z 1.69; 8-base). Post hoc; the largest of 6 contrasts.
+ One decomposition, declared now: which pool carries it? Cross compositions X1 = FD16 base + held-out popularity-light pool (P1w), X2 = W16 base + full-data popularity-light pool (FDP); the contrast "a 0.4 minus 0.2 on M < 50"
+ on C1, X1, X2, C3. Reading: "follows the popularity-light pool" iff C1 and X2 are both above X1 and C3; "follows the base pool" iff C1 and X1 are both above X2 and C3; else "not attributable".
+ Status of anything found here: a lead for a test on INDEPENDENT full-data students (the 8 new wide ones, s955-962), never a candidate by itself.
+
+=== ADDENDUM 6 ; written 2026-11-15T13:38:06Z : four more compositions (8-member popularity-light pools), after the h2 re-read ===
+ The full-data d128 popularity-light fine-tunes (abl_fd10_pop1kd05t25 s951-954) arrived at 13:35Z; hyp.py was re-run as declared in block 7 (h2 on what exists at the final read). Seen [M]: fixed M-rule minus PLAIN with the
+ 8-member full-data pool (4 wide + 4 d128): FD16 base -0.00010+-0.00020 (pmix-private -0.00035+-0.00034), FD8 base +0.00047+-0.00020; rule 0.2 / 0.5 minus 0.2 / 0.4: FD16 +0.00013+-0.00014, FD8 -0.00019+-0.00014.
+ h2 verdict by the declared rule: REFUTED (W16P20x8 at -1.41 SE), unchanged; the FD16P20x8 leg reads +0.9 SE.
+ Declared now, before running: the SAME nested search (variant A; no new families, grids or folds) on C5 = FD16 + (4 wide + 4 d128 full-data), C6 = FD8 + the same pool, C7 = W16 + (4 wide + 4 d128 held-out), C8 = W8 + the same.
+ Purpose: nested value of the M-rule family C(M50) on 8 compositions instead of 4, and whether any family that failed replication (F(Hq) ..) or the M-rule family changes its picture. No new candidate criteria: a family is
+ "confirmed on the 8-member pools" iff its nested gain over PLAIN is > 0 on all of C5-C8; the verdict of the original declaration is not re-opened by these reads (they share feeds and 20 of 24 members with C1-C4).

@@ -1,0 +1,49 @@
+STUDY C - aggregation function and pool-of-pools study. PLAN written 2026-11-12 15:36:51 UTC (before any number of this study was computed).
+
+Member sets (names = preds/nn_<m>_*):
+  PF7x (38) = F5cd+F6+F7x+F9+F10+F12;  G3 (20) = F10+F7x+F7x70;  M2 (14) = F7x+F7x70 (context);
+  ALLg = PF7x + F7x70 + new from-scratch m02 members (v27_gru_m02, v28_lr1_m02, v29_d192_m02, v30_f7_m02) that have
+         complete ft+to+holdout files AND pass the lead's member gate (a): single train-only val >= 0.39467 and holdout >= 0.31799.
+         Family labels for family-equal: each recipe dir = one family (v27,v28,v29,v30 separate families).
+Reference for every variant = current spec on the SAME members: s = 0.5*z(mean_m z(ft_m)) + 0.5*z(mean_m z(to_m)),
+  z = per-feed standardisation (src/stack_val.feed_rank_z[:,1]).
+Variants (all pre-declared; no parameter is tuned; every listed setting is reported):
+  V1 fam-eq     : family-equal (mean of family means of member z), applied in each half, then 0.5/0.5 of z(halves).
+  V2 trim10/trim20/median : per-row trimmed mean (10% / 20% each tail, scipy.stats.trim_mean semantics) and median of member z's, per half.
+  V3 smx_T{0.5,1,2} : per half, log(mean_m softmax_feed(z_m/T)); then z, 0.5/0.5.
+  V4 rankmean   : per half, mean of within-feed normalised ranks (0..1) + 1e-4*mean z tie-break; then z, 0.5/0.5.
+  V5 half-combos (members aggregated with the reference z-mean, halves kept 0.5/0.5):
+     flat   : z(mean over all 2N member z's) (no per-half renormalisation)
+     lse_T1, lse_T0.5 : T*log(0.5 exp(a/T)+0.5 exp(b/T)), a,b = z(half means)  (soft-OR of halves)
+     min    : min(a,b) (soft-AND)   ;  pow2/pow0.5 : 0.5*g(a)+0.5*g(b), g(x)=sign(x)|x|^p
+     trimU10: trimmed-10% mean over the union of the 2N member z's
+  V6 pool-of-pools: PoP(PF7x,G3) = 0.5*z(PF7x spec)+0.5*z(G3 spec); PoP(PF7x,M2); PoP(PF7x,G3,M2) thirds; PoP(PF7x,ALLg); PoP(G3,ALLg).
+     reference = member-equal spec on the UNION of the member sets (also reported vs PF7x and vs G3).
+  V7 trunk-dedup: F7x and F7x70 of the same root r10k averaged first (in each half), each trunk = 1 unit; applied to G3, M2, ALLg.
+Evaluation: val (14,423 feeds) full-list NDCG pessimistic ties (src/metrics.ndcg_per_feed), paired per-feed delta vs the reference,
+  SE user-clustered (user 0 = singletons) and plain iid; slices M<50, M>=50, Tue, Thu, coldpos, warmpos (cold = it_hist_all_luo==0).
+  Holdout (30K train-period feeds, TO members only): same aggregator on the train-only half alone vs the reference to-only z-mean; slice late20%.
+  V5 half-combos need ft: holdout N/A for them (to-only reference = identical).
+ACCEPTANCE (lead's pre-declared rule): (ii) val delta > 2 SE (user-clustered SE, the larger of clustered/iid), (iii) holdout >= -1 SE,
+  (iv) no val slice < -2 SE. Fitted-parameter count ~0 so val and holdout are both out-of-sample. Multiple comparisons: ~30 variants x 3 sets;
+  a lone 2-SE pass is expected by chance ~1x, so an accepted variant must also be holdout-positive in sign to be built (stated now).
+Accepted -> build subs/cand_S3_<tag>.parquet via a new builder in this dir + src/presub_gate.py; outputs/logs in this dir only.
+
+ADDENDUM 2026-11-12 15:40:02 UTC (written while the main run was in progress; before any V8 number; main-run results seen so far: PF7x and part of G3 V1-V4 rows, none passing).
+  The NEW gate now admits 7 members (v27_gru_m02_s511 got its holdout file after the plan): ALLg n=52; extra set N1=G3+NEW (27) added as the likely tonight pool.
+  V8 confidence-preserving aggregators (z-scoring discards each member's per-feed confidence/spread):
+     raw    : per half, mean over members of feed-centred raw scores (x - feed mean)  (= log-linear pool / product of member softmaxes)
+     gscale : per half, mean over members of (x - feed mean)/s_m, s_m = sqrt(mean over feeds of within-feed variance) of member m on that split
+              (label-free, computed separately on val / holdout / test, so no fit), i.e. global scale equalised, per-feed spread kept
+     rgauss : per half, mean of rank-gauss scores Phi^-1((r+0.5)/M) per member (rank-based, normal-shaped)
+  Same reporting and acceptance as the main variants. Sets: PF7x, G3, ALLg, N1.
+
+ADDENDUM 2 2026-11-12 15:44:29 UTC (after the main + V8 results: accepted PoP(PF7x,M2), PoP(PF7x,G3,M2) vs their union equal pool;
+  built subs/cand_S3_PoP3.parquet, subs/cand_S3_PoP2M.parquet, presub PASS w/ 6 known WARN). Written before any number below exists.
+  P5a = PoP(PF7x, G3, M2, NEW) and P5b = PoP(PF7x, M2, NEW), NEW = member-equal pool of ALL gate-(a)-passing from-scratch m02 members
+        present at run time (spec 0.5z(ft)+0.5z(to) as for the other pools). Reference = union equal pool (= ALLg); also reported vs G3, vs PoP3, vs N1=G3+NEW.
+        Same acceptance (ii)-(iv) + holdout sign guard. These are a second look at PoP, so their val z must be read with the
+        multiplicity of 9 PoP variants in mind.
+  DIAG (not a candidate): 1-D re-cooled-share curve s(a) = z((1-a)*z(spec non-recooled PF7x part: F5cd,F6,F9,F10,F12) + a*z(spec F7x+F7x70)),
+        a in {0,.1,...,1}; val, val_to and holdout per a, plus where PoP3 / G3 / M2 / PF7x sit. Holdout-optimal a is reported, not used.
+  Final consistency rerun of agg.py/agg2.py with the NEW set present at ~17:15 UTC (only ALLg / N1 rows can change).

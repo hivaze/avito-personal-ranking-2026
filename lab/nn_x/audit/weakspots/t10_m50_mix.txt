@@ -1,0 +1,11 @@
+train feeds 3151208; M<50 share 0.510; gap share mean: M<50 0.109, M>=50 p>0.9 0.016, M>=50 p<0.1 0.102
+lift of the pos-rank-0 item (P(y|rank0)/mean rate) by gap-share bin:
+  M[5,20): gap(-0.00,0.00] n=301489 lift 1.00 | gap(0.00,0.03] n<500 | gap(0.03,0.10] n=139305 lift 1.54 | gap(0.10,0.30] n=285175 lift 1.38 | gap(0.30,1.01] n=66199 lift 1.62
+  M[20,50): gap(-0.00,0.00] n=107474 lift 1.89 | gap(0.00,0.03] n=44874 lift 2.37 | gap(0.03,0.10] n=306038 lift 2.35 | gap(0.10,0.30] n=319829 lift 2.73 | gap(0.30,1.01] n=35478 lift 3.22
+  M[50,300): gap(-0.00,0.00] n=46564 lift 2.65 | gap(0.00,0.03] n=234280 lift 3.32 | gap(0.03,0.10] n=741952 lift 4.16 | gap(0.10,0.30] n=503239 lift 5.15 | gap(0.30,1.01] n=19258 lift 6.00
+  reference M>=50 p_random>0.9: n=89794 lift 1.74; p_random<0.1: lift 4.74
+  M<50 gap=0     feeds   408963: P(y|rank r) r=0..7: 0.1323 0.0906 0.1486 0.1305 0.0914 0.0885 0.0834 0.0820  mean rate 0.0848
+  M<50 gap>0     feeds  1196898: P(y|rank r) r=0..7: 0.1443 0.0888 0.0766 0.0730 0.0656 0.0622 0.0599 0.0574  mean rate 0.0579
+  M>=50 p>0.9    feeds    89794: P(y|rank r) r=0..7: 0.0251 0.0223 0.0175 0.0177 0.0152 0.0152 0.0153 0.0144  mean rate 0.0115
+  M>=50 p<0.1    feeds  1070739: P(y|rank r) r=0..7: 0.0905 0.0567 0.0414 0.0362 0.0325 0.0309 0.0293 0.0284  mean rate 0.0158
+M<50 feeds with zero gap: 408963 (0.255 of M<50 feeds); these carry the K9 aux at weight 1 (p_random forced to 0) and the production domain token

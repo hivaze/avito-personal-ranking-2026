@@ -1,0 +1,10 @@
+# Copy of the raw run log (not published; written by code/hindsight_04_prepost.py): on the 4,815 holdout feeds whose user has a later feed, NDCG of a GBM combiner on the teacher score (P) plus features from the later snapshot's new events (FUT), split into events before (PRE) and after (POST) the first interaction with a candidate.
+holdout pair feeds 4815; feeds with a candidate interaction among the new events 0.9855; mean n_PRE 3.76 n_POST 29.84; feeds with n_PRE>=1 0.1242, n_POST>=1 0.8995
+teacher 0.31940
+P            NDCG 0.31771  delta vs P +0.00000 +- 0.00000
+P+FUT        NDCG 0.35506  delta vs P +0.03735 +- 0.00248
+P+PRE        NDCG 0.31745  delta vs P -0.00026 +- 0.00036
+P+POST       NDCG 0.35654  delta vs P +0.03883 +- 0.00248
+P+PRE+POST   NDCG 0.35631  delta vs P +0.03860 +- 0.00249
+feeds WITH a candidate interaction in new events 4745 P+FUT +0.03774+-0.00251 P+PRE -0.00037+-0.00035 P+POST +0.03936+-0.00252 P+PRE+POST +0.03912+-0.00253
+feeds WITHOUT 70 P+FUT +0.01151+-0.01349 P+PRE +0.00737+-0.00692 P+POST +0.00311+-0.00427 P+PRE+POST +0.00302+-0.00513

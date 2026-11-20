@@ -1,0 +1,47 @@
+1. clicks by model rank (K = 1 feeds: exact expectation; all feeds: K * p)
+  K=1:      rank  actual expected act/exp      z
+          0-0       1341   1305.8   1.027   0.98
+          1-1        881    892.5   0.987  -0.39
+          2-2        702    709.2   0.990  -0.27
+          3-4       1083   1071.9   1.010   0.34
+          5-9       1689   1643.2   1.028   1.13
+         10-19      1780   1716.9   1.037   1.52
+         20-49      1853   1949.6   0.950  -2.19
+         50-99       948    963.7   0.984  -0.51
+        100-399      465    489.2   0.951  -1.09
+  all:      rank  actual expected act/exp      z
+          0-0       1892   1950.9   0.970  -1.33
+          1-1       1345   1387.0   0.970  -1.13
+          2-2       1088   1128.3   0.964  -1.20
+          3-4       1792   1777.0   1.008   0.36
+          5-9       3047   2962.1   1.029   1.56
+         10-19      3630   3482.9   1.042   2.49
+         20-49      4659   4678.2   0.996  -0.28
+         50-99      2838   2842.3   0.998  -0.08
+        100-399     1692   1774.3   0.954  -1.95
+
+2. noise mixture p = (1-eps) softmax(s/T) + eps/M
+  half A fit: T 0.9774 eps 0.0196   (half B fit: T 1.0108 eps 0.0003)
+  half B NLL per positive: plain softmax (T_A 1.0036) 3.96078 | mixture from A 3.96091 | gain -0.00013 nats/positive, total -1.4 nats on 10909 positives
+  per-feed NLL gain on B -0.00020 ± 0.00023 nats/feed (z -0.9)
+  per M bin (fit on A / read on B):
+    M   5- 30: plain T 1.1208 | mixture T 1.0273 eps 0.0614 | NLL gain on B -0.00024 ± 0.00085 nats/feed
+    M  31-100: plain T 1.0024 | mixture T 0.9497 eps 0.0394 | NLL gain on B -0.00144 ± 0.00070 nats/feed
+    M 101-200: plain T 0.9683 | mixture T 0.9683 eps 0.0000 | NLL gain on B -0.00000 ± 0.00000 nats/feed
+    M 201-300: plain T 0.9530 | mixture T 0.9530 eps 0.0000 | NLL gain on B +0.00000 ± 0.00000 nats/feed
+
+3. expected NDCG when labels are drawn from the fitted mixture (fit on A), model order, same K
+  plain softmax : E[NDCG] 0.40135 (draw sd 0.00161) | actual - expected +0.00158 ± 0.00175 | half B +0.00036 ± 0.00248 | draw part of observed per-feed var 0.667
+      M   5- 30: actual - expected -0.0120 ± 0.0038
+      M  31-100: actual - expected +0.0055 ± 0.0030
+      M 101-200: actual - expected +0.0072 ± 0.0033
+      M 201-300: actual - expected +0.0095 ± 0.0035
+  mixture       : E[NDCG] 0.40245 (draw sd 0.00162) | actual - expected +0.00048 ± 0.00175 | half B -0.00074 ± 0.00248 | draw part of observed per-feed var 0.673
+      M   5- 30: actual - expected -0.0128 ± 0.0038
+      M  31-100: actual - expected +0.0043 ± 0.0030
+      M 101-200: actual - expected +0.0060 ± 0.0033
+      M 201-300: actual - expected +0.0084 ± 0.0035
+      score part sharpened t=0.8: E[NDCG] 0.43430
+      score part sharpened t=0.6: E[NDCG] 0.48667
+      noise part removed (eps = 0, T 0.9774): E[NDCG] 0.40472  (gain over the mixture +0.00226)
+done 65s

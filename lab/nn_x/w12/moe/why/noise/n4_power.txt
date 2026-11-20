@@ -1,0 +1,36 @@
+== (1) within-recipe null: 35 disjoint 4-vs-4 splits per 8-seed recipe (pool deltas, per-feed SE)
+  kd05w192    : rms D val 0.00052 (mean per-feed SE 0.00056, sd null z 0.94) | holdout 0.00036 (SE 0.00032, sd null z 1.12) | corr(Dv,Dh) +0.13 | member sd val 0.00044 hold 0.00021
+  kd05t25w192 : rms D val 0.00054 (mean per-feed SE 0.00056, sd null z 0.95) | holdout 0.00021 (SE 0.00032, sd null z 0.66) | corr(Dv,Dh) +0.09 | member sd val 0.00039 hold 0.00025
+  kd08w192    : rms D val 0.00043 (mean per-feed SE 0.00041, sd null z 1.05) | holdout 0.00024 (SE 0.00023, sd null z 1.04) | corr(Dv,Dh) -0.14 | member sd val 0.00015 hold 0.00023
+  kwwd0       : rms D val 0.00055 (mean per-feed SE 0.00065, sd null z 0.85) | holdout 0.00021 (SE 0.00036, sd null z 0.58) | corr(Dv,Dh) +0.12 | member sd val 0.00061 hold 0.00021
+  kwwd01      : rms D val 0.00077 (mean per-feed SE 0.00061, sd null z 1.27) | holdout 0.00027 (SE 0.00035, sd null z 0.77) | corr(Dv,Dh) -0.02 | member sd val 0.00078 hold 0.00033
+  kwwd05      : rms D val 0.00046 (mean per-feed SE 0.00050, sd null z 0.91) | holdout 0.00015 (SE 0.00028, sd null z 0.52) | corr(Dv,Dh) -0.15 | member sd val 0.00049 hold 0.00013
+  kwaux0      : rms D val 0.00048 (mean per-feed SE 0.00058, sd null z 0.83) | holdout 0.00037 (SE 0.00033, sd null z 1.12) | corr(Dv,Dh) +0.39 | member sd val 0.00043 hold 0.00041
+  kd05w192ps  : rms D val 0.00061 (mean per-feed SE 0.00054, sd null z 1.12) | holdout 0.00033 (SE 0.00031, sd null z 1.07) | corr(Dv,Dh) -0.14 | member sd val 0.00056 hold 0.00042
+  POOLED over 8 recipes: sd of a null 4-vs-4 delta val 0.00055 (recipe spread 0.00004) holdout 0.00028 (0.00003) -> seed sd of one 4-pool sigma_p val 0.00039 holdout 0.00020; per-feed SE val 0.00055 holdout 0.00031; sd of null z val 1.00 holdout 0.89; mean corr(Dv, Dh) +0.04
+  single-member seed sd (8 seeds, mean over recipes): val 0.00048 holdout 0.00027
+  fake arm vs fake ref (all 8 recipes x 35 splits, both orientations): share val<0 & hold>0 0.25; share |z_val| >= 1.5 0.15 (normal 0.13); share |z_val| >= 2.5 0.004 (normal 0.012)
+
+== (2) power of the pre-declared 4-seed rule (Monte Carlo, 200k draws; true effect delta on BOTH splits; unpaired noise from (1); SEs used in the z = the screen's per-feed SEs 0.00057 / 0.00032)
+     delta  P(val>=0)  P(PASS)  P(EXTEND|PASS)  P(val z<=-1.5) | 8 seeds (sigma/sqrt2, SE/sqrt2): P(PASS)
+  +0.00000       0.50    0.017           0.043           0.061 | 0.017
+  +0.00025       0.68    0.113           0.210           0.023 | 0.201
+  +0.00050       0.82    0.381           0.536           0.007 | 0.670
+  +0.00075       0.91    0.723           0.825           0.002 | 0.948
+  +0.00100       0.96    0.924           0.952           0.000 | 0.994
+  +0.00150       1.00    0.996           0.997           0.000 | 1.000
+  +0.00200       1.00    1.000           1.000           0.000 | 1.000
+  +0.00300       1.00    1.000           1.000           0.000 | 1.000
+  4 seeds: delta for 50% P(PASS) 0.00060, for 80% P(PASS) 0.00085 (both splits shifted by delta); val-only 2-sided 5%/80% MDE 0.00155, holdout-only 0.00078
+  8 seeds: delta for 50% P(PASS) 0.00045, for 80% P(PASS) 0.00060 (both splits shifted by delta); val-only 2-sided 5%/80% MDE 0.00110, holdout-only 0.00055
+  seeds per arm (and per reference) for 80% P(PASS) at delta +0.0002 on both splits (noise ~ 1/sqrt(seeds), pool-size gain ignored): ~68
+  seeds per arm (and per reference) for 80% P(PASS) at delta +0.0003 on both splits (noise ~ 1/sqrt(seeds), pool-size gain ignored): ~32
+  seeds per arm (and per reference) for 80% P(PASS) at delta +0.0005 on both splits (noise ~ 1/sqrt(seeds), pool-size gain ignored): ~12
+
+== (3) null with a SHARED reference: D_k = e_k - e_R, e ~ N(0, sigma_p^2) iid (pool seed noise from (1)); 1M draws
+  unconditional: P(all three val < 0) 0.250 (independent refs: 0.125); P(all three val<0 AND all three holdout>0) 0.059 (independent: 0.0156); P(mean val delta <= -0.00100) 0.014; P(mean holdout delta >= +0.00030) 0.096; corr(D_A, D_B) val +0.50
+  conditional on the observed Ra - Rb (val +0.00138, holdout +0.00001; kernel-weighted, ESS 236): E[e_Ra] val +0.00069 holdout +0.00001
+    P(all three val < 0 | Ra-Rb) 0.819; P(all three holdout > 0 | Ra-Rb) 0.190; P(both patterns) 0.159
+    P(mean val delta <= -0.00100 | Ra-Rb) 0.221; P(mean holdout delta >= +0.00030 | Ra-Rb) 0.058
+  arms vs Rbar70 with seed-noise sd (sigma_p*sqrt(1.5) = val 0.00048, holdout 0.00024): z val A -0.61 B -1.81 C -0.26 | z holdout A +0.81 B +1.19 C +1.61
+  mean of the three arms vs Rbar70: val -0.00043 (null sd 0.00036, z -1.19) holdout +0.00029 (null sd 0.00018, z +1.62)

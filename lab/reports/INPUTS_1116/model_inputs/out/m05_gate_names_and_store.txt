@@ -1,0 +1,87 @@
+(a) gate check C (name-based) and --xt_add name rule
+   xp_imp_c50             gate: pass  xt_add: accepted
+   xp_ctr_c               gate: pass  xt_add: accepted
+   tte_it_coec            gate: pass  xt_add: accepted
+   tte_it_ctr             gate: pass  xt_add: accepted
+   tte_it_imp             gate: pass  xt_add: accepted
+   tte_u_ctr              gate: pass  xt_add: accepted
+   tte_ui_pos             gate: pass  xt_add: accepted
+   tte_uc_ctr             gate: pass  xt_add: accepted
+   tte_c_ctr              gate: pass  xt_add: accepted
+   it_tr_coec             gate: WARN  xt_add: accepted
+   u_tr_ctr               gate: WARN  xt_add: accepted
+   it_cand_cnt_train      gate: WARN  xt_add: accepted
+   it_cand_cnt_split      gate: pass  xt_add: accepted
+   hour                   gate: WARN  xt_add: accepted
+   tm_weekend             gate: pass  xt_add: accepted
+   ixh_mf1                gate: pass  xt_add: accepted
+   seq_cvlag_invd20       gate: pass  xt_add: refused by --xt_add
+   hzcv_expo_slog         gate: pass  xt_add: accepted
+   src_expo_h             gate: pass  xt_add: accepted
+   it_hist_hz_all         gate: pass  xt_add: refused by --xt_add
+   it_hist_all            gate: FAIL  xt_add: refused by --xt_add
+   it_hist_et5_luo        gate: pass  xt_add: refused by --xt_add
+   it_hist_all_luo_rk     gate: pass  xt_add: refused by --xt_add
+   pre_fe                 gate: FAIL  xt_add: accepted
+   pre2_fe                gate: WARN  xt_add: accepted
+   pre2_fe_s              gate: pass  xt_add: accepted
+   pre2_id_contrib        gate: FAIL  xt_add: accepted
+   pre2_fe_noid           gate: pass  xt_add: accepted
+   clu_pmi1024_mean       gate: pass  xt_add: accepted
+   trd_kde_s6h            gate: pass  xt_add: accepted
+   als_exp5               gate: WARN  xt_add: accepted
+   centrality             gate: pass  xt_add: accepted
+   seq_max_all            gate: pass  xt_add: accepted
+   lh_any                 gate: FAIL  xt_add: accepted
+   later_overlay          gate: FAIL  xt_add: accepted
+
+(b) arrays present for train AND val AND test
+   data/feats: files train 253 / val 273 / test 273; in all three 253; of these not read by the wide or the pop1 student 220
+      H            1: H
+      M            1: M
+      attn32       4: attn32 attn32_gap attn32_rk attn32_z
+      cat         18: cat_cnt_20 cat_cnt_5 cat_cnt_all cat_cnt_all_gap cat_cnt_all_rk cat_cnt_all_z cat_cnt_et1 cat_cnt_et10 cat_cnt_et2 cat_cnt_et3 cat_cnt_et4 cat_cnt_et5 cat_cnt_et6 cat_cnt_et7 cat_cnt_et8 cat_cnt_et9 cat_min_hpos cat_share_all
+      category     1: category_id
+      centrality   1: centrality
+      clu          6: clu_hcnt1024 clu_het14096 clu_hmin1024 clu_hrw4096 clu_pmi1024_mean clu_pmi11024_mean
+      cos         23: cos_h10 cos_h10_gap cos_h10_rk cos_h10_z cos_h50 cos_hall cos_hall_gap cos_hall_rk cos_hall_z cos_het1 cos_het10 cos_het2 cos_het3 cos_het4 cos_het5 cos_het6 cos_het7 cos_het8 cos_het9 cos_u cos_u_gap cos_u_rk cos_u_z
+      ctx          4: ctx_hs_d7 ctx_hs_e1k64 ctx_hs_k128t10 ctx_hs_k256
+      dot          2: dot_hall dot_u
+      emb          1: emb_missing
+      f1           4: f1 f1_gap f1_rk f1_z
+      f2           4: f2 f2_gap f2_rk f2_z
+      f3           4: f3 f3_gap f3_rk f3_z
+      f4           4: f4 f4_gap f4_rk f4_z
+      f5           4: f5 f5_gap f5_rk f5_z
+      feed         1: feed_cat_share
+      hist         1: hist_n_uniq_cat
+      hour         1: hour
+      it          34: it_cand_cnt_split it_cand_cnt_split_gap it_cand_cnt_split_rk it_cand_cnt_split_z it_cand_cnt_train it_hist_all it_hist_all_gap it_hist_all_luo_gap it_hist_all_luo_rk it_hist_all_luo_z it_hist_all_rk it_hist_all_z it_hist_et1 it_hist_et10 it_hist_et10_luo it_hist_et2 it_hist_et3 it_hist_et4 it_hist_et5 it_hist_et5_luo it_hist_et6 it_hist_et6_luo it_hist_et7 it_hist_et7_luo it_hist_et8 it_hist_et8_luo it_hist_et9 it_hist_et9_luo it_tr_coec it_tr_coec_gap it_tr_coec_rk it_tr_coec_z it_tr_ctr it_tr_pos
+      item         1: item_norm
+      kv64         2: kv64_off kv64_user
+      maxsim32     4: maxsim32 maxsim32_gap maxsim32_rk maxsim32_z
+      meansim32    1: meansim32
+      pre2         5: pre2_fe_noid pre2_hmax8 pre2_id_contrib pre2_idmax32 pre2_new
+      pre2n        7: pre2n_fe pre2n_fe_s pre2n_fe_z pre2n_hmax32 pre2n_new pre2n_new_s pre2n_new_z
+      prew        10: prew_fe prew_fe_noid prew_fe_z prew_hmax32 prew_hmax8 prew_id_contrib prew_id_contrib_v2 prew_idmax32 prew_new prew_new_z
+      seq         23: seq_argmax_hpos seq_cos_last1 seq_cv_invd20_rk seq_dcos_deep seq_dcos_hl2 seq_dcos_hl2_rk seq_dcos_nt_hl10 seq_dcos_rep seq_dcos_s1 seq_dcos_s2 seq_dcos_t1_hl5 seq_dcos_t1_hl5_z seq_dmax_hl10 seq_max2_gap seq_max_all seq_max_all_rk seq_max_all_z seq_max_new8 seq_max_nt seq_max_old seq_max_s1 seq_max_t1 seq_top3
+      tm           3: tm_hcos tm_hsin tm_weekend
+      trd         20: trd_dsr_s6h trd_dsr_sday trd_ex_s6h trd_ex_sday trd_kde_e1_s6h trd_kde_e1_sday trd_kde_s6h trd_kde_sday trd_max_s6h trd_max_sday trd_n85_s6h trd_n85_sday trd_n95_e1_s6h trd_n95_e1_sday trd_n95_s6h trd_n95_sday trd_skde_s6h trd_skde_sday trd_sn95_s6h trd_sn95_sday
+      tte         12: tte_c_ctr tte_it_coec tte_it_ctr tte_it_imp tte_it_pos tte_u_coec tte_u_ctr tte_u_imp tte_uc_ctr tte_uc_imp tte_ui_imp tte_ui_pos
+      u           12: u_het10_share u_het1_share u_het2_share u_het3_share u_het4_share u_het5_share u_het6_share u_het7_share u_het8_share u_het9_share u_tr_ctr u_tr_feeds
+      xp           1: xp_ctr_c
+   data/feats_new: files train 32 / val 49 / test 49; in all three 31; of these not read by the wide or the pop1 student 29
+      hzcv         3: hzcv_censored hzcv_expo_slog hzcv_stale_d
+      it           5: it_hist_hz_all it_hist_hz_et1 it_hist_hz_et2 it_hist_hz_et3 it_hist_hz_et4
+      ixh          8: ixh_df1 ixh_dlogM ixh_good ixh_has ixh_ln ixh_lpos ixh_mf1 ixh_mlogM
+      prew         7: prew_fe_c prew_fe_s prew_fe_wrk prew_hmax32_wrk prew_new_c prew_new_s prew_new_wrk
+      seq          3: seq_cvlag_invd20 seq_cvlag_norm seq_cvlag_pop
+      src          3: src_censored src_expo_h src_expo_slog
+   nn/feat_cache: files train 56 / val 102 / test 102; in all three 56; of these not read by the wide or the pop1 student 21
+      it           2: it_hist_all_luo_rk it_hist_all_luo_z
+      pre2         2: pre2_id_contrib pre2_new
+      pre2n        7: pre2n_fe pre2n_fe_s pre2n_fe_z pre2n_hmax32 pre2n_new pre2n_new_s pre2n_new_z
+      prew         5: prew_fe prew_fe_z prew_hmax32 prew_new prew_new_z
+      seq          1: seq_cv_invd20_rk
+      tm           3: tm_hcos tm_hsin tm_weekend
+      xp           1: xp_ctr_c

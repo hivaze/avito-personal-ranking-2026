@@ -1,0 +1,28 @@
+train feeds 3151208, rows 246745836; feed day slots 0..14
+C1 sparse days: feeds with a sparse day slot after the own day: 0 [must be 0]; feeds whose own day is a sparse day: 1.0000; feeds with a sparse day at all: 1.0000
+C1 dense days, feats (primary): rows with a dense day slot >= the own day: 0 [must be 0]; rows with a non-dense slot in the mask: 0 [must be 0]; rows without any dense day: 73628784 (0.2984)
+   rows by distance (own day - latest dense day), 1..15+: 0.652 0.072 0.077 0.010 0.011 0.010 0.049 0.047 0.037 0.035 0.000 0.000 0.000 0.000 0.000 ; distance 0: 0
+C1 dense days, feats_L (lag-first): rows with a dense day slot >= the own day: 0 [must be 0]; rows with a non-dense slot in the mask: 0 [must be 0]; rows without any dense day: 73628784 (0.2984)
+   rows by distance (own day - latest dense day), 1..15+: 0.399 0.063 0.080 0.073 0.008 0.007 0.146 0.117 0.072 0.035 0.000 0.000 0.000 0.000 0.000 ; distance 0: 0
+C1 PASS
+C3 feats: lag file ok True; public-like share 0.2994 (test 0.2994); keep rows 0.1901; pub lags [6, 7] view shares 0.7066 / 0.2934 test 0.7066 / 0.2934; priv lags [7, 8, 9] view shares 0.2423 / 0.3782 / 0.3794 test 0.2424 / 0.3783 / 0.3794;
+   feats/seq_cv_hz_invd20  rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 588.9 zero share 0.8723 -> ok
+   feats/seq_cv_hz_pop     rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 3000 zero share 0.5113 -> ok
+   feats/seq_cv_hz_norm    rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 26.9 zero share 0.8723 -> ok
+   feats/it_hist_hz_all    rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 5391 zero share 0.4936 -> ok
+   feats/it_hist_hz_et1    rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 4135 zero share 0.5199 -> ok
+   feats/it_hist_hz_et2    rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 1771 zero share 0.7595 -> ok
+   feats/it_hist_hz_et3    rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 2082 zero share 0.7741 -> ok
+   feats/it_hist_hz_et4    rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 3795 zero share 0.8003 -> ok
+   feats/xp_imp_hz_c50     rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 3.932 zero share 0.5113 -> ok
+C3 feats_L: lag file ok True; public-like share 0.2994 (test 0.2994); keep rows 0.1901; pub lags [6, 7] view shares 0.7066 / 0.2934 test 0.7066 / 0.2934; priv lags [7, 8, 9] view shares 0.2423 / 0.3782 / 0.3794 test 0.2424 / 0.3783 / 0.3794;
+   feats_L/seq_cv_hz_invd20  rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 638.7 zero share 0.8866 -> ok
+   feats_L/seq_cv_hz_pop     rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 3000 zero share 0.5263 -> ok
+   feats_L/seq_cv_hz_norm    rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 26.9 zero share 0.8866 -> ok
+   feats_L/it_hist_hz_all    rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 5931 zero share 0.5089 -> ok
+   feats_L/it_hist_hz_et1    rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 4561 zero share 0.5369 -> ok
+   feats_L/it_hist_hz_et2    rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 1784 zero share 0.7796 -> ok
+   feats_L/it_hist_hz_et3    rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 2082 zero share 0.7953 -> ok
+   feats_L/it_hist_hz_et4    rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 4323 zero share 0.8177 -> ok
+   feats_L/xp_imp_hz_c50     rows 246745836 dtype float32 non-finite 0 below -1e-4 0 max 3.932 zero share 0.5451 -> ok
+C3 PASS

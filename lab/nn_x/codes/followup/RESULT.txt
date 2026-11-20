@@ -1,0 +1,150 @@
+CODES-DECODING FOLLOW-UPS (reports/CODES_DECODING_1113.md §8 (a)-(d)) -- RESULT
+Agent run 2026-11-13 05:43-06:02 UTC. CPU only (12 threads), no GPU, nothing submitted, nothing outside nn_x/codes/followup/ written.
+Pre-declaration: nn_x/codes/followup/PREDECLARED.txt, written 05:47:47 UTC (date -u) BEFORE any number below; ADDENDUM 1
+(post-hoc, information only) 05:57:30 UTC. Scripts: f01_build.py (features), fu_common.py (unchanged x02 / tail.py / stage0
+harnesses), f02_eval.py (tasks 1-2 gates), f02b_s4_desc.py, f03_buried.py (task 3), f03b_f5old.py (addendum), f04_popfree.py
+(task 4). Logs and arrays: nn_x/codes/followup/out/.
+Sanity: G3 val 0.40032 and G3 holdout pool 0.32379 reproduced exactly; buried cell 7,624 positives / 151,881 leak-free pairs
+(= stage0); cell = 37.4% of leak-free val loss (stage0: ~37%).
+
+SUMMARY
+  (1) s4 similar-listings graph ........ CLOSED (0/4 features pass; coverage 0.05-0.13% of candidates; nested <= 0; tail win < 0.5)
+  (2) region-normalised popularity ..... CLOSED (0/2 pass; nested exactly 0 on val; tail win 0.48-0.49; null when pop-matched)
+  (3) buried-cell map .................. information: loss spread ~proportionally; one CONCENTRATION (Personal vertical x1.61,
+                                         mechanical: big same-category blocks); no non-trivial cue > 0.55 that survives (addendum)
+  (4) pop-free free check .............. INTERIM: prediction HOLDS (pop-free TO 0.925 vs G3 0.974); FT read pending; pop1 design written
+
+=====================================================================================================================
+(1) s4 SIMILAR-LISTINGS ITEM-TO-ITEM GRAPH -- pre-declared 05:47:47 UTC -- verdict CLOSED
+Graph: ALL 3,151,208 train feeds (no sampling), 583.6M history events. B = e1 view with source s4 (9,435,594 events);
+  A = nearest older e1 view of a different item in the same snapshot (found for 99.25%). Deduped per user (user-0 feeds =
+  separate users): 7,830,812 (user, A, B) triples -> 7,759,648 distinct directed edges, of which only 60,539 (0.8%) are seen by
+  >= 2 users (edge-count quantiles 50/90/99% = 1/1/1). 6.30M distinct anchors, 5.94M distinct targets: the graph is almost
+  entirely singleton edges (huge, short-lived catalogue).
+Val features use all train edges (train days < val days; no val/test histories). Holdout features use only (user, A, B) with
+  first-seen day < the holdout feed's day (strictly earlier; no leak).
+Coverage (share of candidates with a non-zero value): val s4_link 0.05%, s4_sum 0.05%, s4_sym 0.09%, s4_link_any 0.13%;
+  holdout 0.04-0.09%.
+Gate: PASS iff val nested > +0.0003 AND z > 2 (primary s4_link; others z > 2.5) AND tail win rate > 0.5.
+  feature      | tail win (+-SE)  [untied share, win|untied] | pop-matched | val nested +-SE (z)        | holdout nested | buried AUC | gate
+  s4_link      | 0.4995 +- 0.0001 [0.002, 0.163]             | 0.4998      | -0.00012 +- 0.00006 (-2.18) | 0 (w=0 both)   | 0.4994     | FAIL
+  s4_link_any  | 0.4989 +- 0.0001 [0.004, 0.186]             | 0.4996      | -0.00025 +- 0.00014 (-1.76) | 0              | 0.4987     | FAIL
+  s4_sym       | 0.4992 +- 0.0001 [0.003, 0.233]             | 0.4998      | -0.00023 +- 0.00007 (-3.08) | 0              | 0.4988     | FAIL
+  s4_sum       | 0.4995 +- 0.0001 [0.002, 0.163]             | 0.4998      | -0.00012 +- 0.00011 (-1.10) | 0              | 0.4994     | FAIL
+  controls:
+  pop (it_hist_all_luo) | 0.4480 +- 0.0048 [0.871, 0.440] | 0.4989 | 0 (w=0) | 0 (w=0)  | 0.4301 |
+  cos maxsim32          | 0.3604 +- 0.0045                | 0.3501 | -0.00451 +- 0.00047 | - | 0.3685 |
+  cos cos_hall          | 0.4011 +- 0.0047                | 0.3953 | -0.00511 +- 0.00055 | - | 0.3978 |
+Reading:
+  - When an s4 link separates the clicked item from a beater (0.2-0.4% of tail pairs) it sides with the BEATER 77-84% of the
+    time: s4 successors of the user's items are near-duplicates/similar items that G3 already ranks high (cosine-aligned).
+  - Descriptive (f02b): s4-linked candidates ARE clicked 3.5-4.7x more often than the rest of their feeds (target rate 0.043-0.054
+    vs 0.012) and G3 slightly under-predicts them (act/exp 1.08 +- 0.11 for s4_link_any, 1.28 +- 0.14 for s4_sym), but G3
+    already places the linked positives at a median within-feed percentile of 0.96-0.97, and the cell holds only 77 of 22K val
+    positives (0.35%). Ceiling ~0: the binding constraint is coverage, not signal.
+  - Spearman with popularity +0.03..+0.05: not a popularity proxy. Nested deltas are negative because a w chosen on one fold
+    (0.05 / -0.1 / -0.2) does not transfer to the other.
+
+=====================================================================================================================
+(2) REGION-NORMALISED POPULARITY -- pre-declared 05:47:47 UTC -- verdict CLOSED
+Region key: home region of a feed = K2 component (nn_x/codes/features/out/k2_item_comp.npy, 60,358 frequent items in 216
+  components) winning the vote among the feed's candidates at its modal non-zero f2 level. Assigned for 63.6% of train feeds,
+  65.4% of holdout feeds, but only 39.5% of val feeds (53.6% of val candidate rows): K2 covers train-frequent items, val items
+  are later/staler.
+Counts: unique (user, region, item) over train history events of any type: 232.8M pairs with a region.
+  rp_lift = log(((n_iR + 5 pi_R) / (n_i + 5)) / pi_R) (regional over-representation of the item among the user's home-region
+  users), rp_cnt = log1p(n_iR). Val coverage 30.5% / 20.3% non-zero; holdout 36.3% / 22.4%.
+  feature  | tail win (+-SE)  [untied, win|untied] | pop-matched      | rho(pop) | val nested       | holdout nested           | buried AUC | gate
+  rp_lift  | 0.4896 +- 0.0034 [0.441, 0.476]      | 0.5009 +- 0.0017 | +0.20    | 0 (w=0 both)     | 0 (w=0 both)             | 0.4796     | FAIL
+  rp_cnt   | 0.4814 +- 0.0032 [0.335, 0.444]      | 0.5001 +- 0.0015 | +0.48    | 0 (w=0 both)     | -0.00020 +- 0.00013      | 0.4680     | FAIL
+Reading: both cues side with the beaters exactly as raw popularity does (0.48-0.49 vs pop 0.448), and the pop-matched win rate is
+  0.500-0.501: the regional cues carry no information beyond popularity in the cells that matter. G3 act/exp across rp_lift bins
+  1.019 / 0.998 and rp_cnt bins 1.006 / 0.978 (val); 0.997-1.004 (holdout): G3 is calibrated on them. Confirms §8 C1's prior.
+
+=====================================================================================================================
+(3) BURIED-CELL DIAGNOSTIC -- pre-declared 05:47:47 UTC -- information (no gate)
+Cell: 7,543 leak-free positives, 151,881 (positive, same-category beater) pairs; 3,206.5 of 8,577.0 loss units = 37.4% of all
+  leak-free val loss. Loss per cell positive 0.42-0.47 in every class.
+Shares (cell loss | val rows | val positives | cell-loss / row share):
+  delivery: hard-zero .282 | .347 | .307 | 0.81;  near-zero .017 | .036 | .039 | 0.48;  very-low .029 | .033 | .039 | 0.90;
+            low .005 | .009 | .010 | 0.54;  goods .667 | .575 | .605 | 1.16
+  f2 class: home (f2 = feed mode) .355 | .454 | .411 | 0.78;  other non-zero .448 | .392 | .423 | 1.14;  zero .197 | .154 | .166 | 1.27
+  vertical: Personal .343 | .213 | .248 | 1.61 (FLAG);  Transport .292 | .219 | .218 | 1.33;  Home .126 | .171 | .171 | 0.74;
+            Electronics .053 | .060 | .064 | 0.88;  Hobby .053 | .077 | .074 | 0.69;  RealEstate .049 | .099 | .089 | 0.50;
+            Services .037 | .090 | .067 | 0.41;  Jobs .029 | .032 | .031 | 0.90;  Animals .017 | .032 | .032 | 0.53;
+            Business .001 | .006 | .006 | 0.13;  Travel 0
+  f4 tercile (cuts 0.411 / 0.680 over val positives): T1 newest .375 | .397 | .333 | 0.94;  T2 .336 | .297 | .333 | 1.13;
+            T3 oldest .289 | .306 | .334 | 0.94
+Where the loss concentrates: only the Personal vertical (clothing/shoes c13, kids clothing, beauty) passes the pre-declared
+  CONCENTRATION flag (x1.61 of its row share, x1.38 of its positive share); Transport is next (x1.33). The cause is mechanical:
+  the cell needs >= 3 same-category candidates above the click, and these verticals fill feeds with big same-category blocks
+  (clothing 12.4%, cars 11.2% of val rows); loss PER cell positive is not higher there (Personal 0.388, Transport 0.467 vs 0.425
+  overall). Goods vs delivery-free, home vs non-home, and listing age split the cell in proportion to rows/positives
+  (ratios 0.8-1.3). Non-home/zero-f2 positives are slightly over-represented (1.14 / 1.27), the known home-region deficit.
+Cue win rates on all cell pairs (P(cue_pos > cue_beater)): pop 0.430, f1 0.415, f2 0.506, f3 0.500 (constant within a category),
+  f4 0.458, f5 0.449, maxsim32 0.369, cos_hall 0.398, cos_u 0.363, s4_* 0.499, rp_lift 0.480, rp_cnt 0.468. SEs 0.004-0.006.
+Win-rate flags (> 0.55, >= 500 pairs, lower 2-SE bound > 0.5): 25 raised, but all except one are not new information:
+  - negated G3 inputs ("-pop" 0.55-0.65 in every class, "-f4/newer" 0.54-0.58): the mirror of tail.py's conditioning bias
+    (beaters are by construction the items G3 prefers on the cues it uses);
+  - tautological (the cue defines the slice): f2 inside the home class (0.695: the home level is the user's top f2 level), f4 / -f4
+    inside the f4 terciles (0.83).
+  - the one non-trivial flag: f5 inside f4 T3 (oldest listings) 0.558 +- 0.011 (39,762 pairs). ADDENDUM 1 (post-hoc, pre-declared
+    05:57:30 before running): x = f5 * 1[f4 >= 0.680] through x02 -> nested +0.00038 +- 0.00038 (z 0.99) with fold weights
+    -0.05 / -0.05 (the OPPOSITE sign to the cue), tail win 0.480 +- 0.004; G3 act/exp by f5 quintile inside T3 0.96-1.00 (flat).
+    Noise / conditioning artefact. Nothing to pursue.
+Map for later work: the cell is uniformly information-limited across delivery, region and age classes; its size is driven by
+  feeds dominated by one big category (Personal, Transport). Anything targeting it must beat the beaters on within-category
+  preference, which no decoded code supplies.
+
+=====================================================================================================================
+(4) POP-FREE FREE CHECK -- pre-declared 05:47:47 UTC -- INTERIM verdict: PREDICTION HOLDS (2 train-only members)
+Status at handback (06:01 UTC): polling started 05:57:53. The FT preds (preds/nn_abl_e10_xdrop_pop_s95?_n2cpv3_val_oof.npy) do not
+  exist yet. The chain is still waiting for s953/s954 to finish training, then runs FT, then copies. Train-only preds exist for
+  s951/s952 (nn_x/abl/preds; byte-identical to what the chain copies to preds/). So the pre-declared rule gives pool = TO only, 2
+  members. FINAL READ: once the FT files land (expected 06:45-07:15), run `.venv/bin/python nn_x/codes/followup/f04_popfree.py`
+  (CPU, 4 s). It picks up every present member and applies the 0.5 ft + 0.5 to rule by itself.
+Cells: f5 q90 = 0.8906; n = tte_it_imp + it_hist_all_luo. NOISY-HIGH 4.82% of rows (1,179 positives); RELIABLE-HIGH 5.18%;
+  MID/LOW 88.7%; NO-DATA 1.35%.
+act/exp (+- user-clustered SE; differences = paired user-cluster bootstrap SE):
+  cell           | G3 final       | G3 train-only | pop-ful base w5_e10 TO (s951/952) | POP-FREE TO (s951/952)
+  NOISY-HIGH     | 0.974 +- 0.026 | 0.969         | 0.965 +- 0.025                     | 0.925 +- 0.024  (vs G3 -0.049 +- 0.002; vs same-seed base -0.039 +- 0.002)
+  RELIABLE-HIGH  | 1.013 +- 0.025 | 1.001         | 1.006 +- 0.025                     | 1.042 +- 0.026  (vs G3 +0.029 +- 0.003; vs base +0.035 +- 0.003)
+  MID/LOW        | 1.001          | 1.002         | 1.003                              | 1.003
+  NO-DATA        | 0.946 +- 0.081 | 0.913         | 0.893                              | 0.911
+  NDCG           | 0.40032        | 0.40035       | 0.39837                            | 0.39699
+  The same pattern holds in the existing 2-epoch screen (f04c, @last, seeds 23/24): xdrop_pop NOISY-HIGH 0.938 vs base 0.969
+  (-0.031 +- 0.002); RELIABLE-HIGH 1.045 vs 1.005 (+0.040 +- 0.003). So a 2-epoch arm can read the mechanism.
+Reading: §8 D1 is confirmed in mechanism. Without exposure information the pop-free model cannot tell a noisy high f5 from a
+  reliable one. It over-ranks noisy-high items (act/exp 0.925) and under-ranks reliable-high ones (1.042). Both cells together
+  are ~10% of rows and ~11% of positives. The absolute act/exp SE (0.024) is large, but the paired differences are 15-20 SE.
+  The point estimate 0.925 is about 1 SE below the 0.95 threshold, so the final FT pool could land near 0.95. Re-read before
+  launching anything.
+
+POP1 DESIGN (written because the pre-declared prediction holds on the interim read; the lead should confirm with the final read)
+  Arm 'pop1' = ONE 2-epoch arm in the nn_x/abl screen harness: abl_lane.sh A_BASE + HYG (the 2-epoch form of E_BASE), seeds 23/24:
+    --xt cvnd_pre2s --xt_exclude seq_cv_invd20,seq_cv_pop,seq_cv_norm,it_hist_all_luo,it_hist_et1_luo,it_hist_et2_luo,
+    it_hist_et3_luo,it_hist_et4_luo --xt_add xp_imp_c50
+  Exposure input (exact): xp_imp_c50 = log1p(min(tte_it_imp, 50)) as float32, written as data/feats/{train,val,test}/xp_imp_c50.npy
+    and hard-linked into nn/feat_cache/{train,val,test}/ (the abl trainer reads only feat_cache). tte_it_imp = the item's train
+    impressions (src/features_tte.py). Train rows count train days < d only; val/test count all train days. No labels and no
+    own-day rows are used, so it is leak-free.
+    attach_xt transform: default branch (clip +-10). Values lie in [0, 3.93], so nothing is clipped. Not in XT_REL (no rank/z
+      channel; it is one input), not in xt_idcols. n_dense = 92 (xdrop_pop) + 1 = 93.
+    Why capped at 50: f5's noise is a small-denominator problem, so the reliability information sits at low counts. The cap
+      stops the high-end popularity ordering coming back in (11.4% of val rows sit at the cap). Its Spearman with
+      it_hist_all_luo is 0.744 (uncapped 0.746), and its within-feed AUC is 0.528 (popularity 0.547), so it still partly
+      re-enters popularity. Known shift: train day-0 rows are all 0; val has 35% zeros and median 3, close to train days 1-2.
+  Code needed (lead): a flag-off-identical `--xt_add n1,...` in nn_x/abl/abl_arms.py + train.py. It appends names to xt_names
+    after --xt_exclude and before the feat_exists check. The XT_REL / XT_RELONLY lookups stay keyed on the preset. Test it the
+    same way as --xt_exclude (AST + end-to-end identity at flag off).
+  Readout = the frozen SCALE-UP rule (abl_eval.py): primary = LAST checkpoint, delta pop1 - abl_xdrop_pop on the same seed, pooled
+    over seeds 23/24. PASS iff val delta > +1 SE_cal(val) AND holdout delta >= 0. Information only (not gates): pop1 - abl_base
+    (the remaining gap; xdrop_pop - base was -0.0023 val / -0.0074 holdout); NOISY-HIGH act/exp of pop1 (mechanism: it should
+    move from 0.938 toward base 0.969); stale-val and pmix.
+  If PASS: rerun the 10-epoch pop-free family as E_BASE + HYG + the same flags, seeds 951-954, then the existing decide9 /
+    decide6 diversity rule. If FAIL: the pop-free family stays as is.
+
+UPDATE 06:05 UTC (after handback; all 4 train-only members now present, still no FT files):
+  pop-free TO (4 members) NOISY-HIGH act/exp 0.922 +- 0.024 (vs G3 -0.052 +- 0.003; vs same-seed base w5_e10 TO (4) 0.966:
+  -0.044 +- 0.002); RELIABLE-HIGH 1.036 (base 1.006, +0.029 +- 0.003); NDCG 0.39727 vs base 0.39887. Prediction still HOLDS.
+  The final FT-pool read (0.5 ft + 0.5 to) is still pending: run f04_popfree.py once preds/nn_abl_e10_xdrop_pop_s95?_n2cpv3_val_oof.npy land.

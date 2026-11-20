@@ -1,0 +1,133 @@
+# Copy of the raw run log (not published; written by code/05_mass.py, third pass, base G3 = 0.40032 val, leak-free feeds): the exact per-positive split of 1 - NDCG, by coldness, category regime and rank inside the category, with private-mix re-weighting.
+Total loss (leak-free) per feed 0.5995; exact per-positive decomposition verified.
+
+--- loss mass by coldness (LUO) (positives; val leak-free | private-mix reweighted) ---
+class                    pos share loss share loss/pos (x feeds) priv pos share priv loss share
+cold                        0.3028     0.3101             0.4037         0.3723          0.3785
+warm                        0.6972     0.6899             0.3901         0.6277          0.6215
+
+--- loss mass by category novelty (positives; val leak-free | private-mix reweighted) ---
+class                    pos share loss share loss/pos (x feeds) priv pos share priv loss share
+last8                       0.6784     0.6315             0.3669         0.7042          0.6539
+h8-31                       0.1482     0.1603             0.4264         0.1275          0.1420
+h>=32                       0.1069     0.1223             0.4507         0.0877          0.0986
+never                       0.0664     0.0859             0.5097         0.0805          0.1054
+
+--- loss mass by G3 category rank of the positive (LSE) (positives; val leak-free | private-mix reweighted) ---
+class                    pos share loss share loss/pos (x feeds) priv pos share priv loss share
+cat#1                       0.5188     0.4699             0.3570         0.5752          0.5259
+cat#2                       0.1801     0.1872             0.4099         0.1799          0.1893
+cat#3-4                     0.1605     0.1805             0.4432         0.1388          0.1594
+cat#5+                      0.1406     0.1624             0.4553         0.1060          0.1254
+
+--- loss mass by category rank x within-category rank (positives; val leak-free | private-mix reweighted) ---
+class                    pos share loss share loss/pos (x feeds) priv pos share priv loss share
+cat#1|w0                    0.0800     0.0106             0.0522         0.0807          0.0095
+cat#1|w1-2                  0.0921     0.0854             0.3655         0.0917          0.0850
+cat#1|w10+                  0.2048     0.2089             0.4020         0.2532          0.2571
+cat#1|w3-9                  0.1419     0.1650             0.4584         0.1497          0.1743
+cat#2|w0                    0.0441     0.0352             0.3148         0.0421          0.0351
+cat#2|w1-2                  0.0447     0.0520             0.4591         0.0420          0.0482
+cat#2|w10+                  0.0393     0.0389             0.3899         0.0438          0.0435
+cat#2|w3-9                  0.0520     0.0611             0.4633         0.0521          0.0625
+cat#3-4|w0                  0.0522     0.0570             0.4301         0.0454          0.0515
+cat#3-4|w1-2                0.0427     0.0543             0.5011         0.0370          0.0474
+cat#3-4|w10+                0.0214     0.0201             0.3695         0.0169          0.0162
+cat#3-4|w3-9                0.0442     0.0491             0.4383         0.0395          0.0443
+cat#5+|w0                   0.0648     0.0808             0.4914         0.0504          0.0642
+cat#5+|w1-2                 0.0434     0.0483             0.4384         0.0323          0.0369
+cat#5+|w10+                 0.0042     0.0047             0.4416         0.0030          0.0036
+cat#5+|w3-9                 0.0281     0.0285             0.4000         0.0204          0.0208
+
+--- loss mass by novelty x coldness (positives; val leak-free | private-mix reweighted) ---
+class                    pos share loss share loss/pos (x feeds) priv pos share priv loss share
+h8-31|cold                  0.0383     0.0419             0.4312         0.0410          0.0444
+h8-31|warm                  0.1099     0.1184             0.4247         0.0865          0.0976
+h>=32|cold                  0.0260     0.0301             0.4569         0.0242          0.0282
+h>=32|warm                  0.0810     0.0922             0.4487         0.0636          0.0705
+last8|cold                  0.2186     0.2126             0.3834         0.2780          0.2688
+last8|warm                  0.4598     0.4189             0.3591         0.4262          0.3851
+never|cold                  0.0199     0.0255             0.5040         0.0291          0.0371
+never|warm                  0.0465     0.0604             0.5121         0.0514          0.0683
+
+--- loss mass by positive rank bucket (positives; val leak-free | private-mix reweighted) ---
+class                    pos share loss share loss/pos (x feeds) priv pos share priv loss share
+r0                          0.0845     0.0000             0.0000         0.0854          0.0000
+r1-2                        0.1119     0.0955             0.3366         0.1109          0.0955
+r3-9                        0.2178     0.2557             0.4628         0.2126          0.2499
+r10-29                      0.2647     0.3202             0.4767         0.2647          0.3230
+r30..<M/2                   0.1957     0.1927             0.3881         0.2098          0.2054
+r>=M/2                      0.1254     0.1359             0.4271         0.1165          0.1262
+
+=== Category-level ranking (LSE of per-candidate z within (feed, category)); feeds with >= 2 categories ===
+G3       cat NDCG 0.7843  top-1 category hit 0.5784
+N1       cat NDCG 0.7842  top-1 category hit 0.5783
+G3_to    cat NDCG 0.7840  top-1 category hit 0.5783
+G3_ft    cat NDCG 0.7850  top-1 category hit 0.5797
+nf2_oof  cat NDCG 0.7803  top-1 category hit 0.5708
+nf2_tr   cat NDCG 0.7797  top-1 category hit 0.5694
+nf3_oof  cat NDCG 0.7803  top-1 category hit 0.5704
+nf3_tr   cat NDCG 0.7807  top-1 category hit 0.5716
+  cat NDCG G3 - nf2_oof: +0.00401 ± 0.00079
+  cat NDCG G3 - nf3_oof: +0.00401 ± 0.00071
+  cat NDCG G3 - G3_to: +0.00031 ± 0.00032
+  cat NDCG G3_to - nf3_tr: +0.00326 ± 0.00074
+
+=== Error map: intent regime (positive in G3-top category / f3-top) x positive coldness (LUO) ===
+
+[G3-LSE top category]
+cell          share      G3  loss%  catorc%  winorc%         G3-nf2oof           FT half               m02               a4u               NEW
+top|warm      0.341  0.4889   29.1      9.0     47.8 +0.0192(0.0025) -0.0016(0.0008) -0.0004(0.0012) -0.0046(0.0017) -0.0013(0.0006)
+top|mixed     0.101  0.4437    9.3      2.0     13.7 +0.0134(0.0029) +0.0013(0.0009) -0.0003(0.0013) +0.0036(0.0017) -0.0002(0.0006)
+top|cold      0.138  0.4018   13.7      3.1     23.4 +0.0168(0.0034) +0.0036(0.0012) +0.0063(0.0016) +0.0098(0.0024) +0.0013(0.0008)
+top|all       0.579  0.4603   52.1     14.1     84.9 +0.0176(0.0018) +0.0002(0.0006) +0.0012(0.0008) +0.0003(0.0012) -0.0005(0.0004)
+off|warm      0.292  0.3250   32.8     62.0      9.6 +0.0097(0.0020) -0.0010(0.0007) -0.0004(0.0010) -0.0025(0.0014) +0.0000(0.0005)
+off|mixed     0.029  0.3306    3.3      4.1      1.4 +0.0081(0.0044) +0.0027(0.0014) -0.0007(0.0018) -0.0022(0.0028) -0.0010(0.0009)
+off|cold      0.100  0.2938   11.7     19.8      4.1 +0.0108(0.0031) +0.0011(0.0009) +0.0040(0.0015) +0.0079(0.0021) +0.0005(0.0004)
+off|all       0.421  0.3180   47.9     85.9     15.1 +0.0098(0.0016) -0.0003(0.0005) +0.0006(0.0008) -0.0000(0.0011) +0.0000(0.0004)
+
+[f3 top category]
+cell          share      G3  loss%  catorc%  winorc%         G3-nf2oof           FT half               m02               a4u               NEW
+top|warm      0.305  0.4671   27.1     10.4     42.3 +0.0122(0.0027) -0.0014(0.0008) -0.0008(0.0012) -0.0018(0.0018) -0.0004(0.0006)
+top|mixed     0.093  0.4383    8.7      1.9     12.7 +0.0122(0.0030) +0.0018(0.0010) -0.0007(0.0013) +0.0026(0.0018) -0.0004(0.0006)
+top|cold      0.128  0.3890   13.0      4.0     21.2 +0.0109(0.0036) +0.0043(0.0012) +0.0063(0.0016) +0.0141(0.0024) +0.0015(0.0008)
+top|all       0.525  0.4430   48.8     16.3     76.3 +0.0119(0.0018) +0.0006(0.0006) +0.0010(0.0009) +0.0028(0.0012) +0.0001(0.0004)
+off|warm      0.328  0.3634   34.8     60.6     15.1 +0.0172(0.0020) -0.0012(0.0007) -0.0001(0.0010) -0.0054(0.0014) -0.0009(0.0005)
+off|mixed     0.037  0.3683    3.9      4.2      2.4 +0.0121(0.0042) +0.0012(0.0011) +0.0004(0.0019) +0.0016(0.0025) -0.0002(0.0009)
+off|cold      0.110  0.3187   12.5     18.8      6.3 +0.0182(0.0030) +0.0004(0.0010) +0.0042(0.0015) +0.0031(0.0021) +0.0003(0.0005)
+off|all       0.475  0.3534   51.2     83.7     23.7 +0.0170(0.0016) -0.0006(0.0005) +0.0010(0.0008) -0.0029(0.0011) -0.0006(0.0004)
+
+headroom totals: cat-orc 0.1708, within-orc (reassign) 0.2935
+
+=== Feed-level label segments: val share vs private-mix weighted share (pmix weights, report only) ===
+pos coldness     cold     val share 0.2375  priv-mix share 0.2906  pub-mix 0.2736  G3 0.3564
+pos coldness     mixed    val share 0.1299  priv-mix share 0.1502  pub-mix 0.1490  G3 0.4182
+pos coldness     warm     val share 0.6325  priv-mix share 0.5592  pub-mix 0.5774  G3 0.4133
+pos cat novelty  h8-31    val share 0.1293  priv-mix share 0.1120  pub-mix 0.1172  G3 0.3367
+pos cat novelty  h>=32    val share 0.0891  priv-mix share 0.0716  pub-mix 0.0777  G3 0.2957
+pos cat novelty  last8    val share 0.7168  priv-mix share 0.7298  pub-mix 0.7282  G3 0.4340
+pos cat novelty  never    val share 0.0649  priv-mix share 0.0866  pub-mix 0.0769  G3 0.3010
+pos cat G3 rank  #1       val share 0.5793  priv-mix share 0.6259  pub-mix 0.6107  G3 0.4603
+pos cat G3 rank  #2       val share 0.1753  priv-mix share 0.1712  pub-mix 0.1722  G3 0.3742
+pos cat G3 rank  #3+      val share 0.2454  priv-mix share 0.2030  pub-mix 0.2172  G3 0.2778
+G3 val 0.40046; priv-mix 0.40261; pub-mix 0.39711 (pmix is level-miscalibrated; shares only)
+  lever G3-nf2oof : val +0.01434  priv-mix +0.01435
+  lever FT half   : val -0.00001  priv-mix +0.00063
+  lever m02       : val +0.00096  priv-mix +0.00083
+  lever a4u       : val +0.00013  priv-mix -0.00074
+  lever NEW       : val -0.00025  priv-mix -0.00000
+
+=== Worst 10% by standardized M x npos residual: mean M 55.1 (all 96.3); G3 0.2940; mean best-positive pct rank 0.544 (all 0.231)
+  coldpos                      worst10std 0.2670  all 0.2375  lift 1.12
+  warmpos                      worst10std 0.4965  all 0.6325  lift 0.78
+  pos cat novel (>=32/never)   worst10std 0.2851  all 0.1539  lift 1.85
+  pos cat never in history     worst10std 0.1168  all 0.0649  lift 1.80
+  pos cat not G3 top           worst10std 0.6113  all 0.4207  lift 1.45
+  pos cat G3 rank >= 3         worst10std 0.3032  all 0.1573  lift 1.93
+  pos cat not f3 top           worst10std 0.6134  all 0.4751  lift 1.29
+  pos pop luo == 0             worst10std 0.2670  all 0.2375  lift 1.12
+  uid0                         worst10std 0.0362  all 0.0460  lift 0.79
+  H==256                       worst10std 0.3164  all 0.2874  lift 1.10
+  n_train_feeds>0              worst10std 0.3185  all 0.3016  lift 1.06
+  npos==1                      worst10std 0.5821  all 0.7454  lift 0.78
+  cold_share>=45%              worst10std 0.2656  all 0.2592  lift 1.02

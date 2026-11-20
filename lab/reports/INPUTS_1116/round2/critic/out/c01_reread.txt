@@ -1,0 +1,110 @@
+[     0s] views: holdout feeds 30000 (has = 1 on 15225), pool feeds with has = 1 69173; cuts in use [5, 6, 7, 8, 9, 10, 11, 12, 14]
+[     0s]    cut  5: window slots [0, 1, 2, 3, 4] (key 31)
+[     0s]    cut  6: window slots [1, 2, 3, 4, 5] (key 62)
+[     0s]    cut  7: window slots [2, 3, 4, 5, 6] (key 124)
+[     0s]    cut  8: window slots [3, 4, 5, 6, 7] (key 248)
+[     0s]    cut  9: window slots [4, 5, 6, 7, 8] (key 496)
+[     0s]    cut 10: window slots [4, 5, 6, 7, 8] (key 496)
+[     0s]    cut 11: window slots [4, 5, 6, 7, 8] (key 496)
+[     0s]    cut 12: window slots [5, 6, 7, 8, 11] (key 992)
+[     0s]    cut 14: window slots [7, 8, 11, 12, 13] (key 3968)
+[     0s]    hold: 30000 feeds, rows 4630966; feeds by cut {-1: 14775, 5: 13362, 6: 1291, 7: 572}
+[     0s]    pool: 69173 feeds, rows 10254287; feeds by cut {5: 60776, 6: 5892, 7: 2505}
+[     0s]    val_nat: 14423 feeds, rows 1389971; feeds by cut {14: 14423}
+[     0s]    val_twin: 14423 feeds, rows 1389971; feeds by cut {7: 1965, 8: 1987, 9: 3751, 10: 3460, 11: 1760, 12: 1500}
+[     0s]    test_nat: 28595 feeds, rows 2904806; feeds by cut {14: 28595}
+[    39s] 
+=== witness H: hold; feeds 30000, rows 4630966; control block 83 columns ===
+[    50s] null model WITHOUT nx3: loglik -244596.062 (my own recomputation -244596.062); max |gradient| over its columns 7.66e-04
+[    50s]   yardstick nx_rp3_z: cz +4.98, nats/feed 0.00044, R2 0.25 | slots 6-8 +4.32 | slots 11-13 +3.37 | lag 2 d +2.24 | lag 3 d +3.21 | lag 4 d +2.03 | lag 7 d +2.18 | lag 8 d +1.72 | lag 9 d +2.03
+[    51s]   yardstick nx_rp3_rk: cz +4.32, nats/feed 0.00032, R2 0.34 | slots 6-8 +3.55 | slots 11-13 +3.20 | lag 2 d +2.37 | lag 3 d +3.02 | lag 4 d +0.76 | lag 7 d +2.13 | lag 8 d +1.74 | lag 9 d +1.71
+[    60s] null model WITH nx3 (lag view): loglik -244582.758 (mine -244582.758); max |gradient| 1.54e-03; nx3 gain -244582.8
+[    60s]   check: nx_rp3_z under the model that holds it: cz -0.0000
+[    60s] form | cz | cz without nx3 in the null | z by the model variance | nats/feed | R2 with the null model | slots 6-8 | slots 11-13 | lag 2 d | lag 3 d | lag 4 d | lag 7 d | lag 8 d | lag 9 d
+[    61s]   kn1_5:z     | -4.55 | -4.31 | -4.70 | 0.00037 | 0.16 | -3.74 | -2.61 | -2.36 | -1.15 | -3.00 | -1.84 | -0.57 | -2.35
+[    61s]   ns2_5:z     | -4.50 | -3.45 | -4.39 | 0.00032 | 0.34 | -3.14 | -3.50 | -1.84 | -3.61 | -0.11 | -1.88 | -2.73 | -1.44
+[    61s]   bt5:rk      | +4.17 | +3.74 | +4.12 | 0.00028 | 0.08 | +3.79 | +2.11 | +1.39 | +3.17 | +1.94 | +2.02 | +0.95 | +0.34
+[    61s]   kn1_5:rk    | -4.33 | -4.04 | -4.49 | 0.00034 | 0.16 | -3.86 | -2.22 | -2.91 | -1.01 | -2.84 | -1.27 | -1.19 | -1.56
+[    62s]   kn20_5:z    | -4.24 | -3.99 | -4.44 | 0.00033 | 0.20 | -3.44 | -2.46 | -2.15 | -1.01 | -2.82 | -2.74 | +0.08 | -1.33
+[    62s]   ns2_5:rk    | -3.93 | -2.83 | -3.87 | 0.00025 | 0.31 | -2.60 | -3.13 | -1.07 | -3.55 | +0.11 | -1.32 | -3.09 | -0.99
+[    62s]   bt5:z       | +0.98 | +0.97 | +0.95 | 0.00001 | 0.00 | +1.22 | +0.16 | +1.28 | +1.00 | -0.10 | +0.42 | -1.09 | +1.08
+[    63s]   bt5_seen:z  | -4.22 | -3.54 | -4.18 | 0.00029 | 0.20 | -3.42 | -2.67 | -1.23 | -3.07 | -1.60 | -2.50 | -1.95 | +0.53
+[    63s]   coec5:rk    | +3.72 | +3.45 | +3.63 | 0.00022 | 0.03 | +1.91 | +3.30 | +1.34 | +1.68 | +0.31 | +3.53 | +1.28 | +0.22
+[    63s]   never5:z    | +4.66 | +3.82 | +4.64 | 0.00036 | 0.21 | +2.70 | +3.90 | +0.24 | +2.48 | +1.81 | +3.28 | +2.38 | +0.54
+[    63s]   X3_5:z      | +2.15 | +3.04 | +2.14 | 0.00008 | 0.32 | +2.00 | +1.52 | +0.92 | +2.76 | -0.17 | +1.04 | +1.31 | +0.09
+[   441s] placebo, 200 within-feed permutations:
+[   441s]   kn1_5:z    : placebo mean -0.08, sd 0.94, max |cz| 2.60, q99 |cz| 2.39; read -4.55 -> cz / sd -4.85, placebos beyond 0.000 || region slots 11-13 only: read -2.55, placebo sd 0.97, max 3.23, cz / sd -2.64, beyond 0.010
+[   442s]   ns2_5:z    : placebo mean -0.05, sd 1.05, max |cz| 2.99, q99 |cz| 2.70; read -4.50 -> cz / sd -4.30, placebos beyond 0.000 || region slots 11-13 only: read -2.85, placebo sd 1.04, max 2.43, cz / sd -2.73, beyond 0.000
+[   442s]   bt5:rk     : placebo mean -0.14, sd 1.05, max |cz| 2.98, q99 |cz| 2.47; read +4.17 -> cz / sd +3.96, placebos beyond 0.000 || region slots 11-13 only: read +2.06, placebo sd 1.02, max 3.24, cz / sd +2.02, beyond 0.050
+[   442s] redundancy: cz of the row form given the null model + the listed forms
+[   449s]   given + kn1_5:z: ns2_5:z -4.17, bt5:rk +3.96 | coefficient of kn1_5:z -0.0341, LR 21.8
+[   456s]   given + ns2_5:z: kn1_5:z -4.26, bt5:rk +3.72 | coefficient of ns2_5:z -0.0310, LR 19.4
+[   462s]   given + bt5:rk: kn1_5:z -4.37, ns2_5:z -4.07 | coefficient of bt5:rk +0.1066, LR 17.0
+[   468s]   kn1_5:z given the other two: -4.13
+[   475s]   ns2_5:z given the other two: -3.78
+[   481s]   bt5:rk given the other two: +3.55
+[   488s] joint fit of the three: LR 50.9 on 3 df, nats/feed 0.00085; coefficients kn1_5:z -0.0311, ns2_5:z -0.0263, bt5:rk +0.0917
+[   494s] 
+=== witness T: val_twin; feeds 14423, rows 1389971; control block 84 columns ===
+[   496s] null model WITHOUT nx3: loglik -87014.505 (my own recomputation -87014.505); max |gradient| over its columns 6.14e-04
+[   496s]   yardstick nx_rp3_z: cz +6.46, nats/feed 0.00154, R2 0.42 | slot 16 +4.44 | slot 18 +4.73 | M < 50 +6.25 | M >= 50 +3.52 | pmix-public w +3.73 | pmix-private w +2.14 | lag 7 d +1.88 | lag 8 d +4.02 | lag 9 d +2.18 | lag 10 d +4.27
+[   496s]   yardstick nx_rp3_rk: cz +4.78, nats/feed 0.00082, R2 0.56 | slot 16 +3.16 | slot 18 +3.64 | M < 50 +5.03 | M >= 50 +2.25 | pmix-public w +3.10 | pmix-private w +2.13 | lag 7 d +0.74 | lag 8 d +2.94 | lag 9 d +1.68 | lag 10 d +3.45
+[   499s] null model WITH nx3 (twin): loglik -86992.688 (mine -86992.688); max |gradient| 1.72e-04; nx3 gain -86992.7
+[   499s]   check: nx_rp3_z under the model that holds it: cz -0.0000
+[   499s] form | cz | cz without nx3 in the null | z by the model variance | nats/feed | R2 with the null model | slot 16 | slot 18 | M < 50 | M >= 50 | pmix-public w | pmix-private w | lag 7 d | lag 8 d | lag 9 d | lag 10 d
+[   499s]   kn1_5:z     | -3.23 | -3.33 | -3.25 | 0.00037 | 0.26 | -1.49 | -3.11 | -2.33 | -2.30 | -1.58 | -0.84 | -0.78 | +0.15 | -2.45 | -2.97
+[   499s]   ns2_5:z     | -3.51 | -3.44 | -3.47 | 0.00042 | 0.52 | -2.29 | -2.74 | -2.28 | -2.69 | -2.81 | -2.57 | +0.10 | -1.66 | -1.41 | -3.10
+[   500s]   bt5:rk      | +4.18 | +4.16 | +4.13 | 0.00059 | 0.15 | +3.29 | +2.59 | +1.26 | +4.26 | +3.05 | +2.77 | -0.26 | +1.94 | +1.52 | +3.91
+[   500s]   kn1_5:rk    | -2.66 | -2.72 | -2.67 | 0.00025 | 0.27 | -0.96 | -2.84 | -1.77 | -1.99 | -1.05 | -0.34 | -0.51 | +0.17 | -2.24 | -2.42
+[   500s]   kn20_5:z    | -2.65 | -2.82 | -2.70 | 0.00025 | 0.32 | -1.15 | -2.61 | -1.92 | -1.88 | -1.55 | -1.15 | -1.27 | +0.06 | -1.22 | -2.53
+[   500s]   ns2_5:rk    | -3.41 | -3.24 | -3.39 | 0.00040 | 0.46 | -2.24 | -2.65 | -1.94 | -2.80 | -2.97 | -2.74 | +0.36 | -1.25 | -1.43 | -3.39
+[   500s]   bt5:z       | +1.83 | +1.83 | +1.87 | 0.00012 | 0.01 | +1.33 | +1.26 | +0.31 | +2.12 | +2.16 | +2.32 | +0.68 | +0.25 | +0.71 | +1.71
+[   500s]   bt5_seen:z  | -3.04 | -3.06 | -2.98 | 0.00031 | 0.30 | -2.79 | -1.44 | +0.13 | -3.79 | -1.68 | -1.41 | +2.06 | -2.29 | -0.96 | -3.15
+[   500s]   coec5:rk    | +3.35 | +3.22 | +3.28 | 0.00037 | 0.09 | +3.42 | +1.28 | +1.64 | +2.95 | +1.64 | +1.05 | -0.27 | +2.34 | +2.69 | +1.79
+[   500s]   never5:z    | +3.61 | +3.43 | +3.61 | 0.00045 | 0.36 | +3.72 | +1.30 | +0.49 | +4.05 | +1.77 | +1.12 | -1.18 | +2.87 | +1.52 | +2.75
+[   500s]   X3_5:z      | +2.08 | +2.46 | +2.05 | 0.00015 | 0.46 | +1.34 | +1.65 | +0.77 | +2.00 | +1.83 | +1.70 | -0.71 | +0.61 | +1.65 | +1.97
+[   571s] placebo, 200 within-feed permutations:
+[   571s]   kn1_5:z    : placebo mean -0.10, sd 1.09, max |cz| 3.67, q99 |cz| 2.95; read -3.23 -> cz / sd -2.96, placebos beyond 0.005
+[   571s]   ns2_5:z    : placebo mean -0.06, sd 0.95, max |cz| 3.27, q99 |cz| 2.43; read -3.51 -> cz / sd -3.68, placebos beyond 0.000
+[   571s]   bt5:rk     : placebo mean -0.05, sd 1.01, max |cz| 2.88, q99 |cz| 2.55; read +4.18 -> cz / sd +4.15, placebos beyond 0.000
+[   574s] T with the NATURAL nx3 in the null model (the explorer's deciding read): kn1_5:z -3.22, ns2_5:z -3.15, bt5:rk +4.12, kn1_5:rk -2.65, kn20_5:z -2.64, ns2_5:rk -2.99, bt5:z +1.83, bt5_seen:z -2.98, coec5:rk +3.30, never5:z +3.54, X3_5:z +2.34
+[   574s] redundancy: cz of the row form given the null model + the listed forms
+[   576s]   given + kn1_5:z: ns2_5:z -3.48, bt5:rk +4.13 | coefficient of kn1_5:z -0.0282, LR 10.5
+[   578s]   given + ns2_5:z: kn1_5:z -3.20, bt5:rk +4.07 | coefficient of ns2_5:z -0.0322, LR 12.1
+[   580s]   given + bt5:rk: kn1_5:z -3.17, ns2_5:z -3.38 | coefficient of bt5:rk +0.1338, LR 17.1
+[   583s]   kn1_5:z given the other two: -3.14
+[   585s]   ns2_5:z given the other two: -3.35
+[   587s]   bt5:rk given the other two: +4.02
+[   589s] joint fit of the three: LR 38.1 on 3 df, nats/feed 0.00132; coefficients kn1_5:z -0.0274, ns2_5:z -0.0308, bt5:rk +0.1287
+[   595s] 
+=== witness N: val_nat; feeds 14423, rows 1389971; control block 84 columns ===
+[   597s] null model WITHOUT nx3: loglik -87014.505 (my own recomputation -87014.505); max |gradient| over its columns 6.14e-04
+[   597s]   yardstick nx_rp3_z: cz +6.78, nats/feed 0.00166, R2 0.52 | slot 16 +4.44 | slot 18 +5.19 | M < 50 +5.18 | M >= 50 +4.66 | pmix-public w +4.79 | pmix-private w +3.66
+[   597s]   yardstick nx_rp3_rk: cz +5.99, nats/feed 0.00130, R2 0.66 | slot 16 +3.97 | slot 18 +4.53 | M < 50 +5.91 | M >= 50 +3.04 | pmix-public w +4.52 | pmix-private w +3.56
+[   600s] null model WITH nx3 (natural): loglik -86988.736 (mine -86988.736); max |gradient| 2.17e-04; nx3 gain -86988.7
+[   600s]   check: nx_rp3_z under the model that holds it: cz +0.0000
+[   600s] form | cz | cz without nx3 in the null | z by the model variance | nats/feed | R2 with the null model | slot 16 | slot 18 | M < 50 | M >= 50 | pmix-public w | pmix-private w
+[   600s]   kn1_5:z     | -3.36 | -3.46 | -3.38 | 0.00039 | 0.26 | -1.64 | -3.14 | -2.34 | -2.45 | -1.69 | -1.05
+[   600s]   ns2_5:z     | -2.69 | -2.94 | -2.64 | 0.00024 | 0.53 | -2.52 | -1.26 | -2.15 | -1.76 | -2.08 | -1.73
+[   600s]   bt5:rk      | +3.57 | +3.58 | +3.57 | 0.00044 | 0.13 | +2.27 | +2.79 | +3.23 | +2.08 | +2.35 | +1.77
+[   600s]   kn1_5:rk    | -2.82 | -2.89 | -2.82 | 0.00028 | 0.27 | -1.14 | -2.88 | -1.87 | -2.13 | -1.31 | -0.66
+[   601s]   kn20_5:z    | -2.23 | -2.40 | -2.27 | 0.00018 | 0.32 | -0.83 | -2.33 | -1.83 | -1.42 | -1.07 | -0.73
+[   601s]   ns2_5:rk    | -2.86 | -3.06 | -2.80 | 0.00027 | 0.48 | -3.18 | -0.77 | -2.19 | -1.94 | -2.04 | -1.63
+[   601s]   bt5:z       | +2.99 | +2.99 | +2.97 | 0.00031 | 0.00 | +1.17 | +3.06 | +2.88 | +1.55 | +3.02 | +3.04
+[   601s]   bt5_seen:z  | -2.12 | -2.16 | -2.10 | 0.00015 | 0.27 | -2.36 | -0.57 | -1.18 | -1.77 | +0.08 | +0.86
+[   601s]   coec5:rk    | +3.19 | +3.13 | +3.15 | 0.00034 | 0.06 | +3.19 | +1.26 | +2.25 | +2.31 | +1.30 | +0.60
+[   601s]   never5:z    | -0.14 | -0.26 | -0.13 | 0.00000 | 0.29 | +1.07 | -1.38 | +0.48 | -0.51 | -1.84 | -2.36
+[   601s]   X3_5:z      | +3.25 | +3.50 | +3.16 | 0.00035 | 0.46 | +2.83 | +1.78 | +0.79 | +3.45 | +3.24 | +3.03
+[   672s] placebo, 200 within-feed permutations:
+[   672s]   kn1_5:z    : placebo mean -0.08, sd 1.00, max |cz| 2.50, q99 |cz| 2.34; read -3.36 -> cz / sd -3.37, placebos beyond 0.000
+[   672s]   ns2_5:z    : placebo mean +0.05, sd 1.02, max |cz| 2.62, q99 |cz| 2.38; read -2.69 -> cz / sd -2.64, placebos beyond 0.000
+[   672s]   bt5:rk     : placebo mean -0.09, sd 0.97, max |cz| 3.06, q99 |cz| 2.27; read +3.57 -> cz / sd +3.68, placebos beyond 0.000
+[   672s] redundancy: cz of the row form given the null model + the listed forms
+[   674s]   given + kn1_5:z: ns2_5:z -2.66, bt5:rk +3.47 | coefficient of kn1_5:z -0.0293, LR 11.3
+[   676s]   given + ns2_5:z: kn1_5:z -3.34, bt5:rk +3.52 | coefficient of ns2_5:z -0.0249, LR 7.0
+[   678s]   given + bt5:rk: kn1_5:z -3.25, ns2_5:z -2.61 | coefficient of bt5:rk +0.1028, LR 12.7
+[   680s]   kn1_5:z given the other two: -3.23
+[   682s]   ns2_5:z given the other two: -2.58
+[   684s]   bt5:rk given the other two: +3.42
+[   686s] joint fit of the three: LR 29.8 on 3 df, nats/feed 0.00103; coefficients kn1_5:z -0.0282, ns2_5:z -0.0240, bt5:rk +0.0985
+[   686s] DONE

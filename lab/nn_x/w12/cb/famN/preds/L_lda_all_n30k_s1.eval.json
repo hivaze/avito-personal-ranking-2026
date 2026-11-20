@@ -1,0 +1,185 @@
+{
+ "tag": "L_lda_all_n30k_s1",
+ "n_val": 14423,
+ "n_hold": 30000,
+ "val": 0.373536928496566,
+ "val_se": 0.0019263632120276133,
+ "hold": 0.2993770297824356,
+ "hold_se": 0.00104999587110863,
+ "w16_val": 0.40143578947217784,
+ "w16_hold": 0.32459720573745354,
+ "gap_val": 0.02789886097561186,
+ "gap_val_se": 0.0015912560478388684,
+ "gap_hold": 0.025220175955017982,
+ "gap_hold_se": 0.000916477776396119,
+ "rho_val": 0.8060842593299682,
+ "rho_hold": 0.8203448896508304,
+ "rho_global_val": 0.8180399164269667,
+ "rho_global_hold": 0.8210402370896915,
+ "law_record": -0.006938936672318692,
+ "law_refit": -0.006483921607684677,
+ "law_record_hold": -0.0061916414585022434,
+ "member_rule": {
+  "val": {
+   "delta": 0.0002682950891796648,
+   "se": 0.00042823961760536547,
+   "z": 0.6265069324503882,
+   "n": 14423
+  },
+  "hold": {
+   "delta": -0.0002810457504963452,
+   "se": 0.0002414151573272046,
+   "z": -1.1641595068342243,
+   "n": 30000
+  },
+  "pooled_z": -0.3801777812692151,
+  "pass": false
+ },
+ "mix_w005": {
+  "val": {
+   "delta": 0.00010206456982466684,
+   "se": 0.00029035169568607325,
+   "z": 0.35152048822548815,
+   "n": 14423
+  },
+  "hold": {
+   "delta": -1.946078215654768e-05,
+   "se": 0.0001655505514435811,
+   "z": -0.11755190174150419,
+   "n": 30000
+  },
+  "pooled_z": 0.16544077408745625,
+  "pass": false
+ },
+ "mix_w020": {
+  "val": {
+   "delta": -0.001038305354343669,
+   "se": 0.0006213517955386912,
+   "z": -1.6710426553825166,
+   "n": 14423
+  },
+  "hold": {
+   "delta": -0.0009917604147831728,
+   "se": 0.0003605849792272283,
+   "z": -2.750420766024753,
+   "n": 30000
+  },
+  "pooled_z": -3.1264467680453536,
+  "pass": false
+ },
+ "stop_rule_val_ge_0.3900": false,
+ "stop_rule_law_ge_-0.002": false,
+ "extra": {
+  "n_fit_rows": 4397391,
+  "n_sel_rows": 728986,
+  "best_iter": 397,
+  "trees_built": 600,
+  "budget_stop": false,
+  "fit_seconds": 596.4185152053833,
+  "s_per_iter": 0.9940308586756388,
+  "predict_seconds": 2.4027743339538574,
+  "model_mb": 2.512432098388672,
+  "peak_rss_gb": 43.52048873901367,
+  "params": {
+   "loss_function": "Logloss",
+   "eval_metric": "NDCG:type=Base",
+   "iterations": "600",
+   "learning_rate": "0.1",
+   "depth": "8",
+   "l2_leaf_reg": "5",
+   "border_count": "254",
+   "random_seed": "1",
+   "od_type": "Iter",
+   "od_wait": "601",
+   "use_best_model": "False",
+   "allow_writing_files": "False",
+   "thread_count": "12",
+   "metric_period": "10",
+   "task_type": "CPU",
+   "has_time": "True",
+   "embedding_calcers": "['LDA:components=1']"
+  },
+  "top": [
+   [
+    "M",
+    11.19
+   ],
+   [
+    "ctx_hs_k128",
+    4.46
+   ],
+   [
+    "it_hist_et1_luo",
+    2.66
+   ],
+   [
+    "tte_c_ctr",
+    2.16
+   ],
+   [
+    "cos_u",
+    1.72
+   ],
+   [
+    "pre2_fe_z",
+    1.57
+   ],
+   [
+    "f5",
+    1.53
+   ],
+   [
+    "f1",
+    1.52
+   ],
+   [
+    "it_hist_all_luo_rk",
+    1.47
+   ],
+   [
+    "it_hist_all_luo",
+    1.46
+   ],
+   [
+    "ctx_nd_max",
+    1.37
+   ],
+   [
+    "ctx_hn_e1_rrw",
+    1.33
+   ]
+  ],
+  "new_feature_importance": [
+   [
+    "e_pair",
+    1.23
+   ],
+   [
+    "e_ue",
+    0.76
+   ],
+   [
+    "e_ehm",
+    0.37
+   ]
+  ],
+  "selection": "trainside",
+  "arm": "L_lda_all",
+  "seed": 1,
+  "nfit": 30000,
+  "nsel": 5000,
+  "pool_seconds": 59.9848792552948,
+  "cfg": {
+   "loss": "Logloss",
+   "label": "y",
+   "has_time": "True",
+   "emb": "[('e_pair', 'pair', None), ('e_ehm', 'ehm', None), ('e_ue', 'ue', None)]",
+   "calcers": "['LDA:components=1']",
+   "text": "None",
+   "tset": "None",
+   "extra_cols": "None",
+   "cb": "{}",
+   "cols_file": "None"
+  }
+ }
+}

@@ -1,0 +1,43 @@
+component | n ckpt | NDCG holdout rows | NDCG 30,000 other draw-set TRAIN feeds | gap (in-sample - holdout) +- SE(unpaired)
+a   | 2 | 0.32180 | 0.34260 | +0.02081 +- 0.00168
+b   | 2 | 0.32225 | 0.34346 | +0.02120 +- 0.00168
+c   | 2 | 0.32169 | 0.34346 | +0.02178 +- 0.00168
+d   | 2 | 0.32151 | 0.34335 | +0.02183 +- 0.00168
+e   | 2 | 0.32214 | 0.34192 | +0.01978 +- 0.00167
+f   | 1 | 0.32000 | 0.34086 | +0.02086 +- 0.00167
+g1  | 3 | 0.32164 | 0.34203 | +0.02039 +- 0.00167
+g2  | 3 | 0.32127 | 0.34205 | +0.02078 +- 0.00167
+p1  | 4 | 0.31681 | 0.33536 | +0.01855 +- 0.00164
+p2  | 4 | 0.31658 | 0.33783 | +0.02125 +- 0.00164
+teacher_mean11: rows 246745836, non-finite in whole file 0; holdout rows non-finite 0; feeds with constant teacher 0; max |file - sum(components)/11| on holdout rows 1.38e+02; NDCG holdout 0.32370, in-sample feeds 0.34519, gap +0.02149
+teacher_mean25: rows 246745836, non-finite in whole file 0; holdout rows non-finite 0; feeds with constant teacher 0; max |file - sum(components)/25| on holdout rows 1.38e+02; NDCG holdout 0.32286, in-sample feeds 0.34478, gap +0.02192
+component e holdout rows vs the members' own saved holdout files (centred per feed): max abs diff 3.46e-05, corr 1.00000000
+component f holdout rows vs the members' own saved holdout files (centred per feed): max abs diff 1.55e-05, corr 1.00000000
+component p1 holdout rows vs the members' own saved holdout files (centred per feed): max abs diff 8.90e-05, corr 1.00000000
+25 teacher checkpoints
+nn_x/r6/ckpt/r6_cd_m02_r101.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init nn/ckpt/v17_pre2s_s101@77500.pt | snapshot nn/ckpt/v17_pre2s_s101@77500.pt: holdout 30000 val_mix 0 kd_file - init -
+nn_x/r6/ckpt/r6_cd_m02_r102.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init nn/ckpt/v17_pre2s_s102@77500.pt | snapshot nn/ckpt/v17_pre2s_s102@77500.pt: holdout 30000 val_mix 0 kd_file - init -
+nn_x/r6/ckpt/r6_cd_m02_r103.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init nn/ckpt/v17_pre2s_s103@77500.pt | snapshot nn/ckpt/v17_pre2s_s103@77500.pt: holdout 30000 val_mix 0 kd_file - init -
+nn_x/r6/ckpt/r6_cd_m02_r104.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init nn/ckpt/v17_pre2s_s104@77500.pt | snapshot nn/ckpt/v17_pre2s_s104@77500.pt: holdout 30000 val_mix 0 kd_file - init -
+nn_x/r6/ckpt/r6_cd_m02_r105.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init nn/ckpt/v17_pre2s_s105@77500.pt | snapshot nn/ckpt/v17_pre2s_s105@77500.pt: holdout 30000 val_mix 0 kd_file - init -
+nn_x/r6/ckpt/r6_cd_m02_r106.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init nn/ckpt/v17_pre2s_s106@77500.pt | snapshot nn/ckpt/v17_pre2s_s106@77500.pt: holdout 30000 val_mix 0 kd_file - init -
+nn_x/r6/ckpt/r6_cd_m02_r107.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init nn/ckpt/v17_pre2s_s107@77500.pt | snapshot nn/ckpt/v17_pre2s_s107@77500.pt: holdout 30000 val_mix 0 kd_file - init -
+nn_x/w5/ckpt/w5_e10_base_s953.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init -
+nn_x/w5/ckpt/w5_e10_base_s954.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init -
+nn_x/w5/ckpt/w5_e10_base_s951.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init -
+nn_x/w5/ckpt/w5_e10_base_s952.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init -
+nn/ckpt/v23_gru_pre2s_s501.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init -
+nn/ckpt/v23_gru_pre2s_s502.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init -
+nn/ckpt/v23_gru_pre2s_s503.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init -
+nn/ckpt/v23_gru_pre2s_s504.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init -
+nn/ckpt/v23_gru_pre2s_s505.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init -
+nn/ckpt/v23_gru_pre2s_s506.pt: holdout 30000 val_mix 0 kd_file - train_feeds 0 init -
+nn_x/abl/ckpt/abl_e10_pop1_s951.pt: holdout 30000 val_mix 0.0 kd_file - train_feeds 0 init -
+nn_x/abl/ckpt/abl_e10_pop1_s952.pt: holdout 30000 val_mix 0.0 kd_file - train_feeds 0 init -
+nn_x/abl/ckpt/abl_e10_pop1_s953.pt: holdout 30000 val_mix 0.0 kd_file - train_feeds 0 init -
+nn_x/abl/ckpt/abl_e10_pop1_s954.pt: holdout 30000 val_mix 0.0 kd_file - train_feeds 0 init -
+nn_x/abl/ckpt/abl_e10_pop1_s955.pt: holdout 30000 val_mix 0.0 kd_file - train_feeds 0 init -
+nn_x/abl/ckpt/abl_e10_pop1_s956.pt: holdout 30000 val_mix 0.0 kd_file - train_feeds 0 init -
+nn_x/abl/ckpt/abl_e10_pop1_s957.pt: holdout 30000 val_mix 0.0 kd_file - train_feeds 0 init -
+nn_x/abl/ckpt/abl_e10_pop1_s958.pt: holdout 30000 val_mix 0.0 kd_file - train_feeds 0 init -
+provenance problems: 0

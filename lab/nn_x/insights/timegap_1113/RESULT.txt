@@ -1,0 +1,14 @@
+TIMEGAP-1113 RESULT (pre-declared 19:48:24Z, PREDECLARED_timegap.txt; harness = copy of enrich_1113/harness.py; nested user-grouped 5-fold LIN on G3 val 0.40032; full-val theta -> 30K holdout 0.32379; pmix veto)
+item | column(s) | AUC val | PSI trn-val raw / z / pct (all train days; train days>=7 in brackets) | nested val d +- SE | z | holdout | late | early | pmix | verdict
+TG_A | gap_last | 0.5240 | 8.53 / 0.278 / 0.420 [7.67 / 0.061 / 0.395] | +0.00030 +- 0.00027 | +1.10 | -0.00011 (z -0.90) | -0.00025 | +0.00010 | +0.00022 +- 0.00042 | CLOSED
+TG_B | gap_last_any | 0.5307 | 9.58 / 0.221 / 0.393 [8.63 / 0.052 / 0.320] | +0.00020 +- 0.00018 | +1.13 | +0.00001 (z +0.15) | +0.00007 | -0.00005 | +0.00022 +- 0.00031 | CLOSED
+TG_C | gap_first | 0.5322 | 7.13 / 0.530 / 0.318 [6.03 / 0.186 / 0.183] | +0.00018 +- 0.00040 | +0.45 | -0.00063 (z -3.05) | -0.00092 | -0.00051 | +0.00023 +- 0.00064 | CLOSED
+TG_D | never_seen | 0.4733 | 0.00 / 1.244 / 1.255 [0.07 / 1.066 / 1.082] | +0.00015 +- 0.00020 | +0.74 | +0.00003 (z +0.26) | -0.00031 | +0.00011 | +0.00018 +- 0.00029 | CLOSED
+TG_E | n_days_active | 0.5333 | 0.59 / 0.745 / 0.196 [0.56 / 0.254 / 0.129] | -0.00023 +- 0.00032 | -0.71 | -0.00012 (z -0.74) | -0.00051 | +0.00018 | +0.00017 +- 0.00050 | CLOSED
+TG_ALL4 | gap_last+gap_last_any+gap_first+n_days_active | 0.5240, 0.5307, 0.5322, 0.5333 | 8.53 / 0.278 / 0.420 [7.67 / 0.061 / 0.395] ; 9.58 / 0.221 / 0.393 [8.63 / 0.052 / 0.320] ; 7.13 / 0.530 / 0.318 [6.03 / 0.186 / 0.183] ; 0.59 / 0.745 / 0.196 [0.56 / 0.254 / 0.129] | -0.00011 +- 0.00043 | -0.26 | -0.00063 (z -2.97) | -0.00082 | -0.00045 | +0.00020 +- 0.00071 | CLOSED
+INFO (z-only LIN, no pct / isnan; not an item):
+  zonly_A | gap_last | val +0.00027 +- 0.00022 z +1.24 | holdout -0.00008 | late -0.00019 | early +0.00007 | pmix +0.00017
+  zonly_B | gap_last_any | val +0.00015 +- 0.00014 z +1.07 | holdout +0.00000 | late +0.00000 | early +0.00005 | pmix +0.00020
+  zonly_ALL4 | gap_last+gap_last_any+gap_first+n_days_active | val +0.00022 +- 0.00038 z +0.57 | holdout -0.00016 | late -0.00046 | early +0.00015 | pmix +0.00024
+hold-vs-val PSI (raw / z / pct): gap_last 6.99/0.181/0.121; gap_last_any 8.18/0.137/0.139; gap_first 6.57/0.399/0.220; never_seen 0.00/0.619/0.630; n_days_active 0.61/0.447/0.102; n_days_active_any 1.30/0.432/0.156; gap_first_any 8.11/0.378/0.306
+extra columns (info): n_days_active_any PSI z/pct 0.774/0.281 AUC 0.5469; gap_first_any PSI z/pct 0.536/0.505 AUC 0.5453

@@ -1,0 +1,92 @@
+# Read-out copied from lab/nn_x/tricks/hold_clean/RESULT.txt, unchanged below this line.
+RESULT written 2026-11-13 04:50:14 UTC (rule pre-declared 2026-11-13 04:45:51 UTC in PREDECLARED.txt; hold_clean.py output written 04:48 UTC)
+HOLD-CLEAN label-free format readout. CPU only (12 threads), no GPU, nothing adopted or submitted, no closed arm recomputed.
+Files: hold_clean.py (main, pre-declared), ens_gain_info.py (post-declaration info only), out/stats.json, out/ens_gain_info.json, out/run.log
+
+SANITY
+- Holdout index reproduced (rng 12345 over 89,794 train feeds with p_random>0.9 & M>=50): 30,000 feeds / 4,630,966 rows; M == holdout_meta[0]
+  and train cand_target on those rows == holdout_y exactly. cand_fidx matches the row mapping on all parts.
+- G3 holdout (member-equal per-feed z-mean of the 20 TO members in nn_x/pubdiag/build/g3_members.txt) = 0.32379 (reproduced).
+
+DAY SPLIT (MSK = UTC+3, day = (ts+10800)//86400)
+- E = Sep 6-8 MSK = ts < 1788901200 (2026-09-09 00:00 MSK = 2026-09-08 21:00 UTC): 7,823 feeds (26.1%), ts 2026-09-05 21:00 .. 09-08 20:58 UTC
+- L = Sep 9-19 MSK = ts >= 1788901200: 22,177 feeds, ts 2026-09-08 21:00 .. 09-19 20:58 UTC; MSK days present Sep 9-14, 17-19
+  (no Sep 15-16 data); 0 holdout feeds stamped Sep 20.
+- Comparators (format-matched, M>=50): val50 8,530 feeds; test50 17,434 (pub50 5,248 / priv50 12,186; public = ts < 1790497920).
+
+PRIMARY STATISTICS  (E ± SE | L ± SE | E-L ± SE | val50 | test50 | pub50 | priv50 | E_out)
+S1  mean log M         4.89929±.00626 | 4.89497±.00369 | +0.00432±.00727 | 4.84603 | 4.87666 | 4.89306 | 4.86960 | no  (|E-val| .0533 vs |L-val| .0489, guard fails: 0.6 SE)
+S2  mean log1p H       4.86004±.01303 | 4.80279±.00844 | +0.05725±.01553 | 4.90706 | 4.93426 | 4.93752 | 4.93285 | no  (E CLOSER to val/test than L)
+S3  user_id 0 share    0.04883±.00244 | 0.05204±.00149 | -0.00321±.00286 | 0.05006 | 0.04537 | 0.04421 | 0.04587 | no  (E closer; 1.1 SE)
+S4  cat entropy (nats) 1.94044±.00525 | 1.95599±.00327 | -0.01555±.00618 | 1.99199 | 2.02282 | 2.02133 | 2.02347 | YES (2.5 SE; L itself is .036 off val)
+S5  any f1..f5 NaN/0   0.15193±.00132 | 0.15676±.00093 | -0.00483±.00161 | 0.16652 | 0.15969 | 0.15783 | 0.16051 | YES (3.0 SE; all "missing" is f2==0 / f5==0, no NaN anywhere)
+S6  seen-in-history    0               | 0              | 0               | 0       | 0       | 0       | 0       | no  (STRUCTURAL: candidates never occur in the same feed's history in any split; verified per feed; uninformative)
+S7  age < 24 h share   0.12201±.00105 | 0.11847±.00060 | +0.00354±.00121 | 0.11394 | 0.10744 | 0.10271 | 0.10953 | YES (2.9 SE)
+S8  pre2_fe NaN share  1.00000        | 0.00000        | +1.00000        | 0       | 0       | 0       | 0       | YES (by construction: pre2 windows start Sep 9)
+S9  LUO zero rate      0.17861±.00089 | 0.23517±.00065 | -0.05656±.00110 | 0.37907 | 0.44650 | 0.42735 | 0.45493 | YES (51 SE)
+S10 mean log1p LUO     2.29279±.00555 | 2.02735±.00337 | +0.26544±.00649 | 1.55418 | 1.38022 | 1.42350 | 1.36115 | YES (41 SE)
+All-M info (val_all / pub_all / priv_all): S9 LUO zero, S10 log1p LUO, S4 entropy etc. in out/stats.json "table".
+
+PRE-DECLARED COUNT: 6 / 10 (S4, S5, S7, S8, S9, S10)  ->  "E is out-of-format"
+  secondary (info): no 2-SE guard 7/10 (adds S1); vs pub50 6/10; vs priv50 6/10.
+  robustness (info): without S8 (construction fact) 5/10; without the whole pre2/popularity family (S8-S10) 3/10 (S4/S5/S7 are small:
+  E's excess over L in distance to val is .016 nats / .005 / .0035, i.e. the same order as L's own offset from val).
+  Reading: the dominant E-specific deviation is popularity inflation (LUO zero rate 0.179 vs L 0.235 vs val50 0.379 / test50 0.447;
+  log1p LUO 2.29 vs 2.03 vs 1.55 / 1.38) plus the pre2 date flag. On M, H, user_id 0 and p_random, E is NOT worse than L
+  (E is closer to val/test on H and uid0).
+
+INFO STATISTICS
+- M quantiles p10/25/50/75/90: E 61/83/135/230/277; L 61/83/135/227/275; val50 60/79/125/211/273; test50 61/82/131/220/275. mean M E 155.1, L 154.1, val50 146.8, test50 151.2.
+- H: mean E 177.4, L 175.4, val50 172.9, test50 173.5; share H=256 E .389, L .386, val50 .289, test50 .286; share H<=10 E .052, L .066, val50 .035, test50 .030.
+- distinct categories / M: E .1159, L .1195, val50 .1255, test50 .1259.
+- f1..f5: NaN share 0 in every part. Zero share f2 E .1401 / L .1444 / val50 .1549 / test50 .1505; f5 E .0140 / L .0147 / val50 .0134 / test50 .0105; f1/f3/f4 zero 0.
+- listing age (f4 -> hours, 8 bins <3h,3-12h,12-24h,1-3d,3-14d,2w-3m,3m-1y,>1y):
+  E   .0515 .0381 .0325 .0793 .1992 .2743 .1960 .1293  median 629 h
+  L   .0498 .0369 .0317 .0797 .1967 .2729 .1968 .1355  median 643 h
+  val50 .0476 .0339 .0325 .0753 .1923 .2826 .1959 .1399 median 679 h
+  test50 .0431 .0352 .0291 .0747 .1973 .2817 .1966 .1423 median 690 h
+- p_random (no val/test comparator): E mean .97018, q1/5/10/25/50/75 .9025/.9129/.9237/.9518/.9797/.9940, share>.99 .342, >.999 .059;
+  L mean .97006, .9025/.9128/.9238/.9515/.9797/.9938, share>.99 .341, >.999 .063  (identical).
+- positives per feed (label-derived, post-declaration info): E 1.771, L 1.789; feeds without positives 0 in both.
+
+G3 PER-FEED NDCG (holdout, TO pool; info, not a judge)
+- G3  E 0.32513 ± 0.00229 | L 0.32332 ± 0.00134 | all 0.32379 | E-L +0.00181 ± 0.00266 (n.s., 0.7 SE)
+- 20 members: mean E 0.32046, mean L 0.31936; sd across members E 0.00077, L 0.00071, all 0.00063; sd of (E-L) 0.00084;
+  range E 0.00284, L 0.00281; Pearson(member deviation on E, on L) +0.35 overall, -0.35 within family (seed order on E does not
+  predict seed order on L: seed-level differences are noise at this split size).
+- families: F10 E .31967 L .31856 E-L +.00111 (sd E .00076 L .00050); F7x E .32096 L .31965 E-L +.00131 (sd .00043/.00049);
+  F7x70 E .32065 L .31977 E-L +.00088 (sd .00048/.00048).
+- per member E / L / E-L (gap to G3 E ; L):
+  v23_gru_pre2s_s501 .31948 .31888 +.00060 (-.00565±.00097 ; -.00444±.00057)
+  v23_gru_pre2s_s502 .31976 .31810 +.00165 (-.00537±.00098 ; -.00522±.00057)
+  v23_gru_pre2s_s503 .31929 .31910 +.00020 (-.00584±.00106 ; -.00423±.00058)
+  v23_gru_pre2s_s504 .31883 .31839 +.00044 (-.00631±.00104 ; -.00493±.00058)
+  v23_gru_pre2s_s505 .32108 .31790 +.00319 (-.00405±.00099 ; -.00543±.00056)
+  v23_gru_pre2s_s506 .31956 .31900 +.00056 (-.00557±.00097 ; -.00432±.00057)
+  r6_cd_m02_r101     .32100 .31969 +.00131 (-.00413±.00092 ; -.00363±.00054)
+  r6_cd_m02_r102     .32109 .31947 +.00162 (-.00404±.00096 ; -.00385±.00053)
+  r6_cd_m02_r103     .32107 .31989 +.00118 (-.00406±.00096 ; -.00343±.00052)
+  r6_cd_m02_r104     .32087 .32058 +.00029 (-.00426±.00092 ; -.00274±.00053)
+  r6_cd_m02_r105     .32080 .31917 +.00163 (-.00433±.00095 ; -.00415±.00052)
+  r6_cd_m02_r106     .32167 .31916 +.00251 (-.00346±.00097 ; -.00416±.00053)
+  r6_cd_m02_r107     .32021 .31955 +.00066 (-.00492±.00091 ; -.00377±.00054)
+  r6_cd_m02_p70k_r101 .32037 .31988 +.00050 (-.00476±.00092 ; -.00344±.00053)
+  r6_cd_m02_p70k_r102 .32144 .32001 +.00143 (-.00369±.00092 ; -.00331±.00052)
+  r6_cd_m02_p70k_r103 .32070 .31939 +.00132 (-.00443±.00095 ; -.00393±.00053)
+  r6_cd_m02_p70k_r104 .32022 .32070 -.00048 (-.00491±.00094 ; -.00262±.00053)
+  r6_cd_m02_p70k_r105 .32092 .31936 +.00156 (-.00421±.00089 ; -.00396±.00053)
+  r6_cd_m02_p70k_r106 .32083 .31953 +.00131 (-.00430±.00096 ; -.00379±.00053)
+  r6_cd_m02_p70k_r107 .32003 .31950 +.00054 (-.00510±.00094 ; -.00382±.00052)
+- post-declaration info (ens_gain_info.py): ensemble gain G3 - mean member: E +0.00467 ± 0.00049, L +0.00396 ± 0.00027,
+  E-L +0.00071 ± 0.00056 (n.s.). Median paired SE of a member-vs-member delta: E 0.00120, L 0.00069, all 0.00060
+  -> an E column has 2.0x and an L column 1.15x the full-holdout SE (L-only judging costs ~15% SE, ~25% more feeds-equivalent).
+
+VERDICT (pre-declared reading)
+- "E is out-of-format" (6/10 primary statistics; driven mainly by pre2-NaN and LUO popularity inflation, with small but >2 SE
+  shifts in candidate-category entropy, f2/f5 zero share and fresh-listing share).
+- Recommendation, and nothing else: FUTURE arm readouts carry a pre-declared dE/dL information column (holdout NDCG delta on E =
+  Sep 6-8 MSK and on L = Sep 9-19 MSK separately, each ± SE; expected SE ~2.0x / 1.15x the full-holdout SE). The full 30K holdout
+  stays the judge wherever it is the pre-declared judge; dE/dL is information only. No closed arm is recomputed or re-judged, no pick
+  or blend changes. This readout supplies only the "label-free format check" half of the TRICKS_SWEEP_1113 §4.2 re-entry trigger for
+  POP-REL / MODDROP-POP / HZCOND / FPCD / PRE2T; the other half (pop-free family Q1 readout) and the generational / stale-val / pmix
+  bars are untouched by this item.

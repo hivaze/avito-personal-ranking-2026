@@ -1,0 +1,189 @@
+gap1117 TASK A (ENGINEER A, GPU N only) - 2026-11-17 ~03:20-04:10 UTC
+Train-loss options --wcl / --ccl / --fsw for the KD re-cool harness (stages K / L), their tests, the lane arms, the jobs files.
+Nothing was launched for the experiment. Nothing of mine is running. GPU N was used only for the tests below, one job at a time
+(2 at once for G1), each start gated on <= 3 compute processes and >= 60 GB free.
+
+=====================================================================================================================
+1. WHAT CHANGED (file:line)
+=====================================================================================================================
+NEW  lab/nn_x/w5/cd_arms9.py (helper, 145 lines)
+  :30  category_split(lg, t, m, ccat) -> per feed (CE_cat [B], sum_c t_c CE_within_c [B]).
+       Categories come from b["ccat"] (the candidate category input). Padding becomes one segment of its own per row, with zero
+       target. Each feed's category segments come from a row-wise stable sort. The segment logsumexp S_c uses scatter amax (on
+       detached scores, so it only shifts) plus index_add. There is no host sync and the shapes are fixed.
+       CE_cat = -sum_i t_i (S_c(i) - LSE_all); within = -sum_i t_i (s_i - S_c(i)) [n_c(i) >= 2]. A category with t_c = 0 contributes 0.
+       A single-candidate category gives exactly 0 (s - S = 0 bitwise), and the [n_c >= 2] mask makes that explicit.
+  :56  feed_reduce: the same reduction as model.listwise_loss (feed: sum / max_feeds; batch: sum / sum of weights).
+  :63  class GapLoss
+         feed_weight(b, fw) (:80): --fsw weight M^ALPHA / (batch mean | training-feed mean) times fw. Returns fw itself when --fsw is 0.
+         add_terms(loss, lg, y, m, b, fw) (:90): t = y / max(sum y, 1), the main loss's target (the KD mixture under --kd_file).
+           Weight w_f = fw * [feed has a positive], the same weight as the main loss.
+           Returns loss + wcl * reduce(within) + ccl * reduce(CE_cat).
+           When wcl = ccl = 0 (fsw-only arms) it returns the loss object unchanged and computes the decomposition without gradient,
+           for the log only.
+           Diagnostics are summed on the GPU with no sync.
+         summary(step) (:119): one log line per eval, giving the unweighted per-feed CE_cat / within / sum over valid feeds, the
+           added terms per step, the fsw weight min / max / mean, and the loss-weight share of M>=50 feeds (weighted vs unweighted).
+  :133 setup_gap: refuses --loss != softmax, --loss_norm idcg, --rdrop_cd / --sam_cd (both recompute the main loss without these
+       terms), and wcl / ccl < 0.
+
+EDITED lab/nn_x/w5/train.py. It was replaced atomically (written to a copy, then mv). Frozen pre-change copy:
+gap1117/tests/ref_pre_gap1117/train.py.txt, md5 818f4537... (md5.txt).
+  :28-33   docstring paragraph
+  :65      from cd_arms9 import setup_gap
+  :274-286 parser: --wcl (0.0), --ccl (0.0), --fsw (0.0), --fsw_norm batch|train (batch)
+  :488-490 gap = None; if a.wcl or a.ccl or a.fsw: gap = setup_gap(a, tr.M_np[feeds], log)
+           tr.M_np[feeds] = the training feeds after the holdout is excluded.
+  :527-528 loop, right after `fw = ...`: if gap is not None: fw = gap.feed_weight(b, fw)
+           Only the main listwise loss (and the new terms) read fw. The K9 aux uses fw_aux, so it is untouched (asserted in T4f).
+  :539-540 loop, right after the main-loss if/elif/else: if gap is not None: loss = gap.add_terms(loss, lg, y, m, b, fw)
+           Both statements are at the top level of the step loop, so they run on EVERY training batch, including the random-order
+           cooldown pool batches and valcd / hzcd batches. lg is the same logits tensor as the main loss (TRUNC offset included if on).
+  :603-604 eval block: if gap is not None: log(gap.summary(step + 1))
+
+EDITED lab/nn_x/w5/lane.sh. It was replaced atomically through a rename, so a running bash lane would keep reading its old inode;
+none was running. Frozen copy: tests/ref_pre_gap1117/lane.sh.txt.
+  :177-185 K/L arms:
+    wcl05 = --wcl 0.5 | wcl10 = --wcl 1.0 | ccl05 = --ccl 0.5
+    fsw25 = --fsw 0.25 | fsw50 = --fsw 0.5   (spec: mean 1 per batch)
+    fsw25t = --fsw 0.25 --fsw_norm train | fsw50t = --fsw 0.5 --fsw_norm train   (see 3. - recommended in place of fsw25 / fsw50)
+  The prepared arms kw03 (--kd_w 0.3), e4 (--epochs 4) and lr4 (--lr 4e-3) are unchanged and still parse (T5c).
+
+NEW  lab/nn_x/w12/kd/logs/fill_jobs_T1117.txt (128 jobs, exactly the spec)
+  Arms in order wcl05 wcl10 ccl05 fsw25 fsw50 kw03 lr4 e4, seed-major 951..958, K then L for each arm-seed.
+  The new arms come first in every seed block and e4 comes last.
+NEW  lab/nn_x/w12/kd/logs/fill_jobs_T1117_fswt.txt (128 jobs): the same, with fsw25t / fsw50t in place of fsw25 / fsw50.
+  RECOMMENDED (see 3.).
+  None of the 144 distinct variants existed (no json / log / ckpt / claim / failed marker) at 03:25 UTC.
+
+NEW  tests: lab/nn_x/w12/gap1117/tests/
+  test_gap1117.py (CPU), test_gap1117_gpu.py (GPU N), e2e_gap1117.py (wrapper), ref_pre_gap1117/ (frozen copies + md5),
+  out/ (logs, json, per-run logs + rec.npz).
+  The wrapper sends ALL run outputs to out/runs/<run>/; nothing was written into nn_x/w5 apart from bytecode caches.
+  The test checkpoints and preds were deleted after the checks (170 MB of logs / records kept).
+
+=====================================================================================================================
+2. TESTS (all PASS)
+=====================================================================================================================
+CPU: CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 .venv/bin/python lab/nn_x/w12/gap1117/tests/test_gap1117.py
+  -> 21/21 PASS (out/test_gap1117_cpu.log)
+  T1a identity CE_items == CE_cat + sum_c t_c CE_within_c, through category_split (the code train.py runs).
+      48 random padded batches: ties (rounded scores, an all-equal feed), single-candidate categories, an all-singleton feed, a
+      one-category feed, M = 1 feeds, a feed without positives, zero-target categories, garbage scores / categories on padding.
+      Targets: clicks / max(sum, 1) and the KD mixture.
+      max |diff| float32 1.91e-06 (tol 1e-5), float64 3.55e-15 (tol 1e-10); each part vs a float64 brute-force loop 7.1e-15.
+  T1b padding has no effect. T1c gradcheck (float64); grad(CE_cat + within) == grad(main CE) to 2.2e-16.
+  T1d the within-part gradient is exactly 0 on single-candidate categories and on padding.
+  T2a add_terms == loss + wcl * reduce(within) + ccl * reduce(CE_cat) for feed / batch norm, fw on / off, KD target (8.9e-16).
+  T2b wcl = ccl = 1 adds exactly one more main loss. T2c with fsw only, the loss object is returned unchanged.
+  T3a / b feed_weight is M^a / batch mean or M^a / training mean, times fw; with --fsw 0 it is fw itself.
+      The main loss with the weight matches brute force.
+  T4  default unchanged (static):
+      - train.py minus the 10 gap1117 statements (exact set asserted) == the frozen train.py (AST, docstrings stripped).
+      - `gap` is referenced only there.
+      - parse(): every previous default unchanged; the new defaults are 0 / 0 / 0 / batch.
+      - fw never reaches the K9 aux; both loop statements are top-level in the step loop.
+  T5  lane.sh:
+      - DRY output of the 144 previous K/L jobs (36 arms x K/L x 951/958) is byte-identical to the frozen lane.sh; all of them
+        parse identically with the old and new parser, with the gap guard False.
+      - Each new arm (and kw03 / e4 / lr4) == the K/L:ref command + exactly its flags; parsed args differ from ref only there.
+      - An unknown arm is still refused.
+  T6  for all 256 jobs of the two jobs files, lane --variant == fill.sh vname() == the arm_read8.py rc lambda
+      (w5_<k|l>cd_<arm>_s<seed>). `arm_read8.py rc:wcl05` today stops at "no completed (arm, reference) snapshot pair yet",
+      i.e. the look-up runs and simply finds nothing yet. All 16 references w5_{k,l}cd_ref_s951..958 are complete.
+
+lane: CUDA_VISIBLE_DEVICES=N OMP_NUM_THREADS=12 ... .venv/bin/python lab/nn_x/w12/gap1117/tests/test_gap1117_gpu.py g3 | g1 g2
+  -> 1/1 + 32/32 PASS (out/test_gap1117_gpu.log, out/gpu_g1_g2.stdout)
+  G3 micro-benchmark, B x Mx = 512x16 ... 108x304: category_split fwd+bwd 0.76 ms, flat in shape (launch-bound).
+     The main listwise loss takes 0.23 ms. float32 identity on these shapes 1.9e-6.
+  G1 DEFAULT UNCHANGED, end to end, deterministic kernels:
+     Setup: the frozen train.py vs the new train.py, flags off. Both run the real K:ref:951 command (init
+     w5_e10_kd05w192_s951@77500, teacher_mean11, kd_w 0.5), shortened to --train_feeds 20000 --epochs 1 (74 steps),
+     with cooldown_mix 0.3 so there are many pool batches.
+     Results:
+       - identical training gathers;
+       - per-step loss values BITWISE identical (74 / 74);
+       - loss-input logits (1.34M values) and optimiser-entry gradient norms bitwise identical;
+       - log lines identical (args line and timings removed);
+       - selected and @last checkpoints bitwise identical (state_dict);
+       - val / holdout prediction files bitwise identical;
+       - add_terms never called.
+     Remaining differences when off: the logged args line, the json "args" and the checkpoint "args" dict gain 4 keys
+     (wcl 0.0, ccl 0.0, fsw 0.0, fsw_norm 'batch'). That is metadata only.
+  G2 SMOKE of each arm (normal kernels):
+     Setup: K:<arm>:951 lane command with --train_feeds 60000 --epochs 1 --eval_every 100 --select_min_step 100 --cliplog 10
+     --no_test, 195 steps per run, all with the same training gathers as ref.
+     Results:
+       - all losses finite;
+       - a gap1117 line at every eval;
+       - add_terms called on every step (195 / 195, pool batches included).
+     Logged decomposition at the snapshot: per-feed CE_cat 1.19-1.21, within 2.29-2.35 (sum 3.47-3.55). The within-category
+     part is ~2/3 of the main CE.
+     Added terms per step: wcl05 0.672-0.680 | wcl10 1.344-1.360 | ccl05 0.349.
+     fsw weights and loss-weight share of M>=50 feeds in these batches (unweighted 0.503-0.505):
+       fsw25  (batch) weights 0.849-1.150 -> share 0.5030 / 0.5056
+       fsw50  (batch) weights 0.714-1.311 -> share 0.5031 / 0.5059
+       fsw25t (train) weights 0.555-1.544 -> share 0.618 / 0.624
+       fsw50t (train) weights 0.287-2.221 -> share 0.719 / 0.729
+     Pre-clip grad norm (CLIPLOG; nothing clipped anywhere, clip 1.0), median / p90:
+       ref 0.134 / 0.249 | wcl05 0.176 / 0.299 | wcl10 0.211 / 0.363 | ccl05 0.162 / 0.317
+       fsw25 0.133 / 0.245 | fsw50 0.133 / 0.244 | fsw25t 0.154 / 0.215 | fsw50t 0.169 / 0.219
+       The full ref re-cool: 0 clipped, max 0.51.
+     STEP TIME (paired over the same 188 steps; eval intervals and the first 5 steps excluded; GPU N otherwise idle):
+       ref median 45.3 ms/step.
+       Median per-step ratio vs ref: wcl05 +0.3%, wcl10 +1.2%, ccl05 -0.2%, fsw25 -1.8%, fsw50 +1.2%, fsw25t +0.7%, fsw50t -1.0%.
+       All of this is inside run-to-run noise. The micro-benchmark bound is ~0.8 ms/step (<= 2% of a 45 ms step, < 1% of the
+       ~170 ms/step of a shared-GPU production re-cool).
+       Expected cost per job = the reference's: ~57 min of training for K/L 2-epoch, ~115 min for e4.
+     The smoke val / holdout numbers (195 steps) carry no information about the arms.
+
+=====================================================================================================================
+3. IMPORTANT: --fsw "mean 1 over the feeds of each batch" is close to a no-op here -> recommend fsw25t / fsw50t
+=====================================================================================================================
+SplitData.batches cuts every batch inside one M bucket of width 16 (Mpad = ceil(M/16)*16). Every batch is therefore nearly
+M-homogeneous, and a per-batch normalisation only re-weights feeds inside a bucket.
+Computed over all 3,151,208 train feeds (the smoke batches above agree):
+  - per-batch normalised weight sd: 0.049 (ALPHA 0.25) / 0.097 (ALPHA 0.5);
+  - loss-weight share of M>=50 feeds: 0.4904 unweighted -> 0.4906 / 0.4908 per-batch normalised, vs 0.606 / 0.709 with
+    --fsw_norm train (one constant = mean M^ALPHA over the run's training feeds, so the epoch-mean weight is 1).
+The smoke agrees: fsw25 / fsw50 end at loss 2.6568 / 2.6570, vs 2.6567 for ref.
+Only the train-normalised version does what the background asks ("weight feeds by size; large feeds carry most of the loss").
+fsw25 / fsw50 are implemented and in lane.sh exactly as specified, but I recommend running fsw25t / fsw50t instead
+(fill_jobs_T1117_fswt.txt). That saves ~32 GPU-hours on a predictable null.
+If the lead wants the literal arms anyway, fill_jobs_T1117.txt is the spec's file.
+
+=====================================================================================================================
+4. RECOMMENDED LAUNCH (legacy layout ON; the lead launches)
+=====================================================================================================================
+  cd <repo> && setsid nohup bash nn_x/w12/kd/fill.sh <repo>/nn_x/w12/kd/logs/fill_jobs_T1117_fswt.txt 2 \
+      >> nn_x/w12/kd/logs/fill_T1117.log 2>&1 < /dev/null &
+  - Literal spec instead: the same command with fill_jobs_T1117.txt.
+  - Stop: touch nn_x/w12/kd/logs/FILL_STOP. Running jobs are not touched; remove the file before the next fill.
+  - fill.sh uses the GPUs, launches only when a GPU has <= 2 compute processes and >= 60 GB free, and runs 1 job per lane.
+  - Size: 112 jobs of ~1 h + 16 e4 jobs of ~2 h = ~144 GPU-hours. About 9-10 h wall at 16 concurrent jobs, longer under load.
+Read-out per arm (CPU, as soon as K+L pairs exist; PASS bar 2.5 for re-cools):
+  cd <repo> && CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 .venv/bin/python nn_x/w12/kd/arm_read8.py rc:<arm>
+  for <arm> in wcl05 wcl10 ccl05 fsw25t fsw50t (or fsw25 fsw50) kw03 lr4 e4.
+  Default reference = ref (w5_{k,l}cd_ref_s<seed>), seeds 951-958, pairing only completed pairs.
+  The gap1117 log lines (CE_cat / within per eval) are in nn_x/w5/logs/w5_{k,l}cd_<arm>_s<seed>.log.
+
+=====================================================================================================================
+5. RISKS / NOTES
+=====================================================================================================================
+- Optimiser scale: AdamW and Muon are nearly invariant to a global loss scale, so the arms act through the RATIO of the two parts.
+    wcl05 / wcl10 = the within-category part at 1.5x / 2x the category part.
+    ccl05 = the category part at 1.5x.
+    wcl = ccl = LAMBDA would be (almost) a no-op.
+  This is the intended lever, but the size of the shift is set by that ratio.
+- Under KD the target t contains the teacher softmax. wcl therefore also up-weights the TEACHER's within-category order, and
+  ccl the teacher's category mass, not only the clicks.
+- The new terms use CUDA index_add / scatter_reduce, whose float summation order is not deterministic. Arm runs are not bitwise
+  reproducible run to run. Production training is already non-deterministic, and the flag-off path is unchanged (G1).
+- No clipping occurs in any arm (max p90 0.36 < 1.0), so clipping does not mask the extra gradient.
+- The new arms are refused together with --rdrop_cd / --sam_cd (they recompute the main loss) and with --loss_norm idcg.
+  Neither is used by K / L.
+- The older nn_x/w5/tests AST proofs (test_w5.py / test_w7.py chain) already predate the 11-14 KD flags and were stale before this
+  change. My own default-off proof is in this folder (T4 + G1).
+- train.py / lane.sh were swapped by rename. Any process that had them open keeps the old version; none was running at the time.
+- Stopping fill.sh leaves claim dirs only for started jobs. A failed job leaves logs/queue/failed_<v> and is not retried
+  automatically.

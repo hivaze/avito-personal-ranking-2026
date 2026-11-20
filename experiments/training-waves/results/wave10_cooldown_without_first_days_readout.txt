@@ -1,0 +1,56 @@
+  holdout INFO slices: early Sep 6-8 (days <= 20704) 7823 feeds, late Sep 9-19 (days >= 20705) 22177 feeds (of 30000)
+== WAVE-10 FPCD-lite STAGE B (CD re-cool, roots (101, 102, 103, 104), reference w5_cd_m02ref_r<root>, CDSEED 900 + root; PRIMARY = SELECTED checkpoint, last = info). Rule (nn_x/w5/logs/B_fpcd_predeclared.txt, single arm): PASS iff val > +2 SE AND holdout >= -1 SE AND no val slice (M<50, M>=50, Tue, Thu) < -2 SE AND pmix >= -1 SE AND 4-root pool holdout >= +2 SE AND stale-val >= -1 SE; STOP otherwise. INFORMATION ARM (grey-zone pre-gate): holdout early / late / dE-dL are info columns; a PASS needs the generational bar + TRICKS 4.2 + a 7-root confirmation before any pick
+== runs: selected step / total | selected val, holdout (in-training eval) | last val, holdout | minutes
+  w5:w5_cd_m02ref_r101           best  19670/19670 | sel val 0.39721 hold 0.31976 | last val 0.39721 hold 0.31976 | 38 min
+  w5:w5_cd_m02ref_r102           best  17000/19670 | sel val 0.39727 hold 0.32010 | last val 0.39678 hold 0.31969 | 39 min
+  w5:w5_cd_m02ref_r103           best  19000/19670 | sel val 0.39646 hold 0.32026 | last val 0.39662 hold 0.32022 | 48 min
+  w5:w5_cd_m02ref_r104           best  19670/19670 | sel val 0.39602 hold 0.32024 | last val 0.39602 hold 0.32024 | 42 min
+  w5:w5_cd_fpcd_r101             best  18000/19670 | sel val 0.39564 hold 0.31871 | last val 0.39581 hold 0.31851 | 27 min
+  w5:w5_cd_fpcd_r102             best  15000/19670 | sel val 0.39609 hold 0.31871 | last val 0.39582 hold 0.31826 | 27 min
+  w5:w5_cd_fpcd_r103             best  19000/19670 | sel val 0.39619 hold 0.31921 | last val 0.39556 hold 0.31885 | 27 min
+  w5:w5_cd_fpcd_r104             best  14000/19670 | sel val 0.39499 hold 0.31888 | last val 0.39547 hold 0.31866 | 26 min
+
+== fpcd (--cd_exclude_days 0,1,2) vs m02ref (B = arm); PRIMARY = selected checkpoints
+    VAL  w5_cd_fpcd_r101 0.39564 vs w5_cd_m02ref_r101 0.39721: -0.00157
+    VAL  w5_cd_fpcd_r102 0.39609 vs w5_cd_m02ref_r102 0.39727: -0.00118
+    VAL  w5_cd_fpcd_r103 0.39619 vs w5_cd_m02ref_r103 0.39646: -0.00027
+    VAL  w5_cd_fpcd_r104 0.39499 vs w5_cd_m02ref_r104 0.39602: -0.00102
+    HOLD w5_cd_fpcd_r101 0.31870 vs w5_cd_m02ref_r101 0.31979: -0.00108
+    HOLD w5_cd_fpcd_r102 0.31871 vs w5_cd_m02ref_r102 0.32010: -0.00139
+    HOLD w5_cd_fpcd_r103 0.31921 vs w5_cd_m02ref_r103 0.32027: -0.00106
+    HOLD w5_cd_fpcd_r104 0.31888 vs w5_cd_m02ref_r104 0.32025: -0.00136
+  [selected (PRIMARY)] VAL  pooled: all -0.00101+-0.00041 (z -2.49)  M<50 -0.00174+-0.00076 (z -2.28)  M>=50 -0.00051+-0.00044 (z -1.16)  Tue -0.00086+-0.00057 (z -1.50)  Thu -0.00118+-0.00057 (z -2.06)  coldpos +0.00028+-0.00082 (z +0.34)  warmpos -0.00165+-0.00054 (z -3.03)
+  [selected (PRIMARY)] HOLD pooled: all -0.00122+-0.00025 (z -4.80)  late20% -0.00076+-0.00049 (z -1.54)  early Sep6-8 -0.00300+-0.00062 (z -4.81)  late Sep9-19 -0.00060+-0.00027 (z -2.25)
+  HOLDOUT INFO (selected): early Sep 6-8 -0.00300+-0.00062 (z -4.81)  late Sep 9-19 -0.00060+-0.00027 (z -2.25)  dE-dL -0.00240+-0.00068; per-root early -0.00256 -0.00343 -0.00280 -0.00320; per-root late -0.00056 -0.00067 -0.00044 -0.00072
+    VAL  w5_cd_fpcd_r101@last 0.39581 vs w5_cd_m02ref_r101@last 0.39721: -0.00140
+    VAL  w5_cd_fpcd_r102@last 0.39582 vs w5_cd_m02ref_r102@last 0.39678: -0.00095
+    VAL  w5_cd_fpcd_r103@last 0.39556 vs w5_cd_m02ref_r103@last 0.39662: -0.00107
+    VAL  w5_cd_fpcd_r104@last 0.39547 vs w5_cd_m02ref_r104@last 0.39602: -0.00055
+    HOLD w5_cd_fpcd_r101@last 0.31852 vs w5_cd_m02ref_r101@last 0.31979: -0.00127
+    HOLD w5_cd_fpcd_r102@last 0.31825 vs w5_cd_m02ref_r102@last 0.31969: -0.00144
+    HOLD w5_cd_fpcd_r103@last 0.31885 vs w5_cd_m02ref_r103@last 0.32024: -0.00139
+    HOLD w5_cd_fpcd_r104@last 0.31866 vs w5_cd_m02ref_r104@last 0.32025: -0.00158
+  [last (info)] VAL  pooled: all -0.00099+-0.00039 (z -2.56)  M<50 -0.00203+-0.00073 (z -2.77)  M>=50 -0.00028+-0.00042 (z -0.66)  Tue -0.00125+-0.00055 (z -2.26)  Thu -0.00071+-0.00054 (z -1.32)  coldpos +0.00101+-0.00077 (z +1.31)  warmpos -0.00189+-0.00052 (z -3.62)
+  [last (info)] HOLD pooled: all -0.00142+-0.00024 (z -5.81)  late20% -0.00081+-0.00046 (z -1.74)  early Sep6-8 -0.00319+-0.00062 (z -5.12)  late Sep9-19 -0.00080+-0.00025 (z -3.23)
+  ENS VAL 4-member arm vs 4-member ref: all -0.00047+-0.00057 (z -0.82) (ref 0.39969, arm 0.39922)
+  ENS HOLD 4-member arm vs 4-member ref: all -0.00073+-0.00034 (z -2.15) (ref 0.32265, arm 0.32192)
+  same-root corr arm vs m02ref (val, within-feed z, selected): 0.9807 0.9758 0.9828 0.9734 (mean 0.9781)
+  PMIX private-mix pooled delta -0.00118 +- 0.00061 (z -1.93); < -1 SE: YES
+  STALE-VAL pooled delta (private-like inputs): -0.00042 +- 0.00040 (z -1.05); < -1 SE: YES
+  LEVERS (pooled loss reduction per val feed, + = arm helps; feed-clustered SE; 08_levers classes / 05_mass block):
+    warm|recent -0.00015+-0.00032 (pos 0.460)  warm|mid -0.00035+-0.00013 (pos 0.110)  warm|novel -0.00034+-0.00013 (pos 0.127)  cold|recent -0.00010+-0.00020 (pos 0.219)  cold|mid +0.00005+-0.00007 (pos 0.038)  cold|novel -0.00009+-0.00007 (pos 0.046)  cat#1|w3+ +0.00022+-0.00014 (pos 0.347)  total -0.00099+-0.00041 (pos 1.000)
+  CLIPLOG w5_cd_m02ref_r101: cooldown clipped 0.000 (median 0.292); pool clipped 0.000 (median 0.243) | aux/main grad norm by Mpad 16:0.01 64:0.03 112:0.07 160:0.13 208:0.18 256:0.22 304:0.47
+  CLIPLOG w5_cd_fpcd_r101: cooldown clipped 0.000 (median 0.251); pool clipped 0.000 (median 0.215) | aux/main grad norm by Mpad 16:0.01 64:0.04 112:0.10 160:0.18 208:0.23 256:0.29 304:0.56
+  log r101: FPCD step 19670: cooldown steps 19670 (regular 19254, pool 416, pool share 0.0211); realised feeds/step regular 230.2 (unmasked 317.3, ratio 0.7255) pool 157.1 (ratio 0.7515); pool passes 1 (0.649 per allowed pool feed); split events regular 0 pool 0; train time 27.3 min
+  log r102: FPCD step 19670: cooldown steps 19670 (regular 19277, pool 393, pool share 0.0200); realised feeds/step regular 230.3 (unmasked 317.4, ratio 0.7256) pool 154.0 (ratio 0.7512); pool passes 1 (0.601 per allowed pool feed); split events regular 0 pool 0; train time 26.8 min
+  log r103: FPCD step 19670: cooldown steps 19670 (regular 19297, pool 373, pool share 0.0190); realised feeds/step regular 230.4 (unmasked 317.6, ratio 0.7255) pool 155.7 (ratio 0.7513); pool passes 1 (0.576 per allowed pool feed); split events regular 0 pool 0; train time 26.7 min
+  log r104: FPCD step 19670: cooldown steps 19670 (regular 19246, pool 424, pool share 0.0216); realised feeds/step regular 230.4 (unmasked 317.5, ratio 0.7255) pool 157.2 (ratio 0.7521); pool passes 1 (0.662 per allowed pool feed); split events regular 0 pool 0; train time 26.0 min
+  slices (selected): M<50 -0.00174+-0.00076 (z -2.28)  M>=50 -0.00051 (z -1.16)  Tue -0.00086 (z -1.50)  Thu -0.00118 (z -2.06)  coldpos +0.00028 (z +0.34)  warmpos -0.00165 (z -3.03)  | holdout late20% -0.00076
+  val gate input: z -2.494 (one-sided p 0.9937); futility note (val < 0 or holdout < 0): fires
+  gates: val > +2 SE NO; holdout >= -1 SE NO; no val slice (M<50, M>=50, Tue, Thu) < -2 SE NO; pmix >= -1 SE NO; 4-root pool holdout >= +2 SE NO; stale-val >= -1 SE NO
+
+== summary (wave 10 FPCD-lite, stage B, SELECTED checkpoints, pooled over roots 101-104 vs m02ref)
+  fpcd  val -0.00101+-0.00041 (z -2.49) hold -0.00122+-0.00025 (z -4.80) [early -0.00300 late -0.00060 dE-dL -0.00240+-0.00068] | M<50 -0.00174 M>=50 -0.00051 Tue -0.00086 Thu -0.00118 coldpos +0.00028 warmpos -0.00165 | pmix -0.00118+-0.00061 | pool val -0.00047 hold -0.00073+-0.00034 (z -2.15) | stale -0.00042+-0.00040 | corr 0.9781 | last val -0.00099 hold -0.00142 -> STOP (val > +2 SE, holdout >= -1 SE, no val slice (M<50, M>=50, Tue, Thu) < -2 SE, pmix >= -1 SE, 4-root pool holdout >= +2 SE, stale-val >= -1 SE)
+
+== registry-ready one-liners
+  w5_cd_fpcd_r101-104 (--cd_exclude_days 0,1,2: Sep 6-8 pre2-blank feeds masked out of every cooldown batch, same 19,670 steps) vs w5_cd_m02ref (CD harness, CDSEED 900+root, selected ckpt, pre-declared single-arm rule nn_x/w5/logs/B_fpcd_predeclared.txt): val -0.00101 +- 0.00041 (z -2.5), holdout -0.00122 +- 0.00025 (z -4.8; early Sep 6-8 -0.00300, late Sep 9-19 -0.00060, dE-dL -0.00240 +- 0.00068), pool hold -0.00073 (z -2.2), pool val -0.00047, pmix -0.00118, stale -0.00042, M<50 -0.00174 / M>=50 -0.00051 / Tue -0.00086 / Thu -0.00118, coldpos +0.00028 / warmpos -0.00165, same-root corr 0.9781, realised regular batch ratio 0.7255-0.7256, pool share 0.0190-0.0216, split events 0-0, 26-27 min per root, @last val -0.00099 / hold -0.00142 -> STOP (val > +2 SE, holdout >= -1 SE, no val slice (M<50, M>=50, Tue, Thu) < -2 SE, pmix >= -1 SE, 4-root pool holdout >= +2 SE, stale-val >= -1 SE) (nn_x/w5/logs/w5_eval_B_fpcd.txt)

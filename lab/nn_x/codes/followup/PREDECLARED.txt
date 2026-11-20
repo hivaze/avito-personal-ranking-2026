@@ -1,0 +1,95 @@
+CODES-DECODING FOLLOW-UPS (reports/CODES_DECODING_1113.md §8 (a)-(d)) -- PRE-DECLARATION
+Written 2026-11-13 05:47:47 UTC (date -u), BEFORE any follow-up number was computed. CPU only, 12 threads, no GPU, no submissions.
+Only data structure was inspected before this file (array dtypes, feed counts, day range, hist ordering); no feature or result.
+New files only under nn_x/codes/followup/.
+
+COMMON MACHINERY (used by tasks 1-3)
+- G3 val = preds/ens_G3_final_val.npy (0.40032). G3 holdout = decide6's pool: feed_rank_z of the member-equal mean of
+  feed_rank_z(member holdout preds) over the 20 G3 members (F10 v23_gru_pre2s_s501-506, F7x r6_cd_m02_r101-107,
+  F7x70 r6_cd_m02_p70k_r101-107; preds/holdout/), holdout = the fixed 30K random-like train feeds of nn/holdout_eval.py
+  (rng 12345, p_random > 0.9, M >= 50), verified against preds/holdout/holdout_{meta,y}.npy. Recorded G3 holdout 0.32379.
+- NESTED RESIDUAL (x02 harness, unchanged): score = fz(G3) + w * fz(x), fz = per-feed z (0 where the feed has no spread),
+  w in {-1,-.5,-.3,-.2,-.1,-.05,0,.05,.1,.2,.3,.5,1}; nested 2-fold by user (rng 0 halves of non-zero users; user-0 feeds
+  alternate by feed index); w chosen on one fold, applied to the other; delta = per-feed NDCG vs fz(G3); SE = sd/sqrt(n_feeds).
+  Same harness on the holdout (folds from holdout users, rng 0).
+- TAIL PRE-SCREEN (tail.py definitions, unchanged): tail feed = >= 1 positive and none in G3's top-8; focal positive = best-ranked
+  positive; beaters = negatives G3 ranks above it; win rate = P(x_pos > x_beater) + 0.5 P(tie), pooled over pairs, pairs with a
+  NaN cue dropped, user-clustered SE (ratio_cl; user-0 feeds singletons).
+- BURIED CELL (nn_x/r3/stage0_gate.py, unchanged): zG3 = 0.5 z(ens_G3_ft_val) + 0.5 z(ens_G3_to_val) (feed_rank_z); cell
+  positive = positive whose category is G3's LSE-top category in the feed (pcr == 0) and with >= 3 same-category candidates
+  ranked above it (wr >= 3); pairs = (cell positive, same-category negatives G3 ranks above it); leak-free feeds only
+  (qt.leak_mask), as in stage0. Pair AUC = P(x_pos > x_neg) + 0.5 ties.
+- CONTROLS for tasks 1-2 (same three readouts): popularity it_hist_all_luo; cosine maxsim32 (max cos to the 32 newest history
+  items) and cos_hall. ANTI-POPULARITY control for each new feature: its tail win rate restricted to popularity-matched pairs
+  (|log1p pop_pos - log1p pop_beater| <= 0.25) and its Spearman with it_hist_all_luo over val rows.
+
+TASK 1: s4 SIMILAR-LISTINGS ITEM-TO-ITEM GRAPH
+- Edges from ALL 3,151,208 train feeds' histories (no sampling; if memory forces it, a seeded uniform feed sample, stated).
+  For every history event with type e1 and source s4 (view of item B from the similar-listings block), the anchor A = the
+  nearest OLDER (higher hpos) e1 event in the same history snapshot with item != B (any source). Dedupe per user:
+  unique (user, A, B), user_id 0 feeds each a separate user; edge weight c(A->B) = number of distinct users; first_day(user,
+  A, B) = min MSK day ((ts + 10800) // 86400) of that user's feeds whose snapshot contains the pair.
+- Val features: edges from all train feeds (all train days < val days: no leak, no val/test histories used).
+  Holdout features: only (user, A, B) with first_day < the holdout feed's day (strictly earlier days; no leak).
+- Features (per candidate B of a feed; R = the 32 newest distinct items with an e1 event in the feed's history):
+  s4_link (PRIMARY)  = max over A in R of c(A->B) / out(A), out(A) = sum_B' c(A->B')   (0 if none)
+  s4_link_any        = 1[some item A anywhere in the feed's history (any event type) has c(A->B) > 0]
+  s4_sym             = max over A in R of (c(A->B) + c(B->A)) / (out(A) + in(A))
+  s4_sum             = log1p(sum over A in R of c(A->B))
+- GATE (per feature): PASS iff val nested delta > +0.0003 AND > 2 SE (z > 2) AND tail win rate > 0.5 (point estimate).
+  Multiplicity: s4_link is the primary (z > 2); s4_link_any / s4_sym / s4_sum count only with z > 2.5.
+  Task-1 verdict = PASS iff at least one feature passes; else CLOSED. Holdout nested delta reported; if a passing feature has
+  holdout delta < -2 SE the verdict becomes HOLD (val-only, contradicted). Buried-cell pair AUC reported (information).
+
+TASK 2: REGION-NORMALISED POPULARITY
+- Region key: K2 components (nn_x/codes/features/out/k2_item_comp.npy, frequent items in components >= 10 items). A feed's home
+  region R_f = the component winning the majority vote among the feed's candidates at the feed's modal non-zero f2 level
+  (04_k2_geo.py (b) construction; ties -> larger count then lower comp id); feeds without a voter have no region.
+- Counts from ALL train feeds' histories: unique (user, region, item) over history events of ANY type (user-0 feeds separate
+  users; region = R_f of the snapshot's feed; feeds without a region contribute to the global count only), with first_day as in
+  task 1. n_i = distinct users with item i; n_iR = distinct users of home region R with item i; N_R = sum_i n_iR; N = sum over
+  region-assigned pairs; pi_R = N_R / N.
+- Features for candidate i in feed f with home region R = R_f:
+  rp_lift (PRIMARY) = log( ((n_iR + m * pi_R) / (n_i^reg + m)) / pi_R ), m = 5, n_i^reg = users with item i that HAVE a region
+                      (regional over-/under-representation of the item among the user's region vs all regions; 0 = neutral)
+  rp_cnt            = log1p(n_iR)  (popularity within the user's region class)
+  Feeds without a region: both features constant 0 within the feed (fz -> 0, i.e. no effect).
+  Holdout: counts with first_day < the holdout feed's day. Val: all train.
+- GATE identical to task 1: PASS iff val nested > +0.0003 AND z > 2 (rp_lift; rp_cnt needs z > 2.5) AND tail win rate > 0.5;
+  else CLOSED; holdout < -2 SE on a passing feature -> HOLD.
+
+TASK 3: BURIED-CELL DIAGNOSTIC (information, no gate)
+- Lost NDCG = exact per-positive split of 1-NDCG (tail.py §4: positive j at rank r_j carries (disc(j) - disc(r_j)) / IDCG),
+  ranks under zG3 (stage0 score), leak-free feeds. Cell loss = sum over cell positives.
+- Decompose the cell loss and the cell pair counts by the positive's: delivery class (C1 table: hard-zero 15 codes / near-zero
+  c27,c34-c38 / very-low c19,c37,c5,c47 / low c4,c24 / goods rest), f2 class (home = f2 == feed's modal non-zero level; other
+  non-zero; zero), vertical (11, categories/out/code_vertical.json), f4 tercile (cuts = terciles of f4 over all val positives).
+  Report per class: share of cell loss, share of all val candidate rows, share of all val positives, loss share / row share,
+  loss per cell positive.
+- Per class: pair win rates (P(x_pos > x_beater), ties 0.5, user-clustered SE) of the cues: popularity it_hist_all_luo, f5,
+  f4, f1, f3, f2, cos maxsim32, cos_hall, cos_u, plus the task-1/2 features.
+- Flags (pre-declared): CONCENTRATION if a class holds > 1.5x its row share of the cell loss (and >= 3% of the cell loss);
+  CUE if a (class, cue) win rate > 0.55 with >= 500 pairs and lower 2-SE bound > 0.5.
+
+TASK 4: POP-FREE FREE CHECK (§8 D1)
+- Wait for preds/nn_abl_e10_xdrop_pop_s95{1,2,3,4}_{n2cpv3_val_oof,trainonly_val}.npy (poll every 5 min, give up 2.5 h after
+  the start of polling; report what exists). Pop-free pool = member-equal: to = fz-mean (feed_rank_z) over the present members'
+  train-only preds; ft likewise over members with an FT file; pool = 0.5 z(ft) + 0.5 z(to) if every present member has FT,
+  else to only. Comparators: G3 final (ens_G3_final_val) and, like for like, G3 train-only (ens_G3_to_val) when the pool is to-only.
+- Cells (15_residual_f5 definition): n = tte_it_imp + it_hist_all_luo; NOISY-HIGH = f5 >= q90(f5 over val rows) AND n < 5;
+  complements: RELIABLE-HIGH = f5 >= q90 AND n >= 5; MID/LOW = 0 < f5 < q90; NO-DATA = f5 == 0.
+- act/exp per score s: expected = within-feed decile (of s) positive rate, renormalised per feed to its actual positives
+  (15_residual_f5 / x02 construction); act/exp = sum y / sum expected in the cell; user-clustered SE; the pop-free - G3 difference
+  with a user-cluster bootstrap SE (200 reps).
+- PREDICTION HOLDS iff the pop-free pool's act/exp on NOISY-HIGH < 0.95 (point estimate). If it holds: write the design of ONE
+  2-epoch arm 'pop1' = E_BASE minus the 8 popularity inputs (--xt_exclude seq_cv_invd20,seq_cv_pop,seq_cv_norm,it_hist_all_luo,
+  it_hist_et1_luo,it_hist_et2_luo,it_hist_et3_luo,it_hist_et4_luo) plus ONE exposure-count input (column named exactly, with
+  its construction and leak status), read by the frozen SCALE-UP rule (abl_eval.py: PASS iff val > +1 SE_cal AND holdout >= 0)
+  for the lead to launch. If it does not hold: record and close (no design).
+
+ADDENDUM 1 -- written Fri Nov 13 05:57:30 UTC 2026 (date -u), AFTER task 3's map and BEFORE computing anything below. POST-HOC, information only.
+Task 3 flagged one non-tautological, non-negated cue: f5 win rate 0.558 +- 0.011 on buried-cell pairs whose positive is in
+f4 tercile T3 (oldest listings). One check, x02 harness unchanged on val (no gate can promote it: post-hoc):
+  x = f5 * 1[f4 >= 0.6801] (the T3 cut over all val positives), within-feed z as in x02.
+  Also its tail win rate (tail.py) and G3 act/exp by f5 quintile inside f4 T3 rows.
+Reading rule: nested > +0.0003 at z > 2 AND tail win > 0.5 -> "lead worth a pre-declared confirmation on holdout"; else noise.

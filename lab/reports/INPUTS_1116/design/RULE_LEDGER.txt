@@ -1,0 +1,48 @@
+=== <UTC timestamp at copy> TRAINED-INPUT BUNDLE "NX": BUILD GATE + ARM RULES, written before any build and before any run (design reports/INPUTS_1116/DESIGN.md; workflow a workflow run) ===
+ BUNDLE (7 train-stage inputs appended to cvnd_pre2s by --xt_add; nothing is removed; n_dense 104 -> 111 hard labels d128 and students d192):
+   W  nx_rp3_z, nx_rp3_rk, nx_p3a_z, has:nx_rp3_z   whole-sequence co-visitation walk (C09 kernel; other users' histories; label-free)
+   T  nx_bt_z, nx_bt_rk, nx_bt_seen                 first-choice click strength of the item on exploration feeds (C06 fit; train labels of other feeds, holdout feeds never a source)
+   Train rows (holdout rows included) are built in the LAG VIEW of reports/INPUTS_1116/design/BUILD_SPEC.txt: cut' = max(slot - L, 5), L = the stored per-feed test-lag draw
+   (hz2_lag.npy); sources strictly before the cut; lag 1-3 d on Sep 12-14 and 6-8 d on Sep 17-19; 5-7 dense source days; has = 0 (NaN) on Sep 6-11.
+   Val / test rows: all train sources + earlier val / test histories (W), the all-train fit (T). No val label, no later snapshot of the same user, user 0 never linked.
+ STEP 0 (CPU only; NO GPU process of this arm before it is read and written here):
+   G-code   C1 and C2 of BUILD_SPEC.txt: stored C09 / C06 holdout arrays reproduced (1e-5 relative / 1e-4 absolute); every causality count 0.
+   G-parity C3: dZ <= 0.05 and largest bucket <= 0.10 for the non-zero share of the walk (and the seen share of T) on test-like train rows against PRIVATE rows and against PUBLIC rows,
+            and on val-like train rows against val rows.  C4: PSI <= 0.25 for every file, train (has = 1) against val, public and private.  C5: non-default share on every test day >= 0.5 x val's.
+   G-info   C7 with the calibrated lens (placebo sd 0.86-1.06, out/p05_cond_DE.txt): the family's z or rank form reads the sign on record and |cz| >= 2.5
+            BOTH on the holdout rows in the lag view AND on val rows with the stale-val twin. C6: none of the 20 permutations of a family reaches 3.0.
+   COMPOSITION: W fails any gate -> NO ARM; the train-stage input family is closed without a GPU hour (there is nothing lag-buildable to train on).
+                T fails a gate -> the bundle is the 4 W inputs (arm name nx4). No column is transformed, re-binned or re-lagged after its gate is read.
+   Reference values on record (fresh builds): W +6.0 val / +10.0 holdout; T +5.4 / +6.9 (reports/INPUTS_1116/residual_rows.md 4.1).
+ STAGE A, the information question, hard labels (no teacher): 8 members WITH the bundle, abl_e10_nx_s951-958 (reports/INPUTS_1116/design/launch_nx_hl.sh <gpu> <seed> nx),
+   against 8 WITHOUT: the 6 stored w5_e10_base_s951-956 + 2 fresh abl_e10_base_s957, s958 (same script, arm base). Smoke first (SMOKE=1, one seed, both arms): log lists 34 + 7 inputs.
+   Harness check: the 2 fresh controls minus the 6 stored, member level: |z| <= 2 on val and on the holdout; otherwise 6 more fresh controls (951-956) replace the stored ones before the read.
+   READ (one look; reports/INPUTS_1116/design/read_nx.py abl_e10_nx:951-958 w5_e10_base:951-956+abl_e10_base:957-958; selected checkpoints; member level = difference of member means,
+   SE = max(paired per-feed SE, seed-level SE)):
+     PASS iff  z_val >= +1.0  AND  z_holdout >= +1.0 on the 15,225 lag-view holdout feeds (Sep 12-19)  AND  (z_val + z_holdout) / sqrt(2) >= 2.0
+           AND private-mix (src/pmix.py) member z >= -1.0  AND  8-pool minus 8-pool >= 0 on val and on the lag-view holdout feeds  AND  last-step lag-view holdout delta >= 0
+           AND stale-val (project scenario SVL with the NX columns of the arm replaced by their stale-val twins) member delta >= -1 SE.
+     REPLICATE iff pooled z in [1.6, 2.0) with z_val >= 0 and z_holdout >= 0: 4 more seeds per arm (959-962), ONE re-read of 12 + 12 by the same clauses.
+     Anything else: NOT PASSED.
+   Why the in-period holdout may carry weight here: on holdout rows the new columns are lag-built (never fresher than on val), so the contrast is not a popularity-type freshness contrast;
+   it is never used alone (z_val >= 1 is required) and never on the feeds without the lag view.
+   Power from SEs on record (out/p01_power.txt, out/p04_rule_power.txt; member-level SE at 8 + 8: val 0.00036, private mix 0.00052, lag-view holdout 0.00029; x1.17 for contrasts
+   between different input views): true member-level val effect +0.0005 / +0.0010 / +0.0020 -> P(PASS) 0.28-0.37 / 0.77-0.86 / 0.99-1.00 (holdout effect 0.7x, private 0.5x);
+   false PASS <= 0.017. Smallest effect shown with power 0.8: +0.0009 to +0.0011. An effect of +0.0003 is NOT readable by this test (power 0.12-0.16).
+ STAGE B, only after a PASS of A: 8 wide distilled students with the bundle, OLD teacher (teacher_mean11, blind to the bundle), abl_e10_nxkd05w192_s951-958
+   (design/launch_nx_kd.sh), against the 16 stored wide students (w5_e10_kd05w192_s951-958 + w5_e10_kd05t25w192_s951-958). Same clauses, same tool. A PASS is conservative.
+   NOT PASSED after a PASS of A is NOT a closure (the teacher half of the target cannot carry the input); it is reported with the ratio B / A.
+   Power: effect kept by the student +0.0005 / +0.0010 -> 0.49-0.61 / 0.93-0.97.
+ AFTER A PASS OF B: 16 all-data wide students with the bundle (8 with teacher_mean11, 8 with teacher_mean25, seeds 951-958; write-new lane copy of lane_full_v.sh with one arm),
+   production fine-tune (inputs come from the checkpoint cfg), file FDNX16P20 = the FD16P20 recipe with its 16 wide members replaced.
+   FILE RULE: gate PASS (plus a construction review of the 6 new files: the gate's input audit is a name check) AND final val delta vs FD16P20 >= +1 SE AND private-mix delta >= 0
+   AND val M<50 >= -1 SE -> one experimental slot; it becomes a candidate for pick 2 by the standing selection rule; pick 1 is not changed by this rule.
+   Teacher regeneration is NOT pre-authorised: it needs its own block (a teacher with the bundle against a teacher built the same way without it), opened only if A passes with
+   pooled z >= 3 and B reads below half of A.
+ CLOSURE: STEP 0 failure of W, or NOT PASSED at A, closes "new train-stage inputs from the residual-gated rows" for this competition: W and T are the two strongest independent
+   families of 305 columns read with the calibrated lens, in the only form whose parity can be shown. Stated limit of that closure: it excludes a member-level effect of +0.001 or more
+   (power 0.77-0.86), not one of +0.0003. No further input arm is opened on a likelihood read alone.
+ FORECAST (designer, before any build): P(W passes STEP 0) 0.6; P(PASS at A) 0.12; P(member-level effect >= +0.001) 0.05; P(file-level private gain >= +0.0005) 0.03;
+   central member-level effect on val +0.0003.
+ NOT IN THE BUNDLE, with the reason, in reports/INPUTS_1116/DESIGN.md section 6 (f1 / f2 equality flags and the same-user earlier-feed block of inventory D fail the calibrated lens:
+   out/p05_cond_DE.txt; density pair, surface split, first-seen gap, all-feed click rate, ALS: parity or lag).

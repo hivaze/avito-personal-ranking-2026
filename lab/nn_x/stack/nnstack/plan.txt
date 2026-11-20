@@ -1,0 +1,56 @@
+PLAN written Thu Nov 12 15:37:01 UTC 2026 (before any stacker run)
+STUDY B: neural listwise stacker (set-transformer / DeepSets) on family z-scores, residual form.
+Members (main): PF7x = F5cd(6)+F6(6)+F7x(7)+F9(6)+F10(6)+F12(7) = 38. Reference = member-equal PF7x pool
+  spec = 0.5*z(mean_m z(ft_m)) + 0.5*z(mean_m z(to_m))  (preds/ens_PF7x_{ft,to}_val.npy), val 0.39974.
+Secondary (if time): G3 = F10+F7x+F7x70 (20) vs equal G3 pool.
+Per-candidate inputs: 6 family z(ft) + 6 family z(to) (family mean of member z, re-z'd per feed), base = z(equal spec),
+  within-feed rank pct of base, log M, log(1+H), user0 flag, cold flag (it_hist_all_luo==0), feed cold share.
+Score = base + corr (corr head init 0 -> starts at the equal pool); learned temperature on the loss only.
+Variants: LIN (corr linear per candidate), MLP (per-candidate MLP, no interaction), SET (2-layer masked self-attn + mean pool context).
+Loss: listwise softmax CE (feeds with >=1 positive). Reg: AdamW wd, dropout 0.1, width 32-64, L2 on corr.
+Protocol (val-trained): outer folds = EXACT FT folds (GroupKFold(5) on val feeds, groups=user_id, user0 singletons, as
+  nn/finetune.py --u0_singleton). Per outer fold: 4 inner models, each trained on 3 of the 4 training folds and early-stopped
+  (NDCG) on the 4th; OOF = mean of the 4 inner per-feed z. Test = mean of all 20 inner models (z'd).
+Protocol (holdout-trained): inputs = to-family z's only (holdout has train-only preds), trained on the 30K holdout (ES on
+  a user-grouped 20% split of the holdout), applied on val to both halves (ft family z's and to family z's) -> 0.5/0.5 spec;
+  and to the to-half only. Evaluated on all val (fully OOS).
+Reporting: paired per-feed delta vs the equal pool of the same members, SE = sd/sqrt(n); slices M<50, M>=50, Tue, Thu,
+  coldpos, warmpos. For holdout-trained: also its holdout-internal ES split delta (in-domain, for context).
+ACCEPTANCE (pre-declared by the lead, copied): (i) strictly OOS (nested FT folds, or holdout-fit -> val), (ii) beats equal
+  pool of SAME members by > 2 SE on val, (iii) holdout >= -1 SE vs equal pool where holdout eval is OOS (val-trained
+  stacker cannot be applied to holdout ft half; for the val-trained to-only variant we can evaluate on holdout to-half),
+  (iv) no val slice below -2 SE. Public LB never used. If accepted -> test scores + subs/cand_S2_nnstack_*.parquet + presub_gate.
+GPU: one GPU (2 preferred), CUDA_VISIBLE_DEVICES single id, threads 12.
+
+ADDENDUM Thu Nov 12 15:56:19 UTC 2026: results so far (PF7x): all variants +0.0000..+0.00036 (<=1.5 SE); DS (deep-sets) with ctx most consistent.
+Added (declared now, before running): G3 pool versions g3_ds_b3 (val-trained, nested, 3 seeds) and h_ds_g3 (holdout-trained),
+and the per-half shared stacker (train2.py; val-trained -> OOS holdout check; holdout-pretrain -> val fine-tune).
+Post-hoc combos (averages of finished stackers, shrink curve) are reported as DESCRIPTIVE only (selection after seeing results),
+not eligible for acceptance.
+
+ADDENDUM 2 Thu Nov 12 16:05:44 UTC 2026: new mode 'gate' declared before running: feed-conditional linear re-weighting (DeepSets feed embedding ->
+per-feed weights g over the score columns, zero-init; corr_i = sum_c g_c(feed) x_ic). Runs: v_gate_b3 (PF7x val nested 3 seeds),
+g3_gate_b3 (G3), h_gate (PF7x holdout-trained). Same acceptance.
+
+ADDENDUM 3 Thu Nov 12 16:09:44 UTC 2026: mode 'cgate' declared before running: feed-adaptive CONVEX family weights (softmax over the family z
+columns from a DeepSets feed embedding; residual vs uniform so it starts at the equal pool). Runs: v_cgate_b3, h_cgate, g3_cgate_b3.
+Note: by now ~20 stacker variants have been evaluated; any single >2 SE result will be reported with that multiplicity caveat.
+
+ADDENDUM 4 Thu Nov 12 16:14:39 UTC 2026: g3_gate_b3 = +0.00062 +- 0.00028 (2.2 SE; ~25 variants tried -> multiplicity caveat); v_gate_b3 (PF7x)
++0.00051 +- 0.00033; cgate (convex family weights) null. Declared now, before running: stability replicates of the SAME gate config
+with stacker seeds 1 and 2 (--seed 1/2) for G3 and PF7x, each also applied OOS to the holdout (val-trained models, ft slots <- to
+half; criterion iii). If accepted, the final candidate = per-feed z mean of the seed-0/1/2 runs (9 models per inner split; its OOF
+is still nested); the acceptance verdict is taken on that 3-replicate mean and on each replicate's sign.
+
+ADDENDUM 5 Thu Nov 12 16:20:14 UTC 2026: diagnostic only (mechanism, not a candidate): g3_gate_nofam = gate over [pool_ft, pool_to, base, rank] only
+(feed-conditional ft/to weighting), same protocol.
+
+ADDENDUM 6 Thu Nov 12 16:24:01 UTC 2026: g3gate3 (mean of 3 replicates) = +0.000557 +- 0.000277 (t 2.02), holdout OOS -0.00006 +- 0.00012, gate PASS
+(tie-safe rank version cand_S2_nnstk_g3gate3r). Declared now: cross-domain confirmation h_gate_g3 (holdout-trained gate, G3 families,
+applied to val) - context only, does not change the acceptance verdict.
+
+ADDENDUM 7 Thu Nov 12 16:25:31 UTC 2026: mechanism diagnostic (post-hoc, NOT a candidate): mode 'wft' = 2 per-feed scalars from (log M, log H, user0,
+cold share): corr = a(feed)*(z_ft - z_to) + b(feed)*rank(base); G3, nested, 3 seeds (g3_wft_b3).
+
+ADDENDUM 8 Thu Nov 12 16:28:38 UTC 2026: generality check (context only, verdict unchanged): same gate config on the M2 pool (F7x+F7x70, 14 members),
+3 seeds, vs equal M2 pool (m2_gate_b3).

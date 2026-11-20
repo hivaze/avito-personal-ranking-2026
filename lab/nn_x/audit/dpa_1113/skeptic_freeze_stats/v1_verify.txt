@@ -1,0 +1,17 @@
+[1s] loaded; holdout feeds 30000 (M<50: 0), val feeds 14423 (M<50 0.409)
+[93s] ME: holdout 0.32379 (rec. 0.32379) val 0.40032 (rec. 0.40032)
+SURFACE argmax (vs ME) holdout a=(np.float64(0.3), np.float64(0.4), np.float64(0.3)) +0.00007 | val a=(np.float64(0.1), np.float64(0.4), np.float64(0.5)) +0.00070 | val pmix(priv) a=(np.float64(0.2), np.float64(0.7), np.float64(0.1)) +0.00095 | val pub-w a=(np.float64(0.2), np.float64(0.6), np.float64(0.2)) +0.00081 | val M>=50 a=(np.float64(0.0), np.float64(0.4), np.float64(0.6)) +0.00043 | val M<50 a=(np.float64(0.1), np.float64(0.0), np.float64(0.9)) +0.00139
+  corr(holdout surface, val all surface) over 67 pts: +0.492
+  corr(holdout surface, val pmix surface) over 67 pts: +0.530
+  corr(holdout surface, val M>=50 surface) over 67 pts: +0.734
+  corr(holdout surface, val M<50 surface) over 67 pts: +0.209
+  F10 0                              a=(np.float64(0.0), np.float64(0.5), np.float64(0.5)): HOLD -0.00018+-0.00019 (z -0.97) | VAL +0.00062 (z +1.82) | VAL M>=50 +0.00038 (z +1.07) | VAL M<50 +0.00096 (z +1.47) | pmix +0.00073
+  val-fit (0.05,.35,.6)~(0,.4,.6)    a=(np.float64(0.0), np.float64(0.4), np.float64(0.6)): HOLD -0.00039+-0.00018 (z -2.10) | VAL +0.00064 (z +1.93) | VAL M>=50 +0.00043 (z +1.21) | VAL M<50 +0.00094 (z +1.50) | pmix +0.00058
+  (0.1,.4,.5)                        a=(np.float64(0.1), np.float64(0.4), np.float64(0.5)): HOLD -0.00034+-0.00015 (z -2.25) | VAL +0.00070 (z +2.55) | VAL M>=50 +0.00032 (z +1.05) | VAL M<50 +0.00125 (z +2.46) | pmix +0.00060
+  hold-best (.3,.4,.3)               a=(np.float64(0.3), np.float64(0.4), np.float64(0.3)): HOLD +0.00007+-0.00006 (z +1.24) | VAL +0.00011 (z +1.06) | VAL M>=50 +0.00002 (z +0.24) | VAL M<50 +0.00023 (z +1.09) | pmix +0.00027
+holdout-fit OOF (step .1 grid, 30 random user-grouped 5-fold splits): mean delta -0.00013 (min -0.00031 max -0.00001); share of splits with delta > 0: 0.00; median z -1.13
+  same incl. exact ME in the grid: mean -0.00013, share > 0 0.00, median z -1.13
+val-fit family weights nested OOF (step .1, 30 random splits): mean +0.00021 (min +0.00003 max +0.00051), median z +0.65, share z>2 0.00, mean pmix +0.00010
+M<50 share: val 0.409 | holdout 0.000 | test public 0.387 private 0.392
+mean M: val 96.4 holdout 154.4 public 103.6 private 100.7
+[94s] done

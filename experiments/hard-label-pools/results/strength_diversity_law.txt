@@ -1,0 +1,56 @@
+# Read-out copied from the raw run log (not published), unchanged below this line.
+val pairs: a b rho nd_a nd_b eq gain_over_best
+  pre2_final   xgb_x300_luo     rho 0.6594 0.35900 0.36723 eq 0.37031 gain +0.00308
+  F5cd         V13              rho 0.9785 0.39828 0.39765 eq 0.39900 gain +0.00072
+  F5           V13              rho 0.9796 0.39793 0.39765 eq 0.39847 gain +0.00054
+  F5           F5cd             rho 0.9890 0.39793 0.39828 eq 0.39869 gain +0.00041
+  V13          F4               rho 0.9598 0.39765 0.39401 eq 0.39742 gain -0.00024
+  OLD5ep       F3               rho 0.9910 0.39116 0.38938 eq 0.39070 gain -0.00045
+  F3           stk2_res4_clean  rho 0.9559 0.38938 0.38491 eq 0.38874 gain -0.00064
+  F5cd         F4               rho 0.9612 0.39828 0.39401 eq 0.39746 gain -0.00082
+  F5           F4               rho 0.9669 0.39793 0.39401 eq 0.39692 gain -0.00101
+  F4           OLD5ep           rho 0.9885 0.39401 0.39116 eq 0.39293 gain -0.00108
+  V13          OLD5ep           rho 0.9578 0.39765 0.39116 eq 0.39640 gain -0.00125
+  OLD5ep       stk2_res4_clean  rho 0.9483 0.39116 0.38491 eq 0.38984 gain -0.00131
+  F3           xgb_x300_luo     rho 0.8303 0.38938 0.36723 eq 0.38804 gain -0.00135
+  V13          F3               rho 0.9482 0.39765 0.38938 eq 0.39598 gain -0.00168
+  F5cd         OLD5ep           rho 0.9572 0.39828 0.39116 eq 0.39652 gain -0.00176
+  F4           F3               rho 0.9757 0.39401 0.38938 eq 0.39212 gain -0.00189
+  xgb_x300_luo stk2_res4_clean  rho 0.8653 0.36723 0.38491 eq 0.38275 gain -0.00217
+  F5cd         F3               rho 0.9466 0.39828 0.38938 eq 0.39605 gain -0.00223
+  F4           stk2_res4_clean  rho 0.9311 0.39401 0.38491 eq 0.39166 gain -0.00235
+  F5           OLD5ep           rho 0.9684 0.39793 0.39116 eq 0.39557 gain -0.00236
+  OLD5ep       xgb_x300_luo     rho 0.8224 0.39116 0.36723 eq 0.38862 gain -0.00254
+  F5           F3               rho 0.9615 0.39793 0.38938 eq 0.39502 gain -0.00291
+  V13          stk2_res4_clean  rho 0.9115 0.39765 0.38491 eq 0.39411 gain -0.00354
+  F5cd         stk2_res4_clean  rho 0.9050 0.39828 0.38491 eq 0.39461 gain -0.00367
+  F5cd         xgb_x300_luo     rho 0.7797 0.39828 0.36723 eq 0.39453 gain -0.00375
+  F4           xgb_x300_luo     rho 0.8060 0.39401 0.36723 eq 0.39026 gain -0.00375
+  F3           pre2_final       rho 0.6813 0.38938 0.35900 eq 0.38538 gain -0.00401
+  pre2_final   stk2_res4_clean  rho 0.6843 0.35900 0.38491 eq 0.38068 gain -0.00423
+  F5           stk2_res4_clean  rho 0.9274 0.39793 0.38491 eq 0.39342 gain -0.00451
+  V13          xgb_x300_luo     rho 0.7935 0.39765 0.36723 eq 0.39307 gain -0.00459
+  F5           xgb_x300_luo     rho 0.8108 0.39793 0.36723 eq 0.39300 gain -0.00493
+  OLD5ep       pre2_final       rho 0.6789 0.39116 0.35900 eq 0.38613 gain -0.00503
+  F4           pre2_final       rho 0.6681 0.39401 0.35900 eq 0.38701 gain -0.00700
+  F5cd         pre2_final       rho 0.6663 0.39828 0.35900 eq 0.38990 gain -0.00838
+  V13          pre2_final       rho 0.6695 0.39765 0.35900 eq 0.38846 gain -0.00920
+  F5           pre2_final       rho 0.6893 0.39793 0.35900 eq 0.38794 gain -0.01000
+val fit gain = alpha (1-rho) - beta gap: all pairs ([0.013004660507090503, 0.2907650783019763], 0.8016675476382097), gap<0.01 ([0.01857659866495422, 0.377659515348071], 0.9454690944354323)
+  in-sample best weight of pre2_final added to F5: w 0.05 -> 0.39774 (F5 0.39793)
+  in-sample best weight of xgb_x300_luo added to F5: w 0.05 -> 0.39762 (F5 0.39793)
+  in-sample best weight of stk2_res4_clean added to F5: w 0.1 -> 0.39763 (F5 0.39793)
+  in-sample best weight of F4 added to F5: w 0.2 -> 0.39812 (F5 0.39793)
+  in-sample best weight of OLD5ep added to F5: w 0.05 -> 0.39778 (F5 0.39793)
+holdout pairs:
+  V13_to     F4_to      rho 0.9606 0.32056 0.31810 eq 0.32147 gain +0.00092
+  F5_to      V13_to     rho 0.9780 0.32162 0.32056 eq 0.32236 gain +0.00074
+  V13_to     OLD5ep_to  rho 0.9576 0.32056 0.31647 eq 0.32089 gain +0.00033
+  F5_to      F5cd_to    rho 0.9860 0.32162 0.32279 eq 0.32271 gain -0.00008
+  F5cd_to    V13_to     rho 0.9767 0.32279 0.32056 eq 0.32260 gain -0.00019
+  F5_to      F4_to      rho 0.9686 0.32162 0.31810 eq 0.32131 gain -0.00031
+  F4_to      OLD5ep_to  rho 0.9892 0.31810 0.31647 eq 0.31768 gain -0.00042
+  F5cd_to    F4_to      rho 0.9613 0.32279 0.31810 eq 0.32215 gain -0.00064
+  F5cd_to    OLD5ep_to  rho 0.9556 0.32279 0.31647 eq 0.32160 gain -0.00119
+  F5_to      OLD5ep_to  rho 0.9695 0.32162 0.31647 eq 0.32040 gain -0.00123
+holdout fit ([0.06145083751498479, 0.6204365609631602], 0.9571996795710555)

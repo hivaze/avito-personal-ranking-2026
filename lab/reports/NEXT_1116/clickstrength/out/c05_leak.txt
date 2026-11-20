@@ -1,0 +1,41 @@
+[     0s] RULE.txt md5 5b526db8dd62f7de28d502c5399575b8; c01_build.py md5 fdfb8712c0a1a6b8db47048210ce5843
+[     0s] views: holdout feeds 30000 (with a view 15225), pool feeds with a view 69171; newest source slots in use [2, 3, 4, 5, 7, 8, 13]
+[     0s]    hold: 30000 feeds, rows 4630966; feeds by lag (-1 = no view) {-1: 14775, 3: 3555, 5: 3391, 8: 2027, 9: 3054, 10: 3198}
+[     0s]    pool: 69171 feeds, rows 10253859; feeds by lag (-1 = no view) {3: 15802, 5: 15272, 8: 9190, 9: 14355, 10: 14552}
+[     0s]    val_nat: 14423 feeds, rows 1389971; feeds by lag (-1 = no view) {3: 7542, 4: 1, 5: 6878, 6: 2}
+[     0s]    val_twin: 14423 feeds, rows 1389971; feeds by lag (-1 = no view) {8: 2960, 9: 4583, 10: 6878, 11: 2}
+[     0s]    test_nat: 28595 feeds, rows 2904806; feeds by lag (-1 = no view) {7: 6050, 8: 7367, 9: 7578, 10: 7600}
+[     0s] === (1) causality by real timestamps ===
+[     0s]   hold: feeds with a view 15225; (row time - newest source feed of its window): min 2.001 d, median 7.431 d; feeds with a source at or after (row time - 2 d): 0; feeds with newest source slot > row slot - 3: 0
+[     0s]   pool: feeds with a view 69171; (row time - newest source feed of its window): min 2.001 d, median 7.495 d; feeds with a source at or after (row time - 2 d): 0; feeds with newest source slot > row slot - 3: 0
+[     0s]   val_nat: feeds with a view 14423; (row time - newest source feed of its window): min 2.001 d, median 2.954 d; feeds with a source at or after (row time - 2 d): 0; feeds with newest source slot > row slot - 3: 0
+[     0s]   val_twin: feeds with a view 14423; (row time - newest source feed of its window): min 7.003 d, median 8.930 d; feeds with a source at or after (row time - 2 d): 0; feeds with newest source slot > row slot - 3: 0
+[     0s]   test_nat: feeds with a view 28595; (row time - newest source feed of its window): min 6.001 d, median 8.271 d; feeds with a source at or after (row time - 2 d): 0; feeds with newest source slot > row slot - 3: 0
+[     0s] === (2) re-derivation by a second code path ===
+[     3s]   position weights: max abs difference to the builder 0.00e+00
+[     9s]   shrinkage all: tau2 0.10630 -> a 9.4076; builder: tau2 0.10630, a 9.4076
+[    11s]   shrinkage expl: tau2 -0.29121 -> a 50.0000; builder: tau2 -0.29121, a 50.0000
+[    15s]   sampled feeds 25 per query set: rows 14485, distinct items 14476; train rows of these items on dense slots 517945 (of them in holdout feeds 11142)
+[    15s]   hold: rows 3185 of 25 feeds; mismatches imp3 / clicks 0, expected clicks 0, entered value 0 (max abs difference F1 1.60e-07, F2 1.03e-08); rows that would change if holdout feeds were sources 302; (row time - newest CONTRIBUTING source row): min 2.037 d over 1504 seen rows
+[    15s]   pool: rows 3921 of 25 feeds; mismatches imp3 / clicks 0, expected clicks 0, entered value 0 (max abs difference F1 8.04e-08, F2 2.00e-09); rows that would change if holdout feeds were sources 281; (row time - newest CONTRIBUTING source row): min 2.022 d over 1723 seen rows
+[    15s]   val_nat: rows 2506 of 25 feeds; mismatches imp3 / clicks 0, expected clicks 0, entered value 0 (max abs difference F1 7.46e-08, F2 1.15e-09); rows that would change if holdout feeds were sources 285; (row time - newest CONTRIBUTING source row): min 2.213 d over 1326 seen rows
+[    15s]   val_twin: rows 2580 of 25 feeds; mismatches imp3 / clicks 0, expected clicks 0, entered value 0 (max abs difference F1 6.26e-08, F2 1.53e-09); rows that would change if holdout feeds were sources 136; (row time - newest CONTRIBUTING source row): min 7.364 d over 818 seen rows
+[    15s]   test_nat: rows 2293 of 25 feeds; mismatches imp3 / clicks 0, expected clicks 0, entered value 0 (max abs difference F1 1.11e-07, F2 2.07e-09); rows that would change if holdout feeds were sources 150; (row time - newest CONTRIBUTING source row): min 6.452 d over 888 seen rows
+[    15s]   TOTAL: 14485 rows; mismatches counts 0, expected clicks 0, entered value 0; rows that differ when holdout feeds are admitted 1154 (the check can fail); min (row time - contributing source row) 2.022 d
+[    15s] === (3) sources and label arrays of the builder ===
+[    15s]   arrays opened by c01_build.py (code scan): ['cand_item_id.npy', 'train/cand_item_id.npy', 'train/cand_pos.npy', 'train/cand_target.npy']; "cand_target" occurrences: ['he only label array opened is data/flat/train/cand_target.npy', 'train/cand_target.npy']
+[    15s]   holdout feeds among the source feeds of the builder: 0 (asserted in c01_build.py; fs12 = -1 on all 30000 holdout feeds); admitting them changes 1154 of the 14485 re-derived rows
+[    15s] === (4) own-feed test: mean within-feed AUC of the entered value for the click (feeds with a view), +- 1 SE over feeds; (5) the leaky build ===
+[    17s]   cs3a_c       | slots 6-8: pool 0.5112 +- 0.0014 (31074 feeds), holdout 0.5063 +- 0.0031 (6946 feeds), pool - holdout +0.0048 = +1.4 SE | slots 11-13: pool 0.5049 +- 0.0012 (38097 feeds), holdout 0.4994 +- 0.0026 (8279 feeds), pool - holdout +0.0055 = +1.9 SE -> ok
+[    17s]   cs3x_c       | slots 6-8: pool 0.5076 +- 0.0014 (31074 feeds), holdout 0.5122 +- 0.0030 (6946 feeds), pool - holdout -0.0046 = -1.4 SE | slots 11-13: pool 0.5063 +- 0.0012 (38097 feeds), holdout 0.5040 +- 0.0026 (8279 feeds), pool - holdout +0.0024 = +0.8 SE -> ok
+[    18s]   cs3a_c_LEAK  | slots 6-8: pool 0.9251 +- 0.0007 (31074 feeds), holdout 0.5191 +- 0.0032 (6946 feeds), pool - holdout +0.4060 = +124.5 SE | slots 11-13: pool 0.9267 +- 0.0007 (38097 feeds), holdout 0.5218 +- 0.0029 (8279 feeds), pool - holdout +0.4049 = +134.8 SE -> FLAGGED (pool above holdout by more than 3 SE)
+[    18s]   cs3x_c_LEAK  | slots 6-8: pool 0.9875 +- 0.0002 (31074 feeds), holdout 0.5114 +- 0.0031 (6946 feeds), pool - holdout +0.4760 = +151.3 SE | slots 11-13: pool 0.9861 +- 0.0002 (38097 feeds), holdout 0.5165 +- 0.0029 (8279 feeds), pool - holdout +0.4696 = +161.4 SE -> FLAGGED (pool above holdout by more than 3 SE)
+[    18s]   (5) leaky build pool cs3a_c: rows with a different value 1.0000; corr with the build of record 0.184
+[    18s]   (5) leaky build pool cs3x_c: rows with a different value 1.0000; corr with the build of record 0.067
+[    18s]   (5) leaky build hold cs3a_c: rows with a different value 0.8062; corr with the build of record 0.166
+[    18s]   (5) leaky build hold cs3x_c: rows with a different value 0.8020; corr with the build of record 0.061
+[    18s]   (5) causality check on the leaky windows, pool: feeds with a view 69171; (row time - newest source feed of its window): min -0.999 d, median -0.401 d; feeds with a source at or after (row time - 2 d): 69171; feeds with newest source slot > row slot - 3: 69171
+[    18s]   (5) causality check on the leaky windows, hold: feeds with a view 15225; (row time - newest source feed of its window): min -0.999 d, median -0.397 d; feeds with a source at or after (row time - 2 d): 15225; feeds with newest source slot > row slot - 3: 15225
+[    18s] NOT RUN (only after a GO): the same audit on all 246.7M train rows; the share of rows whose own user contributed an earlier impression of the same item (stated limit of RULE.txt section 2).
+[    18s] === g5: PASS ===
+[    18s] DONE

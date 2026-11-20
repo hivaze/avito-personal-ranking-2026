@@ -1,0 +1,12 @@
+[train-fit] base                         val NDCG@200/500/1000 it: 0.3303 0.3303 0.3307 | vs base (500it) +0.0000 (SE 0.0000)  [130s]
+    top gain: f5:0.196, category_id:0.183, f3:0.176, f4:0.174, f1:0.139, f2:0.133
+[train-fit] base+user_dot                val NDCG@200/500/1000 it: 0.3479 0.3467 0.3447 | vs base (500it) +0.0164 (SE 0.0014)  [255s]
+    top gain: category_id:0.193, f1:0.149, user_dot:0.146, f5:0.146, f4:0.133, f3:0.122, f2:0.110
+[train-fit] base+hist(rec_hl5,max_sim)   val NDCG@200/500/1000 it: 0.3589 0.3587 0.3566 | vs base (500it) +0.0284 (SE 0.0016)  [375s]
+    top gain: max_sim:0.166, category_id:0.152, f3:0.140, f4:0.120, f5:0.116, rec_hl5:0.115, f2:0.098, f1:0.093
+[train-fit] base+compact8                val NDCG@200/500/1000 it: 0.3617 0.3617 0.3602 | vs base (500it) +0.0314 (SE 0.0016)  [1248s]
+    top gain: category_id:0.157, last5_cos:0.083, f4:0.081, f5:0.080, f3:0.076, max_sim:0.071, user_dot:0.067, type1_max:0.065, centrality_loo:0.062, smax_t0.1:0.055
+[train-fit] base+all_emb                 val NDCG@200/500/1000 it: 0.3650 0.3651 0.3632 | vs base (500it) +0.0348 (SE 0.0016)  [4311s]
+    top gain: category_id:0.137, f4:0.046, f5:0.044, user_dot:0.035, cand_cat_centrality:0.033, last5_cos:0.032, f3:0.032, type1_max:0.029, smax_t0.05:0.029, max_sim:0.028
+[train-fit] emb_only(all)                val NDCG@200/500/1000 it: 0.3592 0.3588 0.3565 | vs base (500it) +0.0285 (SE 0.0018)  [7142s]
+    top gain: cand_cat_centrality:0.052, max_sim:0.052, last1_cos:0.044, user_dot:0.044, last10_cos:0.039, centrality_loo:0.036, type1_max:0.034, type3_mean:0.030, type4_max:0.030, type4_mean:0.030

@@ -1,0 +1,22 @@
+== GATE-CAL val / block pop (xdrop_pop, seeds (951, 952, 953, 954)): ablated pool 0.39727, with-input twin pool 0.39887
+   TRUE pool-level NN-input value of the block: +0.00160 +- 0.00102 (z +1.6)
+   linear nested seq_cv_invd20_fz       -0.00015 +- 0.00039  w [0.05, 0]
+   linear nested seq_cv_pop_fz          -0.00014 +- 0.00029  w [0.05, 0]
+   linear nested seq_cv_norm_fz         +0.00011 +- 0.00045  w [0.05, 0.02]
+   linear nested it_hist_all_luo_fz     -0.00015 +- 0.00029  w [0.05, 0]
+   linear nested it_hist_et1_luo_fz     -0.00013 +- 0.00030  w [0.05, 0]
+   linear nested it_hist_et2_luo_fz     +0.00009 +- 0.00024  w [0.02, -0.02]
+   linear nested it_hist_et3_luo_fz     -0.00028 +- 0.00025  w [0.02, -0.02]
+   linear nested it_hist_et4_luo_fz     -0.00013 +- 0.00026  w [0.05, 0]
+   (i) LINEAR NESTED best single column (post hoc pick, optimistic): seq_cv_norm_fz +0.00011 +- 0.00045 = 0.07 of true
+  [pop-control(no signal)] fit half 1: scale 1.0, cfg 0, rounds 0, inner gain +0.00000 -> other half +0.00000 +- 0.00000 (n 7242) [21s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]
+  [pop-control(no signal)] fit half 0: scale 1.0, cfg 0, rounds 0, inner gain +0.00000 -> other half +0.00000 +- 0.00000 (n 7181) [41s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]
+  [pop-control(no signal)] BOTH halves: +0.00000 +- 0.00000 (z +0.00) over 14423 feeds; all-feed mean +0.00000; top gain: hour 0.00, guest 0.00, base_z 0.00, base_rk 0.00, M 0.00, H 0.00
+  [pop-block] fit half 1: scale 1.0, cfg 0, rounds 150, inner gain +0.00089 -> other half -0.00119 +- 0.00059 (n 7242) [27s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, 41, 51, 70, 66, 89, 83], [0, 14, 9, 41, 71, 50, 17], [0, 24, 2, 22, 4, -59, -142]]
+  [pop-block] fit half 0: scale 1.0, cfg 2, rounds 10, inner gain +0.00032 -> other half +0.00004 +- 0.00046 (n 7181) [51s]
+      inner table x1e5 (rows cfg, cols rounds (0, 10, 20, 40, 80, 150, 250)): [[0, -6, -15, -18, -61, -127, -118], [0, 23, -27, -36, -56, -122, -81], [0, 32, -24, -60, -132, -202, -284]]
+  [pop-block] BOTH halves: -0.00058 +- 0.00037 (z -1.55) over 14423 feeds; all-feed mean -0.00058; top gain: it_hist_et1_luo 0.10, it_hist_et2_luo_fz 0.08, seq_cv_invd20 0.07, it_hist_et4_luo_fz 0.06, it_hist_et3_luo 0.06, it_hist_et4_luo 0.06, seq_cv_norm 0.06, it_hist_et2_luo 0.06
+   (ii) MONOTONE GBDT RESIDUAL: control +0.00000 +- 0.00000 | block -0.00058 +- 0.00037 = -0.36 of true (+0.00160 +- 0.00102)

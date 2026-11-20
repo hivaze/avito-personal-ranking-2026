@@ -1,0 +1,569 @@
+[
+ {
+  "section": "c.labels",
+  "name": "YetiRank <- soft prob (softmax of teacher, sums to 1 per feed)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7280; within-feed Spearman to teacher 0.785; pred sd 1.66",
+  "sec": 2.52
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank <- pointwise prob in (0,1)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7341; within-feed Spearman to teacher 0.791; pred sd 1.69",
+  "sec": 2.17
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank <- teacher logit (any real, negatives)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7277; within-feed Spearman to teacher 0.798; pred sd 1.7",
+  "sec": 2.16
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7277; within-feed Spearman to teacher 0.798; pred sd 1.7",
+  "sec": 2.14
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank <- 0.5*y/npos + 0.5*softmax(teacher)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7342; within-feed Spearman to teacher 0.769; pred sd 1.48",
+  "sec": 2.22
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank <- graded 0/1/3/4",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7243; within-feed Spearman to teacher 0.780; pred sd 1.62",
+  "sec": 1.41
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank:mode=NDCG <- soft prob (softmax of teacher, sums to 1 per feed)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7337; within-feed Spearman to teacher 0.774; pred sd 1.61",
+  "sec": 2.66
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank:mode=NDCG <- pointwise prob in (0,1)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7353; within-feed Spearman to teacher 0.789; pred sd 1.69",
+  "sec": 2.63
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank:mode=NDCG <- teacher logit (any real, negatives)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7319; within-feed Spearman to teacher 0.791; pred sd 1.69",
+  "sec": 2.7
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank:mode=NDCG <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7327; within-feed Spearman to teacher 0.793; pred sd 1.69",
+  "sec": 2.67
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank:mode=NDCG <- 0.5*y/npos + 0.5*softmax(teacher)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7296; within-feed Spearman to teacher 0.759; pred sd 1.43",
+  "sec": 2.73
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank:mode=NDCG <- graded 0/1/3/4",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7300; within-feed Spearman to teacher 0.772; pred sd 1.6",
+  "sec": 1.99
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank:mode=MRR <- soft prob (softmax of teacher, sums to 1 per feed)",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/algo/tensor_search_helpers.cpp:565: Too few sampling units (subsample=0.8, bootstrap_type=MVS): please increase sampling rate or disable sampling",
+  "sec": 0.05
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank:mode=MRR <- pointwise prob in (0,1)",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/algo/tensor_search_helpers.cpp:565: Too few sampling units (subsample=0.8, bootstrap_type=MVS): please increase sampling rate or disable sampling",
+  "sec": 0.05
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank:mode=MRR <- teacher logit (any real, negatives)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6470; within-feed Spearman to teacher 0.765; pred sd 1.9",
+  "sec": 1.07
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank:mode=MRR <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7008; within-feed Spearman to teacher 0.779; pred sd 1.8",
+  "sec": 1.09
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank:mode=MRR <- 0.5*y/npos + 0.5*softmax(teacher)",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/algo/tensor_search_helpers.cpp:565: Too few sampling units (subsample=0.8, bootstrap_type=MVS): please increase sampling rate or disable sampling",
+  "sec": 0.04
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank:mode=MRR <- graded 0/1/3/4",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7190; within-feed Spearman to teacher 0.774; pred sd 1.75",
+  "sec": 1.1
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRankPairwise <- soft prob (softmax of teacher, sums to 1 per feed)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6778; within-feed Spearman to teacher 0.713; pred sd 0.67",
+  "sec": 5.62
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRankPairwise <- pointwise prob in (0,1)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6801; within-feed Spearman to teacher 0.736; pred sd 0.722",
+  "sec": 5.59
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRankPairwise <- teacher logit (any real, negatives)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6703; within-feed Spearman to teacher 0.746; pred sd 0.742",
+  "sec": 5.79
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRankPairwise <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6703; within-feed Spearman to teacher 0.746; pred sd 0.742",
+  "sec": 5.57
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRankPairwise <- 0.5*y/npos + 0.5*softmax(teacher)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6979; within-feed Spearman to teacher 0.715; pred sd 0.624",
+  "sec": 5.68
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRankPairwise <- graded 0/1/3/4",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6873; within-feed Spearman to teacher 0.723; pred sd 0.691",
+  "sec": 2.71
+ },
+ {
+  "section": "c.labels",
+  "name": "QuerySoftMax <- soft prob (softmax of teacher, sums to 1 per feed)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6430; within-feed Spearman to teacher 0.581; pred sd 0.087",
+  "sec": 0.22
+ },
+ {
+  "section": "c.labels",
+  "name": "QuerySoftMax <- pointwise prob in (0,1)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6875; within-feed Spearman to teacher 0.748; pred sd 0.354",
+  "sec": 0.22
+ },
+ {
+  "section": "c.labels",
+  "name": "QuerySoftMax <- teacher logit (any real, negatives)",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/libs/metrics/metric.cpp:7021: Min target less than 0: -5.19582",
+  "sec": 0.03
+ },
+ {
+  "section": "c.labels",
+  "name": "QuerySoftMax <- feed-centred teacher logit",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/libs/metrics/metric.cpp:7021: Min target less than 0: -5.67043",
+  "sec": 0.03
+ },
+ {
+  "section": "c.labels",
+  "name": "QuerySoftMax <- 0.5*y/npos + 0.5*softmax(teacher)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6551; within-feed Spearman to teacher 0.577; pred sd 0.149",
+  "sec": 0.22
+ },
+ {
+  "section": "c.labels",
+  "name": "QuerySoftMax <- graded 0/1/3/4",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7065; within-feed Spearman to teacher 0.737; pred sd 0.834",
+  "sec": 0.22
+ },
+ {
+  "section": "c.labels",
+  "name": "QueryRMSE <- soft prob (softmax of teacher, sums to 1 per feed)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7173; within-feed Spearman to teacher 0.766; pred sd 0.0162",
+  "sec": 0.2
+ },
+ {
+  "section": "c.labels",
+  "name": "QueryRMSE <- pointwise prob in (0,1)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7315; within-feed Spearman to teacher 0.795; pred sd 0.125",
+  "sec": 0.2
+ },
+ {
+  "section": "c.labels",
+  "name": "QueryRMSE <- teacher logit (any real, negatives)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7374; within-feed Spearman to teacher 0.803; pred sd 0.826",
+  "sec": 0.2
+ },
+ {
+  "section": "c.labels",
+  "name": "QueryRMSE <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7374; within-feed Spearman to teacher 0.803; pred sd 0.826",
+  "sec": 0.2
+ },
+ {
+  "section": "c.labels",
+  "name": "QueryRMSE <- 0.5*y/npos + 0.5*softmax(teacher)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7071; within-feed Spearman to teacher 0.717; pred sd 0.0273",
+  "sec": 0.19
+ },
+ {
+  "section": "c.labels",
+  "name": "QueryRMSE <- graded 0/1/3/4",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7281; within-feed Spearman to teacher 0.768; pred sd 0.425",
+  "sec": 0.19
+ },
+ {
+  "section": "c.labels",
+  "name": "PairLogit <- soft prob (softmax of teacher, sums to 1 per feed)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6901; within-feed Spearman to teacher 0.790; pred sd 1.18",
+  "sec": 2.52
+ },
+ {
+  "section": "c.labels",
+  "name": "PairLogit <- pointwise prob in (0,1)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6901; within-feed Spearman to teacher 0.790; pred sd 1.18",
+  "sec": 2.43
+ },
+ {
+  "section": "c.labels",
+  "name": "PairLogit <- teacher logit (any real, negatives)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6901; within-feed Spearman to teacher 0.790; pred sd 1.18",
+  "sec": 2.38
+ },
+ {
+  "section": "c.labels",
+  "name": "PairLogit <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6901; within-feed Spearman to teacher 0.790; pred sd 1.18",
+  "sec": 2.39
+ },
+ {
+  "section": "c.labels",
+  "name": "PairLogit <- 0.5*y/npos + 0.5*softmax(teacher)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6920; within-feed Spearman to teacher 0.790; pred sd 1.18",
+  "sec": 2.42
+ },
+ {
+  "section": "c.labels",
+  "name": "PairLogit <- graded 0/1/3/4",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6990; within-feed Spearman to teacher 0.768; pred sd 1.68",
+  "sec": 0.95
+ },
+ {
+  "section": "c.labels",
+  "name": "LambdaMart <- soft prob (softmax of teacher, sums to 1 per feed)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7395; within-feed Spearman to teacher 0.776; pred sd 1.58",
+  "sec": 1.71
+ },
+ {
+  "section": "c.labels",
+  "name": "LambdaMart <- pointwise prob in (0,1)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7319; within-feed Spearman to teacher 0.789; pred sd 1.68",
+  "sec": 1.71
+ },
+ {
+  "section": "c.labels",
+  "name": "LambdaMart <- teacher logit (any real, negatives)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7203; within-feed Spearman to teacher 0.781; pred sd 2.14",
+  "sec": 1.94
+ },
+ {
+  "section": "c.labels",
+  "name": "LambdaMart <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7257; within-feed Spearman to teacher 0.795; pred sd 1.7",
+  "sec": 1.93
+ },
+ {
+  "section": "c.labels",
+  "name": "LambdaMart <- 0.5*y/npos + 0.5*softmax(teacher)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7212; within-feed Spearman to teacher 0.729; pred sd 1.5",
+  "sec": 1.93
+ },
+ {
+  "section": "c.labels",
+  "name": "LambdaMart <- graded 0/1/3/4",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7282; within-feed Spearman to teacher 0.760; pred sd 1.58",
+  "sec": 0.82
+ },
+ {
+  "section": "c.labels",
+  "name": "LambdaMart:metric=MRR <- soft prob (softmax of teacher, sums to 1 per feed)",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/algo/tensor_search_helpers.cpp:565: Too few sampling units (subsample=0.8, bootstrap_type=MVS): please increase sampling rate or disable sampling",
+  "sec": 0.04
+ },
+ {
+  "section": "c.labels",
+  "name": "LambdaMart:metric=MRR <- pointwise prob in (0,1)",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/algo/tensor_search_helpers.cpp:565: Too few sampling units (subsample=0.8, bootstrap_type=MVS): please increase sampling rate or disable sampling",
+  "sec": 0.04
+ },
+ {
+  "section": "c.labels",
+  "name": "LambdaMart:metric=MRR <- teacher logit (any real, negatives)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.5866; within-feed Spearman to teacher 0.619; pred sd 2.88",
+  "sec": 0.25
+ },
+ {
+  "section": "c.labels",
+  "name": "LambdaMart:metric=MRR <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6035; within-feed Spearman to teacher 0.633; pred sd 2.57",
+  "sec": 0.26
+ },
+ {
+  "section": "c.labels",
+  "name": "LambdaMart:metric=MRR <- 0.5*y/npos + 0.5*softmax(teacher)",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/private/libs/algo/tensor_search_helpers.cpp:565: Too few sampling units (subsample=0.8, bootstrap_type=MVS): please increase sampling rate or disable sampling",
+  "sec": 0.04
+ },
+ {
+  "section": "c.labels",
+  "name": "LambdaMart:metric=MRR <- graded 0/1/3/4",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6514; within-feed Spearman to teacher 0.686; pred sd 1.82",
+  "sec": 0.25
+ },
+ {
+  "section": "c.labels",
+  "name": "StochasticRank:metric=NDCG <- soft prob (softmax of teacher, sums to 1 per feed)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7132; within-feed Spearman to teacher 0.743; pred sd 0.00662",
+  "sec": 13.92
+ },
+ {
+  "section": "c.labels",
+  "name": "StochasticRank:metric=NDCG <- pointwise prob in (0,1)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6992; within-feed Spearman to teacher 0.756; pred sd 0.00575",
+  "sec": 13.73
+ },
+ {
+  "section": "c.labels",
+  "name": "StochasticRank:metric=NDCG <- teacher logit (any real, negatives)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7201; within-feed Spearman to teacher 0.790; pred sd 0.00923",
+  "sec": 13.43
+ },
+ {
+  "section": "c.labels",
+  "name": "StochasticRank:metric=NDCG <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7335; within-feed Spearman to teacher 0.799; pred sd 0.0127",
+  "sec": 13.43
+ },
+ {
+  "section": "c.labels",
+  "name": "StochasticRank:metric=NDCG <- 0.5*y/npos + 0.5*softmax(teacher)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7130; within-feed Spearman to teacher 0.730; pred sd 0.0065",
+  "sec": 13.3
+ },
+ {
+  "section": "c.labels",
+  "name": "StochasticRank:metric=NDCG <- graded 0/1/3/4",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7242; within-feed Spearman to teacher 0.745; pred sd 0.00714",
+  "sec": 13.3
+ },
+ {
+  "section": "c.labels",
+  "name": "StochasticRank:metric=DCG <- soft prob (softmax of teacher, sums to 1 per feed)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.6933; within-feed Spearman to teacher 0.706; pred sd 0.0043",
+  "sec": 13.32
+ },
+ {
+  "section": "c.labels",
+  "name": "StochasticRank:metric=DCG <- pointwise prob in (0,1)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7298; within-feed Spearman to teacher 0.794; pred sd 0.0118",
+  "sec": 13.22
+ },
+ {
+  "section": "c.labels",
+  "name": "StochasticRank:metric=DCG <- teacher logit (any real, negatives)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7316; within-feed Spearman to teacher 0.802; pred sd 0.0368",
+  "sec": 12.98
+ },
+ {
+  "section": "c.labels",
+  "name": "StochasticRank:metric=DCG <- feed-centred teacher logit",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7316; within-feed Spearman to teacher 0.802; pred sd 0.0368",
+  "sec": 13.34
+ },
+ {
+  "section": "c.labels",
+  "name": "StochasticRank:metric=DCG <- 0.5*y/npos + 0.5*softmax(teacher)",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7058; within-feed Spearman to teacher 0.710; pred sd 0.00533",
+  "sec": 13.27
+ },
+ {
+  "section": "c.labels",
+  "name": "StochasticRank:metric=DCG <- graded 0/1/3/4",
+  "status": "PASS",
+  "detail": "eval NDCG(hard clicks) 0.7230; within-feed Spearman to teacher 0.760; pred sd 0.0231",
+  "sec": 13.09
+ },
+ {
+  "section": "c.labels",
+  "name": "CrossEntropy <- pointwise prob in (0,1)",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoost.__init__() got an unexpected keyword argument 'loss_function'",
+  "sec": 0.0
+ },
+ {
+  "section": "c.labels",
+  "name": "CrossEntropy <- soft prob (sums to 1 per feed)",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoost.__init__() got an unexpected keyword argument 'loss_function'",
+  "sec": 0.0
+ },
+ {
+  "section": "c.labels",
+  "name": "CrossEntropy <- teacher logit (outside [0,1])",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoost.__init__() got an unexpected keyword argument 'loss_function'",
+  "sec": 0.0
+ },
+ {
+  "section": "c.labels",
+  "name": "Logloss <- pointwise prob in (0,1), no target_border",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoost.__init__() got an unexpected keyword argument 'loss_function'",
+  "sec": 0.0
+ },
+ {
+  "section": "c.labels",
+  "name": "Logloss <- pointwise prob in (0,1), target_border=0.5",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoost.__init__() got an unexpected keyword argument 'loss_function'",
+  "sec": 0.0
+ },
+ {
+  "section": "c.labels",
+  "name": "RMSE <- teacher logit",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoost.__init__() got an unexpected keyword argument 'loss_function'",
+  "sec": 0.0
+ },
+ {
+  "section": "c.labels",
+  "name": "RMSE <- feed-centred teacher logit",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoost.__init__() got an unexpected keyword argument 'loss_function'",
+  "sec": 0.0
+ },
+ {
+  "section": "c.labels",
+  "name": "QueryRMSE <- teacher logit (QueryRMSE removes the feed mean itself)",
+  "status": "FAIL",
+  "detail": "TypeError: CatBoost.__init__() got an unexpected keyword argument 'loss_function'",
+  "sec": 0.0
+ },
+ {
+  "section": "c.labels",
+  "name": "YetiRank + target_border=0.5 on graded labels",
+  "status": "PASS",
+  "detail": "eval NDCG 0.7200, pred sd 1.75, trees 40; differs from 'YetiRank' (corr 0.981)",
+  "sec": 2.5
+ },
+ {
+  "section": "c.labels",
+  "name": "QuerySoftMax + target_border=0.5 on graded labels",
+  "status": "PASS",
+  "detail": "eval NDCG 0.6728, pred sd 0.723, trees 40; differs from 'QuerySoftMax' (corr 0.982)",
+  "sec": 0.39
+ },
+ {
+  "section": "c.labels",
+  "name": "QueryRMSE: raw teacher logit vs feed-centred teacher logit give the same ranking model",
+  "status": "PASS",
+  "detail": "max |centred pred difference| 2.38e-07, corr 1.00000",
+  "sec": 0.35
+ },
+ {
+  "section": "c.labels",
+  "name": "QuerySoftMax with soft labels minimises the listwise cross-entropy to the soft target (KL falls)",
+  "status": "PASS",
+  "detail": "train KL(teacher softmax || model softmax): uniform start 0.6132 -> after 150 trees 0.3557",
+  "sec": 0.61
+ },
+ {
+  "section": "c.labels",
+  "name": "QuerySoftMax: multiplying all labels by 3 changes the fit (sum of labels = feed weight)",
+  "status": "PASS",
+  "detail": "labels x3: corr 0.9848, sd ratio 2.560 (label sum acts as a feed weight)",
+  "sec": 0.38
+ },
+ {
+  "section": "c.labels",
+  "name": "QuerySoftMax with an all-zero-label feed",
+  "status": "PASS",
+  "detail": "one all-negative feed in train: trains, eval NDCG 0.6653",
+  "sec": 0.18
+ },
+ {
+  "section": "c.labels",
+  "name": "QuerySoftMax with negative labels (centred logits)",
+  "status": "FAIL",
+  "detail": "CatBoostError: catboost/libs/metrics/metric.cpp:7021: Min target less than 0: -5.67043",
+  "sec": 0.02
+ }
+]

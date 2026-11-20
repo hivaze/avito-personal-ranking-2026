@@ -1,0 +1,12 @@
+public feeds 8562 private feeds 20033 (timestamp < / >= 1790497920)
+## probe_W8_FTonly_wft100: w_ft 1.0 on preds/ens_W8kd_*
+  path check: this code at w_ft 0.5 reproduces subs/cand_W8kd_r2.parquet row by row: True (share of equal rows 1.000000)
+  path check: w_ft 0 reproduces subs/cand_W8TOkd_r3.parquet: True (share 1.000000)
+  file <repo>/nn_x/w12/ft_1115/stage/probe_W8_FTonly_wft100.parquet | rows 2904806 feeds 28595 | sha256 1357e4069e230b798846c77d71a7717e4ecc6401aba8aecf93751b2d71c40f10
+  final val 0.40087 (w_ft 0.5 file 0.40165) | delta against the w_ft 0.5 file: val -0.00078+-0.00040 | pmix-public -0.00072+-0.00050 | pmix-private -0.00053+-0.00062 | M<50 -0.00088+-0.00073 M>=50 -0.00071+-0.00046
+  paired public SE of the delta (val per-feed sd / sqrt(8562)) 0.00052 | test correlation to the w_ft 0.5 file: pooled Pearson 0.9979, mean per-feed Pearson 0.9980 | same top-1 item: public 0.8928 private 0.9054
+## cand_FD16P20_wft060: w_ft 0.6 on preds/ens_FD16P20kd_*
+  path check: this code at w_ft 0.5 reproduces subs/cand_FD16P20kd_r4.parquet row by row: True (share of equal rows 1.000000)
+  file <repo>/nn_x/w12/ft_1115/stage/cand_FD16P20_wft060.parquet | rows 2904806 feeds 28595 | sha256 4a5fc1b84b0c17a21439f6577de16e27e0dce08069a102adb5783ffec48f1493
+  final val 0.40261 (w_ft 0.5 file 0.40271) | delta against the w_ft 0.5 file: val -0.00011+-0.00016 | pmix-public -0.00009+-0.00020 | pmix-private -0.00007+-0.00024 | M<50 +0.00017+-0.00030 M>=50 -0.00030+-0.00017
+  paired public SE of the delta (val per-feed sd / sqrt(8562)) 0.00021 | test correlation to the w_ft 0.5 file: pooled Pearson 0.9999, mean per-feed Pearson 0.9999 | same top-1 item: public 0.9808 private 0.9814

@@ -1,0 +1,33 @@
+TIMEGAP-1113 PRE-DECLARATION (split-stationary time-gap features as nested residuals on G3). Written BEFORE any feature of this
+batch was built or scored. Agent: measurement agent (CPU only, 12 threads, read-only on the project).
+Scratch: /tmp/scratchpad/timegap/
+
+PROTOCOL (copied from nn_x/insights/enrich_1113/harness.py = CCB tester-2 harness):
+  base val b = zf(0.5 zf(ens_G3_ft_val) + 0.5 zf(ens_G3_to_val)) (0.40032); base holdout = zf(mean zf of the 20 train-only G3
+  members in preds/holdout) (0.32379). LIN listwise softmax s = beta b + sum_j [w_j1 zf(x_j) + w_j2 (pctrank(x_j)-0.5) + w_j3 isnan],
+  control = beta b; GroupKFold(5) by val user; nested paired per-feed NDCG delta; full-val theta applied to the 30K in-period
+  holdout (+ LATE Sep 17-19 / EARLY Sep 6-8 columns); pmix(private) on the nested per-feed deltas (veto only).
+  Within-feed AUC of each raw column on val reported as information.
+  NOTE: the harness's zf / pctrank ARE the within-feed normalisation under test; the raw gap enters the LIN only through them.
+
+SOURCES (label-free, time-ordered): per item a 15-bit day mask over the train days (Sep 5-19 MSK) of (i) appearances as a
+  CANDIDATE in any train feed and (ii) appearances as a HISTORY item of any train feed, dated by that feed's timestamp. The
+  30K holdout feeds are never a source. For a row on feed day D only days < D count (train sample and holdout rows); val rows
+  (Sep 22-24) see all train days. Train sample: 300K random train feeds excluding the holdout (rng 7, as enrich_1113/build.py).
+
+COLUMNS (raw; the LIN sees z, pctrank, isnan of each):
+  A gap_last      D - last earlier day the item was a candidate (NaN if never)
+  B gap_last_any  D - last earlier day the item was a candidate OR a history item (NaN if never)
+  C gap_first     D - first earlier day the item was a candidate (NaN if never); report Spearman(gap_first, f4) on val
+  D never_seen    1 if no earlier candidate appearance (= isnan(A))
+  E n_days_active number of distinct earlier train days with a candidate appearance (0 if never)
+
+ITEMS (one LIN each): A, B, C, D, E individually, and ALL4 = [A, B, C, E] as one block (4 x [z, pctrank, isnan]).
+PSI (information, the point of the exercise): PSI train-sample vs val of the raw column (10 bins + NaN bin) and of its
+  within-feed z-score and within-feed pct rank (10 equal-width bins on the normalised scale). Expectation: raw PSI large,
+  normalised PSI < 0.1.
+
+PASS BAR (applies to each item): nested val delta >= +0.0005 AND z >= 2.5 AND holdout transfer delta >= 0 AND pmix >= -1 SE.
+  Anything else = CLOSED with its number. Multiplicity: 6 items; under the null P(max z >= 2.5 of 6) ~ 0.04.
+  Harness noise band (s04 / enrich): -0.00047..+0.00022 on val; a 4-column noise LIN reads holdout z about -2.7.
+Fri Nov 13 19:48:24 UTC 2026

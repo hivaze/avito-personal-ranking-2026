@@ -1,0 +1,62 @@
+# Trajectory encoder: the settings that produced the stored encoder inputs.
+# Ten models are trained, one per corpus and variant; every input is the mean over the two variants.
+
+[model]
+d = 384                  # width of every token
+layers = 4
+heads = 6
+dropout = 0.05
+min_item_count = 3       # corpus occurrences an item needs to own a row of the ID table
+
+[training]
+epochs = 2.0
+token_budget = 131072        # padded tokens per batch
+lr = 1e-3                    # dense weights, AdamW
+id_lr = 1e-2                 # ID table, sparse Adam
+warmup_steps = 300
+weight_decay = 0.01
+id_dropout = 0.3             # share of items whose ID embedding is dropped in a step
+new_item_weight = 0.5        # weight of the "next new item" loss; the "next feed open" loss has weight 1
+negatives_feed_open = 6144   # negatives drawn from the batch's feed-open targets
+negatives_new_item = 2048    # negatives drawn from the batch's new-item targets
+negatives_uniform = 8192     # negatives drawn uniformly from the corpus items
+max_positions = 65536        # supervised positions per head and step
+feed_open_targets = 4        # the feed-open target is drawn among this many next new feed opens
+seed = 0
+
+[variants.id64]
+d_id = 64
+id_bias = false
+
+[variants.id128_bias]
+d_id = 128
+id_bias = true               # a learned scalar logit per item with an ID
+
+# eval_oversampling: how often a val or test sequence is seen per epoch (they are 2% of the corpus).
+# content_table: the item content table used in training ("partial" or "full", see corpus.py).
+[corpora.all]
+eval_oversampling = 4
+content_table = "partial"
+[corpora.no_test]
+eval_oversampling = 4
+content_table = "partial"
+[corpora.window1]
+eval_oversampling = 1
+content_table = "full"
+[corpora.window2]
+eval_oversampling = 1
+content_table = "full"
+[corpora.window3]
+eval_oversampling = 1
+content_table = "full"
+
+[scoring]
+sample_feeds = 60000         # feeds of a train block on which a window model is aligned to the "all" model
+chunk_feeds_eval = 30000     # feeds per scoring chunk on val and test
+chunk_feeds_window = 8000    # ... on the train feeds of a block
+# Feeds per scoring chunk on the alignment sample of each block, per "all" model. The chunk size
+# changes only the last bits of a score (bf16 and TF32 arithmetic depend on the batch shapes);
+# these are the sizes the stored scores were made with, one of the six differs from the rest.
+[scoring.chunk_feeds_sample]
+all_id64 = { window1 = 30000, window2 = 4000, window3 = 4000 }
+all_id128_bias = { window1 = 4000, window2 = 4000, window3 = 4000 }

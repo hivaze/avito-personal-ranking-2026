@@ -1,0 +1,118 @@
+DECLARATION  nn_x/w12/lit/syn  (synthesiser of reports/LIT_1115; CPU only, stored arrays only, no GPU, no submission file)
+====================================================================================================================
+BLOCK 1 written 2026-11-15T15:33:30Z (date -u), BEFORE any number of this directory was computed.
+
+PURPOSE. One CPU pre-gate for the only graph-type candidate that both graph reports leave open: neighbour-completed
+collaborative scores for COLD candidates (lit_gnn S1 "NBR-CV" / int_gnn form C). Question: do such columns order the cold
+rows of a feed better than the finished pool already does? It is a residual-lens read (COVERAGE_MAP l.323: under-reads a trained
+input), made sharper by removing the cold/warm trade from the lens.
+
+KNOWN TO ME BEFORE THIS BLOCK (disclosed; sample A below was already read by int_gnn, nn_x/w12/lit/int_gnn/s5.log):
+ - AUC among cold rows: imputed s1 0.609, W16 pool 0.751; after rank-residualising on seq_max_new8 + pre2_fe_noid 0.545 +- 0.010;
+ - nested residual on W16 (column z among cold rows, warm rows 0): -0.00038 +- 0.00051, "feeds with a cold positive +0.00313";
+ - Spearman(imputed s1, W16 pool) among cold rows +0.40.
+ So I know the lens is noisy and that the gain sits in feeds with a cold positive. Stage A is therefore EXPLORATORY.
+
+DATA. Sample A = the 3,000 val feeds of nn_x/w12/lit/int_gnn/s5_cold_val.npz (selF, qrows, nv, s1, s2, dg; read-only).
+ Cold row = it_hist_all_luo == 0 with an embedding (int_gnn's definition). Columns rebuilt exactly as in s5_coldsignal.py:
+   PRIMARY   x1 = "imputed s1 (cos-weighted mean)"  = sum_k w_k s1_k / sum_k w_k, w_k = cos_k if cos_k >= 0.90 else 0
+   REPLICATE x2 = "imputed s2/deg^.5"
+   info: imputed s1 (max), imputed s2/deg, number of linked neighbours, imputed log-degree, density (top-1 cos).
+ Transform for the NDCG reads: v -> log1p(v / median of the positive values) for s-type and count columns, then z among the
+ cold rows of the feed (as int_gnn). Pools: PRIMARY pool F = zf(0.5 zf(ens_FD16P20kd_ft_val) + 0.5 zf(ens_FD16P20kd_to_val))
+ (the scored full-data file, public 0.394892); SECONDARY pool W = the same form of ens_W16kd (int_gnn's pool).
+
+READS.
+ A1 pool-conditional AUC among cold rows: within-feed centred percentile ranks among the cold rows; pooled OLS of rank(x) on
+    (i) rank(pool), (ii) rank(pool) + rank(seq_max_new8) + rank(pre2_fe_noid); feed-mean AUC of the residual, +- sd/sqrt(n)
+    over feeds with a cold positive and a cold negative. 0.5 = the pool already orders cold rows as x would.
+ A2 slot-preserving within-cold re-order (NDCG units): warm rows keep their pool score; the cold rows of a feed are re-ordered
+    by zc(pool) + w * x (zc = z among the cold rows of the feed) and receive, in that order, the sorted pool scores that the
+    feed's cold rows had. Warm rows never move, so a feed without a cold positive has delta exactly 0: the cold/warm trade
+    is removed by construction. w in {0, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0}; nested: GroupKFold(5) by user (every user-0 feed its
+    own group), w = argmax of mean NDCG on 4/5, applied to 1/5. delta_f = NDCG_f(arm) - NDCG_f(pool), src/metrics.ndcg_per_feed;
+    GAIN = mean over ALL sampled feeds, SE = sd / sqrt(n feeds).
+ A3 placebo: x permuted among the cold rows within each feed, 20 draws (seeds 0..19), same nested read.
+ Reported, not deciding: in-sample curve over w; feeds with a cold positive; pmix public / private weights (src/pmix.weights).
+
+STAGE A WORDS (exploratory, primary column x1, primary pool F):
+   KILL-LEAN  iff A1(i) < 0.515 AND A2 < +0.0002
+   GO-TO-B    iff A2 >= +0.0003 OR A1(i) >= 0.530
+   otherwise  INCONCLUSIVE (no stage B).
+
+STAGE B (CONFIRMATORY; run only on GO-TO-B). The same neighbour construction for the cold rows of the val feeds NOT in sample A
+ (14,423 - 3,000 = 11,423 feeds), by copies of the int_gnn scripts executed from THIS directory (one process, <= 12 threads,
+ expected 45-60 min, about 14 GB resident; no file outside this directory is written). The same A1-A3 on those feeds only.
+   PASS  iff A2(x1, pool F) >= +0.0003 AND z >= 2 AND above every placebo draw AND A2(x2, pool F) > 0
+   FAIL  iff A2(x1, pool F) <= +1 SE
+   else  REPLICATE band.
+ Meaning. PASS = the first collaborative column that survives a nested read on the current file; it raises the prior of the
+ trained-input arm (it is NOT an adoption and NOT a submission rule). FAIL = the prior of that arm drops to the base rate of
+ untested inputs and the graph class has no open CPU route left.
+NOT DONE in any case: no lagged-holdout, stale-val or in-period-holdout view (no neighbour columns exist there); val only.
+
+BLOCK 2 written 2026-11-15T15:36:19Z, AFTER stage A was read (gate_A.log) and BEFORE the read below.
+STAGE A RESULT BY THE WORDS OF BLOCK 1 (primary column x1, primary pool F): A1(i) 0.5278 +- 0.0101, A2 -0.00030 +- 0.00020
+ -> not KILL-LEAN (A1(i) >= 0.515), not GO-TO-B (A2 < +0.0003 and A1(i) < 0.530) -> INCONCLUSIVE. Stage B is NOT run.
+ (The replicate column x2 reads A1(i) 0.5409; the rule was keyed on x1 and is not re-keyed.)
+AMENDMENT, INFORMATION ONLY (cannot change the word above; post hoc, on the same already-read sample):
+ A4 "ceiling" read. Question: stage A shows pair-wise information next to the pool (A1) and no NDCG value of a one-column
+ linear use (A2). How large is the NDCG value of the BEST linear use of all seven columns inside the cold rows?
+   model: conditional logit over the cold rows of a feed, features = zc(pool), the 7 transformed columns (z among cold rows),
+   their centred percentile ranks, and 1[x1 > 0] centred within the feed's cold rows; ridge 1.0 on all but zc(pool);
+   fitted on feeds with a cold positive and a cold negative; L-BFGS.
+   (a) IN-SAMPLE fit on all such feeds of sample A = an optimistic upper bound;  (b) nested 5-fold by user = honest.
+   read-outs: AUC among cold rows of the fitted score vs the pool; slot-preserving NDCG delta (cold rows re-ordered by the
+   fitted score, slots kept) over all 3,000 feeds, +- paired SE; pools F and W.
+ Use in the report: (a) bounds what a perfectly calibrated LINEAR use of these columns can add on val; it says nothing about
+ non-linear use inside a trained model beyond the scope note of COVERAGE_MAP l.323.
+
+BLOCK 3 written 2026-11-15T15:37:40Z, AFTER ceiling_A.log was read, BEFORE the read below. INFORMATION ONLY.
+ A1 (rank residual AUC 0.528 / 0.541) and A4 (conditional-logit fit: no AUC gain even in sample) disagree in appearance.
+ A5 resolves it with a likelihood-ratio test in the same conditional logit over cold rows (feeds with a cold positive and a
+ cold negative, sample A, no ridge): pool z alone  vs  pool z + z(x1) [1 df];  vs pool z + z(x2) [1 df];  vs pool z + all
+ 15 extras [15 df]; and, to see whether A1's linear rank residual left pool information in the residual, pool z  vs
+ pool z + pool z^2 + pool rank [2 df]. Reported: 2 * (logL1 - logL0), df, chi-square p. Pools F and W.
+
+BLOCK 4 written 2026-11-15T15:38:21Z, AFTER lr_A.log was read, BEFORE the read below. INFORMATION ONLY.
+ A6 local-permutation placebo for A1. If the A1 statistic (AUC of the linear rank residual) is biased upward by a non-linear
+ relation between rank(x) and rank(pool), a column that has NO information given the pool but the same relation to it will
+ also read above 0.5. Placebo: inside each feed sort the cold rows by the pool score, cut into consecutive blocks of B rows
+ (B = 4 and 8), permute x inside every block; 10 draws each (seeds 0..9); A1(i) recomputed. Columns x1, x2; pools F, W.
+ Reading: real A1(i) minus the placebo mean = the pair-wise information that is conditional on the pool.
+
+BLOCK 5 written 2026-11-15T15:39:25Z, BEFORE the read below. INFORMATION ONLY (closes a flag of int_gnn section 1.2 row 6).
+ A7 cset (learned neighbour aggregation over the in-feed kNN graph; the only GNN-like layer ever trained in the ranker) was
+ never read on a staleness-family witness. Read with src/pmix.py: 6-member train-only pool nn_x/r6/preds/nn_r6_cset_e10_s101..106
+ against the same-seed reference pool preds/nn_v17_pre2s_s101..106 (member-equal z-mean): val, pmix public, pmix private.
+ Also the 2-seed pool (s101, s102 = the pair the closure was read on). No word: a pmix-private read below +1 SE leaves the
+ closure as it is; at or above +2 SE it would be reported as a re-open flag for the lead (old recipe, hard labels).
+ Known before: member-level e10 pair val +0.00017, holdout -0.00001, coldpos +0.009 / warmpos -0.0034 (registry l.111);
+ a4u's 6-pool pmix-private -0.00023 +- 0.00093 (veto.md l.70).
+
+BLOCK 6 written 2026-11-15T15:43:16Z, AFTER blocks 1-5 were read, BEFORE the read below. INFORMATION ONLY.
+ A8 residual-lens read of lit_gnn S2 family (i) on the CURRENT file (the record has it only on G3: -0.00035, nn_x/audit/features/findings.txt l.254).
+ Known before: the fresh-exposure pre-gate of another agent (nn_x/w12/fresh/pregate, same lens, other columns) reads its as-of arm
+ -0.00044 +- 0.00015; trd_ in a val-fit LightGBM +0.0009 +- 0.0006 vs noise control -0.0010 +- 0.0005 (reports/feat_trd_.md).
+ Columns (10, fixed by lit_gnn section 5 S2): trd_{kde,n85,n95,skde,sn95}_{sday,s6h} of data/feats/val. Each enters twice: raw value
+ divided by its sd over all val rows, and within-feed centred percentile rank (20 features). All 14,423 val feeds.
+ Model = the conditional logit of nn_x/w12/fresh/pregate/DECLARATION.txt C1 (listwise softmax with multiple positives over ALL rows
+ of a feed; ridge LAMBDA = 10 on all weights but beta; L-BFGS-B, maxiter 300; start beta = 1, w = 0).
+   CONTROL = b ; b*lm ; cold ; cold*b ; cold*lm   (b = pool F score, lm = ln M - mean, cold = it_hist_all_luo == 0)
+   ARM     = CONTROL + the 20 features.
+ Nested: GroupKFold(5) by user (user-0 feeds singletons), fold seeds 0, 1, 2 (users shuffled); d_f = mean over seeds of
+ NDCG_f(arm) - NDCG_f(control); GAIN = mean, SE = sd / sqrt(14,423). Also: in-sample LR test arm vs control (20 df, no ridge) on
+ all feeds; pmix public / private of d_f; the same with pool W.
+ Placebo: the 10-column vector permuted across the rows of the same feed and cold status, 10 draws (seeds 0..9), fold seed 0.
+ WORD (information for the prior of S2 as a trained input; cannot open or close a GPU arm on its own):
+   SIGNAL iff GAIN(pool F) >= +0.0003 AND z >= 2 AND above every placebo draw;  otherwise NO SIGNAL IN THE RESIDUAL LENS.
+
+BLOCK 7 written 2026-11-15T15:46:18Z: RESULTS BY THE WORDS ABOVE, and one rule note. No further run is made in this directory.
+ A1-A3 (block 1): INCONCLUSIVE; stage B not run.            A4-A6 (blocks 2-4, information): no NDCG value in sample or nested;
+ LR p 0.34 / 0.42 (1 df), 0.47 (15 df); the A1 statistic reads 0.504-0.531 on a placebo without information given the pool.
+ A7 (block 5): cset 6-pool pmix-private -0.00016 +- 0.00105 -> below +1 SE, closure unchanged.
+ A8 (block 6): GAIN(pool F) -0.00030 +- 0.00031, LR p 0.20, real above 8 of 10 placebo draws -> NO SIGNAL IN THE RESIDUAL LENS.
+ RULE NOTE: trd_read.py averaged 14.3 busy cores for 105 s (/usr/bin/time: 1430% CPU; cap = 12 threads): the numpy BLAS pool ran
+ next to a second thread pool. Noticed after the run; peak memory 1.8 GB. Every other script here is single-threaded numpy.
+ CORRECTION to the last sentence (2026-11-15T15:46:24Z): the other scripts (gate_read, ceiling_read, lr_read, placebo_a1) also use the
+ numpy BLAS pool, capped at 12 by the environment; their CPU use was not measured (each ran 2-50 s).

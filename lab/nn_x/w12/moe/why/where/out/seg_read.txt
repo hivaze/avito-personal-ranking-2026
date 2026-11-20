@@ -1,0 +1,104 @@
+=== W1 segment profile (arm = mean of A,B,C 4-pool deltas; refN main reference; null = ref4b - ref4) ===
+  ALL                   | VAL n  14423 arm-refN  -0.00043+-0.00033 arm-ref4  -0.00100+-0.00047 null  -0.00138+-0.00056 || HOLD n  30000 arm-refN  +0.00029+-0.00019 arm-ref4  +0.00030+-0.00026 null  -0.00001+-0.00032
+      per arm vs refN [ALL] A: val -0.00029+-0.00046 hold +0.00020+-0.00026  B: val -0.00087+-0.00048 hold +0.00029+-0.00027  C: val -0.00012+-0.00048 hold +0.00039+-0.00029
+-- feed size M
+  M<20                  | VAL n   2548 arm-refN  -0.00157+-0.00105 arm-ref4  -0.00256+-0.00150 null  -0.00069+-0.00185 || HOLD                                        -
+  20<=M<50              | VAL n   3345 arm-refN  -0.00042+-0.00077 arm-ref4  -0.00086+-0.00105 null  -0.00146+-0.00124 || HOLD                                        -
+  50<=M<100             | VAL n   3182 arm-refN  +0.00002+-0.00071 arm-ref4  -0.00110+-0.00098 null  -0.00266+-0.00115 || HOLD n  10232 arm-refN  +0.00015+-0.00038 arm-ref4  +0.00029+-0.00053 null  -0.00014+-0.00067
+  M>=100                | VAL n   5348 arm-refN  -0.00016+-0.00040 arm-ref4  -0.00028+-0.00055 null  -0.00089+-0.00066 || HOLD n  19768 arm-refN  +0.00036+-0.00021 arm-ref4  +0.00030+-0.00028 null  +0.00005+-0.00035
+  M>=50 (all)           | VAL n   8530 arm-refN  -0.00009+-0.00036 arm-ref4  -0.00058+-0.00050 null  -0.00155+-0.00060 || HOLD n  30000 arm-refN  +0.00029+-0.00019 arm-ref4  +0.00030+-0.00026 null  -0.00001+-0.00032
+-- history length H
+  H<64                  | VAL n   1954 arm-refN  -0.00039+-0.00092 arm-ref4  -0.00166+-0.00132 null  -0.00266+-0.00158 || HOLD n   5070 arm-refN  +0.00067+-0.00050 arm-ref4  -0.00005+-0.00072 null  -0.00082+-0.00090
+  64<=H<256             | VAL n   8293 arm-refN  -0.00050+-0.00044 arm-ref4  -0.00100+-0.00061 null  -0.00090+-0.00074 || HOLD n  13329 arm-refN  +0.00026+-0.00029 arm-ref4  +0.00036+-0.00038 null  +0.00007+-0.00048
+  H>=256 (full)         | VAL n   4176 arm-refN  -0.00029+-0.00062 arm-ref4  -0.00068+-0.00087 null  -0.00173+-0.00103 || HOLD n  11601 arm-refN  +0.00016+-0.00030 arm-ref4  +0.00038+-0.00040 null  +0.00025+-0.00049
+-- user
+  user 0 (anon)         | VAL n    658 arm-refN  -0.00052+-0.00136 arm-ref4  +0.00030+-0.00190 null  -0.00026+-0.00208 || HOLD n   1536 arm-refN  +0.00131+-0.00086 arm-ref4  +0.00085+-0.00132 null  -0.00010+-0.00176
+  user, 0 train feeds   | VAL n   9401 arm-refN  -0.00007+-0.00042 arm-ref4  -0.00057+-0.00058 null  -0.00127+-0.00071 || HOLD n  19060 arm-refN  +0.00016+-0.00024 arm-ref4  +0.00013+-0.00032 null  -0.00008+-0.00041
+  user, 1-2 train feeds | VAL n   3753 arm-refN  -0.00103+-0.00063 arm-ref4  -0.00161+-0.00091 null  -0.00116+-0.00108 || HOLD n   8092 arm-refN  +0.00031+-0.00037 arm-ref4  +0.00023+-0.00050 null  -0.00020+-0.00060
+  user, >=3 train feeds | VAL n    611 arm-refN  -0.00204+-0.00164 arm-ref4  -0.00526+-0.00241 null  -0.00554+-0.00288 || HOLD n   1312 arm-refN  +0.00097+-0.00091 arm-ref4  +0.00242+-0.00114 null  +0.00230+-0.00131
+-- positive items seen in training candidates (any day; model view)
+  all positives seen    | VAL n   8998 arm-refN  -0.00005+-0.00044 arm-ref4  -0.00041+-0.00061 null  -0.00101+-0.00073 || HOLD n  25106 arm-refN  +0.00049+-0.00022 arm-ref4  +0.00047+-0.00029 null  +0.00005+-0.00037
+  some seen             | VAL n   1971 arm-refN  +0.00036+-0.00061 arm-ref4  +0.00126+-0.00086 null  +0.00125+-0.00099 || HOLD n   2730 arm-refN  -0.00029+-0.00044 arm-ref4  -0.00007+-0.00059 null  -0.00027+-0.00083
+  no positive seen      | VAL n   3454 arm-refN  -0.00185+-0.00072 arm-ref4  -0.00383+-0.00103 null  -0.00384+-0.00124 || HOLD n   2164 arm-refN  -0.00125+-0.00067 arm-ref4  -0.00129+-0.00089 null  -0.00036+-0.00099
+-- positive items seen in train before the feed day (causal)
+  all seen before       | VAL n   9063 arm-refN  -0.00005+-0.00044 arm-ref4  -0.00038+-0.00060 null  -0.00098+-0.00073 || HOLD n  17747 arm-refN  +0.00044+-0.00026 arm-ref4  +0.00021+-0.00035 null  -0.00027+-0.00045
+  some                  | VAL n   1957 arm-refN  +0.00041+-0.00061 arm-ref4  +0.00137+-0.00086 null  +0.00128+-0.00098 || HOLD n   4450 arm-refN  +0.00011+-0.00037 arm-ref4  +0.00016+-0.00049 null  -0.00010+-0.00063
+  none before           | VAL n   3403 arm-refN  -0.00192+-0.00072 arm-ref4  -0.00400+-0.00104 null  -0.00396+-0.00125 || HOLD n   7803 arm-refN  +0.00004+-0.00039 arm-ref4  +0.00058+-0.00052 null  +0.00063+-0.00062
+-- popularity input of the positives (it_hist_all_luo == 0 share, as fed)
+  all positives pop>0   | VAL n   9118 arm-refN  +0.00004+-0.00045 arm-ref4  -0.00019+-0.00062 null  -0.00094+-0.00074 || HOLD n  23640 arm-refN  +0.00046+-0.00023 arm-ref4  +0.00047+-0.00032 null  +0.00016+-0.00039
+  some pop=0            | VAL n   1883 arm-refN  -0.00009+-0.00063 arm-ref4  -0.00000+-0.00090 null  +0.00025+-0.00100 || HOLD n   3381 arm-refN  +0.00018+-0.00038 arm-ref4  +0.00007+-0.00052 null  -0.00064+-0.00071
+  all positives pop=0   | VAL n   3422 arm-refN  -0.00185+-0.00065 arm-ref4  -0.00370+-0.00094 null  -0.00343+-0.00118 || HOLD n   2979 arm-refN  -0.00093+-0.00036 arm-ref4  -0.00080+-0.00051 null  -0.00067+-0.00068
+-- candidate warm share (seen in training)
+  <0.6                  | VAL n   4559 arm-refN  -0.00026+-0.00061 arm-ref4  -0.00087+-0.00084 null  -0.00129+-0.00098 || HOLD n     67 arm-refN  +0.00121+-0.00267 arm-ref4  +0.00346+-0.00276 null  +0.00308+-0.00388
+  0.6-0.85              | VAL n   9311 arm-refN  -0.00043+-0.00040 arm-ref4  -0.00092+-0.00057 null  -0.00116+-0.00069 || HOLD n  10286 arm-refN  +0.00082+-0.00033 arm-ref4  +0.00146+-0.00045 null  +0.00113+-0.00054
+  >=0.85                | VAL n    553 arm-refN  -0.00176+-0.00199 arm-ref4  -0.00334+-0.00303 null  -0.00572+-0.00366 || HOLD n  19647 arm-refN  +0.00001+-0.00024 arm-ref4  -0.00032+-0.00032 null  -0.00062+-0.00041
+-- listing age of the positives (mean, days; capped f4 = old)
+  <1d                   | VAL n    631 arm-refN  -0.00127+-0.00173 arm-ref4  -0.00493+-0.00248 null  -0.00858+-0.00310 || HOLD n   1262 arm-refN  +0.00052+-0.00109 arm-ref4  -0.00049+-0.00139 null  -0.00272+-0.00169
+  1-7d                  | VAL n   1897 arm-refN  -0.00090+-0.00077 arm-ref4  -0.00047+-0.00109 null  +0.00143+-0.00144 || HOLD n   3811 arm-refN  +0.00051+-0.00055 arm-ref4  -0.00046+-0.00076 null  -0.00122+-0.00096
+  7-30d                 | VAL n   3176 arm-refN  -0.00067+-0.00071 arm-ref4  -0.00141+-0.00097 null  -0.00215+-0.00115 || HOLD n   6216 arm-refN  -0.00065+-0.00042 arm-ref4  -0.00010+-0.00058 null  +0.00056+-0.00074
+  >=30d                 | VAL n   8719 arm-refN  -0.00017+-0.00044 arm-ref4  -0.00068+-0.00062 null  -0.00118+-0.00073 || HOLD n  18711 arm-refN  +0.00054+-0.00024 arm-ref4  +0.00064+-0.00032 null  +0.00023+-0.00040
+-- median candidate age (days)
+  <7d                   | VAL n    465 arm-refN  +0.00007+-0.00197 arm-ref4  -0.00075+-0.00292 null  -0.00115+-0.00340 || HOLD n    975 arm-refN  +0.00078+-0.00121 arm-ref4  +0.00168+-0.00170 null  +0.00072+-0.00224
+  7-30d                 | VAL n   6676 arm-refN  -0.00055+-0.00048 arm-ref4  -0.00126+-0.00067 null  -0.00107+-0.00080 || HOLD n  15038 arm-refN  +0.00051+-0.00027 arm-ref4  +0.00015+-0.00037 null  -0.00058+-0.00046
+  >=30d                 | VAL n   7282 arm-refN  -0.00035+-0.00048 arm-ref4  -0.00078+-0.00066 null  -0.00167+-0.00080 || HOLD n  13987 arm-refN  +0.00002+-0.00028 arm-ref4  +0.00036+-0.00037 null  +0.00055+-0.00046
+-- number of positives
+  1                     | VAL n  10742 arm-refN  -0.00073+-0.00042 arm-ref4  -0.00159+-0.00059 null  -0.00206+-0.00070 || HOLD n  19280 arm-refN  +0.00037+-0.00027 arm-ref4  +0.00053+-0.00036 null  +0.00030+-0.00044
+  2                     | VAL n   2217 arm-refN  +0.00033+-0.00065 arm-ref4  +0.00067+-0.00094 null  +0.00093+-0.00114 || HOLD n   5850 arm-refN  +0.00040+-0.00036 arm-ref4  -0.00001+-0.00052 null  -0.00084+-0.00065
+  >=3                   | VAL n   1464 arm-refN  +0.00062+-0.00065 arm-ref4  +0.00084+-0.00084 null  +0.00013+-0.00096 || HOLD n   4870 arm-refN  -0.00015+-0.00033 arm-ref4  -0.00025+-0.00044 null  -0.00027+-0.00057
+-- dominant candidate category (top 7 in val)
+  cat 13                | VAL n   2728 arm-refN  +0.00040+-0.00077 arm-ref4  -0.00089+-0.00109 null  -0.00354+-0.00128 || HOLD n   7025 arm-refN  +0.00013+-0.00039 arm-ref4  +0.00014+-0.00054 null  -0.00017+-0.00065
+  cat 2                 | VAL n   2457 arm-refN  -0.00161+-0.00086 arm-ref4  -0.00199+-0.00110 null  -0.00058+-0.00126 || HOLD n   4250 arm-refN  +0.00044+-0.00048 arm-ref4  +0.00035+-0.00062 null  -0.00001+-0.00081
+  cat 3                 | VAL n   1446 arm-refN  -0.00013+-0.00103 arm-ref4  -0.00049+-0.00134 null  -0.00045+-0.00165 || HOLD n   3035 arm-refN  +0.00000+-0.00059 arm-ref4  +0.00052+-0.00084 null  +0.00165+-0.00106
+  cat 50                | VAL n   1078 arm-refN  -0.00061+-0.00122 arm-ref4  -0.00131+-0.00180 null  -0.00230+-0.00217 || HOLD n   2305 arm-refN  +0.00173+-0.00075 arm-ref4  +0.00147+-0.00107 null  +0.00028+-0.00136
+  cat 6                 | VAL n    927 arm-refN  -0.00095+-0.00126 arm-ref4  -0.00085+-0.00214 null  -0.00183+-0.00243 || HOLD n   1876 arm-refN  +0.00034+-0.00075 arm-ref4  +0.00056+-0.00102 null  +0.00088+-0.00123
+  cat 7                 | VAL n    719 arm-refN  +0.00085+-0.00165 arm-ref4  +0.00185+-0.00224 null  +0.00042+-0.00266 || HOLD n   1539 arm-refN  -0.00184+-0.00083 arm-ref4  -0.00104+-0.00105 null  +0.00133+-0.00135
+  cat 15                | VAL n    688 arm-refN  -0.00140+-0.00148 arm-ref4  -0.00360+-0.00208 null  -0.00324+-0.00243 || HOLD n   1791 arm-refN  +0.00084+-0.00075 arm-ref4  +0.00069+-0.00098 null  -0.00104+-0.00122
+  other                 | VAL n   4380 arm-refN  -0.00028+-0.00059 arm-ref4  -0.00069+-0.00083 null  -0.00046+-0.00104 || HOLD n   8179 arm-refN  +0.00032+-0.00038 arm-ref4  +0.00010+-0.00051 null  -0.00081+-0.00063
+-- day
+-- day (val: Sep 22 / Sep 24; holdout: Sep 6-10 / Sep 11-14 / Sep 17-19)
+  val Sep 22            | VAL n   7542 arm-refN  -0.00110+-0.00046 arm-ref4  -0.00177+-0.00065 null  -0.00184+-0.00078 || HOLD                                        -
+  val Sep 24            | VAL n   6880 arm-refN  +0.00031+-0.00048 arm-ref4  -0.00016+-0.00067 null  -0.00087+-0.00080 || HOLD                                        -
+  hold Sep 6-10         | VAL                                        - || HOLD n  12628 arm-refN  +0.00028+-0.00030 arm-ref4  +0.00064+-0.00041 null  +0.00060+-0.00051
+  hold Sep 11-14        | VAL                                        - || HOLD n   9093 arm-refN  +0.00044+-0.00035 arm-ref4  -0.00007+-0.00049 null  -0.00064+-0.00061
+  hold Sep 17-19        | VAL                                        - || HOLD n   8279 arm-refN  +0.00015+-0.00035 arm-ref4  +0.00018+-0.00047 null  -0.00027+-0.00057
+-- split tests (arm - refN, VAL): difference between two bins, z = d / sqrt(se1^2 + se2^2)
+  val: M<50 minus M>=50                          arm -0.00083 +- 0.00073 (z -1.14) | null +0.00042 +- 0.00122 (z +0.35)
+  val: no positive seen minus all seen           arm -0.00180 +- 0.00084 (z -2.14) | null -0.00283 +- 0.00144 (z -1.97)
+  val: any positive pop=0 minus all pop>0        arm -0.00126 +- 0.00066 (z -1.92) | null -0.00118 +- 0.00112 (z -1.05)
+  val: Sep 24 minus Sep 22                       arm +0.00140 +- 0.00067 (z +2.09) | null +0.00097 +- 0.00112 (z +0.87)
+  hold: no positive seen minus all seen          arm -0.00174 +- 0.00071 (z -2.46) | null -0.00040 +- 0.00105 (z -0.38)
+  hold: any positive pop=0 minus all pop>0       arm -0.00080 +- 0.00035 (z -2.28) | null -0.00082 +- 0.00063 (z -1.30)
+  hold: Sep 17-19 minus Sep 6-10                 arm -0.00013 +- 0.00046 (z -0.27) | null -0.00087 +- 0.00076 (z -1.14)
+-- covariate reweighting: holdout feeds reweighted to the cell mix of val M>=50 feeds; cells = M bin (50-100, >=100) x positives-seen class (all/some/none) x any positive pop=0
+  arm-refN: holdout raw +0.00029+-0.00019 | reweighted +0.00001 +- 0.00020 | val M>=50 -0.00009+-0.00036
+  arm-ref4: holdout raw +0.00030+-0.00026 | reweighted +0.00005 +- 0.00028 | val M>=50 -0.00058+-0.00050
+  A-refN: holdout raw +0.00020+-0.00026 | reweighted -0.00009 +- 0.00027 | val M>=50 -0.00013+-0.00048
+  B-refN: holdout raw +0.00029+-0.00027 | reweighted +0.00006 +- 0.00028 | val M>=50 -0.00040+-0.00050
+  C-refN: holdout raw +0.00039+-0.00029 | reweighted +0.00007 +- 0.00029 | val M>=50 +0.00026+-0.00052
+  null ref4b-ref4: holdout raw -0.00001+-0.00032 | reweighted -0.00019 +- 0.00033 | val M>=50 -0.00155+-0.00060
+  cell shares val(M>=50) / holdout: 0:0.199/0.257 1:0.038/0.037 2:0.012/0.007 3:0.037/0.015 4:0.029/0.011 5:0.058/0.014 6:0.296/0.469 7:0.062/0.074 8:0.027/0.023 9:0.106/0.046 10:0.041/0.021 11:0.095/0.026
+
+=== W3 distribution of per-feed deltas (VAL, all 14,423 feeds unless stated) ===
+  A - ref4               mean -0.00086 +- 0.00057 | nonzero 0.688 | win/loss 4915/5008 (sign z -0.93) | 1%-trimmed mean -0.00074 +- 0.00033 | bottom-1% feeds contribute -0.00400, top-1% +0.00387 to the mean | sd 0.0687 | q01 -0.3691 q99 +0.2747
+  B - ref4               mean -0.00144 +- 0.00057 | nonzero 0.695 | win/loss 4943/5087 (sign z -1.44) | 1%-trimmed mean -0.00122 +- 0.00034 | bottom-1% feeds contribute -0.00405, top-1% +0.00380 to the mean | sd 0.0690 | q01 -0.3691 q99 +0.2334
+  C - ref4               mean -0.00069 +- 0.00058 | nonzero 0.695 | win/loss 5054/4971 (sign z +0.83) | 1%-trimmed mean -0.00049 +- 0.00034 | bottom-1% feeds contribute -0.00402, top-1% +0.00381 to the mean | sd 0.0692 | q01 -0.3691 q99 +0.2340
+  A - refN               mean -0.00029 +- 0.00046 | nonzero 1.000 | win/loss 7341/7076 (sign z +2.21) | 1%-trimmed mean -0.00045 +- 0.00029 | bottom-1% feeds contribute -0.00295, top-1% +0.00311 to the mean | sd 0.0556 | q01 -0.2079 q99 +0.2042
+  B - refN               mean -0.00087 +- 0.00048 | nonzero 1.000 | win/loss 7406/7013 (sign z +3.27) | 1%-trimmed mean -0.00085 +- 0.00029 | bottom-1% feeds contribute -0.00313, top-1% +0.00309 to the mean | sd 0.0572 | q01 -0.2097 q99 +0.1963
+  C - refN               mean -0.00012 +- 0.00048 | nonzero 1.000 | win/loss 7540/6876 (sign z +5.53) | 1%-trimmed mean -0.00011 +- 0.00030 | bottom-1% feeds contribute -0.00311, top-1% +0.00309 to the mean | sd 0.0575 | q01 -0.2127 q99 +0.1989
+  mean(A,B,C) - refN     mean -0.00043 +- 0.00033 | nonzero 1.000 | win/loss 7598/6822 (sign z +6.46) | 1%-trimmed mean -0.00033 +- 0.00022 | bottom-1% feeds contribute -0.00215, top-1% +0.00205 to the mean | sd 0.0402 | q01 -0.1372 q99 +0.1268
+  null ref4b - ref4      mean -0.00138 +- 0.00056 | nonzero 0.687 | win/loss 4888/5016 (sign z -1.29) | 1%-trimmed mean -0.00107 +- 0.00033 | bottom-1% feeds contribute -0.00398, top-1% +0.00366 to the mean | sd 0.0673 | q01 -0.3691 q99 +0.2263
+  holdout, for comparison:
+  A - refN (hold)        mean +0.00020 +- 0.00026 | nonzero 1.000 | win/loss 14999/14999 (sign z +0.00) | 1%-trimmed mean +0.00010 +- 0.00015 | bottom-1% feeds contribute -0.00242, top-1% +0.00252 to the mean | sd 0.0448 | q01 -0.1389 q99 +0.1499
+  B - refN (hold)        mean +0.00029 +- 0.00027 | nonzero 1.000 | win/loss 15183/14815 (sign z +2.12) | 1%-trimmed mean +0.00019 +- 0.00015 | bottom-1% feeds contribute -0.00249, top-1% +0.00258 to the mean | sd 0.0461 | q01 -0.1449 q99 +0.1529
+  C - refN (hold)        mean +0.00039 +- 0.00029 | nonzero 1.000 | win/loss 15236/14762 (sign z +2.74) | 1%-trimmed mean +0.00021 +- 0.00016 | bottom-1% feeds contribute -0.00267, top-1% +0.00285 to the mean | sd 0.0495 | q01 -0.1575 q99 +0.1633
+  null ref4b-ref4 (hold) mean -0.00001 +- 0.00032 | nonzero 0.847 | win/loss 12704/12710 (sign z -0.04) | 1%-trimmed mean -0.00009 +- 0.00017 | bottom-1% feeds contribute -0.00319, top-1% +0.00326 to the mean | sd 0.0559 | q01 -0.2003 q99 +0.2003
+-- contribution to the val mean by size of the per-feed delta (arm mean of A,B,C vs refN): bins of |d|
+  |d| in [0,1e-09): n   1755 share 0.122 contributes +0.00000 to the mean
+  |d| in [1e-09,0.01): n   7909 share 0.548 contributes +0.00002 to the mean
+  |d| in [0.01,0.05): n   3511 share 0.243 contributes +0.00010 to the mean
+  |d| in [0.05,0.2): n   1113 share 0.077 contributes -0.00027 to the mean
+  |d| in [0.2,9): n    135 share 0.009 contributes -0.00028 to the mean
+-- per-feed correlation of arm deltas vs ref4 (shared reference inflates it) and vs refN; and with the null (ref4b - ref4):
+  val vs ref4: corr AB +0.538 AC +0.474 BC +0.464
+  val vs refN: corr AB +0.313 AC +0.219 BC +0.222
+  val: corr(arm - ref4, ref4b - ref4): A +0.507 B +0.480 C +0.475

@@ -1,0 +1,62 @@
+# Copy of the raw run log (not published; third pass, base G3): 'if the model knew X' bounds (positive categories first, best within-category order, and others) on leak-free val feeds, with SE.
+
+=== G3: base 0.40046 (leak-free) ===
+cat-orc (positive categories first, model order inside)    0.57123  gain +0.17077 ± 0.00189
+within-orc blocks (segments-lens def)                      0.62308  gain +0.22262 ± 0.00275
+within-orc reassign (category_intent def)                  0.69397  gain +0.29351 ± 0.00242
+top-3 re-order oracle                                      0.45773  gain +0.05727 ± 0.00118
+top-10 re-order oracle                                     0.61106  gain +0.21060 ± 0.00222
+top-30 re-order oracle                                     0.80301  gain +0.40255 ± 0.00253
+exploration-intent oracle (share 0.154; boost novel by 2.0) 0.42815  gain +0.02769 ± 0.00086
+cold-intent oracle (share 0.238; boost cold by 2.0)        0.43805  gain +0.03759 ± 0.00089
+warm-intent oracle (share 0.633; demote cold by 2.0)       0.41928  gain +0.01882 ± 0.00045
+cold+warm intent oracle (delta 1.0 both)                   0.44689  gain +0.04643 ± 0.00084
+
+=== N1: base 0.40021 (leak-free) ===
+cat-orc (positive categories first, model order inside)    0.57117  gain +0.17096 ± 0.00189
+within-orc blocks (segments-lens def)                      0.62224  gain +0.22203 ± 0.00275
+within-orc reassign (category_intent def)                  0.69347  gain +0.29326 ± 0.00242
+top-3 re-order oracle                                      0.45786  gain +0.05764 ± 0.00118
+top-10 re-order oracle                                     0.61135  gain +0.21113 ± 0.00222
+top-30 re-order oracle                                     0.80364  gain +0.40343 ± 0.00252
+exploration-intent oracle (share 0.154; boost novel by 2.0) 0.42832  gain +0.02811 ± 0.00087
+cold-intent oracle (share 0.238; boost cold by 2.0)        0.43759  gain +0.03738 ± 0.00089
+warm-intent oracle (share 0.633; demote cold by 2.0)       0.41916  gain +0.01894 ± 0.00045
+cold+warm intent oracle (delta 1.0 both)                   0.44642  gain +0.04621 ± 0.00083
+
+=== nf2_oof: base 0.38612 (leak-free) ===
+cat-orc (positive categories first, model order inside)    0.55764  gain +0.17152 ± 0.00191
+within-orc blocks (segments-lens def)                      0.61694  gain +0.23082 ± 0.00276
+within-orc reassign (category_intent def)                  0.68445  gain +0.29834 ± 0.00244
+top-3 re-order oracle                                      0.44026  gain +0.05414 ± 0.00115
+top-10 re-order oracle                                     0.59373  gain +0.20762 ± 0.00222
+top-30 re-order oracle                                     0.78612  gain +0.40000 ± 0.00254
+exploration-intent oracle (share 0.154; boost novel by 2.0) 0.41422  gain +0.02810 ± 0.00088
+cold-intent oracle (share 0.238; boost cold by 2.0)        0.42248  gain +0.03636 ± 0.00087
+warm-intent oracle (share 0.633; demote cold by 2.0)       0.40556  gain +0.01945 ± 0.00045
+cold+warm intent oracle (delta 1.0 both)                   0.43210  gain +0.04598 ± 0.00083
+
+=== Marginal NDCG value of moving positives up (G3; each bucket alone; rank r -> floor(r/2)) ===
+bucket     pos share  halve-rank gain  to-top gain (upper)
+r0            0.0845          0.00000              0.00000
+r1-2          0.1119          0.03645              0.06014
+r3-9          0.2178          0.03341              0.16627
+r10-29        0.2647          0.01839              0.21855
+r30..M/2      0.1973          0.00622              0.14679
+r>M/2         0.1238          0.00359              0.10284
+(sums divided by number of feeds = NDCG points; halving ignores collisions between positives)
+gain from moving every positive up by ONE rank: 0.04716  by bucket: r1-2 0.03645 r3-9 0.00900 r10-29 0.00148 r30..M/2 0.00016 r>M/2 0.00007
+G3      : positives at rank > M/2 (MP def, rank >= M/2): 0.1833; top-3 0.1963; mean pct rank 0.2749
+N1      : positives at rank > M/2 (MP def, rank >= M/2): 0.1832; top-3 0.1958; mean pct rank 0.2746
+nf2_oof : positives at rank > M/2 (MP def, rank >= M/2): 0.2086; top-3 0.1796; mean pct rank 0.2926
+nf3_oof : positives at rank > M/2 (MP def, rank >= M/2): 0.2054; top-3 0.1824; mean pct rank 0.2901
+
+=== Best-member-per-feed oracle ===
+G3 members (20)                                                        mean member 0.39681  best-member oracle 0.50297 (+0.10616 over mean member; +0.10251 over G3)
+G3+NEW members (30)                                                    mean member 0.39656  best-member oracle 0.51995 (+0.12339 over mean member; +0.11949 over G3)
+F7x only (7 seeds)                                                     mean member 0.39747  best-member oracle 0.46982 (+0.07234 over mean member; +0.06936 over G3)
+7 across families (F10 s501-503 + F7x r101-102 + F7x70 r101-102)       mean member 0.39681  best-member oracle 0.46787 (+0.07106 over mean member; +0.06741 over G3)
+best-family-pool oracle (F10/F7x/F7x70): 0.42025 (+0.01979 over G3); FT/TO half oracle 0.41308
+mean within-feed Spearman(member final, G3) = 0.9637 (range 0.9588-0.9680)
+synthetic: sigma 0.2 (Spearman 0.9674); 20 noisy copies of G3: mean member 0.39526, best-of-20 oracle 0.52056 (+0.12530 over mean member)
+real G3 members: best-of-20 over mean member +0.10616  => real/synthetic ratio 0.85

@@ -1,0 +1,55 @@
+RECORDS INVENTORY: DENOISING IN THE RECORD
+
+Source keys: F = docs/07-what-failed.md:line; D02/D03/D04/D06 = docs/0x:line; L = docs/records/decision-ledger.txt:line; SL = docs/records/status-log.md:line; XD = experiments/exploration-detection/README.md; SYS = lab/nn_x/w12/fixmiss/systematic/logs_s1.txt; P1/P7/PX = scratchpad loss_design/design/{p1_noise_ohem_dro,p7_ips_target,proxy_read}.txt; RC = lab/reports/RECHECK_1114/SYNTHESIS.md:223; A = lab/nn_x/w12/noise/records/arith_out.txt (my arithmetic, arith.py). Pairs are val / holdout.
+
+1. LABEL NOISE
+- Ensemble distillation (0.5 clicks + 0.5 teacher softmax): member +0.00257 ± 0.00047 / +0.00200 ± 0.00028; first distilled file +0.001032 public (F566). The only label denoiser that paid.
+- The teacher is in-sample: NDCG 0.3465 on train vs 0.3237 on holdout, so it partly copies the noisy click (L68). A cross-fitted teacher hurt: pool 0.40079 vs 0.40134 (F573).
+- Teacher dose and form: weight 0.8 helps a member (+0.00126) but hurts the 8-pool (-0.00049 ± 0.00048); 0.8 in cooldown only gives pooled z -2.88; 0.3 gives +0.00011 (F568-570). Temperature 0.7 / 1.5, 25-member teacher, students-of-students: null (F571-572). Self-distillation from one model: +0.00064, z 1.6 (F565).
+- Label smoothing: on the MLP proxy within ±0.001 (F422); in the loss zoo +0.00007 ± 0.00012 (F438). Never run on students.
+- Reweighting: equal weight per feed adopted, +0.0020 / +0.0006 (F434). Weight M^0.5 scored 0.39475 public vs 0.39482 for its control; within- and across-category weights null, p 0.48-0.94 (F449).
+- Down-weighting surprising clicks combined with KD-gap feed weights (kdc): 16-pool -0.00058 ± 0.00047 / -0.00074 ± 0.00028, p 0.98 (L1300). 3-seed CPU MLP proxy, member: OHEM +0.00014 / -0.00010, kdgap +0.00020 / +0.00005, robust +0.00007 / +0.00002, label-group DRO -0.00756 / -0.00203 (PX). Soft-OHEM fixed point -0.00426 ± 0.00063 (P1). Cooldown on learnability-selected data -0.0035 / -0.0020 (F423).
+- Diagnosis: the hardest 20% of feeds hold 27.5% of the loss, 27.6% when labels are redrawn. R^2 between realised and model-expected per-feed loss is 0.257. Per-feed loss under two redraws correlates 0.325 (P1). Redraw NDCG 0.40124 ± 0.00176 (sd) vs 0.40294 actual (+0.97 sd); temperature 1.004 / 1.011 (SYS, A). The per-feed misses are mostly the click draw, and no feed weight can find them.
+- Truncation: cascade loss (ignore negatives more than 5 below the last click) +0.00004 ± 0.00027, p 0.45 (L1301). Truncated CE never trained (F452).
+- Pseudo or soft labels: test pseudo-labels in the fine-tune -0.0004 (F552). Teacher-labelled held-out user fold: pool +0.00069 ± 0.00057 / -0.00017 (F578). Pseudo-feeds: pool +0.00054 / +0.00010, public -0.00010 (F579). Fine-tune on teacher targets -0.00036 / +0.00002 (F556). Co-click targets on a proxy -0.00109 / -0.00176 (RC).
+
+2. POSITION / EXPOSURE BIAS
+- Auxiliary loss toward production order, weight 0.5 -> 0.1 times (1 - p_random): +0.0024 / +0.0027; removing it from students costs -0.00135 / -0.00128 (F436).
+- Additive position tower null, 0.37361 vs 0.37385 (F357). Propensity head +0.00007 (F366). Examination offset on random-order rows +0.00002 ± 0.00028 (F445). Truncation offset: member -0.0005, pool -0.0003 / -0.0009, although trees showed +0.0022 to +0.0031 (F534).
+- IPS is not in the catalogue. Probe: TV 0.078 -> 0.050, ESS/n 0.911 (P7). CPU proxy: member -0.00017 ± 0.00025 / +0.00015; 3-pool -0.00045 / +0.00009; long feeds -0.00140 (PX). Never run on GPU.
+- Detector v1: 164,118 feeds (D02:65). v2: 291,763 feeds, 105,374 of them short. As a cooldown pool v2 read +0.00025 ± 0.00035 at a 2% share and -0.00161 at 10% (XD). Trainer bug: p_random = 0 below M = 50 (51% of train), so short random-order feeds get the production-order aux loss and the production domain token. --prand2 fixes this, but was read only in cooldown re-runs; the from-scratch runs were stopped at ~40 min (SL731-732).
+- Random-order share of the cooldown: 30% collapsed the run (0.391 -> 0.364); 2% adopted, +0.00117 / +0.00134; 0% leaves val level but costs -0.0023 on cold positives (F402-405). Second stage on random-order feeds: -0.00121 / -0.00147 under the new schedule (F396).
+- Position effect left inside random-order feeds: rank 0 clicks 3.86x as often as rank 200-399 (P7, A); 3.15x at slot 0 (SL700). Val/test positions are not published, so for us this is label noise.
+
+3. INPUT NOISE / DRIFT
+- Popularity-free members: public +0.000066 (F510). Popularity-light at 0.2: val +0.00049, public +0.000523, holdout -0.00063 (F513). 0.4 on short feeds: public +0.00032, pick 1 (F516).
+- Stale cooldown view (hz): stale-val +0.00120 ± 0.00045, but the file read -0.00047 ± 0.00035 on val (F525). Full dose costs -0.0028 on fresh inputs (F526). Equalising inputs at inference: -0.00024 (F529).
+- Dropout: popularity inputs -0.00066 (F524). Age-conditioned: +0.0247 on young positives, -0.0063 elsewhere, -0.00189 holdout (F523). History events: pooled z -2.62 (F420).
+- Near-copies: 10 inputs worth +0.0014 / +0.0003. Best of 64 post-hoc rules +0.00023, -0.00076 cross-fitted. Oracle +0.017. Only 6-9% of a positive's near-copies are positive (D02:243-247).
+- Audits: a ±10 clip left 76-92% of rows at the clip (F36). 94 scaling/encoding constructions: 6 at z>2 vs 2.1 expected (F471). Test-time standardisation -0.0024 to -0.0057 (F477).
+
+4. DATA SELECTION / CLEANING
+- Cooldown on selected data: equal history length +0.00007; recent days -0.0021 / -0.0012; without the first 3 days -0.00101 / -0.00122 (F423).
+- Nothing was dropped: 0 of 3,151,208 train feeds lack a positive (F581). Dropping 20% of users costs -0.0028 / -0.0022 (F693).
+- User 0: each feed is its own fold group (F496); guest flags are inputs (D03:58); leak count corrected from 354 to 110 feeds once user 0 was unlinked (D02:299).
+
+5. EVALUATION NOISE
+- A single val score has SE ~0.0019 (F700). 14 seed pairs give rms z 1.04; fine-tuned members are 1.4x noisier (D04:128-129).
+- Smallest detectable effect: member 0.0029; pool 0.00086 on val, 0.00112 on public (D04:137-138).
+- Pooled-z rule passes 0.25% of nulls and 56% of +0.0005 effects (D04:150). Reference is the mean of same-size subsets (D04:152). Randomization null sd 0.87-1.43 (D04:154).
+- Holdout: 2,294 of 30,000 feeds are production-ordered (0.332 vs 0.318) (XD). Its sign was wrong on both popularity-light contrasts (F710).
+- Selection excess: 0.00045 at K=5, 0.00087 at K=50 (D04:185). 14 final-family files: public sd 0.00021 (F694).
+- Label-draw sd of one file: 0.00228 public, 0.00149 private (A). Every team shares the draw, so it mostly shifts levels, not ranks.
+
+NEVER TRIED (why)
+1. Truncated, symmetric or GCE losses on students: prior 0.02, and the planned CPU zoo arms never ran (F452).
+2. Confident learning or co-teaching (drop/relabel clicks the teacher finds unlikely): not catalogued. kdc, robust and the redraw test say those clicks are signal.
+3. IPS or learned-propensity unbiased LTR on the real network: CPU proxy only.
+4. Full run with the corrected short-feed p_random: stopped at 40 min.
+5. Label spreading over near-copy groups: not run (co-click proxy hurt).
+6. Label smoothing on students: smoothing ran only on click-label proxies.
+7. Clean function matching: only a flawed form ran (F574).
+8. Size of the hidden display-position noise in test (holdout oracle with positions): never measured.
+9. Within-category production order as aux teacher: the probe killed it (F536).
+
+Bottom line: distillation was the one denoising step that paid. The other label-side steps stayed within noise or hurt, and the redraw test says the leftover per-feed misses are the draw, not noise anyone can fix. Item 4 is the one open lever that looks like a fix. Item 3's proxy read negative. Item 8 would only size the floor.

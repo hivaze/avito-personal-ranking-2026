@@ -1,0 +1,13 @@
+(a) relative size of the residue between one and two z-scorings of the W8 blend: median |z2/z1 - 1| = 2.15e-12; share of rows with z2 > z1 in absolute value 1.000
+   C3     tool arithmetic (val check, --blend)    : exact ties before residue 0.094, left after 0.0002 | order == [ties -> partner] 0.9999, == [ties -> ours] 0.9061 | NDCG minus z-mix +0.00006 ± 0.00032
+   C3     c1_calib arithmetic (table 1.2 "v2 way"): exact ties before residue 0.094, left after 0.0002 | order == [ties -> partner] 0.9999, == [ties -> ours] 0.9061 | NDCG minus z-mix +0.00005 ± 0.00032
+   C3     reference: ties -> partner +0.00006 ± 0.00032 | ties -> ours +0.00040 ± 0.00033 | left tied -0.00490 ± 0.00031
+   Pall   tool arithmetic (val check, --blend)    : exact ties before residue 0.085, left after 0.0001 | order == [ties -> partner] 0.9999, == [ties -> ours] 0.9150 | NDCG minus z-mix -0.00105 ± 0.00033
+   Pall   c1_calib arithmetic (table 1.2 "v2 way"): exact ties before residue 0.085, left after 0.0001 | order == [ties -> partner] 0.9999, == [ties -> ours] 0.9150 | NDCG minus z-mix -0.00106 ± 0.00033
+   Pall   reference: ties -> partner -0.00105 ± 0.00033 | ties -> ours +0.00041 ± 0.00036 | left tied -0.00586 ± 0.00034
+   S16kd  tool arithmetic (val check, --blend)    : exact ties before residue 0.152, left after 0.0004 | order == [ties -> partner] 0.9998, == [ties -> ours] 0.8483 | NDCG minus z-mix -0.00020 ± 0.00020
+   S16kd  c1_calib arithmetic (table 1.2 "v2 way"): exact ties before residue 0.152, left after 0.0005 | order == [ties -> partner] 0.9998, == [ties -> ours] 0.8483 | NDCG minus z-mix -0.00021 ± 0.00020
+   S16kd  reference: ties -> partner -0.00020 ± 0.00020 | ties -> ours -0.00016 ± 0.00023 | left tied -0.00329 ± 0.00022
+(b) NOTSUB_c3_val_ranks.parquet vs my rebuild from preds/ens_Q2a8s3_*: identical rows 1.000000, max |diff| 0.0
+(b) NOTSUB_c3_test_ranks.parquet vs my rebuild from preds/ens_Q2a8s3_*: identical rows 1.000000, max |diff| 0.0
+(b) NOTSUB_catboost_test_scores.parquet vs nn_x/cb26/data/e3_xm_yeti_test.npy: max |diff| 0.00e+00

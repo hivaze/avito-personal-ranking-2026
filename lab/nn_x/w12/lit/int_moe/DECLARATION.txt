@@ -1,0 +1,42 @@
+int_moe (internal auditor, mixture-of-experts forms), CPU only. Written 2026-11-15T14:34:42Z (date -u), BEFORE any labelled number of this directory was computed.
+Scope: one own measurement that the record lacks; everything else in the report is read from project files.
+
+BLOCK 1 (2026-11-15T14:34:42Z). CANDIDATE-LEVEL COLD / WARM GATE BETWEEN TWO EXISTING POOLS (script cand_route.py)
+Question: "experts by cold / warm candidate" at the ensemble level. The record has feed-level gates (routers, the M-rule, learned gates) and
+candidate-level additive cold offsets, but no candidate-level gate that gives the popularity-light pool a different weight on cold rows than on warm rows.
+Data: val, 14,423 feeds, stored predictions only. Loader = the build_r4 form re-implemented (member-equal mean of per-feed z per pool, pools
+re-standardised per feed, branch = z((1 - w) B + w P), final = 0.5 z(FT branch) + 0.5 z(TO branch)).
+Compositions: C1 = FD16 + 4 wide full-data popularity-light students (PRIMARY: the files with the owner); C3 = W16 + 4 wide held-out students (REPLICATION: other trained models, same val feeds).
+Cold row: it_hist_all_luo == 0 (nn/feat_cache/val/it_hist_all_luo.npy), the task's "no interaction count at all".
+Reproduction bar (step 0): PLAIN and M-rule finals of C1 / C3 equal to the record (0.402714 / 0.402975; 0.402141 / 0.402847) to 5 decimals; own NDCG equal to src/metrics.ndcg_per_feed to 1e-9. Else STOP.
+Families (per-ROW weight of the popularity-light pool, both branches, w_ft 0.5):
+  CONST: w constant, grid {0, .1, .2, .3, .4, .5, .6, .8} (8 rules).
+  CW   : w = w_cold on cold rows, w_warm on warm rows, grid 8 x 8 (64 rules; diagonal = CONST).
+  CWM  : (information only) w by cold/warm x (M < 50 | M >= 50), grid {0, .2, .4, .6}^4 (256 rules).
+Fixed comparators: PLAIN (0.2), M-RULE (0.2 | 0.4 at M >= 50).
+Nested read: 5 user-grouped folds (user_id 0 feeds = singleton groups) x 5 fold seeds; the rule with the highest mean NDCG on the training folds is scored on the held-out fold; per-feed values averaged over the 5 seeds; SE = user-clustered SE of the per-feed paired difference.
+Statistic G = nested CW minus nested CONST.
+Placebos (same code path, C1): P-perm = the cold flag permuted within each feed (5 permutations; keeps every feed's cold share, removes which rows are cold);
+  P-pool = 4 same-recipe base students of FD16 in the role of the popularity-light pool against the other 12 (4 disjoint blocks), real cold flag.
+CRITERION: SIGNAL iff G(C1) >= +2 SE AND G(C3) >= +1 SE AND G(C1) > max of the 5 P-perm values AND the private-mix reweighting (src/pmix.py) of G(C1) is >= 0.
+  Otherwise NO SIGNAL at pool level. In neither case is a file built; a SIGNAL would be handed to the lead as a proposal for a declared test, nothing more.
+Witnesses: this is a popularity-related contrast, so val and pmix are the witnesses; the in-period holdout is not used (members of C1 were trained on it; it is biased for this contrast).
+Not available here and not checked: stale-val (needs re-prediction), lagged holdout, public.
+DIAGNOSTICS (in-sample, no criterion, cannot produce a candidate): per-feed oracles between existing files with their same-recipe null:
+  O1 base-only vs popularity-light-only; O2 weight 0.2 vs 0.4 (the two settings of the M-rule); O3 over the 64 CW rules;
+  each next to the same oracle with 4 same-recipe base students in the role of the popularity-light pool (12 + 4 split).
+Multiplicity: 64 + 256 rules, 2 compositions, 9 placebo tensors, 3 oracle pairs.
+
+BLOCK 1 RESULT (read 2026-11-15T14:39:22Z, cand_route.log): step 0 PASS; G(C1) -0.00011 +- 0.00003, G(C3) -0.00017 +- 0.00018 -> NO SIGNAL at pool level.
+
+BLOCK 2 (2026-11-15T14:39:22Z; written AFTER block 1 was read, BEFORE any number of block 2). THREE-CLASS CANDIDATE GATES (script cand_route2.py)
+Reason (post hoc, from block 1's fixed contrasts): removing the popularity-light weight from COLD rows costs nothing ((cold 0, warm .2) = PLAIN to 0.00002),
+removing it from WARM rows costs 0.0006: the admixture pays through the order among warm rows. So the remaining candidate-level question is whether the
+weight should differ AMONG warm rows.
+Families (per-row weight, grid {0, .2, .4, .6}^3 = 64 rules; CONST = the 4 diagonal rules of the same grid):
+  A3 : classes cold | warm with cand_f4 below the val median of warm rows | warm with cand_f4 at or above it (f4 = the listing-age input).
+  L3 : classes cold | warm with it_hist_all_luo below the val median of warm rows | at or above it (count level).
+Same nested read, compositions, comparators, witnesses as block 1. Statistic G = nested family minus nested CONST (4-point grid).
+Placebo: the class label permuted within each feed (5 permutations, C1).
+CRITERION per family (Bonferroni over the 2 families): SIGNAL iff G(C1) >= +2.24 SE AND G(C3) >= +1 SE AND G(C1) > max of its 5 placebo values AND private-mix G(C1) >= 0.
+Otherwise NO SIGNAL. No file is built either way. Multiplicity so far in this directory: 64 + 256 + 2 x 64 rules, 2 compositions.

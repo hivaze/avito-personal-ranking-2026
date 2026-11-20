@@ -1,0 +1,95 @@
+# Read-out copied from the raw run log (not published), unchanged below this line.
+[   19.0s] val: 14423 feeds, leak-free 14306; G3 file 0.40032 (leak-free 0.40046); rebuilt G3 point 0.40032; max |per-feed diff| 0.00e+00; grid 67 points
+[   22.2s] FT/TO mix grid (val leak-free): 0.0:0.40047 0.1:0.40057 0.2:0.40077 0.3:0.40091 0.4:0.40061 0.5:0.40046 0.6:0.40064 0.7:0.40032 0.8:0.40024 0.9:0.40013 1.0:0.39997
+[   23.1s] single-family val (leak-free): {'F10': 0.39899, 'F7x': 0.40107, 'F7x70': 0.4004}
+[  103.4s] holdout: 30000 feeds, 29918 user groups, user0 1536; G3 point 0.32379; single family F10 0.32254 F7x 0.32332 F7x70 0.32315
+[  103.4s] ============================== TEST 1: per-cluster vs global family weighting (nested, user-grouped 5-fold x 2 seeds)  ==============================
+[  103.6s] ue8  raw     pc-gl val -0.00044 ± 0.00024 (z -1.85) | hold +0.00005 ± 0.00014 (z +0.36) | priv-mix -0.00031 ± 0.00036 (z -0.86) || vs G3: val pc -0.00014 gl +0.00030; hold pc -0.00013 gl -0.00018
+[  103.7s] ue8  shrunk  pc-gl val -0.00025 ± 0.00020 (z -1.26) | hold +0.00003 ± 0.00013 (z +0.20) | priv-mix -0.00022 ± 0.00031 (z -0.72) || vs G3: val pc +0.00005 gl +0.00030; hold pc -0.00015 gl -0.00018
+[  103.9s] ue32 raw     pc-gl val -0.00015 ± 0.00032 (z -0.46) | hold +0.00046 ± 0.00018 (z +2.57) | priv-mix -0.00006 ± 0.00048 (z -0.12) || vs G3: val pc +0.00015 gl +0.00030; hold pc +0.00028 gl -0.00018
+[  104.0s] ue32 shrunk  pc-gl val +0.00022 ± 0.00025 (z +0.89) | hold +0.00056 ± 0.00015 (z +3.72) | priv-mix +0.00031 ± 0.00037 (z +0.82) || vs G3: val pc +0.00052 gl +0.00030; hold pc +0.00038 gl -0.00018
+[  104.2s] hp8  raw     pc-gl val -0.00009 ± 0.00031 (z -0.28) | hold +0.00015 ± 0.00016 (z +0.91) | priv-mix -0.00030 ± 0.00051 (z -0.58) || vs G3: val pc +0.00021 gl +0.00030; hold pc -0.00003 gl -0.00018
+[  104.3s] hp8  shrunk  pc-gl val -0.00015 ± 0.00025 (z -0.59) | hold +0.00019 ± 0.00015 (z +1.24) | priv-mix -0.00009 ± 0.00041 (z -0.22) || vs G3: val pc +0.00015 gl +0.00030; hold pc +0.00001 gl -0.00018
+[  104.4s] hp32 raw     pc-gl val -0.00004 ± 0.00031 (z -0.12) | hold -0.00034 ± 0.00017 (z -2.03) | priv-mix +0.00004 ± 0.00050 (z +0.08) || vs G3: val pc +0.00026 gl +0.00030; hold pc -0.00052 gl -0.00018
+[  104.6s] hp32 shrunk  pc-gl val -0.00025 ± 0.00022 (z -1.13) | hold -0.00017 ± 0.00015 (z -1.19) | priv-mix -0.00023 ± 0.00034 (z -0.69) || vs G3: val pc +0.00005 gl +0.00030; hold pc -0.00035 gl -0.00018
+[  104.7s] rnd8  raw     pc-gl val +0.00006 ± 0.00027 (z +0.21) | hold -0.00038 ± 0.00014 (z -2.62) | priv-mix +0.00021 ± 0.00038 (z +0.54) || vs G3: val pc +0.00036 gl +0.00030; hold pc -0.00056 gl -0.00018
+[  104.9s] rnd8  shrunk  pc-gl val +0.00008 ± 0.00022 (z +0.34) | hold -0.00022 ± 0.00013 (z -1.69) | priv-mix +0.00014 ± 0.00031 (z +0.44) || vs G3: val pc +0.00037 gl +0.00030; hold pc -0.00040 gl -0.00018
+[  105.0s] rnd32 raw     pc-gl val +0.00001 ± 0.00032 (z +0.04) | hold -0.00048 ± 0.00016 (z -3.04) | priv-mix +0.00014 ± 0.00050 (z +0.28) || vs G3: val pc +0.00031 gl +0.00030; hold pc -0.00065 gl -0.00018
+[  105.2s] rnd32 shrunk  pc-gl val +0.00028 ± 0.00024 (z +1.14) | hold -0.00039 ± 0.00014 (z -2.81) | priv-mix +0.00024 ± 0.00039 (z +0.61) || vs G3: val pc +0.00057 gl +0.00030; hold pc -0.00057 gl -0.00018
+[  105.2s] GATE (pre-declared): arms passing task gate 0/8, plan gate 0/8 -> VERDICT CLOSED
+[  105.2s] ============================== TEST 2: per-cluster vs global FT/TO mix (val only, nested)  ==============================
+[  105.2s] ue8  raw     pc-gl val -0.00026 ± 0.00024 (z -1.08) | priv-mix -0.00034 ± 0.00040 (z -0.84) | global a picks [0.2, 0.3, 0.6] | gl vs G3(a=.5) -0.00000
+[  105.2s] ue8  shrunk  pc-gl val -0.00047 ± 0.00019 (z -2.51) | priv-mix -0.00086 ± 0.00030 (z -2.87) | global a picks [0.2, 0.3, 0.6] | gl vs G3(a=.5) -0.00000
+[  105.2s] ue32 raw     pc-gl val -0.00051 ± 0.00027 (z -1.88) | priv-mix -0.00050 ± 0.00039 (z -1.27) | global a picks [0.2, 0.3, 0.6] | gl vs G3(a=.5) -0.00000
+[  105.2s] ue32 shrunk  pc-gl val +0.00014 ± 0.00021 (z +0.67) | priv-mix -0.00005 ± 0.00032 (z -0.17) | global a picks [0.2, 0.3, 0.6] | gl vs G3(a=.5) -0.00000
+[  105.2s] hp8  raw     pc-gl val -0.00011 ± 0.00025 (z -0.46) | priv-mix -0.00014 ± 0.00037 (z -0.37) | global a picks [0.2, 0.3, 0.6] | gl vs G3(a=.5) -0.00000
+[  105.2s] hp8  shrunk  pc-gl val -0.00025 ± 0.00021 (z -1.17) | priv-mix -0.00016 ± 0.00030 (z -0.51) | global a picks [0.2, 0.3, 0.6] | gl vs G3(a=.5) -0.00000
+[  105.2s] hp32 raw     pc-gl val +0.00048 ± 0.00028 (z +1.74) | priv-mix +0.00063 ± 0.00042 (z +1.50) | global a picks [0.2, 0.3, 0.6] | gl vs G3(a=.5) -0.00000
+[  105.2s] hp32 shrunk  pc-gl val +0.00047 ± 0.00022 (z +2.15) | priv-mix +0.00029 ± 0.00030 (z +0.96) | global a picks [0.2, 0.3, 0.6] | gl vs G3(a=.5) -0.00000
+[  105.3s] rnd8  raw     pc-gl val +0.00027 ± 0.00028 (z +0.95) | priv-mix -0.00004 ± 0.00043 (z -0.09) | global a picks [0.2, 0.3, 0.6] | gl vs G3(a=.5) -0.00000
+[  105.3s] rnd8  shrunk  pc-gl val +0.00023 ± 0.00023 (z +1.00) | priv-mix +0.00007 ± 0.00036 (z +0.18) | global a picks [0.2, 0.3, 0.6] | gl vs G3(a=.5) -0.00000
+[  105.3s] rnd32 raw     pc-gl val +0.00023 ± 0.00027 (z +0.85) | priv-mix +0.00028 ± 0.00044 (z +0.63) | global a picks [0.2, 0.3, 0.6] | gl vs G3(a=.5) -0.00000
+[  105.3s] rnd32 shrunk  pc-gl val +0.00007 ± 0.00021 (z +0.34) | priv-mix +0.00016 ± 0.00035 (z +0.46) | global a picks [0.2, 0.3, 0.6] | gl vs G3(a=.5) -0.00000
+[  105.3s] ============================== INFO: per-cluster G3 NDCG, covariate residual, ANOVA  ==============================
+[  105.3s] ue8   residual ANOVA val F 2.62 p 0.01 eta2 0.0013 | hold F 3.53 p 0.00087 eta2 0.0008 | corr(cluster resid val, hold) +0.479 over 8 clusters; G3 level range val 0.3761-0.4280 hold 0.3134-0.3390
+[  105.3s]     c0: val n  2171 G3 0.3889±0.0053 resid -0.0015 | hold n  3884 G3 0.3187±0.0033 resid -0.0023
+[  105.3s]     c1: val n  1868 G3 0.4098±0.0056 resid +0.0004 | hold n  4112 G3 0.3238±0.0031 resid -0.0006
+[  105.3s]     c2: val n  1927 G3 0.3761±0.0052 resid -0.0142 | hold n  4892 G3 0.3134±0.0026 resid -0.0077
+[  105.3s]     c3: val n  2840 G3 0.4001±0.0046 resid +0.0061 | hold n  5488 G3 0.3272±0.0028 resid +0.0051
+[  105.3s]     c4: val n   205 G3 0.3817±0.0166 resid -0.0282 | hold n  1187 G3 0.3356±0.0062 resid +0.0003
+[  105.3s]     c5: val n  1981 G3 0.4280±0.0058 resid +0.0089 | hold n  3595 G3 0.3390±0.0036 resid +0.0112
+[  105.3s]     c6: val n  1404 G3 0.3961±0.0068 resid +0.0048 | hold n  2751 G3 0.3199±0.0039 resid -0.0023
+[  105.3s]     c7: val n  1910 G3 0.4062±0.0056 resid -0.0033 | hold n  4091 G3 0.3222±0.0030 resid -0.0032
+[  105.3s] ue32  residual ANOVA val F 1.69 p 0.0094 eta2 0.0037 | hold F 3.11 p 1.4e-08 eta2 0.0032 | corr(cluster resid val, hold) +0.390 over 32 clusters; G3 level range val 0.3544-0.4806 hold 0.2997-0.3615
+[  105.3s] hp8   residual ANOVA val F 1.72 p 0.099 eta2 0.0008 | hold F 5.62 p 1.7e-06 eta2 0.0013 | corr(cluster resid val, hold) +0.525 over 8 clusters; G3 level range val 0.3952-0.4150 hold 0.3146-0.3429
+[  105.3s]     c0: val n  2097 G3 0.3981±0.0054 resid -0.0091 | hold n  4072 G3 0.3149±0.0031 resid -0.0078
+[  105.3s]     c1: val n   391 G3 0.4150±0.0141 resid -0.0038 | hold n  1485 G3 0.3423±0.0062 resid -0.0039
+[  105.3s]     c2: val n  3381 G3 0.3963±0.0040 resid -0.0027 | hold n  7784 G3 0.3217±0.0021 resid +0.0007
+[  105.3s]     c3: val n  3185 G3 0.3994±0.0044 resid +0.0079 | hold n  5973 G3 0.3208±0.0026 resid +0.0022
+[  105.3s]     c4: val n   888 G3 0.4067±0.0086 resid -0.0010 | hold n  2125 G3 0.3358±0.0047 resid +0.0127
+[  105.3s]     c5: val n  1407 G3 0.3952±0.0065 resid -0.0072 | hold n  3338 G3 0.3146±0.0033 resid -0.0099
+[  105.3s]     c6: val n  2431 G3 0.4081±0.0051 resid +0.0064 | hold n  4231 G3 0.3306±0.0033 resid +0.0092
+[  105.3s]     c7: val n   526 G3 0.4005±0.0106 resid +0.0002 | hold n   992 G3 0.3429±0.0066 resid -0.0138
+[  105.3s] hp32  residual ANOVA val F 2.20 p 0.00013 eta2 0.0048 | hold F 2.85 p 2.1e-07 eta2 0.0029 | corr(cluster resid val, hold) +0.351 over 31 clusters; G3 level range val 0.3695-0.4579 hold 0.3016-0.3612
+[  105.3s] rnd8   residual ANOVA val F 0.94 p 0.47 eta2 0.0005 | hold F 0.86 p 0.54 eta2 0.0002 | corr(cluster resid val, hold) -0.460 over 8 clusters; G3 level range val 0.3915-0.4102 hold 0.3188-0.3293
+[  105.3s] rnd32  residual ANOVA val F 0.78 p 0.8 eta2 0.0017 | hold F 0.68 p 0.91 eta2 0.0007 | corr(cluster resid val, hold) -0.191 over 32 clusters; G3 level range val 0.3780-0.4259 hold 0.3150-0.3360
+[  105.3s] ============================== INFO: full-fit per-cluster family weights on val leak-free, transferred to holdout  ==============================
+[  105.3s] ue8  raw     val-global w [0.1, 0.4, 0.5] (val 0.40117 vs G3 0.40046); transfer per-cluster - global on holdout -0.00015 ± 0.00015 (z -1.00)
+[  105.3s]       per-cluster w (F10,F7x,F7x70): c0:[0.0, 0.2, 0.8] c1:[0.1, 0.7, 0.2] c2:[0.2, 0.6, 0.2] c3:[0.0, 0.4, 0.6] c4:[0.0, 0.4, 0.6] c5:[0.2, 0.1, 0.7] c6:[0.5, 0.5, 0.0] c7:[0.0, 0.9, 0.1]
+[  105.3s] ue8  shrunk  val-global w [0.1, 0.4, 0.5] (val 0.40117 vs G3 0.40046); transfer per-cluster - global on holdout +0.00001 ± 0.00013 (z +0.05)
+[  105.3s]       per-cluster w (F10,F7x,F7x70): c0:[0.0, 0.5, 0.5] c1:[0.1, 0.7, 0.2] c2:[0.2, 0.6, 0.2] c3:[0.0, 0.4, 0.6] c4:[0.1, 0.4, 0.5] c5:[0.2, 0.1, 0.7] c6:[0.2, 0.5, 0.3] c7:[0.0, 0.9, 0.1]
+[  105.3s] ue32 raw     val-global w [0.1, 0.4, 0.5] (val 0.40117 vs G3 0.40046); transfer per-cluster - global on holdout -0.00029 ± 0.00020 (z -1.44)
+[  105.3s] ue32 shrunk  val-global w [0.1, 0.4, 0.5] (val 0.40117 vs G3 0.40046); transfer per-cluster - global on holdout -0.00018 ± 0.00017 (z -1.09)
+[  105.3s] hp8  raw     val-global w [0.1, 0.4, 0.5] (val 0.40117 vs G3 0.40046); transfer per-cluster - global on holdout +0.00005 ± 0.00019 (z +0.27)
+[  105.3s]       per-cluster w (F10,F7x,F7x70): c0:[0.0, 0.4, 0.6] c1:[0.4, 0.2, 0.4] c2:[0.6, 0.4, 0.0] c3:[0.2, 0.4, 0.4] c4:[1.0, 0.0, 0.0] c5:[0.0, 0.2, 0.8] c6:[0.0, 0.9, 0.1] c7:[0.2, 0.5, 0.3]
+[  105.3s] hp8  shrunk  val-global w [0.1, 0.4, 0.5] (val 0.40117 vs G3 0.40046); transfer per-cluster - global on holdout +0.00017 ± 0.00018 (z +0.95)
+[  105.3s]       per-cluster w (F10,F7x,F7x70): c0:[0.0, 0.4, 0.6] c1:[0.2, 0.6, 0.2] c2:[0.7, 0.3, 0.0] c3:[0.2, 0.4, 0.4] c4:[0.0, 1.0, 0.0] c5:[0.0, 0.2, 0.8] c6:[0.0, 0.9, 0.1] c7:[0.2, 0.5, 0.3]
+[  105.3s] hp32 raw     val-global w [0.1, 0.4, 0.5] (val 0.40117 vs G3 0.40046); transfer per-cluster - global on holdout +0.00000 ± 0.00021 (z +0.02)
+[  105.3s] hp32 shrunk  val-global w [0.1, 0.4, 0.5] (val 0.40117 vs G3 0.40046); transfer per-cluster - global on holdout -0.00014 ± 0.00018 (z -0.80)
+[  105.3s] ============================== INFO: 'right category, buried' cell concentration by cluster (val leak-free)  ==============================
+[  105.7s] cell positives 7,543 of 21,759 leak-free positives (0.347)
+[  105.7s] ue8   cell share of positives by cluster: min 0.274 max 0.467 (overall 0.347); chi2 467.5 p 7.8e-97
+[  105.7s] ue32  cell share of positives by cluster: min 0.219 max 0.608 (overall 0.347); chi2 893.7 p 7e-168
+[  105.7s] hp8   cell share of positives by cluster: min 0.297 max 0.437 (overall 0.347); chi2 167.1 p 1e-32
+[  105.7s] hp32  cell share of positives by cluster: min 0.219 max 0.560 (overall 0.347); chi2 806.9 p 4.1e-151
+[  105.7s] rnd8   cell share of positives by cluster: min 0.338 max 0.359 (overall 0.347); chi2 4.1 p 0.77
+[  105.7s] rnd32  cell share of positives by cluster: min 0.300 max 0.387 (overall 0.347); chi2 51.0 p 0.013
+[  105.7s] ============================== TEST 3: cluster composition val vs test public vs test private (label-free)  ==============================
+[  105.7s] test public 8562 feeds, private 20033
+[  105.7s] ue8   JS val-pub 0.0031 val-priv 0.0019 pub-priv 0.0004 fit-val 0.0012 hold-val 0.0047 fit-priv 0.0053 | chi2 pub-priv 16.6 p 0.02; val-priv 134.4 p 7.5e-26
+[  105.7s]       largest priv-val share shifts: c4 0.014->0.003 (-0.011±0.001); c6 0.098->0.106 (+0.008±0.003); c3 0.198->0.202 (+0.004±0.004)
+[  105.7s]       largest priv-pub share shifts: c2 0.146->0.136 (-0.009±0.005); c0 0.154->0.147 (-0.007±0.005); c7 0.130->0.135 (+0.006±0.004)
+[  105.7s]       val G3 0.40046; cluster-mix reweighted: pub 0.40043 (shift -0.00003 ± 0.00022 (z -0.13)), priv 0.40067 (shift +0.00021 ± 0.00019 (z +1.11)); pmix levels pub 0.39711 priv 0.40261
+[  105.7s] ue32  JS val-pub 0.0037 val-priv 0.0021 pub-priv 0.0009 fit-val 0.0016 hold-val 0.0056 fit-priv 0.0056 | chi2 pub-priv 40.1 p 0.13; val-priv 147.5 p 4.2e-17
+[  105.7s]       largest priv-val share shifts: c6 0.014->0.003 (-0.011±0.001); c7 0.042->0.048 (+0.006±0.002); c20 0.029->0.032 (+0.003±0.002)
+[  105.7s]       largest priv-pub share shifts: c7 0.041->0.048 (+0.007±0.003); c22 0.045->0.040 (-0.006±0.003); c31 0.040->0.044 (+0.004±0.003)
+[  105.7s]       val G3 0.40046; cluster-mix reweighted: pub 0.39994 (shift -0.00053 ± 0.00027 (z -1.95)), priv 0.40054 (shift +0.00008 ± 0.00021 (z +0.36)); pmix levels pub 0.39711 priv 0.40261
+[  105.7s] hp8   JS val-pub 0.0003 val-priv 0.0003 pub-priv 0.0001 fit-val 0.0094 hold-val 0.0034 fit-priv 0.0082 | chi2 pub-priv 2.9 p 0.89; val-priv 22.1 p 0.0024
+[  105.7s]       largest priv-val share shifts: c1 0.027->0.020 (-0.007±0.002); c3 0.223->0.227 (+0.005±0.005); c0 0.147->0.149 (+0.003±0.004)
+[  105.7s]       largest priv-pub share shifts: c2 0.242->0.236 (-0.006±0.006); c6 0.166->0.172 (+0.006±0.005); c0 0.147->0.149 (+0.002±0.005)
+[  105.7s]       val G3 0.40046; cluster-mix reweighted: pub 0.40030 (shift -0.00016 ± 0.00011 (z -1.43)), priv 0.40037 (shift -0.00009 ± 0.00011 (z -0.82)); pmix levels pub 0.39711 priv 0.40261
+[  105.7s] hp32  JS val-pub 0.0007 val-priv 0.0005 pub-priv 0.0005 fit-val 0.0105 hold-val 0.0050 fit-priv 0.0094 | chi2 pub-priv 23.5 p 0.83; val-priv 36.5 p 0.23
+[  105.7s]       largest priv-val share shifts: c6 0.017->0.012 (-0.005±0.001); c11 0.052->0.056 (+0.004±0.002); c17 0.051->0.047 (-0.004±0.002)
+[  105.7s]       largest priv-pub share shifts: c10 0.077->0.083 (+0.006±0.003); c25 0.062->0.067 (+0.005±0.003); c22 0.036->0.032 (-0.004±0.002)
+[  105.7s]       val G3 0.40046; cluster-mix reweighted: pub 0.40071 (shift +0.00025 ± 0.00015 (z +1.65)), priv 0.40059 (shift +0.00013 ± 0.00013 (z +0.94)); pmix levels pub 0.39711 priv 0.40261
+[  105.7s] done; json <repo>/nn_x/pretrain2/P1/out/cluster_diag.json

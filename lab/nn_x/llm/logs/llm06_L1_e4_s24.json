@@ -1,0 +1,168 @@
+{
+  "args": {
+    "variant": "llm06_L1_e4_s24",
+    "backbone": "qwen3-0.6b",
+    "layout": "L1",
+    "random_init": false,
+    "seed": 24,
+    "train_feeds": 150000,
+    "holdout": 30000,
+    "xt": "cvnd_pre2s",
+    "max_hist": 256,
+    "epochs": 4.0,
+    "token_budget": 56000,
+    "eval_token_budget": 96000,
+    "lora_r": 32,
+    "lr_lora": 0.0002,
+    "lr_proj": 0.001,
+    "lr_full": 0.0005,
+    "wd": 0.02,
+    "warmup": -1,
+    "floor": 0.1,
+    "clip": 1.0,
+    "aux_pos": 0.5,
+    "aux_tau": 10.0,
+    "eval_every": 200,
+    "no_val_log": true,
+    "no_sink": false,
+    "sink_token": "im_start",
+    "precision_check": false,
+    "i3_threshold": 0.0001,
+    "final_fp32": true,
+    "cpu_bf16": false,
+    "no_test": false,
+    "device": "cuda",
+    "dtype": "bf16",
+    "attn": "sdpa",
+    "grad_ckpt": true,
+    "threads": 12,
+    "max_steps": 0,
+    "time_limit": 0,
+    "smoke": 0,
+    "out": "<repo>/nn_x/llm",
+    "grad_accum": 1,
+    "probe_json": "",
+    "probe_fp32_feeds": 2000,
+    "probe_gate_mem_gb": 200.0,
+    "probe_gate_hours": 10.0,
+    "arm_eval_every": 200
+  },
+  "best_step": 2000,
+  "total_steps": 3024,
+  "last_eval_step": 3024,
+  "holdout_ndcg": 0.2999972905260888,
+  "val_ndcg": null,
+  "train_minutes": 303.512096174558,
+  "pure_train_minutes": 239.09517710606258,
+  "real_tokens": 157237344,
+  "padded_tokens": 166466862,
+  "padded_tokens_per_s": 11603.946736111935,
+  "peak_mem_gb": 20.06520366668701,
+  "params": {
+    "total": 462389867,
+    "trainable": 21986923,
+    "lora": 20185088,
+    "body": 440467456
+  },
+  "sink": true,
+  "final_fp32": true,
+  "i3": null,
+  "history": [
+    {
+      "step": 200,
+      "loss": 5.3504085445404055,
+      "holdout_ndcg": 0.29104801557552684,
+      "minutes": 12.215416733423869
+    },
+    {
+      "step": 400,
+      "loss": 5.4270852756500245,
+      "holdout_ndcg": 0.29594739310764306,
+      "minutes": 28.434915800889332
+    },
+    {
+      "step": 600,
+      "loss": 5.307731835842133,
+      "holdout_ndcg": 0.29575824774697745,
+      "minutes": 49.80357844432195
+    },
+    {
+      "step": 800,
+      "loss": 5.342911055088043,
+      "holdout_ndcg": 0.2973770737109078,
+      "minutes": 71.0306016643842
+    },
+    {
+      "step": 1000,
+      "loss": 5.293531428575516,
+      "holdout_ndcg": 0.2972110296691728,
+      "minutes": 91.97431391477585
+    },
+    {
+      "step": 1200,
+      "loss": 5.252794594764709,
+      "holdout_ndcg": 0.2973934131755478,
+      "minutes": 113.2734376748403
+    },
+    {
+      "step": 1400,
+      "loss": 5.350710237026215,
+      "holdout_ndcg": 0.29956287158354195,
+      "minutes": 134.46865992546083
+    },
+    {
+      "step": 1600,
+      "loss": 5.266563541889191,
+      "holdout_ndcg": 0.2992010332737819,
+      "minutes": 155.58298849662145
+    },
+    {
+      "step": 1800,
+      "loss": 5.268380315303802,
+      "holdout_ndcg": 0.29923640925565526,
+      "minutes": 177.03280442555746
+    },
+    {
+      "step": 2000,
+      "loss": 5.301058481931687,
+      "holdout_ndcg": 0.30009931011811347,
+      "minutes": 197.92004964749017
+    },
+    {
+      "step": 2200,
+      "loss": 5.382451894283295,
+      "holdout_ndcg": 0.2997442704563471,
+      "minutes": 219.25085331996283
+    },
+    {
+      "step": 2400,
+      "loss": 5.161649549007416,
+      "holdout_ndcg": 0.3000243651294357,
+      "minutes": 240.59740436474482
+    },
+    {
+      "step": 2600,
+      "loss": 5.285309319496155,
+      "holdout_ndcg": 0.29990060250702893,
+      "minutes": 256.34939184586204
+    },
+    {
+      "step": 2800,
+      "loss": 5.341303678750992,
+      "holdout_ndcg": 0.3000913245835728,
+      "minutes": 272.4674906293551
+    },
+    {
+      "step": 3000,
+      "loss": 5.237071385383606,
+      "holdout_ndcg": 0.29992428524216486,
+      "minutes": 293.02158792416253
+    },
+    {
+      "step": 3024,
+      "loss": 5.253578404585521,
+      "holdout_ndcg": 0.2997492273573426,
+      "minutes": 299.2952814340591
+    }
+  ]
+}

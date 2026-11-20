@@ -1,0 +1,25 @@
+3,000 seen production feeds (M >= 50) scored by w5_fd10_kd05w192_s951; slot-bin click-mass shapes, last displayed item excluded
+bins [(0, 0), (1, 1), (2, 2), (3, 4), (5, 9), (10, 19), (20, 49), (50, 99), (100, 199), (200, 1000000)]
+actual          [0.0475, 0.0257, 0.0236, 0.0315, 0.0718, 0.118, 0.2472, 0.2256, 0.1666, 0.0425]
+member row0     [0.0257, 0.0165, 0.0152, 0.026, 0.0583, 0.1041, 0.2497, 0.2579, 0.1971, 0.0497]
+member row1     [0.0225, 0.015, 0.0141, 0.0247, 0.0567, 0.1033, 0.2516, 0.2612, 0.2006, 0.0503]
+
+ e = within-feed clean pool (p_oracle): counterfactual (same feeds) [0.0261, 0.0149, 0.0168, 0.0246, 0.0595, 0.1079, 0.2544, 0.2506, 0.1937, 0.0515]
+  TV actual vs CF 0.0684 ± 0.0012 | row0 vs CF 0.0135 ± 0.0049 | row1 vs CF 0.0177 ± 0.0052
+  top-slot mass: actual 0.0475 CF 0.0261 row0 0.0257 (0.99x CF ± 0.06) row1 0.0225 (0.86x ± 0.05)
+  slots 0-4 mass: actual 0.1283 CF 0.0824 row0 0.0833 row1 0.0763
+
+ e = holdout ref pool (p_holdout_oracle): counterfactual (same feeds) [0.0269, 0.0152, 0.0167, 0.0249, 0.0593, 0.1073, 0.2539, 0.2508, 0.1935, 0.0513]
+  TV actual vs CF 0.0677 ± 0.0012 | row0 vs CF 0.0129 ± 0.0048 | row1 vs CF 0.0175 ± 0.0051
+  top-slot mass: actual 0.0475 CF 0.0269 row0 0.0257 (0.95x CF ± 0.06) row1 0.0225 (0.83x ± 0.05)
+  slots 0-4 mass: actual 0.1283 CF 0.0838 row0 0.0833 row1 0.0763
+
+ e = old p>0.9 pool (d_position): counterfactual (same feeds) [0.0233, 0.0142, 0.0162, 0.0228, 0.0574, 0.1042, 0.2505, 0.256, 0.2007, 0.0547]
+  TV actual vs CF 0.0801 ± 0.0014 | row0 vs CF 0.0107 ± 0.0044 | row1 vs CF 0.0090 ± 0.0044
+  top-slot mass: actual 0.0475 CF 0.0233 row0 0.0257 (1.10x CF ± 0.07) row1 0.0225 (0.96x ± 0.06)
+  slots 0-4 mass: actual 0.1283 CF 0.0764 row0 0.0833 row1 0.0763
+
+300,000-feed sample of the pool: actual [0.0477, 0.0299, 0.0216, 0.0362, 0.074, 0.1165, 0.2443, 0.2275, 0.1645, 0.0377]
+  e = within-feed clean pool (p_oracle): TV actual vs CF 0.0699 | row0 vs CF 0.0131 | row1 vs CF 0.0206 | top slot CF 0.0263, row0/CF 0.98, row1/CF 0.86; slots 0-4 CF 0.0875
+  e = holdout ref pool (p_holdout_oracle): TV actual vs CF 0.0692 | row0 vs CF 0.0133 | row1 vs CF 0.0208 | top slot CF 0.0271, row0/CF 0.95, row1/CF 0.83; slots 0-4 CF 0.0890
+  e = old p>0.9 pool (d_position): TV actual vs CF 0.0819 | row0 vs CF 0.0051 | row1 vs CF 0.0077 | top slot CF 0.0235, row0/CF 1.09, row1/CF 0.96; slots 0-4 CF 0.0812

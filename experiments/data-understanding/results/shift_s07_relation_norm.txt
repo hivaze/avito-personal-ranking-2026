@@ -1,0 +1,21 @@
+
+==== candidate-level adversarial AUC (f1..f5 only) by normalisation
+  raw  : train-vs-val 0.6258   val-vs-test 0.5108
+  rank : train-vs-val 0.5946   val-vs-test 0.5070
+  z    : train-vs-val 0.6160   val-vs-test 0.5000
+
+==== val NDCG: raw vs within-feed rank vs z (identical orderings per feed => identical NDCG; shown as sanity) and pooled LGB on val 5-fold
+  pointwise LGB on val (5-fold by feed), f1..f5 raw     : NDCG 0.3337
+  pointwise LGB on val (5-fold by feed), f1..f5 rank    : NDCG 0.3281
+  pointwise LGB on val (5-fold by feed), f1..f5 z       : NDCG 0.3354
+  pointwise LGB on val (5-fold by feed), f1..f5 raw+rank: NDCG 0.3317
+  paired rank - raw: -0.0055 +- 0.0016
+  paired z - raw: +0.0017 +- 0.0014
+  paired raw+rank - raw: -0.0020 +- 0.0016
+
+==== LGB trained on train sample (60k feeds), evaluated on val: raw vs rank vs raw+rank (f1..f5 + category)
+  raw     : val NDCG 0.3250
+  rank    : val NDCG 0.3240
+  raw+rank: val NDCG 0.3296
+  paired rank - raw: -0.0010 +- 0.0014
+  paired raw+rank - raw: +0.0046 +- 0.0013

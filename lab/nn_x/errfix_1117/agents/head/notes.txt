@@ -1,0 +1,123 @@
+HEAD-OF-LIST ERROR ANALYSIS (ranks 1-10), FD16P20, discovery half of validation, 2026-11-17
+Analyst lens: when is rank 1 wrong, what distinguishes a positive at ranks 2-10 from the items above it,
+score gaps, the two branches s_ft / s_to, re-weighting inside the head or by feed type.
+Scripts: work/a01..a33*.py, helpers work/hk.py (numba NDCG, checked equal to kit.ndcg_per_feed to 3e-16)
+and work/clogit.py (within-feed conditional logit). CPU only, 12 threads.
+
+RESULT: ZERO RULES SUBMITTED. No head correction reaches a cross-fitted gain of +0.0003 with z >= 2.
+Roughly 1,250 parameter settings in about 20 rule families were tried.
+
+BASELINE AND SIZE OF THE OPPORTUNITY
+- Discovery NDCG 0.39939 (7,214 feeds, 697k rows, 11,026 positives).
+- Positive rate by rank: 1: 12.6% | 2: 9.1% | 3: 7.4% | 4-5: 6.0% | 6-10: 4.5% | 11-20: 3.0%.
+- Best positive at rank 1 in 12.6% of feeds; 2-3: 15.1%; 4-10: 26.3%; 11-30: 26.1%; 31+: 20.0%.
+  Share of lost NDCG: rank 2-3 feeds 11%, 4-10 28%, 11-30 33%, 31+ 27%.
+- Oracle re-order of the head with the head set fixed: top-2 +0.027, top-3 +0.056, top-5 +0.110,
+  top-10 +0.212. The opportunity is large, but none of the columns can find it (below).
+
+1. CAN A FLEXIBLE MODEL RE-RANK THE HEAD? (an upper bound for any rule from these columns)
+- LightGBM re-ranker of the top K (all 41 item columns, 8 feed columns, score/s_ft/s_to/rank/gaps),
+  cross-fitted over kit.folds:
+  binary K=5/10/20: -0.0022/-0.0023/-0.0023 (z about -2.5); lambdarank K=10: -0.0052 (z -3.5).
+- Residual GBM (init = per-fold logistic on score, log M, log rank), K=10: 50 rounds -0.00004,
+  150 rounds -0.0006, 400 rounds -0.0016; K=3 and K=20 are also negative. Adding rounds only adds loss.
+- Ridge conditional logit (score not penalised plus all 46 columns), cross-fitted, K=10 and K=30:
+  -0.0011 to -0.0030 at every penalty.
+=> With these columns, the head order is at the noise floor. Any perturbation, linear or not, loses
+   out of fold. Clicks inside the head are decided by things not in the table (photo, price, title).
+
+2. SWAPS INSIDE THE HEAD
+- Rank-1 <-> rank-2 swap gain by quintile of 35 features (rank-1 value and the pair difference),
+  308 bins: there is NO bin in which y2 > y1. The best bin is still -0.0007 per feed. Rank 1 beats rank 2
+  everywhere, even in the smallest-gap quintile (gap_next < .057: y1 9.8% vs y2 8.4%).
+- Cross-fitted regression trees on the swap gain (depth 2-4, leaf 200-800, item/pair/feed features)
+  for swaps 1<->2, 2<->3 and 1<->3: all 27 settings are <= 0 out of fold (the worst is -0.0034).
+- Confident tops (gap_next > .6, 789 feeds): y1 = 23.8%, and positives differ from negatives mainly by
+  M (smaller feeds). No item-level signal.
+
+3. TWO BRANCHES, s_ft vs s_to
+- corr(s_ft, s_to) = 0.991. Global weight on s_ft: 0: -0.00113 | .25: -0.00072 | .4: -0.00014 |
+  .5: 0 | .6: +0.00001 | .75: -0.00048 | 1: -0.00068. 0.5 is already optimal.
+- Head-only re-weighting (top K re-ordered by w*s_ft + (1-w)*s_to, K = 2..300, w = 0..0.6): every
+  variant <= +0.00001. Moving toward s_to inside the head costs 0.0005-0.0011.
+- When the branches disagree on top-1 (1,378 feeds): ft-top1 is positive 8.6%, to-top1 7.5%,
+  score-top1 9.0%. The consensus wins. By segment, H <= 150 looked like it favoured ft
+  (0.115 vs 0.060), but this does not survive cross-fitting.
+- Head discordant pairs: pairwise accuracy ft .6106, to .6142, score .6140. A pairwise logit favours
+  s_to (t ~ .15*dft + .78*dto), but this is pair-count weighted and does not carry over to NDCG
+  (head re-weighting toward s_to loses).
+- Branch weight per segment, cross-fitted (w chosen per segment on 4 folds; segmentations M, H,
+  newest_type, n_hist_cats32, n_feed_cats, newest_src, guest): +0.00007, +0.00014, -0.00012, -0.00002,
+  -0.00009, -0.00062, -0.00028. In-sample the best choices gave +0.0002 to +0.0005, all fold noise.
+- Disagreement as uncertainty: score - lam*|s_ft - s_to| on the full list: lam .15 +0.00001,
+  .3 +0.00010 (z .3), .6 -0.0005. A bonus for disagreement is clearly negative (-0.0008, z -2.7).
+  Rank-average of the branches -0.00023. Agreement product +-0.05/0.1: |delta| <= 0.00013.
+  Head-local re-standardisation of the branches: K=10 +0.00015 (z 1.2), other K negative.
+  Splitting validation by weekday or by fidx quintile shows no drift in the branch balance.
+
+4. SINGLE-FEATURE CORRECTIONS IN THE HEAD
+- Within-feed conditional logit (score + one feature), K=10, 42 features: the largest is
+  cat_n_in_feed z=+2.9, then pre2_fe_z +2.4, cand_maxcos +2.2, cat_views +2.2 (null max about 2.9).
+  K=4: f2 -3.5, f2_home -2.7, c_fav -2.3.
+  Category dummies: max |z| 2.5 over about 30 categories x 4 depths. Calibration is fine.
+- Tie-breaker scan score + w*z(x), w in {+-.02, +-.04, +-.08, 0}, 41 features, cross-fitted, on the head
+  (K=10) and on the full list (574 variants). Best: h10 with w=-.02 (all 5 folds choose it):
+  head +0.00042 (z 1.57), full +0.00052 (z 1.95). Next is cat_user_rank (+.02): +0.00034 (z 1.48).
+  Every other feature is <= +0.0002 or negative. All five history-similarity columns (h5, h10, h32,
+  hmax, hmean5) gain a little at w=-.01 (+0.0002 to +0.0004 in-sample), but w=-.03 to -.05 already
+  turns negative, and the conditional-logit sign for h10 is POSITIVE (+0.03). Given about 600 variants
+  this is consistent with noise, and it fails the z>=2 bar. Not submitted.
+- Category share of the feed (cat_n_in_feed/M): the full-list conditional logit gives z=+6.6, yet
+  NDCG for w = .02..0.3 is -0.00007 to -0.0018. The likelihood gain sits in the middle/tail, which
+  NDCG barely weights.
+- Residual tables against a (rank, M-bucket) calibration show strong-looking bins (hmean5 top decile
+  +0.020, z=6.2; gap_top >= 1.4 at -0.017, z=-7). These are FEED-LEVEL confounds (focused-session
+  feeds have more positives in the head). The within-feed conditional logit removes them
+  (hmean5 z=1.9).
+
+5. INTERACTIONS WITH FEED SEGMENTS (conditional logit, 360 tests per depth)
+- K=10: max interaction z 3.1 (cat_n_in_feed x M<=30). K=30: hmax x n_hist_cats32<=2 at z=4.1,
+  plus f1, h5, cat_actions, cand_maxcos and cat_n_in_feed x focused user (z 2.5-3.3). This is a coherent
+  "focused users deserve sharper affinity" story.
+  As NDCG rules, cross-fitted (T in {1,2,3}, w in 0..0.3, 7 features): hmax -0.00003, h5 -0.00019,
+  hmean5 -0.00039, f1 -0.00027, cat_actions -0.00011, cat_n -0.00021.
+  Small feeds M <= T (T in {20,30,50}): cat_n -0.00001, hmax +0.00047 (z 1.67), f1 -0.00036, hmean5 -0.00002.
+
+6. NEAR-COPIES AND DUPLICATES IN THE HEAD
+- Click-splitting hypothesis (two near-identical candidates both in the top 20 share one click):
+  REJECTED. 5,212 fingerprinted near-copy pairs in 1,378 feeds: the lower copy is positive 3.65% vs
+  3.27% expected, and P(lower pos | upper pos) = 6.2% vs 3.5%. Users open both. Demoting the lower copy
+  by 0.05-0.4 gives -0.00002 to -0.00017.
+- Near-identical to a history item (>= .995) is 1.3-1.7x the rank-calibrated rate inside the head
+  (hmax: 95 positives vs 72 expected) and 0.8x below the head. Promoting it in the head, cross-fitted:
+  hmax -0.00015, c_contact -0.00036. The excess is a feed-level effect again.
+
+7. POPULARITY / ENGAGEMENT (other users)
+- Very popular items (it_hist_et1_luo 300-800) are positive 1.29x the rank-calibrated rate, but only on
+  135 positives. score + w*1[et1 >= T]: in-sample best +0.00048 (T=300, w=.3), cross-fitted +0.00024
+  to +0.00048 (z 0.7-1.6). The hinge-log form gives cf +0.00034 (z 1.5). This is a popularity-only rule
+  and fails the bar. Not submitted.
+- f5 (engagement rate) for well-exposed items (xp_imp_c50 >= 3.9): conditional logit z 1.8-2.4;
+  NDCG cross-fitted +0.00024 (z 1.3). Smoothed CTR (Beta prior) z <= 1.3.
+
+8. MISC
+- Row order inside a feed is random (rel. position vs label flat, corr with score -0.0008): no leak.
+- One tie in the base score in 697k rows, with no positive in it. Tie-breaking cannot help.
+- Validation covers two weekdays (1, 3) with no branch drift.
+
+WHAT THIS MEANS FOR THE LEAD
+- Treat the head of FD16P20 as efficient with respect to every column in this table. Flexible and
+  linear re-rankers both lose out of fold, and every swap bin of ranks 1-2 favours the model's order.
+  Further head gains need NEW information (images, price, title text, the user's own non-click
+  impressions), not re-combination of these columns.
+- Do not chase likelihood-based residuals (conditional-logit or calibration z-scores). In this table
+  they come from the middle/tail or from feed-level confounds and do not move NDCG.
+- The branch balance of 0.5/0.5 is right overall and in every segment we can measure (cross-fitted).
+
+SUMMARY OF FAILED CANDIDATES CLOSEST TO THE BAR (none submitted)
+  h10 tie-break (w=-.02, full list)      cf +0.00052  se .00027  z 1.95   ~600 tie-break variants tried
+  very-popular boost (et1>=300, w=.3)    cf +0.00048  se .00031  z 1.57   popularity-only
+  hmax boost in small feeds (M<=50)      cf +0.00047  se .00028  z 1.67
+  cat_user_rank tie-break (+.02, head)   cf +0.00034  se .00023  z 1.48
+  f5 | exposed (w=.03)                   cf +0.00024  se .00019  z 1.30
+  branch weight by H segment             cf +0.00014  se .00025  z 0.56

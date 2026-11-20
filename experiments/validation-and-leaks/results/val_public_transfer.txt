@@ -1,0 +1,59 @@
+# Read-out copied from the raw run log (not published), unchanged below this line.
+PART 3: TRANSFER-RATIO ANATOMY. 6 contrasts vs G3; resid = public delta - val expectation (uniform val; pubmix in brackets).
+   contrast     d_val  d_pubmix    public     resid       SE      z
+   Cd        -0.00131  -0.00098  -0.00074  +0.00057  0.00080  +0.71  [+0.30]
+   Pall      -0.00136  -0.00100  -0.00038  +0.00097  0.00070  +1.39  [+0.88]
+   PF7x      -0.00058  -0.00048  -0.00010  +0.00048  0.00064  +0.75  [+0.60]
+   M2        +0.00062  +0.00076  -0.00039  -0.00100  0.00055  -1.81  [-2.07]
+   S2        +0.00056  +0.00061  -0.00035  -0.00090  0.00046  -1.97  [-2.09]
+   TOonly    +0.00003  -0.00030  -0.00047  -0.00051  0.00064  -0.80  [-0.28]
+
+=== 3a. predictors per contrast (what each model uses) ===
+   contrast     d_val    d_hold        ±  val-hold  share-.7  wft-.5 valsel      d_ft      d_to
+   Cd        -0.00131  -0.00060  0.00027  -0.00071     -0.70   +0.00      0  -0.00095  -0.00158
+   Pall      -0.00136  -0.00045  0.00025  -0.00091     -0.70   +0.00      0  -0.00112  -0.00118
+   PF7x      -0.00058  -0.00020  0.00022  -0.00038     -0.52   +0.00      0  -0.00062  -0.00051
+   M2        +0.00062  -0.00018  0.00019  +0.00080     +0.30   +0.00      1  +0.00026  +0.00050
+   S2        +0.00056      +nan  0.00000      +nan     +0.00   +0.00      1      +nan      +nan
+   TOonly    +0.00003  +0.00000  0.00000  +0.00003     +0.00   -0.50      0      +nan      +nan
+   (TOonly's holdout = G3's by construction: the holdout only sees train-only members; S2 has no train-only form.)
+
+=== 3b. correlation of the predictor vectors across the contrasts (collinearity; nan-free pairs only) ===
+   generic shrinkage: r = k*d_v +1.00 +0.96 -0.21 +0.81 +0.98 -0.72
+   re-cool share: resid = b*(sh +0.96 +1.00 -0.31 +0.77 +0.97 -0.65
+   FT weight: resid = f*(wft-0. -0.21 -0.31 +1.00 +0.32 -0.22    na
+   val-selected indicator: resi +0.81 +0.77 +0.32 +1.00 +0.85 -0.56
+   val-holdout discrepancy: res +0.98 +0.97 -0.22 +0.85 +1.00 -0.62
+   FT-half excess: resid = h*(d -0.72 -0.65    na -0.56 -0.62 +1.00
+
+=== 3c. 1-parameter residual models (GLS, no intercept): resid_i = beta * x_i; chi2 over the usable contrasts; LOO ===
+   generic shrinkage: r = k*d_val (k-1 = slope)         beta +0.161 ± 0.343  chi2(5)  2.00 p 0.850  LOO sum z^2  3.10  LOO z -0.75 -0.35 -0.12 -0.89 -1.02 -0.75
+   re-cool share: resid = b*(share-0.70)                beta -0.00140 ± 0.00078  chi2(5)  4.72 p 0.451  LOO sum z^2  5.86  LOO z -0.61 +0.15 -0.38 -0.90 -1.97 -0.80
+   FT weight: resid = f*(wft-0.5)                       beta +0.00050 ± 0.00120  chi2(5)  7.82 p 0.167  LOO sum z^2 10.79  LOO z +0.71 +1.39 +0.75 -1.81 -1.97 -0.80
+   val-selected indicator: resid = s*sel                beta -0.00088 ± 0.00042  chi2(5)  3.57 p 0.612  LOO sum z^2  3.69  LOO z +0.71 +1.39 +0.75 -0.22 -0.06 -0.80
+   val-holdout discrepancy: resid = -g*(d_val-d_hold)   beta -1.06570 ± 0.44667  chi2(4)  0.75 p 0.946  LOO sum z^2  0.73  LOO z -0.25 -0.02 +0.08 -0.34 -0.74
+   FT-half excess: resid = h*(d_ft-d_to)                beta +0.63322 ± 0.71748  chi2(3)  5.45 p 0.142  LOO sum z^2  8.94  LOO z -1.82 +1.33 +0.85 -1.77
+   1:1 transfer (resid = 0, no parameter)               chi2(6)  7.99 p 0.239  sum z^2 (no fit) 10.79
+   constant offset: resid = a                           a -0.00047 ± 0.00038  chi2(5)  6.41 p 0.269
+   Reading: every 1-parameter model is accepted (chi2 small) because the 6 residuals are only ~1.5-2 SE from 0 in total;
+   LOO sum z^2 ranks them, but with 5-6 points a difference of < ~2 in LOO sum z^2 is not evidence.
+
+=== 3d. the holdout as a direct predictor of the public delta (the holdout is selection-free and train-period) ===
+   r = d_hold (1:1, no parameter), 5 contrasts: chi2(5) 0.72 p 0.982; per-contrast z Cd:-0.17 Pall:+0.09 PF7x:+0.15 M2:-0.35 TOonly:-0.75
+   r = k_h * d_hold: k_h +1.13 ± 1.16  chi2(4) 0.71  LOO sum z^2 0.76  LOO z -0.18 +0.20 +0.15 -0.33 -0.75
+   same 5 contrasts, r = k_v * d_val: k_v +0.22 ± 0.36  chi2(4) 1.68
+   r = k_v*d_val + k_h*d_hold: k_v -0.13 ± 0.53  k_h +1.36 ± 1.52  chi2(3) 0.65  corr(k_v,k_h) -0.65
+
+=== 3e. the val-only excess: pools' val delta vs G3 split into the FT half and the TO half (4 pools), and the holdout ===
+   pool       d_val      d_ft      d_to    d_hold    public   to->public ratio   hold->public ratio
+   Cd      -0.00131  -0.00095  -0.00158  -0.00060  -0.00074      +0.47              +1.23
+   Pall    -0.00136  -0.00112  -0.00118  -0.00045  -0.00038      +0.32              +0.86
+   PF7x    -0.00058  -0.00062  -0.00051  -0.00020  -0.00010      +0.19              +0.49
+   M2      +0.00062  +0.00026  +0.00050  -0.00018  -0.00039      -0.77              +2.14
+
+=== 3f. what 6 contrasts (5 with holdout) cannot decide ===
+   - share, val-selection, FT-half excess and d_val are collinear (3b): any of them 'explains' the same ~-0.0010 of M2/S2.
+   - A 1-parameter model is accepted whenever its predictor is roughly ordered like (M2, S2) < (TOonly) < (Cd, Pall, PF7x).
+   - Only a contrast that breaks the collinearity (a share-0 pool that is val-BETTER than G3, or a val-selected pool with a
+     low share, or an FT-only file) can separate them; none is scored. The holdout needs no such separation: it predicts
+     public directly at k_h ~ 1 on the 5 contrasts where it exists, and it is the only predictor that does.

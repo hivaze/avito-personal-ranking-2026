@@ -1,0 +1,105 @@
+grid: 231 family-weight points x 5 w_ft; ME index 118 [0.3  0.35 0.35]
+[10s] ME val 0.40032 (G3 0.40032)  ME holdout 0.32379 (0.32379)
+SURFACE val: best a=[0.  0.4 0.6] w_ft=0.3 val 0.40139 (in-sample, +0.00107 vs ME); best at w_ft .5: a=[0.05 0.35 0.6 ] 0.40111
+SURFACE val w_ft curve at ME: 0.3:0.40075 0.4:0.40047 0.5:0.40032 0.6:0.40050 0.7:0.40019
+SURFACE holdout: best a=[0.3 0.4 0.3] 0.32387 (in-sample +0.00007); holdout at val-best a: 0.32341; val(w.5) at holdout-best a: 0.40043
+surface corr (val w.5 vs holdout over the 231 a): 0.467
+   F10 only    a~[1. 0. 0.]: val 0.39882 (-0.00151) holdout 0.32254 (-0.00125)
+   F7x only    a~[0. 1. 0.]: val 0.40097 (+0.00065) holdout 0.32332 (-0.00047)
+   F7x70 only  a~[0. 0. 1.]: val 0.40026 (-0.00006) holdout 0.32316 (-0.00064)
+   fam-equal   a~[0.3  0.35 0.35]: val 0.40032 (+0.00000) holdout 0.32380 (+0.00000)
+   no F10      a~[0.  0.5 0.5]: val 0.40094 (+0.00062) holdout 0.32361 (-0.00018)
+   no F7x70    a~[0.45 0.55 0.  ]: val 0.40016 (-0.00016) holdout 0.32356 (-0.00024)
+   no F7x      a~[0.45 0.   0.55]: val 0.40012 (-0.00020) holdout 0.32332 (-0.00048)
+none    a1_wft                     VAL +0.00018 +- 0.00022 (z +0.82) pmix +0.00015 +- 0.00036 | HOLD n/a (w_ft only) | M<50 +0.00085(+2.2) M>=50 -0.00028(-1.1) Tue +0.00000(+0.0) Thu +0.00037(+1.1)
+      full-val fit: b0: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.3 n=14423/h30000 fold-choices b0:(np.float64(0.3), np.float64(0.35), np.float64(0.35))/0.3,(np.float64(0.3), np.float64(0.35), np.float64(0.35))/0.6,(np.float64(0.3), np.float64(0.35), np.float64(0.35))/0.3,(np.float64(0.3), np.float64(0.35), np.float64(0.35))/0.3,(np.float64(0.3), np.float64(0.35), np.float64(0.35))/0.3
+none    a2_fam                     VAL +0.00049 +- 0.00033 (z +1.47) pmix +0.00070 +- 0.00050 | HOLD -0.00048 +- 0.00017 (z -2.85) | M<50 +0.00078(+1.3) M>=50 +0.00029(+0.8) Tue +0.00035(+0.8) Thu +0.00064(+1.3)
+      full-val fit: b0: a=(np.float64(0.05), np.float64(0.35), np.float64(0.6)) w=0.5 n=14423/h30000 fold-choices b0:(np.float64(0.0), np.float64(1.0), np.float64(0.0))/0.5,(np.float64(0.05), np.float64(0.35), np.float64(0.6))/0.5,(np.float64(0.05), np.float64(0.45), np.float64(0.5))/0.5,(np.float64(0.05), np.float64(0.35), np.float64(0.6))/0.5,(np.float64(0.05), np.float64(0.35), np.float64(0.6))/0.5
+none    a2c_fam01                  VAL +0.00039 +- 0.00032 (z +1.22) pmix +0.00043 +- 0.00048 | HOLD -0.00034 +- 0.00015 (z -2.25) | M<50 +0.00073(+1.2) M>=50 +0.00016(+0.5) Tue +0.00027(+0.6) Thu +0.00053(+1.1)
+      full-val fit: b0: a=(np.float64(0.1), np.float64(0.4), np.float64(0.5)) w=0.5 n=14423/h30000 fold-choices b0:(np.float64(0.0), np.float64(1.0), np.float64(0.0))/0.5,(np.float64(0.1), np.float64(0.4), np.float64(0.5))/0.5,(np.float64(0.1), np.float64(0.8), np.float64(0.1))/0.5,(np.float64(0.1), np.float64(0.4), np.float64(0.5))/0.5,(np.float64(0.1), np.float64(0.4), np.float64(0.5))/0.5
+none    a3_both                    VAL +0.00071 +- 0.00038 (z +1.87) pmix +0.00079 +- 0.00056 | HOLD -0.00039 +- 0.00018 (z -2.10) | M<50 +0.00162(+2.2) M>=50 +0.00008(+0.2) Tue -0.00001(-0.0) Thu +0.00151(+2.6)
+      full-val fit: b0: a=(np.float64(0.0), np.float64(0.4), np.float64(0.6)) w=0.3 n=14423/h30000 fold-choices b0:(np.float64(0.0), np.float64(0.85), np.float64(0.15))/0.3,(np.float64(0.0), np.float64(0.4), np.float64(0.6))/0.3,(np.float64(0.0), np.float64(0.4), np.float64(0.6))/0.3,(np.float64(0.0), np.float64(0.4), np.float64(0.6))/0.3,(np.float64(0.0), np.float64(0.4), np.float64(0.6))/0.3
+M       a1_wft                     VAL +0.00064 +- 0.00022 (z +2.96) pmix +0.00067 +- 0.00036 | HOLD n/a (w_ft only) | M<50 +0.00132(+3.2) M>=50 +0.00017(+0.7) Tue +0.00029(+0.9) Thu +0.00102(+3.4)
+      full-val fit: b0: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.3 n=5893/h0 ; b1: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.6 n=3182/h10232 ; b2: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.6 n=5348/h19768
+M       a2_fam                     VAL +0.00017 +- 0.00035 (z +0.47) pmix +0.00087 +- 0.00055 | HOLD -0.00015 +- 0.00019 (z -0.77) | M<50 +0.00059(+0.8) M>=50 -0.00013(-0.4) Tue -0.00063(-1.4) Thu +0.00104(+1.9)
+      full-val fit: b0: a=(np.float64(0.1), np.float64(0.0), np.float64(0.9)) w=0.5 n=5893/h0 ; b1: a=(np.float64(0.7), np.float64(0.25), np.float64(0.05)) w=0.5 n=3182/h10232 ; b2: a=(np.float64(0.05), np.float64(0.5), np.float64(0.45)) w=0.5 n=5348/h19768
+M       a2c_fam01                  VAL +0.00027 +- 0.00037 (z +0.74) pmix +0.00094 +- 0.00057 | HOLD -0.00030 +- 0.00020 (z -1.47) | M<50 +0.00059(+0.8) M>=50 +0.00006(+0.1) Tue -0.00060(-1.3) Thu +0.00124(+2.1)
+      full-val fit: b0: a=(np.float64(0.1), np.float64(0.0), np.float64(0.9)) w=0.5 n=5893/h0 ; b1: a=(np.float64(0.7), np.float64(0.3), np.float64(0.0)) w=0.5 n=3182/h10232 ; b2: a=(np.float64(0.0), np.float64(0.4), np.float64(0.6)) w=0.5 n=5348/h19768
+M       a3_both                    VAL +0.00009 +- 0.00034 (z +0.27) pmix +0.00037 +- 0.00051 | HOLD -0.00023 +- 0.00017 (z -1.37) | M<50 +0.00119(+1.7) M>=50 -0.00066(-2.0) Tue -0.00013(-0.3) Thu +0.00034(+0.7)
+      full-val fit: b0: a=(np.float64(0.0), np.float64(0.4), np.float64(0.6)) w=0.3 n=5893/h0 ; b1: a=(np.float64(0.05), np.float64(0.45), np.float64(0.5)) w=0.7 n=3182/h10232 ; b2: a=(np.float64(0.05), np.float64(0.5), np.float64(0.45)) w=0.5 n=5348/h19768
+M2      a1_wft                     VAL +0.00067 +- 0.00021 (z +3.15) pmix +0.00056 +- 0.00036 | HOLD n/a (w_ft only) | M<50 +0.00132(+3.2) M>=50 +0.00022(+1.0) Tue +0.00043(+1.5) Thu +0.00094(+3.0)
+      full-val fit: b0: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.3 n=5893/h0 ; b1: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.6 n=8530/h30000
+M2      a2_fam                     VAL +0.00040 +- 0.00036 (z +1.13) pmix +0.00100 +- 0.00054 | HOLD -0.00024 +- 0.00017 (z -1.44) | M<50 +0.00059(+0.8) M>=50 +0.00027(+0.8) Tue -0.00033(-0.7) Thu +0.00120(+2.2)
+      full-val fit: b0: a=(np.float64(0.1), np.float64(0.0), np.float64(0.9)) w=0.5 n=5893/h0 ; b1: a=(np.float64(0.05), np.float64(0.45), np.float64(0.5)) w=0.5 n=8530/h30000
+M2      a2c_fam01                  VAL +0.00033 +- 0.00036 (z +0.91) pmix +0.00102 +- 0.00055 | HOLD -0.00039 +- 0.00018 (z -2.10) | M<50 +0.00059(+0.8) M>=50 +0.00015(+0.4) Tue -0.00050(-1.1) Thu +0.00123(+2.2)
+      full-val fit: b0: a=(np.float64(0.1), np.float64(0.0), np.float64(0.9)) w=0.5 n=5893/h0 ; b1: a=(np.float64(0.0), np.float64(0.4), np.float64(0.6)) w=0.5 n=8530/h30000
+M2      a3_both                    VAL +0.00064 +- 0.00035 (z +1.82) pmix +0.00082 +- 0.00053 | HOLD -0.00018 +- 0.00019 (z -0.97) | M<50 +0.00119(+1.7) M>=50 +0.00027(+0.7) Tue +0.00000(+0.0) Thu +0.00135(+2.6)
+      full-val fit: b0: a=(np.float64(0.0), np.float64(0.4), np.float64(0.6)) w=0.3 n=5893/h0 ; b1: a=(np.float64(0.0), np.float64(0.5), np.float64(0.5)) w=0.7 n=8530/h30000
+cold    a1_wft                     VAL +0.00026 +- 0.00020 (z +1.29) pmix +0.00014 +- 0.00034 | HOLD n/a (w_ft only) | M<50 +0.00112(+3.0) M>=50 -0.00033(-1.4) Tue +0.00013(+0.5) Thu +0.00041(+1.3)
+      full-val fit: b0: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.4 n=4808/h26551 ; b1: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.6 n=4796/h2641 ; b2: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.3 n=4819/h808
+cold    a2_fam                     VAL +0.00036 +- 0.00031 (z +1.17) pmix +0.00096 +- 0.00047 | HOLD -0.00034 +- 0.00017 (z -2.00) | M<50 +0.00074(+1.3) M>=50 +0.00010(+0.3) Tue -0.00005(-0.1) Thu +0.00082(+1.8)
+      full-val fit: b0: a=(np.float64(0.05), np.float64(0.4), np.float64(0.55)) w=0.5 n=4808/h26551 ; b1: a=(np.float64(0.05), np.float64(0.35), np.float64(0.6)) w=0.5 n=4796/h2641 ; b2: a=(np.float64(0.15), np.float64(0.7), np.float64(0.15)) w=0.5 n=4819/h808
+cold    a2c_fam01                  VAL +0.00022 +- 0.00030 (z +0.74) pmix +0.00070 +- 0.00045 | HOLD -0.00036 +- 0.00015 (z -2.35) | M<50 +0.00087(+1.5) M>=50 -0.00023(-0.7) Tue -0.00007(-0.2) Thu +0.00054(+1.2)
+      full-val fit: b0: a=(np.float64(0.1), np.float64(0.4), np.float64(0.5)) w=0.5 n=4808/h26551 ; b1: a=(np.float64(0.1), np.float64(0.3), np.float64(0.6)) w=0.5 n=4796/h2641 ; b2: a=(np.float64(0.1), np.float64(0.8), np.float64(0.1)) w=0.5 n=4819/h808
+cold    a3_both                    VAL +0.00013 +- 0.00033 (z +0.40) pmix +0.00038 +- 0.00049 | HOLD -0.00034 +- 0.00018 (z -1.88) | M<50 +0.00054(+0.9) M>=50 -0.00015(-0.4) Tue -0.00060(-1.4) Thu +0.00093(+1.9)
+      full-val fit: b0: a=(np.float64(0.0), np.float64(0.4), np.float64(0.6)) w=0.3 n=4808/h26551 ; b1: a=(np.float64(0.05), np.float64(0.4), np.float64(0.55)) w=0.6 n=4796/h2641 ; b2: a=(np.float64(0.15), np.float64(0.7), np.float64(0.15)) w=0.5 n=4819/h808
+H       a1_wft                     VAL +0.00065 +- 0.00022 (z +2.98) pmix +0.00074 +- 0.00032 | HOLD n/a (w_ft only) | M<50 +0.00144(+3.8) M>=50 +0.00010(+0.4) Tue +0.00044(+1.6) Thu +0.00087(+2.6)
+      full-val fit: b0: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.6 n=4799/h9815 ; b1: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.3 n=4808/h7525 ; b2: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.3 n=4816/h12660
+H       a2_fam                     VAL +0.00009 +- 0.00035 (z +0.25) pmix +0.00003 +- 0.00053 | HOLD -0.00030 +- 0.00021 (z -1.42) | M<50 +0.00044(+0.7) M>=50 -0.00016(-0.4) Tue -0.00003(-0.1) Thu +0.00021(+0.4)
+      full-val fit: b0: a=(np.float64(0.0), np.float64(0.75), np.float64(0.25)) w=0.5 n=4799/h9815 ; b1: a=(np.float64(0.0), np.float64(0.1), np.float64(0.9)) w=0.5 n=4808/h7525 ; b2: a=(np.float64(0.15), np.float64(0.85), np.float64(0.0)) w=0.5 n=4816/h12660
+H       a2c_fam01                  VAL +0.00021 +- 0.00034 (z +0.60) pmix +0.00036 +- 0.00052 | HOLD -0.00063 +- 0.00024 (z -2.62) | M<50 +0.00095(+1.4) M>=50 -0.00030(-0.8) Tue +0.00008(+0.2) Thu +0.00035(+0.6)
+      full-val fit: b0: a=(np.float64(0.0), np.float64(1.0), np.float64(0.0)) w=0.5 n=4799/h9815 ; b1: a=(np.float64(0.0), np.float64(0.1), np.float64(0.9)) w=0.5 n=4808/h7525 ; b2: a=(np.float64(0.0), np.float64(1.0), np.float64(0.0)) w=0.5 n=4816/h12660
+H       a3_both                    VAL +0.00114 +- 0.00041 (z +2.81) pmix +0.00111 +- 0.00061 | HOLD -0.00047 +- 0.00023 (z -2.04) | M<50 +0.00195(+2.5) M>=50 +0.00058(+1.4) Tue +0.00097(+1.8) Thu +0.00133(+2.1)
+      full-val fit: b0: a=(np.float64(0.0), np.float64(1.0), np.float64(0.0)) w=0.6 n=4799/h9815 ; b1: a=(np.float64(0.0), np.float64(0.1), np.float64(0.9)) w=0.6 n=4808/h7525 ; b2: a=(np.float64(0.0), np.float64(0.85), np.float64(0.15)) w=0.3 n=4816/h12660
+u0      a1_wft                     VAL +0.00049 +- 0.00023 (z +2.19) pmix +0.00059 +- 0.00034 | HOLD n/a (w_ft only) | M<50 +0.00138(+3.4) M>=50 -0.00012(-0.5) Tue +0.00026(+0.9) Thu +0.00075(+2.2)
+      full-val fit: b0: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.3 n=13765/h28464 ; b1: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.6 n=658/h1536
+u0      a2_fam                     VAL +0.00059 +- 0.00033 (z +1.79) pmix +0.00081 +- 0.00047 | HOLD -0.00054 +- 0.00016 (z -3.33) | M<50 +0.00101(+1.6) M>=50 +0.00030(+0.8) Tue +0.00029(+0.7) Thu +0.00091(+1.9)
+      full-val fit: b0: a=(np.float64(0.05), np.float64(0.35), np.float64(0.6)) w=0.5 n=13765/h28464 ; b1: a=(np.float64(0.2), np.float64(0.6), np.float64(0.2)) w=0.5 n=658/h1536
+u0      a2c_fam01                  VAL +0.00043 +- 0.00034 (z +1.26) pmix +0.00041 +- 0.00051 | HOLD -0.00038 +- 0.00014 (z -2.65) | M<50 +0.00083(+1.3) M>=50 +0.00016(+0.4) Tue +0.00001(+0.0) Thu +0.00089(+1.7)
+      full-val fit: b0: a=(np.float64(0.1), np.float64(0.4), np.float64(0.5)) w=0.5 n=13765/h28464 ; b1: a=(np.float64(0.2), np.float64(0.6), np.float64(0.2)) w=0.5 n=658/h1536
+u0      a3_both                    VAL +0.00075 +- 0.00038 (z +1.99) pmix +0.00097 +- 0.00055 | HOLD -0.00041 +- 0.00018 (z -2.27) | M<50 +0.00169(+2.3) M>=50 +0.00010(+0.3) Tue -0.00002(-0.0) Thu +0.00160(+2.8)
+      full-val fit: b0: a=(np.float64(0.0), np.float64(0.4), np.float64(0.6)) w=0.3 n=13765/h28464 ; b1: a=(np.float64(0.15), np.float64(0.2), np.float64(0.65)) w=0.7 n=658/h1536
+Mxcold  a1_wft                     VAL +0.00039 +- 0.00022 (z +1.82) pmix +0.00040 +- 0.00037 | HOLD n/a (w_ft only) | M<50 +0.00125(+3.2) M>=50 -0.00019(-0.8) Tue +0.00017(+0.6) Thu +0.00064(+2.0)
+      full-val fit: b0: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.4 n=2078/h0 ; b1: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.3 n=1650/h0 ; b2: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.3 n=2165/h0 ; b3: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.6 n=2730/h26551 ; b4: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.6 n=3146/h2641 ; b5: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.6 n=2654/h808
+Mxcold  a2_fam                     VAL +0.00091 +- 0.00033 (z +2.74) pmix +0.00150 +- 0.00050 | HOLD -0.00033 +- 0.00017 (z -1.98) | M<50 +0.00185(+2.8) M>=50 +0.00027(+0.8) Tue +0.00078(+1.8) Thu +0.00105(+2.0)
+      full-val fit: b0: a=(np.float64(0.05), np.float64(0.9), np.float64(0.05)) w=0.5 n=2078/h0 ; b1: a=(np.float64(0.1), np.float64(0.3), np.float64(0.6)) w=0.5 n=1650/h0 ; b2: a=(np.float64(0.1), np.float64(0.0), np.float64(0.9)) w=0.5 n=2165/h0 ; b3: a=(np.float64(0.05), np.float64(0.4), np.float64(0.55)) w=0.5 n=2730/h26551 ; b4: a=(np.float64(0.05), np.float64(0.45), np.float64(0.5)) w=0.5 n=3146/h2641 ; b5: a=(np.float64(0.15), np.float64(0.7), np.float64(0.15)) w=0.5 n=2654/h808
+Mxcold  a2c_fam01                  VAL +0.00054 +- 0.00033 (z +1.64) pmix +0.00117 +- 0.00051 | HOLD -0.00036 +- 0.00018 (z -1.94) | M<50 +0.00174(+2.6) M>=50 -0.00028(-0.8) Tue +0.00064(+1.5) Thu +0.00044(+0.9)
+      full-val fit: b0: a=(np.float64(0.0), np.float64(1.0), np.float64(0.0)) w=0.5 n=2078/h0 ; b1: a=(np.float64(0.1), np.float64(0.3), np.float64(0.6)) w=0.5 n=1650/h0 ; b2: a=(np.float64(0.1), np.float64(0.0), np.float64(0.9)) w=0.5 n=2165/h0 ; b3: a=(np.float64(0.0), np.float64(0.4), np.float64(0.6)) w=0.5 n=2730/h26551 ; b4: a=(np.float64(0.0), np.float64(0.7), np.float64(0.3)) w=0.5 n=3146/h2641 ; b5: a=(np.float64(0.2), np.float64(0.6), np.float64(0.2)) w=0.5 n=2654/h808
+day     a1_wft                     VAL +0.00022 +- 0.00022 (z +1.00) pmix -0.00005 +- 0.00034 | HOLD n/a (w_ft only) | M<50 +0.00106(+2.7) M>=50 -0.00037(-1.5) Tue -0.00020(-0.8) Thu +0.00067(+1.9)
+      full-val fit: b0: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.3 n=7543 ; b1: a=(np.float64(0.3), np.float64(0.35), np.float64(0.35)) w=0.3 n=6880
+day     a2_fam                     VAL +0.00012 +- 0.00033 (z +0.35) pmix +0.00008 +- 0.00051 | HOLD n/a (w_ft only) | M<50 +0.00065(+1.0) M>=50 -0.00025(-0.7) Tue +0.00019(+0.5) Thu +0.00003(+0.1)
+      full-val fit: b0: a=(np.float64(0.1), np.float64(0.4), np.float64(0.5)) w=0.5 n=7543 ; b1: a=(np.float64(0.0), np.float64(0.45), np.float64(0.55)) w=0.5 n=6880
+day     a2c_fam01                  VAL +0.00030 +- 0.00032 (z +0.95) pmix +0.00030 +- 0.00049 | HOLD n/a (w_ft only) | M<50 +0.00073(+1.2) M>=50 +0.00001(+0.0) Tue +0.00030(+0.8) Thu +0.00031(+0.6)
+      full-val fit: b0: a=(np.float64(0.1), np.float64(0.4), np.float64(0.5)) w=0.5 n=7543 ; b1: a=(np.float64(0.0), np.float64(0.5), np.float64(0.5)) w=0.5 n=6880
+day     a3_both                    VAL +0.00095 +- 0.00034 (z +2.82) pmix +0.00082 +- 0.00050 | HOLD n/a (w_ft only) | M<50 +0.00193(+3.1) M>=50 +0.00027(+0.7) Tue +0.00009(+0.2) Thu +0.00188(+3.3)
+      full-val fit: b0: a=(np.float64(0.15), np.float64(0.35), np.float64(0.5)) w=0.6 n=7543 ; b1: a=(np.float64(0.0), np.float64(0.4), np.float64(0.6)) w=0.3 n=6880
+
+== conditional minus unconditional (same parameter set), paired ==
+  M       a1_wft     VAL +0.00046 +- 0.00022 (z +2.05)
+  M       a2_fam     VAL -0.00032 +- 0.00032 (z -1.00) | HOLD +0.00033 +- 0.00021 (z +1.59)
+  M       a2c_fam01  VAL -0.00012 +- 0.00034 (z -0.35) | HOLD +0.00004 +- 0.00020 (z +0.19)
+  M       a3_both    VAL -0.00062 +- 0.00027 (z -2.27) | HOLD +0.00016 +- 0.00009 (z +1.72)
+  M2      a1_wft     VAL +0.00049 +- 0.00022 (z +2.24)
+  M2      a2_fam     VAL -0.00009 +- 0.00026 (z -0.34) | HOLD +0.00024 +- 0.00009 (z +2.76)
+  M2      a2c_fam01  VAL -0.00007 +- 0.00026 (z -0.25) | HOLD -0.00005 +- 0.00010 (z -0.52)
+  M2      a3_both    VAL -0.00007 +- 0.00028 (z -0.24) | HOLD +0.00021 +- 0.00009 (z +2.35)
+  cold    a1_wft     VAL +0.00008 +- 0.00015 (z +0.54)
+  cold    a2_fam     VAL -0.00013 +- 0.00025 (z -0.50) | HOLD +0.00014 +- 0.00006 (z +2.30)
+  cold    a2c_fam01  VAL -0.00017 +- 0.00024 (z -0.72) | HOLD -0.00002 +- 0.00005 (z -0.44)
+  cold    a3_both    VAL -0.00058 +- 0.00031 (z -1.86) | HOLD +0.00005 +- 0.00004 (z +1.16)
+  H       a1_wft     VAL +0.00047 +- 0.00019 (z +2.46)
+  H       a2_fam     VAL -0.00040 +- 0.00033 (z -1.23) | HOLD +0.00018 +- 0.00018 (z +1.00)
+  H       a2c_fam01  VAL -0.00019 +- 0.00035 (z -0.53) | HOLD -0.00030 +- 0.00021 (z -1.45)
+  H       a3_both    VAL +0.00043 +- 0.00035 (z +1.23) | HOLD -0.00008 +- 0.00019 (z -0.42)
+  u0      a1_wft     VAL +0.00031 +- 0.00015 (z +2.10)
+  u0      a2_fam     VAL +0.00010 +- 0.00010 (z +0.93) | HOLD -0.00006 +- 0.00005 (z -1.35)
+  u0      a2c_fam01  VAL +0.00004 +- 0.00013 (z +0.29) | HOLD -0.00005 +- 0.00004 (z -1.22)
+  u0      a3_both    VAL +0.00004 +- 0.00006 (z +0.74) | HOLD -0.00002 +- 0.00004 (z -0.54)
+  Mxcold  a1_wft     VAL +0.00021 +- 0.00021 (z +1.03)
+  Mxcold  a2_fam     VAL +0.00042 +- 0.00030 (z +1.41) | HOLD +0.00015 +- 0.00007 (z +2.22)
+  Mxcold  a2c_fam01  VAL +0.00015 +- 0.00034 (z +0.45) | HOLD -0.00002 +- 0.00011 (z -0.18)
+  day     a1_wft     VAL +0.00004 +- 0.00017 (z +0.22)
+  day     a2_fam     VAL -0.00037 +- 0.00025 (z -1.47)
+  day     a2c_fam01  VAL -0.00009 +- 0.00021 (z -0.42)
+  day     a3_both    VAL +0.00024 +- 0.00029 (z +0.80)
+[11s] done

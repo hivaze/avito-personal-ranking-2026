@@ -1,0 +1,241 @@
+{
+  "L": [
+    "llm06_L1_s23",
+    "llm06_L1_s24"
+  ],
+  "B": [
+    "llmcmp_base_s23",
+    "llmcmp_base_s24"
+  ],
+  "R": "llm06rand_L1_s23",
+  "single": {
+    "llm06_L1_s23|val": 0.3759232979167533,
+    "llm06_L1_s23|hold": 0.2994389029781267,
+    "llm06_L1_s24|val": 0.37511627559352256,
+    "llm06_L1_s24|hold": 0.2992140421520511,
+    "llmcmp_base_s23|val": 0.37921757547521234,
+    "llmcmp_base_s23|hold": 0.304479434847049,
+    "llmcmp_base_s24|val": 0.38083242547412305,
+    "llmcmp_base_s24|hold": 0.30325024892713637,
+    "llm06rand_L1_s23|val": 0.3759901595849686,
+    "llm06rand_L1_s23|hold": 0.29977530300607824
+  },
+  "paired": {
+    "val": {
+      "all": [
+        -0.004505213719529832,
+        0.0007882448804189055
+      ],
+      "M<50": [
+        -0.005961287511178637,
+        0.0014698721027562543
+      ],
+      "M>=50": [
+        -0.0034992766909030535,
+        0.0008630812904803497
+      ],
+      "Tue": [
+        -0.005795680564956971,
+        0.0010882945554489248
+      ],
+      "Thu": [
+        -0.003090389385945977,
+        0.0011429703815664016
+      ],
+      "allcold": [
+        0.011332065468761959,
+        0.0015478918962002926
+      ]
+    },
+    "hold": {
+      "all": [
+        -0.004538369322003785,
+        0.00047157826458200204
+      ],
+      "late20%": [
+        -0.0031093757003789802,
+        0.0010853069448046842
+      ]
+    }
+  },
+  "per_seed": {
+    "val": [
+      [
+        -0.003294277558459138,
+        0.0009965699606771176
+      ],
+      [
+        -0.005716149880600523,
+        0.0009321292420956353
+      ]
+    ],
+    "hold": [
+      [
+        -0.005040531868922244,
+        0.000597192197221676
+      ],
+      [
+        -0.004036206775085326,
+        0.0005686229785409621
+      ]
+    ]
+  },
+  "A2": false,
+  "control": {
+    "L-R|val": [
+      -6.686166821542734e-05,
+      0.0006032761435627622
+    ],
+    "R-B|val": [
+      -0.003227415890243711,
+      0.0010139834887149591
+    ],
+    "L-R|hold": [
+      -0.0003364000279515801,
+      0.0003412648849383302
+    ],
+    "R-B|hold": [
+      -0.004704131840970664,
+      0.0006159934426556154
+    ],
+    "attribution": "no evidence that language pretraining helps (L-R <= 1 SE): an A1/A2 gain would be capacity or architecture, so a small from-scratch family is the cheaper way to get it",
+    "note": "R is the 0.6B random-init control (information only for this size; the P4B exception does not apply)"
+  },
+  "A2_detail": {
+    "gap_val": -0.004505213719529777,
+    "gap_hold": -0.004538369322003771,
+    "strength_ok": false,
+    "eqLB_minus_eqBB": {
+      "val": [
+        -0.0024171785904239977,
+        0.0005524023068497395
+      ],
+      "hold": [
+        -0.002622091545894934,
+        0.00031070048282959056
+      ]
+    },
+    "diversity_ok": false,
+    "rho_LB": [
+      0.9381740329948115,
+      0.9438474702553753
+    ],
+    "rho_BB": 0.9462564056126573,
+    "law_predicted_gain_val": -0.000605770766208993
+  },
+  "e1_info": {
+    "traces": {
+      "llm06_L1_s23": {
+        "n_evals": 8,
+        "best_step": 1400,
+        "final_step": 1516,
+        "final": 0.2989017157524225,
+        "previous": 0.2995163175182201,
+        "final_is_best": false,
+        "final_beats_previous": false,
+        "still_improving": false,
+        "trace": [
+          [
+            200,
+            0.29328
+          ],
+          [
+            400,
+            0.293302
+          ],
+          [
+            600,
+            0.295584
+          ],
+          [
+            800,
+            0.298111
+          ],
+          [
+            1000,
+            0.298156
+          ],
+          [
+            1200,
+            0.298669
+          ],
+          [
+            1400,
+            0.299516
+          ],
+          [
+            1516,
+            0.298902
+          ]
+        ]
+      },
+      "llm06_L1_s24": {
+        "n_evals": 8,
+        "best_step": 1512,
+        "final_step": 1512,
+        "final": 0.29928133534786755,
+        "previous": 0.2984424773886144,
+        "final_is_best": true,
+        "final_beats_previous": true,
+        "still_improving": true,
+        "trace": [
+          [
+            200,
+            0.293035
+          ],
+          [
+            400,
+            0.295904
+          ],
+          [
+            600,
+            0.296833
+          ],
+          [
+            800,
+            0.297564
+          ],
+          [
+            1000,
+            0.298093
+          ],
+          [
+            1200,
+            0.297797
+          ],
+          [
+            1400,
+            0.298442
+          ],
+          [
+            1512,
+            0.299281
+          ]
+        ]
+      }
+    },
+    "still_improving": [
+      "llm06_L1_s24"
+    ]
+  },
+  "A1": false,
+  "exception": false,
+  "decision": "A1+A2 FAIL (Qwen3-0.6B (2 epochs, information)) -> STOP for this size. NOTE (information, pre-declared): ['llm06_L1_s24'] still improving at the last holdout evaluation; no extension exists for this arm set.",
+  "slices_below_2se": [
+    "val:all",
+    "val:M<50",
+    "val:M>=50",
+    "val:Tue",
+    "val:Thu",
+    "hold:all",
+    "hold:late20%"
+  ],
+  "L_judged": [
+    "llm06_L1_s23",
+    "llm06_L1_s24"
+  ],
+  "R_judged": "llm06rand_L1_s23",
+  "e1": null,
+  "size": "Qwen3-0.6B (2 epochs, information)",
+  "e1_mode": "info"
+}

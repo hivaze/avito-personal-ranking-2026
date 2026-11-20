@@ -1,0 +1,37 @@
+RESULT: pop1 family to 8 seeds (Task A; rule PREDECLARED_pop1x8.txt 14:21:17Z; single read-out 15:27:01-15:27:25Z by chain_x8.sh;
+numbers in decide_x8_Q2a8.json / the raw run log, not published). Written 2026-11-13T15:28:29Z.
+
+RUNS abl_e10_pop1_s955-958 (GPUs N, launched 14:21:41-51Z, 58-60 min each; args = s951's except variant / seed, verified):
+  member            to val   holdout  FT OOF (final EMA; best epoch)
+  s951 (existing)   0.39214  0.31384  0.39345 (0.39422 ep1)
+  s952 (existing)   0.39581  0.31428  0.39644 (0.39648 ep1)
+  s953 (existing)   0.39555  0.31437  0.39686 (0.39713 ep1)
+  s954 (existing)   0.39321  0.31375  0.39482 (0.39510 ep2)
+  s955 (new)        0.39515  0.31391  0.39643 (0.39685 ep1)
+  s956 (new)        0.39475  0.31368  0.39549 (0.39541 ep4)
+  s957 (new)        0.39523  0.31397  0.39627 (0.39702 ep1)
+  s958 (new)        0.39551  0.31413  0.39709 (0.39749 ep1)
+FT: standard n2cpv3 only (finetune.py --extra n2c_pre_v3 --lr 5e-5 --decay cos --ema 0.99 --ema_start 0.5 --epochs 4 --u0_singleton),
+one member per GPU on 0/1/4/5, 15:23:33-15:27:00Z (~3.5 min each). Copies (cp --update=none) in preds/ (5 files per member),
+preds/holdout/, nn/logs/ (train log + FT log).
+
+POOLS (member-equal 0.5 z(ft) + 0.5 z(to); paired per feed vs G3 = 0.40032 val / 0.32379 holdout):
+  pool                      n   val      hold     V            H             pmix          M<50  M>=50 Tue   Thu   corr(val/hold)
+  Q2a  = G3+pop1(951-954)   24  0.40061  0.32378  +0.00029+-31 -0.00002+-21  +0.00062+-50  -1.0  +2.5  +0.3  +1.0  0.9995/0.9991
+  Q2a' = G3+pop1(955-958)   24  0.40074  0.32357  +0.00041+-30 -0.00022+-21  +0.00106+-48  -0.3  +2.4  +0.4  +1.6  0.9995/0.9991
+  Q2a8 = G3+pop1(951-958)   28  0.40089  0.32306  +0.00057+-40 -0.00073+-29  +0.00107+-62  +0.3  +1.9  +1.2  +0.9  0.9987/0.9977
+  (+-: SE x 1e-5; slices: z of the paired slice delta vs G3)
+
+RULE (Q2a8): (a) V > +1 SE: +0.00057 > 0.00040 TRUE (z 1.43); (b) V(Q2a8) - V(Q2a) = +0.00028 >= -0.00026 TRUE; (c) pmix +0.00107 >=
++0.00062 - 0.00039 TRUE; (d) min slice z +0.28 >= -2 TRUE; (e) H = -0.00073 >= -1 SE (0.00029) FALSE (z -2.54) -> VETOED;
+(f) not run. => Q2a8 DOES NOT QUALIFY; nothing built (no subs/cand_Q2a8_*, no preds/ens_Q2a8pop1_*); G3 / Q2a unchanged.
+
+REPLICATION (information): Q2a' reproduces Q2a's reads in direction and size: Q2a' - Q2a V +0.00013+-0.00022, H -0.00021+-0.00014,
+pmix +0.00044+-0.00034. The pop1 view is stable across seeds: 4-member train-only pool corr pop1(955-958) vs pop1(951-954) 0.9864
+(val) / 0.9863 (holdout) [same-recipe reference F7x vs F7x70 0.9947; F10 vs F7x 0.9853]; each family pool vs the G3 train-only pool
+0.9753-0.9760 (val) / 0.9687-0.9691 (holdout), the 8-member pool 0.9790 / 0.9722.
+READING: doubling the family doubles its weight in the member-equal pool (8/28 vs 4/24) and the holdout loss scales with it
+(-0.00002 -> -0.00073; each pop1 member is ~0.006 below the base on the in-period holdout), while val and pmix grow more slowly
+(+0.00029 -> +0.00057; pmix +0.00062 -> +0.00107). As pre-declared, the in-period holdout is a veto here, so the 8-seed pool is not
+a candidate; Q2a (4 seeds) keeps its recorded ALTERNATE status. The 4 new members (s955-958) stay available in preds/ for any
+later weighted (non-member-equal) pool question, which would need its own pre-declaration.

@@ -1,0 +1,17 @@
+## Harness A/A null: 16-pool ref2 - ref (train-only re-cool references), plain per-feed SE as arm_read8.py
+val all (14423): +0.00011 +- 0.00033 | bucket = extended, capped-only k0 (1132): +0.00196 +- 0.00104 | rest: -0.00005 +- 0.00035
+holdout all (30000): +0.00013 +- 0.00018 | bucket (2159): +0.00060 +- 0.00067 | rest: +0.00010 +- 0.00018
+per-feed sd of the A/A difference: val all 0.0396, bucket 0.0351; holdout all 0.0306, bucket 0.0311
+reference pool level on the bucket: val 0.3776 (rest 0.4033); holdout 0.3165 (rest 0.3250)
+
+## Power of a 16-re-cool test (arm vs ref, same harness), per-feed effect on the bucket = delta; 0 elsewhere
+| assumed per-bucket-feed effect (val / holdout) | source | pool delta val / holdout | z val / holdout (all feeds) | pooled z all feeds | P(pooled z >= 2.5) | P(>= 1.96) | bucket z val / holdout | pooled bucket z | P(bucket pooled z >= 2.5) | P(>= 1.96) | P(>= 1.645) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| +0.00269 / +0.00117 | replay proxy c - b, design 1 (val / holdout read sets) | +0.00021 / +0.00008 | 0.64 / 0.48 | 0.79 | 0.044 | 0.121 | 2.58 / 1.75 | 3.06 | 0.712 | 0.864 | 0.921 |
+| +0.00173 / +0.00173 | replay proxy, pooled holdout + val | +0.00014 / +0.00012 | 0.41 / 0.70 | 0.79 | 0.044 | 0.121 | 1.66 / 2.59 | 3.00 | 0.691 | 0.851 | 0.912 |
+| +0.00087 / +0.00087 | untrained d1 - a, pooled (= the re-cool's start point) | +0.00007 / +0.00006 | 0.21 / 0.35 | 0.40 | 0.018 | 0.059 | 0.83 / 1.30 | 1.51 | 0.161 | 0.326 | 0.446 |
+| +0.00086 / +0.00086 | half of the pooled proxy | +0.00007 / +0.00006 | 0.21 / 0.35 | 0.39 | 0.018 | 0.059 | 0.83 / 1.29 | 1.50 | 0.159 | 0.323 | 0.442 |
+| +0.00000 / +0.00000 | no effect | +0.00000 / +0.00000 | 0.00 / 0.00 | 0.00 | 0.006 | 0.025 | 0.00 / 0.00 | 0.00 | 0.006 | 0.025 | 0.050 |
+(power ignores the requirement that both deltas be >= 0, i.e. it is an upper bound; bucket SEs from the A/A null above)
+
+bucket shares: val 0.0785, holdout 0.0720; test 0.0720

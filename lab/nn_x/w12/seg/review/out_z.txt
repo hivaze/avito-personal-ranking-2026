@@ -1,0 +1,24 @@
+hist_hpos (val) first 12: [ 0  1  2  3  4  5  6  7  8  9 10 11] dtype int16 | first feed H 231
+| segment                      | feeds | % of val | sampled | median earlier train feeds | median old-only distinct items | mean | % with >= 64 | % with >= 128 | % with 0 |
+|------------------------------|-------|----------|---------|----------------------------|--------------------------------|------|--------------|---------------|----------|
+| val cap, user seen in train  | 2158  | 15.0     | 1200    | 1                          | 106                            | 134  | 71           | 40            | 0        |
+| val NEAR, user seen in train | 2029  | 14.1     | 1200    | 1                          | 84                             | 95   | 58           | 29            | 6        |
+test all: cap share 28.81% | of capped feeds: user has train feeds 49.5%, train or val feeds 49.7% | capped AND seen = 14.31% of feeds | seen share of all feeds 29.3%
+test public: cap share 29.39% | of capped feeds: user has train feeds 51.0%, train or val feeds 51.2% | capped AND seen = 15.03% of feeds | seen share of all feeds 30.4%
+test private: cap share 28.57% | of capped feeds: user has train feeds 48.8%, train or val feeds 49.0% | capped AND seen = 14.00% of feeds | seen share of all feeds 28.8%
+val: capped AND seen in train = 14.96% of feeds; seen share of all 30.4%
+
+### Z2: fine-tune gain (FT OOF branch minus train-only branch, FD16 base pool) by H bucket
+| H       | feeds | FT - TO           |
+|---------|-------|-------------------|
+| H=0     | 194   | -0.00751+-0.00579 |
+| 1-4     | 150   | +0.00836+-0.00533 |
+| 5-9     | 135   | +0.00854+-0.00776 |
+| 10-19   | 266   | -0.00039+-0.00355 |
+| 20-49   | 785   | +0.00245+-0.00237 |
+| 50-99   | 1552  | +0.00236+-0.00181 |
+| 100-255 | 7165  | -0.00019+-0.00085 |
+| H=256   | 4176  | -0.00271+-0.00108 |
+| H<256   | 10247 | +0.00050+-0.00070 |
+| ALL     | 14423 | -0.00043+-0.00059 |
+contrast (H < 256) minus cap: +0.00320 +- 0.00129 (z +2.49)

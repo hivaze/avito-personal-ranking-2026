@@ -1,0 +1,19 @@
+verify_mech: adversarial check of the 'mech' findings (2026-11-19). Scripts: v1_cpu.py, v2_gpu.py (GPU N), v3_cpu.py; outputs v1_cpu.txt, v2_gpu.txt, v3_cpu.txt, v2_ndcg.npz.
+
+Reproduced bit-for-bit or exactly: ablation deltas (from mech out/*/ndcg_*.npz), trainfit2 numbers, gate shares, sysdiff estimator. @last val parity of my forward passes = stored preds (asserted).
+
+M1  confirmed. Seed-level SEs ~ feed SEs (zero-all val seed SE 0.00019, hold 0.00013). A experts are near-orthogonal (|cos| W2 0.015-0.035), so random routing is a real swap; it costs only -0.0002.
+M1b confirmed (finding stands): training logs 'dead 0.25' sets.1 s951-953; val effective gate is exactly 0 for 4 of 8 experts in sets.1 (s951-953), 6 of 8 in sets.0 s954.
+M2  numbers reproduce; interpretation weakened: random routing keeps ~0.50-0.55 of the selected gate mass, cross-expert gate correlation ~0 (+0.00..+0.08),
+    expert weights near-orthogonal (|cos| 0.07-0.14) -> random routing preserves neither expert content nor per-token gain, yet costs ~0 on val.
+M3  confirmed (block-drop sums recomputed: C 0.0090/0.0080, ref 0.0097/0.0091).
+M4  weakened: X (104 dense inputs) is not the full candidate input (token = c_lin([ce, ce*un]) + cat + c_mlp(X) + miss + domain), so the -0.0315 gap is not 'nonlinear/interaction worth 0.03'.
+M5  refuted for B and C: proper null = 35 4v4 splits of ref seeds 951-958: delta^2 mean 0.0000, sd 0.00009 (val) / 0.00007 (hold), max +0.00017.
+    B +0.00102 (z +11.9), C +0.00058 (z +6.8), A +0.00003 (z +0.4). Per-member seed noise: ref 4-subsets 0.1585-0.1616; A 0.165, B 0.184, C 0.176 (all outside).
+M6  train-fit confirmed (seed-level SE B 0.00037, C 0.00017; replicated on 30k PRODUCTION train feeds, outside the cooldown replay pool: B +0.00243+-0.00031, C +0.00256+-0.00031 @last).
+    But mech's train-fit feeds are inside the cooldown replay pool (p_random>0.9 subset of pool p>0.5): cooldown gain ref +0.0166 there vs +0.0121 on production train feeds.
+    Link to val holds for B only: val member B-ref +0.00010 @70000 -> -0.00076 @last (cooldown val gain B +0.00245 vs ref +0.00332).
+    C has the same train-fit excess but cooldown val gain +0.00345 (ref +0.00332); C @last val -0.00013 paired.
+Screen deficits partly artefacts: vs all 8 ref seeds, val pool @last A +0.00070 (beats 70/70 ref 4-pools), C +0.00045 (beats 94%), B -0.00031 (16%).
+    ref951-954 val pool rank 3/70 (selected) and 1/70 (@last); ref951-954 minus ref955-958 member val +0.00020/+0.00147/+0.00043 at @70000/@77500/@last.
+    Selected-vs-@last val (paired pool vs ref951-954): A -0.00086 -> +0.00009, C -0.00069 -> -0.00016, B -0.00144 -> -0.00093.

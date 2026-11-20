@@ -1,0 +1,750 @@
+"""Tests of train.py --val_mix / --val_fold (VALCD, val-in-cooldown, idea D1; helpers cd_arms7.py) and the lane.sh arm
+B:valcd:<root>:<fold>. Pre-change copies: tests/ref_pre_valcd/*.txt (md5.txt). Written 2026-11-12 ~23:40 UTC.
+
+  cpu part:  CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=12 .venv/bin/python nn_x/w5/tests/test_valcd.py cpu
+  gpu part:  CUDA_VISIBLE_DEVICES=<one id> OMP_NUM_THREADS=12 [VC_GPUS="<ids>"] .venv/bin/python nn_x/w5/tests/test_valcd.py gpu
+             (3 e2e subprocesses of 24 CD steps; with VC_GPUS they run concurrently, one per listed GPU, else sequentially)
+CPU part
+  V0 code. (a) ref_pre_valcd copies intact; train.py minus the valcd statements (tests/strip_valcd.py, exact set: cd_arms7
+     import, --val_mix / --val_fold add_argument, `valcd = None`, `if a.val_mix > 0:` (the only statement that rebinds `prand`),
+     the loop block `if valcd is not None and step >= t_cool and valcd.draw(is_pool):`, the loss block, 2 x `if valcd is not
+     None:`) == the previous train.py (AST, docstrings stripped); parse(): val_mix 0.0, val_fold -1, every other default == the
+     previous parser.  (b) lane.sh: DRY commands of EVERY previous job (A base/trunc/auxf 23-24; B m02ref/truncp/truncp2/auxf/
+     hzcd 101-107; E base/trunc/trunc2/auxf/hzcd 951-954; 61 jobs) byte-identical to the previous lane.sh; B:valcd:<r>:<k>
+     (101-104 x 0-4) == B:m02ref:<r> + {val_mix 0.01, val_fold k}, variant w5_cd_valcd_r<r>_f<k>, CDSEED 900+r, init
+     v17_pre2s_s<r>@77500; malformed jobs refused; bash -n.  (c) call sites: setup_valcd once behind `if a.val_mix > 0` in
+     main(), after setup_wave5 / setup_hzcd and before the training loop; valcd.draw / next / gather / add_loss once each,
+     summary twice; `valcd` 13 Name nodes; eval_subset / predict / feature_stats / save_* never take valcd; no other nn_x/w5
+     module imports cd_arms7 (w5_eval_valcd.py reads val_folds, allowed); common / model / data contain no valcd code;
+     cd_arms7 imports only time / numpy / torch / sklearn.  (d) guards: val_mix 0 at the defaults and in every existing DRY
+     command; the loop test is False at any step when valcd is None (no attribute access).
+  V1 folds: val_folds(val user_id) == nn/finetune.py's --u0_singleton construction re-implemented inline (GroupKFold(5) over
+     np.arange(n), user-0 feeds as groups -1 - i); sizes 2885/2885/2885/2884/2884; every non-0 user in exactly one fold;
+     deterministic; the read-out's reference files exist (m02ref @last val / test / holdout 101-104; r6 m02 n2cpv3 oof / test and
+     train-only val / test 101-104).
+  V2 ValPool on a CPU MiniSplit of REAL val feeds (fold ids of the full split): draw() ~ p on non-pool steps and never on pool
+     steps; next() cycles permutations of exactly the fold != k feeds (passes counted); gather() == SplitData.gather in every
+     key except the added dom (0, 1, 0) rows, pos = arange, fidx + n_train; y == val cand_target rows; the leak guard refuses an
+     OOF feed; the EXACT K9 aux statements of train.py exec'd on a val batch with the extended p_random give an aux term of 0
+     (and a non-zero term on a train-like batch); summary() reports OOF / in-sample NDCG.
+  V3 the exact loop block of train.py: body `b, is_pool = valcd.gather(valcd.next()), True`; the test calls draw() only at
+     steps >= t_cool and only when valcd is not None; the `if a.val_mix > 0` body rebinds (valcd, prand) from setup_valcd.
+  V4 setup_valcd: refuses select_on val / TRUNC / wave-4 / aug / hzcd / bad fold / bad p / no p_random / t_cool >= total before
+     loading anything; a positive call on a fake val split returns the extended p_random (train p_random ++ ones(n_val)) and a
+     pool of the right folds; the expected val-batch count line.
+GPU part (deterministic wrapper tests/e2e_valcd.py; 24 CD steps from v17_pre2s_s101@77500, cooldown_mix 0.2, evals at 12 / 24)
+  G1 flags OFF, previous train.py (scratch code dir) vs new: identical training-gather sequence, model-input batches, train-mode
+     logits, loss-input logits, logged metric lines, bit-identical checkpoint and val preds; no val-sourced batch anywhere; the
+     val split is scored without a domain row in both.
+  G2 new `--val_mix 0.5 --val_fold 0 --save_last --save_holdout` vs new flags OFF: the TRAIN gather sequence (regular + m02 pool
+     streams, including the gathers of the replaced steps) is identical; some steps (1-23) feed a val batch to the model; at
+     every other step the model-input feed ids == the flags-off run's; train-mode logits bitwise-identical before the first val
+     step; val batches: fidx - n_train in the fold != 0 feeds (never fold 0), dom rows (0, 1, 0), pos = arange, y / ccat /
+     xt cols 0 and 3 == the val split's flat arrays (brute force); every eval-mode val call carries no dom (unchanged scoring),
+     eval_subset / predict never see the ValPool; valcd log lines; @last / holdout files; checkpoint differs from flags OFF.
+Writes nn_x/w5/logs/test_valcd_<part>.log (+ .json). Test runs are named w5_tvc_*; their outputs are deleted.
+(11-13 ~05:30 UTC: --rdrop_cd / --sam_cd (cd_arms8.py, wave 7) added later; their statements are stripped FIRST by tests/strip_w7.py
+ (exact set asserted) and their parser defaults excluded, so V0 still compares the pre-valcd code path.)
+"""
+import argparse
+import ast
+import collections
+import hashlib
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+
+PART = sys.argv[1] if len(sys.argv) > 1 else "cpu"
+assert PART in ("cpu", "gpu"), "usage: test_valcd.py cpu|gpu"
+_CVD = os.environ.get("CUDA_VISIBLE_DEVICES", "x")
+if PART == "cpu":
+    assert _CVD == "", "cpu part: run with CUDA_VISIBLE_DEVICES=''"
+else:
+    assert re.fullmatch(r"\d", _CVD), "gpu part: CUDA_VISIBLE_DEVICES=<exactly one GPU id>"
+    os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+NT = min(12, int(os.environ.get("OMP_NUM_THREADS", "12")))
+import numpy as np  # noqa: E402
+import polars as pl  # noqa: E402
+import torch  # noqa: E402
+
+torch.set_num_threads(NT)
+HERE = os.path.dirname(os.path.abspath(__file__))
+W5 = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
+sys.path.insert(1, W5)
+import warnings  # noqa: E402
+
+warnings.filterwarnings("ignore", message=".*CUDA is not available.*")
+import cd_arms as CA  # noqa: E402
+import cd_arms6 as C6  # noqa: E402  (xt_transform: attach_xt's transform, for the brute-force xt check)
+import cd_arms7 as C7  # noqa: E402
+from strip_valcd import EXPECT as VC_EXPECT, VC_IFS, strip_valcd  # noqa: E402
+from strip_w7 import EXPECT as W7_EXPECT, strip_w7  # noqa: E402  (wave-7 rdrop / sam statements, stripped before the valcd proof; 11-13)
+
+ROOT = "<repo>"
+PY = f"{ROOT}/.venv/bin/python"
+REF = f"{HERE}/ref_pre_valcd"
+TRAIN_PY, LANE = f"{W5}/train.py", f"{W5}/lane.sh"
+INIT = f"{ROOT}/nn/ckpt/v17_pre2s_s101@77500.pt"
+FC = f"{ROOT}/nn/feat_cache"
+WD = f"{ROOT}/nn_x/w5"
+SCR = os.environ.get("T5_SCRATCH", "/tmp/scratchpad/t5")
+os.makedirs(SCR, exist_ok=True)
+os.makedirs(f"{WD}/logs", exist_ok=True)
+LOG = open(f"{WD}/logs/test_valcd_{PART}.log", "w")
+RES = {"checks": []}
+FAIL = []
+LOOP_IF = VC_IFS[1]
+ROOTS = (101, 102, 103, 104)
+
+
+def P(*a):
+    s = " ".join(str(x) for x in a)
+    print(s, flush=True)
+    LOG.write(s + "\n")
+    LOG.flush()
+
+
+def check(name, ok, info=""):
+    P(f"  [{'PASS' if ok else 'FAIL'}] {name} {info}")
+    RES["checks"].append(dict(name=name, ok=bool(ok), info=str(info)))
+    if not ok:
+        FAIL.append(name)
+
+
+def load_parse(path):
+    tree = ast.parse(open(path).read())
+    fn = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "parse"][0]
+    ns = {"argparse": argparse, "POOL_P_DEFAULT": CA.POOL_P_DEFAULT}
+    exec(compile(ast.Module(body=[fn], type_ignores=[]), "train_parse", "exec"), ns)
+
+    def parse(argv):
+        sys.argv = ["train.py"] + argv
+        return ns["parse"]()
+    return parse
+
+
+def strip_doc(tree):
+    for n in [tree] + [x for x in ast.walk(tree) if isinstance(x, (ast.FunctionDef, ast.ClassDef))]:
+        if n.body and isinstance(n.body[0], ast.Expr) and isinstance(n.body[0].value, ast.Constant) \
+                and isinstance(n.body[0].value.value, str):
+            n.body = n.body[1:] or [ast.Pass()]
+    return tree
+
+
+def lane_dry(script, jobs, gpu="0"):
+    r = subprocess.run(["bash", script, gpu, jobs], capture_output=True, text=True, env={**os.environ, "DRY": "1"})
+    return r.returncode, r.stdout, r.stderr
+
+
+def dry_cmds(out, parse):
+    cmds = {}
+    for ln in out.splitlines():
+        if " train.py " in ln:
+            argv = ln.split(" train.py ", 1)[1].split()
+            cmds[argv[argv.index("--variant") + 1]] = (vars(parse(argv)), ln)
+    return cmds
+
+
+def diff(a, b):
+    return {k: (a[k], b[k]) for k in a if k != "variant" and a[k] != b[k]}
+
+
+def val_meta():
+    f = pl.read_parquet(f"{ROOT}/data/flat/val/feeds.parquet")
+    return dict(M=f["M"].to_numpy().astype(np.int64), off=f["cand_off"].to_numpy().astype(np.int64),
+                uid=f["user_id"].to_numpy(), n=len(f))
+
+
+# ================================================================================================= CPU part
+def v0_code():
+    P("\n== V0 code identity vs the pre-change copies (tests/ref_pre_valcd), lane.sh, call sites, guards")
+    rec = dict(line.split()[::-1] for line in open(f"{REF}/md5.txt"))
+    okm = {k: hashlib.md5(open(f"{REF}/{k}", "rb").read()).hexdigest() == v for k, v in rec.items()}
+    check("ref_pre_valcd copies intact (md5.txt: train.py, lane.sh, test_w5.py, test_trunc_lifts.py, test_hzcd.py, strip_hzcd.py)",
+          all(okm.values()) and len(okm) == 6, okm)
+    # (a) train.py
+    w7_t, w7_removed = strip_w7(ast.parse(open(TRAIN_PY).read()))  # wave-7 statements first (tests/strip_w7.py; 11-13)
+    vc_t, removed = strip_valcd(w7_t)
+    new_t, old_t = strip_doc(vc_t), strip_doc(ast.parse(open(f"{REF}/train.py.txt").read()))
+    check("train.py minus the wave-7 statements (exact set) minus the valcd statements (exact set) == previous train.py (AST, "
+          "docstrings stripped)", ast.dump(new_t) == ast.dump(old_t) and removed == VC_EXPECT and w7_removed == W7_EXPECT,
+          f"removed {dict(removed)}; w7 {dict(w7_removed)}")
+    parse, old_parse = load_parse(TRAIN_PY), load_parse(f"{REF}/train.py.txt")
+    a0, o0 = vars(parse(["--variant", "w5_x"])), vars(old_parse(["--variant", "w5_x"]))
+    check("parse(): val_mix default 0.0, val_fold -1 (rdrop_cd 0 / sam_cd 0: later flags); every other default == the previous parser",
+          a0.get("val_mix") == 0.0 and a0.get("val_fold") == -1 and a0.get("rdrop_cd") == 0.0 and a0.get("sam_cd") == 0.0
+          and {k: v for k, v in a0.items() if k not in ("val_mix", "val_fold", "rdrop_cd", "sam_cd")} == o0)
+    # (b) lane.sh
+    old_jobs = ([f"A:{a}:{s}" for s in (23, 24) for a in ("base", "trunc", "auxf")]
+                + [f"B:{a}:{r}" for r in range(101, 108) for a in ("m02ref", "truncp", "truncp2", "auxf", "hzcd")]
+                + [f"E:{a}:{s}" for s in range(951, 955) for a in ("base", "trunc", "trunc2", "auxf", "hzcd")])
+    rc_o, out_o, _ = lane_dry(f"{REF}/lane.sh.txt", " ".join(old_jobs))
+    rc_n, out_n, _ = lane_dry(LANE, " ".join(old_jobs))
+    check(f"lane.sh DRY: all {len(old_jobs)} previous jobs print byte-identical commands to the previous lane.sh",
+          rc_o == rc_n == 0 and out_o == out_n and out_n.count(" train.py ") == len(old_jobs),
+          f"{out_n.count(' train.py ')} commands")
+    new_jobs = [f"B:valcd:{r}:{k}" for r in ROOTS for k in range(5)]
+    rc2, out2, err2 = lane_dry(LANE, " ".join(new_jobs + [f"B:m02ref:{r}" for r in ROOTS]))
+    cmds = dry_cmds(out2, parse)
+    P("  DRY commands of the new arm (first / last):")
+    for v in ("w5_cd_valcd_r101_f0", "w5_cd_valcd_r104_f4"):
+        P("    " + cmds[v][1])
+    RES["dry_new"] = [ln for v, (_, ln) in cmds.items() if "valcd" in v]
+    okB = len(cmds) == 24
+    for r in ROOTS:
+        for k in range(5):
+            v = f"w5_cd_valcd_r{r}_f{k}"
+            okB &= v in cmds
+            if v in cmds:
+                t = cmds[v][0]
+                okB &= (diff(cmds[f"w5_cd_m02ref_r{r}"][0], t) == {"val_mix": (0.0, 0.01), "val_fold": (-1, k)}
+                        and t["seed"] == 900 + r and t["init"].endswith(f"v17_pre2s_s{r}@77500.pt") and t["select_on"] == "holdout"
+                        and t["cooldown_mix"] == 0.02 and t["epochs"] == 2.0 and t["cooldown_frac"] == 1.0)
+    check("B:valcd:<r>:<k> (101-104 x 0-4) == B:m02ref:<r> + {val_mix 0.01, val_fold k}; variant w5_cd_valcd_r<r>_f<k>; CDSEED "
+          "900+r; init v17_pre2s_s<r>@77500; m02 0.02, 2 epochs, cooldown_frac 1.0, select_on holdout", rc2 == 0 and okB, err2[-200:])
+    bad = ["B:valcd:101", "B:valcd:101:5", "B:valcd:101:x", "B:m02ref:101:3", "A:valcd:23", "E:valcd:951", "B:valcd:108:0"]
+    rc_bad = {j: lane_dry(LANE, j)[0] for j in bad}
+    check("malformed valcd jobs refused (missing / bad fold, 4th field on another arm, stage A / E, root out of range)",
+          all(rc_bad.values()), rc_bad)
+    check("bash -n lane.sh", subprocess.run(["bash", "-n", LANE]).returncode == 0)
+    # (c) call sites
+    src = open(TRAIN_PY).read()
+    tree = ast.parse(src)
+    parents = {ch: p_ for p_ in ast.walk(tree) for ch in ast.iter_child_nodes(p_)}
+
+    def chain(n):
+        c, x = [], n
+        while x in parents:
+            x = parents[x]
+            if isinstance(x, ast.If):
+                c.append("if " + ast.unparse(x.test))
+            if isinstance(x, ast.For):
+                c.append("for " + ast.unparse(x.target))
+            if isinstance(x, ast.FunctionDef):
+                c.append("def " + x.name)
+        return c
+    su = [chain(n) for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "setup_valcd"]
+    check("setup_valcd: one call, behind `if a.val_mix > 0`, in main()", su == [["if a.val_mix > 0", "def main"]], su)
+    ifs = {ast.unparse(n.test): n for n in ast.walk(tree) if isinstance(n, ast.If) and ast.unparse(n.test) in VC_IFS}
+    setup_if = ifs.get("a.val_mix > 0")
+    body = [ast.unparse(x) for x in setup_if.body] if setup_if is not None else []
+    prand_assigns = [ast.unparse(n) for n in ast.walk(tree) if isinstance(n, ast.Assign)
+                     and any(ast.unparse(e) == "prand" for t in n.targets for e in (t.elts if isinstance(t, ast.Tuple) else [t]))]
+    check("the setup block's body is exactly `valcd, prand = setup_valcd(a, tr, va, prand, hold, t_cool, total, log, eval_ndcg)` "
+          "(the only statement that rebinds prand)",
+          body == ["valcd, prand = setup_valcd(a, tr, va, prand, hold, t_cool, total, log, eval_ndcg)"]
+          and prand_assigns == ["prand = None", "prand = torch.from_numpy(prand_np).to(dev)",
+                                "valcd, prand = setup_valcd(a, tr, va, prand, hold, t_cool, total, log, eval_ndcg)"],
+          f"body {body}; prand assignments {prand_assigns}")
+    lines = {k: n.lineno for k, n in ifs.items()}
+    w5_line = [n.lineno for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "setup_wave5"][0]
+    hz_line = [n.lineno for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "setup_hzcd"][0]
+    loop_line = [n.lineno for n in ast.walk(tree) if isinstance(n, ast.For) and ast.unparse(n.target) == "(step, fb)"][0]
+    check("order: setup_valcd after setup_wave5 and setup_hzcd (prand captured by them is the original) and before the training loop",
+          w5_line < lines["a.val_mix > 0"] and hz_line < lines["a.val_mix > 0"] < loop_line, lines)
+    loop_if = ifs.get(LOOP_IF)
+    check("the loop block: inside the training loop, body `b, is_pool = valcd.gather(valcd.next()), True`, placed after the gather "
+          "statement and before the aug / dense statements",
+          loop_if is not None and chain(loop_if) == ["for (step, fb)", "def main"]
+          and [ast.unparse(x) for x in loop_if.body] == ["b, is_pool = (valcd.gather(valcd.next()), True)"]
+          and re.search(r"\.gather\(fb, with_pos=True\)\n\s+if valcd is not None and step >= t_cool and valcd\.draw\(is_pool\):"
+                        r"[^\n]*\n[^\n]*\n\s+if is_pool and aug_on:", src) is not None,
+          [ast.unparse(x) for x in loop_if.body] if loop_if is not None else "missing")
+    loss_if = ifs.get("valcd is not None and valcd.is_val")
+    check("the loss block: inside the training loop after the optimiser steps, body `valcd.add_loss(loss.item())`",
+          loss_if is not None and chain(loss_if) == ["for (step, fb)", "def main"]
+          and [ast.unparse(x) for x in loss_if.body] == ["valcd.add_loss(loss.item())"]
+          and re.search(r"opt\.step\(\)\n\s+if valcd is not None and valcd\.is_val:", src) is not None)
+    attrs = collections.Counter(n.func.attr for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                                and isinstance(n.func.value, ast.Name) and n.func.value.id == "valcd")
+    check("valcd method calls: draw 1, next 1, gather 1, add_loss 1, summary 2 (eval + selected checkpoint)",
+          attrs == collections.Counter(draw=1, next=1, gather=1, add_loss=1, summary=2), dict(attrs))
+    names = [n for n in ast.walk(tree) if isinstance(n, ast.Name) and n.id == "valcd"]
+    uses = sorted({ast.unparse(parents[n]).split("\n")[0][:90] for n in names})
+    check("`valcd`: 13 Name nodes (init, setup target, loop test 2 + body 2, loss test 2 + body 1, 2 log tests + 2 bodies)",
+          len(names) == 13, uses)
+    ev = [ast.unparse(n) for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+          and n.func.id in ("eval_subset", "predict", "feature_stats", "save_holdout", "save_last", "save_last_test", "save_holdout_hz")
+          and "valcd" in ast.unparse(n)]
+    check("train.py: eval_subset / predict / feature_stats / save_* never take valcd", ev == [], ev)
+    users = sorted(f for f in os.listdir(W5) if f.endswith(".py") and f not in ("cd_arms7.py", "train.py", "w5_eval_valcd.py")
+                   and re.search(r"\bcd_arms7\b", open(f"{W5}/{f}").read()))
+    check("no other nn_x/w5 module imports cd_arms7 (w5_eval_valcd.py reads val_folds read-only; predict / eval / holdout_eval / "
+          "stale_pred / finetune untouched)", users == [], users)
+    cm = "".join(open(f"{W5}/{f}").read() for f in ("common.py", "model.py", "data.py"))
+    check("common.py / model.py / data.py contain no valcd code", not re.search(r"valcd|ValPool|cd_arms7|val_mix", cm))
+    imps = sorted({(n.module if isinstance(n, ast.ImportFrom) else n.names[0].name).split(".")[0]
+                   for n in ast.walk(ast.parse(open(f"{W5}/cd_arms7.py").read())) if isinstance(n, (ast.Import, ast.ImportFrom))})
+    check("cd_arms7.py imports only time / numpy / torch / sklearn (no GPU guard; unit tests call the real functions)",
+          imps == ["numpy", "sklearn", "time", "torch"], imps)
+    # (d) guards
+    a_def = parse(["--variant", "w5_x"])
+    vals = {s: bool(eval(LOOP_IF, {}, dict(valcd=None, step=s, t_cool=0, is_pool=False))) for s in (0, 1, 12, 19669)}
+    check("guards: val_mix 0 at the defaults; the loop test is False at any step when valcd is None (no attribute access)",
+          a_def.val_mix == 0.0 and not (a_def.val_mix > 0) and not any(vals.values()), vals)
+    allc = dry_cmds(out_n, parse)
+    check(f"val_mix 0.0 / val_fold -1 in every existing DRY command ({len(allc)})",
+          all(v[0]["val_mix"] == 0.0 and v[0]["val_fold"] == -1 for v in allc.values()))
+
+
+def v1_folds():
+    P("\n== V1 folds == nn/finetune.py --u0_singleton; reference files")
+    from sklearn.model_selection import GroupKFold
+    m = val_meta()
+    fold = C7.val_folds(m["uid"])
+    # inline re-implementation of nn/finetune.py lines 194-202 (gkf = GroupKFold(5); fold_groups ...; u0 singletons)
+    gkf = GroupKFold(n_splits=5)
+    fold_groups = m["uid"].astype(np.int64)
+    u0 = fold_groups == 0
+    fold_groups = np.where(u0, -1 - np.arange(m["n"]), fold_groups)
+    ref = np.full(m["n"], -1)
+    for k, (tr_f, ho_f) in enumerate(gkf.split(np.arange(m["n"]), groups=fold_groups)):
+        ref[ho_f] = k
+    sizes = tuple(int(x) for x in np.bincount(fold, minlength=5))
+    check("val_folds == finetune.py's construction (inline GroupKFold(5), user-0 singletons); fold id k == finetune's ho_f of "
+          "iteration k", np.array_equal(fold.astype(np.int64), ref) and fold.dtype == np.int8)
+    check(f"fold sizes {sizes} == {C7.FOLD_SIZES}", sizes == C7.FOLD_SIZES)
+    uid = m["uid"].astype(np.int64)
+    nz = uid != 0
+    per_user = pl.DataFrame({"u": uid[nz], "f": fold[nz].astype(np.int64)}).group_by("u").agg(pl.col("f").n_unique().alias("nf"))
+    check("every non-0 user is in exactly one fold (user-grouped); user-0 feeds spread over the folds",
+          int(per_user["nf"].max()) == 1 and len(np.unique(fold[~nz])) == 5,
+          f"users {len(per_user)}, user-0 feeds {int((~nz).sum())} by fold {np.bincount(fold[~nz], minlength=5).tolist()}")
+    check("deterministic: a second call gives the same folds", np.array_equal(C7.val_folds(m["uid"]), fold))
+    refs = [f"{WD}/preds/nn_w5_cd_m02ref_r{r}@last_trainonly_{s}.npy" for r in ROOTS for s in ("val", "test")]
+    refs += [f"{WD}/preds/holdout/nn_w5_cd_m02ref_r{r}@last_holdout.npy" for r in ROOTS]
+    refs += [f"{ROOT}/preds/nn_r6_cd_m02_r{r}_{s}.npy" for r in ROOTS for s in ("n2cpv3_val_oof", "n2cpv3_test", "trainonly_val", "trainonly_test")]
+    miss = [f for f in refs if not os.path.exists(f)]
+    check(f"read-out reference files exist ({len(refs)}: m02ref @last val / test / holdout; r6 m02 n2cpv3 oof / test, train-only val / test)",
+          miss == [], miss)
+    n_cand = int(m["M"].sum())
+    oof = np.load(f"{ROOT}/preds/nn_r6_cd_m02_r101_n2cpv3_val_oof.npy", mmap_mode="r")
+    check("the FT reference OOF file has one score per val candidate", oof.shape == (n_cand,), oof.shape)
+    RES["folds"] = dict(sizes=sizes)
+    return fold
+
+
+def pick_val_feeds(m, fold, rng):
+    """Real val feeds: ~40 per fold (incl. user-0 feeds and short / long feeds)."""
+    picks = []
+    for k in range(5):
+        ids = np.flatnonzero(fold == k)
+        picks.append(rng.choice(ids, 40, replace=False))
+    picks.append(rng.choice(np.flatnonzero(m["uid"] == 0), 10, replace=False))
+    picks.append(rng.choice(np.flatnonzero(m["M"] < 50), 10, replace=False))
+    picks.append(rng.choice(np.flatnonzero(m["M"] >= 200), 10, replace=False))
+    return np.unique(np.concatenate(picks))
+
+
+def aux_statements():
+    """The exact K9 aux statements of train.py (tgt / lp / fw_aux / loss) as source text."""
+    tree = ast.parse(open(TRAIN_PY).read())
+    node = [n for n in ast.walk(tree) if isinstance(n, ast.If) and ast.unparse(n.test) == ast.unparse(ast.parse('a.aux_mode == "mse"', mode="eval").body)][0]
+    body = node.orelse  # the listwise (K9) branch
+    src = "\n".join(ast.unparse(x) for x in body)
+    assert "fw_aux = torch.ones_like(tgt[:, 0]) if prand is None else 1 - prand[b['fidx']]" in src, src
+    return src
+
+
+def v2_pool(fold):
+    P("\n== V2 ValPool on a CPU MiniSplit of real val feeds")
+    from mini_split import MiniSplit
+    m = val_meta()
+    rng = np.random.default_rng(5)
+    feeds = pick_val_feeds(m, fold, rng)
+    ck = torch.load(INIT, map_location="cpu", weights_only=False)
+    xt_names = ck["cfg"]["xt_names"]
+    ms = MiniSplit("val", feeds, xt_names=xt_names)
+    assert not ms.has_pos and ms.has_target and ms.dom is None
+    f_ms = fold[ms.src_feeds]
+    N_TR = 3_151_208
+    k = 1
+    pool = C7.ValPool(ms, N_TR, f_ms, k, 0.3, 4096, 32, seed=1001)
+    check("ValPool feeds = fold != k, oof = fold == k (disjoint, complete)",
+          np.array_equal(pool.feeds, np.flatnonzero(f_ms != k)) and np.array_equal(pool.oof, np.flatnonzero(f_ms == k))
+          and len(pool.feeds) + len(pool.oof) == ms.n, f"{len(pool.feeds)} cooldown / {len(pool.oof)} OOF of {ms.n}")
+    d_np = np.array([pool.draw(False) for _ in range(20000)])
+    d_pool = np.array([pool.draw(True) for _ in range(2000)])
+    check("draw(): ~p on non-pool steps (0.3 +- 0.02 over 20000), never on pool steps; is_val mirrors the last draw",
+          abs(d_np.mean() - 0.3) < 0.02 and not d_pool.any() and pool.is_val is False, f"rate {d_np.mean():.4f}")
+    seen, passes = [], []
+    cur = []
+    p0 = pool.n_passes
+    for _ in range(3 * len(ms.batches(pool.feeds, 4096, 32, shuffle=False)) + 2):
+        fb = pool.next()
+        if pool.n_passes != p0:
+            if cur:
+                passes.append(np.sort(np.concatenate(cur)))
+            cur, p0 = [], pool.n_passes
+        cur.append(np.asarray(fb))
+        seen.append(np.asarray(fb))
+    allf = np.concatenate(seen)
+    check("next(): only fold != k feeds; every completed pass is a permutation of exactly the cooldown feeds; passes counted",
+          not np.isin(allf, pool.oof).any() and len(passes) >= 2 and all(np.array_equal(p_, pool.feeds) for p_ in passes)
+          and pool.n_val == len(seen) and pool.n_feeds == len(allf), f"{len(passes)} complete passes, {len(seen)} batches")
+    fb = pool.next()
+    b0 = ms.gather(fb, with_pos=True)
+    b1 = pool.gather(fb)
+    B, Mx = b0["cmask"].shape
+    same = set(b0) == set(b1) - {"dom", "pos"} and all(torch.equal(b0[kk], b1[kk]) for kk in b0 if kk != "fidx")
+    check("gather(): every key of SplitData.gather unchanged except fidx (+ n_train); added dom rows (0, 1, 0) float32 [B, 3] and "
+          "pos = arange(Mx) int64 [B, Mx]; no other keys",
+          same and torch.equal(b1["fidx"], b0["fidx"] + N_TR) and b1["dom"].shape == (B, 3) and b1["dom"].dtype == torch.float32
+          and torch.equal(b1["dom"], torch.tensor([[0.0, 1.0, 0.0]]).expand(B, 3))
+          and torch.equal(b1["pos"], torch.arange(Mx)[None].expand(B, Mx)) and b1["pos"].dtype == torch.int64)
+    tgt_rows = ms.target_np[b1["ci"].numpy()] * b1["cmask"].numpy()
+    check("y == val cand_target rows of the batch (labels of the val feeds)", np.array_equal(b1["y"].numpy(), tgt_rows.astype(np.float32)))
+    try:
+        pool.gather(np.array([int(pool.oof[0])]))
+        leak = False
+    except AssertionError as e:
+        leak = "LEAK GUARD" in str(e)
+    check("leak guard: gather() of an OOF (fold k) feed raises", leak)
+    # the exact K9 aux statements of train.py on this val batch with the extended p_random
+    src = aux_statements()
+    P("  aux statements: " + src.replace("\n", " | ")[:300])
+    torch.manual_seed(0)
+    prand_tr = torch.rand(N_TR // 1000)  # a (short) stand-in train p_random: fidx of val rows are offset by N_TR anyway
+    prand_ext = torch.cat([prand_tr, torch.ones(ms.n)])
+    pool_short = C7.ValPool(ms, len(prand_tr), f_ms, k, 0.3, 4096, 32, seed=7)
+    bv = pool_short.gather(fb)
+    a_ns = argparse.Namespace(aux_tau=10.0, max_feeds=512, aux_norm="batch", aux_norm_c=1.695)
+    env = dict(torch=torch, a=a_ns, b=bv, m=bv["cmask"], prand=prand_ext, model=argparse.Namespace(aux_out=torch.randn(B, Mx)),
+               aux_w=lambda s: 0.5, step=3, loss=torch.tensor(1.0))
+    exec(src, {}, env)
+    aux_val = float(env["loss"]) - 1.0
+    bt = dict(bv)
+    bt["fidx"] = torch.randint(0, len(prand_tr), (B,))  # train-like fidx: p_random < 1 -> non-zero aux
+    env2 = dict(env, b=bt, loss=torch.tensor(1.0))
+    exec(src, {}, env2)
+    aux_tr = float(env2["loss"]) - 1.0
+    check("exact train.py K9 aux statements: aux term == 0 exactly on a val batch (fw_aux = 1 - p_random = 0 via the extended "
+          "vector, batch norm); non-zero on a train-like batch", aux_val == 0.0 and aux_tr != 0.0 and np.isfinite(aux_tr),
+          f"val {aux_val} train-like {aux_tr:.4f}")
+    a_ns.aux_norm = "feed"
+    env3 = dict(env, loss=torch.tensor(1.0))
+    exec(src, {}, env3)
+    check("... and with --aux_norm feed (AUXF) the val-batch aux term is 0 too", float(env3["loss"]) == 1.0)
+    sys.path.insert(0, f"{ROOT}/src")
+    from metrics import ndcg
+
+    def eval_ndcg(scores, data, feed_ids=None):
+        M, off = data.M_np, data.cand_off_np
+        feed_ids = np.sort(np.arange(data.n) if feed_ids is None else feed_ids)
+        rows = np.concatenate([np.arange(off[f], off[f] + M[f]) for f in feed_ids])
+        Ms = M[feed_ids]
+        return ndcg(scores[rows], data.target_np[rows], np.concatenate([[0], np.cumsum(Ms)[:-1]]), Ms)
+    pool.eval_ndcg = eval_ndcg
+    pool.add_loss(torch.tensor(2.0))
+    s = pool.summary("step 7", np.random.default_rng(0).standard_normal(ms.n_cand).astype(np.float32))
+    P("  " + s)
+    check("summary(): val batches / passes / mean loss and OOF (fold k) vs in-sample NDCG in one line",
+          f"OOF fold {k} ({len(pool.oof)} feeds)" in s and f"in-sample folds != {k} ({len(pool.feeds)} feeds)" in s
+          and "mean val-batch loss 2.0000" in s and "[step 7]" in s)
+
+
+def v3_loop():
+    P("\n== V3 the exact loop block / setup block of train.py")
+    tree = ast.parse(open(TRAIN_PY).read())
+    node = [n for n in ast.walk(tree) if isinstance(n, ast.If) and ast.unparse(n.test) == LOOP_IF][0]
+    test = ast.unparse(node.test)
+    P(f"  loop test: {test}; body: {[ast.unparse(x) for x in node.body]}")
+
+    class FakeVC:
+        def __init__(self, ret):
+            self.calls, self.ret = [], ret
+
+        def draw(self, is_pool):
+            self.calls.append(is_pool)
+            return self.ret
+    res = {}
+    for nm, vc in (("off", None), ("on_true", FakeVC(True)), ("on_false", FakeVC(False))):
+        res[nm] = [bool(eval(test, {}, dict(valcd=vc, step=s, t_cool=12, is_pool=(s % 5 == 0)))) for s in range(24)]
+    ok = (not any(res["off"]) and res["on_true"] == [False] * 12 + [True] * 12 and not any(res["on_false"]))
+    vc_t = FakeVC(True)
+    [eval(test, {}, dict(valcd=vc_t, step=s, t_cool=12, is_pool=(s % 5 == 0))) for s in range(24)]
+    check("loop test: valcd None -> False at every step (no draw call); valcd set, t_cool 12 -> draw() called exactly once per "
+          "step >= 12 with that step's is_pool, result = draw()", ok and vc_t.calls == [(s % 5 == 0) for s in range(12, 24)],
+          f"calls {len(vc_t.calls)}")
+    check("loop body replaces the gathered batch and marks the step as a pool step",
+          [ast.unparse(x) for x in node.body] == ["b, is_pool = (valcd.gather(valcd.next()), True)"])
+
+
+def v4_setup():
+    P("\n== V4 setup_valcd refusals and a positive call (fake splits, no data loaded)")
+    import data as D
+    m = val_meta()
+
+    class FakeVa:
+        batches = D.SplitData.batches
+
+        def __init__(self, split="val", has_target=True, dom=None, has_pos=False):
+            self.split, self.has_target, self.dom, self.has_pos = split, has_target, dom, has_pos
+            self.n, self.user_id, self.M_np, self.device = m["n"], m["uid"], m["M"], torch.device("cpu")
+    tr = argparse.Namespace(n=3_151_208)
+    prand = torch.zeros(tr.n)
+    good = dict(val_mix=0.01, val_fold=2, select_on="holdout", trunc_off=0.0, trunc_lifts="", hcap="", rec_q=0.0, rho_file="",
+                aug_cand=0.0, aug_hist=0.0, hzcd=False, cand_budget=32768, max_feeds=512, seed=1002, cooldown_mix=0.02)
+    cases = {"select_on val": dict(select_on="val"), "trunc_off": dict(trunc_off=1.0), "trunc_lifts": dict(trunc_lifts="x.json"),
+             "hcap": dict(hcap="1:110"), "rec_q": dict(rec_q=0.33), "rho_file": dict(rho_file="x.npz"), "aug_cand": dict(aug_cand=0.5),
+             "aug_hist": dict(aug_hist=0.1), "hzcd": dict(hzcd=True), "fold -1": dict(val_fold=-1), "fold 5": dict(val_fold=5),
+             "p 1.0": dict(val_mix=1.0)}
+    refusals = {}
+    msgs = []
+    for nm, kw in cases.items():
+        try:
+            C7.setup_valcd(argparse.Namespace(**dict(good, **kw)), tr, FakeVa(), prand, np.zeros(1), 0, 19670, msgs.append)
+            refusals[nm] = False
+        except AssertionError as e:
+            refusals[nm] = str(e)[:50]
+    for nm, args in (("no p_random", (tr, FakeVa(), None, np.zeros(1), 0, 19670)), ("no holdout", (tr, FakeVa(), prand, None, 0, 19670)),
+                     ("t_cool >= total", (tr, FakeVa(), prand, np.zeros(1), 19670, 19670)),
+                     ("val split with dom", (tr, FakeVa(dom=torch.zeros(1)), prand, np.zeros(1), 0, 19670)),
+                     ("train split", (tr, FakeVa(split="train"), prand, np.zeros(1), 0, 19670))):
+        try:
+            C7.setup_valcd(argparse.Namespace(**good), *args, msgs.append)
+            refusals[nm] = False
+        except AssertionError as e:
+            refusals[nm] = str(e)[:50]
+    check(f"setup_valcd refuses {len(refusals)} bad configurations before building anything (no log line written)",
+          all(refusals.values()) and msgs == [], {k: v for k, v in refusals.items() if not v})
+    pool, pext = C7.setup_valcd(argparse.Namespace(**good), tr, FakeVa(), prand, np.zeros(1), 0, 19670, msgs.append)
+    fold = C7.val_folds(m["uid"])
+    check("positive call: extended p_random = train p_random ++ ones(n_val) (same dtype / device); pool feeds = fold != 2, OOF = "
+          "fold == 2; pool RNG seed = seed + 2; dom (0, 1, 0)",
+          pext.shape == (tr.n + m["n"],) and torch.equal(pext[:tr.n], prand) and bool((pext[tr.n:] == 1).all())
+          and pext.dtype == prand.dtype and np.array_equal(pool.feeds, np.flatnonzero(fold != 2))
+          and np.array_equal(pool.oof, np.flatnonzero(fold == 2)) and pool.n_train == tr.n and pool.k == 2 and pool.p == 0.01
+          and tuple(pool.dom.tolist()) == C7.DOM_VAL and pool.eval_ndcg is None,
+          f"pool {len(pool.feeds)} / oof {len(pool.oof)}")
+    P("  " + msgs[-1][:400])
+    exp = 0.01 * 0.98 * 19670
+    check("log line: fold / sizes / batches per pass / expected val batches (p * (1 - mix) * steps) / token / fidx offset",
+          len(msgs) == 1 and "fold 2 of 5" in msgs[0] and f"OOF {len(pool.oof)} feeds" in msgs[0]
+          and f"expected val batches {exp:.0f}" in msgs[0] and f"fidx offset {tr.n}" in msgs[0] and "(0.0, 1.0, 0.0)" in msgs[0]
+          and "batches per pass" in msgs[0] and "folds (2885, 2885, 2885, 2884, 2884)" in msgs[0])
+    RES["setup_line"] = msgs[0]
+
+
+# ================================================================================================= GPU part
+E2E = ("--init {init} --epochs 0.0025 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 "
+       "--aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.2 --loss_norm feed --holdout 30000 "
+       "--select_on holdout --eval_every 12 --seed 811 --no_test")
+
+
+def outputs(v):
+    fs = [f"{WD}/logs/{v}.log", f"{WD}/logs/{v}.json", f"{WD}/logs/{v}_cliplog.npz"]
+    for x in (v, f"{v}@last"):
+        fs += [f"{WD}/ckpt/{x}.pt", f"{WD}/preds/nn_{x}_trainonly_val.npy", f"{WD}/preds/nn_{x}_trainonly_test.npy",
+               f"{WD}/preds/holdout/nn_{x}_holdout.npy"]
+    return fs
+
+
+def clean(v):
+    for f in outputs(v):
+        if os.path.exists(f):
+            os.remove(f)
+
+
+def e2e_start(code_dir, v, extra, gpu=None):
+    rec = f"{SCR}/rec_{v}.npz"
+    cmd = [PY, f"{code_dir}/tests/e2e_valcd.py", f"{code_dir}/train.py", rec, "--variant", v] + E2E.format(init=INIT).split() + extra
+    env = {**os.environ, "OMP_NUM_THREADS": str(NT)}
+    if gpu is not None:
+        env["CUDA_VISIBLE_DEVICES"] = str(gpu)
+    out = open(f"{SCR}/{v}.stdout", "w")
+    t0 = time.time()
+    pr = subprocess.Popen(cmd, stdout=out, stderr=subprocess.STDOUT, cwd=code_dir, env=env)
+    return pr, rec, t0, v, code_dir, env["CUDA_VISIBLE_DEVICES"]
+
+
+def e2e_wait(h):
+    pr, rec, t0, v, code_dir, gpu = h
+    rc = pr.wait()
+    P(f"  ran {v} from {code_dir} ({time.time() - t0:.0f}s, rc {rc}, GPU {gpu})")
+    assert rc == 0, open(f"{SCR}/{v}.stdout").read()[-3000:]
+    return dict(np.load(rec, allow_pickle=True)), open(f"{WD}/logs/{v}.log").read()
+
+
+def metric_lines(log):
+    return [re.sub(r" [\d.]+ min", "", ln) for ln in log.splitlines() if ln.startswith("step ") or ln.startswith("BEST")]
+
+
+def per_batch(rec, key, width=None):
+    sh, out, k = rec["shapes"], [], 0
+    for b_, m_ in sh:
+        n = b_ * m_
+        out.append(rec[key][k:k + n].reshape(b_, m_) if width is None else rec[key][k:k + n].reshape(b_, m_, width))
+        k += n
+    return out
+
+
+def per_feed(rec, key):
+    off = rec["fidx_off"]
+    return [rec[key][off[i]:off[i + 1]] for i in range(len(off) - 1)]
+
+
+def gathers(rec, split=None):
+    off = rec["g_off"]
+    out = [rec["g_fidx"][off[i]:off[i + 1]] for i in range(len(off) - 1)]
+    if split is None:
+        return out
+    return [g for g, s in zip(out, rec["g_split"]) if s == split]
+
+
+def ck_equal(a, b):
+    ca = torch.load(a, map_location="cpu", weights_only=False)["state_dict"]
+    cb = torch.load(b, map_location="cpu", weights_only=False)["state_dict"]
+    return ca.keys() == cb.keys() and all(torch.equal(ca[k], cb[k]) for k in ca)
+
+
+def g_e2e():
+    P("\n== G e2e (deterministic wrapper; 24 CD steps from v17_pre2s_s101@77500, cooldown_mix 0.2, evals at 12 / 24)")
+    names = ["w5_tvc_pre_off", "w5_tvc_new_off", "w5_tvc_new_on"]
+    gpus = (os.environ.get("VC_GPUS") or _CVD).split()
+    for v in names:
+        clean(v)
+    pre = f"{SCR}/w5_pre_valcd_code"  # previous train.py with every other module of this checkout
+    shutil.rmtree(pre, ignore_errors=True)
+    os.makedirs(f"{pre}/tests")
+    for f in os.listdir(W5):
+        if f.endswith(".py"):
+            shutil.copy(f"{W5}/{f}", f"{pre}/{f}")
+    shutil.copy(f"{HERE}/e2e_valcd.py", f"{pre}/tests/e2e_valcd.py")
+    shutil.copy(f"{REF}/train.py.txt", f"{pre}/train.py")
+    try:
+        starts = [(pre, names[0], []), (W5, names[1], []), (W5, names[2], ["--val_mix", "0.5", "--val_fold", "0", "--save_last", "--save_holdout"])]
+        hs = []
+        for i, (cd, v, extra) in enumerate(starts):
+            if len(gpus) > 1:
+                hs.append(e2e_start(cd, v, extra, gpu=gpus[i % len(gpus)]))
+            else:
+                hs.append(e2e_start(cd, v, extra))
+                e2e_wait(hs[-1])
+        res = [e2e_wait(h) if len(gpus) > 1 else (dict(np.load(h[1], allow_pickle=True)), open(f"{WD}/logs/{h[3]}.log").read()) for h in hs]
+        (ra, la), (rb, lb), (rc_, lc) = res
+        # ---- G1
+        same_g = len(gathers(ra)) == len(gathers(rb)) == 24 and all(np.array_equal(x, y) for x, y in zip(gathers(ra), gathers(rb)))
+        check("G1 flags OFF, previous vs new train.py: identical training-gather sequence (24 steps incl. pool), model-input batches, "
+              "train-mode logits and loss-input logits",
+              same_g and np.array_equal(ra["fidx"], rb["fidx"]) and np.array_equal(ra["lg_model"], rb["lg_model"])
+              and np.array_equal(ra["lg_loss"], rb["lg_loss"]) and len(ra["src"]) == len(rb["src"]) == 24)
+        check("G1 identical logged metric lines; bit-identical checkpoint and val preds",
+              metric_lines(la) == metric_lines(lb) and len(metric_lines(lb)) >= 3
+              and ck_equal(f"{WD}/ckpt/{names[0]}.pt", f"{WD}/ckpt/{names[1]}.pt")
+              and np.array_equal(np.load(f"{WD}/preds/nn_{names[0]}_trainonly_val.npy"),
+                                 np.load(f"{WD}/preds/nn_{names[1]}_trainonly_val.npy")), metric_lines(lb)[-1] if metric_lines(lb) else "")
+        eva, evb = json.loads(str(ra["eval_counts"])), json.loads(str(rb["eval_counts"]))
+        check("G1 no val-sourced batch anywhere in either run; every eval-mode val call carries no dom row (unchanged scoring); eval "
+              "holdout calls carry the train dom; predict / eval_subset never see a ValPool",
+              all(s == "tr" for s in ra["src"]) and all(s == "tr" for s in rb["src"]) and all(s == "train" for s in rb["split"])
+              and all(not k.startswith("val|") or k.endswith("dom=False") for k in evb) and "val|tr|dom=False" in evb
+              and "train|tr|dom=True" in evb and eva == evb and not rb["predict_valpool"].any() and not rb["eval_valpool"].any(),
+              f"eval counts {evb}")
+        RES["e2e_g1"] = dict(off_lines=metric_lines(lb))
+        # ---- G2
+        n_tr = 3_151_208
+        m = val_meta()
+        fold = C7.val_folds(m["uid"])
+        src = list(rc_["src"])
+        nval = src.count("val")
+        gtr_c, gtr_d = gathers(rc_, "train"), gathers(rb, "train")
+        same_tr = len(gtr_c) == len(gtr_d) == 24 and all(np.array_equal(x, y) for x, y in zip(gtr_c, gtr_d))
+        f_c, f_d = per_feed(rc_, "fidx"), per_feed(rb, "fidx")
+        same_nonval = all(np.array_equal(f_c[i], f_d[i]) for i in range(24) if src[i] != "val")
+        first_val = src.index("val") if nval else 24
+        lgm_c, lgm_d = per_batch(rc_, "lg_model"), per_batch(rb, "lg_model")
+        same_pre = all(np.array_equal(lgm_c[i], lgm_d[i]) for i in range(first_val))
+        check("G2 --val_mix 0.5 --val_fold 0 vs flags OFF: the 24 TRAIN gathers (regular + m02 pool streams, incl. the replaced "
+              "steps) are identical; 1-23 steps feed a val batch; at every other step the model-input feed ids == flags OFF; "
+              "train-mode logits bitwise-identical before the first val step",
+              same_tr and 1 <= nval <= 23 and same_nonval and same_pre and len(src) == 24
+              and all((s == "val") == (sp == "val") for s, sp in zip(src, rc_["split"])),
+              f"val steps {nval} at {[i for i, s in enumerate(src) if s == 'val']}; first val step {first_val}")
+        dom_c = rc_["dom"]
+        offs = rc_["fidx_off"]
+        ci_c, y_c, cc_c, pos_c, xt_c = per_batch(rc_, "ci"), per_batch(rc_, "y"), per_batch(rc_, "ccat"), per_batch(rc_, "pos"), per_batch(rc_, "xt", 2)
+        yv = np.load(f"{ROOT}/data/flat/val/cand_target.npy")
+        catv = np.load(f"{ROOT}/data/flat/val/cand_category_id.npy").astype(np.int64)
+        xt_names = torch.load(INIT, map_location="cpu", weights_only=False)["cfg"]["xt_names"]
+        xref = [np.load(f"{FC}/val/{xt_names[c]}.npy", mmap_mode="r") for c in (0, 3)]
+        ok_f = ok_dom = ok_y = ok_pos = ok_xt = True
+        n_oof = 0
+        for i in range(24):
+            if src[i] != "val":
+                continue
+            fi = f_c[i] - n_tr
+            ok_f &= bool((fi >= 0).all() and (fi < m["n"]).all() and (fold[fi] != 0).all())
+            n_oof += int((fold[np.clip(fi, 0, m["n"] - 1)] == 0).sum())
+            d = dom_c[offs[i]:offs[i + 1]]
+            ok_dom &= np.array_equal(d, np.tile([0.0, 1.0, 0.0], (len(fi), 1)).astype(np.float32))
+            ci, msk = ci_c[i], ci_c[i] >= 0
+            ok_y &= np.array_equal(y_c[i][msk], yv[ci[msk]].astype(np.float32)) and np.array_equal(cc_c[i][msk], catv[ci[msk]])
+            ok_pos &= np.array_equal(pos_c[i], np.tile(np.arange(ci.shape[1]), (ci.shape[0], 1)))
+            for j, c in enumerate((0, 3)):
+                exp = torch.from_numpy(C6.xt_transform(xt_names[c], np.asarray(xref[j][ci[msk]]))).to(torch.float16).float().numpy()
+                ok_xt &= np.array_equal(xt_c[i][msk][:, j], exp)
+        tr_dom_ok = all(np.isfinite(dom_c[offs[i]:offs[i + 1]]).all() and (np.abs(dom_c[offs[i]:offs[i + 1]].sum(1) - 1) < 1e-5).all()
+                        for i in range(24) if src[i] != "val")
+        check("G2 val batches: fidx - n_train are val feeds of the folds != 0 (never fold 0); dom rows (0, 1, 0); pos = arange; y / "
+              "ccat == the val split's flat arrays at the batch rows; xt columns 0 / 3 == attach_xt(feat_cache val) brute force; "
+              "train batches keep their (1-p, p, 0) dom", nval > 0 and ok_f and n_oof == 0 and ok_dom and ok_y and ok_pos and ok_xt and tr_dom_ok,
+              f"fidx {ok_f} oof {n_oof} dom {ok_dom} y/ccat {ok_y} pos {ok_pos} xt {ok_xt} train dom {tr_dom_ok}")
+        evc = json.loads(str(rc_["eval_counts"]))
+        check("G2 eval-mode: every val call carries no dom (val scoring unchanged), no eval batch is val-sourced, holdout evals carry "
+              "the train dom; predict / eval_subset never see the ValPool",
+              all(not k.startswith("val|") or k == "val|tr|dom=False" for k in evc) and "val|tr|dom=False" in evc
+              and "train|tr|dom=True" in evc and all("|val|" not in k for k in evc) and not rc_["predict_valpool"].any()
+              and not rc_["eval_valpool"].any(), f"eval counts {evc}")
+        ls = lc.splitlines()
+        setup_ln = [ln for ln in ls if ln.startswith("wave-5 valcd: from step 0 (of 24)")]
+        step_ln = [ln for ln in ls if ln.startswith("wave-5 valcd [step ")]
+        sel_ln = [ln for ln in ls if ln.startswith("wave-5 valcd [selected step ")]
+        nb_logged = int(re.search(r"val batches (\d+)", step_ln[-1]).group(1)) if step_ln else -1
+        check("G2 log: setup line (fold 0 held out, 11538 cooldown feeds, random-like token), per-eval lines at steps 12 and 24 with "
+              "the val-batch count == the recorded val steps and OOF / in-sample NDCG, selected-checkpoint line; json args",
+              len(setup_ln) == 1 and "fold 0 of 5 held out (OOF 2885 feeds), cooldown val feeds 11538" in setup_ln[0]
+              and [re.search(r"\[step (\d+)\]", x).group(1) for x in step_ln] == ["12", "24"] and nb_logged == nval
+              and "OOF fold 0 (2885 feeds)" in step_ln[-1] and len(sel_ln) == 1
+              and json.load(open(f"{WD}/logs/{names[2]}.json"))["args"]["val_mix"] == 0.5
+              and json.load(open(f"{WD}/logs/{names[2]}.json"))["args"]["val_fold"] == 0,
+              [x[:160] for x in setup_ln + step_ln + sel_ln])
+        fs = [f"{WD}/ckpt/{names[2]}@last.pt", f"{WD}/preds/nn_{names[2]}@last_trainonly_val.npy",
+              f"{WD}/preds/holdout/nn_{names[2]}@last_holdout.npy", f"{WD}/preds/holdout/nn_{names[2]}_holdout.npy",
+              f"{WD}/preds/nn_{names[2]}_trainonly_val.npy", f"{WD}/ckpt/{names[2]}.pt"]
+        check("G2 hygiene outputs written (selected + @last checkpoints, val preds, holdout preds); checkpoint differs from flags OFF; "
+              "val preds cover every val feed (finite, non-zero on fold 0 too)",
+              all(os.path.exists(f) for f in fs) and not ck_equal(f"{WD}/ckpt/{names[2]}.pt", f"{WD}/ckpt/{names[1]}.pt")
+              and np.isfinite(np.load(fs[4])).all() and (np.load(fs[4]) != 0).mean() > 0.99, [os.path.exists(f) for f in fs])
+        RES["e2e_g2"] = dict(off_lines=metric_lines(lb), on_lines=metric_lines(lc), val_steps=[i for i, s in enumerate(src) if s == "val"],
+                             valcd_lines=[x for x in ls if x.startswith("wave-5 valcd")])
+    finally:
+        for v in names:
+            clean(v)
+        shutil.rmtree(pre, ignore_errors=True)
+
+
+def main():
+    t_all = time.time()
+    P(f"== nn_x/w5 --val_mix / --val_fold (valcd) tests, part {PART} ({time.ctime()}, CPU threads {NT})")
+    if PART == "cpu":
+        v0_code()
+        fold = v1_folds()
+        v2_pool(fold)
+        v3_loop()
+        v4_setup()
+    else:
+        g_e2e()
+    RES["failed"] = FAIL
+    P(f"\n== {len(RES['checks']) - len(FAIL)}/{len(RES['checks'])} checks passed; failed: {FAIL}; {time.time() - t_all:.0f}s")
+    json.dump(RES, open(f"{WD}/logs/test_valcd_{PART}.json", "w"), indent=1, default=str)
+    return 0 if not FAIL else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

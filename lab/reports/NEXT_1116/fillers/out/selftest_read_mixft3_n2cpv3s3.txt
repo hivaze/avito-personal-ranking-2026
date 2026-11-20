@@ -1,0 +1,23 @@
+SELFTEST on stored suffixes ['mixft3', 'n2cpv3s3']: plumbing only, the verdicts below are meaningless
+control suffix mixctl3, production suffix n2cpv3s3; val feeds 14423, M<50 5893, M>=50 8530
+LEVELS (val mean NDCG): mixctl3: FILE 0.40240, wide FT pool 0.40128 | n2cpv3s3: FILE 0.40240, wide FT pool 0.40124 | mixft3: FILE 0.40234, wide FT pool 0.40157 | n2cpv3s3: FILE 0.40240, wide FT pool 0.40124
+CONTROL minus PRODUCTION (same recipe, two realisations of every member = the size of a no-effect difference):
+   FILE: val +0.00001 +- 0.00001 (z +0.62) | val M<50 +0.00000 +- 0.00003 (z +0.04) | val M>=50 +0.00001 +- 0.00002 (z +0.89) | pmix-public -0.00000 +- 0.00001 (z -0.41) | pmix-private -0.00001 +- 0.00001 (z -0.54)
+   WIDE FT POOL alone: val +0.00004 +- 0.00004 (z +1.00) | val M<50 +0.00008 +- 0.00010 (z +0.84) | val M>=50 +0.00001 +- 0.00002 (z +0.70) | pmix-public +0.00002 +- 0.00003 (z +0.69) | pmix-private +0.00003 +- 0.00004 (z +0.75)
+== arm mixft3 minus control mixctl3
+   FILE: val -0.00007 +- 0.00022 (z -0.30) | val M<50 +0.00004 +- 0.00040 (z +0.10) | val M>=50 -0.00014 +- 0.00026 (z -0.54) | pmix-public +0.00012 +- 0.00028 (z +0.42) | pmix-private +0.00022 +- 0.00035 (z +0.63)
+   FT BRANCH (0.8 wide + 0.2 pop): val +0.00035 +- 0.00034 (z +1.04) | val M<50 +0.00062 +- 0.00062 (z +1.01) | val M>=50 +0.00017 +- 0.00039 (z +0.43) | pmix-public +0.00033 +- 0.00042 (z +0.79) | pmix-private +0.00045 +- 0.00050 (z +0.91)
+   WIDE FT POOL alone: val +0.00029 +- 0.00038 (z +0.76) | val M<50 +0.00061 +- 0.00070 (z +0.86) | val M>=50 +0.00007 +- 0.00043 (z +0.17) | pmix-public +0.00032 +- 0.00048 (z +0.67) | pmix-private +0.00035 +- 0.00057 (z +0.61)
+   fine-tuned member alone, mean over the 8 members: val +0.00004 (sd 0.00042, > 0: 3/8) | val M<50 +0.00006 (sd 0.00074, > 0: 3/8) | val M>=50 +0.00004 (sd 0.00052, > 0: 3/8) | pmix-public +0.00000 (sd 0.00055, > 0: 4/8) | pmix-private -0.00007 (sd 0.00064, > 0: 4/8)
+== arm n2cpv3s3 minus control mixctl3
+   FILE: val -0.00001 +- 0.00001 (z -0.62) | val M<50 -0.00000 +- 0.00003 (z -0.04) | val M>=50 -0.00001 +- 0.00002 (z -0.89) | pmix-public +0.00000 +- 0.00001 (z +0.41) | pmix-private +0.00001 +- 0.00001 (z +0.54)
+   FT BRANCH (0.8 wide + 0.2 pop): val -0.00003 +- 0.00003 (z -1.18) | val M<50 -0.00000 +- 0.00002 (z -0.04) | val M>=50 -0.00006 +- 0.00004 (z -1.24) | pmix-public -0.00003 +- 0.00003 (z -1.16) | pmix-private -0.00004 +- 0.00003 (z -1.27)
+   WIDE FT POOL alone: val -0.00004 +- 0.00004 (z -1.00) | val M<50 -0.00008 +- 0.00010 (z -0.84) | val M>=50 -0.00001 +- 0.00002 (z -0.70) | pmix-public -0.00002 +- 0.00003 (z -0.69) | pmix-private -0.00003 +- 0.00004 (z -0.75)
+   fine-tuned member alone, mean over the 8 members: val +0.00005 (sd 0.00006, > 0: 7/8) | val M<50 +0.00006 (sd 0.00008, > 0: 5/8) | val M>=50 +0.00004 (sd 0.00008, > 0: 5/8) | pmix-public +0.00005 (sd 0.00006, > 0: 6/8) | pmix-private +0.00004 (sd 0.00006, > 0: 6/8)
+== Holm step-down over 2 arm(s), family alpha 0.02275 (= P(z > 2)); order by p: ['mixft3', 'n2cpv3s3']
+   mixft3: val z -0.299, one-sided p 0.6176, threshold p <= 0.01138 -> val clause MISSED
+   n2cpv3s3: val z -0.622, one-sided p 0.7331, threshold p <= 0.02275 -> val clause MISSED
+== RULE per arm (FILE level): (1) val >= +2 SE, Holm; (2) pmix-private >= 0; (3) val M<50 >= -1 SE
+   mixft3: val -0.00007 +- 0.00022 (z -0.30) -> (1) MISSED | pmix-private +0.00022 +- 0.00035 (z +0.63) -> (2) holds | val M<50 +0.00004 +- 0.00040 (z +0.10) vs -1 SE = -0.00040 -> (3) holds ==> NOT PASSED -> CLOSED
+   n2cpv3s3: val -0.00001 +- 0.00001 (z -0.62) -> (1) MISSED | pmix-private +0.00001 +- 0.00001 (z +0.54) -> (2) holds | val M<50 -0.00000 +- 0.00003 (z -0.04) vs -1 SE = -0.00003 -> (3) holds ==> NOT PASSED -> CLOSED
+SELFTEST: verdicts above are meaningless (stored suffixes, not declared arms)

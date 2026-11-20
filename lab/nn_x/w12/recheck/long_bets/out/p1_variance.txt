@@ -1,0 +1,24 @@
+== (a) local data slope (xf = 80% of users) ==
+ member xf - base (15 pairs, same seed): val -0.00275+-0.00049 | holdout -0.00217+-0.00028
+ mean member: xf val 0.39415 hold 0.31820 | base val 0.39654 hold 0.32029
+ implied local slope per data doubling: val +0.00744  holdout +0.00649  (0.32 doublings; global two-point slope on record +0.0037)
+== (b) correlation structure (val z / holdout z) ==
+ same fold, diff seed     n= 15  val 0.9404  holdout 0.9440
+ diff fold, diff seed     n= 60  val 0.9362  holdout 0.9398
+ diff fold, same seed     n= 30  val 0.9368  holdout 0.9404
+ base-base (all users)    n=  6  val 0.9485  holdout 0.9513
+ note: two different folds share 60/80 = 75% of their users; extrapolate the de-correlation to disjoint data with factor 1/(1-0.75) = 4.
+== (c) pools at equal count ==
+ 3 xf same fold         val 0.39729  holdout 0.32109  (n pools 5)
+ 3 xf different folds   val 0.39753  holdout 0.32120  (n pools 10)
+ 3 base (all users)     val 0.39861  holdout 0.32274  (n pools 4)
+ 15 xf (user-bagged) val 0.39846 hold 0.32250 | 5 xf (1 per fold) val 0.39774 hold 0.32182 | 4 base val 0.39887 hold 0.32328
+ 4 xf (4 folds) - 4 base: val -0.00114+-0.00062 | holdout -0.00184+-0.00036   <- user-bagging at equal count (each member has 20% less data)
+== (d) pool-size curves (mean over subsets) ==
+ base                 k=1: 0.39654/0.32029 | k=2: 0.39813/0.32208 | k=4: 0.39887/0.32328
+   1/k extrapolation to k=inf: val 0.39961  holdout 0.32448
+ kd05                 k=1: 0.39911/0.32229 | k=2: 0.40027/0.32311 | k=4: 0.40085/0.32349
+   1/k extrapolation to k=inf: val 0.40142  holdout 0.32387
+ W8 (wide students)   k=1: 0.39935/0.32263 | k=2: 0.40053/0.32358 | k=4: 0.40118/0.32411 | k=8: 0.40157/0.32456
+   1/k extrapolation to k=inf: val 0.40195  holdout 0.32500
+ W8 member-member corr: val 0.9726 holdout 0.9739

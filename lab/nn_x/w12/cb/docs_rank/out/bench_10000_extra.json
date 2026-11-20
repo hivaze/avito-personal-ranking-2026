@@ -1,0 +1,68 @@
+{
+ "n_feeds": 10000,
+ "rows": 1489391,
+ "n_feat": 177,
+ "threads": 12,
+ "pool_build_s": 0.39243626594543457,
+ "quantize_s": NaN,
+ "load": [
+  88.79638671875,
+  87.75146484375,
+  87.3515625
+ ],
+ "catboost": "1.2.10",
+ "rows_cfg": [
+  {
+   "name": "YetiRank (Classic) = cb26 settings on CPU",
+   "loss": "YetiRank",
+   "kw": {},
+   "total_s": 6.519559383392334,
+   "setup_s": 1.734982967376709,
+   "med_iter_s": 0.30849218368530273,
+   "mean_iter_s": 0.3131793462313138,
+   "n_iter": 16
+  },
+  {
+   "name": "X1 YetiRank:permutations=3",
+   "loss": "YetiRank:permutations=3",
+   "kw": {},
+   "total_s": 5.226286888122559,
+   "setup_s": 1.5150368213653564,
+   "med_iter_s": 0.24773406982421875,
+   "mean_iter_s": 0.24639217670147234,
+   "n_iter": 16
+  },
+  {
+   "name": "X2 QuerySoftMax + Newton leaves",
+   "loss": "QuerySoftMax",
+   "kw": {
+    "leaf_estimation_method": "Newton"
+   },
+   "total_s": 4.295928239822388,
+   "setup_s": 1.4717295169830322,
+   "med_iter_s": 0.19016337394714355,
+   "mean_iter_s": 0.18830453432523286,
+   "n_iter": 16
+  },
+  {
+   "name": "X3 YetiRank (Classic) on a real-valued label",
+   "loss": "YetiRank",
+   "kw": {},
+   "total_s": 16.19405508041382,
+   "setup_s": 2.6460938453674316,
+   "med_iter_s": 0.9033520221710205,
+   "mean_iter_s": 0.9015779862037072,
+   "n_iter": 16
+  },
+  {
+   "name": "X4 LambdaMart on a real-valued label",
+   "loss": "LambdaMart:norm=false",
+   "kw": {},
+   "total_s": 14.923089742660522,
+   "setup_s": 2.5378406047821045,
+   "med_iter_s": 0.8299627304077148,
+   "mean_iter_s": 0.8268065452575684,
+   "n_iter": 16
+  }
+ ]
+}

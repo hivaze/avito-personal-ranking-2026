@@ -1,0 +1,44 @@
+{
+  "variant": "abl_smoke_fd10_kd05w192_s951",
+  "holdout_in_train": true,
+  "kept_step": 73,
+  "total_steps": 73,
+  "n_holdout_feeds_in_training": 194,
+  "holdout_candidates_in_training": 29937,
+  "n_training_feeds": 20000,
+  "pool_holdout_feeds": 194,
+  "holdout_feeds_per_epoch": 194,
+  "steps": {
+    "steps_per_epoch": 73,
+    "steps_per_epoch_without_holdout": 72,
+    "total": 73
+  },
+  "keep_arg_before": "best",
+  "insample_history": [
+    {
+      "step": 25,
+      "holdout_insample_ndcg": 0.24895691927203104
+    },
+    {
+      "step": 50,
+      "holdout_insample_ndcg": 0.26322474798256906
+    },
+    {
+      "step": 73,
+      "holdout_insample_ndcg": 0.2747788463101311
+    }
+  ],
+  "insample_files": [
+    {
+      "file": "<repo>/nn_x/abl/preds/holdout/nn_abl_smoke_fd10_kd05w192_s951@last_holdoutINSAMPLE.npy",
+      "insample_ndcg": 0.27477394250432213,
+      "what": "the last checkpoint"
+    },
+    {
+      "file": "<repo>/nn_x/abl/preds/holdout/nn_abl_smoke_fd10_kd05w192_s951_holdoutINSAMPLE.npy",
+      "insample_ndcg": 0.27477394250432213,
+      "what": "the kept (= LAST) checkpoint"
+    }
+  ],
+  "note": "every holdout number of this run is IN-SAMPLE; val is the only clean witness"
+}

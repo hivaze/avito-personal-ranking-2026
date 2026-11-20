@@ -1,0 +1,21 @@
+=== reference members kd05w192 (val / holdout NDCG) ===
+  s951: 0.39859 / 0.32258
+  s952: 0.39968 / 0.32298
+  s953: 0.39914 / 0.32263
+  s954: 0.39931 / 0.32247
+  s955: 0.39948 / 0.32247
+  s956: 0.39861 / 0.32228
+  s957: 0.39866 / 0.32251
+  s958: 0.39868 / 0.32276
+  arm A members: s951 0.39927/0.32285 s952 0.39948/0.32265 s953 0.39880/0.32242 s954 0.39861/0.32214
+  arm B members: s951 0.39815/0.32258 s952 0.39855/0.32203 s953 0.39826/0.32270 s954 0.39856/0.32235
+  arm C members: s951 0.39883/0.32288 s952 0.39866/0.32261 s953 0.39844/0.32326 s954 0.39873/0.32270
+=== 70 reference 4-subsets: val mean 0.40077 sd 0.00032 min 0.39983 max 0.40155; holdout mean 0.32408 sd 0.00020 ===
+  s951-954 (the screen reference): val 0.40134 rank 3/70 (z_sub +1.77); holdout 0.32408 rank 37/70 (z_sub -0.04)
+  pool gain over mean member: s951-954 val +0.00216 (70-subset mean +0.00175 sd 0.00029); holdout +0.00141 (mean +0.00150 sd 0.00016)
+  arm A 4-pool: val 0.40048 (rank among the 70 reference subsets 60/71, z_sub -0.91; pool gain +0.00144) | holdout 0.32428 (rank 14/71, z_sub +0.97; pool gain +0.00176)
+  arm B 4-pool: val 0.39990 (rank among the 70 reference subsets 70/71, z_sub -2.70; pool gain +0.00152) | holdout 0.32437 (rank 6/71, z_sub +1.42; pool gain +0.00196)
+  arm C 4-pool: val 0.40065 (rank among the 70 reference subsets 49/71, z_sub -0.38; pool gain +0.00198) | holdout 0.32447 (rank 1/71, z_sub +1.93; pool gain +0.00161)
+=== 35 disjoint same-recipe 4-vs-4 splits (null): val delta sd 0.00053, z sd 0.94 (|z|>=2: 1/35); holdout delta sd 0.00035, z sd 1.09 (|z|>=2: 2/35); typical per-feed SE val 0.00056 holdout 0.00032
+    (if the per-feed SE captured all seed noise, z sd would be ~1; the splits are not independent, so this sd is a rough estimate)
+    corr(val delta, holdout delta) over the 35 splits: +0.13

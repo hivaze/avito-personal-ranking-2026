@@ -1,0 +1,21 @@
+exp	arm	seeds	val_base	val_treat	d_val	se_val	hold_base	hold_treat	d_hold	se_hold	best_steps	minutes	params	verdict	note
+A1	gate_elem	23,24	0.38170	0.38212	+0.00042	0.00046	0.30033	0.30083	+0.00050	0.00028	19670/19670	52.2/52.2	941642	LIKELY	gated attn (G1 elementwise) in all 5 attn modules
+A2	fox	23,24	0.38170	0.38151	-0.00019	0.00042	0.30033	0.30019	-0.00014	0.00025	19000/18000	43.6/43.3	860114	NO	FoX forgetting bias on target attn, init f=[.999,.995,.98,.95]
+A3	qknorm_ssmax	23,24	0.38170	0.38164	-0.00006	0.00038	0.30033	0.30024	-0.00010	0.00023	19000/19000	50.0/50.4	859422	NO	QK RMSNorm + SSMax s_h*log(n) in all 5 attn modules
+A4	retr_m16	23,24	0.38170	0.38356	+0.00186	0.00077	0.30033	0.30359	+0.00326	0.00046	19000/19000	53.8/53.9	915415	WIN	TabR-style retrieval values, top-16 hist by raw cos, L2 keys, sink; LN on values
+A4	retr_m16 + stage 2	23,24	0.38226	0.38388	+0.00161	0.00079	0.30058	0.30367	+0.00309	0.00047	1288/1288	5.6/5.7	915415	WIN	stage 2 (exact C0 recipe) on attn_retr_s23/24 vs s2_base_s23/24
+A4	retr_m16 + s2 + ftb	23,24	0.38512	0.38661	+0.00149	0.00072			+nan	nan			None	WIN	baseline fine-tune recipe (frozen n2clean, lr 5e-5, 6 ep, snapshot) vs ftb_s23/24; OOF only
+A1+A4	gate+retr vs base	23,24	0.38170	0.38443	+0.00273	0.00079	0.30033	0.30422	+0.00389	0.00047	19670/19000	61.6/61.4	997975	WIN	combination of A1 (LIKELY) and A4 (WIN)
+A1+A4	gate+retr vs retr	23,24	0.38356	0.38443	+0.00087	0.00047	0.30359	0.30422	+0.00063	0.00029	19670/19000	61.6/61.4	997975	WIN	A1 increment on top of A4
+A5	moe8_top2	23,24	0.38170	0.38197	+0.00027	0.00047	0.30033	0.30087	+0.00053	0.00028	19670/19670	50.8/50.8	1582538	LIKELY	8 routed SwiGLU(64) + shared SwiGLU(128), sigmoid router, aux-loss-free bias, 4 candidate blocks; +0.72M params
+A1+A4	gate+retr + stage 2	23,24	0.38226	0.38518	+0.00292	0.00081	0.30058	0.30435	+0.00377	0.00049	1288/1288	4.6/4.7	997975	WIN	stage 2 (C0 recipe) on attn_gate_retr vs s2_base
+A1+A4	gate+retr + s2 + ftb	23,24	0.38512	0.38707	+0.00195	0.00074			+nan	nan			None	WIN	baseline fine-tune recipe vs ftb_s23/24; OOF only
+A1+A4	gate+retr vs retr after s2+ftb	23,24	0.38661	0.38707	+0.00046	0.00051			+nan	nan			None	NO	A1 increment on top of A4 after full pipeline
+A1+A4+A5	gate+retr+moe vs base	23,24	0.38170	0.38457	+0.00287	0.00080	0.30033	0.30464	+0.00430	0.00049	19670/19000	55.4/55.3	1721431	WIN	full combination of WIN/LIKELY items
+A1+A4+A5	gate+retr+moe vs gate+retr	23,24	0.38443	0.38457	+0.00015	0.00048	0.30422	0.30464	+0.00041	0.00027	19670/19000	55.4/55.3	1721431	LIKELY	A5 increment on top of A1+A4
+A4-dissect	meta-only vs base	23,24	0.38170	0.38186	+0.00016	0.00051	0.30033	0.30072	+0.00038	0.00031	19000/19670	39.2/38.4	915415	LIKELY	A4 without T(k_c-k_j) value term (informational)
+A4-dissect	meta-only vs full A4	23,24	0.38356	0.38186	-0.00169	0.00075	0.30359	0.30072	-0.00288	0.00045	19000/19670	39.2/38.4	915415	NO	contribution of the T(k_c-k_j) value term (negative = term helps)
+A1+A4+A5	gate+retr+moe + stage 2	23,24	0.38226	0.38473	+0.00247	0.00082	0.30058	0.30419	+0.00361	0.00050	1288/1288	2.8/3.0	1721431	WIN	stage 2 vs s2_base
+A1+A4+A5	gate+retr+moe + s2 + ftb	23,24	0.38512	0.38673	+0.00161	0.00078			+nan	nan			None	WIN	fine-tune vs ftb (OOF)
+A1+A4+A5	A5 increment after stage 2	23,24	0.38518	0.38473	-0.00045	0.00051	0.30435	0.30419	-0.00016	0.00030	1288/1288	2.8/3.0	1721431	NO	A5 increment on top of A1+A4 after stage 2
+A1+A4+A5	A5 increment after s2+ftb	23,24	0.38707	0.38673	-0.00034	0.00052			+nan	nan			None	NO	A5 increment on top of A1+A4 after fine-tune

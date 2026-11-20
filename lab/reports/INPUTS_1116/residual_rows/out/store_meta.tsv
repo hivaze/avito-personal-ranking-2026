@@ -1,0 +1,324 @@
+name	dir	rows_train	rows_val	rows_test	in_xt34	in_ft42	family	builder	usedby_1111	inmodel_analogue	sAUC_val_trH	resid_mix_LIN_1111	resid_mix_GBM_1111	resid_trH_LIN_1111	leak_status_1111
+H	data/feats	246745836	1389971	2904806	0	0	base-other	src/features.py	GB+gate+stk*	log1p H	0.500 / 0.500	- (-)	- (-)	- (-)	per-feed constant (within-feed AUC n/a)
+M	data/feats	246745836	1389971	2904806	0	0	base-other	src/features.py	GB+gate+stk*	log M	0.500 / 0.500	- (-)	- (-)	- (-)	per-feed constant (within-feed AUC n/a)
+als_et1_exp5	data/feats		1389971	2904806	0	0	als	src/features_als.py (+src/als_clean_pairs.py)	stk*		0.577 / -	-0.00019 (0.00029)	-0.00044 (0.00037)	- (-)	clean ALS (CURRENT_STATUS 2b); no train version
+als_exp10	data/feats		1389971	2904806	0	0	als	src/features_als.py (+src/als_clean_pairs.py)	stk*		0.579 / -	0.00029 (0.00031)	-0.00074 (0.00037)	- (-)	clean ALS (CURRENT_STATUS 2b); no train version
+als_exp2	data/feats		1389971	2904806	0	0	als	src/features_als.py (+src/als_clean_pairs.py)	stk*		0.578 / -	0.00019 (0.00031)	-0.00037 (0.00036)	- (-)	clean ALS (CURRENT_STATUS 2b); no train version
+als_exp5	data/feats		1389971	2904806	0	0	als	src/features_als.py (+src/als_clean_pairs.py)	stk*		0.579 / -	0.00015 (0.00033)	-0.00055 (0.00037)	- (-)	clean ALS (CURRENT_STATUS 2b); no train version
+als_exp5_rk	data/feats		1389971	2904806	0	0	als	src/features_als.py (+src/als_clean_pairs.py)	stk*		0.580 / -	0.00002 (0.00023)	-0.00073 (0.00037)	- (-)	clean ALS (CURRENT_STATUS 2b); no train version
+als_exp5_z	data/feats		1389971	2904806	0	0	als	src/features_als.py (+src/als_clean_pairs.py)	stk*		0.579 / -	0.00001 (0.00027)	-0.00054 (0.00032)	- (-)	clean ALS (CURRENT_STATUS 2b); no train version
+als_has	data/feats		1389971	2904806	0	0	als	src/features_als.py (+src/als_clean_pairs.py)	stk*		0.544 / -	-0.00017 (0.00010)	-0.00044 (0.00031)	- (-)	clean ALS (CURRENT_STATUS 2b); no train version
+als_last10	data/feats		1389971	2904806	0	0	als	src/features_als.py (+src/als_clean_pairs.py)	stk*		0.579 / -	0.00031 (0.00033)	-0.00060 (0.00037)	- (-)	clean ALS (CURRENT_STATUS 2b); no train version
+als_samecat_exp10	data/feats		1389971	2904806	0	0	als	src/features_als.py (+src/als_clean_pairs.py)	stk*		0.586 / -	-0.00005 (0.00028)	-0.00082 (0.00035)	- (-)	clean ALS (CURRENT_STATUS 2b); no train version
+attn32	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate	lse(all K)	0.636 / 0.631	-0.00016 (0.00012)	-0.00068 (0.00034)	-0.00017 (0.00018)	detector clean (skew +0.003, raw -0.009)
+attn32_gap	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate		0.636 / 0.631	-0.00016 (0.00012)	-0.00068 (0.00031)	-0.00017 (0.00018)	detector clean (skew +0.003, raw -0.009)
+attn32_rk	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate		0.637 / 0.632	-0.00031 (0.00024)	-0.00070 (0.00032)	-0.00009 (0.00018)	detector clean (skew +0.003, raw -0.009)
+attn32_z	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate		0.636 / 0.631	-0.00016 (0.00012)	-0.00082 (0.00033)	-0.00017 (0.00018)	detector clean (skew +0.003, raw -0.009)
+cat_cnt_20	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate+stk*		0.591 / 0.588	-0.00003 (0.00015)	0.00003 (0.00029)	-0.00011 (0.00011)	detector clean (skew +0.008, raw -0.004)
+cat_cnt_5	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate		0.582 / 0.583	-0.00011 (0.00015)	-0.00043 (0.00029)	-0.00006 (0.00010)	detector clean (skew +0.012, raw +0.000)
+cat_cnt_all	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	log1p ccnt (+z/rank)	0.580 / 0.578	-0.00000 (0.00018)	-0.00009 (0.00030)	-0.00012 (0.00009)	detector clean (skew +0.011, raw -0.001)
+cat_cnt_all_gap	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate		0.580 / 0.578	-0.00000 (0.00018)	0.00019 (0.00029)	-0.00012 (0.00009)	detector clean (skew +0.011, raw -0.001)
+cat_cnt_all_rk	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate		0.580 / 0.578	-0.00018 (0.00018)	-0.00010 (0.00030)	-0.00015 (0.00009)	detector clean (skew +0.011, raw -0.001)
+cat_cnt_all_z	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate		0.580 / 0.578	-0.00000 (0.00018)	-0.00010 (0.00027)	-0.00012 (0.00009)	detector clean (skew +0.011, raw -0.001)
+cat_cnt_et1	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	log1p ccnt_et	0.586 / 0.582	0.00005 (0.00019)	-0.00026 (0.00032)	-0.00008 (0.00011)	detector clean (skew +0.008, raw -0.004)
+cat_cnt_et10	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	log1p ccnt_et	0.506 / 0.505	-0.00009 (0.00010)	-0.00006 (0.00014)	0.00000 (0.00004)	detector clean (skew +0.010, raw -0.001)
+cat_cnt_et2	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	log1p ccnt_et	0.536 / 0.536	-0.00006 (0.00006)	-0.00015 (0.00029)	0.00001 (0.00004)	detector clean (skew +0.012, raw +0.000)
+cat_cnt_et3	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	log1p ccnt_et	0.542 / 0.540	0.00005 (0.00008)	-0.00052 (0.00026)	-0.00004 (0.00005)	detector clean (skew +0.008, raw -0.003)
+cat_cnt_et4	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	log1p ccnt_et	0.531 / 0.529	0.00010 (0.00006)	0.00022 (0.00026)	-0.00004 (0.00005)	detector clean (skew +0.012, raw +0.000)
+cat_cnt_et5	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	log1p ccnt_et	0.524 / 0.526	0.00012 (0.00011)	-0.00038 (0.00031)	-0.00001 (0.00004)	detector clean (skew +0.016, raw +0.004)
+cat_cnt_et6	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	log1p ccnt_et	0.522 / 0.524	0.00010 (0.00011)	-0.00078 (0.00028)	-0.00002 (0.00003)	detector clean (skew +0.016, raw +0.004)
+cat_cnt_et7	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	log1p ccnt_et	0.518 / 0.511	-0.00001 (0.00004)	-0.00038 (0.00027)	0.00001 (0.00008)	detector clean (skew +0.004, raw -0.008)
+cat_cnt_et8	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	log1p ccnt_et	0.519 / 0.520	-0.00009 (0.00009)	-0.00035 (0.00031)	0.00005 (0.00006)	detector clean (skew +0.014, raw +0.003)
+cat_cnt_et9	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	log1p ccnt_et	0.508 / 0.504	-0.00006 (0.00009)	0.00028 (0.00023)	0.00002 (0.00008)	detector clean (skew +0.008, raw -0.003)
+cat_min_hpos	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	1/(1+first)	0.596 / 0.599	-0.00014 (0.00013)	-0.00026 (0.00031)	-0.00009 (0.00008)	detector clean (skew +0.013, raw +0.001)
+cat_share_all	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	ccnt/H	0.580 / 0.578	-0.00000 (0.00018)	0.00010 (0.00030)	-0.00012 (0.00009)	detector clean (skew +0.011, raw -0.001)
+category_id	data/feats	246745836	1389971	2904806	0	0	base-other	src/features.py	GB+gate+stk*		0.524 / 0.524	0.00002 (0.00018)	-0.00031 (0.00026)	-0.00008 (0.00011)	detector clean (skew +0.010, raw -0.002)
+centrality	data/feats	246745836	1389971	2904806	0	1	emb	src/features.py	FT+GB+gate		0.582 / 0.587	0.00002 (0.00012)	-0.00029 (0.00031)	-0.00013 (0.00017)	detector clean (skew +0.011, raw -0.000)
+clu_hcnt1024	data/feats	246745836	1389971	2904806	0	0	clu	feats_v2/clu_/build.py	none		0.592 / 0.585	-0.00017 (0.00020)	-0.00046 (0.00031)	-0.00001 (0.00010)	detector clean (skew +0.002, raw -0.009)
+clu_het14096	data/feats	246745836	1389971	2904806	0	0	clu	feats_v2/clu_/build.py	none		0.592 / 0.584	-0.00001 (0.00012)	-0.00029 (0.00033)	-0.00008 (0.00008)	detector clean (skew +0.002, raw -0.010)
+clu_hmin1024	data/feats	246745836	1389971	2904806	0	0	clu	feats_v2/clu_/build.py	none		0.609 / 0.605	-0.00016 (0.00019)	-0.00033 (0.00034)	-0.00020 (0.00013)	detector clean (skew +0.006, raw -0.005)
+clu_hrw4096	data/feats	246745836	1389971	2904806	0	0	clu	feats_v2/clu_/build.py	none		0.605 / 0.600	-0.00023 (0.00016)	-0.00042 (0.00032)	-0.00016 (0.00011)	detector clean (skew +0.004, raw -0.008)
+clu_pmi1024_mean	data/feats	246745836	1389971	2904806	0	0	clu	feats_v2/clu_/build.py	none		0.605 / 0.603	-0.00018 (0.00017)	-0.00045 (0.00032)	-0.00010 (0.00014)	detector clean (skew +0.007, raw -0.005)
+clu_pmi11024_mean	data/feats	246745836	1389971	2904806	0	0	clu	feats_v2/clu_/build.py	none		0.604 / 0.602	-0.00018 (0.00020)	-0.00029 (0.00032)	-0.00010 (0.00014)	detector clean (skew +0.007, raw -0.005)
+cos_h10	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate+stk*		0.627 / 0.626	0.00000 (0.00012)	-0.00013 (0.00031)	-0.00005 (0.00019)	detector clean (skew +0.007, raw -0.005)
+cos_h10_gap	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate		0.627 / 0.626	0.00000 (0.00012)	-0.00032 (0.00037)	-0.00005 (0.00019)	detector clean (skew +0.007, raw -0.005)
+cos_h10_rk	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate		0.627 / 0.626	-0.00023 (0.00019)	-0.00002 (0.00036)	0.00003 (0.00020)	detector clean (skew +0.006, raw -0.005)
+cos_h10_z	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate		0.627 / 0.626	0.00000 (0.00012)	-0.00059 (0.00030)	-0.00005 (0.00019)	detector clean (skew +0.007, raw -0.005)
+cos_h50	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate		0.619 / 0.614	-0.00023 (0.00017)	-0.00039 (0.00034)	-0.00011 (0.00018)	detector clean (skew +0.005, raw -0.007)
+cos_hall	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate		0.605 / 0.602	-0.00021 (0.00016)	-0.00048 (0.00035)	-0.00028 (0.00017)	detector clean (skew +0.006, raw -0.006)
+cos_hall_gap	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate		0.605 / 0.602	-0.00021 (0.00016)	-0.00053 (0.00034)	-0.00028 (0.00017)	detector clean (skew +0.006, raw -0.006)
+cos_hall_rk	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate		0.606 / 0.602	0.00005 (0.00025)	-0.00027 (0.00035)	-0.00022 (0.00018)	detector clean (skew +0.005, raw -0.006)
+cos_hall_z	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate		0.605 / 0.602	-0.00021 (0.00016)	-0.00020 (0.00034)	-0.00028 (0.00017)	detector clean (skew +0.006, raw -0.006)
+cos_het1	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate	max cos in type (diff. def.)	0.611 / 0.609	-0.00018 (0.00023)	-0.00036 (0.00033)	-0.00028 (0.00018)	detector clean (skew +0.007, raw -0.005)
+cos_het10	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate	max cos in type (diff. def.)	0.508 / 0.507	0.00003 (0.00010)	-0.00013 (0.00019)	-0.00000 (0.00006)	detector clean (skew +0.010, raw -0.001)
+cos_het2	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate	max cos in type (diff. def.)	0.552 / 0.549	-0.00023 (0.00019)	-0.00068 (0.00034)	-0.00004 (0.00006)	detector clean (skew +0.009, raw -0.002)
+cos_het3	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate	max cos in type (diff. def.)	0.560 / 0.555	-0.00021 (0.00019)	-0.00074 (0.00034)	-0.00005 (0.00009)	detector clean (skew +0.005, raw -0.007)
+cos_het4	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate	max cos in type (diff. def.)	0.539 / 0.532	-0.00004 (0.00013)	-0.00038 (0.00035)	-0.00009 (0.00007)	detector clean (skew +0.006, raw -0.006)
+cos_het5	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate	max cos in type (diff. def.)	0.542 / 0.544	-0.00011 (0.00011)	-0.00026 (0.00034)	-0.00008 (0.00007)	detector clean (skew +0.014, raw +0.002)
+cos_het6	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate	max cos in type (diff. def.)	0.539 / 0.542	-0.00011 (0.00013)	-0.00080 (0.00034)	-0.00008 (0.00008)	detector clean (skew +0.013, raw +0.002)
+cos_het7	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate	max cos in type (diff. def.)	0.523 / 0.511	-0.00022 (0.00012)	-0.00026 (0.00027)	-0.00008 (0.00009)	detector clean (skew -0.003, raw -0.014)
+cos_het8	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate	max cos in type (diff. def.)	0.533 / 0.534	-0.00001 (0.00011)	-0.00068 (0.00031)	0.00000 (0.00007)	detector clean (skew +0.014, raw +0.002)
+cos_het9	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate	max cos in type (diff. def.)	0.510 / 0.504	0.00004 (0.00013)	0.00005 (0.00028)	-0.00003 (0.00010)	detector clean (skew +0.003, raw -0.008)
+cos_u	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate+stk*	cos_u (+z/rank)	0.641 / 0.635	-0.00036 (0.00016)	0.00032 (0.00031)	-0.00016 (0.00020)	detector clean (skew +0.002, raw -0.010)
+cos_u_gap	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate		0.641 / 0.635	-0.00036 (0.00016)	0.00003 (0.00032)	-0.00016 (0.00020)	detector clean (skew +0.002, raw -0.010)
+cos_u_rk	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate	rank(cos_u)	0.641 / 0.635	0.00000 (0.00027)	-0.00038 (0.00036)	-0.00016 (0.00019)	detector clean (skew +0.002, raw -0.010)
+cos_u_z	data/feats	246745836	1389971	2904806	0	0	cos	src/features.py	GB+gate	z(cos_u)	0.641 / 0.635	-0.00036 (0.00016)	-0.00005 (0.00030)	-0.00016 (0.00020)	detector clean (skew +0.002, raw -0.010)
+ctx_hn_bestrk	data/feats	246745836	1389971	2904806	1	0	ctx_hn	feats_v2/ctx_/build_ctx3.py	XT		0.633 / 0.628	-0.00019 (0.00021)	-0.00040 (0.00031)	-0.00010 (0.00011)	detector clean (skew -0.000, raw -0.012)
+ctx_hn_e1_rrw	data/feats	246745836	1389971	2904806	1	0	ctx_hn	feats_v2/ctx_/build_ctx3.py	XT		0.641 / 0.644	-0.00024 (0.00017)	-0.00063 (0.00034)	-0.00017 (0.00018)	detector clean (skew +0.007, raw -0.005)
+ctx_hn_margin	data/feats	246745836	1389971	2904806	1	0	ctx_hn	feats_v2/ctx_/build_ctx3.py	XT		0.638 / 0.633	-0.00019 (0.00024)	-0.00005 (0.00035)	-0.00011 (0.00015)	detector clean (skew -0.001, raw -0.013)
+ctx_hn_rrw	data/feats	246745836	1389971	2904806	1	0	ctx_hn	feats_v2/ctx_/build_ctx3.py	XT		0.643 / 0.645	-0.00003 (0.00015)	-0.00043 (0.00037)	-0.00021 (0.00017)	detector clean (skew +0.004, raw -0.007)
+ctx_hn_soft05	data/feats	246745836	1389971	2904806	1	0	ctx_hn	feats_v2/ctx_/build_ctx3.py	XT		0.649 / 0.648	0.00004 (0.00021)	-0.00034 (0.00033)	-0.00019 (0.00017)	detector clean (skew +0.003, raw -0.008)
+ctx_hn_top1w	data/feats	246745836	1389971	2904806	1	0	ctx_hn	feats_v2/ctx_/build_ctx3.py	XT		0.580 / 0.553	0.00004 (0.00019)	-0.00084 (0.00047)	-0.00012 (0.00011)	detector clean (skew +0.002, raw -0.010)
+ctx_hs_d7	data/feats	246745836	1389971	2904806	0	0	ctx_hs	feats_v2/ctx_/build_ctx4.py	none		0.643 / 0.645	0.00013 (0.00019)	-0.00084 (0.00031)	-0.00016 (0.00021)	detector clean (skew +0.006, raw -0.006)
+ctx_hs_e1	data/feats	246745836	1389971	2904806	1	0	ctx_hs	feats_v2/ctx_/build_ctx4.py	XT		0.646 / 0.645	-0.00012 (0.00023)	-0.00012 (0.00031)	-0.00017 (0.00018)	detector clean (skew +0.005, raw -0.007)
+ctx_hs_e1k64	data/feats	246745836	1389971	2904806	0	0	ctx_hs	feats_v2/ctx_/build_ctx4.py	none		0.649 / 0.644	-0.00016 (0.00024)	0.00002 (0.00033)	-0.00023 (0.00016)	detector clean (skew +0.003, raw -0.009)
+ctx_hs_k128	data/feats	246745836	1389971	2904806	1	0	ctx_hs	feats_v2/ctx_/build_ctx4.py	XT		0.653 / 0.649	0.00002 (0.00022)	-0.00006 (0.00030)	-0.00016 (0.00015)	detector clean (skew +0.002, raw -0.010)
+ctx_hs_k128t10	data/feats	246745836	1389971	2904806	0	0	ctx_hs	feats_v2/ctx_/build_ctx4.py	none		0.652 / 0.648	-0.00010 (0.00018)	-0.00068 (0.00032)	-0.00021 (0.00016)	detector clean (skew +0.001, raw -0.010)
+ctx_hs_k256	data/feats	246745836	1389971	2904806	0	0	ctx_hs	feats_v2/ctx_/build_ctx4.py	none		0.649 / 0.644	-0.00008 (0.00024)	-0.00012 (0.00027)	-0.00020 (0.00015)	detector clean (skew +0.001, raw -0.011)
+ctx_hs_mutual	data/feats	246745836	1389971	2904806	1	0	ctx_hs	feats_v2/ctx_/build_ctx4.py	XT		0.566 / 0.543	-0.00026 (0.00018)	-0.00064 (0.00038)	-0.00011 (0.00013)	detector clean (skew +0.003, raw -0.008)
+ctx_hs_t10	data/feats	246745836	1389971	2904806	1	0	ctx_hs	feats_v2/ctx_/build_ctx4.py	XT		0.648 / 0.647	0.00003 (0.00017)	-0.00018 (0.00031)	-0.00019 (0.00020)	detector clean (skew +0.003, raw -0.008)
+ctx_nd_hcent	data/feats	246745836	1389971	2904806	1	1	ctx_nd	feats_v2/ctx_/build_ctx.py	XT+FT+stk*		0.605 / 0.602	-0.00013 (0.00021)	0.00025 (0.00035)	0.00002 (0.00018)	detector clean (skew +0.004, raw -0.007)
+ctx_nd_knn_f1	data/feats	246745836	1389971	2904806	1	1	ctx_nd	feats_v2/ctx_/build_ctx.py	XT+FT+stk*		0.607 / 0.619	0.00021 (0.00022)	-0.00039 (0.00035)	-0.00014 (0.00017)	detector clean (skew +0.008, raw -0.003)
+ctx_nd_knn_h	data/feats	246745836	1389971	2904806	1	1	ctx_nd	feats_v2/ctx_/build_ctx.py	XT+FT+stk*		0.612 / 0.621	0.00001 (0.00025)	-0.00033 (0.00038)	-0.00006 (0.00015)	detector clean (skew +0.001, raw -0.011)
+ctx_nd_knn_h_dev	data/feats	246745836	1389971	2904806	1	1	ctx_nd	feats_v2/ctx_/build_ctx.py	XT+FT+stk*		0.602 / 0.590	-0.00021 (0.00021)	-0.00035 (0.00035)	-0.00003 (0.00010)	detector clean (skew +0.004, raw -0.007)
+ctx_nd_knn_u	data/feats	246745836	1389971	2904806	1	1	ctx_nd	feats_v2/ctx_/build_ctx.py	XT+FT+stk*		0.600 / 0.611	0.00009 (0.00024)	-0.00031 (0.00031)	-0.00021 (0.00018)	detector clean (skew +0.005, raw -0.007)
+ctx_nd_knn_u_dev	data/feats	246745836	1389971	2904806	1	1	ctx_nd	feats_v2/ctx_/build_ctx.py	XT+FT+stk*		0.602 / 0.592	0.00025 (0.00024)	-0.00036 (0.00037)	-0.00005 (0.00013)	detector clean (skew +0.003, raw -0.008)
+ctx_nd_max	data/feats	246745836	1389971	2904806	1	1	ctx_nd	feats_v2/ctx_/build_ctx.py	XT+FT+stk*		0.573 / 0.566	0.00036 (0.00025)	-0.00011 (0.00037)	0.00012 (0.00019)	detector clean (skew +0.006, raw -0.006)
+ctx_nd_top5h	data/feats	246745836	1389971	2904806	1	1	ctx_nd	feats_v2/ctx_/build_ctx.py	XT+FT+stk*		0.598 / 0.593	-0.00013 (0.00018)	-0.00029 (0.00037)	-0.00013 (0.00021)	detector clean (skew +0.003, raw -0.008)
+ctx_nd_top5u	data/feats	246745836	1389971	2904806	1	1	ctx_nd	feats_v2/ctx_/build_ctx.py	XT+FT+stk*		0.594 / 0.594	0.00002 (0.00014)	-0.00028 (0.00032)	-0.00018 (0.00018)	detector clean (skew +0.008, raw -0.004)
+ctx_nd_ucent	data/feats	246745836	1389971	2904806	1	1	ctx_nd	feats_v2/ctx_/build_ctx.py	XT+FT+stk*		0.565 / 0.553	-0.00048 (0.00020)	-0.00056 (0.00037)	-0.00007 (0.00014)	detector clean (skew +0.001, raw -0.010)
+dot_hall	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate		0.605 / 0.602	-0.00021 (0.00016)	-0.00013 (0.00033)	-0.00027 (0.00017)	detector clean (skew +0.006, raw -0.006)
+dot_u	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate	dot_u	0.641 / 0.635	-0.00030 (0.00016)	0.00041 (0.00031)	-0.00014 (0.00020)	detector clean (skew +0.001, raw -0.010)
+emb_missing	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate+stk*	cmiss	0.500 / 0.500	-0.00001 (0.00002)	-0.00002 (0.00006)	-0.00003 (0.00005)	detector clean (skew +0.012, raw +0.000)
+f1	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate+stk*	raw/z/rank	0.623 / 0.623	0.00056 (0.00021)	-0.00026 (0.00034)	-0.00009 (0.00015)	detector clean (skew +0.008, raw -0.003)
+f1_gap	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate		0.623 / 0.623	0.00055 (0.00021)	0.00021 (0.00035)	-0.00009 (0.00015)	detector clean (skew +0.008, raw -0.003)
+f1_rk	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate	rank	0.623 / 0.623	0.00005 (0.00021)	0.00004 (0.00033)	-0.00001 (0.00014)	detector clean (skew +0.008, raw -0.003)
+f1_z	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate	z	0.623 / 0.623	0.00055 (0.00021)	-0.00004 (0.00035)	-0.00009 (0.00015)	detector clean (skew +0.008, raw -0.003)
+f2	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate+stk*	raw/z/rank	0.506 / 0.509	0.00010 (0.00025)	0.00019 (0.00029)	0.00003 (0.00011)	detector clean (skew +0.015, raw +0.004)
+f2_gap	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate		0.506 / 0.509	0.00010 (0.00025)	-0.00003 (0.00031)	0.00003 (0.00011)	detector clean (skew +0.015, raw +0.004)
+f2_rk	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate	rank	0.506 / 0.509	0.00020 (0.00026)	0.00015 (0.00031)	-0.00001 (0.00010)	detector clean (skew +0.015, raw +0.004)
+f2_z	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate	z	0.506 / 0.509	0.00010 (0.00025)	0.00032 (0.00029)	0.00003 (0.00011)	detector clean (skew +0.015, raw +0.004)
+f3	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate+stk*	raw/z/rank	0.601 / 0.602	0.00013 (0.00013)	0.00011 (0.00028)	0.00003 (0.00009)	detector clean (skew +0.011, raw -0.001)
+f3_gap	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate		0.601 / 0.602	0.00012 (0.00013)	0.00000 (0.00027)	0.00003 (0.00009)	detector clean (skew +0.011, raw -0.001)
+f3_rk	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate	rank	0.601 / 0.602	-0.00031 (0.00019)	-0.00019 (0.00028)	-0.00006 (0.00009)	detector clean (skew +0.011, raw -0.001)
+f3_z	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate	z	0.601 / 0.602	0.00012 (0.00013)	0.00010 (0.00027)	0.00003 (0.00009)	detector clean (skew +0.011, raw -0.001)
+f4	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate+stk*	raw/z/rank	0.545 / 0.546	0.00003 (0.00023)	-0.00009 (0.00042)	-0.00006 (0.00013)	detector clean (skew +0.019, raw +0.008)
+f4_gap	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate		0.545 / 0.546	0.00003 (0.00023)	0.00052 (0.00040)	-0.00006 (0.00013)	detector clean (skew +0.019, raw +0.008)
+f4_rk	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate	rank	0.545 / 0.546	-0.00005 (0.00020)	0.00050 (0.00039)	-0.00000 (0.00007)	detector clean (skew +0.019, raw +0.008)
+f4_z	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate	z	0.545 / 0.546	0.00003 (0.00023)	0.00019 (0.00039)	-0.00006 (0.00013)	detector clean (skew +0.019, raw +0.008)
+f5	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate+stk*	raw/z/rank	0.561 / 0.564	-0.00014 (0.00024)	0.00024 (0.00033)	0.00001 (0.00009)	detector clean (skew +0.015, raw +0.004)
+f5_gap	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate		0.561 / 0.564	-0.00014 (0.00024)	0.00001 (0.00034)	0.00001 (0.00009)	detector clean (skew +0.015, raw +0.004)
+f5_rk	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate	rank	0.561 / 0.564	-0.00017 (0.00024)	-0.00020 (0.00034)	-0.00000 (0.00005)	detector clean (skew +0.015, raw +0.004)
+f5_z	data/feats	246745836	1389971	2904806	0	0	f1-5	src/features.py	GB+gate	z	0.561 / 0.564	-0.00014 (0.00024)	-0.00013 (0.00032)	0.00001 (0.00009)	detector clean (skew +0.015, raw +0.004)
+feed_cat_share	data/feats	246745836	1389971	2904806	0	0	cat	src/features.py	GB+gate	fcs	0.579 / 0.582	0.00009 (0.00022)	0.00000 (0.00031)	-0.00009 (0.00012)	detector clean (skew +0.011, raw -0.001)
+hist_n_uniq_cat	data/feats	246745836	1389971	2904806	0	0	base-other	src/features.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00019 (0.00024)	0.00000 (0.00000)	per-feed constant (within-feed AUC n/a)
+hour	data/feats	246745836	1389971	2904806	0	0	base-other	src/features.py	FT+GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00019 (0.00019)	0.00000 (0.00000)	calendar shift val->test (SHIFT-7, PSI 0.09)
+it_cand_cnt_split	data/feats	246745836	1389971	2904806	0	0	it_cand	src/features.py	GB+gate		0.503 / 0.458	0.00006 (0.00018)	-0.00043 (0.00029)	0.00018 (0.00030)	BANNED in FT: transductive over split incl. same-user later feeds (finetune.py ITEM_CLEAN); train PSI 16.6
+it_cand_cnt_split_gap	data/feats	246745836	1389971	2904806	0	0	it_cand	src/features.py	GB+gate		0.503 / 0.458	0.00006 (0.00018)	0.00003 (0.00032)	0.00018 (0.00030)	BANNED in FT: transductive over split incl. same-user later feeds (finetune.py ITEM_CLEAN); train PSI 16.6
+it_cand_cnt_split_rk	data/feats	246745836	1389971	2904806	0	0	it_cand	src/features.py	GB+gate		0.503 / 0.458	-0.00002 (0.00018)	0.00033 (0.00032)	0.00039 (0.00028)	BANNED in FT: transductive over split incl. same-user later feeds (finetune.py ITEM_CLEAN); train PSI 16.6
+it_cand_cnt_split_z	data/feats	246745836	1389971	2904806	0	0	it_cand	src/features.py	GB+gate		0.503 / 0.458	0.00006 (0.00018)	-0.00013 (0.00029)	0.00018 (0.00030)	BANNED in FT: transductive over split incl. same-user later feeds (finetune.py ITEM_CLEAN); train PSI 16.6
+it_cand_cnt_train	data/feats	246745836	1389971	2904806	0	0	it_cand	src/features.py	FT+GB+gate		0.534 / 0.542	0.00019 (0.00022)	-0.00026 (0.00037)	0.00018 (0.00030)	val/test-safe; train rows count themselves (min 1; PSI val->train 5.1)
+it_hist_all	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.557 / 0.581	-0.00016 (0.00016)	-0.00035 (0.00033)	0.00003 (0.00025)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_all_gap	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.557 / 0.581	-0.00016 (0.00016)	0.00003 (0.00035)	0.00003 (0.00025)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_all_luo	data/feats	246745836	1389971	2904806	1	1	it_hist_luo	src/features_luo.py	XT+FT+gate+stk*		0.556 / 0.572	-0.00004 (0.00017)	-0.00050 (0.00033)	-0.00001 (0.00010)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_all_luo_gap	data/feats	246745836	1389971	2904806	0	1	it_hist_luo	src/features_luo.py	FT+gate+stk*		0.556 / 0.572	-0.00004 (0.00017)	0.00007 (0.00035)	-0.00001 (0.00010)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_all_luo_rk	data/feats	246745836	1389971	2904806	0	1	it_hist_luo	src/features_luo.py	FT+gate+stk*		0.557 / 0.572	-0.00002 (0.00019)	-0.00065 (0.00033)	0.00001 (0.00009)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_all_luo_z	data/feats	246745836	1389971	2904806	0	0	it_hist_luo	src/features_luo.py	FT+gate+stk*		0.556 / 0.572	-0.00004 (0.00017)	-0.00005 (0.00033)	-0.00001 (0.00010)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_all_rk	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.557 / 0.581	-0.00015 (0.00019)	-0.00035 (0.00031)	0.00037 (0.00023)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_all_z	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.557 / 0.581	-0.00016 (0.00016)	-0.00003 (0.00033)	0.00003 (0.00025)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_et1	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.558 / 0.584	-0.00019 (0.00017)	-0.00071 (0.00032)	0.00003 (0.00028)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_et10	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.513 / 0.522	-0.00005 (0.00009)	-0.00016 (0.00028)	-0.00009 (0.00016)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_et10_luo	data/feats	246745836	1389971	2904806	0	1	it_hist_luo	src/features_luo.py	FT+gate+stk*		0.513 / 0.522	-0.00005 (0.00009)	-0.00016 (0.00028)	-0.00009 (0.00016)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_et1_luo	data/feats	246745836	1389971	2904806	1	1	it_hist_luo	src/features_luo.py	XT+FT+gate+stk*		0.557 / 0.575	0.00003 (0.00018)	-0.00051 (0.00032)	-0.00000 (0.00007)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_et2	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.533 / 0.546	0.00016 (0.00013)	-0.00035 (0.00030)	0.00004 (0.00015)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_et2_luo	data/feats	246745836	1389971	2904806	1	1	it_hist_luo	src/features_luo.py	XT+FT+gate+stk*		0.533 / 0.543	0.00016 (0.00013)	-0.00015 (0.00029)	-0.00008 (0.00007)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_et3	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.531 / 0.544	-0.00006 (0.00014)	-0.00067 (0.00030)	0.00003 (0.00011)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_et3_luo	data/feats	246745836	1389971	2904806	1	1	it_hist_luo	src/features_luo.py	XT+FT+gate+stk*		0.531 / 0.540	-0.00001 (0.00015)	-0.00083 (0.00030)	-0.00004 (0.00011)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_et4	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.528 / 0.541	0.00011 (0.00016)	-0.00034 (0.00031)	0.00008 (0.00013)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_et4_luo	data/feats	246745836	1389971	2904806	1	1	it_hist_luo	src/features_luo.py	XT+FT+gate+stk*		0.528 / 0.539	0.00012 (0.00017)	-0.00037 (0.00030)	-0.00001 (0.00006)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_et5	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.513 / 0.520	-0.00029 (0.00018)	-0.00066 (0.00039)	0.00004 (0.00012)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_et5_luo	data/feats	246745836	1389971	2904806	0	1	it_hist_luo	src/features_luo.py	FT+gate+stk*		0.512 / 0.518	-0.00023 (0.00017)	-0.00076 (0.00038)	-0.00002 (0.00008)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_et6	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.511 / 0.518	-0.00018 (0.00015)	-0.00060 (0.00036)	-0.00002 (0.00009)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_et6_luo	data/feats	246745836	1389971	2904806	0	1	it_hist_luo	src/features_luo.py	FT+gate+stk*		0.511 / 0.516	-0.00022 (0.00014)	-0.00060 (0.00036)	0.00007 (0.00009)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_et7	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.513 / 0.517	0.00005 (0.00012)	-0.00042 (0.00029)	0.00006 (0.00007)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_et7_luo	data/feats	246745836	1389971	2904806	0	1	it_hist_luo	src/features_luo.py	FT+gate+stk*		0.513 / 0.517	0.00005 (0.00012)	-0.00042 (0.00029)	0.00003 (0.00007)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_et8	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.508 / 0.512	-0.00030 (0.00016)	-0.00092 (0.00030)	-0.00013 (0.00009)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_et8_luo	data/feats	246745836	1389971	2904806	0	1	it_hist_luo	src/features_luo.py	FT+gate+stk*		0.508 / 0.511	-0.00030 (0.00016)	-0.00101 (0.00030)	-0.00011 (0.00012)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_hist_et9	data/feats	246745836	1389971	2904806	0	0	it_hist (non-LUO)	src/features.py	GB		0.505 / 0.503	0.00008 (0.00007)	-0.00017 (0.00021)	-0.00002 (0.00011)	BANNED: same-user later snapshots (CURRENT_STATUS sec 2)
+it_hist_et9_luo	data/feats	246745836	1389971	2904806	0	1	it_hist_luo	src/features_luo.py	FT+gate+stk*		0.505 / 0.503	0.00008 (0.00007)	-0.00025 (0.00021)	-0.00002 (0.00012)	no label leak; non-causal cross-user popularity on train (LEAKAGE-7, SHIFT-1/2); user0 later kept (LEAKAGE-3)
+it_tr_coec	data/feats	246745836	1389971	2904806	0	0	it_tr	src/features.py	FT		0.507 / 0.527	0.00030 (0.00023)	0.00086 (0.00038)	0.00047 (0.00037)	val/test-safe; train rows in-sample (leave-own-row-out only), LEAKAGE detector
+it_tr_coec_gap	data/feats	246745836	1389971	2904806	0	0	it_tr	src/features.py	FT		0.507 / 0.527	0.00030 (0.00023)	0.00067 (0.00035)	0.00047 (0.00037)	val/test-safe; train rows in-sample (leave-own-row-out only), LEAKAGE detector
+it_tr_coec_rk	data/feats	246745836	1389971	2904806	0	0	it_tr	src/features.py	FT		0.507 / 0.527	0.00022 (0.00025)	0.00023 (0.00036)	-0.00007 (0.00017)	val/test-safe; train rows in-sample (leave-own-row-out only), LEAKAGE detector
+it_tr_coec_z	data/feats	246745836	1389971	2904806	0	0	it_tr	src/features.py	FT		0.507 / 0.527	0.00030 (0.00023)	0.00089 (0.00035)	0.00047 (0.00037)	val/test-safe; train rows in-sample (leave-own-row-out only), LEAKAGE detector
+it_tr_ctr	data/feats	246745836	1389971	2904806	0	0	it_tr	src/features.py	FT		0.510 / 0.533	0.00015 (0.00021)	0.00028 (0.00034)	0.00015 (0.00035)	val/test-safe; train rows in-sample (leave-own-row-out only), LEAKAGE detector
+it_tr_pos	data/feats	246745836	1389971	2904806	0	0	it_tr	src/features.py	FT		0.526 / 0.544	0.00023 (0.00014)	-0.00020 (0.00030)	0.00032 (0.00027)	val/test-safe; train rows in-sample (leave-own-row-out only), LEAKAGE detector
+item_norm	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate	log1p	c	0.010	0.00 / 0.00	0.00005 (0.00031)	- / -
+kv64_off	data/feats	3151208	14423	28595	0	0									
+kv64_states	data/feats		2499547x64	4973106x64	0	0									
+kv64_user	data/feats	3151208x64	14423x64	28595x64	0	0									
+maxsim32	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate+stk*	smax32	0.648 / 0.640	-0.00013 (0.00021)	-0.00033 (0.00034)	-0.00008 (0.00016)	detector clean (skew +0.000, raw -0.012)
+maxsim32_gap	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate		0.648 / 0.640	-0.00013 (0.00021)	-0.00054 (0.00033)	-0.00008 (0.00016)	detector clean (skew +0.000, raw -0.012)
+maxsim32_rk	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate		0.648 / 0.640	-0.00021 (0.00027)	-0.00040 (0.00036)	-0.00003 (0.00017)	detector clean (skew -0.000, raw -0.012)
+maxsim32_z	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate		0.648 / 0.640	-0.00013 (0.00021)	-0.00040 (0.00032)	-0.00008 (0.00016)	detector clean (skew +0.000, raw -0.012)
+meansim32	data/feats	246745836	1389971	2904806	0	0	emb	src/features.py	GB+gate	smean(all K)	0.621 / 0.618	-0.00015 (0.00011)	-0.00040 (0.00035)	-0.00014 (0.00018)	detector clean (skew +0.005, raw -0.006)
+pre2_fe	data/feats	246745836	1389971	2904806	0	0	pre2	pretrain/assemble.py --prefix pre2_ (val/test), pretrain/assemble_train.py (train)	gate		0.662 / 0.576	-0.00001 (0.00011)	-0.00012 (0.00032)	- (-)	rebuild in progress (train file rewritten 15:07); id_contrib LEAKAGE-2
+pre2_fe_noid	data/feats	246745836	1389971	2904806	0	0	pre2	pretrain/assemble.py --prefix pre2_ (val/test), pretrain/assemble_train.py (train)	gate		0.655 / 0.571	-0.00006 (0.00013)	0.00019 (0.00032)	- (-)	rebuild in progress (train file rewritten 15:07); id_contrib LEAKAGE-2
+pre2_fe_z	data/feats	246745836	1389971	2904806	1	0	pre2	pretrain/assemble.py --prefix pre2_ (val/test), pretrain/assemble_train.py (train)	gate		0.662 / 0.576	-0.00001 (0.00011)	-0.00025 (0.00032)	- (-)	rebuild in progress (train file rewritten 15:07); id_contrib LEAKAGE-2
+pre2_hmax32	data/feats	246745836	1389971	2904806	1	0	pre2	pretrain/assemble.py --prefix pre2_ (val/test), pretrain/assemble_train.py (train)	gate		0.649 / 0.565	-0.00004 (0.00024)	-0.00031 (0.00035)	- (-)	rebuild in progress (train file rewritten 15:07); id_contrib LEAKAGE-2
+pre2_hmax8	data/feats	246745836	1389971	2904806	0	0	pre2	pretrain/assemble.py --prefix pre2_ (val/test), pretrain/assemble_train.py (train)	gate		0.639 / 0.564	-0.00023 (0.00017)	-0.00055 (0.00033)	- (-)	rebuild in progress (train file rewritten 15:07); id_contrib LEAKAGE-2
+pre2_id_contrib	data/feats	246745836	1389971	2904806	0	0	pre2	pretrain/assemble.py --prefix pre2_ (val/test), pretrain/assemble_train.py (train)	gate		0.524 / 0.499	0.00023 (0.00019)	-0.00011 (0.00036)	- (-)	rebuild in progress (train file rewritten 15:07); id_contrib LEAKAGE-2
+pre2_idmax32	data/feats	246745836	1389971	2904806	0	0	pre2	pretrain/assemble.py --prefix pre2_ (val/test), pretrain/assemble_train.py (train)	gate		0.543 / 0.522	0.00027 (0.00016)	-0.00018 (0.00032)	- (-)	rebuild in progress (train file rewritten 15:07); id_contrib LEAKAGE-2
+pre2_new	data/feats	246745836	1389971	2904806	0	0	pre2	pretrain/assemble.py --prefix pre2_ (val/test), pretrain/assemble_train.py (train)	gate		0.661 / 0.576	0.00005 (0.00012)	-0.00013 (0.00032)	- (-)	rebuild in progress (train file rewritten 15:07); id_contrib LEAKAGE-2
+pre2_new_z	data/feats	246745836	1389971	2904806	1	0	pre2	pretrain/assemble.py --prefix pre2_ (val/test), pretrain/assemble_train.py (train)	gate		0.661 / 0.576	0.00005 (0.00012)	0.00016 (0.00028)	- (-)	rebuild in progress (train file rewritten 15:07); id_contrib LEAKAGE-2
+pre2n_fe	data/feats	246745836	1389971	2904806	0	0									
+pre2n_fe_s	data/feats	246745836	1389971	2904806	0	0									
+pre2n_fe_z	data/feats	246745836	1389971	2904806	0	0									
+pre2n_hmax32	data/feats	246745836	1389971	2904806	0	0									
+pre2n_new	data/feats	246745836	1389971	2904806	0	0									
+pre2n_new_s	data/feats	246745836	1389971	2904806	0	0									
+pre2n_new_z	data/feats	246745836	1389971	2904806	0	0									
+pre_fe	data/feats		1389971	2904806	0	1	pre	pretrain/assemble.py	FT		0.663 / -	0.00004 (0.00011)	0.00002 (0.00030)	- (-)	val/test clean; train version quarantined (8b leak)
+pre_fe_noid	data/feats		1389971	2904806	0	1	pre	pretrain/assemble.py	FT		0.656 / -	0.00004 (0.00011)	-0.00013 (0.00031)	- (-)	val/test clean; train version quarantined (8b leak)
+pre_fe_z	data/feats		1389971	2904806	0	1	pre	pretrain/assemble.py	FT		0.663 / -	0.00005 (0.00010)	-0.00043 (0.00028)	- (-)	val/test clean; train version quarantined (8b leak)
+pre_hmax32	data/feats		1389971	2904806	0	0	pre	pretrain/assemble.py	FT		0.649 / -	0.00000 (0.00024)	-0.00034 (0.00035)	- (-)	val/test clean; train version quarantined (8b leak)
+pre_hmax8	data/feats		1389971	2904806	0	0	pre	pretrain/assemble.py	FT		0.639 / -	-0.00007 (0.00015)	-0.00054 (0.00034)	- (-)	val/test clean; train version quarantined (8b leak)
+pre_id_contrib	data/feats		1389971	2904806	0	0	pre	pretrain/assemble.py	FT		0.567 / -	-0.00009 (0.00019)	-0.00014 (0.00036)	- (-)	val/test clean; train version quarantined (8b leak); val/test construction differs (LEAKAGE-2, PSI 3.5)
+pre_id_contrib_v2	data/feats		1389971	2904806	0	1									
+pre_idmax32	data/feats		1389971	2904806	0	1	pre	pretrain/assemble.py	FT		0.543 / -	0.00013 (0.00016)	-0.00002 (0.00033)	- (-)	val/test clean; train version quarantined (8b leak)
+pre_new	data/feats		1389971	2904806	0	1	pre	pretrain/assemble.py	FT		0.661 / -	0.00002 (0.00012)	-0.00016 (0.00031)	- (-)	val/test clean; train version quarantined (8b leak)
+pre_new_z	data/feats		1389971	2904806	0	1	pre	pretrain/assemble.py	FT		0.661 / -	0.00007 (0.00012)	-0.00022 (0.00029)	- (-)	val/test clean; train version quarantined (8b leak)
+prew_fe	data/feats	246745836	1389971	2904806	0	0	prew	pretrain/make_prew.py	XTprew+gate		0.608 / 0.603	-0.00018 (0.00014)	-0.00022 (0.00034)	0.00002 (0.00030)	no label leak; train density skew +0.015 AUC (LEAKAGE-6)
+prew_fe_noid	data/feats	246745836	1389971	2904806	0	0	prew	pretrain/make_prew.py	gate		0.606 / 0.599	-0.00033 (0.00014)	-0.00029 (0.00032)	-0.00005 (0.00022)	no label leak; train density skew +0.015 AUC (LEAKAGE-6)
+prew_fe_z	data/feats	246745836	1389971	2904806	0	0	prew	pretrain/make_prew.py	XTprew+gate		0.608 / 0.603	-0.00018 (0.00014)	0.00027 (0.00033)	0.00002 (0.00030)	no label leak; train density skew +0.015 AUC (LEAKAGE-6)
+prew_hmax32	data/feats	246745836	1389971	2904806	0	0	prew	pretrain/make_prew.py	XTprew+gate		0.603 / 0.592	0.00005 (0.00024)	-0.00039 (0.00037)	-0.00012 (0.00017)	no label leak; train density skew +0.015 AUC (LEAKAGE-6)
+prew_hmax8	data/feats	246745836	1389971	2904806	0	0	prew	pretrain/make_prew.py	gate		0.599 / 0.592	-0.00040 (0.00014)	-0.00055 (0.00035)	-0.00013 (0.00018)	no label leak; train density skew +0.015 AUC (LEAKAGE-6)
+prew_id_contrib	data/feats	246745836	1389971	2904806	0	0	prew	pretrain/make_prew.py	gate		0.554 / 0.548	-0.00011 (0.00025)	0.00006 (0.00038)	-0.00006 (0.00025)	no label leak; train density skew +0.015 AUC (LEAKAGE-6); id_contrib val/test zero-share differs (LEAKAGE-2)
+prew_id_contrib_v2	data/feats	246745836	1389971	2904806	0	0									
+prew_idmax32	data/feats	246745836	1389971	2904806	0	0	prew	pretrain/make_prew.py	gate		0.543 / 0.538	0.00013 (0.00016)	-0.00002 (0.00033)	-0.00006 (0.00010)	no label leak; train density skew +0.015 AUC (LEAKAGE-6)
+prew_new	data/feats	246745836	1389971	2904806	0	0	prew	pretrain/make_prew.py	XTprew+gate		0.608 / 0.603	0.00011 (0.00016)	-0.00007 (0.00035)	-0.00004 (0.00028)	no label leak; train density skew +0.015 AUC (LEAKAGE-6)
+prew_new_z	data/feats	246745836	1389971	2904806	0	0	prew	pretrain/make_prew.py	XTprew+gate		0.608 / 0.603	0.00011 (0.00016)	-0.00052 (0.00034)	-0.00004 (0.00028)	no label leak; train density skew +0.015 AUC (LEAKAGE-6)
+seq_argmax_hpos	data/feats	246745836	1389971	2904806	0	1	seq	feats_v2/seq_/feat_hist.py	FT		0.556 / 0.556	0.00014 (0.00021)	-0.00040 (0.00031)	-0.00005 (0.00014)	detector clean (skew +0.010, raw -0.001)
+seq_cos_last1	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.601 / 0.605	-0.00029 (0.00011)	0.00005 (0.00036)	-0.00012 (0.00019)	detector clean (skew +0.013, raw +0.002)
+seq_cv_invd20	data/feats	246745836	1389971	2904806	1	1	seq_cv	feats_v2/seq_/feat_covis.py	XT+FT+stk*		0.552 / 0.541	-0.00008 (0.00017)	-0.00112 (0.00038)	0.00005 (0.00010)	detector clean (skew -0.000, raw -0.012)
+seq_cv_invd20_rk	data/feats	246745836	1389971	2904806	0	1	seq_cv	feats_v2/seq_/feat_rel.py	FT+stk*		0.552 / 0.541	-0.00018 (0.00014)	-0.00014 (0.00033)	-0.00003 (0.00008)	detector clean (skew -0.000, raw -0.012)
+seq_cv_norm	data/feats	246745836	1389971	2904806	1	0	seq_cv	feats_v2/seq_/feat_covis.py	XT+FT+stk*		0.551 / 0.541	-0.00014 (0.00018)	-0.00076 (0.00037)	0.00002 (0.00007)	detector clean (skew -0.000, raw -0.012)
+seq_cv_pop	data/feats	246745836	1389971	2904806	1	1	seq_cv	feats_v2/seq_/feat_covis.py	XT+FT+stk*		0.551 / 0.547	-0.00013 (0.00019)	-0.00043 (0.00033)	-0.00008 (0.00008)	detector clean (skew +0.013, raw +0.001)
+seq_dcos_deep	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.548 / 0.547	-0.00006 (0.00010)	-0.00041 (0.00035)	0.00000 (0.00006)	detector clean (skew +0.009, raw -0.003)
+seq_dcos_hl2	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.627 / 0.628	-0.00013 (0.00011)	-0.00023 (0.00034)	-0.00009 (0.00021)	detector clean (skew +0.009, raw -0.003)
+seq_dcos_hl2_rk	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_rel.py	none		0.628 / 0.629	-0.00013 (0.00018)	-0.00059 (0.00033)	-0.00006 (0.00020)	detector clean (skew +0.009, raw -0.003)
+seq_dcos_nt_hl10	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.586 / 0.580	-0.00044 (0.00018)	-0.00043 (0.00031)	-0.00001 (0.00012)	detector clean (skew +0.003, raw -0.009)
+seq_dcos_rep	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.581 / 0.576	-0.00021 (0.00016)	-0.00048 (0.00035)	0.00002 (0.00010)	detector clean (skew +0.005, raw -0.007)
+seq_dcos_s1	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.620 / 0.620	-0.00022 (0.00017)	-0.00053 (0.00035)	-0.00003 (0.00020)	detector clean (skew +0.008, raw -0.003)
+seq_dcos_s2	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.581 / 0.582	-0.00012 (0.00016)	-0.00075 (0.00037)	-0.00025 (0.00015)	detector clean (skew +0.008, raw -0.004)
+seq_dcos_t1_hl5	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.627 / 0.631	-0.00018 (0.00018)	-0.00038 (0.00033)	-0.00016 (0.00022)	detector clean (skew +0.011, raw -0.001)
+seq_dcos_t1_hl5_z	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_rel.py	none		0.627 / 0.631	-0.00018 (0.00018)	-0.00030 (0.00033)	-0.00016 (0.00022)	detector clean (skew +0.011, raw -0.001)
+seq_dmax_hl10	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.629 / 0.632	-0.00032 (0.00012)	-0.00059 (0.00034)	-0.00014 (0.00018)	detector clean (skew +0.009, raw -0.003)
+seq_max2_gap	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.503 / 0.503	0.00013 (0.00016)	-0.00032 (0.00038)	-0.00003 (0.00012)	detector clean (skew +0.011, raw -0.001)
+seq_max_all	data/feats	246745836	1389971	2904806	0	1	seq	feats_v2/seq_/feat_hist.py	FT		0.645 / 0.634	-0.00029 (0.00024)	-0.00026 (0.00034)	-0.00011 (0.00014)	detector clean (skew -0.002, raw -0.013)
+seq_max_all_rk	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_rel.py	none		0.645 / 0.634	-0.00001 (0.00030)	0.00011 (0.00037)	-0.00014 (0.00014)	detector clean (skew -0.002, raw -0.014)
+seq_max_all_z	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_rel.py	none		0.645 / 0.634	-0.00029 (0.00024)	-0.00014 (0.00032)	-0.00011 (0.00014)	detector clean (skew -0.002, raw -0.013)
+seq_max_new8	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.635 / 0.634	-0.00006 (0.00015)	-0.00034 (0.00035)	-0.00008 (0.00018)	detector clean (skew +0.004, raw -0.007)
+seq_max_nt	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.600 / 0.588	-0.00015 (0.00024)	-0.00021 (0.00038)	-0.00002 (0.00011)	detector clean (skew -0.004, raw -0.015)
+seq_max_old	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.602 / 0.590	-0.00018 (0.00013)	0.00003 (0.00034)	-0.00000 (0.00009)	detector clean (skew -0.002, raw -0.014)
+seq_max_s1	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.631 / 0.624	0.00008 (0.00015)	-0.00048 (0.00034)	-0.00014 (0.00016)	detector clean (skew +0.003, raw -0.009)
+seq_max_t1	data/feats	246745836	1389971	2904806	0	0	seq	feats_v2/seq_/feat_hist.py	none		0.639 / 0.631	-0.00005 (0.00018)	-0.00054 (0.00034)	-0.00012 (0.00013)	detector clean (skew +0.001, raw -0.010)
+seq_top3	data/feats	246745836	1389971	2904806	0	1	seq	feats_v2/seq_/feat_hist.py	FT		0.645 / 0.636	-0.00035 (0.00022)	-0.00030 (0.00034)	-0.00013 (0.00016)	detector clean (skew -0.001, raw -0.012)
+tm_hcos	data/feats	246745836	1389971	2904806	0	0									
+tm_hsin	data/feats	246745836	1389971	2904806	0	0									
+tm_weekend	data/feats	246745836	1389971	2904806	0	0									
+trd_dsr_s6h	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.527 / 0.514	0.00006 (0.00020)	-0.00012 (0.00035)	-0.00009 (0.00010)	detector clean (skew -0.000, raw -0.012)
+trd_dsr_sday	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.537 / 0.521	-0.00013 (0.00020)	-0.00026 (0.00034)	-0.00014 (0.00009)	detector clean (skew -0.006, raw -0.017)
+trd_ex_s6h	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.501 / 0.500	-0.00003 (0.00008)	-0.00004 (0.00021)	0.00001 (0.00003)	detector clean (skew +0.011, raw -0.000)
+trd_ex_sday	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.502 / 0.502	0.00002 (0.00014)	-0.00003 (0.00027)	-0.00002 (0.00004)	detector clean (skew +0.011, raw -0.001)
+trd_kde_e1_s6h	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.529 / 0.537	0.00006 (0.00015)	-0.00006 (0.00033)	-0.00005 (0.00011)	detector clean (skew +0.019, raw +0.007)
+trd_kde_e1_sday	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.534 / 0.541	-0.00015 (0.00013)	-0.00038 (0.00035)	-0.00007 (0.00012)	detector clean (skew +0.018, raw +0.006)
+trd_kde_s6h	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.528 / 0.535	0.00003 (0.00014)	-0.00024 (0.00033)	-0.00006 (0.00011)	detector clean (skew +0.019, raw +0.007)
+trd_kde_sday	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.532 / 0.539	-0.00015 (0.00014)	0.00010 (0.00033)	-0.00014 (0.00012)	detector clean (skew +0.017, raw +0.006)
+trd_max_s6h	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.527 / 0.528	-0.00012 (0.00017)	-0.00006 (0.00035)	-0.00010 (0.00012)	detector clean (skew +0.012, raw +0.001)
+trd_max_sday	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.531 / 0.529	0.00004 (0.00016)	0.00045 (0.00036)	-0.00014 (0.00012)	detector clean (skew +0.007, raw -0.004)
+trd_n85_s6h	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.523 / 0.524	-0.00038 (0.00016)	-0.00010 (0.00030)	-0.00001 (0.00009)	detector clean (skew +0.012, raw +0.000)
+trd_n85_sday	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.534 / 0.534	-0.00019 (0.00014)	-0.00061 (0.00032)	-0.00005 (0.00011)	detector clean (skew +0.009, raw -0.003)
+trd_n95_e1_s6h	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.503 / 0.503	-0.00031 (0.00013)	-0.00049 (0.00026)	0.00006 (0.00009)	detector clean (skew +0.011, raw -0.001)
+trd_n95_e1_sday	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.509 / 0.508	0.00004 (0.00015)	0.00000 (0.00025)	-0.00002 (0.00008)	detector clean (skew +0.010, raw -0.002)
+trd_n95_s6h	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.504 / 0.503	-0.00040 (0.00015)	-0.00075 (0.00029)	0.00001 (0.00010)	detector clean (skew +0.011, raw -0.000)
+trd_n95_sday	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.510 / 0.509	-0.00011 (0.00017)	-0.00040 (0.00027)	-0.00007 (0.00010)	detector clean (skew +0.010, raw -0.002)
+trd_skde_s6h	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.519 / 0.532	-0.00016 (0.00016)	-0.00008 (0.00037)	-0.00001 (0.00010)	detector: skew +0.024, raw +0.013 (see findings)
+trd_skde_sday	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.521 / 0.535	-0.00018 (0.00015)	0.00012 (0.00037)	-0.00010 (0.00009)	detector: skew +0.024, raw +0.013 (see findings)
+trd_sn95_s6h	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.501 / 0.505	-0.00010 (0.00014)	-0.00027 (0.00028)	-0.00002 (0.00010)	detector clean (skew +0.014, raw +0.002)
+trd_sn95_sday	data/feats	246745836	1389971	2904806	0	0	trd	feats_v2/trd/build_emb.py	none		0.504 / 0.510	-0.00009 (0.00016)	0.00013 (0.00030)	-0.00013 (0.00010)	detector clean (skew +0.016, raw +0.005)
+tte_c_ctr	data/feats	246745836	1389971	2904806	0	0	tte	src/features_tte.py	GB+gate		0.533 / 0.534	-0.00002 (0.00019)	-0.00039 (0.00030)	-0.00001 (0.00010)	train: strictly earlier days (expanding window); val/test: all train
+tte_it_coec	data/feats	246745836	1389971	2904806	0	0	tte	src/features_tte.py	GB+gate		0.507 / 0.514	0.00035 (0.00023)	0.00027 (0.00035)	0.00007 (0.00025)	train: strictly earlier days (expanding window); val/test: all train
+tte_it_ctr	data/feats	246745836	1389971	2904806	0	0	tte	src/features_tte.py	GB+gate		0.510 / 0.518	0.00015 (0.00021)	0.00028 (0.00034)	0.00015 (0.00025)	train: strictly earlier days (expanding window); val/test: all train
+tte_it_imp	data/feats	246745836	1389971	2904806	0	0	tte	src/features_tte.py	GB+gate		0.534 / 0.528	0.00019 (0.00022)	-0.00026 (0.00037)	0.00018 (0.00017)	train: strictly earlier days (expanding window); val/test: all train
+tte_it_pos	data/feats	246745836	1389971	2904806	0	0	tte	src/features_tte.py	GB+gate		0.526 / 0.526	0.00023 (0.00014)	-0.00020 (0.00030)	-0.00002 (0.00015)	train: strictly earlier days (expanding window); val/test: all train
+tte_u_coec	data/feats	246745836	1389971	2904806	0	0	tte	src/features_tte.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00058 (0.00028)	0.00000 (0.00000)	train: strictly earlier days (expanding window); val/test: all train
+tte_u_ctr	data/feats	246745836	1389971	2904806	0	0	tte	src/features_tte.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00016 (0.00025)	0.00000 (0.00000)	train: strictly earlier days (expanding window); val/test: all train
+tte_u_imp	data/feats	246745836	1389971	2904806	0	0	tte	src/features_tte.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00020 (0.00025)	0.00000 (0.00000)	train: strictly earlier days (expanding window); val/test: all train
+tte_uc_ctr	data/feats	246745836	1389971	2904806	0	0	tte	src/features_tte.py	GB+gate		0.507 / 0.505	0.00025 (0.00013)	-0.00075 (0.00032)	-0.00008 (0.00007)	train: strictly earlier days (expanding window); val/test: all train
+tte_uc_imp	data/feats	246745836	1389971	2904806	0	0	tte	src/features_tte.py	GB+gate		0.522 / 0.512	0.00007 (0.00010)	-0.00004 (0.00026)	-0.00003 (0.00004)	train: strictly earlier days (expanding window); val/test: all train
+tte_ui_imp	data/feats	246745836	1389971	2904806	0	0	tte	src/features_tte.py	GB+gate		0.500 / 0.500	0.00007 (0.00008)	-0.00002 (0.00013)	0.00001 (0.00006)	train: strictly earlier days (expanding window); val/test: all train
+tte_ui_pos	data/feats	246745836	1389971	2904806	0	0	tte	src/features_tte.py	GB+gate		0.500 / 0.500	0.00002 (0.00001)	-0.00002 (0.00008)	-0.00000 (0.00000)	train: strictly earlier days (expanding window); val/test: all train
+u_het10_share	data/feats	246745836	1389971	2904806	0	0	u_het	src/features.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00015 (0.00013)	0.00000 (0.00000)	per-feed constant (within-feed AUC n/a)
+u_het1_share	data/feats	246745836	1389971	2904806	0	0	u_het	src/features.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00014 (0.00019)	0.00000 (0.00000)	per-feed constant (within-feed AUC n/a)
+u_het2_share	data/feats	246745836	1389971	2904806	0	0	u_het	src/features.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00012 (0.00023)	0.00000 (0.00000)	per-feed constant (within-feed AUC n/a)
+u_het3_share	data/feats	246745836	1389971	2904806	0	0	u_het	src/features.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00018 (0.00019)	0.00000 (0.00000)	per-feed constant (within-feed AUC n/a)
+u_het4_share	data/feats	246745836	1389971	2904806	0	0	u_het	src/features.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00023 (0.00020)	0.00000 (0.00000)	per-feed constant (within-feed AUC n/a)
+u_het5_share	data/feats	246745836	1389971	2904806	0	0	u_het	src/features.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00028 (0.00021)	0.00000 (0.00000)	per-feed constant (within-feed AUC n/a)
+u_het6_share	data/feats	246745836	1389971	2904806	0	0	u_het	src/features.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00009 (0.00021)	0.00000 (0.00000)	per-feed constant (within-feed AUC n/a)
+u_het7_share	data/feats	246745836	1389971	2904806	0	0	u_het	src/features.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00000 (0.00019)	0.00000 (0.00000)	per-feed constant (within-feed AUC n/a)
+u_het8_share	data/feats	246745836	1389971	2904806	0	0	u_het	src/features.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00017 (0.00021)	0.00000 (0.00000)	per-feed constant (within-feed AUC n/a)
+u_het9_share	data/feats	246745836	1389971	2904806	0	0	u_het	src/features.py	GB+gate		0.500 / 0.500	0.00000 (0.00000)	-0.00002 (0.00021)	0.00000 (0.00000)	per-feed constant (within-feed AUC n/a)
+u_tr_ctr	data/feats	246745836	1389971	2904806	0	0	u_tr	src/features.py	FT		0.500 / 0.500	0.00000 (0.00000)	-0.00007 (0.00024)	0.00000 (0.00000)	val/test-safe; train rows include own label; user0 = a user (SHIFT-6)
+u_tr_feeds	data/feats	246745836	1389971	2904806	0	0	u_tr	src/features.py	FT		0.500 / 0.500	0.00000 (0.00000)	-0.00019 (0.00019)	0.00000 (0.00000)	val/test-safe; train rows include own label; user0 = a user (SHIFT-6)
+xp_ctr_c	data/feats	246745836	1389971	2904806	0	0									
+xp_imp_c50	data/feats	246745836	1389971	2904806	0	0									
+ctx_nd_c80	data/feats_new		1389971	2904806	0	0									
+ctx_nd_c90	data/feats_new		1389971	2904806	0	0									
+ctx_nd_c95	data/feats_new		1389971	2904806	0	0									
+ctx_nd_dupb_f1	data/feats_new		1389971	2904806	0	0									
+ctx_nd_dupb_h	data/feats_new		1389971	2904806	0	0									
+ctx_nd_dupb_u	data/feats_new		1389971	2904806	0	0									
+ctx_nd_mean	data/feats_new		1389971	2904806	0	0									
+hz_lag	data/feats_new	246745836			0	0									
+hzcv_censored	data/feats_new	246745836	1389971	2904806	0	0									
+hzcv_expo_slog	data/feats_new	246745836	1389971	2904806	0	0									
+hzcv_stale_d	data/feats_new	246745836	1389971	2904806	0	0									
+it_hist_all_luo_zsl	data/feats_new		1389971	2904806	0	1									
+it_hist_hz_all	data/feats_new	246745836	1389971	2904806	0	0									
+it_hist_hz_et1	data/feats_new	246745836	1389971	2904806	0	0									
+it_hist_hz_et2	data/feats_new	246745836	1389971	2904806	0	0									
+it_hist_hz_et3	data/feats_new	246745836	1389971	2904806	0	0									
+it_hist_hz_et4	data/feats_new	246745836	1389971	2904806	0	0									
+ixh_df1	data/feats_new	246745836	1389971	2904806	0	0									
+ixh_dlogM	data/feats_new	246745836	1389971	2904806	0	0									
+ixh_good	data/feats_new	246745836	1389971	2904806	0	0									
+ixh_has	data/feats_new	246745836	1389971	2904806	0	0									
+ixh_ln	data/feats_new	246745836	1389971	2904806	0	0									
+ixh_lpos	data/feats_new	246745836	1389971	2904806	0	0									
+ixh_mf1	data/feats_new	246745836	1389971	2904806	0	0									
+ixh_mlogM	data/feats_new	246745836	1389971	2904806	0	0									
+pre2_fe_s	data/feats_new	246745836	1389971	2904806	1	0									
+pre2_new_s	data/feats_new	246745836	1389971	2904806	1	0									
+pre_hmax32_c	data/feats_new		1389971	2904806	0	1									
+pre_hmax32_sent	data/feats_new		1389971	2904806	0	1									
+pre_hmax8_c	data/feats_new		1389971	2904806	0	1									
+pre_hmax8_sent	data/feats_new		1389971	2904806	0	0									
+pre_idmax32_has	data/feats_new		1389971	2904806	0	1									
+prew_fe_c	data/feats_new	246745836	1389971	2904806	0	0									
+prew_fe_s	data/feats_new	246745836	1389971	2904806	0	0									
+prew_fe_wrk	data/feats_new	246745836	1389971	2904806	0	0									
+prew_hmax32_wrk	data/feats_new	246745836	1389971	2904806	0	0									
+prew_new_c	data/feats_new	246745836	1389971	2904806	0	0									
+prew_new_s	data/feats_new	246745836	1389971	2904806	0	0									
+prew_new_wrk	data/feats_new	246745836	1389971	2904806	0	0									
+seq_cvlag_invd20	data/feats_new	246745836	1389971	2904806	0	0									
+seq_cvlag_norm	data/feats_new	246745836	1389971	2904806	0	0									
+seq_cvlag_pop	data/feats_new	246745836	1389971	2904806	0	0									
+src_censored	data/feats_new	246745836	1389971	2904806	0	0									
+src_expo_h	data/feats_new	246745836	1389971	2904806	0	0									
+src_expo_slog	data/feats_new	246745836	1389971	2904806	0	0									
+ud_cos_prev	data/feats_new		1389971	2904806	0	0									
+ud_drift	data/feats_new		1389971	2904806	0	0									
+ud_drift_fz	data/feats_new		1389971	2904806	0	0									
+ud_gap_l	data/feats_new		1389971	2904806	0	0									
+ud_has	data/feats_new		1389971	2904806	0	0									

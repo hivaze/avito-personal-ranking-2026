@@ -1,0 +1,47 @@
+== flag-off parity, lab/nn_x/w5/train.py vs the copy (flags off): parity_w5 vs parity_copy, variant w5_smoke_e10_kd05w192_s951 (smoke recipe, seed 951, GPU N)
+  log lines: 22 vs 22; differing lines 8
+    parity_w5  : step 25/72 loss 4.1156 val_ndcg 0.31099 holdout_ndcg 0.24858 lr 1.00e-04 <min>
+    parity_copy: step 25/72 loss 4.1156 val_ndcg 0.31096 holdout_ndcg 0.24859 lr 1.00e-04 <min>
+    parity_w5  : wave-5 CLIPLOG (pre-clip grad norm, clip 1.0): warmup n 50 clipped 0.460 median 0.862 p90 2.390; aux/main grad-norm ratio (median of last 5 splits) 0.055
+    parity_copy: wave-5 CLIPLOG (pre-clip grad norm, clip 1.0): warmup n 50 clipped 0.460 median 0.862 p90 2.391; aux/main grad-norm ratio (median of last 5 splits) 0.055
+  history (step, sampled loss, val, holdout): [(25, 4.1155805587768555, 0.31099198391299027, 0.24858015589951893), (50, 0.0, 0.33154649009668463, 0.26311171790453325), (72, 3.4151811599731445, 0.3494621684378649, 0.27457837624282266)]
+                                          vs [(25, 4.1155805587768555, 0.31095903166091177, 0.24859403006706265), (50, 0.0, 0.3315453627529292, 0.2631058458979943), (72, 3.4151735305786133, 0.34951462155510726, 0.2745708742340976)]
+  checkpoints / preds removed after the comparison: see logs/smoke_parity_recorded.txt
+== GPU run-to-run control, lab/nn_x/w5/train.py twice (same args): parity_w5 vs parity_w5b, variant w5_smoke_e10_kd05w192_s951 (smoke recipe, seed 951, GPU N)
+  log lines: 22 vs 22; differing lines 9
+    parity_w5  : step 25/72 loss 4.1156 val_ndcg 0.31099 holdout_ndcg 0.24858 lr 1.00e-04 <min>
+    parity_w5b : step 25/72 loss 4.1156 val_ndcg 0.31098 holdout_ndcg 0.24859 lr 1.00e-04 <min>
+    parity_w5  : step 50/72 loss 0.0000 val_ndcg 0.33155 holdout_ndcg 0.26311 lr 2.00e-04 <min>
+    parity_w5b : step 50/72 loss 0.0000 val_ndcg 0.33155 holdout_ndcg 0.26314 lr 2.00e-04 <min>
+  history (step, sampled loss, val, holdout): [(25, 4.1155805587768555, 0.31099198391299027, 0.24858015589951893), (50, 0.0, 0.33154649009668463, 0.26311171790453325), (72, 3.4151811599731445, 0.3494621684378649, 0.27457837624282266)]
+                                          vs [(25, 4.1155805587768555, 0.31098273040752955, 0.2485942380473327), (50, 0.0, 0.33155157428241694, 0.2631365088353007), (72, 3.415173053741455, 0.3494757801152708, 0.27455528202781887)]
+  checkpoints / preds removed after the comparison: see logs/smoke_parity_recorded.txt
+== GPU run-to-run control, the copy twice (flags off): parity_copy vs ref_diag, variant w5_smoke_e10_kd05w192_s951 (smoke recipe, seed 951, GPU N)
+  log lines: 22 vs 22; differing lines 8
+    parity_copy: step 25/72 loss 4.1156 val_ndcg 0.31096 holdout_ndcg 0.24859 lr 1.00e-04 <min>
+    ref_diag   : step 25/72 loss 4.1156 val_ndcg 0.31102 holdout_ndcg 0.24860 lr 1.00e-04 <min>
+    parity_copy: step 50/72 loss 0.0000 val_ndcg 0.33155 holdout_ndcg 0.26311 lr 2.00e-04 <min>
+    ref_diag   : step 50/72 loss 0.0000 val_ndcg 0.33154 holdout_ndcg 0.26315 lr 2.00e-04 <min>
+  history (step, sampled loss, val, holdout): [(25, 4.1155805587768555, 0.31095903166091177, 0.24859403006706265), (50, 0.0, 0.3315453627529292, 0.2631058458979943), (72, 3.4151735305786133, 0.34951462155510726, 0.2745708742340976)]
+                                          vs [(25, 4.1155805587768555, 0.31101814082125007, 0.24860430256630864), (50, 0.0, 0.3315425083132416, 0.26314728991324265), (72, 3.4151663780212402, 0.3494190701101614, 0.27458229071674434)]
+  checkpoints / preds removed after the comparison: see logs/smoke_parity_recorded.txt
+
+== warm step rate (segments after the first eval: steps 25-72, CUDA-synchronised, evals excluded; tag 'rate', run back to back)
+  ref       : 47 warm steps, 12.209 steps/s, step-time ratio vs ref 1.000; peak step alloc 42.8 GB (resident 38.39, overhead 4.41), peak reserved 58.3 GB; loss last10 2.4605
+  A moe-ffn : 47 warm steps, 11.753 steps/s, step-time ratio vs ref 1.039; peak step alloc 43.29 GB (resident 38.4, overhead 4.89), peak reserved 58.32 GB; loss last10 2.4591
+  B moe-vo  : 47 warm steps, 11.271 steps/s, step-time ratio vs ref 1.083; peak step alloc 43.65 GB (resident 38.4, overhead 5.26), peak reserved 58.32 GB; loss last10 2.4591
+  C b3ff1   : 47 warm steps, 11.582 steps/s, step-time ratio vs ref 1.054; peak step alloc 43.21 GB (resident 38.39, overhead 4.81), peak reserved 58.34 GB; loss last10 2.4348
+
+== smokes (20K train feeds, 1 epoch = 72 steps, evals every 25 steps; GPU N alone; run_redirect.py MOE_DIAG=1)
+| arm | steps | train s net of evals | steps/s | x ref | peak step alloc GB (resident) | step overhead GB | loss first10 | loss last10 | loss last 25% | val@72 | holdout@72 | params |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| ref (copy, flags off; ref_diag) | 72 | 8.2 | 8.769 | 1.00 | 42.8 (38.39) | 4.41 | 3.8182 | 2.4605 | 3.0327 | 0.34942 | 0.27458 | 2.12M |
+| ref (copy, flags off; parity_copy) | 72 | 8.3 | 8.676 | 0.99 | 52.83 (n/a) | n/a | 3.8182 | 2.4605 | 3.0327 | 0.34951 | 0.27457 | 2.12M |
+| ref (w5 train.py; parity_w5b) | 72 | 8.5 | 8.507 | 0.97 | 42.8 (38.39) | 4.41 | 3.8182 | 2.4605 | 3.0327 | 0.34948 | 0.27456 | 2.12M |
+| A moe-ffn | 72 | 8.8 | 8.145 | 0.93 | 43.29 (38.4) | 4.89 | 3.8183 | 2.4591 | 3.0313 | 0.35004 | 0.27492 | 2.71M |
+    w12/moe: 4 routed modules (cross.0.moe, cross.1.moe, sets.0.moe, sets.1.moe); total params 2,714,816, active per token 2,272,448; routers 4 (6,144 params) -> AdamW no decay; expert stacks 8 (589,824 params) -> MuonBatched; quantile balancer after every optimiser step; cfg {'moe_ffn': 8, 'moe_w': 48, 'moe_k': 2, 'moe_scale': 2.0, 'moe_xdrop': 0.1, 'moe_eta': 0.1}
+    w12/moe step 72: min load entropy 0.993, max dead share 0.00 | cross.0.moe:ffn ent 0.993 maxmin 1.87 dead 0.00 b [-0.115,-0.007] rms 0.025 | cross.1.moe:ffn ent 0.995 maxmin 1.48 dead 0.00 b [-0.181,+0.001] rms 0.025 | sets.0.moe:ffn ent 0.996 maxmin 1.61 dead 0.00 b [-0.247,+0.034] rms 0.025 | sets.1.moe:ffn ent 0.994 maxmin 1.67 dead 0.00 b [-0.165,-0.004] rms 0.023
+| B moe-vo | 72 | 9.0 | 7.996 | 0.91 | 43.65 (38.4) | 5.26 | 3.8184 | 2.4591 | 3.0314 | 0.35010 | 0.27504 | 2.72M |
+    w12/moe: 2 routed modules (cross.0.attn.vo, cross.1.attn.vo); total params 2,720,960, active per token 2,426,048; routers 4 (12,288 params) -> AdamW no decay; expert stacks 4 (589,824 params) -> MuonBatched; quantile balancer after every optimiser step; cfg {'vo_moe': 4, 'vo_k': 2, 'vo_eta': 0.1}
+    w12/moe step 72: min load entropy 0.999, max dead share 0.00 | cross.0.vo:V ent 0.999 maxmin 1.18 dead 0.00 b [-0.204,+0.002] rms 0.068 | cross.0.vo:O ent 0.999 maxmin 1.17 dead 0.00 b [-0.168,-0.002] rms 0.050 | cross.1.vo:V ent 0.999 maxmin 1.14 dead 0.00 b [-0.194,+0.008] rms 0.068 | cross.1.vo:O ent 0.999 maxmin 1.10 dead 0.00 b [-0.135,-0.006] rms 0.052
+| C b3ff1 | 72 | 8.6 | 8.341 | 0.95 | 43.21 (38.39) | 4.81 | 3.7491 | 2.4348 | 2.9999 | 0.36351 | 0.28253 | 2.27M |

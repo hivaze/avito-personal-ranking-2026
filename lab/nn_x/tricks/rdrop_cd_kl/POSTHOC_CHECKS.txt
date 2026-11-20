@@ -1,0 +1,5 @@
+POST-HOC INSTRUMENT CHECKS declared at: 2026-11-13 04:48:29 UTC (after the primary verdict; INFO ONLY, cannot change it)
+On checkpoint (a) w5_cd_m02ref_r101.pt, same code path as probe_kl.py:
+  1. eval-vs-eval: two model.eval() passes on the same 64 batches (expect symKL ~ 0: the measured KL is dropout, not kernel noise).
+  2. fp32: the train-vs-train pair WITHOUT bf16 autocast (expect close to the bf16 value: bf16 does not inflate the KL).
+  3. replicate: batch seed 2026, torch seed 7 (64 fresh batches, fresh masks), bf16, train-vs-train (stability of S).

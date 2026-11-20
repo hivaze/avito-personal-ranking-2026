@@ -1,0 +1,2301 @@
+{
+ "checks": [
+  {
+   "name": "screen.sh base reproduces every sx_base_s23 arg (except variant / no_test)",
+   "ok": true,
+   "info": "identical"
+  },
+  {
+   "name": "every r6/r7 model flag at its OFF default",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "optimiser flags at nn/ defaults",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "screen.sh muon_in: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'muon_inputs': 'adamw'}"
+  },
+  {
+   "name": "screen.sh batch2s: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'cand_budget': 65536, 'max_feeds': 1024, 'lr': 0.001414, 'warmup': 250, 'eval_every': 500, 'muon_momentum': 0.9, 'adam_betas': '0.8,0.96'}"
+  },
+  {
+   "name": "screen.sh resdrop0: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'res_drop': 0.0, 'drop': 0.1, 'attn_drop': -1.0}"
+  },
+  {
+   "name": "screen.sh pbld: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'pbld': 16}"
+  },
+  {
+   "name": "screen.sh hc4: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'hc': 4}"
+  },
+  {
+   "name": "screen.sh dwa: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'dwa': True}"
+  },
+  {
+   "name": "screen.sh diff2: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'diff_attn': 'cross'}"
+  },
+  {
+   "name": "screen.sh swiglu: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'ffn': 'swiglu'}"
+  },
+  {
+   "name": "screen.sh derf: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'norm': 'derf'}"
+  },
+  {
+   "name": "screen.sh hl2: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'hist_extra': 1}"
+  },
+  {
+   "name": "screen.sh periln: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'periln': True}"
+  },
+  {
+   "name": "screen.sh ftok: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'ftok': 8}"
+  },
+  {
+   "name": "screen.sh postln: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'postln': True}"
+  },
+  {
+   "name": "screen.sh a4u: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'retr_uniq': True}"
+  },
+  {
+   "name": "screen.sh wd01: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'wd': 0.1}"
+  },
+  {
+   "name": "screen.sh cset: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'cretr_m': 8, 'set_sim_bias': True}"
+  },
+  {
+   "name": "screen.sh typed: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'typed_cross': True}"
+  },
+  {
+   "name": "screen.sh adrop0: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'attn_drop': 0.0}"
+  },
+  {
+   "name": "screen.sh a4w: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'retr_m': 32, 'retr_prod': True}"
+  },
+  {
+   "name": "screen.sh drop0: flags parse as specified, nothing else changes",
+   "ok": true,
+   "info": "{'drop': 0.0}"
+  },
+  {
+   "name": "screen.sh e10 base reproduces the F7 recipe (v17_pre2s_s101 args, except variant/seed/save_steps)",
+   "ok": true,
+   "info": "identical"
+  },
+  {
+   "name": "screen.sh batch2s e10: lr 2.83e-3, eval 1250, save_steps halved",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "screen.sh wd01 e10: wd 0.05 (lr*wd kept)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flag-off r7 cfg == nn/ cfg",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flag-off global RNG state after construction",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flag-off r7 state_dict == nn/ (keys, order and values)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flag-off parameter order == nn/ (optimiser group order)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "muon_in: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 0 (0 params) rng_same True"
+  },
+  {
+   "name": "muon_in: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "batch2s: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 0 (0 params) rng_same True"
+  },
+  {
+   "name": "batch2s: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "resdrop0: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 0 (0 params) rng_same True"
+  },
+  {
+   "name": "resdrop0: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['res_drop']"
+  },
+  {
+   "name": "pbld: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 5 (88504 params) rng_same True"
+  },
+  {
+   "name": "pbld: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['pbld']"
+  },
+  {
+   "name": "hc4: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 72 (7376 params) rng_same True"
+  },
+  {
+   "name": "hc4: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['hc']"
+  },
+  {
+   "name": "dwa: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 4 (14 params) rng_same True"
+  },
+  {
+   "name": "dwa: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['dwa']"
+  },
+  {
+   "name": "diff2: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 10 (34064 params) rng_same True"
+  },
+  {
+   "name": "diff2: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['diff_attn']"
+  },
+  {
+   "name": "swiglu: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 20 new 30 (328740 params) rng_same True | replaced 20 tensors"
+  },
+  {
+   "name": "swiglu: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['ffn']"
+  },
+  {
+   "name": "derf: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 28 (28 params) rng_same True | replaced 0 tensors"
+  },
+  {
+   "name": "derf: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['norm']"
+  },
+  {
+   "name": "hl2: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 20 (149248 params) rng_same True"
+  },
+  {
+   "name": "hl2: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['hist_extra']"
+  },
+  {
+   "name": "periln: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 20 (2560 params) rng_same True"
+  },
+  {
+   "name": "periln: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['periln']"
+  },
+  {
+   "name": "ftok: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 40 (181248 params) rng_same True"
+  },
+  {
+   "name": "ftok: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['ftok', 'ftok_groups']"
+  },
+  {
+   "name": "ftok: 8 groups partition the 104 inputs, matched to the cvnd_pre2s xt layout",
+   "ok": true,
+   "info": "[15, 30, 13, 5, 5, 7, 20, 9]"
+  },
+  {
+   "name": "postln: baseline init unchanged",
+   "ok": true,
+   "info": "changed 20 missing 0 new 0 (0 params) rng_same True | DeepNorm-scaled tensors 20 (expected 20), exactly beta x nn/ True"
+  },
+  {
+   "name": "postln: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['postln']"
+  },
+  {
+   "name": "a4u: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 1 (1152 params) rng_same True"
+  },
+  {
+   "name": "a4u: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['retr_uniq']"
+  },
+  {
+   "name": "wd01: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 0 (0 params) rng_same True"
+  },
+  {
+   "name": "wd01: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "cset: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 13 (66058 params) rng_same True"
+  },
+  {
+   "name": "cset: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['cretr_m', 'set_sim_bias']"
+  },
+  {
+   "name": "typed: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 0 (0 params) rng_same True"
+  },
+  {
+   "name": "typed: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['typed_cross']"
+  },
+  {
+   "name": "adrop0: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 0 (0 params) rng_same True"
+  },
+  {
+   "name": "adrop0: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['attn_drop']"
+  },
+  {
+   "name": "a4w: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 1 (8192 params) rng_same True"
+  },
+  {
+   "name": "a4w: cfg stores only the non-default keys",
+   "ok": true,
+   "info": "['retr_prod']"
+  },
+  {
+   "name": "eval logits identical (batch S)",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "train-mode loss identical (batch S, dropout on, same seed)",
+   "ok": true,
+   "info": "2.1643023 vs 2.1643023"
+  },
+  {
+   "name": "all gradients bit-identical under deterministic kernels (batch S, math SDPA)",
+   "ok": true,
+   "info": "max|dgrad| r7 vs nn/ 0.00e+00; nn/ rerun 0.00e+00"
+  },
+  {
+   "name": "eval logits identical (batch L)",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "train-mode loss identical (batch L, dropout on, same seed)",
+   "ok": true,
+   "info": "2.8678358 vs 2.8678358"
+  },
+  {
+   "name": "all gradients bit-identical under deterministic kernels (batch L, math SDPA)",
+   "ok": true,
+   "info": "max|dgrad| r7 vs nn/ 0.00e+00; nn/ rerun 0.00e+00"
+  },
+  {
+   "name": "a4u: r7 port == r6 (init state_dict, warm eval logits, train loss)",
+   "ok": true,
+   "info": "sd True eval True loss 2.872923 / 2.872923"
+  },
+  {
+   "name": "cset: r7 port == r6 (init state_dict, warm eval logits, train loss)",
+   "ok": true,
+   "info": "sd True eval True loss 2.866140 / 2.866140"
+  },
+  {
+   "name": "typed: r7 port == r6 (init state_dict, warm eval logits, train loss)",
+   "ok": true,
+   "info": "sd True eval True loss 2.869152 / 2.869152"
+  },
+  {
+   "name": "adrop0: r7 port == r6 (init state_dict, warm eval logits, train loss)",
+   "ok": true,
+   "info": "sd True eval True loss 2.867837 / 2.867837"
+  },
+  {
+   "name": "a4w: r7 port == r6 (init state_dict, warm eval logits, train loss)",
+   "ok": true,
+   "info": "sd True eval True loss 2.868391 / 2.868391"
+  },
+  {
+   "name": "muon_in: fresh init is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "muon_in: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 0"
+  },
+  {
+   "name": "muon_in: warm start is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "muon_in: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "muon_in: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "muon_in: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "muon_in: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.55e+00"
+  },
+  {
+   "name": "muon_in: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "muon_in: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "muon_in: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "0 new tensors; no-grad []; zero-grad new []; loss 2.8692"
+  },
+  {
+   "name": "batch2s: fresh init is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "batch2s: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 0"
+  },
+  {
+   "name": "batch2s: warm start is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "batch2s: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "batch2s: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "batch2s: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "batch2s: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.55e+00"
+  },
+  {
+   "name": "batch2s: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "batch2s: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "batch2s: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "0 new tensors; no-grad []; zero-grad new []; loss 2.8692"
+  },
+  {
+   "name": "resdrop0: fresh init is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "resdrop0: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 0"
+  },
+  {
+   "name": "resdrop0: warm start is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "resdrop0: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "resdrop0: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "resdrop0: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "resdrop0: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.55e+00"
+  },
+  {
+   "name": "resdrop0: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "resdrop0: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "resdrop0: active (train-mode outputs differ at the same seed) and dropout sites as specified",
+   "ok": true,
+   "info": "nn.Dropout p [0.0]; attention-probability p [0.1]"
+  },
+  {
+   "name": "resdrop0: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "0 new tensors; no-grad []; zero-grad new []; loss 2.8626"
+  },
+  {
+   "name": "pbld: fresh init is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "pbld: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 5"
+  },
+  {
+   "name": "pbld: warm start is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "pbld: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "pbld: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "pbld: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "pbld: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 3.80e+00"
+  },
+  {
+   "name": "pbld: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "pbld: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "pbld: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 4.42e-01"
+  },
+  {
+   "name": "pbld: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "5 new tensors; no-grad []; zero-grad new []; loss 2.8751"
+  },
+  {
+   "name": "pbld: zero-init output / static HC tensors get a gradient at the true init",
+   "ok": true,
+   "info": "1 tensors, min |g|_1 1.64e+01"
+  },
+  {
+   "name": "hc4: fresh init is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "hc4: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 72"
+  },
+  {
+   "name": "hc4: warm start is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "hc4: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "hc4: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "hc4: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "hc4: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.55e+00"
+  },
+  {
+   "name": "hc4: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "hc4: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "hc4: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 4.15e-02"
+  },
+  {
+   "name": "hc4: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "72 new tensors; no-grad []; zero-grad new []; loss 2.8692"
+  },
+  {
+   "name": "hc4: zero-init output / static HC tensors get a gradient at the true init",
+   "ok": true,
+   "info": "24 tensors, min |g|_1 1.24e-09"
+  },
+  {
+   "name": "dwa: fresh init is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "dwa: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 4"
+  },
+  {
+   "name": "dwa: warm start is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "dwa: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "dwa: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "dwa: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "dwa: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.55e+00"
+  },
+  {
+   "name": "dwa: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "dwa: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "dwa: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 8.75e-02"
+  },
+  {
+   "name": "dwa: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "4 new tensors; no-grad []; zero-grad new []; loss 2.8697"
+  },
+  {
+   "name": "diff2: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 10"
+  },
+  {
+   "name": "diff2: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "diff2: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "diff2: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 1.91e-06)"
+  },
+  {
+   "name": "diff2: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.94e+00"
+  },
+  {
+   "name": "diff2: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "diff2: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "diff2: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 6.17e-01"
+  },
+  {
+   "name": "diff2: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "10 new tensors; no-grad []; zero-grad new []; loss 2.8688"
+  },
+  {
+   "name": "swiglu: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "swiglu: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "swiglu: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 1.91e-06)"
+  },
+  {
+   "name": "swiglu: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 6.83e+00"
+  },
+  {
+   "name": "swiglu: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "swiglu: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "swiglu: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 3.75e+00"
+  },
+  {
+   "name": "swiglu: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "30 new tensors; no-grad []; zero-grad new []; loss 2.8932"
+  },
+  {
+   "name": "derf: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "derf: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "derf: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "derf: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.14e+00"
+  },
+  {
+   "name": "derf: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "derf: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "derf: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 4.37e+00"
+  },
+  {
+   "name": "derf: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "28 new tensors; no-grad []; zero-grad new []; loss 2.9517"
+  },
+  {
+   "name": "hl2: fresh init is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "hl2: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 20"
+  },
+  {
+   "name": "hl2: warm start is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "hl2: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "hl2: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "hl2: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "hl2: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 5.33e+00"
+  },
+  {
+   "name": "hl2: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "hl2: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "hl2: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 6.77e-02"
+  },
+  {
+   "name": "hl2: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "20 new tensors; no-grad []; zero-grad new []; loss 2.8671"
+  },
+  {
+   "name": "hl2: zero-init output / static HC tensors get a gradient at the true init",
+   "ok": true,
+   "info": "2 tensors, min |g|_1 3.34e-01"
+  },
+  {
+   "name": "periln: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 20"
+  },
+  {
+   "name": "periln: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "periln: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "periln: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "periln: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 5.78e+00"
+  },
+  {
+   "name": "periln: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "periln: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 6.68e-06"
+  },
+  {
+   "name": "periln: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 3.78e+00"
+  },
+  {
+   "name": "periln: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "20 new tensors; no-grad []; zero-grad new []; loss 3.0139"
+  },
+  {
+   "name": "ftok: fresh init is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "ftok: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 40"
+  },
+  {
+   "name": "ftok: warm start is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "ftok: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "ftok: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "ftok: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "ftok: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 5.33e+00"
+  },
+  {
+   "name": "ftok: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "ftok: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "ftok: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 1.46e-01"
+  },
+  {
+   "name": "ftok: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "40 new tensors; no-grad []; zero-grad new []; loss 2.8699"
+  },
+  {
+   "name": "ftok: zero-init output / static HC tensors get a gradient at the true init",
+   "ok": true,
+   "info": "1 tensors, min |g|_1 3.24e+00"
+  },
+  {
+   "name": "postln: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "postln: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "postln: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 3.81e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "postln: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.58e+00"
+  },
+  {
+   "name": "postln: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "postln: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "postln: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 2.39e+00"
+  },
+  {
+   "name": "postln: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "0 new tensors; no-grad []; zero-grad new []; loss 2.9509"
+  },
+  {
+   "name": "a4u: fresh init is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "a4u: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 1"
+  },
+  {
+   "name": "a4u: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "a4u: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "a4u: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 3.81e-06 (unjittered, info: 1.91e-06)"
+  },
+  {
+   "name": "a4u: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.64e+00"
+  },
+  {
+   "name": "a4u: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "a4u: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "a4u: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 1.12e+00"
+  },
+  {
+   "name": "a4u: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "1 new tensors; no-grad []; zero-grad new []; loss 2.8690"
+  },
+  {
+   "name": "a4u: zero-init output / static HC tensors get a gradient at the true init",
+   "ok": true,
+   "info": "1 tensors, min |g|_1 5.94e-02"
+  },
+  {
+   "name": "wd01: fresh init is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "wd01: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 0"
+  },
+  {
+   "name": "wd01: warm start is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "wd01: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "wd01: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "wd01: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "wd01: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.55e+00"
+  },
+  {
+   "name": "wd01: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "wd01: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "wd01: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "0 new tensors; no-grad []; zero-grad new []; loss 2.8692"
+  },
+  {
+   "name": "cset: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 13"
+  },
+  {
+   "name": "cset: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "cset: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "cset: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 1.91e-06)"
+  },
+  {
+   "name": "cset: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 5.18e+00"
+  },
+  {
+   "name": "cset: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "cset: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "cset: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 8.99e-01"
+  },
+  {
+   "name": "cset: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "13 new tensors; no-grad []; zero-grad new []; loss 2.8729"
+  },
+  {
+   "name": "cset: zero-init output / static HC tensors get a gradient at the true init",
+   "ok": true,
+   "info": "1 tensors, min |g|_1 9.05e+00"
+  },
+  {
+   "name": "typed: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 0"
+  },
+  {
+   "name": "typed: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "typed: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "typed: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 1.91e-06)"
+  },
+  {
+   "name": "typed: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.22e+00"
+  },
+  {
+   "name": "typed: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "typed: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "typed: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 1.21e+00"
+  },
+  {
+   "name": "typed: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "0 new tensors; no-grad []; zero-grad new []; loss 2.8662"
+  },
+  {
+   "name": "adrop0: fresh init is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "adrop0: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 0"
+  },
+  {
+   "name": "adrop0: warm start is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "adrop0: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "adrop0: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "adrop0: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 3.81e-06)"
+  },
+  {
+   "name": "adrop0: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.55e+00"
+  },
+  {
+   "name": "adrop0: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "adrop0: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "adrop0: active (train-mode outputs differ at the same seed) and dropout sites as specified",
+   "ok": true,
+   "info": "nn.Dropout p [0.1]; attention-probability p [0.0]"
+  },
+  {
+   "name": "adrop0: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "0 new tensors; no-grad []; zero-grad new []; loss 2.8658"
+  },
+  {
+   "name": "a4w: fresh init is an exact no-op (eval logits bit-identical to nn/)",
+   "ok": true,
+   "info": "max|d| S 0.00e+00 L 0.00e+00"
+  },
+  {
+   "name": "a4w: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new: 1"
+  },
+  {
+   "name": "a4w: logits shape [B, Mx], finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "a4w: valid logits independent of padded candidates / history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "a4w: logits independent of the amount of padding (Mx 64 -> 288, Hx 256 -> 256; tie-free)",
+   "ok": true,
+   "info": "max|d| 1.91e-06 (unjittered, info: 1.91e-06)"
+  },
+  {
+   "name": "a4w: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.59e+00"
+  },
+  {
+   "name": "a4w: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "a4w: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "a4w: active (perturbed new parameters change the eval logits)",
+   "ok": true,
+   "info": "max|d| 7.43e-01"
+  },
+  {
+   "name": "a4w: every used parameter gets a gradient; every new one non-zero; all finite",
+   "ok": true,
+   "info": "1 new tensors; no-grad []; zero-grad new []; loss 2.8686"
+  },
+  {
+   "name": "a4w: zero-init output / static HC tensors get a gradient at the true init",
+   "ok": true,
+   "info": "1 tensors, min |g|_1 3.90e-01"
+  },
+  {
+   "name": "base: 46 Muon matrices (as logged by the F7 / sx runs)",
+   "ok": true,
+   "info": "46"
+  },
+  {
+   "name": "muon_in: Muon 46 -> 41; the 5 input projections move to AdamW decay",
+   "ok": true,
+   "info": "41"
+  },
+  {
+   "name": "pbld: P on Muon; W2 AdamW decay; w1 / b1 / b2 AdamW no-decay",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "hc4: every HC tensor on AdamW no-decay (incl. the 2-D A_r / W_*)",
+   "ok": true,
+   "info": "72"
+  },
+  {
+   "name": "dwa: 4 alpha vectors on AdamW no-decay",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "derf: Derf alpha / s / weight / bias on AdamW no-decay",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "diff2: q2 and lam on Muon (+4 matrices), bias_scale2 no-decay",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "swiglu: gate / up / out separate Muon matrices (46 - 10 + 15 = 51)",
+   "ok": true,
+   "info": "51"
+  },
+  {
+   "name": "muon_in: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite, eval == nn/",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "batch2s: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite, eval == nn/",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "resdrop0: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite, eval == nn/",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "pbld: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite, eval == nn/",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "hc4: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite, eval == nn/",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "dwa: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite, eval == nn/",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "diff2: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "swiglu: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "derf: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "hl2: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite, eval == nn/",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "periln: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "ftok: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite, eval == nn/",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "postln: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "a4u: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "wd01: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite, eval == nn/",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cset: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "typed: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "adrop0: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite, eval == nn/",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "a4w: 65,536-candidate batch (1,024 feeds) runs in eval and train, finite",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "base: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.124 -> 5.884"
+  },
+  {
+   "name": "muon_in: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.124 -> 5.838"
+  },
+  {
+   "name": "batch2s: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.166 -> 5.838"
+  },
+  {
+   "name": "resdrop0: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.123 -> 5.870"
+  },
+  {
+   "name": "pbld: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.125 -> 5.878"
+  },
+  {
+   "name": "hc4: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.124 -> 5.877"
+  },
+  {
+   "name": "dwa: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.124 -> 5.881"
+  },
+  {
+   "name": "diff2: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.123 -> 5.886"
+  },
+  {
+   "name": "swiglu: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.122 -> 5.879"
+  },
+  {
+   "name": "derf: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.116 -> 5.920"
+  },
+  {
+   "name": "hl2: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.122 -> 5.883"
+  },
+  {
+   "name": "periln: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.120 -> 5.864"
+  },
+  {
+   "name": "ftok: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.124 -> 5.879"
+  },
+  {
+   "name": "postln: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.127 -> 5.900"
+  },
+  {
+   "name": "a4u: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.124 -> 5.884"
+  },
+  {
+   "name": "wd01: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.124 -> 5.884"
+  },
+  {
+   "name": "cset: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.122 -> 5.878"
+  },
+  {
+   "name": "typed: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.123 -> 5.884"
+  },
+  {
+   "name": "adrop0: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.125 -> 5.883"
+  },
+  {
+   "name": "a4w: 25 optimiser steps finite and the training loss falls",
+   "ok": true,
+   "info": "6.125 -> 5.885"
+  }
+ ],
+ "params": {
+  "base": 1008512,
+  "muon_in": 1008512,
+  "batch2s": 1008512,
+  "resdrop0": 1008512,
+  "pbld": 1097016,
+  "hc4": 1015888,
+  "dwa": 1008526,
+  "diff2": 1042576,
+  "swiglu": 1007652,
+  "derf": 1008540,
+  "hl2": 1157760,
+  "periln": 1011072,
+  "ftok": 1189760,
+  "postln": 1008512,
+  "a4u": 1009664,
+  "wd01": 1008512,
+  "cset": 1074570,
+  "typed": 1008512,
+  "adrop0": 1008512,
+  "a4w": 1016704
+ },
+ "init_change": {
+  "muon_in": {
+   "fresh init": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "warm start": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ]
+  },
+  "batch2s": {
+   "fresh init": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "warm start": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ]
+  },
+  "resdrop0": {
+   "fresh init": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "warm start": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ]
+  },
+  "pbld": {
+   "fresh init": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "warm start": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ]
+  },
+  "hc4": {
+   "fresh init": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "warm start": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ]
+  },
+  "dwa": {
+   "fresh init": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "warm start": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ]
+  },
+  "diff2": {
+   "fresh init": [
+    [
+     0.04660046100616455,
+     0.010725671425461769
+    ],
+    [
+     0.05461011826992035,
+     0.009761189110577106
+    ]
+   ],
+   "warm start": [
+    [
+     0.6168899536132812,
+     0.08241848647594452
+    ],
+    [
+     0.5895090103149414,
+     0.07842589914798737
+    ]
+   ]
+  },
+  "swiglu": {
+   "fresh init": [
+    [
+     0.2629871368408203,
+     0.0744234025478363
+    ],
+    [
+     0.2439889758825302,
+     0.07256851345300674
+    ]
+   ],
+   "warm start": [
+    [
+     3.753398895263672,
+     0.27770209312438965
+    ],
+    [
+     2.669079303741455,
+     0.30865493416786194
+    ]
+   ]
+  },
+  "derf": {
+   "fresh init": [
+    [
+     0.24374505877494812,
+     0.05330347642302513
+    ],
+    [
+     0.2756866216659546,
+     0.05068504065275192
+    ]
+   ],
+   "warm start": [
+    [
+     4.369457244873047,
+     0.5755102038383484
+    ],
+    [
+     3.0257601737976074,
+     0.7379782199859619
+    ]
+   ]
+  },
+  "hl2": {
+   "fresh init": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "warm start": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ]
+  },
+  "periln": {
+   "fresh init": [
+    [
+     0.4053422808647156,
+     0.09817217290401459
+    ],
+    [
+     0.3788757622241974,
+     0.08987772464752197
+    ]
+   ],
+   "warm start": [
+    [
+     3.7794599533081055,
+     0.41529104113578796
+    ],
+    [
+     2.877732276916504,
+     0.5105351805686951
+    ]
+   ]
+  },
+  "ftok": {
+   "fresh init": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "warm start": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ]
+  },
+  "postln": {
+   "fresh init": [
+    [
+     0.17945018410682678,
+     0.05043293163180351
+    ],
+    [
+     0.1861339807510376,
+     0.046674296259880066
+    ]
+   ],
+   "warm start": [
+    [
+     2.3920440673828125,
+     0.2754705846309662
+    ],
+    [
+     2.3291850090026855,
+     0.30159273743629456
+    ]
+   ]
+  },
+  "a4u": {
+   "fresh init": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "warm start": [
+    [
+     1.1283073425292969,
+     0.03506254777312279
+    ],
+    [
+     0.5498447418212891,
+     0.03260516747832298
+    ]
+   ]
+  },
+  "wd01": {
+   "fresh init": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "warm start": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ]
+  },
+  "cset": {
+   "fresh init": [
+    [
+     0.060289449989795685,
+     0.010265903547406197
+    ],
+    [
+     0.05698828399181366,
+     0.010127697139978409
+    ]
+   ],
+   "warm start": [
+    [
+     0.9652328491210938,
+     0.06374907493591309
+    ],
+    [
+     0.7403240203857422,
+     0.05933067575097084
+    ]
+   ]
+  },
+  "typed": {
+   "fresh init": [
+    [
+     0.05989503860473633,
+     0.009209347888827324
+    ],
+    [
+     0.0582355260848999,
+     0.010886016301810741
+    ]
+   ],
+   "warm start": [
+    [
+     1.1305618286132812,
+     0.12555290758609772
+    ],
+    [
+     1.2087039947509766,
+     0.14983053505420685
+    ]
+   ]
+  },
+  "adrop0": {
+   "fresh init": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "warm start": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ]
+  },
+  "a4w": {
+   "fresh init": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "warm start": [
+    [
+     0.7475337982177734,
+     0.02476147562265396
+    ],
+    [
+     0.3521757125854492,
+     0.025840315967798233
+    ]
+   ]
+  }
+ },
+ "gpu_timing": {
+  "base": {
+   "ms": 84.39590828493237,
+   "rel": 1.0,
+   "peak_gb": 3.334840774536133,
+   "loss_first": 6.12354850769043,
+   "loss_last": 5.883730530738831
+  },
+  "muon_in": {
+   "ms": 83.97508040070534,
+   "rel": 0.9950136458890132,
+   "peak_gb": 3.334970474243164,
+   "loss_first": 6.12354850769043,
+   "loss_last": 5.83840537071228
+  },
+  "batch2s": {
+   "ms": 139.24655597656965,
+   "rel": 1.6499206988383113,
+   "per_sample_rel": 0.8249603494191556,
+   "peak_gb": 6.659700870513916,
+   "loss_first": 6.1664228439331055,
+   "loss_last": 5.838349103927612
+  },
+  "resdrop0": {
+   "ms": 83.89473566785455,
+   "rel": 0.994061647925089,
+   "peak_gb": 3.020066738128662,
+   "loss_first": 6.1229248046875,
+   "loss_last": 5.87044084072113
+  },
+  "pbld": {
+   "ms": 93.10494037345052,
+   "rel": 1.103192586767539,
+   "peak_gb": 3.666990280151367,
+   "loss_first": 6.124848365783691,
+   "loss_last": 5.878032088279724
+  },
+  "hc4": {
+   "ms": 120.92100083827972,
+   "rel": 1.4327827414337853,
+   "peak_gb": 5.327893257141113,
+   "loss_first": 6.12354850769043,
+   "loss_last": 5.8774254322052
+  },
+  "dwa": {
+   "ms": 87.92218891903758,
+   "rel": 1.0417826018555305,
+   "peak_gb": 3.4116134643554688,
+   "loss_first": 6.12354850769043,
+   "loss_last": 5.881052613258362
+  },
+  "diff2": {
+   "ms": 93.68464909493923,
+   "rel": 1.1100615065205148,
+   "peak_gb": 3.5556788444519043,
+   "loss_first": 6.1233344078063965,
+   "loss_last": 5.88629674911499
+  },
+  "swiglu": {
+   "ms": 88.70591782033443,
+   "rel": 1.0510689395136417,
+   "peak_gb": 3.4604339599609375,
+   "loss_first": 6.122457504272461,
+   "loss_last": 5.879302978515625
+  },
+  "derf": {
+   "ms": 89.04410060495138,
+   "rel": 1.0550760388089677,
+   "peak_gb": 4.141841888427734,
+   "loss_first": 6.115514278411865,
+   "loss_last": 5.9200321435928345
+  },
+  "hl2": {
+   "ms": 97.05521678552032,
+   "rel": 1.149999078839798,
+   "peak_gb": 3.9991469383239746,
+   "loss_first": 6.122341632843018,
+   "loss_last": 5.883153200149536
+  },
+  "periln": {
+   "ms": 89.26117280498147,
+   "rel": 1.0576481090010108,
+   "peak_gb": 3.5880813598632812,
+   "loss_first": 6.119725227355957,
+   "loss_last": 5.86391019821167
+  },
+  "ftok": {
+   "ms": 124.01090888306499,
+   "rel": 1.469394801278598,
+   "peak_gb": 4.836989879608154,
+   "loss_first": 6.123895645141602,
+   "loss_last": 5.879199147224426
+  },
+  "postln": {
+   "ms": 84.64445732533932,
+   "rel": 1.0029450366191666,
+   "peak_gb": 3.334596633911133,
+   "loss_first": 6.126748085021973,
+   "loss_last": 5.900440812110901
+  },
+  "a4u": {
+   "ms": 88.51482160389423,
+   "rel": 1.0488046565605507,
+   "peak_gb": 3.3706202507019043,
+   "loss_first": 6.12354850769043,
+   "loss_last": 5.883624076843262
+  },
+  "wd01": {
+   "ms": 84.38838319852948,
+   "rel": 0.9999108358858171,
+   "peak_gb": 3.334596633911133,
+   "loss_first": 6.12354850769043,
+   "loss_last": 5.883853316307068
+  },
+  "cset": {
+   "ms": 92.8167337551713,
+   "rel": 1.0997776508525632,
+   "peak_gb": 3.9543886184692383,
+   "loss_first": 6.122469425201416,
+   "loss_last": 5.87809956073761
+  },
+  "typed": {
+   "ms": 84.27371410652995,
+   "rel": 0.9985521314849781,
+   "peak_gb": 3.334719181060791,
+   "loss_first": 6.123421669006348,
+   "loss_last": 5.883563160896301
+  },
+  "adrop0": {
+   "ms": 83.90147238969803,
+   "rel": 0.9941414707740918,
+   "peak_gb": 3.334596633911133,
+   "loss_first": 6.125178337097168,
+   "loss_last": 5.883266806602478
+  },
+  "a4w": {
+   "ms": 101.62019496783614,
+   "rel": 1.2040891203487278,
+   "peak_gb": 4.611330032348633,
+   "loss_first": 6.124629974365234,
+   "loss_last": 5.884691596031189
+  },
+  "base_again": {
+   "ms": 84.44557106122375,
+   "rel": 1.0005884500481197
+  }
+ },
+ "partition": {
+  "base": {
+   "muon": 46,
+   "decay": 12,
+   "no_decay": 93
+  },
+  "muon_in": {
+   "muon": 41,
+   "decay": 17,
+   "no_decay": 93
+  },
+  "batch2s": {
+   "muon": 46,
+   "decay": 12,
+   "no_decay": 93
+  },
+  "resdrop0": {
+   "muon": 46,
+   "decay": 12,
+   "no_decay": 93
+  },
+  "pbld": {
+   "muon": 47,
+   "decay": 13,
+   "no_decay": 96
+  },
+  "hc4": {
+   "muon": 46,
+   "decay": 12,
+   "no_decay": 165
+  },
+  "dwa": {
+   "muon": 46,
+   "decay": 12,
+   "no_decay": 97
+  },
+  "diff2": {
+   "muon": 50,
+   "decay": 12,
+   "no_decay": 99
+  },
+  "swiglu": {
+   "muon": 51,
+   "decay": 12,
+   "no_decay": 98
+  },
+  "derf": {
+   "muon": 46,
+   "decay": 12,
+   "no_decay": 121
+  },
+  "hl2": {
+   "muon": 53,
+   "decay": 12,
+   "no_decay": 106
+  },
+  "periln": {
+   "muon": 46,
+   "decay": 12,
+   "no_decay": 113
+  },
+  "ftok": {
+   "muon": 62,
+   "decay": 12,
+   "no_decay": 117
+  },
+  "postln": {
+   "muon": 46,
+   "decay": 12,
+   "no_decay": 93
+  },
+  "a4u": {
+   "muon": 46,
+   "decay": 13,
+   "no_decay": 93
+  },
+  "wd01": {
+   "muon": 46,
+   "decay": 12,
+   "no_decay": 93
+  },
+  "cset": {
+   "muon": 51,
+   "decay": 12,
+   "no_decay": 101
+  },
+  "typed": {
+   "muon": 46,
+   "decay": 12,
+   "no_decay": 93
+  },
+  "adrop0": {
+   "muon": 46,
+   "decay": 12,
+   "no_decay": 93
+  },
+  "a4w": {
+   "muon": 47,
+   "decay": 12,
+   "no_decay": 93
+  }
+ },
+ "failed": []
+}

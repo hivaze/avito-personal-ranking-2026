@@ -1,0 +1,57 @@
+MEMBERSHIP (recomputed from train.py rules; label-free)
+  u20a: training feeds 2496456 (fold 0 dropped: 624752), cooldown pool 107273 | u20b: training feeds 3121208, unlabelled 624752, cooldown pool 107273 | u20c: training feeds 3121208, cooldown pool 134118
+  W0S: 11022 feeds | in u20a training 0 | in u20b training 11022, of them unlabelled (teacher-only target, aux weight 0) 11022, in u20b cooldown pool 0 | in u20c training (labelled) 11022, in u20c cooldown pool 0
+  W0L: 26883 feeds | in u20a training 0 | in u20b training 26883, of them unlabelled (teacher-only target, aux weight 0) 26883, in u20b cooldown pool 0 | in u20c training (labelled) 26883, in u20c cooldown pool 17462
+  H0: 5974 feeds | in u20a training 0 | in u20b training 0, of them unlabelled (teacher-only target, aux weight 0) 0, in u20b cooldown pool 0 | in u20c training (labelled) 0, in u20c cooldown pool 0
+  log w5_e10_u20a_s951: w12 xfold 0: 624752 feeds of the fold dropped, 2496456 training feeds || train feeds 2496456, steps/epoch 7871, total steps 78710 || cooldown mix: p=0.02 from step 62968, exploration pool 107273 feeds
+  log w5_e10_u20a_s952: w12 xfold 0: 624752 feeds of the fold dropped, 2496456 training feeds || train feeds 2496456, steps/epoch 7871, total steps 78710 || cooldown mix: p=0.02 from step 62968, exploration pool 107273 feeds
+  log w5_e10_u20b_s951: U20 xfold 0 UNLABELLED: 624752 of 3121208 training feeds get teacher-only targets || train feeds 3121208, steps/epoch 9835, total steps 98350 || cooldown mix: p=0.02 from step 78680, exploration pool 107273 feeds
+  log w5_e10_u20b_s952: U20 xfold 0 UNLABELLED: 624752 of 3121208 training feeds get teacher-only targets || train feeds 3121208, steps/epoch 9835, total steps 98350 || cooldown mix: p=0.02 from step 78680, exploration pool 107273 feeds
+  log w5_e10_u20c_s951: train feeds 3121208, steps/epoch 9835, total steps 98350 || cooldown mix: p=0.02 from step 78680, exploration pool 134118 feeds
+  log w5_e10_u20c_s952: train feeds 3121208, steps/epoch 9835, total steps 98350 || cooldown mix: p=0.02 from step 78680, exploration pool 134118 feeds
+  witness feeds without a positive (the only label-dependent factor of the unlabelled target, train.py l.502): 0
+
+=== SELECTED checkpoints, domain token tr === scored: u20a [951, 952], u20b [], u20c []
+  feeds                            n |  u20a member  pool | B-A member (per seed) ; B-A pool | C-A member ; C-A pool [IN-SAMPLE for C on W0*] | B-C member
+  W0S short, all               11022 | 0.49482 0.49650
+    M 5-9                       1266 | 0.69954 0.70198
+    M 10-19                     1872 | 0.56212 0.56400
+    M 20-34                     3930 | 0.47476 0.47511
+    M 35-49                     3954 | 0.41735 0.42002
+    excl. user-0 bucket        10654 | 0.49358 0.49501
+  W0L long, all                26883 | 0.32044 0.32173
+    in C cooldown pool         17462 | 0.32004 0.32173
+    not in C pool               9421 | 0.32118 0.32172
+    old p>0.9 (holdout-like)    9392 | 0.32252 0.32417
+    M 50-99                     9143 | 0.36302 0.36440
+    M 100-300                  17740 | 0.29849 0.29973
+    excl. user-0 bucket        25806 | 0.31894 0.32023
+  W0S + W0L                    37905 | 0.37115 0.37255
+  H0 fold-0 holdout             5974 | 0.31941 0.31986
+  W1S control (fold 1)         11228 | 0.52733 0.52924
+  W1L control (fold 1)          6000 | 0.34802 0.35009
+  teacher_xf0 (GPU bf16 file, 3 hard-label members that never saw fold 0) NDCG: W0S 0.49489, W0L 0.32085, H0 0.31869
+  mean within-feed corr to the teacher (member mean over seeds): W0S: u20a 0.9721 | W0L: u20a 0.9746 | H0: u20a 0.9744
+  anchor on H0, CPU fp32 minus stored GPU bf16 file, per member: u20a_s951 -0.00022+-0.00023; u20a_s952 +0.00026+-0.00022; 
+
+=== @last checkpoints, domain token tr === scored: u20a [951, 952], u20b [], u20c []
+  feeds                            n |  u20a member  pool | B-A member (per seed) ; B-A pool | C-A member ; C-A pool [IN-SAMPLE for C on W0*] | B-C member
+  W0S short, all               11022 | 0.49519 0.49703
+    M 5-9                       1266 | 0.69895 0.70223
+    M 10-19                     1872 | 0.56158 0.56397
+    M 20-34                     3930 | 0.47558 0.47610
+    M 35-49                     3954 | 0.41802 0.42043
+    excl. user-0 bucket        10654 | 0.49394 0.49556
+  W0L long, all                26883 | 0.32052 0.32198
+    in C cooldown pool         17462 | 0.32013 0.32186
+    not in C pool               9421 | 0.32126 0.32222
+    old p>0.9 (holdout-like)    9392 | 0.32274 0.32421
+    M 50-99                     9143 | 0.36310 0.36458
+    M 100-300                  17740 | 0.29858 0.30003
+    excl. user-0 bucket        25806 | 0.31903 0.32049
+  W0S + W0L                    37905 | 0.37131 0.37288
+  H0 fold-0 holdout             5974 | 0.31903 0.32034
+  teacher_xf0 (GPU bf16 file, 3 hard-label members that never saw fold 0) NDCG: W0S 0.49489, W0L 0.32085, H0 0.31869
+  mean within-feed corr to the teacher (member mean over seeds): W0S: u20a 0.9724 | W0L: u20a 0.9748 | H0: u20a 0.9745
+  anchor on H0, CPU fp32 minus stored GPU bf16 file, per member: u20a_s951 -0.00019+-0.00020; u20a_s952 +0.00026+-0.00022; 
+DONE

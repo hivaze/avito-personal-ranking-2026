@@ -1,0 +1,51 @@
+# Teacher of student_wide_t25.toml, student_wide_t25_holdout.toml and
+# student_popularity_light_narrow_t25_holdout.toml: the per-feed-centred mean of the train scores of
+# 25 click-label (hard-label) members. Written to [teachers] mean25 of configs/paths.toml by
+# scripts/05_build_teacher.py average.
+# The 11 members of teacher_mean11.toml (seven of them can be averaged, not dumped again, see there),
+# plus 6 members with a recurrent (GRU) block over the history (v23_gru_pre2s_s501..s506; this
+# package cannot rebuild or re-score them, their group files are read as stored) and 8
+# popularity-light members at width 128 (abl_e10_pop1_s951..s958,
+# teacher_hard_label_popularity_light.toml).
+
+name = "mean25"
+
+[[dumps]]
+file = "teacher_a"
+members = ["r6_cd_m02_r101", "r6_cd_m02_r102"]
+
+[[dumps]]
+file = "teacher_b"
+members = ["r6_cd_m02_r103", "r6_cd_m02_r104"]
+
+[[dumps]]
+file = "teacher_c"
+members = ["r6_cd_m02_r105", "r6_cd_m02_r106"]
+
+[[dumps]]
+file = "teacher_d"
+members = ["r6_cd_m02_r107", "w5_e10_base_s953"]
+
+[[dumps]]
+file = "teacher_e"
+members = ["w5_e10_base_s954", "w5_e10_base_s951"]
+
+[[dumps]]
+file = "teacher_f"
+members = ["w5_e10_base_s952"]
+
+[[dumps]]
+file = "teacher_g1"
+members = ["v23_gru_pre2s_s501", "v23_gru_pre2s_s502", "v23_gru_pre2s_s503"]
+
+[[dumps]]
+file = "teacher_g2"
+members = ["v23_gru_pre2s_s504", "v23_gru_pre2s_s505", "v23_gru_pre2s_s506"]
+
+[[dumps]]
+file = "teacher_p1"
+members = ["abl_e10_pop1_s951", "abl_e10_pop1_s952", "abl_e10_pop1_s953", "abl_e10_pop1_s954"]
+
+[[dumps]]
+file = "teacher_p2"
+members = ["abl_e10_pop1_s955", "abl_e10_pop1_s956", "abl_e10_pop1_s957", "abl_e10_pop1_s958"]

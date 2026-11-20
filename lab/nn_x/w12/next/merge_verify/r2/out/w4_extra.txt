@@ -1,0 +1,30 @@
+== A. A/A null of the LEVEL of the cold offset: 60 random 8-vs-8 splits of the 16 wide students (seed 4242), all test feeds
+  level (pool A - pool B): sd over splits 0.00257; mean feed-level SE 0.00024; ratio 10.6; max |level| 0.00780; sd on PUBLIC 0.00244, on PRIVATE 0.00265
+  single members: mean cold-minus-warm offset (own z) -0.5166, sd between the 16 members 0.0056 (kd05w192 -0.5156, kd05t25w192 -0.5176)
+
+== B. matched null of the W8P20 design at the train-only level (PRIVATE - PUBLIC contrast of the cold offset, candidate minus the W8 TO pool)
+  null, 70 choices of 4 same-view students: contrast mean -0.00009, sd 0.00010; mean feed-level SE 0.00014; sd of z 0.71, rms of z 0.99, max |z| 2.04; chi2 mean 4.6, max 10.4; level sd 0.00028; Sunday pm - am z: sd 0.60
+  real pop1kd admixture, train-only: level +0.00949; PUBLIC +0.00997 PRIVATE +0.00928; contrast -0.00068 ± 0.00022 (nominal z -3.1; in null sd of the contrast -7.0; z / null sd of z -4.3); chi2 11.2 (null max 10.4)
+  by day group: Sat +0.00981 ± 0.00021 | Sun am +0.01035 ± 0.00036 | Sun pm +0.00909 ± 0.00027 | Mon +0.00938 ± 0.00020 | Tue +0.00931 ± 0.00020
+
+== C. a monotone re-scaling (probabilities instead of logits): law-rho against the W8 scores (feed-mean Pearson of z), law on record, measured z-mix on val
+  partner file                           | Spearman fm | law-rho test fm (val) | law on record at gap 0 / 0.001032 | gate 2 at 0.001032 | val: equal z-mix vs W8
+  C3 logits (as on disk)                 | 0.9873      | 0.9935 (0.9935)       | +0.00012 / -0.00027              | not met            | -0.00027 ± 0.00039 (z -0.70)
+  C3 softmax(1.0 z)                      | 0.9873      | 0.8663 (0.8670)       | +0.00249 / +0.00210              | met                | -0.00066 ± 0.00048 (z -1.38)
+  C3 softmax(1.5 z)                      | 0.9873      | 0.7682 (0.7698)       | +0.00431 / +0.00392              | met                | -0.00054 ± 0.00050 (z -1.08)
+  C3 softmax(3.0 z)                      | 0.9873      | 0.5586 (0.5628)       | +0.00821 / +0.00782              | met                | -0.00068 ± 0.00051 (z -1.34)
+  W8 itself as exp(2 z) (same order)     | 1.0000      | 0.6820 (0.6847)       | +0.00592 / +0.00592              | met                | +0.00000 ± 0.00000 (z +nan)
+  W8 itself as softmax(1.0 z)            | 1.0000      | 0.8688 (0.8696)       | +0.00244 / +0.00244              | met                | +0.00000 ± 0.00000 (z +nan)
+
+== D. feeds with M < 20 (the distribution check of the tool reads feeds with M >= 20 only)
+  feeds with M < 20: test 4656 (16.3%), public 1351 (15.8%); val 2548 (17.7%)
+  C3 scores, all M < 20 feeds negated        : 16.28% of all feeds | mean Spearman 0.6701 | share of M >= 20 feeds below 0.3: 0.000% | share of M < 20 feeds with Spearman < 0: 100.00% | law-rho 0.6704 (clean 0.9935) -> law rises by +0.00601
+  C3 scores, 30% of the M < 20 feeds negated : 4.86% of all feeds | mean Spearman 0.8928 | share of M >= 20 feeds below 0.3: 0.000% | share of M < 20 feeds with Spearman < 0: 29.85% | law-rho 0.8971 (clean 0.9935) -> law rises by +0.00179
+  C3 scores, 10% of the M < 20 feeds negated : 1.69% of all feeds | mean Spearman 0.9544 | share of M >= 20 feeds below 0.3: 0.000% | share of M < 20 feeds with Spearman < 0: 10.37% | law-rho 0.9600 (clean 0.9935) -> law rises by +0.00062
+  genuine partners, share of M < 20 feeds with Spearman < 0 against W8 (study c2_extend T10): neural 0.000%, CatBoost 0.387%, LLM 0.494%, XGBoost 1.031%
+
+== E. rebuild of two cached inputs of the study (nn_x/w12/next/merge/cache)
+  NOTSUB_c3_test_scores.parquet vs my 0.5 z(FT) + 0.5 z(TO) of preds/ens_Q2a8s3_*: max abs diff 4.77e-07; same within-feed order 100.00000%
+  NOTSUB_catboost_val_ranks.parquet vs my within-feed rank of e3_xm_yeti_val.npy: identical rows 99.99928%; per-feed Spearman min 0.999999
+
+done in 41 s

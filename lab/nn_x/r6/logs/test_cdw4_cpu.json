@@ -1,0 +1,228 @@
+{
+ "checks": [
+  {
+   "name": "cd_lane.sh DRY: one train.py command per arm and root",
+   "ok": true,
+   "info": "[('c0', 101), ('c0', 104), ('hcap', 101), ('hcap', 104), ('m02', 101), ('m02', 104), ('rec33', 101), ('rec33', 104), ('rho70', 101), ('rho70', 104)]"
+  },
+  {
+   "name": "r101 m02: every wave-4 flag OFF (cooldown_mix 0.02, seed 811, init s101@77500)",
+   "ok": true,
+   "info": "{'hcap': '', 'rec_q': 0.0, 'rec_days': 3, 'rho_file': '', 'rho_keep': 0.7}"
+  },
+  {
+   "name": "r101 c0: every wave-4 flag OFF",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "r101 hcap: differs from m02 only by ['hcap']",
+   "ok": true,
+   "info": "{'hcap': ('', '1:110,4:117,6:41,8:42,10:40')}"
+  },
+  {
+   "name": "r101 rec33: differs from m02 only by ['rec_q']",
+   "ok": true,
+   "info": "{'rec_q': (0.0, 0.33)}"
+  },
+  {
+   "name": "r101 rho70: differs from m02 only by ['rho_file']",
+   "ok": true,
+   "info": "{'rho_file': ('', '<repo>/nn_x/r6/rho/excess_r101.npz')}"
+  },
+  {
+   "name": "r104 m02: every wave-4 flag OFF (cooldown_mix 0.02, seed 811, init s104@77500)",
+   "ok": true,
+   "info": "{'hcap': '', 'rec_q': 0.0, 'rec_days': 3, 'rho_file': '', 'rho_keep': 0.7}"
+  },
+  {
+   "name": "r104 c0: every wave-4 flag OFF",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "r104 hcap: differs from m02 only by ['hcap']",
+   "ok": true,
+   "info": "{'hcap': ('', '1:110,4:117,6:41,8:42,10:40')}"
+  },
+  {
+   "name": "r104 rec33: differs from m02 only by ['rec_q']",
+   "ok": true,
+   "info": "{'rec_q': (0.0, 0.33)}"
+  },
+  {
+   "name": "r104 rho70: differs from m02 only by ['rho_file']",
+   "ok": true,
+   "info": "{'rho_file': ('', '<repo>/nn_x/r6/rho/excess_r104.npz')}"
+  },
+  {
+   "name": "AST: train.py minus the wave-4 statements == pre-wave-4 train.py (flag-off path unchanged)",
+   "ok": true,
+   "info": "removed ifs ['a.hcap or a.rec_q > 0 or a.rho_file', 'cool_stream is not None and (not is_pool) and (step >= t_cool)', 'cool_stream is not None']; ifexp -> else [('tr_cap is not None and step >= t_cool', 'tr'), ('tr_cap is not None', 'tr')]; other ['import cd_arms4', 'add_argument --hcap', 'add_argument --rec_q', 'add_argument --rec_days', 'add_argument --rho_file', 'add_argument --rho_keep', 'tr_cap, cool_stream = (None, None)']"
+  },
+  {
+   "name": "every wave-4 guard / conditional test is False for m02 (any step, pool or not)",
+   "ok": true,
+   "info": "{'cool_stream is not None': False, 'cool_stream is not None and (not is_pool) and (step >= t_cool)': False, 'tr_cap is not None': False, 'a.hcap or a.rec_q > 0 or a.rho_file': False, 'tr_cap is not None and step >= t_cool': False, 'cool_stream is not None [pool step]': False, 'cool_stream is not None and (not is_pool) and (step >= t_cool) [pool step]': False, 'tr_cap is not None [pool step]': False, 'a.hcap or a.rec_q > 0 or a.rho_file [pool step]': False, 'tr_cap is not None and step >= t_cool [pool step]': False}"
+  },
+  {
+   "name": "hcap: the setup guard is True",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "rec33: the setup guard is True",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "rho70: the setup guard is True",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "setup_wave4: one call, behind `if a.hcap or a.rec_q > 0 or a.rho_file`, in main()",
+   "ok": true,
+   "info": "[['if a.hcap or a.rec_q > 0 or a.rho_file', 'def main']]"
+  },
+  {
+   "name": "cool_stream.next: one call, in the training loop, on non-pool cooldown steps only",
+   "ok": true,
+   "info": "[['if cool_stream is not None and (not is_pool) and (step >= t_cool)', 'for (step, fb)', 'def main']]"
+  },
+  {
+   "name": "tr_cap used only by: init, setup, training-batch gather (cooldown), selection-holdout eval",
+   "ok": true,
+   "info": "['b = (tr_cap if tr_cap is not None and step >= t_cool else tr).gather(fb, with_pos=True)', 'ndh = eval_subset(model, tr_cap if tr_cap is not None else tr, hold, hold_rows) if hold is not None ', 'tr_cap, cool_stream = (None, None)', 'tr_cap, cool_stream = setup_wave4(a, tr, feeds, prand_np, hold, log)']"
+  },
+  {
+   "name": "no other nn_x/r6 module imports cd_arms4 except rho_score.py (predict / holdout_eval / finetune untouched)",
+   "ok": true,
+   "info": "['rho_score.py']"
+  },
+  {
+   "name": "parse(): wave-4 defaults OFF; parse() runs with only argparse + POOL_P_DEFAULT (test_r6 T12)",
+   "ok": true,
+   "info": "{'hcap': '', 'rec_q': 0.0, 'rec_days': 3, 'rho_file': '', 'rho_keep': 0.7}"
+  },
+  {
+   "name": "last 3 train days = Sep 17-19 (MSK), boundary = 2026-09-17 00:00 MSK (1789592400)",
+   "ok": true,
+   "info": "(['2026-09-17', '2026-09-18', '2026-09-19'], 1789592400)"
+  },
+  {
+   "name": "recent = every training feed at/after the boundary, none before; 0 holdout feeds",
+   "ok": true,
+   "info": "750485 feeds (0.2404); of which Sep 20 spill-over 34"
+  },
+  {
+   "name": "pool steps identical with and without the rec stream (m02 mix RNG untouched)",
+   "ok": true,
+   "info": "pool steps 374 / 19670"
+  },
+  {
+   "name": "recent share of non-pool cooldown batches ~0.33 (within 3 SE)",
+   "ok": true,
+   "info": "0.3351 (SE 0.0034); wave-4 stream (non-pool cooldown batches): regular 12829 recent 6467 (0.335) rho 0 (0.000); passes recent 3 rho 0"
+  },
+  {
+   "name": "recent batches hold only recent feeds; the other non-pool steps return the regular batch object itself",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "kept = round(0.7 x production feeds); exactly the top 70% by excess (kept min >= dropped max)",
+   "ok": true,
+   "info": "{'file': '/tmp/scratchpad/t4/synth_excess.npz', 'n_prod': 2987090, 'n_keep': 2090963, 'keep': 0.7, 'n_pool': 134118, 'n_stream': 2225081, 'excess_cut': -0.5238784027068031, 'excess_mean_kept': 0.49658473628685634, 'excess_mean_dropped': -1.15841119052952}"
+  },
+  {
+   "name": "every pool-eligible feed in the stream; stream = kept + pool; 0 holdout feeds",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "guards fire: file on other feeds, file scored with another root's snapshot, keep < 0.5",
+   "ok": true,
+   "info": "[True, True, True]"
+  },
+  {
+   "name": "every non-pool cooldown batch is drawn from the rho stream; dropped production feeds never appear",
+   "ok": true,
+   "info": "wave-4 stream (non-pool cooldown batches): regular 0 recent 0 (0.000) rho 19296 (1.000); passes recent 0 rho 3"
+  },
+  {
+   "name": "~2.8 passes over the kept stream (3 shuffles started), >= 99.9% of kept production feeds seen",
+   "ok": true,
+   "info": "passes 3, coverage 1.00000"
+  },
+  {
+   "name": "cap view arrays == numpy-capped arrays (h_emb, h_cat, h_et, h_es, H, hist_off, n_hist)",
+   "ok": true,
+   "info": "{'caps': {1: 110, 4: 117, 6: 41, 8: 42, 10: 40}, 'events_before': 48997, 'events_after': 42119, 'events_dropped_share': 0.14037594199180603, 'feeds_changed': 162, 'feeds_changed_share': 0.6136363744735718, 'mean_H_before': 185.59469604492188, 'mean_H_after': 159.5416717529297, 'dropped_by_type': {1: 5248, 4: 835, 6: 303, 8: 188, 10: 304}}"
+  },
+  {
+   "name": "every gathered batch (19) identical between the cap view and the numpy-capped split",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "caps respected in every gathered batch (max per-feed count per capped type <= cap)",
+   "ok": true,
+   "info": "{1: 110, 4: 117, 6: 41, 8: 42, 10: 40}"
+  },
+  {
+   "name": "the fixture is over the caps before capping (feeds with > 110 views)",
+   "ok": true,
+   "info": "89"
+  },
+  {
+   "name": "no-op caps (256): gather identical to the original split",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "every feed and type: kept count == min(stored count, cap); uncapped types (2,3,5,7,9) untouched",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "dropped share ~0.096 and changed-feed share ~0.317 (hcap_caps.txt, 200K-feed sample)",
+   "ok": true,
+   "info": "dropped 0.0955, feeds changed 0.3163, 21s"
+  }
+ ],
+ "cd_lane_cmds": {
+  "m02:101": "--variant r6_cd_m02_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811 --cooldown_mix 0.02",
+  "c0:101": "--variant r6_cd_c0_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811",
+  "hcap:101": "--variant r6_cd_hcap_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811 --cooldown_mix 0.02 --hcap 1:110,4:117,6:41,8:42,10:40",
+  "rec33:101": "--variant r6_cd_rec33_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811 --cooldown_mix 0.02 --rec_q 0.33 --rec_days 3",
+  "rho70:101": "--variant r6_cd_rho70_r101 --init <repo>/nn/ckpt/v17_pre2s_s101@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811 --cooldown_mix 0.02 --rho_file <repo>/nn_x/r6/rho/excess_r101.npz --rho_keep 0.7",
+  "m02:104": "--variant r6_cd_m02_r104 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811 --cooldown_mix 0.02",
+  "c0:104": "--variant r6_cd_c0_r104 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811",
+  "hcap:104": "--variant r6_cd_hcap_r104 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811 --cooldown_mix 0.02 --hcap 1:110,4:117,6:41,8:42,10:40",
+  "rec33:104": "--variant r6_cd_rec33_r104 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811 --cooldown_mix 0.02 --rec_q 0.33 --rec_days 3",
+  "rho70:104": "--variant r6_cd_rho70_r104 --init <repo>/nn/ckpt/v17_pre2s_s104@77500.pt --epochs 2 --lr 2e-3 --warmup 0 --sched wsd --cooldown_frac 1.0 --muon --aux_pos 0.5 --aux_mode listwise --aux_tau 10 --aux_anneal 0.1 --cooldown_mix 0.1 --loss_norm feed --holdout 30000 --select_on holdout --eval_every 1000 --seed 811 --cooldown_mix 0.02 --rho_file <repo>/nn_x/r6/rho/excess_r104.npz --rho_keep 0.7"
+ },
+ "rec": {
+  "n_recent": 750485,
+  "share_batches": 0.3351471807628524,
+  "eff_recent_feed_share_nonpool": 0.49531654739483816
+ },
+ "rho_synth": {
+  "file": "/tmp/scratchpad/t4/synth_excess.npz",
+  "n_prod": 2987090,
+  "n_keep": 2090963,
+  "keep": 0.7,
+  "n_pool": 134118,
+  "n_stream": 2225081,
+  "excess_cut": -0.5238784027068031,
+  "excess_mean_kept": 0.49658473628685634,
+  "excess_mean_dropped": -1.15841119052952
+ },
+ "hcap_full": {
+  "dropped_share": 0.09546220302581787,
+  "feeds_changed": 0.31633520126342773,
+  "mean_H_after": 167.5154266357422
+ },
+ "failed": []
+}

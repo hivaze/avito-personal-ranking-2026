@@ -1,0 +1,285 @@
+{
+ "checks": [
+  {
+   "name": "data.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms4.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms5.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms6.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms7.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cd_arms8.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "blend.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "holdout_eval.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "stale_pred.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "finetune.py byte-identical to nn_x/w5",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "nn_x/w5/train.py unchanged since the copy (md5 tests/w5_source_md5.txt)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "nn_x/w5/model.py unchanged since the copy (md5 tests/w5_source_md5.txt)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "nn_x/w5/data.py unchanged since the copy (md5 tests/w5_source_md5.txt)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "nn_x/w5/common.py unchanged since the copy (md5 tests/w5_source_md5.txt)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "nn_x/abl/model.py byte-identical to nn_x/w5/model.py (the screen's paired base lineage)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "common.py: W5 output path -> nn_x/w10/r4",
+   "ok": true,
+   "info": "W5 = ROOT / 'nn_x' / 'w10' / 'r4'"
+  },
+  {
+   "name": "common.py AST-equal to nn_x/w5/common.py apart from the W5 path",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "model.py AST proof: removed set == expected",
+   "ok": true,
+   "info": "{'class GDCNBranch': 1, 'Ranker.__init__ kwargs dcn_par, dcn_rank, dcn_nox': 1, 'self.dcnp = None': 1, 'if dcn_par': 1, 'if self.dcnp is not None': 1}"
+  },
+  {
+   "name": "model.py minus the R4 statements == nn_x/w5/model.py (ast.unparse)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "train.py AST proof: removed set == expected",
+   "ok": true,
+   "info": "{'add_argument --dcn_par': 1, 'add_argument --dcn_rank': 1, 'add_argument --dcn_nox': 1, 'variant assert w5_|w10_ -> w5_': 1, 'if a.dcn_par (init assert + log)': 1, 'Ranker(... dcn_par=, dcn_rank=, dcn_nox=)': 3}"
+  },
+  {
+   "name": "train.py minus the R4 statements == nn_x/w5/train.py (ast.unparse)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "lane.sh DRY: 6 w10 commands, 4 w5 reference commands",
+   "ok": true,
+   "info": "['w10_r4_s23', 'w10_r4_s24', 'w10_r4c_s23', 'w10_r4c_s24', 'w5_e10_r4_s951', 'w5_e10_r4_s952']"
+  },
+  {
+   "name": "A:r4:23 == w5 A:base:23 + exactly {dcn_par 2}",
+   "ok": true,
+   "info": "{'dcn_par': (0, 2)}"
+  },
+  {
+   "name": "A:r4c:23 == A:r4:23 + dcn_nox",
+   "ok": true,
+   "info": "{'dcn_nox': (False, True)}"
+  },
+  {
+   "name": "A:r4:24 == w5 A:base:24 + exactly {dcn_par 2}",
+   "ok": true,
+   "info": "{'dcn_par': (0, 2)}"
+  },
+  {
+   "name": "A:r4c:24 == A:r4:24 + dcn_nox",
+   "ok": true,
+   "info": "{'dcn_nox': (False, True)}"
+  },
+  {
+   "name": "E:r4:951 == w5 E:base:951 + exactly {dcn_par 2}",
+   "ok": true,
+   "info": "{'dcn_par': (0, 2)}"
+  },
+  {
+   "name": "E:r4:952 == w5 E:base:952 + exactly {dcn_par 2}",
+   "ok": true,
+   "info": "{'dcn_par': (0, 2)}"
+  },
+  {
+   "name": "abl_base_s23 stored args == A_BASE + HYG (the screen's paired base; abl-only / r4-only flags at their off values)",
+   "ok": true,
+   "info": "{'rdrop_cd': (None, 0.0), 'sam_cd': (None, 0.0), 'xt_rel_extra': ('', None), 'dcn_rank': (None, 32), 'dcn_nox': (None, False), 'xt_exclude': ('', None)}"
+  },
+  {
+   "name": "abl_base_s24 stored args == A_BASE + HYG (the screen's paired base; abl-only / r4-only flags at their off values)",
+   "ok": true,
+   "info": "{'rdrop_cd': (None, 0.0), 'sam_cd': (None, 0.0), 'xt_rel_extra': ('', None), 'dcn_rank': (None, 32), 'dcn_nox': (None, False), 'xt_exclude': ('', None)}"
+  },
+  {
+   "name": "lane.sh refuses GPUs N <ids>",
+   "ok": true,
+   "info": "[True, True, True, True, True, True]"
+  },
+  {
+   "name": "bash -n lane.sh",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "state_dict keys and values bit-identical",
+   "ok": true,
+   "info": "153 tensors"
+  },
+  {
+   "name": "cfg identical (no dcn keys at flags off)",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "r4 Ranker(**w5 cfg) builds (finetune / holdout_eval / stale_pred path) and matches the state_dict keys",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "dense features bit-identical on 4 real train batches",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "eval-mode logits bit-identical",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "train-mode logits + aux_out bit-identical (same RNG state, dropout on)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cfg stores dcn_par / dcn_rank / dcn_nox only when ON",
+   "ok": true,
+   "info": "params base 1.0085M, dcn2 1.0693M (+60809), dcn2nox 1.0422M (+33665)"
+  },
+  {
+   "name": "branch parameter count == LN(d) + 2 layers of rank-32 cross + gate on D = d + n_dense = 232, + out",
+   "ok": true,
+   "info": "60809 vs 60809"
+  },
+  {
+   "name": "base parameters (the shared ones) keep exactly their flag-off init under the RNG fork",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "Muon rule (train.py) covers exactly the 8 cross / gate matrices (v, u, gv, gu x 2 layers) and excludes dcnp.out",
+   "ok": true,
+   "info": "['dcnp.gu.0.weight', 'dcnp.gu.1.weight', 'dcnp.gv.0.weight', 'dcnp.gv.1.weight', 'dcnp.u.0.weight', 'dcnp.u.1.weight', 'dcnp.v.0.weight', 'dcnp.v.1.weight']"
+  },
+  {
+   "name": "output layer zero-init",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "ZERO-INIT: eval-mode logits at init bit-identical to the base (dcn2)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "ZERO-INIT: train-mode logits + aux_out at init bit-identical to the base (same RNG state; no RNG draw in the branch)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "ZERO-INIT: the same for dcn2 nox (eval + train)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "backward at init: dcnp.out.weight receives a finite non-zero gradient",
+   "ok": true,
+   "info": "|g out| 1.103e+00"
+  },
+  {
+   "name": "backward at init: every other branch gradient (U/V/G/LN) is exactly zero (zero-init output)",
+   "ok": true,
+   "info": "14 tensors"
+  },
+  {
+   "name": "backward at init: shared-parameter gradients finite",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "after perturbing the output weight: every branch parameter has a finite non-zero gradient",
+   "ok": true,
+   "info": "16 tensors"
+  },
+  {
+   "name": "live branch: eval logits differ from the base, finite, shape [B, M]",
+   "ok": true,
+   "info": "max|d| 2.542e+00"
+  },
+  {
+   "name": "padded history + padded candidate slots never influence the valid logits (live branch, bitwise)",
+   "ok": true,
+   "info": "0.0e+00 0.0e+00 0.0e+00 0.0e+00"
+  },
+  {
+   "name": "one feed never influences another (perturbing feed j: others bitwise equal, feed j changes)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "cfg round trip: Ranker(**cfg) + load_state_dict(strict) reproduces the logits",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "branch inputs: c width 128, X width n_dense = 104, output [B, M]",
+   "ok": true,
+   "info": "{'c': 128, 'X': 104, 'o': torch.Size([22, 16])}"
+  }
+ ],
+ "fail": []
+}

@@ -1,0 +1,50 @@
+== val (1) systematic delta^2 (units: within-feed logit sd^2)
+   NULL ref 4v4 splits of seeds 951-958 (n=35): mean -0.00000 sd 0.00009 min -0.00013 max +0.00017  [mech used one split: 951,952 vs 953,954 (2v2)]
+   A: delta^2 vs ref951-954 -0.00016 (mech) | vs all 8 ref seeds +0.00003 | z vs null +0.4 | share of null >= value 0.31
+   B: delta^2 vs ref951-954 +0.00095 (mech) | vs all 8 ref seeds +0.00102 | z vs null +11.9 | share of null >= value 0.00
+   C: delta^2 vs ref951-954 +0.00044 (mech) | vs all 8 ref seeds +0.00058 | z vs null +6.8 | share of null >= value 0.00
+   per-member seed-noise sd: ref 4-subsets (n=70) mean 0.1601 range [0.1585, 0.1616]; A 0.1649 B 0.1843 C 0.1756
+== hold (1) systematic delta^2 (units: within-feed logit sd^2)
+   NULL ref 4v4 splits of seeds 951-958 (n=35): mean -0.00000 sd 0.00007 min -0.00021 max +0.00016  [mech used one split: 951,952 vs 953,954 (2v2)]
+   A: delta^2 vs ref951-954 -0.00014 (mech) | vs all 8 ref seeds -0.00003 | z vs null -0.4 | share of null >= value 0.74
+   B: delta^2 vs ref951-954 +0.00087 (mech) | vs all 8 ref seeds +0.00091 | z vs null +12.2 | share of null >= value 0.00
+   C: delta^2 vs ref951-954 +0.00041 (mech) | vs all 8 ref seeds +0.00054 | z vs null +7.3 | share of null >= value 0.00
+   per-member seed-noise sd: ref 4-subsets (n=70) mean 0.1558 range [0.1546, 0.1572]; A 0.1600 B 0.1775 C 0.1711
+
+== (2) NDCG deltas arm - ref, same seeds 951-954, paired per feed (member = per-feed mean of the 4 seed deltas; pool = mean rank-z)
+-- val selected: ref member 0.39918, ref pool 0.40134 (gain +0.00216); NULL ref pool(951-954) - pool(955-958) +0.00138; 35-split null sd of pool diff 0.00052 (|max| 0.00138)
+   A: member -0.00014+-0.00042 (per seed +0.00068 -0.00020 -0.00034 -0.00070; seed-level SE 0.00029) | pool -0.00086+-0.00057 | pool gain over member +0.00144
+   B: member -0.00080+-0.00043 (per seed -0.00044 -0.00113 -0.00088 -0.00075; seed-level SE 0.00014) | pool -0.00144+-0.00057 | pool gain over member +0.00152
+   C: member -0.00051+-0.00042 (per seed +0.00024 -0.00101 -0.00070 -0.00058; seed-level SE 0.00027) | pool -0.00069+-0.00058 | pool gain over member +0.00198
+-- val @last: ref member 0.39913, ref pool 0.40138 (gain +0.00225); NULL ref pool(951-954) - pool(955-958) +0.00113; 35-split null sd of pool diff 0.00047 (|max| 0.00113)
+   A: member +0.00033+-0.00041 (per seed +0.00058 -0.00020 -0.00004 +0.00097; seed-level SE 0.00027) | pool +0.00009+-0.00056 | pool gain over member +0.00201
+   B: member -0.00076+-0.00043 (per seed -0.00131 -0.00113 -0.00082 +0.00020; seed-level SE 0.00034) | pool -0.00093+-0.00056 | pool gain over member +0.00209
+   C: member -0.00013+-0.00042 (per seed +0.00052 -0.00069 -0.00005 -0.00028; seed-level SE 0.00025) | pool -0.00016+-0.00056 | pool gain over member +0.00222
+-- hold selected: ref member 0.32267, ref pool 0.32408 (gain +0.00141); NULL ref pool(951-954) - pool(955-958) +0.00001; 35-split null sd of pool diff 0.00034 (|max| 0.00088)
+   A: member -0.00015+-0.00024 (per seed +0.00027 -0.00033 -0.00021 -0.00033; seed-level SE 0.00014) | pool +0.00020+-0.00031 | pool gain over member +0.00176
+   B: member -0.00025+-0.00024 (per seed -0.00000 -0.00095 +0.00008 -0.00012; seed-level SE 0.00024) | pool +0.00029+-0.00032 | pool gain over member +0.00196
+   C: member +0.00020+-0.00025 (per seed +0.00029 -0.00037 +0.00063 +0.00023; seed-level SE 0.00021) | pool +0.00040+-0.00034 | pool gain over member +0.00161
+-- hold @last: ref member 0.32255, ref pool 0.32403 (gain +0.00147); NULL ref pool(951-954) - pool(955-958) +0.00003; 35-split null sd of pool diff 0.00031 (|max| 0.00076)
+   A: member -0.00010+-0.00023 (per seed +0.00066 -0.00033 -0.00016 -0.00057; seed-level SE 0.00027) | pool +0.00026+-0.00031 | pool gain over member +0.00184
+   B: member -0.00035+-0.00025 (per seed +0.00012 -0.00095 -0.00017 -0.00038; seed-level SE 0.00023) | pool +0.00028+-0.00032 | pool gain over member +0.00210
+   C: member +0.00016+-0.00024 (per seed +0.00044 -0.00047 +0.00063 +0.00003; seed-level SE 0.00024) | pool +0.00042+-0.00033 | pool gain over member +0.00174
+
+== (3) M6 train-fit: seed-level view (mech/out/trainfit2_ndcg.npz)
+   @70000 A train per-seed +0.00045 +0.00005 -0.00015 +0.00012 | mean +0.00012 seed-level SE 0.00012
+   @70000 A hold  per-seed +0.00078 -0.00002 -0.00013 -0.00074 | mean -0.00002 seed-level SE 0.00031
+   @70000 B train per-seed +0.00109 +0.00028 +0.00029 +0.00069 | mean +0.00059 seed-level SE 0.00019
+   @70000 B hold  per-seed +0.00025 -0.00068 +0.00022 -0.00084 | mean -0.00026 seed-level SE 0.00029
+   @70000 C train per-seed +0.00178 +0.00105 +0.00074 +0.00015 | mean +0.00093 seed-level SE 0.00034
+   @70000 C hold  per-seed +0.00114 -0.00011 +0.00047 +0.00002 | mean +0.00038 seed-level SE 0.00028
+   @last A train per-seed +0.00056 -0.00026 -0.00043 +0.00094 | mean +0.00020 seed-level SE 0.00033
+   @last A hold  per-seed +0.00066 -0.00033 -0.00016 -0.00057 | mean -0.00010 seed-level SE 0.00027
+   @last B train per-seed +0.00215 +0.00201 +0.00307 +0.00356 | mean +0.00270 seed-level SE 0.00037
+   @last B hold  per-seed +0.00012 -0.00095 -0.00017 -0.00038 | mean -0.00035 seed-level SE 0.00023
+   @last C train per-seed +0.00309 +0.00277 +0.00225 +0.00272 | mean +0.00271 seed-level SE 0.00017
+   @last C hold  per-seed +0.00044 -0.00047 +0.00063 +0.00003 | mean +0.00016 seed-level SE 0.00024
+   share of train feeds with NDCG exactly 1 (no positive or perfect) 0.0531
+   share of hold feeds with NDCG exactly 1 (no positive or perfect) 0.0391
+   cooldown ref: train per seed +0.0174 +0.0160 +0.0174 +0.0156 | hold +0.0033 +0.0028 +0.0028 +0.0021
+   cooldown A: train per seed +0.0175 +0.0157 +0.0171 +0.0164 | hold +0.0032 +0.0025 +0.0028 +0.0022
+   cooldown B: train per seed +0.0184 +0.0178 +0.0201 +0.0184 | hold +0.0032 +0.0025 +0.0025 +0.0025
+   cooldown C: train per seed +0.0187 +0.0178 +0.0189 +0.0181 | hold +0.0026 +0.0024 +0.0030 +0.0021

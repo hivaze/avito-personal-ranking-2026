@@ -1,0 +1,57 @@
+== r7 eval_screen screen; sigma_run val 0.00035 holdout 0.00015; seeds (23, 24)
+== runs (selected step / final step; train minutes; GPU; peak reserved GB)
+  r7:r7_base_s23               best  19670/19670 val 0.39408 hold 0.31779 | final val 0.39408 hold 0.31779 (end-sel +0.00000 / +0.00000) | 35 min | GPU N | 55 GB
+  r7:r7_base_s24               best  19670/19670 val 0.39334 hold 0.31749 | final val 0.39334 hold 0.31749 (end-sel +0.00000 / +0.00000) | 27 min | GPU N | 55 GB
+  r7:r7_muon_in_s23            best  19670/19670 val 0.39360 hold 0.31779 | final val 0.39360 hold 0.31779 (end-sel +0.00000 / +0.00000) | 27 min | GPU N | 55 GB
+  r7:r7_muon_in_s24            best  19670/19670 val 0.39180 hold 0.31690 | final val 0.39180 hold 0.31690 (end-sel +0.00000 / +0.00000) | 36 min | GPU N | 55 GB
+  r7:r7_resdrop0_s23           best  19000/19670 val 0.39378 hold 0.31818 | final val 0.39453 hold 0.31813 (end-sel +0.00075 / -0.00005) | 27 min | GPU N | 55 GB
+  r7:r7_resdrop0_s24           best  19670/19670 val 0.39424 hold 0.31793 | final val 0.39424 hold 0.31793 (end-sel +0.00000 / +0.00000) | 37 min | GPU N | 55 GB
+  r7:r7_pbld_s23               best  19670/19670 val 0.39348 hold 0.31805 | final val 0.39348 hold 0.31805 (end-sel +0.00000 / +0.00000) | 39 min | GPU N | 55 GB
+  r7:r7_pbld_s24               best  19670/19670 val 0.39280 hold 0.31810 | final val 0.39280 hold 0.31810 (end-sel +0.00000 / +0.00000) | 29 min | GPU N | 55 GB
+
+== muon_in vs base (B = treatment)
+  VAL  r7:r7_muon_in_s23 0.39360 vs r7:r7_base_s23 0.39408: all -0.00049+-0.00080 (z -0.61)  M<50 +0.00040+-0.00134 (z +0.30)  M>=50 -0.00110+-0.00079 (z -1.40)  Tue -0.00072+-0.00099 (z -0.72)  Thu -0.00023+-0.00104 (z -0.22)  coldpos +0.00243+-0.00141 (z +1.73)  warmpos -0.00210+-0.00097 (z -2.18)
+  VAL  r7:r7_muon_in_s24 0.39180 vs r7:r7_base_s24 0.39334: all -0.00154+-0.00078 (z -1.97)  M<50 -0.00133+-0.00132 (z -1.01)  M>=50 -0.00168+-0.00075 (z -2.25)  Tue -0.00057+-0.00095 (z -0.60)  Thu -0.00261+-0.00103 (z -2.54)  coldpos -0.00201+-0.00137 (z -1.46)  warmpos -0.00161+-0.00093 (z -1.72)
+  VAL  pooled: all -0.00101+-0.00057 (z -1.79)  M<50 -0.00046+-0.00095 (z -0.49)  M>=50 -0.00139+-0.00055 (z -2.51)  Tue -0.00064+-0.00070 (z -0.92)  Thu -0.00142+-0.00074 (z -1.92)  coldpos +0.00021+-0.00098 (z +0.22)  warmpos -0.00186+-0.00069 (z -2.71)
+  HOLD r7:r7_muon_in_s23 0.31779 vs r7:r7_base_s23 0.31780: all -0.00001+-0.00044 (z -0.03)  late20% +0.00069+-0.00087 (z +0.80)
+  HOLD r7:r7_muon_in_s24 0.31691 vs r7:r7_base_s24 0.31751: all -0.00060+-0.00043 (z -1.41)  late20% -0.00022+-0.00088 (z -0.25)
+  HOLD pooled: all -0.00031+-0.00031 (z -0.98)  late20% +0.00024+-0.00064 (z +0.37)
+  CORR val (within-feed z): base-base 0.9781 | arm-base cross-seed 0.9769 | arm-arm 0.9799 | arm-base same-seed 0.9826
+  ENS mixed {base_sA, arm_sB} vs 2x base: VAL all +0.00011+-0.00038 (z +0.28)  HOLD all -0.00005+-0.00021 (z -0.23)
+  ENS 2 arm members vs 2 base members (z-mean): VAL 0.39345 vs 0.39429: all -0.00084+-0.00065 (z -1.29)  M<50 -0.00034+-0.00112 (z -0.30)  M>=50 -0.00119+-0.00066 (z -1.81)  Tue +0.00007+-0.00080 (z +0.09)  Thu -0.00184+-0.00090 (z -2.06)  coldpos +0.00041+-0.00116 (z +0.35)  warmpos -0.00155+-0.00081 (z -1.92)
+                                                HOLD 0.31777 vs 0.31835: all -0.00058+-0.00035 (z -1.66)  late20% -0.00016+-0.00068 (z -0.23)
+  SCALE growth |final-init| arm vs base (seed means): {'top_sim_bias': (2.1085, 1.607, True), 'c_ln_gain': (0.3103, 0.2996, False), 'retr_a': (1.376, 0.6451, True), 'cross0_WO_rms': (0.036, 0.0351, False)}  -> SCALE-SUSPECT True
+  ==> FAIL   WARN slices < -2 SE: ['val M>=50']
+
+== resdrop0 vs base (B = treatment)
+  VAL  r7:r7_resdrop0_s23 0.39378 vs r7:r7_base_s23 0.39408: all -0.00030+-0.00080 (z -0.37)  M<50 -0.00040+-0.00135 (z -0.30)  M>=50 -0.00023+-0.00078 (z -0.29)  Tue -0.00001+-0.00101 (z -0.01)  Thu -0.00061+-0.00103 (z -0.59)  coldpos -0.00154+-0.00144 (z -1.07)  warmpos +0.00009+-0.00097 (z +0.09)
+  VAL  r7:r7_resdrop0_s24 0.39424 vs r7:r7_base_s24 0.39334: all +0.00091+-0.00080 (z +1.14)  M<50 +0.00295+-0.00135 (z +2.18)  M>=50 -0.00050+-0.00077 (z -0.66)  Tue +0.00145+-0.00098 (z +1.48)  Thu +0.00032+-0.00105 (z +0.30)  coldpos +0.00400+-0.00142 (z +2.82)  warmpos -0.00036+-0.00096 (z -0.38)
+  VAL  pooled: all +0.00030+-0.00058 (z +0.53)  M<50 +0.00127+-0.00098 (z +1.30)  M>=50 -0.00037+-0.00056 (z -0.65)  Tue +0.00072+-0.00073 (z +0.99)  Thu -0.00015+-0.00075 (z -0.20)  coldpos +0.00123+-0.00106 (z +1.16)  warmpos -0.00014+-0.00070 (z -0.20)
+  HOLD r7:r7_resdrop0_s23 0.31818 vs r7:r7_base_s23 0.31780: all +0.00038+-0.00043 (z +0.88)  late20% +0.00072+-0.00086 (z +0.84)
+  HOLD r7:r7_resdrop0_s24 0.31793 vs r7:r7_base_s24 0.31751: all +0.00042+-0.00043 (z +0.98)  late20% +0.00111+-0.00092 (z +1.20)
+  HOLD pooled: all +0.00040+-0.00031 (z +1.29)  late20% +0.00092+-0.00064 (z +1.44)
+  CORR val (within-feed z): base-base 0.9781 | arm-base cross-seed 0.9745 | arm-arm 0.9735 | arm-base same-seed 0.9821
+  ENS mixed {base_sA, arm_sB} vs 2x base: VAL all +0.00008+-0.00039 (z +0.21)  HOLD all +0.00037+-0.00022 (z +1.72)
+  ENS 2 arm members vs 2 base members (z-mean): VAL 0.39432 vs 0.39429: all +0.00004+-0.00065 (z +0.05)  M<50 +0.00024+-0.00113 (z +0.21)  M>=50 -0.00010+-0.00065 (z -0.16)  Tue +0.00113+-0.00081 (z +1.39)  Thu -0.00116+-0.00089 (z -1.31)  coldpos +0.00095+-0.00120 (z +0.79)  warmpos -0.00059+-0.00081 (z -0.73)
+                                                HOLD 0.31876 vs 0.31835: all +0.00041+-0.00035 (z +1.15)  late20% +0.00045+-0.00072 (z +0.63)
+  SCALE growth |final-init| arm vs base (seed means): {'top_sim_bias': (1.8525, 1.607, False), 'c_ln_gain': (0.2071, 0.2996, False), 'retr_a': (0.8809, 0.6451, True), 'cross0_WO_rms': (0.0407, 0.0351, False)}  -> SCALE-SUSPECT False
+  ==> FAIL
+
+== pbld vs base (B = treatment)
+  VAL  r7:r7_pbld_s23 0.39348 vs r7:r7_base_s23 0.39408: all -0.00060+-0.00083 (z -0.72)  M<50 +0.00035+-0.00144 (z +0.25)  M>=50 -0.00125+-0.00080 (z -1.56)  Tue -0.00082+-0.00105 (z -0.78)  Thu -0.00035+-0.00109 (z -0.32)  coldpos +0.00322+-0.00152 (z +2.12)  warmpos -0.00237+-0.00101 (z -2.35)
+  VAL  r7:r7_pbld_s24 0.39280 vs r7:r7_base_s24 0.39334: all -0.00054+-0.00084 (z -0.64)  M<50 -0.00021+-0.00142 (z -0.15)  M>=50 -0.00077+-0.00083 (z -0.93)  Tue +0.00191+-0.00104 (z +1.84)  Thu -0.00322+-0.00111 (z -2.90)  coldpos +0.00346+-0.00160 (z +2.16)  warmpos -0.00232+-0.00100 (z -2.33)
+  VAL  pooled: all -0.00057+-0.00061 (z -0.93)  M<50 +0.00007+-0.00104 (z +0.07)  M>=50 -0.00101+-0.00061 (z -1.66)  Tue +0.00054+-0.00077 (z +0.70)  Thu -0.00179+-0.00080 (z -2.22)  coldpos +0.00334+-0.00119 (z +2.82)  warmpos -0.00234+-0.00073 (z -3.22)
+  HOLD r7:r7_pbld_s23 0.31805 vs r7:r7_base_s23 0.31780: all +0.00026+-0.00047 (z +0.55)  late20% +0.00114+-0.00091 (z +1.25)
+  HOLD r7:r7_pbld_s24 0.31809 vs r7:r7_base_s24 0.31751: all +0.00058+-0.00046 (z +1.26)  late20% +0.00040+-0.00099 (z +0.41)
+  HOLD pooled: all +0.00042+-0.00034 (z +1.22)  late20% +0.00077+-0.00071 (z +1.09)
+  CORR val (within-feed z): base-base 0.9781 | arm-base cross-seed 0.9748 | arm-arm 0.9772 | arm-base same-seed 0.9801
+  ENS mixed {base_sA, arm_sB} vs 2x base: VAL all +0.00060+-0.00042 (z +1.44)  HOLD all +0.00044+-0.00024 (z +1.86)
+  ENS 2 arm members vs 2 base members (z-mean): VAL 0.39442 vs 0.39429: all +0.00013+-0.00069 (z +0.20)  M<50 +0.00058+-0.00118 (z +0.49)  M>=50 -0.00017+-0.00072 (z -0.24)  Tue +0.00116+-0.00090 (z +1.29)  Thu -0.00099+-0.00092 (z -1.07)  coldpos +0.00278+-0.00129 (z +2.15)  warmpos -0.00124+-0.00086 (z -1.44)
+                                                HOLD 0.31863 vs 0.31835: all +0.00028+-0.00039 (z +0.71)  late20% +0.00096+-0.00085 (z +1.13)
+  SCALE growth |final-init| arm vs base (seed means): {'top_sim_bias': (1.882, 1.607, False), 'c_ln_gain': (0.3073, 0.2996, False), 'retr_a': (0.1227, 0.6451, False), 'cross0_WO_rms': (0.035, 0.0351, False)}  -> SCALE-SUSPECT False
+  ==> FAIL   WARN slices < -2 SE: ['val Thu']
+
+== summary
+  muon_in    val -0.00101 (z -1.79)  hold -0.00031 (z -0.98)  rho_x 0.9769 vs rho_bb 0.9781  -> FAIL
+  resdrop0   val +0.00030 (z +0.53)  hold +0.00040 (z +1.29)  rho_x 0.9745 vs rho_bb 0.9781  -> FAIL
+  pbld       val -0.00057 (z -0.93)  hold +0.00042 (z +1.22)  rho_x 0.9748 vs rho_bb 0.9781  -> FAIL

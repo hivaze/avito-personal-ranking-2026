@@ -1,0 +1,50 @@
+# Read-out copied from the raw run log (not published), unchanged below this line.
+[    1.0s] [val] feeds 14423, leak-free 14306; G3 NDCG all 0.40032 / leak-free 0.40046
+[    1.1s] [val] (1) top-16 Jaccard raw vs S1cat: mean 0.572 (median 0.600); feeds with > 32 distinct history items: mean 0.528 (median 0.524); identical sets 0.089 -> plan stop rule (> 0.8): continue
+[    1.2s] [val] (1) top-16 Jaccard raw vs S1pool: mean 0.663 (median 0.684); feeds with > 32 distinct history items: mean 0.629 (median 0.684); identical sets 0.122 -> plan stop rule (> 0.8): continue
+[    1.2s] [val] (1) top-16 Jaccard raw vs S2csls: mean 0.822 (median 0.882); feeds with > 32 distinct history items: mean 0.804 (median 0.778); identical sets 0.223 -> plan stop rule (> 0.8): STOP arm
+[    1.6s] [val] (2) cell: 7,543 leak-free cell positives, 151,881 beater pairs, 5,334 feeds
+[    1.6s] [val]   control -log1p(it_hist_all_luo)    cell AUC 0.5699 ± 0.0050 (cov 1.000)
+[    1.6s] [val]   control -maxsim32                  cell AUC 0.6315 ± 0.0050 (cov 0.985)
+[    1.6s] [val]   control +maxsim32 (feature)        cell AUC 0.3685 ± 0.0050 (cov 0.985)
+[    1.7s] [val]   S0raw   cell AUC maxall 0.3730±0.0050  top16 0.3660±0.0050  last32 0.3685±0.0050  rec_hl3 0.3652±0.0049  last5 0.3712±0.0049
+[    1.7s] [val]   S1cat   cell AUC maxall 0.3924±0.0052  top16 0.3914±0.0052  last32 0.3899±0.0051  rec_hl3 0.3803±0.0050  last5 0.3869±0.0051
+[    1.7s] [val]   S1pool  cell AUC maxall 0.3693±0.0051  top16 0.3603±0.0050  last32 0.3630±0.0050  rec_hl3 0.3643±0.0049  last5 0.3707±0.0049
+[    1.7s] [val]   S2csls  cell AUC maxall 0.3767±0.0052  top16 0.3625±0.0051  last32 0.3717±0.0051  rec_hl3 0.3670±0.0050  last5 0.3733±0.0050
+[    1.8s] [val]   cell AUC S1cat - S0raw (maxall, paired): +0.0195 ± 0.0030
+[    1.8s] [val]   cell AUC S1pool - S0raw (maxall, paired): -0.0037 ± 0.0019
+[    1.8s] [val]   cell AUC S2csls - S0raw (maxall, paired): +0.0037 ± 0.0029
+[    2.9s] [val]   single-feature NDCG S0raw   maxall 0.3424  top16 0.3413  last32 0.3480  rec_hl3 0.3481  last5 0.3460
+[    4.1s] [val]   single-feature NDCG S1cat   maxall 0.3391 (-0.0032±0.0009)  top16 0.3375 (-0.0038±0.0010)  last32 0.3439 (-0.0040±0.0008)  rec_hl3 0.3441 (-0.0040±0.0011)  last5 0.3413 (-0.0048±0.0010)
+[    5.3s] [val]   single-feature NDCG S1pool  maxall 0.3429 (+0.0006±0.0006)  top16 0.3398 (-0.0015±0.0008)  last32 0.3484 (+0.0004±0.0006)  rec_hl3 0.3452 (-0.0029±0.0009)  last5 0.3424 (-0.0036±0.0009)
+[    6.4s] [val]   single-feature NDCG S2csls  maxall 0.3332 (-0.0091±0.0012)  top16 0.3392 (-0.0021±0.0009)  last32 0.3413 (-0.0067±0.0010)  rec_hl3 0.3459 (-0.0021±0.0007)  last5 0.3438 (-0.0022±0.0007)
+[   13.1s] [val] (3) nested residual on G3, z(S1cat:maxall): grid -0.00031 ± 0.00017 (z -1.86; w [-0.02, 0.02, 0.02, -0.02, -0.02, -0.02, -0.02, 0.0, 0.02, 0.02]) | ridge -0.00048 ± 0.00045 (w [0.0962, 0.0857, 0.0976, 0.0969, 0.0885, 0.0947, 0.0893, 0.0913, 0.0956, 0.094]) | pmix -0.00024 ± 0.00026 | M>=50 -0.00020 M<50 -0.00048 | full-fit best +0.00006 at w=-0.02
+[   19.5s] [val] (3) nested residual on G3, z(S0raw:maxall): grid -0.00011 ± 0.00023 (z -0.45; w [-0.05, -0.05, -0.05, -0.02, -0.05, -0.02, -0.05, -0.05, -0.05, 0.0]) | ridge -0.00002 ± 0.00005 (w [0.0, -0.0029, 0.0061, 0.0017, 0.002, 0.0044, 0.0015, 0.0005, 0.0034, -0.0027]) | pmix -0.00004 ± 0.00034 | M>=50 -0.00026 M<50 +0.00012 | full-fit best +0.00012 at w=-0.05
+[   25.7s] [val] (3) nested residual on G3, z(S1pool:maxall): grid -0.00027 ± 0.00018 (z -1.51; w [-0.02, 0.02, 0.02, -0.02, -0.02, -0.02, -0.05, -0.05, 0.02, 0.02]) | ridge -0.00017 ± 0.00029 (w [0.0568, 0.0482, 0.0578, 0.0552, 0.049, 0.0562, 0.0503, 0.0523, 0.0571, 0.0512]) | pmix -0.00042 ± 0.00027 | M>=50 -0.00036 M<50 -0.00014 | full-fit best +0.00014 at w=-0.02
+[   32.1s] [val] (3) nested residual on G3, z(S2csls:maxall): grid -0.00031 ± 0.00016 (z -1.92; w [0.0, 0.02, 0.02, -0.05, -0.02, -0.02, -0.05, 0.02, -0.05, 0.0]) | ridge +0.00000 ± 0.00005 (w [0.0037, -0.001, 0.0048, 0.0014, 0.0021, 0.0071, -0.004, 0.004, 0.0033, 0.0007]) | pmix -0.00005 ± 0.00023 | M>=50 -0.00050 M<50 -0.00004 | full-fit best +0.00004 at w=0.02
+[   38.4s] [val] (3) nested residual on G3, z(S1cat:top16): grid +0.00009 ± 0.00023 (z +0.40; w [-0.02, -0.02, 0.05, -0.02, -0.02, -0.02, 0.05, -0.02, -0.02, -0.02]) | ridge -0.00131 ± 0.00062 (w [0.1384, 0.1349, 0.1449, 0.1344, 0.1293, 0.1389, 0.1376, 0.1389, 0.1352, 0.1313]) | pmix +0.00042 ± 0.00032 | M>=50 -0.00013 M<50 +0.00041 | full-fit best +0.00036 at w=-0.02
+[   44.8s] [val] (3) nested residual on G3, z(S1cat:rec_hl3): grid +0.00019 ± 0.00024 (z +0.79; w [0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]) | ridge -0.00297 ± 0.00078 (w [0.1884, 0.1805, 0.1797, 0.1773, 0.174, 0.1832, 0.1773, 0.1828, 0.1823, 0.1745]) | pmix +0.00061 ± 0.00038 | M>=50 +0.00037 M<50 -0.00007 | full-fit best +0.00019 at w=0.02
+[   47.7s] [holdout] feeds 30000, rows 4,630,966; G3 holdout pool NDCG 0.32379
+[   47.9s] [holdout] (1) top-16 Jaccard raw vs S1cat: mean 0.578 (median 0.600)
+[   48.0s] [holdout] (1) top-16 Jaccard raw vs S1pool: mean 0.669 (median 0.684)
+[   48.0s] [holdout] (1) top-16 Jaccard raw vs S2csls: mean 0.826 (median 0.882)
+[   49.6s] [holdout] (2) cell: 23,325 cell positives, 562,545 beater pairs
+[   49.9s] [holdout]   control -log1p(it_hist_all_luo)    cell AUC 0.5947 ± 0.0028 (cov 1.000)
+[   49.9s] [holdout]   control -maxsim32                  cell AUC 0.6015 ± 0.0027 (cov 0.983)
+[   50.0s] [holdout]   S0raw   cell AUC maxall 0.4015  top16 0.4018  last32 0.3985  rec_hl3 0.3933  last5 0.3965
+[   50.1s] [holdout]   S1cat   cell AUC maxall 0.4200  top16 0.4170  last32 0.4159  rec_hl3 0.4056  last5 0.4073
+[   50.3s] [holdout]   S1pool  cell AUC maxall 0.3978  top16 0.3968  last32 0.3958  rec_hl3 0.3921  last5 0.3936
+[   50.4s] [holdout]   S2csls  cell AUC maxall 0.4028  top16 0.3975  last32 0.3975  rec_hl3 0.3944  last5 0.3967
+[   79.9s] [holdout] (3) nested residual on G3, z(S1cat:maxall): grid -0.00012 ± 0.00008 (z -1.59; w [0.02, 0.0, 0.0, 0.02, 0.0, 0.0, 0.02, 0.02, 0.02, 0.0]) | ridge -0.00040 ± 0.00020 (w [0.0503, 0.0536, 0.0477, 0.0585, 0.0541, 0.0505, 0.0578, 0.0521, 0.0539, 0.0499]) | full-fit best +0.00000 at w=0.0
+[  107.7s] [holdout] (3) nested residual on G3, z(S0raw:maxall): grid -0.00003 ± 0.00008 (z -0.34; w [0.02, 0.02, 0.02, 0.0, 0.0, 0.02, 0.02, 0.02, 0.02, 0.0]) | ridge -0.00034 ± 0.00012 (w [-0.0335, -0.0296, -0.0366, -0.0284, -0.0303, -0.0325, -0.0245, -0.035, -0.0304, -0.0359]) | full-fit best +0.00001 at w=0.02
+[  135.6s] [holdout] (3) nested residual on G3, z(S1pool:maxall): grid -0.00004 ± 0.00008 (z -0.45; w [0.02, 0.0, 0.02, 0.02, 0.0, 0.0, 0.02, 0.02, 0.02, 0.02]) | ridge +0.00004 ± 0.00009 (w [0.0113, 0.0167, 0.0093, 0.0183, 0.0162, 0.0132, 0.0195, 0.0131, 0.0149, 0.0111]) | full-fit best +0.00001 at w=0.02
+[  163.8s] [holdout] (3) nested residual on G3, z(S2csls:maxall): grid -0.00005 ± 0.00007 (z -0.63; w [0.02, 0.0, 0.0, 0.02, 0.02, 0.02, 0.02, 0.0, 0.02, 0.0]) | ridge -0.00019 ± 0.00011 (w [-0.0317, -0.0258, -0.0314, -0.0275, -0.0245, -0.0295, -0.0214, -0.0315, -0.0268, -0.0318]) | full-fit best +0.00001 at w=0.02
+[  194.0s] [holdout] (3) nested residual on G3, z(S1cat:top16): grid +0.00024 ± 0.00012 (z +1.96; w [0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02]) | ridge -0.00085 ± 0.00031 (w [0.1006, 0.098, 0.097, 0.1064, 0.1065, 0.1025, 0.1041, 0.0976, 0.106, 0.0984]) | full-fit best +0.00024 at w=0.02
+[  224.7s] [holdout] (3) nested residual on G3, z(S1cat:rec_hl3): grid -0.00012 ± 0.00015 (z -0.82; w [0.05, 0.02, 0.05, 0.0, 0.02, 0.0, 0.02, 0.05, 0.05, 0.0]) | ridge -0.00317 ± 0.00047 (w [0.1902, 0.182, 0.1825, 0.1828, 0.1866, 0.1795, 0.183, 0.1842, 0.1977, 0.1797]) | full-fit best +0.00004 at w=0.02
+[  224.7s] GATE (i)   S1 cell AUC 0.3924 - raw 0.3730 = +0.0195 (>= +0.05): False
+[  224.7s] GATE (ii)  S1 cell AUC 0.3924 > max control 0.6315: False
+[  224.7s] GATE (iii) val nested grid -0.00031 ± 0.00017 (>= +0.0003 and 2 SE), ridge -0.00048 (> 0): False
+[  224.7s] GATE (iv)  holdout nested -0.00012 (>= 0): False
+[  224.7s] GATE (v)   pmix -0.00024 ± 0.00026 (>= -1 SE): True
+[  224.7s] GATE VERDICT: CLOSED
+[  224.8s] done

@@ -1,0 +1,166 @@
+DECLARATION  nn_x/w12/lit/critic  (adversarial critic of reports/LIT_1115/SYNTHESIS.md; CPU only, stored arrays only, no GPU, no submission file)
+====================================================================================================================
+BLOCK 1 written 2026-11-15T15:57:07Z (date -u), BEFORE any number of this directory was computed.
+
+PURPOSE. SYNTHESIS section 2.2 reads the fresh-density columns (G2 = lit_gnn S2 family i) on the FRESH val predictions of the
+file (pool F) and of W16 and says "no stale-val view exists for the columns". The columns themselves are lag-0 by construction
+(reports/feat_trd_.md section 1: same-day pool of the same split), so only the POOL needs a stale view, and stale-val predictions of
+the 16 wide students are on disk (nn_x/w12/stale/hz2n_review/preds_stale_lt3 = scenario SVL, the faithful witness of
+CURRENT_STATUS log 08:58Z). The stated mechanism of G2 is "a collaborative signal that does not go stale"; its stated host is the
+popularity-light students. Neither was read. This block reads both, in the SAME lens as SYNTHESIS A8, plus a positive control
+that tells whether the lens can see anything in the stale regime.
+
+KNOWN TO ME BEFORE THIS BLOCK: SYNTHESIS A8 (pool F: -0.00030 +- 0.00031, LR p 0.20; placebo mean -0.00050 sd 0.00020, real seed 0
+-0.00024; pool W -0.00045 +- 0.00030); feat_trd_.md (density block +0.0009 +- 0.0006 in a val-fit LightGBM, noise control -0.0010);
+FRESH_1115/pregate.md (fresh exposure counts: NO); the pool loses 0.0033-0.0042 under stale inputs on the holdout [D].
+No number of this directory exists yet.
+
+LENS (identical to nn_x/w12/lit/syn/trd_read.py): conditional logit over all rows of a feed (listwise softmax, multiple positives),
+ridge 10 on all weights but beta, L-BFGS-B maxiter 300, start beta 1; nested GroupKFold(5) by user (user-0 feeds singletons),
+fold seeds 0, 1, 2; d_f = mean over fold seeds of NDCG_f(arm) - NDCG_f(control); GAIN = mean over 14,423 val feeds, SE = sd / sqrt(n).
+CONTROL = b ; b*lm ; cold ; cold*b ; cold*lm (b = pool score, lm = ln M centred, cold = it_hist_all_luo == 0 in the stored fresh file).
+
+POOLS (train-only predictions; zf = within-feed z; member-equal z-mean):
+  F   = zf(0.5 zf(ens_FD16P20kd_ft_val) + 0.5 zf(ens_FD16P20kd_to_val))          reproduction of SYNTHESIS A8 only
+  WL  = 16 wide students (w5_e10_kd05w192 + kd05t25w192, s951-958), @last checkpoints, FRESH val inputs
+  S   = the same 16 members, stale-val predictions (scenario SVL)
+  P   = 4 wide popularity-light students (abl_e10_pop1kd05w192 s951-954, selected checkpoint, fresh val inputs; no stale view of
+        them is on disk; they lack the 8 popularity inputs, so the stale view changes only their one exposure count)
+  WP  = zf(0.8 WL + 0.2 P)      SP = zf(0.8 S + 0.2 P)   (the form of the picks, train-only branch, fresh / stale base)
+ARMS (features = raw value / sd over val rows, and within-feed centred percentile rank):
+  T10 = the 10 columns of SYNTHESIS A8 (20 features)
+  T4  = trd_kde_sday, trd_skde_sday, trd_n95_sday, trd_sn95_sday (8 features; the core of the proposed C-Graph arm)
+  PC  = POSITIVE CONTROL: the stored FRESH counters it_hist_all_luo and seq_cv_pop, log1p (4 features). On S these carry exactly
+        what the stale view removed; on WL they are inputs the members already see.
+PLACEBO (T4 on S, T4 on P): the column vector permuted across the rows of the same feed and cold status, 10 draws (seeds 0..9),
+  fold seed 0; compared with the real read of fold seed 0.
+
+WORDS (information for the prior of the G2 student arm; cannot open or close a GPU arm on their own):
+  REPRO-OK             iff T10 on F reads -0.00030 within +-0.00005.
+  LENS-HAS-POWER       iff PC on S >= +0.0010 with z >= 3.
+  MECHANISM-VISIBLE    iff T4 on S or on SP >= +0.0005 with z >= 2 AND its fold-seed-0 read is above every placebo draw.
+  MECHANISM-NOT-VISIBLE iff LENS-HAS-POWER AND T4 and T10 on S and on SP are all < +0.0003 AND T4 on S (fold seed 0) is not above
+                        every placebo draw.
+  otherwise            INCONCLUSIVE.
+  HOST FLAG "pool-level pass is trivial" iff T4 on P >= +0.0005 with z >= 2 while T4 on WP < +0.0002
+                       (= the pool-level clause of the proposed rule K-STALE can pass without any file-level value).
+REPORTED, NOT DECIDING: NDCG of WL, S, P, WP, SP; pmix-private of every gain; in-sample LR (no ridge) of T10 and T4 on S.
+LIMITS FIXED IN ADVANCE: val only; residual lens (COVERAGE_MAP l.323: under-reads a trained input); P is not re-predicted under
+stale inputs; the stale view is a simulation of private-like staleness, not the test set.
+THREADS: every BLAS / OpenMP pool limited to 6 (threadpoolctl) and polars to 2, so that two pools together stay <= 12; checked with
+/usr/bin/time.
+
+BLOCK 2 written 2026-11-15T16:03:52Z, AFTER block 1 was read (stale_trd_read.log) and BEFORE the read below.
+BLOCK 1 RESULT BY ITS WORDS: REPRO-OK (T10 on F -0.00030 +- 0.00031, per fold seed identical to SYNTHESIS).
+ LENS-HAS-POWER = NO: PC on S +0.00016 +- 0.00026 (z 0.64) although the stale view costs S - WL = -0.00164 +- 0.00051; PC on P
+ +0.00006 +- 0.00034 although P lacks exactly those inputs (WL - P = 0.00157 at pool level). MECHANISM-VISIBLE = NO (T4 on S
+ +0.00015 +- 0.00028, seed-0 read = placebo mean; T4 on SP -0.00020 +- 0.00027). Not MECHANISM-NOT-VISIBLE (needs lens power).
+ -> INCONCLUSIVE: the residual lens of SYNTHESIS 2.2 cannot see a popularity-type input whose trained value is known to be 0.0016.
+ HOST FLAG not raised (T4 on P -0.00014 +- 0.00027), but that read is made with the same blind lens.
+
+PURPOSE OF BLOCK 2. The same question for the OTHER lens of SYNTHESIS (2.1, cold rows: likelihood-ratio test in a conditional
+ logit over the cold rows of a feed, and the slot-preserving cold re-order A2): can it see a pair-wise score on cold rows whose
+ value as a TRAINED input is on record? Positive control: the pre-trained encoder score. Members trained WITHOUT the 6 pre2 inputs
+ exist (nn_x/abl/preds/nn_abl_e10_xdrop_pre2_s951/952, 10 epochs); their matched base is nn_x/w5/preds/nn_w5_e10_base_s951/952;
+ worth of the channel on record: val +0.00077 +- 0.00073 (2 seeds), 2-pool +0.00061 +- 0.00083 [D readout_pre2_10ep.txt]. On cold
+ rows the encoder score has no ID part (hz2n.md l.62), so data/feats/val/pre2_fe_noid.npy IS the input those members lack.
+KNOWN BEFORE: SYNTHESIS A1-A6 numbers; int_gnn: AUC among cold rows of the content-only encoder score 0.677, of imputed s1 0.61.
+POOLS: X = z-mean of the two xdrop_pre2 members (selected checkpoint, train-only val); B = z-mean of the two matched base members.
+COLUMN: c = pre2_fe_noid, z among the cold rows of the feed (cold = it_hist_all_luo == 0). No transform.
+READS, on (i) the 3,000 feeds of sample A (selF of nn_x/w12/lit/int_gnn/s5_cold_val.npz) and (ii) all 14,423 val feeds:
+ L1 likelihood-ratio test, conditional logit over cold rows of feeds with a cold positive and a cold negative:
+    zc(X) vs zc(X) + zc(c), 1 df, no ridge (the form of SYNTHESIS A5).
+ L2 slot-preserving cold re-order: cold rows ordered by zc(X) + w zc(c), slots = the feed's sorted cold X scores, warm rows
+    fixed; w in {0, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0}; nested GroupKFold(5) by user; delta vs X over all feeds of the set, paired SE
+    (the form of SYNTHESIS A2). In-sample curve reported.
+ L3 trained reference: cold rows of X re-ordered by B's score (slots kept): delta vs X (what the trained input, plus seed noise,
+    does to the cold-row order); and B - X as a whole.
+WORDS:
+ COLD-LENS-HAS-POWER (all feeds)   iff L1 p < 0.001 AND L2 nested >= +0.0003 with z >= 2 on all val feeds.
+ ... AT THE SIZE OF SAMPLE A       iff in addition L1 p < 0.05 on sample A.
+ Meaning: with power at the size of sample A, the null of SYNTHESIS 2.1 (p 0.34, A2 -0.00030) is an informative null for a scalar
+ use of the neighbour-completed score; with power only on all feeds, 2.1 was under-powered and its stage B would be needed for
+ the statement "no detectable information"; without power the read says nothing either way.
+
+BLOCK 3 written 2026-11-15T16:05:31Z, AFTER block 2 was read (cold_lens_pc.log) and BEFORE the read below. INFORMATION ONLY.
+BLOCK 2 RESULT BY ITS WORDS: COLD-LENS-HAS-POWER = NO as a pair (L1 p 9.1e-10 on all feeds, 0.024 on sample A = the likelihood-ratio
+ half HAS power at both sizes; L2 nested -0.00007 +- 0.00005 on all feeds, 0 on sample A = the slot-preserving NDCG half has NONE).
+ L3: cold rows of X put in the matched base pool's order, slots kept: -0.00082 +- 0.00028. So the slot-preserving re-order loses
+ NDCG even when the order comes from the model that HAS the input: the lens discards the new score's confidence and keeps the old
+ one's. Reading for SYNTHESIS 2.1: A5 (LR) is the only valid read; A2 / A3 / A4 (all slot-preserving) cannot show a gain.
+QUESTION OF BLOCK 3. Is the failure specific to the slot-preserving form? Same positive control, two additive forms, all val feeds
+ and sample A, nested GroupKFold(5) by user, w in {0, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5}:
+   R1 = X + w * zc(c) on cold rows only (cold rows may cross warm rows);   R2 = X + w * zf(c) on all rows (the project's standard
+   nested residual). No word; reported as the ratio "residual read / trained worth" for a pair-wise content score.
+
+BLOCK 4 written 2026-11-15T16:08:03Z, AFTER blocks 1-3 were read and BEFORE the build below is started.
+BLOCK 3 RESULT (information): the additive residual forms read the positive control at +0.00025 +- 0.00024 (cold rows only) and
+ +0.00046 +- 0.00044 (all rows) on all val feeds, and at -0.00037 +- 0.00047 / -0.00081 +- 0.00094 on sample A: no NDCG lens resolves
+ an input of the encoder channel's size on 3,000 feeds. Only the likelihood-ratio test does (LR 37.5 all feeds, 5.1 sample A).
+PURPOSE OF BLOCK 4 = the confirmatory stage that SYNTHESIS declared and did not run (its own word for 2.1 was INCONCLUSIVE),
+ read with the one lens that passed its positive control. Build: copies of nn_x/w12/lit/int_gnn/{g_common,s2_graph,s3_walk,
+ s4_content,s5_coldsignal}.py in nn_x/w12/lit/critic/stageB/, run as "s5_coldsignal.py 14423" (all val feeds; one process,
+ torch threads 10, numba 8; expected 45-60 min, about 14 GB; writes only stageB/s5_cold_val.npz).
+READ (copy of nn_x/w12/lit/syn/lr_read.py with a feed-subset argument; conditional logit over the cold rows of feeds with a cold
+ positive and a cold negative; columns built exactly as there): pool F and pool W; x1 = imputed s1 (cos-weighted mean), x2 = imputed
+ s2 / deg^0.5; z and rank forms; 15-extras test. Sets: ALL 14,423 val feeds; NEW = the 11,423 feeds outside sample A (untouched);
+ OLD = sample A (must reproduce LR 0.92 / 0.66: build check).
+KNOWN BEFORE: sample A reads LR 0.92 (z form, coef +0.024), 2.83 (rank form, coef +0.053) for x1; the positive control (encoder score
+ on members trained without it) reads LR 37.5 / coef +0.116 on all feeds and 5.1 / +0.095 on sample A; its trained worth on record
+ is +0.0006 .. +0.0008 (SE 0.0007-0.0008).
+WORDS, keyed on x1, z form, pool F, ALL feeds (the already-read 3,000 feeds are included: their read is a null and cannot inflate):
+  G1-LR-PASS  iff LR >= 10.83 (p < 0.001) with a positive coefficient AND x2 (z form) LR >= 3.84 with a positive coefficient
+              AND the NEW feeds alone have a positive x1 coefficient with LR >= 3.84.
+  G1-LR-FAIL  iff LR < 3.84.
+  otherwise   G1-LR-WEAK.
+ Meaning. PASS: conditional information of the order of half the encoder channel's or more on cold rows -> the trained-input arm
+ (base students, full file leverage) deserves its build; my P for +0.0005 at pool level goes to 0.10-0.15. FAIL: no detectable
+ conditional information at a size where the positive control reads 37.5 -> P 0.02, the open CPU route of the graph class is
+ closed by a powered read. WEAK: P 0.03-0.05, not worth the build. None of the three is an adoption or a submission rule.
+ Rank-form and 15-extras tests are reported, not deciding.
+
+BLOCK 5 written 2026-11-15T16:25:19Z, WHILE the stage-B build is running (no stage-B number exists). INFORMATION ONLY, cannot change the word of block 4.
+ Next to the likelihood-ratio tests of block 4, on the all-feeds file: the additive cold-row residual R1 of block 3 for the real
+ columns (pool F and pool W: score + w * zc(column) on cold rows, column transformed as in SYNTHESIS (log1p(v / median positive),
+ z among the cold rows of the feed), w in {0, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5}, nested GroupKFold(5) by user, all val feeds), for
+ x1 and x2. Yardstick: the positive control reads +0.00025 +- 0.00024 in this form. Script stageB_r1.py.
+
+BLOCK 6 written 2026-11-15T16:26:11Z, BEFORE the read below (no number of these arms is known to me). INFORMATION FOR THE LEAD, light CPU read.
+ SYNTHESIS row M4 names as its re-open trigger "a finished hz2n / hzt run (on disk, unread) that reads >= 0 on val and >= +1 SE on
+ pmix-private at FILE level". Train-only val predictions of three unread arms are complete on disk (nn_x/w5/preds/
+ nn_w5_{kcd,lcd}_{hzt,hznFS,hz2nF}_s951-958@last_trainonly_val.npy: 16 re-cools each), with their references (ref, hz). No fine-tuned
+ and no stale-val prediction of them exists, so only the TRAIN-ONLY half of the trigger can be read; the lead's own rules for these
+ arms (E_kd_predeclared.txt 07:41Z rule B, 08:5xZ hzt) need the stale-val witness and are NOT applied or replaced here.
+ KNOWN BEFORE: hz in the file fails in the FINE-TUNED branch (-0.00062) and is level in the train-only branch [D CURRENT_STATUS 13:10Z];
+ hz - ref 16-pool val +0.00024 +- 0.00038 [D].
+ READS (16-pool @last, member-equal z-mean; paired per feed; pmix = src/pmix.weights):
+  (a) arm - ref and arm - hz: val, val M<50, pmix-public, pmix-private, for arm in hz (check), hzt, hznFS, hz2nF;
+  (b) admixture form: [0.8 z(arm) + 0.2 z(P)] - [0.8 z(ref) + 0.2 z(P)], P = 4 wide popularity-light students: val, pmix-private.
+ WORD: TRAIN-ONLY HALF OF THE M4 TRIGGER MET iff for hzt, hznFS or hz2nF form (b) reads val >= 0 AND pmix-private >= +1 SE
+ (3 looks, disclosed). Met = the lead may spend the GPU inference + fine-tunes its own rule needs; not met = the trigger cannot fire
+ through these runs. Nothing here adopts or closes an arm.
+
+BLOCK 7 written 2026-11-15T16:57:39Z, AFTER lr_B_{OLD,ALL,NEW}.log were read. RESULT OF BLOCK 4 BY ITS WORDS, then one information read.
+ Build check: OLD reproduces LR 0.92 / 0.66 / 2.83 exactly. ALL (5,265 pair feeds, 229,380 cold rows, 6,617 cold positives), pool F:
+ x1 z form LR 4.40 (p 0.036, coef +0.024); x2 z form LR 5.39 (p 0.020, coef +0.028); rank forms 11.37 (p 0.0007) / 8.19 (p 0.0042);
+ 15 extras 25.26 (p 0.047). NEW (11,369 untouched feeds): x1 3.48 (p 0.062, coef +0.023); x2 4.79 (p 0.029); rank 8.56 / 8.11.
+ -> 3.84 <= 4.40 < 10.83 -> **G1-LR-WEAK** (not PASS: below 10.83 and NEW x1 below 3.84; not FAIL).
+ INFORMATION READ declared now (cannot change the word): the positive control in RANK form (the same conditional logit, column =
+ centred percentile rank of pre2_fe_noid among the cold rows x sqrt(12)), all feeds and sample A, so that the rank-form LR of the
+ real columns (11.37) has a yardstick of its own. Script cold_lens_pc3.py. Then stageB_r1.py (block 5).
+
+BLOCK 8 written 2026-11-15T16:58:53Z: RESULTS OF BLOCKS 5-7 AND CLOSING NOTES. No further run is made in this directory.
+ Block 7 information: positive control in rank form LR 40.10 (all feeds, coef +0.109), 5.06 (sample A, coef +0.086). So the real
+ columns stand at 12% (z form: 4.40 / 37.51) and 28% (rank form: 11.37 / 40.10) of the positive control's likelihood ratio, i.e.
+ 0.21 and 0.45 of its coefficient.
+ Block 5 information: additive cold-row residual on all val feeds, pool F: x1 -0.00010 +- 0.00015, x2 -0.00013 +- 0.00013; pool W:
+ -0.00010 +- 0.00021 / -0.00016 +- 0.00018 (positive control in this form +0.00025 +- 0.00024): nothing on the NDCG scale.
+ Block 6: hz check reproduces the record (+0.00024 +- 0.00038). Admixture form (b), arm - ref: hz val +0.00004 +- 0.00033, pmix-private
+ +0.00054 +- 0.00052; hzt -0.00010 +- 0.00039 / +0.00049 +- 0.00060; hznFS +0.00014 +- 0.00035 / +0.00094 +- 0.00056; hz2nF +0.00010 +-
+ 0.00050 / +0.00048 +- 0.00077. By the word: TRAIN-ONLY HALF OF THE M4 TRIGGER MET for hznFS (1 of 3 looks). The parent hz meets the
+ same half (+1.03 SE) and is known to fail in the fine-tuned branch, so the half does not discriminate; hznFS - hz as pools:
+ val -0.00023 +- 0.00021, pmix-private -0.00073 +- 0.00036.
+ RESOURCES: stale_trd_read.py 3:54 at 8.7 busy cores, 1.6 GB; stageB/s5_coldsignal.py 48:50 at 6.3 busy cores, 13.9 GB peak (PID
+ 642352, exit 0); every other script under 10 s. The first call of lr_B.py (5 s, before its thread line was patched) ran with the
+ 12-thread setting of the original; single-threaded numpy in practice. One heavy process at a time; no GPU process; nothing outside
+ nn_x/w12/lit/critic/ and reports/LIT_1115/CRITIC.md was written.

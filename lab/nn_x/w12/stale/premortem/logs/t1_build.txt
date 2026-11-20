@@ -1,0 +1,48 @@
+check NDCG vs src/metrics (tied random score): max abs diff 0.0
+pool W8 done 1s
+pool W8b done 2s
+pool W16 done 2s
+pool N8 done 3s
+pool S16 done 4s
+pool Pd done 4s
+pool Pw done 4s
+pool Px8 done 4s
+check G3: corr(stored ens TO val branch, member-equal TO pool of mine) = 1.000000
+check C3: corr(stored ens TO val branch, member-equal TO pool of mine) = 1.000000
+check W8kd: my four branch pools reproduce preds/ens_W8kd_* (corr > 0.999999)
+check W16kd: my four branch pools reproduce preds/ens_W16kd_* (corr > 0.999999)
+check S16kd: my four branch pools reproduce preds/ens_S16kd_* (corr > 0.999999)
+W8         val FINAL 0.40165 FT 0.40087 TO 0.40157 staleTO 0.39982 SVF 0.40131 hold 0.32456
+W16        val FINAL 0.40158 FT 0.40070 TO 0.40144 staleTO 0.39994 SVF 0.40084 hold 0.32460
+S16        val FINAL 0.40173 FT 0.40085 TO 0.40172 staleTO 0.39992 SVF 0.40123 hold 0.32428
+W8b        val FINAL 0.40139 FT 0.40043 TO 0.40122 staleTO 0.39997 SVF 0.40080 hold 0.32413
+C3         val FINAL 0.40101 FT 0.40043 TO 0.40103 staleTO 0.39970 SVF 0.40040 hold 0.32306
+G3         val FINAL 0.40032 FT 0.39984 TO 0.40035 staleTO 0.39941 SVF 0.39986 hold 0.32379
+Pd         val FINAL 0.40027 FT 0.40033 TO 0.39943 staleTO 0.39908 SVF 0.40036 hold 0.31715
+Pw         val FINAL 0.40076 FT 0.40099 TO 0.40000 staleTO 0.39997 SVF 0.40101 hold 0.31772
+Px8        val FINAL 0.40093 FT 0.40103 TO 0.39987 staleTO 0.39963 SVF 0.40094 hold 0.31752
+W8P10      val FINAL 0.40195 FT 0.40146 TO 0.40200 staleTO 0.40019 SVF 0.40177 hold 0.32428
+W8P10x8    val FINAL 0.40204 FT 0.40150 TO 0.40175 staleTO 0.40009 SVF 0.40184 hold 0.32425
+W16P10d    val FINAL 0.40178 FT 0.40105 TO 0.40166 staleTO 0.40048 SVF 0.40125 hold 0.32436
+W16P10x8   val FINAL 0.40181 FT 0.40103 TO 0.40180 staleTO 0.40030 SVF 0.40131 hold 0.32443
+W16P10w    val FINAL 0.40170 FT 0.40112 TO 0.40180 staleTO 0.40033 SVF 0.40143 hold 0.32441
+W8P20      val FINAL 0.40214 FT 0.40167 TO 0.40212 staleTO 0.40070 SVF 0.40195 hold 0.32393
+W8P20x8    val FINAL 0.40224 FT 0.40184 TO 0.40200 staleTO 0.40069 SVF 0.40181 hold 0.32413
+W16P20d    val FINAL 0.40172 FT 0.40125 TO 0.40152 staleTO 0.40075 SVF 0.40157 hold 0.32404
+W16P20x8   val FINAL 0.40189 FT 0.40122 TO 0.40173 staleTO 0.40059 SVF 0.40159 hold 0.32405
+W16P20w    val FINAL 0.40214 FT 0.40140 TO 0.40190 staleTO 0.40068 SVF 0.40184 hold 0.32414
+W8P30      val FINAL 0.40177 FT 0.40146 TO 0.40177 staleTO 0.40059 SVF 0.40212 hold 0.32352
+W8P30x8    val FINAL 0.40216 FT 0.40176 TO 0.40201 staleTO 0.40094 SVF 0.40170 hold 0.32354
+W16P30d    val FINAL 0.40202 FT 0.40127 TO 0.40156 staleTO 0.40079 SVF 0.40204 hold 0.32331
+W16P30x8   val FINAL 0.40220 FT 0.40139 TO 0.40175 staleTO 0.40100 SVF 0.40187 hold 0.32353
+W16P30w    val FINAL 0.40236 FT 0.40159 TO 0.40220 staleTO 0.40086 SVF 0.40186 hold 0.32368
+W8P40      val FINAL 0.40195 FT 0.40148 TO 0.40170 staleTO 0.40103 SVF 0.40201 hold 0.32285
+W8P40x8    val FINAL 0.40218 FT 0.40154 TO 0.40219 staleTO 0.40107 SVF 0.40185 hold 0.32313
+W16P40d    val FINAL 0.40207 FT 0.40139 TO 0.40144 staleTO 0.40117 SVF 0.40211 hold 0.32284
+W16P40x8   val FINAL 0.40244 FT 0.40133 TO 0.40202 staleTO 0.40141 SVF 0.40218 hold 0.32293
+W16P40w    val FINAL 0.40236 FT 0.40180 TO 0.40237 staleTO 0.40133 SVF 0.40202 hold 0.32324
+check W8P20 - W8 FINAL val +0.00049 +- 0.00031 (on record +0.00049 +- 0.00031); W8P20 val 0.40214 (0.40214)
+check W16 - W8 FINAL val -0.00007 +- 0.00034 (on record -0.00007 +- 0.00034); W16 val 0.40158 (0.40158)
+check W8P20 - W8 holdout TO -0.00063 +- 0.00022 (on record -0.00063 +- 0.00022)
+check W8P20 - W8 stale-val TO +0.00088 +- 0.00036 (witness +0.00088 +- 0.00036)
+done 11s

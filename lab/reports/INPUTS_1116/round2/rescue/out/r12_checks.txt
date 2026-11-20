@@ -1,0 +1,43 @@
+[     0s] === A. independent re-derivation on a sample ===
+[    14s]   hold: 400 sampled rows checked
+[    14s]   pool: 300 sampled rows checked
+[    15s]   val_nat: 300 sampled rows checked
+[    16s]   val_twin: 400 sampled rows checked
+[    17s]   test_nat: 300 sampled rows checked
+[    17s]   mismatches / rows checked: imp5 0 / 1700, coec5 0 / 1700, gapf5 0 / 1700, never5 0 / 1700, bt5_seen 0 / 1700, ns1_5 0 / 1700, ns2_5 0 / 1700, uc5 0 / 600, reshown5 0 / 600
+[    17s]   RE-DERIVATION VERDICT: PASS
+[    17s] 
+=== B. D5 natural-val columns against the stored full-depth columns of record ===
+[    17s]   bt5      : present D5 1.0000 / stored 1.0000; Pearson +0.763, Spearman +0.792 on rows where both are present (1.000)
+[    17s]   bt5_seen : present D5 1.0000 / stored 1.0000; Pearson +0.838, Spearman +0.838 on rows where both are present (1.000)
+[    17s]   coec5    : present D5 1.0000 / stored 1.0000; Pearson +0.767, Spearman +0.746 on rows where both are present (1.000)
+[    17s]   kn1_5    : present D5 0.9998 / stored 0.9998; Pearson +0.920, Spearman +0.932 on rows where both are present (1.000)
+[    17s]   kn20_5   : present D5 0.9998 / stored 0.9998; Pearson +0.977, Spearman +0.977 on rows where both are present (1.000)
+[    17s]   X3_5     : present D5 1.0000 / stored 1.0000; Pearson +0.915, Spearman +0.871 on rows where both are present (1.000)
+[    17s]   ns2_5    : present D5 1.0000 / stored 1.0000; Pearson +0.974, Spearman +0.868 on rows where both are present (1.000)
+[    17s]   gapf5    : present D5 0.5814 / stored 0.6505; Pearson +0.612, Spearman +0.561 on rows where both are present (0.581)
+[    17s]   never5   : present D5 1.0000 / stored 1.0000; Pearson +0.864, Spearman +0.862 on rows where both are present (1.000)
+[    17s]   uc5      : present D5 0.1662 / stored 0.9498; Pearson +0.905, Spearman +0.879 on rows where both are present (0.166)
+[    18s]   als5     : present D5 0.4030 / stored 0.6206; Pearson +0.737, Spearman +0.732 on rows where both are present (0.403)
+[    18s] 
+=== C. stored columns of record on natural val under the null model pool + own inputs + nx3 (data/feats/val), z / rank form ===
+[    27s]   stored column for bt5      : without nx3 +3.87 / +5.38 | with nx3 +3.92 / +5.45 || D5 natural column, with nx3 +2.99 / +3.57
+[    28s]   stored column for bt5_seen : without nx3 -3.45 / -3.60 | with nx3 -3.47 / -3.62 || D5 natural column, with nx3 -2.12 / -2.31
+[    28s]   stored column for coec5    : without nx3 +3.48 / +3.46 | with nx3 +3.47 / +3.52 || D5 natural column, with nx3 +3.49 / +3.19
+[    28s]   stored column for kn1_5    : without nx3 -4.01 / -3.13 | with nx3 -3.92 / -3.08 || D5 natural column, with nx3 -3.36 / -2.82
+[    28s]   stored column for kn20_5   : without nx3 -2.71 / -2.24 | with nx3 -2.54 / -2.08 || D5 natural column, with nx3 -2.23 / -1.83
+[    29s]   stored column for X3_5     : without nx3 +4.54 / +3.34 | with nx3 +4.20 / +2.92 || D5 natural column, with nx3 +3.25 / +1.94
+[    29s]   stored column for ns2_5    : without nx3 -3.79 / -3.83 | with nx3 -3.47 / -3.59 || D5 natural column, with nx3 -2.69 / -2.86
+[    29s]   stored column for gapf5    : without nx3 -5.60 / -5.34 | with nx3 -5.58 / -5.30 || D5 natural column, with nx3 -2.63 / -2.46
+[    29s]   stored column for never5   : without nx3 +2.23 / +2.09 | with nx3 +2.39 / +2.26 || D5 natural column, with nx3 -0.14 / -0.16
+[    29s]   stored column for uc5      : without nx3 +1.94 / +2.26 | with nx3 +1.92 / +2.24 || D5 natural column, with nx3 +1.57 / +1.87
+[    30s]   stored column for als5     : without nx3 +4.04 / +4.42 | with nx3 +3.38 / +3.77 || D5 natural column, with nx3 +1.67 / +1.39
+[    30s] 
+=== D. test-like-only variant of the view (has = slot >= 11): C4 PSI on POOL rows of slots 11-13 against public / private / (val for scale) ===
+[    30s]   bt5:rk: pool slots 11-13 vs public 0.0650, vs private 0.0077, vs val 0.4499
+[    30s]   coec5:rk: pool slots 11-13 vs public 0.0348, vs private 0.0065, vs val 0.2312
+[    31s]   kn1_5:z: pool slots 11-13 vs public 0.0003, vs private 0.0004, vs val 0.0002
+[    31s]   ns2_5:z: pool slots 11-13 vs public 0.0266, vs private 0.0568, vs val 0.0136
+[    32s]   ns2_5:rk: pool slots 11-13 vs public 0.0304, vs private 0.0693, vs val 0.0102
+[    32s]   als5:z: pool slots 11-13 vs public 0.0009, vs private 0.0040, vs val 0.0039
+[    32s] DONE

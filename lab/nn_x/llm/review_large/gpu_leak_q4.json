@@ -1,0 +1,119 @@
+{
+ "backbone": "qwen3.5-4b",
+ "ckpt": "llmq4_L1_s23",
+ "load_s": 7.9,
+ "ckpt_step": 1514,
+ "mean_abs_lora_B": 0.002450588745996356,
+ "G1_perm_equivariance_fp32": {
+  "ok": true,
+  "max_abs_err": 1.5497207641601562e-06,
+  "score_std": 1.4208203554153442,
+  "tol": 0.001
+ },
+ "noise_floor_fp32": 0.0,
+ "G2_labels_positions_not_read_fp32": {
+  "ok": true,
+  "keys_read": [
+   "H",
+   "M",
+   "ccat",
+   "ce",
+   "ce_raw",
+   "cf",
+   "cmask",
+   "cmiss",
+   "dom",
+   "hcat",
+   "he",
+   "he_raw",
+   "hemb_ok",
+   "hes",
+   "het",
+   "hmask",
+   "ue_raw",
+   "un",
+   "user0",
+   "xt"
+  ],
+  "max_diff_flipped_labels_reversed_pos": 0.0,
+  "repeat_noise_floor": 0.0
+ },
+ "G3_cross_feed_isolation_fp32": {
+  "ok": true,
+  "max_abs_change_other_feeds": 0.0,
+  "max_abs_feed_alone_vs_in_batch": 3.337860107421875e-06,
+  "tol_alone": 0.001
+ },
+ "G4_other_candidate_isolation_L1_fp32": {
+  "ok": true,
+  "max_abs_change_other_candidates": 0.0,
+  "max_abs_change_perturbed_candidate": 7.255684852600098,
+  "L2_positive_control_max_change_other_candidates": 0.005694746971130371
+ },
+ "G1_perm_equivariance_bf16": {
+  "ok": true,
+  "max_abs_err": 0.0010478496551513672,
+  "score_std": 1.4202739000320435,
+  "tol": 0.07101369500160218
+ },
+ "noise_floor_bf16": 0.0,
+ "G2_labels_positions_not_read_bf16": {
+  "ok": true,
+  "keys_read": [
+   "H",
+   "M",
+   "ccat",
+   "ce",
+   "ce_raw",
+   "cf",
+   "cmask",
+   "cmiss",
+   "dom",
+   "hcat",
+   "he",
+   "he_raw",
+   "hemb_ok",
+   "hes",
+   "het",
+   "hmask",
+   "ue_raw",
+   "un",
+   "user0",
+   "xt"
+  ],
+  "max_diff_flipped_labels_reversed_pos": 0.0,
+  "repeat_noise_floor": 0.0
+ },
+ "G3_cross_feed_isolation_bf16": {
+  "ok": true,
+  "max_abs_change_other_feeds": 0.0,
+  "max_abs_feed_alone_vs_in_batch": 0.0035338401794433594,
+  "tol_alone": 0.07101369500160218
+ },
+ "G4_other_candidate_isolation_L1_bf16": {
+  "ok": true,
+  "max_abs_change_other_candidates": 0.0,
+  "max_abs_change_perturbed_candidate": 7.249260902404785
+ },
+ "G5_branch_equals_HF_forward_fp32": {
+  "ok": true,
+  "max_rel_err": 4.549175173451658e-06,
+  "n_checks": 18,
+  "history_lengths": [
+   256,
+   168,
+   40,
+   1,
+   0,
+   0
+  ]
+ },
+ "G6_saved_preds_reproduced_by_ckpt": {
+  "ok": true,
+  "max_abs_diff_val": 2.6226043701171875e-06,
+  "max_abs_diff_holdout": 0.0008740425109863281,
+  "score_std": 1.4208203554153442
+ },
+ "peak_mem_gb": 21.202454090118408,
+ "all_pass": true
+}

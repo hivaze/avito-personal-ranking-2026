@@ -1,0 +1,241 @@
+ADVERSARIAL CRITIQUE 2 of reports/EXTERNAL_TOP1_1113.md and its three analyses (external, top1, publicprobe)
+Written 2026-11-12 ~23:25 UTC. CPU only (12 threads), new files only, all under nn_x/audit/critique2/ (this file, c2_01..c2_05 .py,
+out/*.log, out/*.json, out/*.npy). No process touched. Conventions as in the report: +- = paired per-feed SE over the 14,423
+val feeds unless stated; G3 = cand_G_F10F7xF7x70_memeq (val 0.40032, public 0.392820). Live board re-read at ~23:05 UTC: #1
+0.3982555809 still 1 entry ("3h"), 440 teams, 1215 participants, 5431 submissions; nothing changed since the 22:00 snapshot.
+
+=====================================================================================================================
+0. VERDICT IN FIVE LINES
+=====================================================================================================================
+1. The report's one NEW piece of evidence for the "val-heavy protocol" hypothesis and for design D1 (h3 arm C1: joint GBDT with
+   val rows at weight 1 = +0.00206 +- 0.00101 over train-only, "z 2.0", H3 raised 0.08 -> 0.10) was measured with every arm at
+   ONE seed. Re-running arm A at seeds 12/13 moves it by +0.00075 / +0.00192 (c2_01): the seed spread of the reference alone is
+   as large as the claimed effect. With 2 C1 seeds vs 3 A seeds the contrast is +0.0015 +- 0.0007 at SEED level (6/6 pairings
+   positive, smallest margin +0.0001), and the "weight 10 gives nothing, weight 1 gives +0.002" dose-response that the synthesis
+   reads as a mechanism is a single-seed difference inside seed noise (C1 - C10 +0.0020 +- 0.0012 per feed, seed sd ~0.001).
+   The H3 raise and the "2-SE GBDT precedent" for D1 are not supported; D1 keeps its earlier prior (~0.08-0.10).
+2. The public-ablation programme's central device (the "re-cool dose-response": public residual = -0.00130 x re-cool share,
+   decided by three share-0 probes P1/P5/P6, feeding a "re-cool discount" into the frozen Dec-7 estimator) is CONFOUNDED.
+   Across the five scored pools re-cool share and val delta are collinear (corr +0.95; c2_03). A plain "val-selected pools
+   regress to G3 on public" model (resid = -0.00035 - 0.93 x d_val, i.e. public delta ~ -0.00035 + 0.07 x d_val) fits the five
+   residuals with chi2 0.4 on 3 df, explains the two share-0.70 points the share model cannot (TO-only -0.00040, S2 -0.00091),
+   and predicts the SAME public readings for the share-0 probes: Pall -0.00047 vs H2 -0.00048 (0.0 SE apart), F10only -0.00054
+   vs -0.00069 (0.2 SE), NEW12 -0.00040 vs +0.00014 (0.9 SE). Under the shrinkage model the programme's pooled excess E would
+   read ~+0.0008 and TRIGGER the re-cool discount although lowering the re-cool share buys nothing. The five residuals are also
+   consistent with pure 1:1 transfer plus noise (chi2 7.1 on 5 df, p 0.22). Public cannot answer the question the programme
+   asks of it; the discount term must come out of the Dec-7 estimator.
+3. Two of today's three built probes duplicate CLOSED items: P2 (w_ft 1.0) re-opens w_ft, closed three times (ROUND5 2c,
+   sol_ensemble stop-list, INSIGHTS do-not; critique R4) and already probed once today (TO-only -0.00047, one-shot z -0.9); P3
+   (M-split) re-tests a rule that FAILED its pre-declared fresh-member confirmation at 18:54 (-0.00017 +- 0.00031) on the very
+   members it was found on, with 26% power at its own adoption bar even if val is right (c2_03 d). P1 (NEW12) separates its two
+   hypotheses by 1.46 SE, below the programme's own ">= 0.001 / 2 SE" readability bar, and by 0.9 SE from the shrinkage model.
+4. The external branch's CLOSE is right but its headline argument is wrong. The "oracle ceiling" (+0.00062 +- 0.00036, "the most
+   ANY category-level demand series can add") is a smoothing artefact: the 512-cell in-sample table is 46% binomial noise
+   (median 24 positives per cell), reads +0.0005..+0.0008 across K = 30/100/300 and three fold seeds, and a 3072-cell leaky table
+   reads +0.0046 +- 0.0007 (c2_02). A leaky table bounds nothing. What closes the branch is the HONEST evidence: user-OOF cat x
+   day +0.00002 / +0.00012 / +0.00017 over three fold seeds, the within-train week-1 -> week-2 replications (|d| <= 0.0004), the
+   joint 9-prior combiner -0.00034 +- 0.00021, and the negative forward trend. The registry row should cite those, not the oracle.
+5. Of the report's nine ranked actions: 1 (P1-P3) is two duplicates plus one unreadable probe; 2 (D2) is not "never tried on the
+   train side" (cb26 E1 = NN residual CatBoost trained on the 30K train-period holdout feeds: val -0.00031, holdout OOF -0.00042
+   z -2.3) and the GBDT-proxy -> NN transfer failed today (TRUNC); 3 (D1) loses its new motivation; 4 (G1) compares the public
+   cost with the wrong null (composition alone predicts a ratio of 0.79-0.87, c2_04) to arbitrate a lever (hzcd) the registry
+   already CLOSED; 6 (D3) has a kill rule (single val >= 0.393) 0.0017 below the project's own gate (a); 9 is a GBDT proxy of a
+   cooldown-data class that is 0 of 15. Items 5 (TRUNC read-outs, 0 GPU), 7 (close external) and 8 (board watch) stand. The one
+   live candidate-generating item with holdout evidence is not in the report: decide8 / W5base (CURRENT_STATUS 22:54).
+
+=====================================================================================================================
+1. THE FIVE MOST DECISION-RELEVANT NUMBERS, RE-CHECKED INDEPENDENTLY
+=====================================================================================================================
+N1. h3 arm C1 "+0.00206 +- 0.00101 (z 2.0)" (top1 2.3 / report 2.3, 4 rank 3). PARTLY REFUTED: real but half the size, and the
+    reported SE is the wrong SE.
+    c2_01_h3_seed.py (same harness, data, folds and params as nn_x/audit/top1/h3_val_value_gbdt.py; out/c2_01_h3_seed.{log,json}):
+      arm A (train-only, 150K feeds) seed 11 0.37064 (stored) | seed 12 0.37139 | seed 13 0.37257  -> seed spread 0.0019, sd ~0.0010
+      A12 - A11 +0.00075 +- 0.00101; A13 - A11 +0.00192 +- 0.00103; A12 - A13 -0.00117 +- 0.00101 (all "2-SE" by the per-feed SE)
+      arm C1 (joint, val weight 1, user-OOF) seed 11 0.37271 (stored) | seed 12 0.37338
+      C1(12) - A(11) +0.00274; C1(12) - A(12) +0.00199; C1(12) - A(13) +0.00082; C1(12) - C1(11) +0.00068 +- 0.00096
+      mean(C1 s11,s12) - mean(A s11,s12,s13) = +0.00151 +- 0.00067 (per-feed); seed-level SE sqrt(0.00097^2/3 + 0.00047^2/2) ~ 0.00065
+    Reading: the per-feed paired SE treats both GBDTs as fixed and understates the uncertainty of a single-seed-vs-single-seed
+    contrast by the bagging/feature-fraction seed noise (~0.001 here, as large as the effect). The datum survives as "+0.0015 +-
+    0.0007 at seed level, Thu +0.0028 vs Tue +0.0004" and says what the NN FT already said (val labels are worth ~+0.001-0.0015
+    to a member); it does not say that a NEW protocol extracts more than the FT. The C1-vs-C10 "mechanism" (natural weight good,
+    x10 nothing) is a single-seed difference (+0.0020 +- 0.0012 per feed, ~1.3 seed-SE) and must not be cited.
+N2. "Oracle ceiling" +0.00062 +- 0.00036 and the sentence "no external series can beat an oracle built from the target labels"
+    (external finding 1; report 1.3, 1.7; registry row text). NUMBER REPRODUCES, ARGUMENT REFUTED.
+    c2_02_oracle.py (independent implementation of the e02 P6 tables and nested harness; out/c2_02_oracle.log):
+      P6d in-sample cat x day x hour-bucket, K=100: +0.00062 / +0.00072 / +0.00074 +- 0.00036 over fold seeds 0/1/2 (reproduces);
+      K=30: +0.00073..+0.00083 (z 2.0-2.3); K=300: +0.00053..+0.00071. The number moves with the smoothing constant.
+      The table is noise-dominated: 393 cells with >200 rows, median 24 positives per cell; between-cell variance of the smoothed
+      log-ratio 0.123 vs mean binomial variance 0.056 -> 46% of the "oracle" is sampling noise of the val labels themselves.
+      A finer leaky table (cat x day x hour24, 3072 cells, K=100) reads +0.00460 +- 0.00070 (z 6.6, w 1.0 in every fold): a
+      leaky in-sample table can be made to read anything between 0 and the label-memorisation limit by choosing the cell count.
+      Honest user-OOF cat x day: +0.00002 / +0.00012 / +0.00017 (+- 0.0002) over fold seeds 0/1/2; in-sample cat x day (128
+      cells) -0.00010 / -0.00014 / -0.00012: the coarse table has NO real between-day category signal on val.
+    Reading: the close stands on the honest OOF reads, the P8 week-1 -> week-2 replications (+0.00001 / -0.00003 / +0.00001,
+    trend -0.00038 +- 0.00017) and the joint combiner (-0.00034 +- 0.00021), i.e. on "the genuine category x calendar variation
+    in this window is below 0.0003 on every honest read". The "ceiling" framing is logically invalid and should not go into the
+    registry (it invites the rebuttal "your oracle is just a badly smoothed table" and it is correct).
+N3. The publicprobe transfer structure: WLS slope -0.00130 +- 0.00076 per unit re-cool share (1.7 sigma), the H1/H2 predictions
+    for NEW12 / Pall / F10only, the pubmix expectations and public SEs, and the composition shares (report 3.0-3.1, 5.3).
+    NUMBERS REPRODUCE; THE INFERENCE IS CONFOUNDED.
+    c2_03_pubresid.py (out/c2_03_pubresid.log):
+      composition (label-free): 14-24h MSK val 0.482 / public 0.360 / private 0.596; 18-24h 0.251 / 0.181 / 0.369; weekend 0 /
+      1.000 / 0.242; M<50 0.409 / 0.387 / 0.392; cold>.3 0.427 / 0.735 / 0.836 (all as reported); boundary 1790497920 = Sun
+      Sep 27 11:32 MSK, public 8,562 = 29.9% of 28,595 test feeds. Addition: cold>.45 share val 0.083 / public 0.213 / private
+      0.324 -> private is still colder in the tail; "public is already private-like on coverage" holds for the 0.3 cut only.
+      pubmix table: every entry reproduces to 1e-5 (M2 +0.00059 +- 0.00043, NEW12 -0.00077 +- 0.00062, msplit +0.00048 +-
+      0.00035 incl. the slice form, FTonly -0.00046 +- 0.00051, Pall -0.00138 +- 0.00055, F10only -0.00160 +- 0.00063).
+      WLS through G3 on the three points used: slope -0.00130 +- 0.00075 (reproduces). But the share model predicts resid 0 for
+      the two share-0.70 pools and they read -0.00040 (TO-only) and -0.00091 (S2).
+      Competing model on all 5 scored pools: resid = -0.00035 +- 0.00028 + (-0.934 +- 0.418) x d_val, chi2 0.4 on 3 df; share
+      model (no intercept) chi2 4.1 on 5 df; pure 1:1 + noise chi2 7.1 on 5 df (p 0.22; computed from the logged SE_tot).
+      corr(re-cool share, d_val) over the 5 pools = +0.951: the two explanations are not separable with these pools.
+      Predicted public delta of the planned probes: NEW12 H1 -0.00077 | H2 +0.00014 | shrinkage -0.00040 (SE 0.00062);
+      Pall -0.00138 | -0.00048 | -0.00047 (SE 0.00055); F10only -0.00160 | -0.00069 | -0.00054 (SE 0.00063); N1 -0.00028 |
+      +0.00006 | -0.00039 (SE 0.00036). Pooled excess E under shrinkage = mean(+0.00037, +0.00091, +0.00106) ~ +0.0008 = the
+      programme's "apply the discount" threshold.
+    Reading: the programme's rule 4.3 would attribute a generic regression-to-the-mean of val-selected pools to the re-cool
+    component and shift the final pick toward lower re-cool share (the holdout-weaker member type: NEW singles are ~0.0004 below
+    the m02 re-cools on the holdout, CURRENT_STATUS 17:25). The D_C term is not identifiable from public readouts of these pools.
+N4. TRUNC stage-E FAIL numbers (report 0.3, 4 rank 5; registry row): member val -0.00048 +- 0.00051, holdout -0.00009 +-
+    0.00029, 4-member pool -0.00034 / -0.00087 +- 0.00038. CONFIRMED (selected checkpoints, the pre-declared primary).
+    c2_05_trunc_e.py from nn_x/w5/preds (out/c2_05_trunc_e.log): per-seed d val -0.00005 / -0.00038 / -0.00138 / -0.00009
+    (holdout -0.00052 / -0.00001 / +0.00016 / +0.00002), pooled member -0.00048 +- 0.00051 (seed-level sd of the four deltas
+    0.00062), 4-pool holdout -0.00087 +- 0.00038: exact. At the LAST checkpoints: member val -0.00016 +- 0.00051, holdout +0.00007
+    +- 0.00029, 4-pool holdout -0.00042 +- 0.00038. Added to the 20-member G3 TO branch (24 members): trunc - base -0.00013 +-
+    0.00025 (selected) / +0.00006 +- 0.00026 (last). TRUNC is null at the level that matters, not harmful; closing it is right and
+    nothing here argues for re-opening it (trunc2 / 955-956 read under their rules; truncp2 cooldown form was -0.00052).
+N5. G1 decision rule "public cost >= 0.8 x val cost -> family carries over; <= 0.5 x -> promote hzcd" (publicprobe 2.4; report 3.1
+    P4, 4 rank 4). THRESHOLDS ANCHORED ON THE WRONG NULL.
+    c2_04_popcost_mix.py on the stored CPU replays (nn_x/audit/features/out/replay; out/c2_04_popcost_mix.log): zeroing the
+    popularity family costs r6_cd_m02_r101 -0.00566 +- 0.00108 val, v23_gru_pre2s_s501 -0.00611 +- 0.00107 (as reported). The
+    cost is composition-dependent: cold>.3 feeds -0.0037 vs cold<=.3 -0.0071..-0.0079 (the family is already absent on cold
+    feeds). Reweighted to the public M x cold-share mix (pmix) the EXPECTED public cost is -0.00495 / -0.00481, i.e. a ratio of
+    0.87 / 0.79 to the val cost under composition alone (M-mix only: 1.00). So "0.8" is the null, not "carries over", and "0.5" is
+    ~2 SE below the null (ratio SE ~0.16 at SE_pub 0.0008). Stale-popularity replays (st_pop) cost -0.0012 / -0.0015 val and MORE
+    under the private mix (ratio 1.4 / 1.2-1.5): the staleness direction is the opposite of the composition direction, which is
+    why a single public cost cannot be read as "over-reliance". If G1 is run at all its rule must compare with -0.0048..-0.0050
+    (pmix expectation), and the lever it arbitrates (hzcd) is CLOSED in the registry (holdout -0.00052 z -2.75; critique R6).
+
+=====================================================================================================================
+2. REFUTED OR UNSUPPORTED CLAIMS (claim -> why; file)
+=====================================================================================================================
+R1 "C1 joint GBDT +0.00206 +- 0.00101 (z 2.0) ... the signature of a small but real in-distribution signal extracted only when
+   it is NOT over-fit; H3 0.08 -> 0.10; D1 'now with a 2-SE GBDT precedent'" -> single-seed arms; A's own seed spread is 0.0019;
+   seed-level contrast +0.0015 +- 0.0007; C1 vs C10 inside seed noise. (c2_01)
+R2 "Oracle ceiling +0.00062: the most ANY category-level demand series can add ... no external series can beat an oracle built from
+   the target labels" -> the in-sample table is 46% label-sampling noise and a finer leaky table reads +0.0046; a leaky table is
+   not a bound. The branch is closed by the honest reads (0 +- 0.0002), not by the oracle. (c2_02)
+R3 "Four realised public deltas fit ONE structure: non-re-cool differences transfer 1:1, the re-cool component carries a val-only
+   excess proportional to share (1.7 sigma); the programme's first job is to make it 3-sigma or kill it; it decides the member
+   composition of the final pick" -> share and d_val collinear (0.95); shrinkage model fits better (chi2 0.4/3 vs 4.1/5) and
+   explains TO-only / S2; pure noise also fits (chi2 7.1/5); the three share-0 probes predict the same readings under both
+   models (Pall identical). Not decidable on public. (c2_03)
+R4 "P1 NEW12 is readable in one shot (H1 -0.00077 vs H2 +0.00014, SE 0.00062)" -> separation 1.46 SE, below the programme's own
+   ">= 0.001" bar; 0.9 SE from the shrinkage prediction. (c2_03 d)
+R5 "P3 msplit: r >= +0.0007 -> adopt TO-only on M<50 ... fresh-sample test of the M-split" -> the M-split FAILED its pre-declared
+   fresh-member confirmation (-0.00017 +- 0.00031, CURRENT_STATUS 18:54; "it stays closed" 19:31; INSIGHTS do-not "Segment
+   routing"); P3 re-tests it on the members it was found on; P(adopt | val right) 0.26, P(adopt | uniform null) 0.006; the
+   expected public transfer of any val-found pool effect so far is ~0.07-0.14 x. (c2_03 d; critique N3/R5)
+R6 "P2 FT-only completes the w_ft curve; 'the critique's R4 objection is answered by using both endpoints'" -> w_ft is CLOSED
+   three times (COVERAGE_MAP: nested +0.0002 z 0.96; sol_ensemble stop-list; INSIGHTS do-not), the TO-only endpoint was already
+   bought today for -0.00047 at SE 0.0005 (z -0.9), and a third point at SE 0.0005 on a curve whose val shape is flat within
+   +-0.0005 cannot move the weight by the programme's own rule (never beyond 0.75). Spends a submission for nothing.
+R7 "Final-pick estimator S_C = 0.5 (V_C + D_C) + 0.5 P_C with the re-cool discount D_C from the pooled share-0 probes" -> D_C is
+   not identifiable (R3); under the shrinkage model it would be applied spuriously and push the pick toward the member type that
+   is weaker on the holdout. Drop D_C; keep V and P (and the holdout eligibility).
+R8 "G1: public cost >= 0.8 x val cost -> carries over; <= 0.5 x -> promote hzcd (the only private-specific lever left)" -> 0.8 is the
+   composition-only null (0.79-0.87); hzcd is CLOSED (holdout -0.00052 z -2.75, the family "trades cold vs warm", critique R6);
+   a 1-submission ratio read cannot re-open it. (c2_04)
+R9 "D2: NN-as-feature inside a train-side GBDT was NEVER tried on the train side" -> cb26 E1 trained a residual CatBoost on the
+   30K train-period random-like holdout feeds with the NN TO pool as baseline (val -0.00031, holdout OOF -0.00042, z -2.3;
+   registry 'CatBoost / GBDT in every role: CLOSED'). D2 differs in scale (3.1M production feeds, OOF NN scores) and in the
+   training-only columns, i.e. it is the GBDT-proxy idea that failed to transfer today (TRUNC: proxy +0.0022..+0.0031, NN
+   -0.0005). The ARGUS +2.32% is a GBDT production ranker gaining an NN feature, not a weak GBDT (0.37-0.38 here) re-ranking a
+   strong NN (0.397). P ~0.15 for >= +0.001 member is optimistic; ~0.05-0.1 is the registry-consistent prior.
+R10 "D3 kill: single val < 0.393" -> gate (a) requires a single member within 0.002 of the best family on val AND holdout (F7x TO
+   0.39667 / 0.31999 -> >= 0.3947 / >= 0.3180). A 0.393 member fails the project's own admission rule by 0.0017; the frontier law
+   (sol_ensemble 2.5) says it would cost, not add. ListMLE is CLOSED (worse) in the frozen-trunk zoo; DIN/hcap null.
+R11 "H1 merge excluded ... the team count ROSE 439 -> 440 (a merge lowers it)" -> a merge (-1) plus two new registrations (+2) also
+   gives +1; the count is not exclusionary. The entries-count mechanics quoted from the join-team page are the real argument;
+   H1 at 0.05 is fine, the count argument should not be cited.
+R12 "A 1-entry team has no winner's-curse optimism; the number is an unbiased single draw" -> true only if the team chose to upload
+   once blind; a team that developed on val and uploaded its val-best has the same val-selection optimism we measured for our
+   own pools (val-best -> public shortfall -0.0004..-0.0010). Immaterial for the +0.0054 gap, but the sentence overstates.
+R13 "Public is already private-like on the cold/coverage axis, so the remaining gap is hour and weekend" -> at the 0.3 cut yes
+   (0.735 vs 0.836); at 0.45 private is 0.324 vs public 0.213. The hour twins do not close the tail; the pmix veto (M x cold
+   share) is the right lens for that part and it is already in the rules. (c2_03 a)
+
+=====================================================================================================================
+3. DUPLICATE CHECK OF THE REPORT'S RANKED ITEMS (COVERAGE_MAP / EXPERIMENT_REGISTRY / CURRENT_STATUS / critique.txt)
+=====================================================================================================================
+rank 1 P1 NEW12: new file, but the question (re-cool val-only excess) is not decidable on public (R3/R4). As a pick-2-type
+   verification of a share-0 pool it duplicates the already planned Pall readout. DROP as a probe; Pall once is enough.
+rank 1 P2 FT-only: DUPLICATE of the closed w_ft line (ROUND5 2c, sol_ensemble stop-list, INSIGHTS do-not, critique R4) and of
+   today's TO-only submission. DROP.
+rank 1 P3 msplit: DUPLICATE of the M-split, closed by its pre-declared fresh confirmation (18:54; 19:31 "stays closed"). DROP.
+rank 2 D2: not a literal duplicate, but cb26 E1 (train-side NN residual GBDT on 30K holdout feeds, -0.00031) and the TRUNC
+   proxy->NN failure are the priors; registry 'GBDT in every role CLOSED'. Idle-lane item at most; keep its kill rule; the real
+   yield is 5 more m02-recipe TO members trained on 80% of the data, into a pool with +0.0002 infinite-member headroom.
+rank 3 D1 val-in-cooldown: NEW (no registry row covers replay of val feeds inside the cooldown; r5_refit covers the post-hoc refit,
+   ftopt the FT recipe). Keep, at the pre-C1 prior and with the OOF/forward readout as written; expected 0..+0.0005 pool.
+rank 4 G1: new probe, wrong null (R8), arbitrates a CLOSED lever (hzcd; critique R6). Low priority; if run, rule re-anchored.
+rank 5 TRUNC read-outs: pre-declared, 0 GPU; numbers confirmed (N4). Keep.
+rank 6 D3 model-5 clone: components CLOSED/null (ListMLE, DIN, hcap); kill rule below gate (a) (R10). Idle lanes only, with
+   gate (a) as the kill.
+rank 7 close external: keep, with the registry row rewritten on the honest numbers (N2).
+rank 8 board watch + Dec-7 protocol: keep, minus the D_C term (R7) and minus the team-count argument (R11).
+rank 9 Sep-12 production-step GBDT proxy arms: a recency-type cooldown-data arm (rec33 -0.0021, rho70 -0.0035: the class is 0 of
+   15) read through a proxy that did not transfer today. DO NOT RUN.
+Not in the report but live and pre-declared: decide8 / W5base (w5_e10_base_s951-956, holdout 0.3200-0.3208, the highest single
+   holdouts; FT running on GPUs N; rule = decide6 holdout-led). This is the only candidate-generating item with member-level
+   holdout evidence tonight and should be rank 1 of the 0-GPU items.
+
+=====================================================================================================================
+4. CORRECTED TOP-6 (action | why | cost | kill)
+=====================================================================================================================
+1. PUBLIC SUBMISSIONS: cancel P2 and P3; do not submit P1 as a probe. Submit Pall ONCE as the pick-2 verification (pre-declared
+   kill: realised < -0.0019 -> Pall is not pick 2). Amend the frozen Dec-7 estimator to S_C = 0.5 V_C + 0.5 P_C with no re-cool
+   discount, holdout eligibility unchanged. | why: c2_03 (R3/R4/R7), R5, R6; public cannot resolve < 0.0007 between near-copies
+   and the share-0 chain is confounded with val-selection shrinkage. | cost: 1 submission, 0 GPU. | kill: n/a (protocol).
+2. 0-GPU READ-OUTS FIRST: decide8 (W5base U1/U2/U3 vs G3 under the decide6 holdout-led rule) when the s951-956 FT lands; trunc2
+   and 955/956 under their pre-declared rules, then CLOSE TRUNC in the registry. | why: the only items with member-level holdout
+   evidence (W5base singles 0.3200-0.3208 vs F7x 0.3200); TRUNC numbers confirmed null (N4). | cost: 0 new GPU. | kill: decide8
+   rule (H > +1 SE, V >= 0, no slice < -2 SE, pmix >= -1 SE, presub PASS); none qualifies -> G3 stays.
+3. D1 VAL-IN-COOLDOWN at its honest prior: 4 roots x 5 user folds x 2 mixes as designed, judged on the 4-root OOF pool vs the FT
+   pool (SE ~0.0004) plus holdout, pmix, and the Tue->Thu forward read. | why: the one val protocol never run; the NN record (FT
+   +0.0011 member, pool ~0, refit -0.00025, retune null, forward +0.0005) and the seed-corrected GBDT datum (+0.0015 +- 0.0007 for
+   a 0.37 GBDT) both say small; P ~0.1 for > +0.0005 pool. | cost: ~20 GPU-h (~3 h wall on the GPUs) + 0.5 day plumbing. | kill:
+   4-root OOF pool delta vs the FT pool < +0.0005, or holdout < -1 SE, or pmix < -1 SE, or forward Tue->Thu < 0.
+4. CLOSE THE EXTERNAL BRANCH with the honest row: "calendar x category / x age / posting-time priors, extrapolated trends,
+   weather / FX / election / payday / outage series: CLOSED. User-OOF cat x day +0.00002..+0.00017 (3 fold seeds); within-train
+   week-1 -> week-2 replication |d| <= 0.0004, trend -0.00038 +- 0.00017; joint 9-prior combiner val -0.00034 +- 0.00021 /
+   holdout -0.00017 +- 0.00014." Remove the "oracle ceiling" sentence everywhere (registry, top-10 report draft). Keep
+   findings.txt 1 (dated environmental context) for the report. | why: N2. | cost: 10 min lead. | kill: n/a.
+5. D2 ARGUS-STYLE STACK only on otherwise idle lanes, re-labelled as what it is (a train-side NN-residual GBDT at 3.1M-feed scale;
+   precedent cb26 E1 -0.00031; proxy->NN transfer failed in TRUNC), with its kill rule kept (GBDT val OOF < best TO member +
+   0.0005, or holdout < 0 vs that member, or pool delta on G3 < +0.0005, or pmix / stale-val < -1 SE) and the 5 fold-NN members
+   gated by gate (a) before any pool use. | why: R9; expected pool 0..+0.0005, P ~0.05-0.1. | cost: ~22 GPU-h + 2 h GBDT. |
+   kill: as stated; also kill if fewer than 6 GPUs are idle (it must not displace D1 or any decide8 FT).
+6. BOARD WATCH + HYGIENE (0 GPU): one leaderboard snapshot per day (teams / entries / last; #1 unchanged at 23:05 UTC: 1 entry,
+   440 teams), never compare with another team below +-0.0015; drop the team-count argument; if G1 is ever run, re-anchor its rule
+   on the pmix-expected public cost (-0.0048..-0.0050) and record that it cannot re-open hzcd on its own; if D3 is ever run, use
+   gate (a) (>= 0.3947 val / >= 0.3180 holdout single TO) as the kill, not 0.393; do not run action 9. | why: N5, R8, R10, R11.
+   | cost: minutes/day. | kill: n/a.
+What this leaves of the user's two questions: (i) external / connected data are a measured null on every honest read (the close
+is right; only its argument is replaced); (ii) the #1 explanation is unchanged (genuine model advantage, P ~0.5; size +0.0054
+public at a cross-team SE 0.0012-0.0018), with H3 back at ~0.08 because the GBDT datum that raised it is seed noise at the
+reported precision. Nothing measurable in the project explains +0.005, and the next 2 GPU-days should go to the holdout-led
+decide8 candidates and D1, not to public probes.
+
+=====================================================================================================================
+5. FILES
+=====================================================================================================================
+nn_x/audit/critique2/critique2.txt                 this file
+nn_x/audit/critique2/c2_01_h3_seed.py + out/c2_01_h3_seed.{log,json}, out/c2_01_perfeed_{A12,A13,C1_12}.npy   N1 (GBDT seeds)
+nn_x/audit/critique2/c2_02_oracle.py + out/c2_02_oracle.log                                                      N2 (oracle)
+nn_x/audit/critique2/c2_03_pubresid.py + out/c2_03_pubresid.log                                                  N3 (public residuals, composition, P1/P3 power)
+nn_x/audit/critique2/c2_04_popcost_mix.py + out/c2_04_popcost_mix.log                                            N5 (G1 null)
+nn_x/audit/critique2/c2_05_trunc_e.py + out/c2_05_trunc_e.log                                                    N4 (TRUNC E)
+Inputs read: nn_x/audit/top1/out/h3_*; nn_x/audit/publicprobe/out/cand_*_val.npy, probe_design.txt; nn_x/audit/features/out/replay;
+nn_x/w5/preds (+ holdout); nn_x/insights/{data_usage,review}/out/gb; preds/ens_G3_*; eda/errors/segments; the scratchpad
+e_readout_trunc.json / chain_e_trunc.log; live board https://ods.ai/competitions/avitotechrecsys2026/leaderboard (23:05 UTC).

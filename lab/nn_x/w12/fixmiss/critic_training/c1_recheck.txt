@@ -1,0 +1,67 @@
+<repo>/lab/nn_x/w12/fixmiss/critic_training/c1_recheck.py:89: RuntimeWarning: Mean of empty slice
+  print(f"  M [{a},{b}): share {m.mean():.3f}  contrib {dall[m].sum() / N:+.5f}  mean {dall[m].mean():+.5f}+-{se(dall[m]):.5f}")
+<repo>/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:142: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+<repo>/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:219: RuntimeWarning: Degrees of freedom <= 0 for slice
+  ret = _var(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+<repo>/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:178: RuntimeWarning: invalid value encountered in divide
+  arrmean = um.true_divide(arrmean, div, out=arrmean,
+<repo>/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:211: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+=== A. rebuild check
+rebuilt 0.40293 stored 0.40294 | per-feed max|diff| 0.1309, feeds differing 0.0012
+corr(rebuilt, stored) val 0.999999
+
+=== B. item 1 on FD16P20@m0.4_0.2 (ref = rebuilt)
+thr 50 : val +0.00017+-0.00014 | pub +0.00029+-0.00019 | priv +0.00040+-0.00023 | M<50 +0.00000+-0.00000 | M>=50 +0.00030+-0.00023
+all M  : val -0.00032+-0.00025 | pub -0.00023+-0.00031 | priv -0.00015+-0.00038 | M<50 -0.00122+-0.00051 | M>=50 +0.00030+-0.00023
+per-M-bucket contribution of the all-feeds swap (sum over bucket / N) and bucket mean:
+  M [2,30): share 0.269  contrib -0.00015  mean -0.00057+-0.00066
+  M [30,50): share 0.139  contrib -0.00034  mean -0.00246+-0.00080
+  M [50,75): share 0.126  contrib +0.00013  mean +0.00104+-0.00054
+  M [75,100): share 0.095  contrib -0.00006  mean -0.00064+-0.00059
+  M [100,150): share 0.129  contrib +0.00020  mean +0.00153+-0.00055
+  M [150,300): share 0.242  contrib -0.00009  mean -0.00038+-0.00033
+  M [300,1000000): share 0.000  contrib +0.00000  mean +nan+-nan
+  identity check: thr-50 swap equals all-swap on M>=50 rows: True
+
+=== C. selection-aware reads
+nested choice over 12 options by 5 user folds: picks ['>=50', '>=50', '>=50', '>=50', '>=50'] | val +0.00017+-0.00014 | pub +0.00029+-0.00019 | priv +0.00040+-0.00023 | M<50 +0.00000+-0.00000 | M>=50 +0.00030+-0.00023
+nested choice, '>=t' family + none: picks ['>=50', '>=50', '>=50', '>=50', '>=50'] | val +0.00017+-0.00014 | pub +0.00029+-0.00019 | priv +0.00040+-0.00023 | M<50 +0.00000+-0.00000 | M>=50 +0.00030+-0.00023
+in-sample best option >=50 +0.00017; sign-flip null (user groups) of the max over the menu: mean +0.00017, 95% +0.00044; p = 0.419
+thr-50 alone vs the max-over-menu null: p = 0.419
+
+=== D. replication independence (W16+PD4w)
+W16+PD4w thr 50: val +0.00018+-0.00014 | pub +0.00030+-0.00018 | priv +0.00038+-0.00021 | M<50 +0.00000+-0.00000 | M>=50 +0.00031+-0.00024
+per-feed corr of the two deltas on M>=50: 0.303 (feeds with any change 5349 of 8530)
+mean of the two deltas: val +0.00018+-0.00011 | pub +0.00030+-0.00015 | priv +0.00039+-0.00017 | M<50 +0.00000+-0.00000 | M>=50 +0.00030+-0.00019
+row-level corr of (FT pop pool - TO pop pool) between FDP4 and PD4w on M>=50 rows: 0.943
+
+=== E. item 2 analog on disk: click-label pop-light (abl_e10_pop1_s951-954), FT std vs nopop preset (n2cpv3, 1 seed)
+  abl_e10_pop1_s951: TO 0.39214 | FT std 0.39345 (+0.00131) | FT nopop 0.39268 (+0.00054) | nopop - std -0.00077
+  abl_e10_pop1_s952: TO 0.39581 | FT std 0.39644 (+0.00063) | FT nopop 0.39543 (-0.00038) | nopop - std -0.00101
+  abl_e10_pop1_s953: TO 0.39555 | FT std 0.39686 (+0.00131) | FT nopop 0.39560 (+0.00005) | nopop - std -0.00126
+  abl_e10_pop1_s954: TO 0.39321 | FT std 0.39482 (+0.00162) | FT nopop 0.39365 (+0.00044) | nopop - std -0.00118
+  W16+PC4a w0.2: nopop-FT minus std-FT : val +0.00010+-0.00017 | pub +0.00044+-0.00021 | priv +0.00057+-0.00025 | M<50 +0.00011+-0.00028 | M>=50 +0.00009+-0.00021
+  W16+PC4a w0.2: no-FT (TO) minus std-FT: val +0.00009+-0.00021 | pub +0.00053+-0.00026 | priv +0.00071+-0.00031 | M<50 -0.00031+-0.00038 | M>=50 +0.00036+-0.00025
+  W16+PC4a w0.2: item1-form minus std-FT: val +0.00021+-0.00015 | pub +0.00049+-0.00019 | priv +0.00057+-0.00022 | M<50 +0.00000+-0.00000 | M>=50 +0.00036+-0.00025
+  W16+PC4a w0.2: nopop-FT minus item1-form: val -0.00012+-0.00015 | pub -0.00005+-0.00017 | priv +0.00000+-0.00020 | M<50 +0.00011+-0.00028 | M>=50 -0.00027+-0.00016
+  W16+PC4a m0.4_0.2: nopop-FT minus std-FT : val +0.00013+-0.00023 | pub +0.00046+-0.00028 | priv +0.00064+-0.00034 | M<50 +0.00019+-0.00047 | M>=50 +0.00009+-0.00021
+  W16+PC4a m0.4_0.2: no-FT (TO) minus std-FT: val +0.00003+-0.00028 | pub +0.00034+-0.00033 | priv +0.00048+-0.00040 | M<50 -0.00045+-0.00057 | M>=50 +0.00036+-0.00025
+  W16+PC4a m0.4_0.2: item1-form minus std-FT: val +0.00021+-0.00015 | pub +0.00049+-0.00019 | priv +0.00057+-0.00022 | M<50 +0.00000+-0.00000 | M>=50 +0.00036+-0.00025
+  W16+PC4a m0.4_0.2: nopop-FT minus item1-form: val -0.00008+-0.00021 | pub -0.00002+-0.00025 | priv +0.00007+-0.00030 | M<50 +0.00019+-0.00047 | M>=50 -0.00027+-0.00016
+  FD16+PC4a w0.2: nopop-FT minus std-FT : val +0.00019+-0.00013 | pub +0.00023+-0.00016 | priv +0.00024+-0.00019 | M<50 +0.00029+-0.00023 | M>=50 +0.00012+-0.00016
+  FD16+PC4a w0.2: no-FT (TO) minus std-FT: val +0.00032+-0.00020 | pub +0.00059+-0.00025 | priv +0.00077+-0.00031 | M<50 +0.00019+-0.00036 | M>=50 +0.00041+-0.00022
+  FD16+PC4a w0.2: item1-form minus std-FT: val +0.00024+-0.00013 | pub +0.00047+-0.00018 | priv +0.00060+-0.00023 | M<50 +0.00000+-0.00000 | M>=50 +0.00041+-0.00022
+  FD16+PC4a w0.2: nopop-FT minus item1-form: val -0.00005+-0.00014 | pub -0.00024+-0.00020 | priv -0.00036+-0.00026 | M<50 +0.00029+-0.00023 | M>=50 -0.00029+-0.00019
+  FD16+PC4a m0.4_0.2: nopop-FT minus std-FT : val +0.00023+-0.00020 | pub +0.00026+-0.00025 | priv +0.00030+-0.00030 | M<50 +0.00039+-0.00043 | M>=50 +0.00012+-0.00016
+  FD16+PC4a m0.4_0.2: no-FT (TO) minus std-FT: val +0.00053+-0.00025 | pub +0.00067+-0.00031 | priv +0.00078+-0.00039 | M<50 +0.00070+-0.00053 | M>=50 +0.00041+-0.00022
+  FD16+PC4a m0.4_0.2: item1-form minus std-FT: val +0.00024+-0.00013 | pub +0.00047+-0.00018 | priv +0.00060+-0.00023 | M<50 +0.00000+-0.00000 | M>=50 +0.00041+-0.00022
+  FD16+PC4a m0.4_0.2: nopop-FT minus item1-form: val -0.00001+-0.00021 | pub -0.00021+-0.00027 | priv -0.00030+-0.00035 | M<50 +0.00039+-0.00043 | M>=50 -0.00029+-0.00019
+
+=== F. O/E by within-feed popularity tercile, final files, M>=50 / M<50 (fitted temperature)
+  stored final : t 0.998 | M>=50 0.999 1.013 0.991 | M<50 0.997 1.003 1.000
+  item-1 final : t 0.997 | M>=50 0.997 1.012 0.994 | M<50 0.997 1.003 1.000
+  FT branch    : t 0.999 | M>=50 0.991 1.017 0.995 | M<50 0.999 1.008 0.996
+  FT branch it1: t 0.999 | M>=50 0.988 1.014 1.000 | M<50 0.999 1.008 0.996
+  TO branch    : t 0.990 | M>=50 1.005 1.010 0.989 | M<50 0.993 0.998 1.006

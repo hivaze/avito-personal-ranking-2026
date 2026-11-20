@@ -1,0 +1,447 @@
+{
+ "checks": [
+  {
+   "name": "r6 flags at OFF defaults",
+   "ok": true,
+   "info": "{'attn_drop': -1.0, 'retr_prod': False, 'retr_uniq': False, 'cretr_m': 0, 'set_sim_bias': False, 'typed_cross': False, 'drop_cd': -1.0, 'pool_p': 0.5, 'aug_cand': 0.0, 'aug_hist': 0.0}"
+  },
+  {
+   "name": "all sx_base_s23 args reproduced by the r6 command line",
+   "ok": true,
+   "info": "identical"
+  },
+  {
+   "name": "flag-off r6 cfg == nn/ cfg",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flag-off r6 state_dict == nn/ (keys and values)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "flag-off global RNG state after construction",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "wd01: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 0 (0 params) rng_same True"
+  },
+  {
+   "name": "wd01: cfg stores only non-default r6 keys",
+   "ok": true,
+   "info": "[]"
+  },
+  {
+   "name": "adrop0: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 0 (0 params) rng_same True"
+  },
+  {
+   "name": "adrop0: cfg stores only non-default r6 keys",
+   "ok": true,
+   "info": "['attn_drop']"
+  },
+  {
+   "name": "a4u: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 1 (1152 params) rng_same True"
+  },
+  {
+   "name": "a4u: cfg stores only non-default r6 keys",
+   "ok": true,
+   "info": "['retr_uniq']"
+  },
+  {
+   "name": "a4w: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 1 (8192 params) rng_same True | retr_m 32: differing shared tensors []"
+  },
+  {
+   "name": "a4w: cfg stores only non-default r6 keys",
+   "ok": true,
+   "info": "['retr_prod']"
+  },
+  {
+   "name": "cset: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 13 (66058 params) rng_same True"
+  },
+  {
+   "name": "cset: cfg stores only non-default r6 keys",
+   "ok": true,
+   "info": "['cretr_m', 'set_sim_bias']"
+  },
+  {
+   "name": "typed: baseline init unchanged",
+   "ok": true,
+   "info": "changed 0 missing 0 new 0 (0 params) rng_same True"
+  },
+  {
+   "name": "typed: cfg stores only non-default r6 keys",
+   "ok": true,
+   "info": "['typed_cross']"
+  },
+  {
+   "name": "eval logits identical (batch S)",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "train-mode loss identical (batch S, dropout on, same seed)",
+   "ok": true,
+   "info": "2.164641 vs 2.164641"
+  },
+  {
+   "name": "all gradients identical (batch S)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "eval logits identical (batch L)",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "train-mode loss identical (batch L, dropout on, same seed)",
+   "ok": true,
+   "info": "2.867813 vs 2.867813"
+  },
+  {
+   "name": "all gradients identical (batch L)",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "adrop0: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new (not in ckpt): 0"
+  },
+  {
+   "name": "adrop0: warm start is an exact no-op in eval (batch S)",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "adrop0: warm start is an exact no-op in eval (batch L)",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "adrop0: logits shape [B, Mx] and finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "adrop0: valid logits independent of padded candidates/history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "adrop0: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.55e+00"
+  },
+  {
+   "name": "adrop0: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "adrop0: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "adrop0: gradient reaches every new parameter, all grads finite",
+   "ok": true,
+   "info": "0 new tensors; zero-grad: []"
+  },
+  {
+   "name": "a4u: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new (not in ckpt): 1"
+  },
+  {
+   "name": "a4u: logits shape [B, Mx] and finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "a4u: valid logits independent of padded candidates/history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "a4u: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.64e+00"
+  },
+  {
+   "name": "a4u: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "a4u: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "a4u: gradient reaches every new parameter, all grads finite",
+   "ok": true,
+   "info": "1 new tensors; zero-grad: []"
+  },
+  {
+   "name": "a4u: zero-init output layer gets a gradient at the true init",
+   "ok": true,
+   "info": "{'retr.e_cnt.weight': 0.05418051406741142}"
+  },
+  {
+   "name": "a4w: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new (not in ckpt): 1"
+  },
+  {
+   "name": "a4w: retr_prod alone is an exact no-op at warm start",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "a4w: logits shape [B, Mx] and finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "a4w: valid logits independent of padded candidates/history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "a4w: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.59e+00"
+  },
+  {
+   "name": "a4w: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "a4w: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "a4w: gradient reaches every new parameter, all grads finite",
+   "ok": true,
+   "info": "1 new tensors; zero-grad: []"
+  },
+  {
+   "name": "a4w: zero-init output layer gets a gradient at the true init",
+   "ok": true,
+   "info": "{'retr.t3.weight': 0.3759523630142212}"
+  },
+  {
+   "name": "cset: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new (not in ckpt): 13"
+  },
+  {
+   "name": "cset: cretr alone is an exact no-op at warm start",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "cset: logits shape [B, Mx] and finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "cset: valid logits independent of padded candidates/history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "cset: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 5.18e+00"
+  },
+  {
+   "name": "cset: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "cset: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "cset: gradient reaches every new parameter, all grads finite",
+   "ok": true,
+   "info": "15 new tensors; zero-grad: []"
+  },
+  {
+   "name": "cset: zero-init output layer gets a gradient at the true init",
+   "ok": true,
+   "info": "{'cretr.Z.weight': 8.924239158630371}"
+  },
+  {
+   "name": "typed: warm start loads every baseline tensor",
+   "ok": true,
+   "info": "new (not in ckpt): 0"
+  },
+  {
+   "name": "typed: logits shape [B, Mx] and finite",
+   "ok": true,
+   "info": "(40, 304)"
+  },
+  {
+   "name": "typed: valid logits independent of padded candidates/history",
+   "ok": true,
+   "info": "max|d| 0.00e+00"
+  },
+  {
+   "name": "typed: no cross-feed leakage (feed 0 perturbed)",
+   "ok": true,
+   "info": "other feeds max|d| 0.00e+00; feed 0 max|d| 4.22e+00"
+  },
+  {
+   "name": "typed: permutation equivariance within feeds (real)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "typed: permutation equivariance within feeds (jittered)",
+   "ok": true,
+   "info": "max|d| 1.91e-06"
+  },
+  {
+   "name": "typed: gradient reaches every new parameter, all grads finite",
+   "ok": true,
+   "info": "0 new tensors; zero-grad: []"
+  },
+  {
+   "name": "attn_drop=0.1 (== drop) is bit-identical to the baseline in train mode",
+   "ok": true,
+   "info": ""
+  },
+  {
+   "name": "attn_drop=0 changes train-mode outputs (dropout removed)",
+   "ok": true,
+   "info": "mean|d| 0.0919"
+  },
+  {
+   "name": "adrop0 keeps residual/FFN/retrieval dropout at 0.1",
+   "ok": true,
+   "info": "11 Dropout"
+  },
+  {
+   "name": "adrop0 sets attention-probability dropout 0 in every Attn",
+   "ok": true,
+   "info": "5 Attn"
+  },
+  {
+   "name": "hand example: first occurrence (newest) and counts",
+   "ok": true,
+   "info": "first [[1, 1, 0, 0, 0, 1, 0]] cnt [[2, 2, 2, 0, 2, 1, 0]]"
+  },
+  {
+   "name": "a4u retrieves only distinct items (batch S)",
+   "ok": true,
+   "info": "baseline top-16: 31.8% of valid slots are repeats of a higher slot; 67.2% of candidate rows have >= 1 repeated item"
+  },
+  {
+   "name": "a4u retrieves only distinct items (batch L)",
+   "ok": true,
+   "info": "baseline top-16: 30.1% of valid slots are repeats of a higher slot; 74.9% of candidate rows have >= 1 repeated item"
+  },
+  {
+   "name": "cross[0] gets the full key mask, cross[-1] the target-action mask",
+   "ok": true,
+   "info": "keys kept in the typed view: 34.5% of valid events"
+  },
+  {
+   "name": "base: optimizer step finite; new tensors updated",
+   "ok": true,
+   "info": "Muon matrices 46 (new: []); new tensors moved 0/0"
+  },
+  {
+   "name": "adrop0: optimizer step finite; new tensors updated",
+   "ok": true,
+   "info": "Muon matrices 46 (new: []); new tensors moved 0/0"
+  },
+  {
+   "name": "a4u: optimizer step finite; new tensors updated",
+   "ok": true,
+   "info": "Muon matrices 46 (new: []); new tensors moved 1/1"
+  },
+  {
+   "name": "a4w: optimizer step finite; new tensors updated",
+   "ok": true,
+   "info": "Muon matrices 47 (new: ['retr.t3.weight']); new tensors moved 1/1"
+  },
+  {
+   "name": "cset: optimizer step finite; new tensors updated",
+   "ok": true,
+   "info": "Muon matrices 51 (new: ['cretr.Z.weight', 'cretr.p.weight', 'cretr.t1.weight', 'cretr.t2.weight', 'cretr.wk.weight']); new tensors moved 12/12"
+  },
+  {
+   "name": "typed: optimizer step finite; new tensors updated",
+   "ok": true,
+   "info": "Muon matrices 46 (new: []); new tensors moved 0/0"
+  }
+ ],
+ "params": {
+  "base": 1008512,
+  "wd01": 1008512,
+  "adrop0": 1008512,
+  "a4u": 1009664,
+  "a4w": 1016704,
+  "cset": 1074570,
+  "typed": 1008512
+ },
+ "dedup_stats": {
+  "S": {
+   "dup_slot_share": 0.318069726228714,
+   "rows_with_dup": 0.6720583438873291,
+   "uniq_dup_slots": 0
+  },
+  "L": {
+   "dup_slot_share": 0.30137816071510315,
+   "rows_with_dup": 0.7487562298774719,
+   "uniq_dup_slots": 0
+  }
+ },
+ "cpu_throughput_s": {
+  "base": {
+   "S": 0.05387309845536947,
+   "L": 0.06347925122827291
+  },
+  "adrop0": {
+   "S": 0.05677134357392788,
+   "L": 0.06594435963779688
+  },
+  "a4u": {
+   "S": 0.05520382709801197,
+   "L": 0.06750449817627668
+  },
+  "a4w": {
+   "S": 0.06214934028685093,
+   "L": 0.08488219883292913
+  },
+  "cset": {
+   "S": 0.06268804613500834,
+   "L": 0.08359929919242859
+  },
+  "typed": {
+   "S": 0.059553381986916065,
+   "L": 0.07114395033568144
+  }
+ },
+ "failed": []
+}

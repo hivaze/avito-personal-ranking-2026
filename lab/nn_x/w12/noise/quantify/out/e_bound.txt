@@ -1,0 +1,14 @@
+fit g(w) = a(1-(1-w)^2) - b w^2: a = +0.00366, b = +0.00133; fitted [0.00175 0.00242 0.00267 0.00234] vs recorded [0.00152 0.00257 0.00273 0.00228]; rms residual 0.00014
+  without w=0.3: a = +0.00399, b = +0.00172
+  without w=0.5: a = +0.00337, b = +0.00101
+  without w=0.8: a = +0.00363, b = +0.00133
+  without w=1.0: a = +0.00349, b = +0.00090
+a under ±0.00047 noise on each point: +0.00367 ± 0.00070 (5-95%: +0.00253 .. +0.00483)
+perfect labels beyond the adopted w = 0.5 member: a - g(0.5) = +0.00109
+pool / member transfer of the distillation gain: val 0.77, holdout 0.10 -> pool-level value of perfect labels beyond the current file: +0.00011 .. +0.00084
+  member val: slope 0.0125 NDCG per e-fold of users; doubling the users ~ +0.0087; perfect labels (a) ~ x1.34 users; distillation w=0.5 ~ x1.23
+  member holdout: slope 0.0099 NDCG per e-fold of users; doubling the users ~ +0.0068; perfect labels (a) ~ x1.45 users; distillation w=0.5 ~ x1.30
+  3-pool val: slope 0.0076 NDCG per e-fold of users; doubling the users ~ +0.0053; perfect labels (a) ~ x1.62 users; distillation w=0.5 ~ x1.40
+  3-pool holdout: slope 0.0085 NDCG per e-fold of users; doubling the users ~ +0.0059; perfect labels (a) ~ x1.54 users; distillation w=0.5 ~ x1.35
+
+best val score / T: within-feed sd mean 0.992, row-weighted rms 0.992 (M >= 50 feeds: 0.992)

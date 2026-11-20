@@ -1,0 +1,143 @@
+{
+ "A": {
+  "status": "ready",
+  "summary": "The three loss options are in the trainer, tested, and the K/L arms plus both jobs files are written. Nothing was launched for the experiment and nothing of mine is running.\n\nWhat was added (helper <repo>/lab/nn_x/w5/cd_arms9.py; edits in train.py and lane.sh):\n- `--wcl LAMBDA` adds LAMBDA times the within-category loss: sum over categories of t_c times the cross-entropy inside c.\n- `--ccl LAMBDA` adds LAMBDA times the category-level loss CE_cat(t_c, S_c).\n- Both use the main loss's target (the teacher mix under KD), its per-feed weight and `--loss_norm feed` normalisation. Categories come from `b[\"ccat\"]` and padding is masked.\n- `--fsw ALPHA` weights each feed by M^ALPHA, normalised to mean 1 per batch, on the main loss and the two new terms but not the display-order aux. I also added `--fsw_norm train`, which normalises once over the training feeds instead.\n- The code runs on every training batch, pool batches included, and logs the loss split, the added terms and the fsw weights at every eval.\n- train.py lines: 65 (import), 274-286 (parser), 488-490 (setup), 527-528 (fsw weight), 539-540 (new terms), 603-604 (log).\n- lane.sh lines 177-185: arms wcl05, wcl10, ccl05, fsw25, fsw50 as specified, plus fsw25t and fsw50t (train-normalised). kw03, e4 and lr4 still parse.\n\nTest results:\n- **CPU tests, 21/21 pass.**\n  - The identity CE_items = CE_cat + within holds on random padded batches with ties and single-candidate categories: max error 1.9e-6 in float32, 3.6e-15 in float64. It also matches a brute-force loop and a gradient check.\n  - With all options off, train.py minus the new statements equals the frozen original (AST comparison).\n  - The dry-run commands of all 144 existing K/L jobs are byte-identical to the old lane.sh.\n  - All 256 job names agree between lane.sh, fill.sh and arm_read8.py `rc:`.\n- **GPU N, 33/33 pass.**\n  - Options off vs the frozen trainer, deterministic mode, real K:ref:951 command over 74 steps: per-step losses, logits, gradient norms, logs, checkpoints and predictions are all bitwise identical.\n  - Smoke run of every arm (195 steps): losses finite, new terms logged at every eval, no gradient clipping.\n  - Step time: about 45 ms in every arm, differences within \u00b12% noise. The loss split alone costs 0.76 ms per step.\n\nDecision for you \u2014 fsw25/fsw50 as specified will do almost nothing. Batches are cut inside 16-wide feed-size buckets, so normalising per batch only re-weights feeds of nearly the same size. The loss share of feeds with M >= 50 moves from 0.4904 to 0.4906; the train-normalised version moves it to 0.606 (ALPHA 0.25) and 0.709 (ALPHA 0.5). The smoke runs agree: fsw25 and fsw50 ended at loss 2.6568 and 2.6570 vs 2.6567 for ref. So I wrote two jobs files, 128 jobs each:\n- fill_jobs_T1117.txt is exactly your list.\n- fill_jobs_T1117_fswt.txt is the same but with fsw25t/fsw50t in place of fsw25/fsw50. I recommend this one; it saves about 32 GPU-hours on a near-certain null.\n\nBoth are ordered seed by seed (951-958); within each seed the new arms come first and e4 last, with K then L for each arm. Expect about 144 GPU-hours in total.\n\nNotes, file references and full test output are in <repo>/lab/nn_x/w12/gap1117/ENGINEER_A.txt. The tests and logs are in <repo>/lab/nn_x/w12/gap1117/tests/.",
+  "files_changed": [
+   "<repo>/lab/nn_x/w5/cd_arms9.py",
+   "<repo>/lab/nn_x/w5/train.py",
+   "<repo>/lab/nn_x/w5/lane.sh",
+   "<repo>/lab/nn_x/w12/kd/logs/fill_jobs_T1117.txt",
+   "<repo>/lab/nn_x/w12/kd/logs/fill_jobs_T1117_fswt.txt",
+   "<repo>/lab/nn_x/w12/gap1117/ENGINEER_A.txt",
+   "<repo>/lab/nn_x/w12/gap1117/tests/test_gap1117.py",
+   "<repo>/lab/nn_x/w12/gap1117/tests/test_gap1117_gpu.py",
+   "<repo>/lab/nn_x/w12/gap1117/tests/e2e_gap1117.py",
+   "<repo>/lab/nn_x/w12/gap1117/tests/ref_pre_gap1117/train.py.txt",
+   "<repo>/lab/nn_x/w12/gap1117/tests/ref_pre_gap1117/lane.sh.txt",
+   "<repo>/lab/nn_x/w12/gap1117/tests/ref_pre_gap1117/md5.txt",
+   "<repo>/lab/nn_x/w12/gap1117/tests/out/"
+  ],
+  "tests": [
+   {
+    "name": "CPU T1 identity CE_items = CE_cat + sum_c t_c CE_within_c (48 random padded batches, ties, singleton categories, KD and click targets)",
+    "result": "PASS: max error float32 1.91e-6 (tol 1e-5), float64 3.55e-15; vs float64 brute-force loop 7.1e-15; gradient check OK; zero gradient on singleton categories and padding"
+   },
+   {
+    "name": "CPU T2/T3 reductions and fsw weights vs brute force",
+    "result": "PASS (8.9e-16); wcl = ccl = 1 adds exactly one main loss; fsw-only arms return the loss object unchanged"
+   },
+   {
+    "name": "CPU T4 default unchanged (static): train.py minus the 10 gap1117 statements == frozen original (AST); defaults; aux never reads fw",
+    "result": "PASS"
+   },
+   {
+    "name": "CPU T5 lane.sh: 144 existing K/L dry-run jobs byte-identical to frozen lane.sh; new arms and kw03/e4/lr4 = K/L:ref + exactly their flags",
+    "result": "PASS"
+   },
+   {
+    "name": "CPU T6 names: lane --variant == fill.sh vname == arm_read8 rc lambda for all 256 jobs",
+    "result": "PASS; arm_read8.py rc:wcl05 currently stops at 'no completed pair yet' (nothing has run yet); all 16 ref re-cools complete"
+   },
+   {
+    "name": "GPUN G1 options off vs frozen trainer, deterministic, real K:ref:951 command shortened to 74 steps (cooldown_mix 0.3)",
+    "result": "PASS: per-step losses, loss-input logits (1.34M values), gradient norms, log lines, selected and @last checkpoints, val/holdout preds all bitwise identical; add_terms never called"
+   },
+   {
+    "name": "GPUN G2 smoke of ref, wcl05, wcl10, ccl05, fsw25, fsw50, fsw25t, fsw50t (K:<arm>:951, 60k feeds, 195 steps)",
+    "result": "PASS: losses finite, gap1117 line at every eval, add_terms called 195/195 incl. pool batches, same batches as ref, no clipping (pre-clip p90 at most 0.36)"
+   },
+   {
+    "name": "Step-time overhead (paired vs ref; plus micro-benchmark)",
+    "result": "ref 45.3 ms/step; median per-step difference wcl05 +0.3%, wcl10 +1.2%, ccl05 -0.2%, fsw25 -1.8%, fsw50 +1.2%, fsw25t +0.7%, fsw50t -1.0% (noise); loss split alone 0.76 ms fwd+bwd vs 0.23 ms for the main loss"
+   }
+  ],
+  "launch": "cd <repo> && setsid nohup bash nn_x/w12/kd/fill.sh <repo>/nn_x/w12/kd/logs/fill_jobs_T1117_fswt.txt 2 >> nn_x/w12/kd/logs/fill_T1117.log 2>&1 < /dev/null &\n(the literal spec instead: same command with fill_jobs_T1117.txt; stop: touch nn_x/w12/kd/logs/FILL_STOP; read-out per arm: CUDA_VISIBLE_DEVICES=\"\" OMP_NUM_THREADS=12 .venv/bin/python nn_x/w12/kd/arm_read8.py rc:<arm>)",
+  "risks": [
+   "fsw25/fsw50 as specified are near no-ops: batches are cut inside 16-wide feed-size buckets, so the loss share of M>=50 feeds moves only 0.4904 -> 0.4906. Use fsw25t/fsw50t (train-normalised: 0.606 / 0.709), i.e. fill_jobs_T1117_fswt.txt.",
+   "AdamW and Muon are nearly insensitive to an overall loss scale, so these arms work only through the ratio of the two parts: wcl05/wcl10 put the within-category part at 1.5x/2x the category part, ccl05 the category part at 1.5x. wcl = ccl would do almost nothing.",
+   "Under KD the target includes the teacher softmax, so wcl/ccl also up-weight the teacher's within-category order and category mass, not only the clicks.",
+   "The new terms use CUDA index_add/scatter_reduce, which are not deterministic, so arm runs are not bitwise reproducible. The options-off path is proven identical (G1).",
+   "With all options off, the logged args, the json 'args' and the checkpoint 'args' dict gain 4 keys (wcl, ccl, fsw, fsw_norm); this is metadata only.",
+   "The options refuse --rdrop_cd, --sam_cd and --loss_norm idcg; none of these is used by K/L.",
+   "Compute: about 144 GPU-hours (112 jobs of ~1 h plus 16 e4 jobs of ~2 h); fill.sh spreads it over the GPUs, at most 2 processes per GPU.",
+   "The older nn_x/w5/tests proof chain (test_w5/test_w7) was already out of date before this change (it predates the KD flags); the current default-off proof is in gap1117/tests."
+  ]
+ },
+ "B": {
+  "status": "go",
+  "summary": "GO for one test of 16 re-cools, read on the feeds the extension reaches, with no promise of a file gain. The most the lever can add is about +0.0001..+0.0002 NDCG on private at pool level.\n\nBuilt (step 1): for every feed, up to 128 events older than its oldest stored event, taken from the most recent strictly earlier snapshot of the same user. User 0 is never used, val never reads test snapshots, and train/val/test rows follow one rule. Alignment uses the reviewed refill aligner with one snapshot; placement error 0.2-0.4% (the refill had 0.4-0.5%). Every written event passed a leak check: 10.3M train events in the main variant, 48.7K val, 101K test, plus the 7-day variant. Arrays are in artifacts/data/feats_new/histext_1117/{train,val,test}/ (main) and .../k7/ (snapshot at least 7 days older). Val/test items missing from the split's own table get the source split's vector through ext_table.npy.\n\nCoverage (step 2), main variant, all feeds: train 8.94%, holdout 8.02%, val 10.28%, test 10.04% (private-like 9.84%). Among capped feeds: 19.3% / 18.6% / 27.1% / 25.0%. Mean extra events per extended feed 36.6 / 36.2 / 32.8 / 35.3. Median gap to the snapshot used: train 3.0 days, val 10.0, test 14.8.\n\nParity: the 3-day vs 15-day gap does not show up in what the model sees. The number of events per extension matches between train and test (KS 0.04, or 0.09 on capped feeds). Requiring the snapshot to be at least k days older makes that match worse (KS 0.14-0.24) and cuts train coverage to 1-6%. Reweighting by gap cannot match 54.5% of test (gap 14 days or more). Recommended restriction: the most recent snapshot, capped feeds only. Coverage after it: train 8.18%, holdout 7.20%, val 7.85%, test 7.20% (private-like 6.98%). Val looks like test on every extension statistic.\n\nPatch (step 3), not applied: lab/nn_x/w12/gap1117/lifelong/model_patch.diff, against the w5 files as of 03:34Z (copies in patch_base/; it still applied cleanly at 03:41Z).\n- Extension tokens sit at positions 257-384 with their own 128 position rows. By default these start as copies of row 256 (the refill's untrained setting, measured as harmless); two other starts are flags.\n- The top-16 retrieval runs over stored plus extension events; extension events share the oldest recency bucket.\n- All dense inputs stay computed on the stored 256 events.\n- Checks on GPU N: with the flag off, or with the extension emptied, outputs are bit-identical, including to the stored val predictions. Non-extended feeds stay bit-identical with the flag on. Train steps work and the new rows get gradient.\n- Cost: a training step with +128 tokens is 1.07-1.19x per batch shape, 1.13x weighted over an epoch; inference 1.07-1.17x.\n\nDecision (step 4): on the existing re-cool references, a read restricted to the extended feeds has a calibrated error (swap null: z spread 0.79). Its power is 0.71 if re-cooling captures the replay's proxy effect, 0.16 at the untrained level, and the false-positive rate is 0.006. Under task A's whole-set rule the same test could not pass (power 0.04). Probability of a pass is about 0.26, the cost is about 17 GPU-hours on idle GPUs, and the engineering is done. A pass would settle whether the effect is real, not prove a file gain.\n\nSide finding for task A: in the same swap null, the harness's whole-val z is over-dispersed (spread 1.53; 22% of draws have |z| >= 1.96), so the T1117 Holm bars are less strict than their nominal level.\n\nFull write-up: lab/nn_x/w12/gap1117/lifelong/NOTES.txt.",
+  "files_changed": [
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/NOTES.txt",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/model_patch.diff",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/patch_base/ (data.py, model.py, train.py, finetune.py, holdout_eval.py, SHA256_BASE.txt: base copies of lab/nn_x/w5 at 03:34Z)",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/hx_lib.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/s0_counts.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/s0b_uncapped_probe.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/s1_align_all.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/s2_stats.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/s2b_parity_extra.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/s3_build_arrays.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/s4_retrieval_share.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/bench_attn.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/t_patch.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/p_power.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/p_swapnull.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/read_hx.py",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/out_*.txt (s0_counts, s0b_uncapped, s1_align_all, s2_stats, s2b_parity_extra, s2b_parity_extra_v2_head, s3_build, s4_retrieval_share, bench_attn, t_patch, p_power, p_swapnull, read_hx_AA_ref2)",
+   "<repo>/lab/nn_x/w12/gap1117/lifelong/out/align_{train,val,test}.npz, out/s2_summary.npz (intermediates)",
+   "<repo>/artifacts/data/feats_new/histext_1117/{train,val,test}/ (k0: ext_off, ext_n, ext_status, ext_snap_split, ext_snap_fidx, ext_gap_days, ext_nT_full, ext_capped, ext_item_id, ext_category_id, ext_event_type, ext_event_source, ext_emb_idx, ext_src_split, ext_src_row, meta.json; ext_table.npy, ext_table_items.npy)",
+   "<repo>/artifacts/data/feats_new/histext_1117/{train,val,test}/k7/ (same arrays, snapshot >= 7 days older)"
+  ],
+  "tests": [
+   {
+    "name": "leak/provenance check on every written event (same user != 0, strictly earlier snapshot, admissible split, row inside the snapshot's history)",
+    "result": "PASS: train k0 10,307,309 / k7 4,094,998, val 48,668 / 45,895, test 101,346 / 101,697 events"
+   },
+   {
+    "name": "single-snapshot aligner positive check (cap pretended 192, truth = stored 193-256)",
+    "result": "placement error 0.2-0.4%; a true event 65-78%; same position 33-52% (refill union: 0.4-0.5% / 60-72%)"
+   },
+   {
+    "name": "T1 flag off: patched vs base code, fp32, all val feeds; bf16 vs the stored val predictions",
+    "result": "max |diff| 0; stored predictions: corr 1.0000000, max |diff| 0"
+   },
+   {
+    "name": "T2 flag on with the extension emptied",
+    "result": "max |diff| 0 against flag off"
+   },
+   {
+    "name": "T3 flag on (k0, capped, rec_x = row 256): non-extended feeds",
+    "result": "bit-identical (max |diff| 0); extended feeds corr 0.99996, top-1 changes in 10.2%"
+   },
+   {
+    "name": "T4 train-split smoke (3 optimiser steps, batches 256 + 128 wide)",
+    "result": "losses finite, gradient reaches rec_x, dense inputs identical with and without the extension keys"
+   },
+   {
+    "name": "micro-benchmark on GPU N, +128 history tokens",
+    "result": "train step 1.07-1.19x per shape, 1.13x epoch-weighted; inference 1.07-1.17x (val pass 0.73 -> 0.82 s)"
+   },
+   {
+    "name": "patch applies to current lab/nn_x/w5 (dry run, 03:41Z)",
+    "result": "clean, all 5 files"
+   },
+   {
+    "name": "harness A/A null (ref2 - ref, 16-pool) + 60-pattern member-swap null",
+    "result": "bucket SE calibrated (pooled-z spread 0.79, 0/60 >= 2.5); whole-val z over-dispersed (spread 1.53); bucket SE val 0.00104 / holdout 0.00067"
+   },
+   {
+    "name": "power of the 16-re-cool test, bucket rule (pooled z >= 2.5)",
+    "result": "0.71 at the replay proxy, 0.16 at the untrained level, 0.006 false-positive; whole-set form 0.04"
+   }
+  ],
+  "launch": "cd <repo> && patch -p1 --dry-run -i lab/nn_x/w12/gap1117/lifelong/model_patch.diff && patch -p1 -i lab/nn_x/w12/gap1117/lifelong/model_patch.diff   # only after task A's train.py edits are final\nCUDA_VISIBLE_DEVICES=<free gpu> OMP_NUM_THREADS=12 .venv/bin/python lab/nn_x/w12/gap1117/lifelong/t_patch.py   # identity re-check (refresh patch_base/ + diff after any rebase)\n# add to lane.sh arm_flags (lane.sh belongs to task A, not edited here):  K:hx|L:hx) echo \"--hist_ext 128\" ;;\nbash nn_x/w5/lane.sh <gpu> \"K:hx:951 L:hx:951\"   # repeat over GPUs for seeds 951-958: 16 jobs, <= 3 procs/GPU, >= 60 GB free, ~64 min each\n.venv/bin/python lab/nn_x/w12/gap1117/lifelong/read_hx.py hx   # one look after all 16 finish; also nn_x/w12/kd/arm_read8.py rc:hx for the T1117 form",
+  "risks": [
+   "Prize is small: at most ~+0.0001..+0.0002 NDCG on private at pool level (+0.00006 if the re-cool only reaches the untrained start point); expected value of the whole route ~+0.00003; below every file-level MDE, so a pass decides the mechanism, not a file.",
+   "Promotion needs the 20 FD16P20 members re-cooled from their @77500 snapshots plus n2cpv3s3 fine-tunes with the flag. A clean comparison also needs matching re-cools without the extension, because 16-pool re-cool noise on val (~0.0003) exceeds the gain. The pop1 students' snapshots are unchecked.",
+   "train.py is being edited by task A: the diff targets the 03:34Z base and applies cleanly at 03:41Z, but must be dry-run and re-tested after their edits. lane.sh needs one arm line, which I did not add.",
+   "Untested end to end: finetune.py with the flag, and test inference through train.py's final block (same SplitData/gather code as val, which was tested).",
+   "Selection parity: heavy test users whose earlier snapshot does not overlap get no extension (alignment fails for 16% on test vs 2.6% on train). Train extensions are more view-rich (0.26 vs 0.17), the existing train-format difference. Uncapped extensions are parity-skewed and excluded by default.",
+   "Side finding for task A: in the swap null the harness's whole-val z is over-dispersed (spread 1.53), so T1117 Holm bars on the pooled z are less strict than nominal (rough estimate: swap patterns share members)."
+  ]
+ }
+}

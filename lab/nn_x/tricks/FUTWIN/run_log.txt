@@ -1,0 +1,55 @@
+holdout: 30000 feeds, 4630966 candidates, positives 53524, feeds with >=1 positive 30000  [0s]
+holdout feeds with user_id 0: 1536; kept set S (later train feed >= 24 h): 4476 (0.149); gap median 97.6 h, p10 33.2 h, p90 223.6 h
+features built in 1s
+S: 4476 feeds; |W| median 68, mean 77.2, share |W|=0 0.004, share |W|>=10 0.918; H_a median 256, H_b median 256
+S feeds with >=1 positive: 4476; of those, window contains an event on an own positive item: 4168 (0.931)
+G3 train-only holdout pool NDCG (all 30K): 0.32379 (expected 0.32379)
+G3 pool NDCG on S: 0.32204; off S: 0.32410
+
+== paired per-feed NDCG delta vs G3 pool on S (w = weight on zf(feature); w = 0.1 is the pre-declared one)
+w 0.10 u_fut        delta +0.00275 +- 0.00068 (z +4.02); NDCG on S 0.32479; feeds up 0.442 down 0.300
+w 0.10 u_past       delta -0.00123 +- 0.00055 (z -2.24); NDCG on S 0.32081; feeds up 0.356 down 0.375
+w 0.10 u_echo       delta +0.02963 +- 0.00113 (z +26.11); NDCG on S 0.35167; feeds up 0.784 down 0.000
+w 0.10 u_fut_nopos  delta +0.00072 +- 0.00067 (z +1.07); NDCG on S 0.32276; feeds up 0.382 down 0.348  [info]
+w 0.05 u_fut        delta +0.00179 +- 0.00043 (z +4.13); NDCG on S 0.32383; feeds up 0.396 down 0.258  [info]
+w 0.05 u_past       delta -0.00049 +- 0.00036 (z -1.38); NDCG on S 0.32155; feeds up 0.318 down 0.326  [info]
+w 0.05 u_echo       delta +0.01425 +- 0.00069 (z +20.52); NDCG on S 0.33629; feeds up 0.740 down 0.000  [info]
+w 0.05 u_fut_nopos  delta +0.00077 +- 0.00041 (z +1.87); NDCG on S 0.32281; feeds up 0.347 down 0.297  [info]
+w 0.20 u_fut        delta +0.00431 +- 0.00099 (z +4.37); NDCG on S 0.32635; feeds up 0.463 down 0.327  [info]
+w 0.20 u_past       delta -0.00334 +- 0.00083 (z -4.01); NDCG on S 0.31870; feeds up 0.377 down 0.409  [info]
+w 0.20 u_echo       delta +0.06133 +- 0.00189 (z +32.46); NDCG on S 0.38337; feeds up 0.807 down 0.000  [info]
+w 0.20 u_fut_nopos  delta +0.00050 +- 0.00096 (z +0.52); NDCG on S 0.32254; feeds up 0.401 down 0.384  [info]
+w 0.30 u_fut        delta +0.00522 +- 0.00130 (z +4.03); NDCG on S 0.32726; feeds up 0.470 down 0.342  [info]
+w 0.30 u_past       delta -0.00492 +- 0.00106 (z -4.65); NDCG on S 0.31712; feeds up 0.382 down 0.424  [info]
+w 0.30 u_echo       delta +0.09036 +- 0.00248 (z +36.49); NDCG on S 0.41240; feeds up 0.815 down 0.000  [info]
+w 0.30 u_fut_nopos  delta -0.00054 +- 0.00126 (z -0.43); NDCG on S 0.32150; feeds up 0.408 down 0.399  [info]
+
+delta(u_fut) - delta(u_past) @0.1 = +0.00398 +- 0.00064 (z +6.18)
+delta(u_fut) - delta(u_echo) @0.1 = -0.02688 +- 0.00117 (z -22.99)
+
+== within-feed corr (Pearson of per-feed z over candidates; feeds where both vary)
+corr(u_fut, u_past): pooled +0.7277, per-feed mean +0.7194, median +0.8876 over 4381 feeds
+corr(u_fut, u_echo): pooled +0.5206, per-feed mean +0.5087, median +0.7057 over 4455 feeds
+corr(u_past, u_echo): pooled +0.4415, per-feed mean +0.4280, median +0.5920 over 4397 feeds
+corr(u_fut_nopos, u_past): pooled +0.7251, per-feed mean +0.7161, median +0.8830 over 4335 feeds
+corr(u_fut, pool): pooled +0.3279, per-feed mean +0.3277, median +0.3394 over 4455 feeds
+corr(u_past, pool): pooled +0.3296, per-feed mean +0.3259, median +0.3431 over 4397 feeds
+corr(u_echo, pool): pooled +0.2612, per-feed mean +0.2569, median +0.2551 over 4471 feeds
+
+== info slices @0.1 (delta +- SE; n feeds)
+|W| 1-9                                          n    349 | u_fut +0.01616+-0.00315 | u_past -0.00138+-0.00133 | u_echo +0.03755+-0.00522 | u_fut_nopos +0.00526+-0.00255
+|W| 10-49                                        n   1412 | u_fut +0.00405+-0.00105 | u_past +0.00003+-0.00104 | u_echo +0.02953+-0.00192 | u_fut_nopos +0.00156+-0.00108
+|W|>=50                                          n   2699 | u_fut +0.00035+-0.00090 | u_past -0.00186+-0.00071 | u_echo +0.02862+-0.00144 | u_fut_nopos -0.00030+-0.00091
+gap 24-48h                                       n    966 | u_fut +0.00458+-0.00168 | u_past -0.00179+-0.00131 | u_echo +0.02978+-0.00246 | u_fut_nopos +0.00088+-0.00159
+gap 2-4d                                         n   1207 | u_fut +0.00395+-0.00125 | u_past -0.00079+-0.00088 | u_echo +0.02680+-0.00193 | u_fut_nopos +0.00206+-0.00123
+gap >=4d                                         n   2303 | u_fut +0.00135+-0.00092 | u_past -0.00123+-0.00079 | u_echo +0.03104+-0.00167 | u_fut_nopos -0.00004+-0.00093
+has positive                                     n   4476 | u_fut +0.00275+-0.00068 | u_past -0.00123+-0.00055 | u_echo +0.02963+-0.00113 | u_fut_nopos +0.00072+-0.00067
+window has own-positive event                    n   4168 | u_fut +0.00300+-0.00071 | u_past -0.00107+-0.00057 | u_echo +0.02999+-0.00117 | u_fut_nopos +0.00083+-0.00070
+has positive, no own-positive event in window    n    308 | u_fut -0.00064+-0.00241 | u_past -0.00340+-0.00209 | u_echo +0.02464+-0.00452 | u_fut_nopos -0.00064+-0.00241
+
+== DECISION (pre-declared, w = 0.1)
+(1) delta(u_fut) = +0.00275 >= +0.005 and z = +4.02 >= 3: False
+(2) delta(u_fut) - delta(u_past) = +0.00398 >= +0.003: True
+(3) delta(u_fut) = +0.00275 >= 0.30 * delta(u_echo) = +0.00889 (ratio 0.093): False
+VERDICT: CLOSED for good (category-intent aux family; FUTWIN Step B / PFD unfunded)
+[total 28s]

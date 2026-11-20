@@ -1,0 +1,12 @@
+=== witness control B' 2026-11-15T03:14:40Z (val 14,423 feeds; +- = 1 SE paired per feed) ===
+B'1: effect of the stale override per member: E_cpu = CPU stale - CPU no-override; E_gpu = stored GPU stale - stored GPU val
+  w5_cd_hzcd_r101       : E_cpu -0.00072 +- 0.00045 | E_gpu -0.00078 +- 0.00046 | E_cpu - E_gpu +0.00006 +- 0.00020 (+0.31 SE) -> ok
+  w5_cd_m02ref_r101     : E_cpu -0.00152 +- 0.00057 | E_gpu -0.00167 +- 0.00057 | E_cpu - E_gpu +0.00015 +- 0.00023 (+0.67 SE) -> ok
+  abl_pop1_s23          : E_cpu -0.00003 +- 0.00012 | E_gpu +0.00001 +- 0.00012 | E_cpu - E_gpu -0.00004 +- 0.00009 (-0.45 SE) -> ok
+  abl_base_s23          : E_cpu -0.00156 +- 0.00056 | E_gpu -0.00157 +- 0.00055 | E_cpu - E_gpu +0.00001 +- 0.00020 (+0.05 SE) -> ok
+  mean of E_cpu - E_gpu over the four members: +0.00005 (bar +-0.00015) -> B'1 holds
+B'2: 4-pool w5_cd_hzcd_r101-104 vs 4-pool w5_cd_m02ref_r101-104, stale-val delta (the 11-12 closure read)
+  CPU fp32 +0.00078 +- 0.00054 | stored GPU bf16 +0.00084 +- 0.00054 | CPU - GPU -0.00006 +- 0.00022 (-0.29 SE) -> ok
+  for reference, the same pools on val (stored GPU val files): +0.00079 +- 0.00051
+B'2 holds
+CONTROL B': VALID

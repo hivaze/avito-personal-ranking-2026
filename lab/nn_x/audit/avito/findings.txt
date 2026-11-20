@@ -1,0 +1,269 @@
+AVITO PLATFORM NUANCES AND PRIOR AVITO COMPETITIONS: WEB RESEARCH + DATA CHECKS
+Audit agent, 2026-11-12 ~20:30-21:30 UTC. CPU only (12 threads/process, CUDA_VISIBLE_DEVICES=""), no existing file edited.
+Directory: <repo>/nn_x/audit/avito/ (scripts a01..a07, common_av.py, run_all.sh; logs in out/).
+All NDCG numbers are the exact competition metric on val (14,423 feeds) unless stated; "±" is a paired per-feed SE.
+Baseline = G3 final pool preds/ens_G3_final_val.npy = 0.40032 (verified). Nested additive test = score + w*feature with w
+chosen on 4 user-grouped folds and read on the 5th (w grid 0..1.5). Residual test = LightGBM lambdarank boosting FROM G3
+(G3 within-feed z as init_score, scale 4), 5 user-grouped folds, 2 seeds; the base residual model with only
+[logM, logH, category] reproduces G3 within -0.0003 ± 0.0003, so deltas between feature sets are interpretable.
+(The first harness in a02/a03, a stacker that takes G3 as a feature, loses 0.013 to raw G3 and is NOT interpretable; ignore
+those two LightGBM lines.)
+
+====================================================================================================================
+0. TL;DR
+====================================================================================================================
+1. Web: nothing public explains the #1 jump. The competition page states only "val/test = feeds whose candidates were
+   uniformly shuffled before display" and "target = >=1 event from the target-action set, all equal weight"; no public
+   repo is above 0.352, no Telegram/ODS post is indexed, the Data Fest 2025 Avito-track talk pages are login-walled.
+   The only stated test-time channel is the one already known (same-user later-feed history/user-embedding snapshot).
+2. Avito platform facts that are now CONFIRMED in our data and already exploited by the pipeline (do not redo):
+   f4 = exact listing age (feat_life_), the 128-d vectors are the two-tower (Mikheev) item/user vectors (item tower =
+   category + location + price + seller + title/description/infomodel TOKENS, NO images; user tower = online per-request
+   over listing actions + search queries), s1 = recs-feed surface, the target is "an interaction started from this feed".
+3. New nuance with a free, testable lever: the FINAL G3 pool is miscalibrated by listing age on exploration traffic:
+   act/exp 0.875 (<1 h), 0.859 (1-3 h), 0.979, 1.040, 0.996, 1.076 (1-2 d), 1.097 (2-3 d), 1.031, 1.068 (1-2 w), ~1.0
+   beyond. Fresh listings are over-ranked, 1-day-to-2-week listings under-ranked. In uniformly shuffled feeds the raw
+   positive-rate lift by age is 0.29x (<1 h), 0.37x (1-3 h), 0.51x, 0.60x, 0.73x (12-24 h), 0.89x (1-2 d) and ~1.1x
+   above one week: in exploration traffic fresh listings are clicked LESS, the opposite of Avito's production folklore
+   ("good listings sell in the first hours", habr 1086210), which is a production-exposure effect. A cross-fitted
+   age-bin offset on the final pool is measured in a07 (see §5; numbers patched in below).
+4. Nuances that are real but carry NO residual signal over G3 (all nested, all within ±0.0003, most |z| < 1.5):
+   category x hour-of-day prior, category x weekend prior (tested on the 30K holdout, which has weekends),
+   event_source-specific category affinity / centroids (feed vs search vs other surface), user "mode" from the event mix
+   (contact / messaging / favourite shares, search share), candidate-category share and singleton flags, similarity to
+   contacted items, similarity to type-10 items. The NN's history encoder already carries event type + source per event.
+5. Structural facts worth recording:
+   - No category quota/cap in candidate sets; the candidate category mix tracks the history mix (within-feed corr 0.75-0.80
+     val/test, 0.80 production): the set is blender-shaped even when the ORDER is shuffled.
+   - Val/test M histograms spike at M = 30/31 (1.6x / 1.9x the neighbours; test 1.6x / 1.9x), absent in train (1.1x).
+     Train production feeds of M = 30/31 end at max pos 30, i.e. a 31-slot first page; exploration feeds are therefore
+     logged with a page-boundary truncation that production feeds do not show. No ranking information (order hidden).
+   - In random-like train feeds the feature profile by position is flat (sd 0.002 over pos 0-39 for f1/f4/f5, category
+     entropy flat) -> no fixed "slot" (fresh-item / promo slot) leaks through features; the attention bias in shuffled
+     feeds is 2.6% at pos 0 -> 1.2% by pos 20 (smooth).
+   - Type 10 = a post-view action on the same item (95.5% of type-10 items also have a type-1 event, the type-10 event is
+     NEWER in 83%), never contact/favourite (<2%), short retention (mean hpos 44); candidates similar to type-10 items are
+     2.1x positives at cos >= 0.99. There is NO negative-feedback event type: every type's recent same-category lift is
+     1.17-1.38 (hides are not logged).
+   - event_source: type-1 views are 64.5% s1 (recs feed), 23.7% s2 (search: fewer categories per event 0.25 vs 0.16,
+     higher contact follow-up 8.8% vs 5.1%), 4.3% s0 (unknown surface, contact follow-up 12.3%: deep links / item page),
+     7.5% other. A category seen ONLY through search views is not a positive signal for the feed (lift 0.91 vs 1.13 for
+     feed-only, 1.19 both); the NN can learn this from the source embedding and the additive tests are null.
+   - Public is 100% weekend and morning-heavy (56% before 12:00 MSK); private is 24% weekend and evening-heavy (37%
+     after 18:00). G3 val NDCG by hour bucket: 0.394 / 0.406 / 0.409 / 0.385 (night / morning / day / evening), mostly an
+     M effect (mean M 101 / 93 / 92 / 105). Expect the private LEVEL below val for composition reasons; already in calib.
+   - Age composition of public vs private is nearly identical (private has 1.4 pp more <3 h listings), so an age offset
+     fitted on val transfers in composition; its SIZE on private is unknown (LUO==0 share for 3-7 d listings: val 0.62,
+     private 0.86, insights review), so the lead must treat it as a cheap, bounded post-processing candidate, not a fact.
+
+====================================================================================================================
+1. Web research: Avito's main-page recsys as described by Avito (2018-2026) and what it implies for this dataset
+====================================================================================================================
+Sources read this session (fetched; [V]) and the earlier reports they confirm (deep_ru_competitions.md,
+research_competition_avito.md):
+- ods.ai competition page [V]: target text "1 — зафиксировано хотя бы одно событие из набора целевых действий; все события
+  из целевого набора имеют одинаковый вес"; collection "Val и test собраны из выдач, в которых кандидаты были равномерно
+  случайно перемешаны ещё до показа пользователю"; metric NDCG with negatives first on ties, IDCG@30; public/private
+  chronological ~30/70, same timestamp stays together, users may appear in both. No rule text on external/test data
+  (it defers to the PDF the lead already has). No dated news.
+- Leaderboard [V, 20:3x UTC]: 1 (the leader) 0.398256 (1 entry) | 2 0.394695 (35) | 3
+  0.393767 (59) | 4 us 0.392820 (10) | 5 0.392557 (60) | 6 0.392122 (41) | 7 0.391650 (53) |
+  8 0.391033 (33) | 9 0.390664 (46) | 10 0.390632 (46) | 11 0.390415 (53) | 12 0.389738 (41) |
+  13 0.389158 (6) | 14 0.389025 (44) | 15 0.388989 (55). 1212 participants, 439 teams, 5355 submissions.
+  Note the second low-entry outlier: 0.3892 with 6 entries (13th). One-entry 0.3983 is 3.5 sigma of the public paired
+  SE above #2; a first-entry score this high with no prior submissions is consistent with a team that developed on val
+  only and uploaded once (the same way we would), plus a test-time channel.
+- habr 1090584 (Oct 2026, main-page ranker) [V, verbatim]: dataset = "буквально показы объявлений на главной и
+  таргет, который собирается из действий после показа"; 2026 CatBoost target "составной, из целевых действий", "куда
+  помимо контактов входит, например, добавление в избранное"; "Целевая метрика — количество пользователей с контактами";
+  neural ranker history "отфильтровали историю до полезных целевых действий", "ограничили её ёмкость 50 событиями",
+  "Клики добавлять не стали". NO mention of exploration, randomisation, position bias or item freshness.
+- habr 1086210 (2026, collaborative model) [V]: "Exploration — разбавляем выдачу товарами, которые могут привлечь
+  внимание" (e.g. car parts for a car buyer) — exploration at Avito means MIXING attention-grabbing items in, not
+  shuffling; new listings reach the main page in <= 25 min ("Новое объявление попадает на главную за 25 минут вместо 6
+  часов"); cold items start from a content vector; positives = weighted clickstream signal; collab_score is a top-10 SHAP
+  ranker feature. Recs bring ~half of views and ~30% of contacts.
+- habr 1004694 (two-tower, Mikheev) [V]: item tower inputs = binary (delivery, private/company seller), categorical
+  (category, location), numeric (price, seller rating, search radius), text (title, description, infomodel parameters
+  as summed token embeddings, 10K most popular attributes); NO images. User tower = history as listing embeddings +
+  search queries, positional embeddings, "эмбеддинг пользователя в режиме реального времени"; item embeddings cached
+  and refreshed on listing create/update. Used as dot-product ranker feature (+2.3% target actions, top-1 SHAP) and ANN
+  candidate generator. => our user_emb is this online user vector (per-request snapshot, confirmed by eda_embeddings
+  §1.4) and the item vector encodes attributes+text, which is why a linear probe recovers category at 98.5% and why
+  near-duplicate listings (re-posts, same seller templates) have cos > 0.99.
+- habr 974682 (diversity blender) [V, verbatim]: "Группируем объявления по категориям, сохраняя внутри категорий порядок,
+  который задаётся моделью ранжирования", "Сэмплируем категорию из распределения категорийных интересов", "забираем
+  лучшее из доступных объявлений в ней", interest = weighted events with exponential time decay, favourites > clicks,
+  "данные из поиска оказывают большее влияние, чем из ленты рекомендаций" (for the interest model), target excludes
+  views; only negative signal named = hides ("скрытия", 2.5% fewer with the blender). Hides are NOT in our event set
+  (checked: no event type behaves as negative feedback).
+- habr 1069352 (monetisation, 2026) [V]: Avito handles position bias in CTR models with (i) a three-CatBoost scheme
+  (with/without position, difference as the baseline of a third model) and (ii) IPW "взвешиваем все объекты обратно
+  пропорционально этой вероятности"; no randomised traffic described.
+- kod.ru interview (Jul 2026, head of recs) [V]: two retrieval models (content-similar to what the user viewed/searched;
+  what similar users looked at) narrow millions to ~1,000, then a second-stage ranker; "поиски не влияют на
+  рекомендации" (search does not change recs; opening a listing does); views and view->contact conversion are
+  attractiveness features that "не влияют на персонализацию, но влияют на то, чтобы привлекательные объявления попадали в
+  топ"; clickbait filter = many views, few contacts; category interest model moved to SASRec.
+- habr 417571 (2018 bandits) [V, snippet]: UCB1 exploration on "similar ads"; a reference group always gets the same
+  algorithm (control traffic) — closest public precedent for Avito logging unbiased traffic.
+- Avito ML Cup 2025 recsys: only the 1st-place code is public (deep_ru §3: EASE-DAN / RDLAE / SASRec scorers ->
+  fold-averaged CatBoost YetiRank; Bayesian-smoothed contact ratios; only users with positives). The DF25 track lists 3
+  recsys talks (the task author and two of the 2025 winners) but their pages require login; no slides found.
+- Public repos for THIS contest (five participant repositories): CatBoost YetiRank 0.346-0.352
+  public; nothing new.
+- Listing lifecycle (third-party guides, not Avito): free re-posting once per 30 days in standard categories (365 days in
+  some), paid "поднятие"; ads lose position over time. Our data: the age histogram has NO visible 30-day or 60-day
+  bump (val age-days 26..34 per mille: 6.3 6.2 6.2 5.8 4.4 4.5 4.4 4.3; smooth decay), so re-posting does not create a
+  mass point and re-posted listings get new item_ids (cannot be linked except through near-duplicate vectors).
+
+Implications for "how is 0.3983 possible": nothing in Avito's public material points to a second test-time channel.
+The platform facts that matter (feed = blender-shaped sets, exploration = shuffled display, target = any interaction
+started from the feed, user vector = online snapshot) are the ones the project already uses, and the snapshot leak
+(eda_history_leak §3) remains the only known mechanism with the right size (+0.004 public).
+
+====================================================================================================================
+2. Data checks: what the nuances look like in OUR data (val unless stated)
+====================================================================================================================
+2.1 event_source = UI surface of a type-1/4/7 action (a02)
+- type 1: s1 64.5%, s2 23.7%, s0 4.3%, s3+ 7.5%. Per source: contact follow-up on the same item s0 12.3%, s2 8.8%,
+  s3+ 7.0%, s1 5.1%; repeat share s0 0.23, s2 0.18, s1 0.12; categories per event s1 0.16, s2 0.25, s3+ 0.35.
+  Reading: s1 = recommendation feed (also the surface of the target action, eda_history_leak §2.2), s2 = search
+  (narrow intent, higher conversion), s0 = no surface (push / deep link / item-page), s3+ = other blocks.
+- type 4 (favourite-like): s1 42%, s2 21%, s3+ 23%, s0 14%; s0 favourites have 31% contact follow-up (favourites made
+  from the item page or chat). type 7: evenly spread; s0 has 40% contact follow-up.
+- Candidate lifts (base 1.58%): same-category type-1 views in the last 20 events: s1 1.30x (48.8% of rows), s2 1.27x
+  (22.6%), s3+ 1.33x (11.9%), s0 1.34x (8.9%). Cross table: s1-only 1.13x, s2-only 0.91x, both 1.19x, neither 0.52x.
+  Per-feed AUC: c1_s1_20 0.6225, c1_s2_20 0.6173, match-last-s1 0.6181, match-last-s2 0.6143.
+- Source centroids (last 20 type-1 per source): cos to s1 centroid AUC 0.6148 (coverage 0.91), s2 0.5603 (0.61), s3+
+  0.5351 (0.36); any-source reference 0.6227. Positive lift at cos > 0.95: s1 3.96x, s2 2.66x, s3+ 3.08x.
+- Nested additive over G3: c1_s1_20 +0.00018 ± 0.00015; c1_s2_20 -0.00016 ± 0.00011; c1_s3+_20 (negative sign)
+  +0.00018 ± 0.00018; match_last1_s2 -0.00022 ± 0.00008; cos1_s2_20 -0.00036 ± 0.00018 (z -2.0, adding search
+  similarity HURTS); cos1_s1_20 +0.00021 ± 0.00025. Residual LightGBM (init-score harness, a07): see §5.
+  Verdict: no lever; the source is already in the history tokens. The one actionable sign is that search-surface
+  similarity is, if anything, over-weighted by the pool (adding it hurts), which argues against any "search-intent"
+  feature family.
+
+2.2 User mode from the event mix (a03)
+- Mean shares: view 0.453, contact(2/3) 0.247, favourite(4) 0.103, messaging(5/6/8) 0.110, 7/9 0.058, 10 0.014.
+- Across contact+messaging share quintiles (H >= 10) the per-feed AUC of every single feature is within 0.02 and no
+  feature flips sign (f4 0.54-0.56, f5 0.55-0.58, cos_u 0.63-0.65, maxsim32 0.63-0.66, LUO popularity 0.54-0.57).
+  G3 NDCG 0.410 (low contact share) -> 0.397 (high); the low-share bucket has more positives per feed (1.77 vs 1.43).
+- Feeds with NO recent contact/messaging (last 32) have the highest positive rate (1.89%) and G3 NDCG (0.417); feeds
+  with >= 50% search views among type-1 have G3 0.433 (n = 834), feeds with 10-30% search views 0.389 — composition.
+- Favourite share: no direction change. H: AUC of f4/f5 is highest when H = 0 (0.62 / 0.65) — for history-less feeds the
+  item attributes carry the ranking, as expected.
+- Residual LightGBM with mode shares (init-score harness): see §5. Verdict: no mode lever.
+
+2.3 Seasonality (a01)
+- Composition: val hour buckets [0-6,7-11,12-17,18-23] = 0.125/0.277/0.347/0.251, public 0.206/0.351/0.263/0.181,
+  private 0.098/0.205/0.328/0.369; weekend share val 0 / public 1.0 / private 0.242.
+- Val positive rate by bucket 1.55/1.62/1.66/1.47%; G3 NDCG 0.3939/0.4061/0.4091/0.3850 (mean M 101/93/92/105).
+- Category x hour (random-like train feeds, 9.2M rows, 60K feeds, holdout excluded): total chi2 251 on ~156 df; only one
+  category (23) at p < 0.001; smoothed log-ratios are within ±0.1. Nested additive on val: -0.00003 ± 0.00009.
+  Category rate prior (control): -0.00010 ± 0.00018.
+- Category x weekend (same fit; train has 4 weekend days): total chi2 68 on ~52 df, no category significant. Nested on
+  the 30K holdout with the G3 train-only pool (holdout NDCG 0.32379 reproduced): all -0.00001 ± 0.00006, weekend feeds
+  +0.00010 ± 0.00015. Hour x category on the holdout: +0.00002 ± 0.00009.
+  Verdict: time x category interactions do not exist at a usable size; the public/private time mix only moves the level.
+
+2.4 Candidate-set structure (a04)
+- Distinct categories per feed: val 12.0 (M<20: 5.5, M>=200: 17.6); top-category share median 0.34 (q90 0.62); feeds with a
+  single category 0.2%. Max per-category count for M >= 100: median 59, q99 199, max 262; the most common max-count values
+  are unremarkable (34-49) -> no cap/quota.
+- 86.5% of candidates (val) / 86.2% (test) / 88.0% (train) are in a history category; within-feed corr(candidate category
+  share, history category share) 0.75 val, 0.76 test, 0.80 random-like train, 0.78 production. The blender's category
+  sampling shapes the SET; the shuffle only destroys the order.
+- Positive-rate lift by the candidate's category share in the feed: 0.29x (<2%) -> 1.48x (>70%); singleton-category
+  candidates 1.36x on val (3.8% of rows) but 0.44x on random-like train M >= 50 feeds (the val figure is an M-mix effect:
+  singletons are common in short feeds). Nested additive: log share +0.00015 ± 0.00025, singleton 0 / -0.00008.
+- Positives in a category absent from history: 6.6% val, 7.4% random-like train, 4.1% production.
+- M parity 0.496 even (no 2-column grid signature in M). M spikes at 30/31: see §0.5 and a06.
+
+2.5 Type 10, repeat engagement (a05, a06)
+- Type 10 (0.5% of events, 6.8% of feeds): 95.5% of its items also have a type-1 event; type 10 is the newer event in
+  83%; co-occurrence with contact 0.7-1.9%, favourite 1.7%. Same-category-as-type-10 lift 1.29x within those feeds (vs
+  1.49x for same-category-as-last-view); max-cos to type-10 items: 2.13x at >= 0.99, 1.89x at 0.95-0.99.
+  Plausible meaning: a card-level engagement after the view (gallery / map / seller page), i.e. positive intent.
+- Items with >= 3 events (30.5% of events) / contacted or messaged items (45.2%): same-category lift 1.24x / 1.22x for
+  recent ones vs 0.97x for other recent categories — the NN's per-type affinities already carry this; max-cos to
+  contacted items has per-feed AUC 0.580 (maxsim32 0.648) and adds 0 over G3 (+0.00000; sign-flipped +0.00014 ± 0.00019).
+
+2.6 Listing age (a06; f4 -> hours via data/feats/life_f4_age_knots.npy)
+- Val share / positive lift: <1h 2.9% / 0.29x; 1-3h 1.9% / 0.37x; 3-6h 1.5% / 0.51x; 6-12h 1.9% / 0.60x; 12-24h 3.3% /
+  0.73x; 1-2d 4.3% / 0.89x; 2-3d 3.3% / 0.94x; 3-7d 9.6% / 0.94x; 1-2w 9.6% / 1.06x; 2-4w 11.9% / 1.11x; 1-2m 10.4% /
+  1.11x; 2-3m 6.0% / 1.12x; 3-6m 11.2% / 1.08x; 6-12m 8.4% / 1.13x; >1y 14.0% / 1.08x.
+- Public vs private age shares are within 0.6 pp per bin (private <3 h: 4.7% vs public 3.6%).
+- G3 FINAL pool act/exp by bin: 0.875 / 0.859 / 0.979 / 1.040 / 0.996 / 1.076 / 1.097 / 1.031 / 1.068 / 1.003 / 0.983 /
+  0.988 / 0.952 / 0.986 / 0.984. The pool over-ranks listings younger than 3 h by ~14% and under-ranks 1 d - 2 w
+  listings by 7-10%. Cross-fitted offset test: §5.
+- Why fresh listings under-convert on shuffled traffic (inference, consistent with Avito's texts): production boosts fresh
+  listings (collab model in 25 min, "fresh" slots), so their production CTR looks high; on uniformly shuffled feeds the
+  freshness boost is gone and very fresh listings are simply listings nobody has vetted yet (no favourites, often
+  incomplete). Train rows (production) therefore teach "fresh = good", and it_hist_*_luo makes it worse (future counts
+  make young train listings look warm; FEATURES_REVIEW FR-3).
+
+2.7 Pagination / slot structure (a06)
+- Train M histogram is smooth (h[31]/mean(h[29],h[33]) = 1.06); val 1.91, test 1.93; h[30] 1.61/1.57. No spike at 61.
+- Train feeds with M = 31: max pos = 30 in 68% (no gaps) -> a 31-slot first page; M = 30: max pos 30 in 37%.
+  Positive rate by pos in M = 31 production feeds: 12.3% at pos 0, 2.4-2.8% at pos 20-27, then 7.8 / 7.5 / 6.8 / 10.6 /
+  12.0% at pos 28-32: the end-of-feed effect spans the last row(s), not one item (30% of positives at pos >= 29).
+- Random-like train feeds: positive rate 2.6% (pos 0) -> 1.2% (pos 20+) smooth attention bias; mean f1/f4/f5 and
+  category entropy FLAT by position (sd 0.002), production feeds strongly structured (f4 0.355 -> 0.49, f1 0.61 -> 0.43).
+  => shuffled feeds have no feature-identifiable slot, so nothing about "which item was last" can be recovered on
+  val/test. The M = 30/31 spike means a share of exploration feeds is logged to the page boundary; a07 §3 checks whether
+  G3 behaves differently on them.
+
+2.8 Already answered by earlier reports (cited, not repeated)
+- Repeated impressions of the same item to the same user across feeds: 0.13% of test rows, neutral (eda_shift_overlap §3,
+  eda_collab_stats §0).
+- Target set: >= 1 interaction that started from this feed; 83% type 1/source 1, plus type 4/source 1 and contact 2/3
+  (eda_history_leak §2.2).
+- Embedding semantics: unit vectors x 256, item norm uninformative, category recoverable at 98.5%, no item-quality
+  content; user vector = online two-tower snapshot (eda_embeddings).
+- Same-user later-feed leak: +0.0040 public / +0.0014 private, 58 / 48 feeds (eda_history_leak §3.3); the user decides.
+
+====================================================================================================================
+3. Testable ideas (ranked), with prior checks
+====================================================================================================================
+See the structured output; the age-calibration offset is the only one with a measured positive prior, the rest are
+closures with evidence.
+
+====================================================================================================================
+4. Weak spots / eye fatigue noticed while reading the reports
+====================================================================================================================
+- The stacker-style residual harness (G3 as an input feature of a LightGBM lambdarank) loses 0.013 to raw G3 and
+  cannot detect ±0.001 effects; any past "residual over the NN" verdict obtained that way (not the clogit/additive ones)
+  should be re-read with that in mind. Boosting from G3 as init_score reproduces G3 within -0.0003 and is the right tool.
+- The holdout (train-period random-like feeds, M >= 50) cannot see age miscalibration of the kind found here, because its
+  LUO counts are two-sided in time (review_leakage LEAKAGE-1); age-calibration levers must be judged on val and on the
+  stale-val replay, not on the holdout.
+- The public/private time-of-day mix is very different (public morning-heavy, private evening-heavy) and the G3 NDCG by
+  hour differs by 0.024 mostly through M; the M-only calibration already covers it, but any public-vs-val comparison of
+  a candidate must be read per M-bucket.
+
+====================================================================================================================
+5. a07 results (residual harness with init_score; age offsets; page-boundary feeds)
+====================================================================================================================
+5.1 Residual harness (G3 as init_score, scale 4; base = logM, logH, category): base 0.40003 (-0.00029 ± 0.00030 vs G3).
+    Adding features makes the tree residual WORSE on val, including 12 features the NN already uses (base+raw -0.00496
+    ± 0.00083): a tree residual over a strong pool overfits the 11.5K-feed training folds. Paired differences between
+    feature sets on the same harness are still readable: source over raw +0.00001 ± 0.00026, mode over raw -0.00005 ±
+    0.00020. Both NULL. The nested additive tests (§2) are the primary readout; they agree.
+5.2 Cross-fitted listing-age offset on the final pool (offset = log act/exp per age bin from 4 folds, applied to the 5th):
+    15 bins w=1: +0.00026 ± 0.00034 (M>=50 +0.00037 ± 0.00039); 8 bins w=1: +0.00029 ± 0.00032 (M>=50 +0.00049 ±
+    0.00036, M<50 0.0); 4 bins: +0.00007..+0.00033; w=0.5/1.5 no better. Fitted offsets (8 bins): -0.142 (<3h), +0.015,
+    -0.004, +0.081 (1-3d), +0.049 (3-14d), -0.008, -0.034, -0.016. => real miscalibration, but it sits on 2-5% of rows,
+    so the NDCG value is <= +0.0003 and not significant on val. Matches INSIGHTS_1112 item 11 (+0.0003 TO-half).
+    Halves: TO act/exp [<3h,3-12h,12-24h,1-3d,3-14d,2w-3m,3m-1y,>1y] = 0.864 1.055 1.044 1.131 1.067 0.989 0.953 0.964;
+    FT = 0.849 0.964 0.943 1.034 1.029 0.999 0.984 1.008. The FT half repairs 1-3 d (1.13 -> 1.03) but NOT the freshest
+    listings (0.85): val has too few <3 h rows (2.9%) to re-learn them.
+5.3 Train mechanism (a08, 60K random-like vs 60K production-like train feeds, M>=50): positive-rate lift by age
+    [<3h,3-12h,12-24h,1-3d,3-14d,2w-3m,3m-1y,>1y] random-like 0.34 0.56 0.72 0.88 1.02 1.12 1.12 1.05 (val 0.32 0.56 0.73
+    0.91 1.00 1.11 1.10 1.08) vs production 0.83 1.19 1.23 1.08 1.00 0.98 1.00 0.93; at production pos 0-4 fresh listings
+    are 1.38x. log(production/random-like lift): +0.89 +0.76 +0.55 +0.20 -0.02 -0.13 -0.12 -0.12 nats. Production
+    exposure (fresh boost on top) manufactures "fresh = good" in 96% of the training gradient; the pool keeps 14% of it
+    for <3 h listings even after FT. This is the same shape as the TRUNC-PROD lever (an artefact of production logging
+    that a training-only offset on production rows can explain away), with a smaller ceiling.
+5.4 Page-boundary feeds (val): G3 NDCG M 26-28 0.476 ± 0.013, M 29-31 0.443 ± 0.010, M 32-35 0.436 ± 0.012, M 58-60
+    0.362 ± 0.014, M 61-63 0.387 ± 0.017; npos/feed 1.21 / 1.31 / 1.30. Monotone in M, nothing special at 30/31. Closed.

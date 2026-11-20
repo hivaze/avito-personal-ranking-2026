@@ -1,0 +1,184 @@
+{
+ "tag": "Y_def_all32_n0k_s0",
+ "n_val": 14423,
+ "n_hold": 30000,
+ "val": 0.3405580645375967,
+ "val_se": 0.0017256763968238082,
+ "hold": 0.2583576150820254,
+ "hold_se": 0.0007826416525513752,
+ "w16_val": 0.40143578947217784,
+ "w16_hold": 0.32459720573745354,
+ "gap_val": 0.06087772493458114,
+ "gap_val_se": 0.0019287361499802005,
+ "gap_hold": 0.06623959065542813,
+ "gap_hold_se": 0.0011707899919671633,
+ "rho_val": 0.6238157053481413,
+ "rho_hold": 0.6139813920339784,
+ "rho_global_val": 0.6283396790851795,
+ "rho_global_hold": 0.615593721459889,
+ "law_record": -0.016014752144747103,
+ "law_refit": -0.014632130145198522,
+ "law_record_hold": -0.01785861915958383,
+ "member_rule": {
+  "val": {
+   "delta": 8.011482649995139e-05,
+   "se": 0.0004679683056087136,
+   "z": 0.17119712070188467,
+   "n": 14423
+  },
+  "hold": {
+   "delta": -0.00027443717974562934,
+   "se": 0.0002623526784062128,
+   "z": -1.0460620467564106,
+   "n": 30000
+  },
+  "pooled_z": -0.6186229218354227,
+  "pass": false
+ },
+ "mix_w005": {
+  "val": {
+   "delta": 0.0004865560857360494,
+   "se": 0.00031406567617829314,
+   "z": 1.5492176402614417,
+   "n": 14423
+  },
+  "hold": {
+   "delta": -8.951205809953622e-05,
+   "se": 0.0001728673409698818,
+   "z": -0.5178078033555896,
+   "n": 30000
+  },
+  "pooled_z": 0.7293168898586391,
+  "pass": false
+ },
+ "mix_w020": {
+  "val": {
+   "delta": -0.0017767205072788902,
+   "se": 0.0007049533483120505,
+   "z": -2.520337709627301,
+   "n": 14423
+  },
+  "hold": {
+   "delta": -0.0019643882050675646,
+   "se": 0.0004090078640802598,
+   "z": -4.802812800396649,
+   "n": 30000
+  },
+  "pooled_z": -5.178249385287659,
+  "pass": false
+ },
+ "stop_rule_val_ge_0.3900": false,
+ "stop_rule_law_ge_-0.002": false,
+ "extra": {
+  "n_fit_rows": 44201,
+  "n_sel_rows": 14936,
+  "best_iter": 3,
+  "trees_built": 5,
+  "budget_stop": false,
+  "fit_seconds": 51.447017192840576,
+  "s_per_iter": 10.289403438568115,
+  "predict_seconds": 1.0215487480163574,
+  "model_mb": 0.03546142578125,
+  "peak_rss_gb": 16.887958526611328,
+  "params": {
+   "loss_function": "YetiRank",
+   "eval_metric": "NDCG:type=Base",
+   "iterations": "5",
+   "learning_rate": "0.2",
+   "depth": "8",
+   "l2_leaf_reg": "5",
+   "border_count": "254",
+   "random_seed": "0",
+   "od_type": "Iter",
+   "od_wait": "6",
+   "use_best_model": "False",
+   "allow_writing_files": "False",
+   "thread_count": "4",
+   "metric_period": "10",
+   "task_type": "CPU",
+   "has_time": "True"
+  },
+  "top": [
+   [
+    "f5",
+    9.95
+   ],
+   [
+    "ctx_hn_soft05",
+    9.42
+   ],
+   [
+    "cos_u_rk",
+    7.63
+   ],
+   [
+    "f1_rk",
+    7.24
+   ],
+   [
+    "u_het4_share",
+    6.76
+   ],
+   [
+    "u_het5_share",
+    5.51
+   ],
+   [
+    "it_hist_et3_luo",
+    4.86
+   ],
+   [
+    "cos_h10_rk",
+    4.84
+   ],
+   [
+    "pre2_new_z",
+    4.78
+   ],
+   [
+    "ctx_hs_e1",
+    3.88
+   ],
+   [
+    "u_het2_share",
+    2.45
+   ],
+   [
+    "it_hist_all_luo_rk",
+    2.19
+   ]
+  ],
+  "new_feature_importance": [
+   [
+    "e_ehm",
+    1.52
+   ],
+   [
+    "e_pair",
+    1.5
+   ],
+   [
+    "e_ue",
+    0.0
+   ]
+  ],
+  "selection": "trainside",
+  "arm": "Y_def_all32",
+  "seed": 0,
+  "nfit": 300,
+  "nsel": 100,
+  "pool_seconds": 39.634620904922485,
+  "cfg": {
+   "loss": "YetiRank",
+   "label": "y",
+   "has_time": "True",
+   "emb": "[('e_pair', 'pair', 32), ('e_ehm', 'ehm', 32), ('e_ue', 'ue', 32)]",
+   "calcers": "None",
+   "text": "None",
+   "tset": "None",
+   "extra_cols": "None",
+   "cb": "{}",
+   "cols_file": "None"
+  }
+ }
+}

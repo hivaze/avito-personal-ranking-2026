@@ -1,0 +1,72 @@
+## 3. Passes (step 2; `s2_replay.py`, `s3_read.py`, `s3c_pooled.py`, `s3d_table.py`; outputs `out_s2.txt`, `out_s3.txt`, `out_s3c.txt`, `out_s3d.txt`)
+
+Read sets: design 1 (T) = feeds with criteria A and B and >= 1 event older than the stored 256th: holdout 2,358 (mean fill 46.7 events, 197 with all 128), val 1,383 (46.0; 155). Design 2 (U) = feeds with criterion A and >= 1 old-only event: holdout 3,123 (mean fill 73.8; 791 with all 128), val 1,878 (105.4; 1,051). Every feed has a placebo donor.
+
+### 3.1 Mean NDCG of each pass, 4-pool and families [M]
+
+Design 1 (T):
+
+| pass | holdout pool4 | holdout distilled | holdout hard | val pool4 | val distilled | val hard |
+|---|---|---|---|---|---|---|
+| a: stored 256 | 0.31640 | 0.31601 | 0.31458 | 0.38037 | 0.38166 | 0.37993 |
+| b: newest 128 | 0.31378 | 0.31389 | 0.31139 | 0.37770 | 0.37809 | 0.37772 |
+| c: newest 128 + recovered | 0.31495 | 0.31549 | 0.31317 | 0.38039 | 0.37995 | 0.37973 |
+| am: stored 128 + n | 0.31536 | 0.31566 | 0.31297 | 0.38071 | 0.38064 | 0.37854 |
+| e: placebo (another user's events) | 0.31280 | 0.31371 | 0.31190 | 0.37654 | 0.37449 | 0.37673 |
+| b192: newest 192 | 0.31437 | 0.31477 | 0.31322 | 0.38129 | 0.37988 | 0.38079 |
+| c192: newest 192 + recovered | 0.31604 | 0.31607 | 0.31539 | 0.38237 | 0.38189 | 0.38422 |
+| g: newest 128 + stored 193-256 | 0.31495 | 0.31494 | 0.31367 | 0.37917 | 0.37978 | 0.37772 |
+| d1: 256 + recovered, dense inputs held | 0.31669 | 0.31586 | 0.31579 | 0.38222 | 0.38258 | 0.38000 |
+| d2: 256 + recovered, dense inputs recomputed | 0.31737 | 0.31618 | 0.31673 | 0.38145 | 0.38308 | 0.38078 |
+| dP: 256 + another user's events | 0.31558 | 0.31365 | 0.31439 | 0.37947 | 0.38026 | 0.38017 |
+
+Design 2 (U):
+
+| pass | holdout pool4 | holdout distilled | holdout hard | val pool4 | val distilled | val hard |
+|---|---|---|---|---|---|---|
+| a: stored 256 | 0.31902 | 0.31814 | 0.31689 | 0.38803 | 0.38855 | 0.38573 |
+| b: newest 128 | 0.31664 | 0.31638 | 0.31483 | 0.38397 | 0.38377 | 0.38186 |
+| c: newest 128 + recovered | 0.31814 | 0.31829 | 0.31649 | 0.38665 | 0.38803 | 0.38436 |
+| am: stored 128 + n | 0.31834 | 0.31788 | 0.31575 | 0.38663 | 0.38788 | 0.38439 |
+| e: placebo (another user's events) | 0.31438 | 0.31379 | 0.31278 | 0.38478 | 0.38475 | 0.38304 |
+| b192: newest 192 | 0.31735 | 0.31688 | 0.31634 | 0.38734 | 0.38713 | 0.38467 |
+| c192: newest 192 + recovered | 0.31767 | 0.31779 | 0.31727 | 0.38605 | 0.38797 | 0.38664 |
+| g: newest 128 + stored 193-256 | 0.31761 | 0.31735 | 0.31666 | 0.38604 | 0.38620 | 0.38446 |
+| d1: 256 + recovered, dense inputs held | 0.31939 | 0.31802 | 0.31819 | 0.38739 | 0.38737 | 0.38693 |
+| d2: 256 + recovered, dense inputs recomputed | 0.31913 | 0.31761 | 0.31800 | 0.38844 | 0.38639 | 0.38762 |
+| dP: 256 + another user's events | 0.31650 | 0.31518 | 0.31642 | 0.39024 | 0.38801 | 0.38593 |
+
+### 3.2 Paired contrasts, 4-pool [M] (SE cluster-robust by user; "pooled" = feeds of both read sets)
+
+| contrast | design 1 holdout (2,358) | design 1 val (1,383) | design 1 pooled (3,741) | design 2 holdout (3,123) | design 2 val (1,878) | design 2 pooled (5,001) |
+|---|---|---|---|---|---|---|
+| a - b: worth of the true events 129-256 (denominator) | +0.00262 +- 0.00154 | +0.00267 +- 0.00247 | +0.00264 +- 0.00133 | +0.00238 +- 0.00130 | +0.00405 +- 0.00207 | +0.00301 +- 0.00113 |
+| **c - b: worth of the recovered events (numerator)** | **+0.00117 +- 0.00082 (z 1.43)** | +0.00269 +- 0.00157 (z 1.71) | +0.00173 +- 0.00078 (z 2.23) | **+0.00151 +- 0.00093 (z 1.62)** | +0.00267 +- 0.00215 (z 1.24) | +0.00194 +- 0.00099 (z 1.96) |
+| am - b: stored events in the same slots | +0.00158 +- 0.00100 | +0.00301 +- 0.00183 | +0.00211 +- 0.00092 | +0.00170 +- 0.00099 | +0.00265 +- 0.00183 | +0.00206 +- 0.00092 |
+| c - am: recovered minus stored, same slots | -0.00041 +- 0.00105 | -0.00032 +- 0.00183 | -0.00038 +- 0.00095 | -0.00020 +- 0.00103 | +0.00002 +- 0.00200 | -0.00012 +- 0.00099 |
+| e - b: placebo | -0.00098 +- 0.00077 | -0.00116 +- 0.00129 | -0.00105 +- 0.00068 | -0.00226 +- 0.00087 (z -2.60) | +0.00081 +- 0.00174 | -0.00111 +- 0.00085 |
+| c - e: own old events minus another user's | +0.00215 +- 0.00093 (z 2.31) | +0.00385 +- 0.00194 (z 1.98) | +0.00278 +- 0.00093 (z 2.99) | +0.00376 +- 0.00112 (z 3.36) | +0.00187 +- 0.00237 (z 0.79) | +0.00305 +- 0.00113 (z 2.70) |
+| d1 - a: 256 + recovered, untrained for it | +0.00029 +- 0.00058 | +0.00186 +- 0.00132 | +0.00087 +- 0.00061 | +0.00037 +- 0.00071 | -0.00064 +- 0.00172 | -0.00001 +- 0.00078 |
+| d2 - a | +0.00097 +- 0.00065 | +0.00108 +- 0.00147 | +0.00101 +- 0.00068 | +0.00011 +- 0.00073 | +0.00041 +- 0.00178 | +0.00022 +- 0.00081 |
+| dP - a: 256 + another user's events | -0.00082 +- 0.00074 | -0.00089 +- 0.00120 | -0.00084 +- 0.00065 | -0.00252 +- 0.00077 (z -3.26) | +0.00221 +- 0.00150 | -0.00074 +- 0.00074 |
+| d1 - dP | +0.00111 +- 0.00085 | +0.00275 +- 0.00172 | +0.00172 +- 0.00083 (z 2.06) | +0.00289 +- 0.00091 (z 3.19) | -0.00285 +- 0.00198 | +0.00074 +- 0.00094 |
+
+### 3.3 By the number of slots filled, c - b (and a - b), 4-pool [M]
+
+| filled | design 1 holdout | design 1 val | design 1 pooled | design 2 holdout | design 2 val | design 2 pooled |
+|---|---|---|---|---|---|---|
+| 1-31 | +0.00155 +- 0.00064 (n 1,156; a - b +0.00223 +- 0.00199) | +0.00004 +- 0.00109 (n 692) | +0.00098 +- 0.00057 | -0.00064 +- 0.00088 (n 760) | +0.00334 +- 0.00683 (n 93) | -0.00021 +- 0.00108 |
+| 32-63 | -0.00070 +- 0.00242 (n 464; +0.00061 +- 0.00491) | +0.00279 +- 0.00364 (n 324) | +0.00073 +- 0.00207 | -0.00056 +- 0.00218 (n 616) | -0.00306 +- 0.00382 (n 198) | -0.00117 +- 0.00189 |
+| 64-127 | +0.00099 +- 0.00217 (n 541; +0.00562 +- 0.00267) | +0.00704 +- 0.00659 (n 212) | +0.00269 +- 0.00242 | +0.00251 +- 0.00176 (n 956; +0.00413 +- 0.00240) | +0.00079 +- 0.00441 (n 536) | +0.00189 +- 0.00194 |
+| 128 (pass c as the rule words it) | +0.00387 +- 0.00367 (n 197; +0.00144 +- 0.00403) | +0.00837 +- 0.00578 (n 155; +0.01025 +- 0.00710) | +0.00585 +- 0.00327 (z 1.79) | +0.00396 +- 0.00230 (n 791; +0.00272 +- 0.00186) | +0.00466 +- 0.00297 (n 1,051; +0.00354 +- 0.00278) | +0.00436 +- 0.00196 (z 2.22) |
+
+The gain grows with the number of events filled in both designs (pooled: +0.0010 / +0.0007 / +0.0027 / +0.0059 and -0.0002 / -0.0012 / +0.0019 / +0.0044); no single cell is 2 SE from zero on one set.
+
+### 3.4 What the passes say, in words
+
+- **The recovered events are worth about what the stored events in the same slots are.** c - am is -0.0004 +- 0.0010 (design 1, pooled) and -0.0001 +- 0.0010 (design 2, pooled); nothing separates them on either set.
+- **It is the user's own past that carries it, not "more events".** Another user's events in the same slots read below the empty slots (e - b -0.0011 +- 0.0007 and -0.0011 +- 0.0009 pooled, 1.3-1.5 SE) and clearly below the user's own (c - e +0.0028 +- 0.0009, z 3.0; +0.0031 +- 0.0011, z 2.7). On val alone the placebo of design 2 is not separated (c - e +0.0019 +- 0.0024).
+- **Every member agrees in sign.** The numerator c - b is positive for 4 of 4 members on both sets in both designs (16 of 16 cells; design 1 holdout +0.0018, +0.0017, +0.0006, +0.0014; val +0.0028, +0.0022, +0.0011, +0.0035; design 2 holdout +0.0011, +0.0024, +0.0004, +0.0017; val +0.0037, +0.0025, +0.0035, +0.0040); single cells are 0.4-2.4 SE.
+- **A model not trained for it gains nothing reliable from a 384-event history.** d1 - a: +0.0009 +- 0.0006 (design 1, pooled), 0.0000 +- 0.0008 (design 2, pooled). The foreign-event form is below it in design 1 and on the holdout in design 2; on val in design 2 the placebo reads higher than the real events (-0.0029 +- 0.0020), i.e. noise of that size is present.
+- **Calibration of the replay design (g).** Stored events 193-256 shown in slots 129-192 return rho_g = 1.23 [0.64, 2.69] of the worth of the true events 129-192 on all 15,777 capped feeds of both sets (holdout 1.78 [0.95, 5.94]; val 0.15 [-2.31, 2.38]): showing events in slots 64 positions too shallow does not destroy their worth, so the slot substitution of pass (c) is a fair instrument. On the holdout the marginal 64-event stretches read +0.00141 +- 0.00053 (events 129-192) and +0.00174 +- 0.00050 (events 193-256), 4-pool, all capped feeds: the review's "no decay with depth" holds there too.
+- **Sanity against the review.** Truncation cost on all capped feeds, hard-label members (mean of the two member deltas), val: K = 192 -0.00247 +- 0.00093 (review -0.00246 +- 0.00093), K = 128 -0.00456 +- 0.00123 (review -0.00475 +- 0.00122). My GPU pass and the review's CPU file correlate 0.9999998; member-level costs differ by about 0.0002 because the top-16 retrieval breaks ties between repeated items differently on CPU and GPU (8-9% of capped feeds change NDCG between the two devices). New [M]: the truncation cost holds on the holdout, 4-pool, 11,601 capped feeds: K = 192 -0.00174 +- 0.00050 (z -3.5), K = 128 -0.00314 +- 0.00066 (z -4.7).

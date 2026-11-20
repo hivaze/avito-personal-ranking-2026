@@ -1,0 +1,41 @@
+== pop1 information readout (2-epoch screen, LAST checkpoints, seeds 23/24 rz-mean pools; f5 q90 0.8906)
+  cell shares (val rows / positives): NOISY-HIGH 0.0482 / 1179; RELIABLE-HIGH 0.0518 / 1336; MID/LOW 0.8865 / 19342; NO-DATA 0.0135 / 126
+  pool NDCG: base 0.39447  xdrop_pop 0.39201  pop1 0.39275 | members: base_s23 0.39364  base_s24 0.39348  xdrop_pop_s23 0.39141  xdrop_pop_s24 0.39103  pop1_s23 0.39278  pop1_s24 0.39199
+
+  NOISY-HIGH:
+    base       pool act/exp 0.969 +- 0.026  (s23 0.967, s24 0.972)
+    xdrop_pop  pool act/exp 0.938 +- 0.025  (s23 0.940, s24 0.937)
+    pop1       pool act/exp 0.938 +- 0.025  (s23 0.947, s24 0.932)
+    pop1 - xdrop_pop: -0.000 +- 0.001 (paired cluster bootstrap)
+    pop1 - base: -0.031 +- 0.002 (paired cluster bootstrap)
+    xdrop_pop - base: -0.031 +- 0.002 (paired cluster bootstrap)
+    share of the xdrop_pop -> base gap closed by pop1: -0.01
+
+  RELIABLE-HIGH:
+    base       pool act/exp 1.005 +- 0.025  (s23 0.996, s24 1.014)
+    xdrop_pop  pool act/exp 1.045 +- 0.026  (s23 1.044, s24 1.046)
+    pop1       pool act/exp 1.041 +- 0.026  (s23 1.039, s24 1.042)
+    pop1 - xdrop_pop: -0.004 +- 0.002 (paired cluster bootstrap)
+    pop1 - base: +0.036 +- 0.003 (paired cluster bootstrap)
+    xdrop_pop - base: +0.040 +- 0.003 (paired cluster bootstrap)
+    share of the xdrop_pop -> base gap closed by pop1: +0.10
+
+  MID/LOW:
+    base       pool act/exp 1.002 +- 0.002  (s23 1.003, s24 1.001)
+    xdrop_pop  pool act/exp 1.001 +- 0.002  (s23 1.001, s24 1.001)
+    pop1       pool act/exp 1.001 +- 0.002  (s23 1.001, s24 1.002)
+    pop1 - xdrop_pop: +0.000 +- 0.000 (paired cluster bootstrap)
+    pop1 - base: -0.001 +- 0.000 (paired cluster bootstrap)
+    xdrop_pop - base: -0.001 +- 0.000 (paired cluster bootstrap)
+    share of the xdrop_pop -> base gap closed by pop1: +0.19
+
+  NO-DATA:
+    base       pool act/exp 0.930 +- 0.080  (s23 0.921, s24 0.921)
+    xdrop_pop  pool act/exp 0.976 +- 0.084  (s23 0.971, s24 0.963)
+    pop1       pool act/exp 0.988 +- 0.085  (s23 0.988, s24 0.983)
+    pop1 - xdrop_pop: +0.013 +- 0.005 (paired cluster bootstrap)
+    pop1 - base: +0.058 +- 0.009 (paired cluster bootstrap)
+    xdrop_pop - base: +0.045 +- 0.007 (paired cluster bootstrap)
+    share of the xdrop_pop -> base gap closed by pop1: -0.29
+
+wrote <repo>/nn_x/abl/pop1/out/pop1_actexp.{log,json}

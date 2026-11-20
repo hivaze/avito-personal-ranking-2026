@@ -1,0 +1,55 @@
+# Merged from raw run logs (not published): s11.log (oracle bounds), s10.log (gates), s07.log (routing between models), s16.log (near-duplicate pairs).
+===== s11.log =====
+(a) category oracle (all positive categories first): 0.56871 (+0.1708); share of candidates in a positive category 0.323
+(b) oracle all-cold-positive flag, cold boost 0.25: +0.00852
+(b) oracle all-cold-positive flag, cold boost 0.5: +0.01557
+(b) oracle all-cold-positive flag, cold boost 1.0: +0.02530
+(b) oracle all-cold-positive flag, cold boost 2.0: +0.03263
+    nested gate AUC for all-cold-positive feeds: 0.6611 (base rate 0.174)
+    realistic gate x cold boost: per-beta [ 8.0e-05 -3.9e-04 -9.0e-04], nested -0.00003+-0.00021
+(c) v11-twin (FT half = nn_final5v2): 0.39805; per-feed oracle max gain +0.00360; feeds differing 0.435
+===== s10.log =====
+explore feeds: 0.1523
+v11 on explore feeds 0.2810, others 0.4189
+gate AUC (nested) 0.7216; mean g 0.151
+  -maxsim32    oracle : per-beta [0.00098 0.00775 0.01586]  nested +0.01586+-0.00086
+  -maxsim32    gate   : per-beta [-0.0044  -0.00485 -0.00628]  nested +0.00000+-0.00000
+  -maxsim32    gate^2 : per-beta [-0.00454 -0.00452 -0.00442]  nested +0.00000+-0.00000
+  -maxsim32    const  : per-beta [-0.00901 -0.02799 -0.08466]  nested +0.00000+-0.00000
+  log_luo      oracle : per-beta [0.00207 0.00368 0.00624]  nested +0.00624+-0.00055
+  log_luo      gate   : per-beta [-0.00066 -0.00151 -0.00483]  nested +0.00000+-0.00000
+  log_luo      gate^2 : per-beta [-0.00017 -0.00048 -0.00078]  nested +0.00000+-0.00000
+  log_luo      const  : per-beta [-0.00886 -0.02321 -0.0432 ]  nested +0.00000+-0.00000
+  -cat_cnt_all oracle : per-beta [0.00361 0.00867 0.01456]  nested +0.01456+-0.00069
+  -cat_cnt_all gate   : per-beta [ 0.00012 -0.00027 -0.00229]  nested -0.00007+-0.00020
+  -cat_cnt_all gate^2 : per-beta [-6.e-05  1.e-05 -5.e-05]  nested -0.00021+-0.00018
+  -cat_cnt_all const  : per-beta [-0.00398 -0.01952 -0.07028]  nested +0.00000+-0.00000
+  -maxsim+luo  oracle : per-beta [0.00042 0.00517 0.01036]  nested +0.01036+-0.00077
+  -maxsim+luo  gate   : per-beta [-0.00466 -0.00591 -0.0087 ]  nested +0.00000+-0.00000
+  -maxsim+luo  gate^2 : per-beta [-0.00459 -0.0047  -0.00502]  nested +0.00000+-0.00000
+  -maxsim+luo  const  : per-beta [-0.01399 -0.03371 -0.06891]  nested +0.00000+-0.00000
+===== s07.log =====
+<repo>/solvers/errors/s07_route.py:40: RuntimeWarning: Mean of empty slice
+  j = int(np.argmax(D[:, tr & m].mean(1)))
+<repo>/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:134: RuntimeWarning: invalid value encountered in divide
+  ret = um.true_divide(
+nn_final5: w_FT=0.0: 0.39712 (-0.00081+-0.00044)  w_FT=0.25: 0.39743 (-0.00051+-0.00032)  w_FT=0.5: 0.39793 (+0.00000+-0.00000)  w_FT=0.75: 0.39772 (-0.00021+-0.00030)  w_FT=1.0: 0.39784 (-0.00009+-0.00043)
+   M<50|M>=50           seg0(0.25:+0.0002,0.75:-0.0013,1.0:-0.0014) seg1(0.25:-0.0010,0.75:+0.0006,1.0:+0.0008) | nested routed +0.00030+-0.00029
+   coldshare<.3|>=.3    seg0(0.25:-0.0005,0.75:-0.0005,1.0:-0.0002) seg1(0.25:-0.0006,0.75:+0.0001,1.0:+0.0000) | nested routed -0.00029+-0.00014
+   user new|train|u0    seg0(0.25:-0.0009,0.75:-0.0000,1.0:+0.0001) seg1(0.25:+0.0002,0.75:-0.0006,1.0:-0.0007) seg2(0.25:+0.0001,0.75:-0.0006,1.0:+0.0011) | nested routed -0.00024+-0.00026
+   H<129|>=129          seg0(0.25:-0.0014,0.75:+0.0000,1.0:+0.0006) seg1(0.25:-0.0001,0.75:-0.0003,1.0:-0.0004) | nested routed -0.00059+-0.00023
+nn_final5cd12: w_FT=0.0: 0.39818 (-0.00055+-0.00042)  w_FT=0.25: 0.39849 (-0.00024+-0.00029)  w_FT=0.5: 0.39873 (+0.00000+-0.00000)  w_FT=0.75: 0.39828 (-0.00045+-0.00031)  w_FT=1.0: 0.39837 (-0.00036+-0.00043)
+   M<50|M>=50           seg0(0.25:+0.0001,0.75:-0.0012,1.0:-0.0018) seg1(0.25:-0.0004,0.75:+0.0001,1.0:+0.0006) | nested routed -0.00007+-0.00027
+   coldshare<.3|>=.3    seg0(0.25:-0.0004,0.75:-0.0005,1.0:-0.0004) seg1(0.25:-0.0000,0.75:-0.0004,1.0:-0.0003) | nested routed -0.00025+-0.00013
+   user new|train|u0    seg0(0.25:-0.0008,0.75:-0.0003,1.0:-0.0003) seg1(0.25:+0.0009,0.75:-0.0012,1.0:-0.0014) seg2(0.25:-0.0001,0.75:+0.0016,1.0:+0.0052) | nested routed +0.00027+-0.00016
+   H<129|>=129          seg0(0.25:-0.0002,0.75:+0.0003,1.0:+0.0005) seg1(0.25:-0.0003,0.75:-0.0008,1.0:-0.0007) | nested routed -0.00013+-0.00021
+nn_final4: w_FT=0.0: 0.39281 (-0.00120+-0.00048)  w_FT=0.25: 0.39362 (-0.00038+-0.00031)  w_FT=0.5: 0.39401 (+0.00000+-0.00000)  w_FT=0.75: 0.39355 (-0.00046+-0.00033)  w_FT=1.0: 0.39322 (-0.00079+-0.00050)
+   M<50|M>=50           seg0(0.25:-0.0005,0.75:-0.0005,1.0:-0.0004) seg1(0.25:-0.0003,0.75:-0.0004,1.0:-0.0011) | nested routed -0.00021+-0.00013
+   coldshare<.3|>=.3    seg0(0.25:-0.0006,0.75:-0.0005,1.0:-0.0009) seg1(0.25:-0.0001,0.75:-0.0005,1.0:-0.0006) | nested routed -0.00050+-0.00016
+   user new|train|u0    seg0(0.25:-0.0004,0.75:-0.0001,1.0:-0.0001) seg1(0.25:-0.0003,0.75:-0.0012,1.0:-0.0022) seg2(0.25:-0.0011,0.75:-0.0012,1.0:-0.0015) | nested routed -0.00041+-0.00022
+   H<129|>=129          seg0(0.25:-0.0009,0.75:-0.0008,1.0:-0.0013) seg1(0.25:-0.0002,0.75:-0.0003,1.0:-0.0006) | nested routed -0.00027+-0.00017
+===== s16.log =====
+(pos, twin-neg) pairs at cos>=0.95: 11590; positives with a twin: 4363 (0.198 of positives)
+share of twin pairs where the twin is ranked above the positive: 0.371
+oracle twin disambiguation: 0.41427 (+0.01633); positives moved 2329
+AUC inside (pos, twin-neg) pairs: v11 0.629  FT5 0.629  TO5 0.627  pre_fe 0.564  cos_u 0.562  maxsim32 0.561  f1 0.532(eq 0.14)  it_hist_all_luo 0.526(eq 0.18)  it_tr_ctr 0.522(eq 0.17)  seq_cv_pop 0.520(eq 0.23)  f5 0.518  f2 0.503(eq 0.86)  cold_item 0.503(eq 0.69)  f3 0.500(eq 1.00)  ag_age 0.496(eq 0.37)  item_id 0.495  f4 0.490

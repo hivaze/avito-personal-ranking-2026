@@ -1,0 +1,90 @@
+W8 final val 0.40165 (14423 feeds, 1389971 rows) | test 28595 feeds, 2904806 rows | public feeds 8562
+
+== A. W8 file vs C3 file, test: the correlation under each definition
+  file == rank of the ens blend: W8 0.999999  C3 1.000000
+  pooled Spearman (np.corrcoef of z of file ranks): all 0.9908 | M>=50 0.9914 | M<50 0.9850
+  feed-mean Spearman: all 0.9873 | M>=50 0.9910 | M<50 0.9814
+  pooled Pearson of z of the model scores: all 0.9938 | M>=50 0.9938 | M<50 0.9934
+  feed-mean Pearson of z of the model scores: all 0.9935 ± 0.0000 | M>=50 0.9938 | M<50 0.9929
+  shape-restored (C3 file ranks on the W8 shape) feed-mean 0.9948 | M-weighted 0.9943
+  test S16kd    : truth feed-mean Pearson 0.9988 | shape-restored 0.9993 (+0.0004) | pooled Spearman 0.9979 (-0.0009)
+  test CatBoost : truth feed-mean Pearson 0.8375 | shape-restored 0.8384 (+0.0010) | pooled Spearman 0.8249 (-0.0125)
+  test XGBoost  : truth feed-mean Pearson 0.7679 | shape-restored 0.7681 (+0.0002) | pooled Spearman 0.7441 (-0.0238)
+  test LLMx2    : truth feed-mean Pearson 0.8383 | shape-restored 0.8398 (+0.0015) | pooled Spearman 0.8256 (-0.0127)
+  test GRUx6    : truth feed-mean Pearson 0.9828 | shape-restored 0.9848 (+0.0020) | pooled Spearman 0.9784 (-0.0044)
+
+== B. calibration on val: gap, rho (feed-mean | pooled), laws, measured equal z-mix over the better file, paired per feed
+  C3        val 0.40101 gap +0.00064 ± 0.00055 | rho fm 0.9935 pl 0.9938 | law rec -0.00012 refit -0.00013 | measured -0.00027 ± 0.00039 | err rec +0.00015 refit +0.00014
+  G3        val 0.40032 gap +0.00133 ± 0.00058 | rho fm 0.9931 pl 0.9935 | law rec -0.00037 refit -0.00034 | measured -0.00044 ± 0.00040 | err rec +0.00006 refit +0.00010
+  Pall      val 0.39896 gap +0.00269 ± 0.00063 | rho fm 0.9911 pl 0.9917 | law rec -0.00085 refit -0.00073 | measured -0.00095 ± 0.00044 | err rec +0.00010 refit +0.00022
+  Cd        val 0.39901 gap +0.00264 ± 0.00065 | rho fm 0.9903 pl 0.9909 | law rec -0.00082 refit -0.00071 | measured -0.00061 ± 0.00044 | err rec -0.00021 refit -0.00010
+  S16kd     val 0.40173 gap -0.00008 ± 0.00034 | rho fm 0.9989 pl 0.9989 | law rec -0.00001 refit -0.00001 | measured +0.00005 ± 0.00022 | err rec -0.00006 refit -0.00007
+  GRUx6     val 0.39848 gap +0.00317 ± 0.00073 | rho fm 0.9828 pl 0.9836 | law rec -0.00088 refit -0.00080 | measured -0.00068 ± 0.00051 | err rec -0.00020 refit -0.00011
+  basex4    val 0.39887 gap +0.00278 ± 0.00067 | rho fm 0.9879 pl 0.9883 | law rec -0.00083 refit -0.00072 | measured -0.00115 ± 0.00045 | err rec +0.00032 refit +0.00043
+  CatBoost  val 0.38201 gap +0.01964 ± 0.00144 | rho fm 0.8397 pl 0.8422 | law rec -0.00444 refit -0.00434 | measured -0.00458 ± 0.00096 | err rec +0.00014 refit +0.00024
+  XGBoost   val 0.36770 gap +0.03395 ± 0.00167 | rho fm 0.7730 pl 0.7749 | law rec -0.00861 refit -0.00800 | measured -0.00763 ± 0.00111 | err rec -0.00098 refit -0.00037
+  LLMx2     val 0.37676 gap +0.02489 ± 0.00145 | rho fm 0.8404 pl 0.8464 | law rec -0.00644 refit -0.00598 | measured -0.00624 ± 0.00093 | err rec -0.00020 refit +0.00026
+  law on record: mean -0.00009 rms 0.00035 max 0.00098 | refit: mean +0.00007 rms 0.00023 max 0.00043
+  |law error| / paired SE of the measurement: on record [0.38, 0.15, 0.24, 0.47, 0.28, 0.39, 0.72, 0.15, 0.89, 0.21]
+
+== C. blend from RANK files against the z-mix of the model scores (paired per feed: rank mix minus z mix)
+  partner        gap |      v1 way - better      v2 way - better |   v1 way - zmix (paired) v1 ties left tied - zmix   v2 way - zmix (paired) | tied rows in the v1 mix
+  C3        +0.00064 | -0.00020 ± 0.00038   -0.00511 ± 0.00037 |       +0.00007 ± 0.00034       -0.00607 ± 0.00032       -0.00484 ± 0.00031 | 0.167
+  G3        +0.00133 | -0.00083 ± 0.00040   -0.00602 ± 0.00039 |       -0.00039 ± 0.00035       -0.00666 ± 0.00034       -0.00558 ± 0.00033 | 0.167
+  Pall      +0.00269 | -0.00157 ± 0.00043   -0.00672 ± 0.00044 |       -0.00061 ± 0.00036       -0.00701 ± 0.00035       -0.00577 ± 0.00034 | 0.167
+  Cd        +0.00264 | -0.00122 ± 0.00044   -0.00648 ± 0.00046 |       -0.00061 ± 0.00037       -0.00733 ± 0.00037       -0.00587 ± 0.00036 | 0.167
+  S16kd     -0.00008 | -0.00042 ± 0.00024   -0.00320 ± 0.00023 |       -0.00047 ± 0.00021       -0.00360 ± 0.00022       -0.00325 ± 0.00022 | 0.160
+  GRUx6     +0.00317 | -0.00129 ± 0.00051   -0.00705 ± 0.00052 |       -0.00061 ± 0.00040       -0.00800 ± 0.00040       -0.00637 ± 0.00040 | 0.167
+  basex4    +0.00278 | -0.00120 ± 0.00046   -0.00720 ± 0.00047 |       -0.00005 ± 0.00038       -0.00747 ± 0.00037       -0.00605 ± 0.00038 | 0.166
+  CatBoost  +0.01964 | -0.00645 ± 0.00099   -0.01020 ± 0.00096 |       -0.00187 ± 0.00061       -0.00991 ± 0.00060       -0.00562 ± 0.00055 | 0.159
+  XGBoost   +0.03395 | -0.01060 ± 0.00119   -0.01290 ± 0.00113 |       -0.00298 ± 0.00070       -0.01146 ± 0.00070       -0.00528 ± 0.00062 | 0.159
+  LLMx2     +0.02489 | -0.00893 ± 0.00101   -0.01332 ± 0.00097 |       -0.00268 ± 0.00064       -0.01167 ± 0.00064       -0.00708 ± 0.00059 | 0.159
+  v2-way penalty: mean -0.00557 min -0.00708 max -0.00325 | v1-way: mean -0.00102 min -0.00298 max +0.00007
+  corr(|gap|, v2 penalty) -0.296 (Spearman -0.527); corr(|gap|, v1 penalty) -0.974
+  -- alternative explanation test: is the "rank-file penalty" a property of rank files, or of giving a WEAKER partner the shape of the stronger file?
+     (a) roles swapped: OURS = the weaker model (scores), PARTNER = W8 as a rank file restored on the weaker shape; (b) equal-strength pairs, both directions
+     (a) ours = Pall     , partner = W8 ranks: v2-way mix minus z-mix -0.00558 ± 0.00034   | original direction (ours W8, partner Pall ranks) -0.00577 ± 0.00034
+     (a) ours = Cd       , partner = W8 ranks: v2-way mix minus z-mix -0.00605 ± 0.00036   | original direction (ours W8, partner Cd ranks) -0.00587 ± 0.00036
+     (a) ours = GRUx6    , partner = W8 ranks: v2-way mix minus z-mix -0.00627 ± 0.00040   | original direction (ours W8, partner GRUx6 ranks) -0.00637 ± 0.00040
+     (a) ours = basex4   , partner = W8 ranks: v2-way mix minus z-mix -0.00556 ± 0.00038   | original direction (ours W8, partner basex4 ranks) -0.00605 ± 0.00038
+     (a) ours = CatBoost , partner = W8 ranks: v2-way mix minus z-mix -0.00551 ± 0.00056   | original direction (ours W8, partner CatBoost ranks) -0.00562 ± 0.00055
+     (a) ours = LLMx2    , partner = W8 ranks: v2-way mix minus z-mix -0.00680 ± 0.00060   | original direction (ours W8, partner LLMx2 ranks) -0.00708 ± 0.00059
+     (a) ours = XGBoost  , partner = W8 ranks: v2-way mix minus z-mix -0.00633 ± 0.00064   | original direction (ours W8, partner XGBoost ranks) -0.00528 ± 0.00062
+     (b) Pall + Cd (gap -0.00005, rho fm 0.9989): ours Pall, partner Cd ranks -0.00310 ± 0.00021 | ours Cd, partner Pall ranks -0.00307 ± 0.00021
+     (b) GRUx6 + basex4 (gap -0.00039, rho fm 0.9827): ours GRUx6, partner basex4 ranks -0.00640 ± 0.00038 | ours basex4, partner GRUx6 ranks -0.00621 ± 0.00038
+     (b) C3 + G3 (gap +0.00069, rho fm 0.9986): ours C3, partner G3 ranks -0.00365 ± 0.00025 | ours G3, partner C3 ranks -0.00365 ± 0.00024
+     (b) CatBoost + LLMx2 (gap +0.00525, rho fm 0.9296): ours CatBoost, partner LLMx2 ranks -0.00450 ± 0.00045 | ours LLMx2, partner CatBoost ranks -0.00479 ± 0.00046
+     (b) W8 + S16kd: ours W8, partner S16 ranks -0.00325 ± 0.00022 | ours S16, partner W8 ranks -0.00329 ± 0.00022
+
+== D. refit on the 10 partners: pooled rho a 0.0103 b 0.304 | feed-mean rho a 0.0089 b 0.296 | corr(1 - rho, |gap|) 0.992
+  bootstrap (better fixed; 2000 resamples of feeds): a sd 0.0145 5-95% [-0.0126, +0.0351] | b sd 0.100 [0.150, 0.476] | corr 0.977
+     (0.95, 0.000): on record +0.00093 | refit fm +0.00045 | 5-95% [-0.00063, +0.00176] | 2.5-97.5% [-0.00093, +0.00195]
+     (0.90, 0.000): on record +0.00186 | refit fm +0.00089 | 5-95% [-0.00126, +0.00351] | 2.5-97.5% [-0.00187, +0.00391]
+     (0.90, 0.002): on record +0.00110 | refit fm +0.00030 | 5-95% [-0.00157, +0.00256] | 2.5-97.5% [-0.00205, +0.00290]
+     (0.86, 0.000): on record +0.00260 | refit fm +0.00125 | 5-95% [-0.00177, +0.00492] | 2.5-97.5% [-0.00262, +0.00547]
+  bootstrap (better re-decided; 2000 resamples of feeds): a sd 0.0146 5-95% [-0.0128, +0.0353] | b sd 0.101 [0.150, 0.477] | corr 0.977
+     (0.95, 0.000): on record +0.00093 | refit fm +0.00045 | 5-95% [-0.00064, +0.00177] | 2.5-97.5% [-0.00093, +0.00197]
+     (0.90, 0.000): on record +0.00186 | refit fm +0.00089 | 5-95% [-0.00128, +0.00353] | 2.5-97.5% [-0.00187, +0.00395]
+     (0.90, 0.002): on record +0.00110 | refit fm +0.00030 | 5-95% [-0.00161, +0.00257] | 2.5-97.5% [-0.00205, +0.00293]
+     (0.86, 0.000): on record +0.00260 | refit fm +0.00125 | 5-95% [-0.00180, +0.00495] | 2.5-97.5% [-0.00262, +0.00553]
+
+== E. all 55 pairs of the 11 models (equal z-mix over the better member, val feed-mean rho)
+  55 pairs: a 0.0192 b 0.364 | rms residual 0.00054 | law on record on the 55: rms 0.00061 | pairs with rho < 0.95 and gap < 0.005: 0
+  subset pairs with W8 or S16 (19): 19 pairs | own fit a 0.0076 b 0.290 | law on record minus measured: mean -0.00006 rms 0.00038
+  subset pairs among the 8 neural pools, rho >= 0.95: 28 pairs | own fit a 0.0498 b 0.541 | law on record minus measured: mean +0.00001 rms 0.00027
+  subset pairs with rho < 0.95 (any model of CatBoost / XGBoost / LLM): 27 pairs | own fit a 0.0154 b 0.338 | law on record minus measured: mean -0.00032 rms 0.00083
+  subset pairs of two non-neural models (3): 3 pairs | own fit a 0.0331 b 0.439 | law on record minus measured: mean -0.00065 rms 0.00091
+  highest-leverage pairs of the 55-pair fit: basex4+CatBoost (h 0.17, rho 0.841, gap 0.0169, meas -0.00360); XGBoost+LLMx2 (h 0.13, rho 0.897, gap 0.0091, meas +0.00001); GRUx6+CatBoost (h 0.12, rho 0.851, gap 0.0165, meas -0.00360); CatBoost+LLMx2 (h 0.09, rho 0.930, gap 0.0053, meas -0.00067); C3+XGBoost (h 0.09, rho 0.788, gap 0.0333, meas -0.00800); S16kd+XGBoost (h 0.08, rho 0.776, gap 0.0340, meas -0.00770)
+  55-pair fit WITHOUT the 3 pairs of two non-neural models (52 pairs): a 0.0140 b 0.330 -> at (0.90, 0) +0.00140, at (0.90, 0.002) +0.00074  (55 pairs: +0.00192, +0.00119)
+  bootstrap 55 pairs: a 5-95% [+0.0065, +0.0348] b [0.270, 0.475]
+     (0.95, 0.000): 5-95% [+0.00032, +0.00174]
+     (0.90, 0.000): 5-95% [+0.00065, +0.00348]
+     (0.90, 0.002): 5-95% [+0.00010, +0.00254]
+     (0.86, 0.000): 5-95% [+0.00091, +0.00487]
+  bootstrap 52 pairs (no pair of two non-neural models): a 5-95% [-0.0003, +0.0328] b [0.224, 0.463]
+     (0.95, 0.000): 5-95% [-0.00001, +0.00164]
+     (0.90, 0.000): 5-95% [-0.00003, +0.00328]
+     (0.90, 0.002): 5-95% [-0.00049, +0.00237]
+     (0.86, 0.000): 5-95% [-0.00004, +0.00460]
+
+[done in 76 s]

@@ -1,0 +1,41 @@
+# FD16P20, the first final pick. The name: full data (FD), 16 full-view students, a popularity-light
+# pool at weight 0.2 (P20).
+# 16 full-view distilled students and 4 popularity-light students, all width 192 and all trained on
+# every train feed; the popularity-light pool enters at weight 0.2.
+# Half of the full-view students learned from the teacher averaged over 11
+# members (names with "kd05w192"), half from the teacher averaged over 25
+# (names with "kd05t25w192").
+
+name = "FD16P20"
+
+[members]
+# Member names are the names of the runs: prediction files and logs carry them.
+# The order is part of the recipe. Pooling adds float32 arrays in this order,
+# and another order changes the last bit of a few scores.
+full_view = [
+    "w5_fd10_kd05w192_s951", "w5_fd10_kd05w192_s952", "w5_fd10_kd05w192_s953", "w5_fd10_kd05w192_s954",
+    "w5_fd10_kd05w192_s955", "w5_fd10_kd05w192_s956", "w5_fd10_kd05w192_s957", "w5_fd10_kd05w192_s958",
+    "w5_fd10_kd05t25w192_s951", "w5_fd10_kd05t25w192_s952", "w5_fd10_kd05t25w192_s953", "w5_fd10_kd05t25w192_s954",
+    "w5_fd10_kd05t25w192_s955", "w5_fd10_kd05t25w192_s956", "w5_fd10_kd05t25w192_s957", "w5_fd10_kd05t25w192_s958",
+]
+popularity_light = [
+    "abl_fd10_pop1kd05w192_s951", "abl_fd10_pop1kd05w192_s952", "abl_fd10_pop1kd05w192_s953", "abl_fd10_pop1kd05w192_s954",
+]
+
+[weights]
+popularity_light = 0.2    # each branch: 0.8 z(full-view pool) + 0.2 z(popularity-light pool)
+finetuned_branch = 0.5    # final score: 0.5 z(fine-tuned branch) + 0.5 z(train-only branch)
+
+[files]
+finetune_tag = "n2cpv3s3"                  # tag of the fine-tune recipe in member file and log names
+pool_tag = "FD16P20kd"                     # pools: ens_<pool_tag>_{ft,to}_{val,test}.npy in the predictions folder
+submission = "cand_FD16P20kd_r4.parquet"   # in the submissions folder
+
+[gate]
+reference_pool_tag = "W8P20kd"             # the gate measures this file against the stored pools of W8P20
+
+[record]
+sha256 = "14adc19ac794e3977cc0275a0c15d2c76e55c5dcdeec911dc47a8193128626a8"
+val_ndcg = 0.40271                         # validation, 14,423 feeds
+public_ndcg = 0.394892                     # public leaderboard, scored 2026-11-15
+gate_output = "gate_FD16P20kd.txt"

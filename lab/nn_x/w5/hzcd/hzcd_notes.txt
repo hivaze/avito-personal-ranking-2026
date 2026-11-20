@@ -1,0 +1,77 @@
+hzcd arm: popularity-parity cooldown in the wave-5 harness (nn_x/w5). Written 2026-11-12 ~22:00 UTC. NOT launched.
+Motivation: nn_x/audit/features/findings.txt items 2/3/8, reports/AUDIT_1112.md 3.2 row 1, INSIGHTS_1112 3.1 item 6, critique
+item 6. Pre-flight: nn_x/w5/hzcd/preflight.txt (rule pre-declared 21:43 UTC, PASS 4/4 at 21:57 UTC; caveats there).
+
+WHAT THE FLAG DOES (--hzcd, default off)
+  From the cooldown start (step t_cool = round((1 - cooldown_frac) * total); step 0 in the CD harness, --cooldown_frac 1.0
+  right after --init) every TRAINING batch, regular and pool, is gathered through cd_arms6.HzTrainView: the ordinary
+  SplitData.gather of the train split, then the 5 LUO popularity columns of b['xt'] are overwritten by the horizon-limited
+  counts of data/feats_new/train/it_hist_hz_{all,et1,et2,et3,et4}.npy. Columns (from the model's xt_names, so --init runs
+  are covered; preset cvnd_pre2s = 34 inputs): 3 it_hist_all_luo -> it_hist_hz_all, 4 it_hist_et1_luo -> it_hist_hz_et1,
+  5 et2, 6 et3, 7 et4. Column 3 is also an xt_rel column, so its in-model within-feed pct-rank and z (model.dense_features)
+  are computed from the hz values in those batches.
+  Scaling (identical to the luo path): data.SplitData.attach_xt transforms names starting with it_hist as log1p(max(x, 0)),
+  NaN -> 0, stores float16, and gather returns xt[ci].float(). cd_arms6.xt_transform reproduces attach_xt's branches (tested
+  bitwise against MiniSplit.xt built by the same rules) and load_hz casts with torch .to(device, float16) as attach_xt does.
+  Downstream the hz values pass through exactly what the luo values pass through: xt_drop (0 in F7), the xt_rel rank / z,
+  and the dense normalisation f_mean / f_std (fitted on luo batches at model build, or loaded from the --init checkpoint).
+  The hz counts live on the same log1p-count scale, so sharing the normalisation is the intended parity (val/test luo
+  values go through the same constants).
+  Untouched: feature_stats at model build, the selection holdout (eval_subset reads tr), val / test predict, save_last,
+  save_holdout and holdout_eval.py (all read tr / va / te). Extra output with --hzcd: preds/holdout/nn_<v>_holdout_hz.npy =
+  the selected checkpoint's holdout preds scored THROUGH the hz view (same numerics as the as-built holdout file: predict
+  without TF32); the as-built nn_<v>_holdout.npy is written as before. Holdout feeds have hz lag 0 (feat_new/hz_common.py),
+  so the two files differ only through same-day listings. Not combinable with --hcap (asserted). GPU cost: +2.3 GB (the
+  5 hz columns, fp16, 246.7M rows) and a few small copy kernels per training batch; the view is released before the test
+  split loads.
+
+FILES (all under nn_x/w5; every edited file was written new and mv'ed over, never edited in place; running jobs untouched)
+  cd_arms6.py (new)              luo_cols, xt_transform, load_hz, HzTrainView, hz_stats, setup_hzcd, save_holdout_hz
+  train.py                       + import, --hzcd, `tr_hz = None` / `if a.hzcd: tr_hz = setup_hzcd(...)` after the wave-5
+                                 setup, the gather conditional `tr_hz if tr_hz is not None and step >= t_cool else <previous>`,
+                                 `if a.hzcd: save_holdout_hz(...)` after save_holdout, `if a.hzcd: tr_hz = None` after `del tr`
+  lane.sh                        arms B:hzcd (= m02ref + --hzcd, roots 101-107) and E:hzcd (= base + --hzcd, seeds 951-954);
+                                 every existing arm prints a byte-identical DRY command (tested)
+  tests/strip_hzcd.py (new)      AST stripper of exactly the hzcd statements (shared by the three test files)
+  tests/test_hzcd.py (new)       cpu: code identity vs tests/ref_pre_hzcd, lane commands, files, transform parity, view ==
+                                 brute force on a MiniSplit, the loop conditional; gpu: N e2e runs (tests/e2e_hzcd.py)
+  tests/e2e_hzcd.py (new)        deterministic wrapper recording the LUO-slot xt columns reaching model.dense per call
+  tests/test_w5.py               strips the hzcd statements first (exact set asserted), then its r6 proof as before
+  tests/test_trunc_lifts.py      same, for its pre-trunc_lifts proof; parse-default check ignores the later hzcd flag
+  tests/ref_pre_hzcd/            frozen pre-change copies (train.py, lane.sh, test_w5.py, test_trunc_lifts.py) + md5.txt
+  hzcd/preflight.{py,txt,json,log}, hzcd/hzcd_notes.txt (this file)
+
+TESTS (staging copy first, then re-run in place after the mv; logs nn_x/w5/logs/test_{hzcd,w5,trunc_lifts}_cpu.log)
+  test_hzcd.py cpu 28/28, test_w5.py cpu 42/42, test_trunc_lifts.py cpu 19/19.
+  GPU e2e (test_hzcd.py gpu; GPUs N + 6, 24 CD steps from v17_pre2s_s101@77500, cooldown_mix 0.2): see the appended section.
+
+DRY COMMANDS (bash nn_x/w5/lane.sh <gpu> "B:hzcd:101 ..." with DRY=1), relative to their references:
+  B:hzcd:<r>   = B:m02ref:<r> + --hzcd    (--init nn/ckpt/v17_pre2s_s<r>@77500.pt ... --seed 900+r --hzcd)
+  E:hzcd:<s>   = E:base:<s>   + --hzcd    (10-epoch F7 m02 recipe, --seed s --hzcd)
+  Launch (NOT done here) would be e.g.  bash nn_x/w5/lane.sh <gpu> "B:hzcd:101 B:hzcd:102 B:hzcd:103 B:hzcd:104"
+  under the lane's own GPU checks; read-out vs w5_cd_m02ref_r<r> by the wave-5 rules (w5_eval.py / stale_pred.py).
+
+READ-OUT RULE (critique item 6, amended): val >= -1 SE AND holdout >= 0 (as built AND with hz inputs: nn_<v>_holdout_hz.npy)
+  AND stale(both) delta > +2 SE AND coverage-matched (trunc17-type) delta >= 0 AND pmix >= -1 SE AND act/exp 1-3 d < 1.08;
+  kill on any clause, or a coldpos/warmpos trade of the agedrop shape. Expected pool 0..+0.0003 (P 0.15); the pre-flight
+  caveat 2 (10-24 d rows unchanged) bounds the private upside.
+
+GPU SMOKE RESULTS (test_hzcd.py gpu; tests/e2e_hzcd.py; GPUs N + 6 concurrently, each already at 2 compute processes / ~[n] GB
+free at launch; 4 e2e runs of 24 CD steps in two pairs, 238 s + 117 s wall; outputs w5_thz_* deleted afterwards)
+  run 1 (21:56:44 UTC; logs/test_hzcd_gpu_run1.log): G1 PASS (3/3): previous train.py vs new train.py, flags OFF: identical
+    batch sequence (24 steps incl. pool steps), identical train-mode and loss-input logits, identical logged metric lines,
+    bit-identical checkpoint and val preds; every eval-mode dense call carried luo (val 4.17M rows / 120 calls, train holdout
+    9.26M rows / 164 calls, 0 mismatches). The two G2 FAILs of run 1 were test-design errors (the --hzcd run used
+    --cooldown_frac 0.5 against a frac-1.0 reference, so pool mixing started at a different step; and the save_holdout_hz
+    predict was compared against luo although it reads the view by design); the harness checks of that run (pre-cooldown
+    luo exact, cooldown hz exact, 170,491 changed cells) already passed. G2 was re-designed and re-run.
+  run 2 (22:03:22 UTC; logs/test_hzcd_gpu.log): G2 PASS (6/6): flags OFF --cooldown_frac 0.5 vs --hzcd --cooldown_frac 0.5
+    --save_holdout (t_cool 12): same batch sequence; steps 0-11 bitwise-identical train-mode and loss-input logits (view
+    inactive before the cooldown); steps 12-23 all differ; steps 0-11 gathered from tr with the LUO slots == brute-force luo
+    (exact), steps 12-23 through the view with the LUO slots == brute-force hz (exact; 170,491 cells differ from luo);
+    every eval-mode call through tr (holdout selection evals, val predicts, save_holdout) carried luo (0 mismatches in
+    18.06M rows / 366 calls); predict saw the view exactly once (save_holdout_hz, after training; 4.63M rows, 0 mismatches
+    vs hz, 416,845 rows differ from luo = the same-day listings of the holdout); nn_<v>_holdout_hz.npy written (as-built
+    shape, finite; holdout NDCG with hz inputs 0.31691 at 24 steps, max |hz - as built| 2.93); log lines present; the
+    checkpoint differs from the flags-off run.
+  Full 4-run GPU part: CUDA_VISIBLE_DEVICES=<g> HZ_GPU_REF=<g2> OMP_NUM_THREADS=12 .venv/bin/python nn_x/w5/tests/test_hzcd.py gpu

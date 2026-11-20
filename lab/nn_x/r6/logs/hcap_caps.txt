@@ -1,0 +1,13 @@
+type | p99.9 train / val / test | max val / test | capped? | cap | rule | val+test feeds > cap | train feeds > cap | train events cut
+   1 |    214 /  174 /  168 |  222 | yes |  110 | plateau end (h[110]=741 < 0.5 x mean h[100..109]=2108) | 0.0250 | 0.2945 | 0.1797
+   2 |    203 /  206 /  202 |  217 | no  |    - | - | - | - | -
+   3 |     43 /   43 /   43 |   72 | no  |    - | - | - | - | -
+   4 |    179 /  117 /  117 |  122 | yes |  117 | hard ceiling: val/test p99.9 | 0.0007 | 0.0057 | 0.0106
+   5 |     39 /   39 /   38 |   41 | no  |    - | - | - | - | -
+   6 |     58 /   41 /   41 |   44 | yes |   41 | hard ceiling: val/test p99.9 | 0.0007 | 0.0228 | 0.0230
+   7 |    113 /  133 /  109 |  215 | no  |    - | - | - | - | -
+   8 |     51 /   42 /   42 |   44 | yes |   42 | hard ceiling: val/test p99.9 | 0.0008 | 0.0033 | 0.0050
+   9 |     36 /   36 /   36 |   43 | no  |    - | - | - | - | -
+  10 |     57 /   39 /   40 |   45 | yes |   40 | hard ceiling: val/test p99.9 | 0.0007 | 0.0065 | 0.0793
+
+--hcap "1:110,4:117,6:41,8:42,10:40"   (train events dropped: 0.0957 of all train history events; train feeds changed: 0.3171)

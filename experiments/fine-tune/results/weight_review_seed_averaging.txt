@@ -1,0 +1,13 @@
+## Fold assignment (sklearn GroupKFold(5), no shuffle, groups = user_id with every user-0 feed as its own group; identical for every member; seeds 1000 k + {0, 1, 2})
+val feeds 14423, users 13741, user-0 feeds 658
+fold 0: feeds 2885 | users 2880 | candidates 266501 | feeds with M >= 50 1655 | pmix-public weight share 0.194
+fold 1: feeds 2885 | users 2880 | candidates 278647 | feeds with M >= 50 1731 | pmix-public weight share 0.204
+fold 2: feeds 2885 | users 2880 | candidates 282386 | feeds with M >= 50 1729 | pmix-public weight share 0.198
+fold 3: feeds 2884 | users 2879 | candidates 281522 | feeds with M >= 50 1726 | pmix-public weight share 0.206
+fold 4: feeds 2884 | users 2879 | candidates 280915 | feeds with M >= 50 1689 | pmix-public weight share 0.199
+test feeds whose user has a val feed (user 0 excluded): 94 of 28595
+
+## Seed averaging: 3 fine-tune seeds per fold against 1 (same members, same folds)
+G3 (20 hard-label members): FT pool alone 3 seeds - 1 seed +0.00007+-0.00018 | file +0.00018+-0.00012 | pmix-public +0.00023+-0.00015 | pmix-private +0.00021+-0.00019 | corr of the two FT pools: val 0.99990 test 0.99998 | variance of the difference of the two FT pools (z units): val 0.000206 test 0.000045
+G3 + 8 popularity-light hard-label members (28): FT pool alone 3 seeds - 1 seed -0.00009+-0.00016 | file +0.00012+-0.00011 | pmix-public +0.00018+-0.00013 | pmix-private +0.00022+-0.00016 | corr of the two FT pools: val 0.99991 test 0.99998 | variance of the difference of the two FT pools (z units): val 0.000180 test 0.000039
+member level, 20 G3 members: 3 seeds - 1 seed -0.00000+-0.00005 (SE across members) | variance of z(1 seed) - z(3 seeds): 0.00051 -> seed-noise variance of one fine-tune about 0.00076 (z units; x 3/2 because the 3-seed mean contains the first seed)
